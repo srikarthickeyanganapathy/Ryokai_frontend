@@ -1,0 +1,208 @@
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Heading, Text } from '@/shared/ui/Typography'
+import { Icons } from '@/shared/ui/Icons'
+import { IconButton, Button } from '@/shared/ui/Button'
+import { Badge } from '@/shared/ui/Badge'
+import { cn } from '@/shared/lib/cn'
+import { normalizePriority } from '@/shared/lib/priority'
+import { ChecklistForm } from './ChecklistForm'
+import { useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, useUpdateTask } from '@/features/tasks/hooks/useTasks'
+
+export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
+  const addChecklistItem = useAddChecklistItem(task?.id)
+  const toggleChecklistItem = useToggleChecklistItem(task?.id)
+  const deleteChecklistItem = useDeleteChecklistItem(task?.id)
+  const updateTask = useUpdateTask()
+  const [localEdits, setLocalEdits] = useState({})
+  const [isDirty, setIsDirty] = useState(false)
+
+  return (
+    <AnimatePresence>
+      {isOpen && task && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+          />
+
+          {/* Drawer Panel */}
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed inset-y-0 right-0 w-full max-w-2xl bg-[var(--bg-elevated)] shadow-2xl border-l border-[var(--color-border-subtle)] z-50 flex flex-col"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border-subtle)]">
+              <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                <Badge variant="outline" className="font-mono text-[10px] uppercase">{task.id}</Badge>
+                {task.status === 'Done' && (
+                  <Badge className="bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/20">
+                    Completed
+                  </Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <IconButton variant="ghost" title="Copy Link">
+                  <Icons.settings className="w-4 h-4" /> {/* Placeholder for link/share */}
+                </IconButton>
+                <IconButton variant="ghost" onClick={onClose}>
+                  <Icons.x className="w-4 h-4" />
+                </IconButton>
+              </div>
+            </div>
+
+            {/* Content Body */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="px-6 py-8 max-w-3xl mx-auto space-y-10">
+                
+                {/* Overview Section */}
+                <section>
+                  <Heading 
+                    level={2} 
+                    contentEditable 
+                    suppressContentEditableWarning
+                    onInput={(e) => {
+                      setLocalEdits(prev => ({ ...prev, title: e.currentTarget.textContent }))
+                      setIsDirty(true)
+                    }}
+                    className="text-2xl font-semibold tracking-tight mb-6 outline-none hover:bg-[var(--bg-subtle)] p-2 -ml-2 rounded transition-colors cursor-text"
+                  >
+                    {task.title}
+                  </Heading>
+                  
+                  {/* Attributes Grid */}
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-8 text-sm">
+                    <div className="flex items-center justify-between group">
+                      <span className="text-[var(--text-secondary)] flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full border-2 border-[var(--color-border-default)]" />
+                        Status
+                      </span>
+                      <span className="font-medium cursor-pointer hover:text-[var(--accent-cyan)]">{task.status}</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between group">
+                      <span className="text-[var(--text-secondary)] flex items-center gap-2">
+                        <Icons.alert className="w-4 h-4" />
+                        Priority
+                      </span>
+                      <Badge variant="outline" className="cursor-pointer">{task.priority}</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between group">
+                      <span className="text-[var(--text-secondary)] flex items-center gap-2">
+                        <Icons.user className="w-4 h-4" />
+                        Assignee
+                      </span>
+                      <span className="font-medium flex items-center gap-2 cursor-pointer hover:text-[var(--accent-cyan)]">
+                        <div className="w-5 h-5 rounded-full bg-[var(--accent-violet)] text-white flex items-center justify-center text-[10px]">
+                          {(task?.assignedTo || 'U').charAt(0).toUpperCase()}
+                        </div>
+                        {task.assignedTo || 'Unassigned'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between group">
+                      <span className="text-[var(--text-secondary)] flex items-center gap-2">
+                        <Icons.check className="w-4 h-4" />
+                        Due Date
+                      </span>
+                      <span className="font-medium cursor-pointer hover:text-[var(--accent-cyan)]">
+                        {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No date'}
+                      </span>
+                    </div>
+                  </div>
+                </section>
+
+                <hr className="border-[var(--color-border-subtle)]" />
+
+                {/* Description */}
+                <section>
+                  <Heading level={4} className="mb-4">Description</Heading>
+                  <div 
+                    contentEditable
+                    suppressContentEditableWarning
+                    onInput={(e) => {
+                      setLocalEdits(prev => ({ ...prev, description: e.currentTarget.textContent }))
+                      setIsDirty(true)
+                    }}
+                    className="text-[var(--text-secondary)] min-h-[100px] outline-none hover:bg-[var(--bg-subtle)] p-3 -mx-3 rounded-md transition-colors cursor-text whitespace-pre-wrap"
+                  >
+                    {task.description || ''}
+                  </div>
+                </section>
+
+                {/* Checklist */}
+                <section>
+                  <Heading level={4} className="mb-4">Checklist</Heading>
+                  <div className="space-y-4">
+                    {task.checklists?.length > 0 && (
+                      <div className="space-y-2 mb-4">
+                        {task.checklists.map(item => (
+                          <div key={item.id} className="flex items-center justify-between group py-1">
+                            <div className="flex items-center gap-3">
+                              <input 
+                                type="checkbox" 
+                                checked={item.completed} 
+                                onChange={() => toggleChecklistItem.mutate(item.id)}
+                                className="w-4 h-4 cursor-pointer accent-[var(--accent-cyan)]"
+                              />
+                              <span className={cn(
+                                "text-sm transition-colors",
+                                item.completed ? "line-through text-[var(--text-muted)]" : "text-[var(--text-primary)]"
+                              )}>
+                                {item.text}
+                              </span>
+                            </div>
+                            <IconButton 
+                              variant="ghost" 
+                              size="sm" 
+                              className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-600 transition-opacity"
+                              onClick={() => deleteChecklistItem.mutate(item.id)}
+                            >
+                              <Icons.x className="w-3 h-3" />
+                            </IconButton>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <ChecklistForm 
+                      onSubmit={(data) => addChecklistItem.mutate(data.text)}
+                      isLoading={addChecklistItem.isPending}
+                    />
+                  </div>
+                </section>
+                
+                <section>
+                  <Heading level={4} className="mb-4">Activity</Heading>
+                  <div className="text-center py-8 text-[var(--text-muted)] text-sm border border-dashed border-[var(--color-border-subtle)] rounded-lg">
+                    Activity history will appear here.
+                  </div>
+                </section>
+
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-[var(--color-border-subtle)] bg-[var(--bg-subtle)] flex items-center justify-between">
+              <Text size="xs" variant="muted">Created {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '—'}</Text>
+              <Button size="sm" disabled={!isDirty} onClick={() => {
+                updateTask.mutate({ id: task.id, payload: localEdits }, {
+                  onSuccess: () => setIsDirty(false)
+                })
+                onUpdate?.(localEdits)
+              }}>Save Changes</Button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
+}

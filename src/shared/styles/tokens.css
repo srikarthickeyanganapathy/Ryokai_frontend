@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Base Colors (Light Theme Defaults) */
+    --bg-base: #FAFAFA;
+    --bg-elevated: #FFFFFF;
+    --bg-glass: rgba(255, 255, 255, 0.7);
+    
+    --text-primary: #111111;
+    --text-secondary: #666666;
+    --text-tertiary: #999999;
+    
+    /* Accents */
+    --accent-cyan: #00B8C4;
+    --accent-magenta: #E00035;
+    --accent-violet: #5C00D1;
+
+    /* Semantics */
+    --success: #00C851;
+    --warning: #FFBB33;
+    --error: #FF4444;
+
+    /* Elevation & Shadows */
+    --shadow-level-0: none;
+    --shadow-level-1: 0px 4px 12px rgba(0,0,0, 0.05);
+    --shadow-level-2: 0px 8px 24px rgba(0,0,0, 0.1);
+    --shadow-level-3: 0px 24px 48px rgba(0,0,0, 0.15);
+
+    /* Radii */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-pill: 9999px;
+  }
+
+  /* Dark Theme Canonical */
+  .dark {
+    --bg-base: #050505;
+    --bg-elevated: #0E0E0E;
+    --bg-glass: rgba(20, 20, 20, 0.6);
+    
+    --text-primary: #FFFFFF;
+    --text-secondary: #888888;
+    --text-tertiary: #555555;
+    
+    --accent-cyan: #00F0FF;
+    --accent-magenta: #FF003C;
+    --accent-violet: #7000FF;
+
+    --success: #00FF66;
+    --warning: #FFD600;
+    --error: #FF2A2A;
+
+    --shadow-level-1: 0px 4px 12px rgba(0,0,0, 0.2);
+    --shadow-level-2: 0px 8px 24px rgba(0,0,0, 0.4);
+    --shadow-level-3: 0px 24px 48px rgba(0,0,0, 0.6);
+  }
+
+  body {
+    @apply bg-[var(--bg-base)] text-[var(--text-primary)] antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+}
