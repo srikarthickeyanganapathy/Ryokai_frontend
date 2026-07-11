@@ -177,9 +177,9 @@ export function TasksPage() {
     <div className="flex flex-col h-[calc(100vh-8rem)] relative">
       
       {/* Header */}
-      <div className="mb-6">
-        <Heading level={2} className="tracking-tight mb-1">My Tasks</Heading>
-        <Text variant="muted">Stay focused. Finish what matters.</Text>
+      <div className="mb-4">
+        <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-0.5">My Tasks</Heading>
+        <Text variant="muted" className="text-[13px]">Stay focused. Finish what matters.</Text>
       </div>
 
       {/* Toolbar */}
@@ -228,13 +228,13 @@ export function TasksPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] shadow-2xl rounded-full px-6 py-3 flex items-center gap-4 z-20"
+              className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[var(--bg-elevated)] border border-[var(--border-default)] shadow-[var(--shadow-lg)] rounded-[var(--radius-pill)] px-5 py-2.5 flex items-center gap-4 z-20"
             >
-              <Text size="sm" className="font-medium mr-2">
+              <Text size="sm" className="text-[13px] font-medium mr-2">
                 {Object.keys(rowSelection).length} selected
               </Text>
-              <div className="h-4 w-px bg-[var(--color-border-subtle)]" />
-              <button onClick={handleBulkComplete} className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent-cyan)] transition-colors">
+              <div className="h-4 w-px bg-[var(--border-default)]" />
+              <button onClick={handleBulkComplete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
                 Complete
               </button>
               {showAssignInput ? (
@@ -247,22 +247,22 @@ export function TasksPage() {
                     value={assignInput}
                     onChange={(e) => setAssignInput(e.target.value)}
                     placeholder="Assignee username" 
-                    className="text-sm px-2 py-1 bg-transparent border-b border-[var(--color-border-subtle)] focus:outline-none focus:border-[var(--accent-cyan)] text-[var(--text-primary)] w-32"
+                    className="text-[13px] px-2 py-1 bg-transparent border-b border-[var(--border-default)] focus:outline-none focus:border-[var(--accent)] text-[var(--text-primary)] w-32"
                     autoFocus
                   />
-                  <button type="submit" className="text-sm font-medium text-[var(--accent-cyan)] hover:text-[var(--accent-cyan-hover)] transition-colors">Save</button>
+                  <button type="submit" className="text-[13px] font-medium text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors">Save</button>
                 </form>
               ) : (
-                <button onClick={() => { setShowAssignInput(true); setAssignInput('') }} className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                <button onClick={() => { setShowAssignInput(true); setAssignInput('') }} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                   Assign
                 </button>
               )}
-              <button onClick={handleBulkDelete} className="text-sm font-medium text-[var(--text-secondary)] hover:text-red-500 transition-colors">
+              <button onClick={handleBulkDelete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
                 Delete
               </button>
               <button 
                 onClick={() => setRowSelection({})}
-                className="ml-2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                className="ml-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
               >
                 <Icons.x className="w-4 h-4" />
               </button>

@@ -164,12 +164,12 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
 
   if (isLoading) {
     return (
-      <div className="flex h-full gap-6 overflow-x-auto pb-4">
+      <div className="flex h-full gap-4 overflow-x-auto pb-4">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="flex flex-col bg-[var(--bg-subtle)] rounded-xl h-full w-[320px] shrink-0 border border-[var(--color-border-subtle)] p-3 gap-3">
-            <div className="h-6 w-32 bg-[var(--bg-elevated)] animate-pulse rounded" />
-            <div className="h-24 bg-[var(--bg-elevated)] animate-pulse rounded-xl" />
-            <div className="h-32 bg-[var(--bg-elevated)] animate-pulse rounded-xl" />
+          <div key={i} className="flex flex-col bg-[var(--bg-subtle)] rounded-[var(--radius-lg)] h-full w-[300px] shrink-0 border border-[var(--border-subtle)] p-3 gap-2.5">
+            <div className="h-5 w-28 bg-[var(--bg-elevated)] animate-pulse rounded-[var(--radius-xs)]" />
+            <div className="h-20 bg-[var(--bg-elevated)] animate-pulse rounded-[var(--radius-md)]" />
+            <div className="h-28 bg-[var(--bg-elevated)] animate-pulse rounded-[var(--radius-md)]" />
           </div>
         ))}
       </div>
@@ -177,7 +177,7 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
   }
 
   return (
-    <div className="flex h-full gap-6 overflow-x-auto pb-4 items-start">
+    <div className="flex h-full gap-4 overflow-x-auto pb-4 items-start">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -197,7 +197,7 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
         {/* Drag Overlay for smooth beautiful animations */}
         <DragOverlay>
           {activeTask ? (
-            <div className="rotate-2 scale-105 shadow-2xl opacity-90 cursor-grabbing">
+            <div className="rotate-1 scale-[1.02] shadow-[var(--shadow-lg)] opacity-95 cursor-grabbing">
               <KanbanTaskCard task={activeTask} />
             </div>
           ) : null}

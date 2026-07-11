@@ -2,39 +2,31 @@ import React, { useMemo } from 'react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { useDashboardStats } from '@/features/analytics/hooks/useDashboard'
 import { StatCard } from '@/features/analytics/components/StatCard'
-import { 
-  CompletionChart, 
-  PriorityChart, 
-  ProductivityChart 
-} from '@/features/analytics/components/Charts'
+import { CompletionChart, PriorityChart } from '@/features/analytics/components/Charts'
 import { CheckCircle2, TrendingUp, PlusCircle, AlertCircle, Clock, ShieldAlert, Timer, BarChart3 } from 'lucide-react'
 
+// Status colors are provided directly by the backend (DashboardStatsDTO.statusBreakdown[].color)
+// so the chart stays in sync with whatever palette the API defines, instead of guessing locally.
 export function AnalyticsPage() {
   const { data: rawStats, isLoading, isError } = useDashboardStats()
 
   const stats = useMemo(() => {
     if (!rawStats) return null
 
-    // Mapping DashboardStatsDTO from backend to UI — using correct field meanings
     return {
       completionRate: rawStats.myCompletionRate || 0,
       totalTasks: rawStats.totalTasks || 0,
       doneCount: rawStats.doneCount || 0,
       overdueCount: rawStats.overdueCount || 0,
-      todoCount: rawStats.todoCount || 0,       // ASSIGNED tasks count
-      inReviewCount: rawStats.inReviewCount || 0, // SUBMITTED tasks count
-      revisionsCount: rawStats.revisionsCount || 0, // REJECTED tasks count
+      todoCount: rawStats.todoCount || 0,
+      inReviewCount: rawStats.inReviewCount || 0,
+      revisionsCount: rawStats.revisionsCount || 0,
       assignedToMe: rawStats.assignedToMeCount || 0,
-      avgTime: 0, // Backend doesn't provide this yet
-      
-      // Status breakdown for chart
-      priorityData: rawStats.statusBreakdown ? rawStats.statusBreakdown.map(s => ({
+      priorityData: (rawStats.statusBreakdown || []).map((s) => ({
         name: s.status,
-        value: s.count
-      })) : [],
-      
-      // Empty mock for weekly data since backend doesn't provide it yet
-      weeklyData: []
+        value: s.count,
+        color: s.color,
+      })),
     }
   }, [rawStats])
 
@@ -101,71 +93,37 @@ export function AnalyticsPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] overflow-y-auto pr-2 pb-10">
-      
-      {/* Header */}
+
       <div className="mb-6">
         <Heading level={2} className="tracking-tight mb-1">Analytics</Heading>
         <Text variant="muted">Measure your progress. Optimize your workflow.</Text>
       </div>
 
-      {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard 
-          title="Completion Rate" 
-          value={`${stats.completionRate}%`} 
-          icon={CheckCircle2} 
+        <StatCard title="Completion Rate" value={`${stats.completionRate}%`} icon={CheckCircle2} />
+        <StatCard title="Total Tasks" value={stats.totalTasks} icon={PlusCircle} />
+        <StatCard title="Assigned to Me" value={stats.assignedToMe} icon={Clock} />
+        <StatCard title="In Review" value={stats.inReviewCount} icon={TrendingUp} />
+        <StatCard
+          title="Overdue"
+          value={stats.overdueCount}
+          icon={AlertCircle}
+          trend={stats.overdueCount > 0 ? -1 : 0}
         />
-        <StatCard 
-          title="Total Tasks" 
-          value={stats.totalTasks} 
-          icon={PlusCircle} 
-        />
-        <StatCard 
-          title="Assigned to Me" 
-          value={stats.assignedToMe} 
-          icon={Clock} 
-        />
-        <StatCard 
-          title="In Review" 
-          value={stats.inReviewCount} 
-          icon={TrendingUp} 
-        />
-        <StatCard 
-          title="Overdue" 
-          value={stats.overdueCount} 
-          icon={AlertCircle} 
-          trend={stats.overdueCount > 0 ? -1 : 0} 
-        />
-        <StatCard 
-          title="Needs Work" 
-          value={stats.revisionsCount} 
-          icon={ShieldAlert} 
-        />
-        <StatCard 
-          title="To Do" 
-          value={stats.todoCount} 
-          icon={Timer} 
-        />
-        <StatCard 
-          title="Done" 
-          value={stats.doneCount} 
-          icon={CheckCircle2} 
-        />
+        <StatCard title="Needs Work" value={stats.revisionsCount} icon={ShieldAlert} />
+        <StatCard title="To Do" value={stats.todoCount} icon={Timer} />
+        <StatCard title="Done" value={stats.doneCount} icon={CheckCircle2} />
       </div>
 
-      {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <CompletionChart />
+          <CompletionChart rate={stats.completionRate} />
         </div>
         <div className="lg:col-span-1">
           <PriorityChart data={stats.priorityData} />
         </div>
-        <div className="lg:col-span-3">
-          <ProductivityChart data={stats.weeklyData} />
-        </div>
       </div>
-      
+
     </div>
   )
 }

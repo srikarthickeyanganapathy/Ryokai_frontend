@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
@@ -16,6 +16,13 @@ import { useUpdateMemberRole, useOrgRoles } from '@/features/organizations/hooks
 import { cn } from '@/shared/lib/cn'
 import { usePermissions } from '@/context/usePermissions'
 
+function formatDate(isoString) {
+  if (!isoString) return '—'
+  return new Date(isoString).toLocaleDateString(undefined, {
+    month: 'short', day: 'numeric', year: 'numeric',
+  })
+}
+
 export function OrganizationDetailPage() {
   const { orgId } = useParams()
   const { data: org, isLoading, isError, error } = useOrganization(orgId)
@@ -27,17 +34,18 @@ export function OrganizationDetailPage() {
   const [selectedTeam, setSelectedTeam] = useState(null)
   const [activeTab, setActiveTab] = useState('overview')
   const updateRoleMutation = useUpdateMemberRole(orgId)
-  const { isSuperAdmin, isOrgAdmin, isAdmin } = usePermissions()
+  const { isSuperAdmin, isOrgAdmin } = usePermissions()
+  const canManage = isSuperAdmin || isOrgAdmin
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'members', label: 'Members' },
     { id: 'teams', label: 'Teams' },
-    { id: 'leaves', label: 'Leave Requests' }
-  ];
-  
-  if (isSuperAdmin || isOrgAdmin) {
-    tabs.push({ id: 'admin', label: 'Admin Settings' });
+    { id: 'leaves', label: 'Leave Requests' },
+  ]
+
+  if (canManage) {
+    tabs.push({ id: 'admin', label: 'Admin Settings' })
   }
 
   if (isLoading || rolesLoading) {
@@ -64,9 +72,6 @@ export function OrganizationDetailPage() {
         <Text variant="muted" className="mt-2 mb-6 max-w-md mx-auto">
           {error?.message || 'An unexpected error occurred.'}
         </Text>
-        <Link to="/app/organizations">
-          <Button variant="outline">Back to Organizations</Button>
-        </Link>
       </div>
     )
   }
@@ -75,25 +80,13 @@ export function OrganizationDetailPage() {
     return (
       <div className="text-center py-20 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl border-dashed">
         <Heading level={3}>Organization not found</Heading>
-        <Text variant="muted" className="mt-2 mb-6">The organization you're looking for doesn't exist.</Text>
-        <Link to="/app/organizations">
-          <Button variant="outline">Back to Organizations</Button>
-        </Link>
+        <Text variant="muted" className="mt-2">The organization you're looking for doesn't exist.</Text>
       </div>
     )
   }
 
   return (
     <div className="flex flex-col min-h-full">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] mb-6">
-        <Link to="/app/organizations" className="hover:text-[var(--text-primary)] transition-colors">
-          Organizations
-        </Link>
-        <Icons.chevronRight className="w-3 h-3" />
-        <span className="text-[var(--text-primary)] font-medium">{org.name}</span>
-      </div>
-
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -114,8 +107,8 @@ export function OrganizationDetailPage() {
             onClick={() => setActiveTab(tab.id)}
             className={cn(
               "relative pb-3 text-sm font-medium transition-colors whitespace-nowrap",
-              activeTab === tab.id 
-                ? "text-[var(--text-primary)]" 
+              activeTab === tab.id
+                ? "text-[var(--text-primary)]"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             )}
           >
@@ -180,9 +173,12 @@ export function OrganizationDetailPage() {
               <div className="w-10 h-10 rounded-lg bg-[var(--accent-green)]/10 flex items-center justify-center">
                 <Icons.tasks className="w-5 h-5 text-[var(--accent-green)]" />
               </div>
-              <Text variant="muted" size="sm">Projects</Text>
+              <Text variant="muted" size="sm">Created</Text>
             </div>
-            <span className="text-3xl font-bold">{org.projectCount ?? 0}</span>
+            <span className="text-3xl font-bold">{formatDate(org.createdAt)}</span>
+            {org.createdBy && (
+              <Text variant="muted" size="xs" className="mt-1">by {org.createdBy}</Text>
+            )}
           </motion.div>
         </div>
       )}
@@ -192,7 +188,7 @@ export function OrganizationDetailPage() {
         <section className="mb-10">
           <div className="flex items-center justify-between mb-4">
             <Heading level={3}>Members</Heading>
-            {(isSuperAdmin || isOrgAdmin) && (
+            {canManage && (
               <Button variant="primary" size="sm" onClick={() => setInviteModalOpen(true)}>
                 <Icons.plus className="w-4 h-4 mr-1.5" />
                 Invite Member
@@ -210,35 +206,42 @@ export function OrganizationDetailPage() {
           ) : (
             <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl divide-y divide-[var(--color-border-subtle)]">
               {members.map((member, i) => {
+                // orgRole on a membership is always one of this org's own roles
+                // (ADMIN/DIRECTOR/MANAGER/EMPLOYEE or a custom one) — it is never
+                // the platform-level "SUPER_ADMIN" role, which lives outside
+                // organization membership entirely.
                 const currentRole = roles.find(r => r.name === member.orgRole)
                 return (
-                <div key={member.userId || i} className="flex items-center justify-between px-5 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center text-sm font-medium">
-                      {member.username?.charAt(0)?.toUpperCase() || '?'}
+                  <div key={member.userId || i} className="flex items-center justify-between px-5 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center text-sm font-medium">
+                        {member.username?.charAt(0)?.toUpperCase() || '?'}
+                      </div>
+                      <div>
+                        <Text className="font-medium text-sm">{member.username}</Text>
+                      </div>
                     </div>
                     <div>
-                      <Text className="font-medium text-sm">{member.username}</Text>
+                      <select
+                        value={currentRole?.id ?? ''}
+                        onChange={(e) => updateRoleMutation.mutate({ userId: member.userId, roleId: e.target.value })}
+                        disabled={!canManage || updateRoleMutation.isPending}
+                        className={cn(
+                          "bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] rounded-md px-2 py-1 text-sm focus:outline-none focus:border-[var(--accent-cyan)]",
+                          (!canManage || updateRoleMutation.isPending) && "opacity-50 cursor-not-allowed"
+                        )}
+                      >
+                        {!currentRole && (
+                          <option value="" disabled>{member.orgRole || 'Unknown role'}</option>
+                        )}
+                        {roles.map(role => (
+                          <option key={role.id} value={role.id}>{role.name}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
-                  <div>
-                    <select
-                      value={currentRole?.id || ''}
-                      onChange={(e) => updateRoleMutation.mutate({ userId: member.userId, roleId: e.target.value })}
-                      disabled={!(isSuperAdmin || isOrgAdmin) || member.orgRole === 'SUPER_ADMIN'}
-                      className={`bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] rounded-md px-2 py-1 text-sm focus:outline-none focus:border-[var(--accent-cyan)] ${!(isSuperAdmin || isOrgAdmin) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      {member.orgRole === 'SUPER_ADMIN' ? (
-                        <option value={currentRole?.id || ''}>SUPER_ADMIN</option>
-                      ) : (
-                        roles.map(role => (
-                          <option key={role.id} value={role.id}>{role.name}</option>
-                        ))
-                      )}
-                    </select>
-                  </div>
-                </div>
-              )})}
+                )
+              })}
             </div>
           )}
         </section>
@@ -249,7 +252,7 @@ export function OrganizationDetailPage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <Heading level={3}>Teams</Heading>
-            {(isSuperAdmin || isOrgAdmin) && (
+            {canManage && (
               <Button variant="outline" size="sm" onClick={() => setCreateTeamModalOpen(true)}>
                 <Icons.plus className="w-4 h-4 mr-1.5" />
                 Create Team
@@ -269,27 +272,25 @@ export function OrganizationDetailPage() {
               {teams.map((team, i) => (
                 <div key={team.id || i} className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl p-5 flex flex-col">
                   <div className="flex-1">
-
                     <div className="flex items-center justify-between mb-1">
                       <Heading level={4} className="text-base">{team.name}</Heading>
-                      <Badge variant="outline" className="text-xs">{team.members?.length || 0} members</Badge>
+                      <Badge variant="outline" className="text-xs">{team.memberCount ?? team.members?.length ?? 0} members</Badge>
                     </div>
                     {team.description && (
                       <Text variant="muted" size="sm" className="line-clamp-2 mt-2">{team.description}</Text>
                     )}
                   </div>
                   <div className="mt-4 pt-4 border-t border-[var(--color-border-subtle)]">
-                    {(isSuperAdmin || isOrgAdmin) ? (
-                      <Button variant="ghost" size="sm" className="w-full" onClick={() => setSelectedTeam(team)}>
-                        <Icons.settings className="w-4 h-4 mr-2" />
-                        Manage Members
-                      </Button>
-                    ) : (
-                      <Button variant="ghost" size="sm" className="w-full" disabled>
-                        <Icons.settings className="w-4 h-4 mr-2" />
-                        Manage Members
-                      </Button>
-                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full"
+                      disabled={!canManage}
+                      onClick={() => canManage && setSelectedTeam(team)}
+                    >
+                      <Icons.settings className="w-4 h-4 mr-2" />
+                      Manage Members
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -304,7 +305,7 @@ export function OrganizationDetailPage() {
       )}
 
       {/* Admin Settings Tab */}
-      {activeTab === 'admin' && (isSuperAdmin || isOrgAdmin) && (
+      {activeTab === 'admin' && canManage && (
         <section className="mb-10">
           <div className="flex items-center justify-between mb-4">
             <Heading level={3}>Organization Admin Settings</Heading>
@@ -318,12 +319,12 @@ export function OrganizationDetailPage() {
         </section>
       )}
 
-      {(isSuperAdmin || isOrgAdmin) && (
+      {canManage && (
         <>
-          <InviteMemberModal 
-            isOpen={inviteModalOpen} 
-            onClose={() => setInviteModalOpen(false)} 
-            orgId={orgId} 
+          <InviteMemberModal
+            isOpen={inviteModalOpen}
+            onClose={() => setInviteModalOpen(false)}
+            orgId={orgId}
           />
 
           <CreateTeamModal

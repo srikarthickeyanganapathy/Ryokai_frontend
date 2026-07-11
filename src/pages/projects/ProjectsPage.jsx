@@ -37,23 +37,23 @@ export function ProjectsPage() {
     <div className="flex flex-col min-h-full">
       
       {/* Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
         <div>
-          <Heading level={2} className="tracking-tight mb-1">Projects</Heading>
-          <Text variant="muted">Organize work across your teams.</Text>
+          <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-0.5">Projects</Heading>
+          <Text variant="muted" className="text-[13px]">Organize work across your teams.</Text>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <div className="relative w-full sm:w-64">
-            <Icons.search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+            <Icons.search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-tertiary)]" />
             <Input 
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
               placeholder="Search projects..." 
-              className="pl-9 bg-[var(--bg-elevated)] border-transparent focus:border-[var(--color-border-default)]" 
+              className="pl-8" 
             />
           </div>
-          <Button className="shrink-0 gap-2" onClick={() => setIsCreateOpen(true)}>
-            <Icons.projects className="w-4 h-4" />
+          <Button size="sm" className="shrink-0 gap-1.5" onClick={() => setIsCreateOpen(true)}>
+            <Icons.projects className="w-3.5 h-3.5" />
             New Project
           </Button>
         </div>
@@ -79,20 +79,20 @@ export function ProjectsPage() {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-48 rounded-xl bg-[var(--bg-subtle)] animate-pulse" />
+            <div key={i} className="h-44 rounded-[var(--radius-lg)] bg-[var(--bg-subtle)] animate-pulse" />
           ))}
         </div>
       )}
 
       {/* Error State */}
       {!isLoading && isError && (
-        <div className="text-center py-20 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl border-dashed">
-          <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4 text-red-500">
-            <Icons.x className="w-6 h-6" />
+        <div className="text-center py-16 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-[var(--radius-lg)] border-dashed">
+          <div className="w-11 h-11 rounded-full bg-[var(--danger-soft)] flex items-center justify-center mx-auto mb-4 text-[var(--danger)]">
+            <Icons.x className="w-5 h-5" />
           </div>
-          <Heading level={3}>Failed to load projects</Heading>
+          <Heading level={3} className="text-[15px] font-semibold">Failed to load projects</Heading>
           <Text variant="muted" className="mt-2 mb-6 max-w-md mx-auto">
             {error?.message || 'An unexpected error occurred. Please try again.'}
           </Text>
@@ -109,7 +109,7 @@ export function ProjectsPage() {
             hidden: { opacity: 0 },
             visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
           }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         >
           {projects.map(project => (
             <motion.div 
@@ -127,11 +127,11 @@ export function ProjectsPage() {
 
       {/* Empty State */}
       {!isLoading && !isError && projects.length === 0 && (
-        <div className="text-center py-20 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl border-dashed">
-          <div className="w-12 h-12 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center mx-auto mb-4 text-[var(--text-muted)]">
-            <Icons.projects className="w-6 h-6" />
+        <div className="text-center py-16 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-[var(--radius-lg)] border-dashed">
+          <div className="w-11 h-11 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center mx-auto mb-4 text-[var(--text-tertiary)]">
+            <Icons.projects className="w-5 h-5" />
           </div>
-          <Heading level={3}>No projects found</Heading>
+          <Heading level={3} className="text-[15px] font-semibold">No projects found</Heading>
           <Text variant="muted" className="mt-2 mb-6 max-w-md mx-auto">Get started by creating a new project to organize your tasks.</Text>
           <Button onClick={() => setIsCreateOpen(true)}>Create Project</Button>
         </div>

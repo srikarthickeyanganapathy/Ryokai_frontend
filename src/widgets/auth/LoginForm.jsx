@@ -38,7 +38,7 @@ export function LoginForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="username"
@@ -46,7 +46,7 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder="Username" {...field} />
+                <Input placeholder="Username" size="lg" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -62,13 +62,13 @@ export function LoginForm() {
                 <FormLabel>Password</FormLabel>
                 <Link 
                   to="/forgot-password" 
-                  className="text-xs text-[var(--accent-cyan)] hover:underline"
+                  className="text-xs text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
                 >
                   Forgot password?
                 </Link>
               </div>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <Input type="password" placeholder="••••••••" size="lg" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -77,7 +77,8 @@ export function LoginForm() {
 
         <Button 
           type="submit" 
-          className="w-full mt-2" 
+          size="lg"
+          className="w-full mt-1" 
           isLoading={loginMutation.isPending}
         >
           Sign In

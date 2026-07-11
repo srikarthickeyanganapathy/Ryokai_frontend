@@ -47,7 +47,7 @@ export function AppTopbar({ onMenuClick }) {
   const unread = typeof unreadCount === 'number' ? unreadCount : 0
 
   return (
-    <header className="h-16 flex items-center justify-between px-4 md:px-8 border-b border-[var(--color-border-subtle)] bg-[var(--bg-base)]/80 backdrop-blur-md sticky top-0 z-10">
+    <header className="h-12 flex items-center justify-between px-3 md:px-4 border-b border-[var(--border-subtle)] bg-[var(--bg-base)] sticky top-0 z-10">
 
       <div className="flex items-center gap-4">
         <IconButton
@@ -58,7 +58,7 @@ export function AppTopbar({ onMenuClick }) {
           <Icons.menu className="w-5 h-5 text-[var(--text-secondary)]" />
         </IconButton>
 
-        <div className="hidden sm:block w-64 lg:w-80">
+        <div className="hidden sm:block w-64 lg:w-72">
           <CommandMenu />
         </div>
       </div>
@@ -80,7 +80,7 @@ export function AppTopbar({ onMenuClick }) {
               >
                 <Icons.alert className="w-5 h-5" />
                 {unread > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-[var(--accent-cyan)] text-white text-[10px] font-bold leading-none px-1 border-2 border-[var(--bg-base)]">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] flex items-center justify-center rounded-full bg-[var(--accent)] text-white text-[9px] font-semibold leading-none px-1 border-2 border-[var(--bg-base)]">
                     {unread > 99 ? '99+' : unread}
                   </span>
                 )}
@@ -89,13 +89,13 @@ export function AppTopbar({ onMenuClick }) {
           </PopoverTrigger>
           <PopoverContent align="end" className="w-80 p-0 max-h-[420px] flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border-subtle)]">
-              <Heading level={4} className="text-sm">Notifications</Heading>
+            <div className="flex items-center justify-between px-3 py-2.5 border-b border-[var(--border-subtle)]">
+              <Heading level={4} className="text-[13px]">Notifications</Heading>
               {unread > 0 && (
                 <button
                   onClick={() => markAllRead.mutate()}
                   disabled={markAllRead.isPending}
-                  className="text-xs font-medium text-[var(--accent-cyan)] hover:text-[var(--accent-cyan)]/80 transition-colors"
+                  className="text-[11px] font-medium text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
                 >
                   Mark all read
                 </button>
@@ -131,9 +131,9 @@ export function AppTopbar({ onMenuClick }) {
                   <div
                     key={n.id}
                     className={cn(
-                      'flex items-start gap-3 px-4 py-3 border-b border-[var(--color-border-subtle)] last:border-b-0 transition-colors cursor-pointer group',
-                      !isRead && 'bg-[var(--accent-cyan)]/5',
-                      'hover:bg-[var(--bg-subtle)]'
+                      'flex items-start gap-3 px-3 py-2.5 border-b border-[var(--border-subtle)] last:border-b-0 transition-colors cursor-pointer group',
+                      !isRead && 'bg-[var(--accent-soft)]',
+                      'hover:bg-[var(--bg-hover)]'
                     )}
                     onClick={() => {
                       if (!isRead) markRead.mutate(n.id)
@@ -142,7 +142,7 @@ export function AppTopbar({ onMenuClick }) {
                   >
                     <div className={cn(
                       'w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5',
-                      !isRead ? 'bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)]' : 'bg-[var(--bg-subtle)] text-[var(--text-muted)]'
+                      !isRead ? 'bg-[var(--accent-soft)] text-[var(--accent)]' : 'bg-[var(--bg-subtle)] text-[var(--text-tertiary)]'
                     )}>
                       <IconComponent className="w-4 h-4" />
                     </div>
@@ -201,7 +201,7 @@ export function AppTopbar({ onMenuClick }) {
                       )}
                     </div>
                     {!isRead && (
-                      <div className="w-2 h-2 rounded-full bg-[var(--accent-cyan)] shrink-0 mt-1.5" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] shrink-0 mt-1.5" />
                     )}
                   </div>
                 )
@@ -214,15 +214,15 @@ export function AppTopbar({ onMenuClick }) {
         <Popover open={userMenuOpen} onOpenChange={setUserMenuOpen}>
           <PopoverTrigger asChild>
             <div>
-              <Avatar size="sm" className="cursor-pointer hover:ring-2 hover:ring-[var(--accent-cyan)]/50 transition-all">
+              <Avatar size="sm" className="cursor-pointer transition-shadow focus-ring">
                 <AvatarImage src={user?.avatarUrl} />
                 <AvatarFallback>{user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}</AvatarFallback>
               </Avatar>
             </div>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-56 p-1.5">
-            <div className="px-3 py-2">
-              <Text className="font-medium text-sm">{user?.name || user?.username}</Text>
+            <div className="px-2 py-1.5">
+              <Text className="font-medium text-[13px]">{user?.name || user?.username}</Text>
               {user?.email && (
                 <Text variant="muted" size="xs" className="truncate">{user.email}</Text>
               )}
@@ -232,9 +232,9 @@ export function AppTopbar({ onMenuClick }) {
               <Link
                 to="/app/sessions"
                 onClick={() => setUserMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-[var(--bg-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors w-full"
+                className="flex items-center gap-2 px-2 h-7 text-[13px] rounded-[var(--radius-sm)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors w-full"
               >
-                <Icons.settings className="w-4 h-4" />
+                <Icons.settings className="w-3.5 h-3.5" />
                 Settings
               </Link>
               <button
@@ -243,9 +243,9 @@ export function AppTopbar({ onMenuClick }) {
                   await logout()
                   navigate('/login')
                 }}
-                className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-red-500/10 text-[var(--text-secondary)] hover:text-red-500 transition-colors w-full text-left"
+                className="flex items-center gap-2 px-2 h-7 text-[13px] rounded-[var(--radius-sm)] hover:bg-[var(--danger-soft)] text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors w-full text-left"
               >
-                <Icons.x className="w-4 h-4" />
+                <Icons.x className="w-3.5 h-3.5" />
                 Logout
               </button>
             </div>

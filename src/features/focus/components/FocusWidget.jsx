@@ -21,7 +21,7 @@ export function FocusWidget() {
   }, [tasks])
 
   return (
-    <div className="relative overflow-hidden p-6 rounded-2xl bg-gradient-to-br from-[var(--bg-elevated)] to-[var(--bg-subtle)] border border-[var(--accent-cyan)]/30 hover:border-[var(--accent-cyan)]/60 transition-colors shadow-lg group">
+    <div className="relative overflow-hidden p-5 rounded-[var(--radius-lg)] bg-[var(--bg-elevated)] border border-[var(--border-default)] hover:border-[var(--accent-border)] transition-colors group">
       
       {/* Background glow */}
       <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-[var(--accent-cyan)]/10 rounded-full blur-3xl group-hover:bg-[var(--accent-cyan)]/20 transition-colors" />

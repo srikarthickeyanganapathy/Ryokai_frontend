@@ -36,11 +36,11 @@ export function CommandMenu() {
     <>
       <div 
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--text-secondary)] bg-[var(--bg-elevated)] border border-[var(--color-border-default)] rounded-md cursor-pointer hover:bg-[var(--bg-subtle)] transition-colors w-full max-w-sm"
+        className="flex items-center gap-2 px-2.5 h-8 text-[13px] text-[var(--text-tertiary)] bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-[var(--radius-md)] cursor-pointer hover:border-[var(--border-strong)] transition-colors w-full max-w-sm"
       >
-        <Icons.search className="w-4 h-4" />
+        <Icons.search className="w-3.5 h-3.5" />
         <span className="flex-1 text-left">Search...</span>
-        <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded border border-[var(--color-border-subtle)] bg-[var(--bg-base)] px-1.5 font-mono text-[10px] font-medium opacity-100">
+        <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded-[var(--radius-xs)] border border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-1.5 font-mono text-[10px] font-medium text-[var(--text-tertiary)]">
           <span className="text-xs">⌘</span>K
         </kbd>
       </div>

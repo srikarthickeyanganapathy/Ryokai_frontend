@@ -21,18 +21,20 @@ function formatDate(isoString) {
   })
 }
 
+// Matches Project.ProjectStatus exactly: ACTIVE, COMPLETED, ARCHIVED.
 const statusColors = {
   ACTIVE: 'bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/20',
   COMPLETED: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
   ARCHIVED: 'bg-red-500/10 text-red-500 border-red-500/20',
 }
+const defaultStatusColor = 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]'
 
 export function ProjectDetailPage() {
   const { projectId } = useParams()
   const navigate = useNavigate()
   const { workspaceMode } = useWorkspace()
   const { data: project, isLoading, isError } = useProject(Number(projectId))
-  
+
   const updateProjectMutation = useUpdateProject()
   const deleteProjectMutation = useDeleteProject()
 
@@ -102,7 +104,7 @@ export function ProjectDetailPage() {
               <Icons.chevronLeft className="w-5 h-5" />
             </Link>
             <Heading level={2} className="tracking-tight">{project.name}</Heading>
-            <Badge variant="outline" className={cn('text-xs', statusColors[project.status])}>
+            <Badge variant="outline" className={cn('text-xs', statusColors[project.status] || defaultStatusColor)}>
               {project.status}
             </Badge>
           </div>

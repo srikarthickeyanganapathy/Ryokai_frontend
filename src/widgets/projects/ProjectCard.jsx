@@ -22,37 +22,38 @@ export function ProjectCard({ project }) {
   } = project
 
   const tasksLeft = tasksTotal - tasksCompleted
-  const safeColor = color || 'var(--accent-cyan)'
+  const safeColor = color || 'var(--accent)'
 
   return (
     <Link to={`/app/projects/${id}`} className="block">
       <motion.div 
-        whileHover={{ y: -2 }}
-        className="group relative bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl p-6 transition-all hover:shadow-md hover:border-[var(--color-border-default)] h-full flex flex-col"
+        whileHover={{ y: -1 }}
+        transition={{ duration: 0.12 }}
+        className="group relative bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] p-5 transition-colors hover:border-[var(--border-default)] h-full flex flex-col"
       >
         {/* Header (Project & Status) */}
         <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <div 
-              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-sm"
-              style={{ backgroundColor: `${safeColor}15`, color: safeColor }}
+              className="w-9 h-9 rounded-[var(--radius-sm)] flex items-center justify-center shrink-0"
+              style={{ backgroundColor: `${safeColor}18`, color: safeColor }}
             >
-              <Icons.projects className="w-5 h-5" />
+              <Icons.projects className="w-4 h-4" />
             </div>
             <div>
-              <Heading level={4} className="group-hover:text-[var(--accent-cyan)] transition-colors">
+              <Heading level={4} className="text-[14px] font-semibold group-hover:text-[var(--accent)] transition-colors">
                 {name}
               </Heading>
-              <Text size="sm" variant="muted" className="mt-0.5 line-clamp-1">{description}</Text>
+              <Text size="sm" variant="muted" className="text-[12px] mt-0.5 line-clamp-1">{description}</Text>
             </div>
           </div>
           <Badge 
-            variant="outline" 
+            size="sm"
             className={cn(
               "shrink-0",
-              status === 'ACTIVE' && "bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/20",
-              status === 'COMPLETED' && "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-              status === 'ARCHIVED' && "bg-red-500/10 text-red-500 border-red-500/20"
+              status === 'ACTIVE' && "bg-[var(--accent-soft)] text-[var(--accent)]",
+              status === 'COMPLETED' && "bg-[var(--success-soft)] text-[var(--success)]",
+              status === 'ARCHIVED' && "bg-[var(--danger-soft)] text-[var(--danger)]"
             )}
           >
             {status}
@@ -60,16 +61,16 @@ export function ProjectCard({ project }) {
         </div>
 
         {/* Progress & Metrics */}
-        <div className="mt-4 mb-6 flex-1">
-          <div className="flex justify-between items-end mb-2">
-            <Text size="sm" className="font-medium">{progress}% <span className="text-[var(--text-muted)] font-normal">Completed</span></Text>
-            <Text size="sm" variant="muted">{tasksLeft} tasks left</Text>
+        <div className="mt-3 mb-5 flex-1">
+          <div className="flex justify-between items-end mb-1.5">
+            <Text size="sm" className="text-[12px] font-medium">{progress}% <span className="text-[var(--text-tertiary)] font-normal">Completed</span></Text>
+            <Text size="sm" variant="muted" className="text-[12px]">{tasksLeft} tasks left</Text>
           </div>
-          <div className="h-2 w-full bg-[var(--bg-subtle)] rounded-full overflow-hidden">
+          <div className="h-1.5 w-full bg-[var(--bg-subtle)] rounded-full overflow-hidden">
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
               className="h-full rounded-full"
               style={{ backgroundColor: safeColor }}
             />
@@ -77,14 +78,14 @@ export function ProjectCard({ project }) {
         </div>
 
         {/* Footer (Created By, Due, Updated) */}
-        <div className="flex items-center justify-between pt-4 border-t border-[var(--color-border-subtle)]">
+        <div className="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">
           <Text size="xs" variant="muted">
             {createdBy || 'System'}
           </Text>
 
           <div className="flex flex-col items-end gap-1">
-            <div className="flex items-center text-[var(--text-secondary)] text-xs gap-1.5">
-              <Icons.alert className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+            <div className="flex items-center text-[var(--text-secondary)] text-[11px] gap-1.5">
+              <Icons.alert className="w-3 h-3 text-[var(--text-tertiary)]" />
               Due {dueDate ? new Date(dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'No date'}
             </div>
             <Text size="xs" variant="muted">

@@ -8,7 +8,7 @@ export const Command = forwardRef(({ className, ...props }, ref) => (
   <CommandPrimitive
     ref={ref}
     className={cn(
-      'flex h-full w-full flex-col overflow-hidden rounded-md bg-[var(--bg-elevated)] text-[var(--text-primary)]',
+      'flex h-full w-full flex-col overflow-hidden rounded-[var(--radius-lg)] bg-[var(--bg-elevated)] text-[var(--text-primary)]',
       className
     )}
     {...props}
@@ -19,8 +19,8 @@ Command.displayName = CommandPrimitive.displayName
 export const CommandDialog = ({ children, ...props }) => {
   return (
     <Modal {...props}>
-      <ModalContent className="overflow-hidden p-0 shadow-lg">
-        <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-[var(--text-secondary)] [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
+      <ModalContent className="overflow-hidden p-0 shadow-[var(--shadow-lg)] max-w-xl top-[20%] translate-y-0">
+        <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-[var(--text-secondary)] [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-11 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-2 [&_[cmdk-item]_svg]:h-4 [&_[cmdk-item]_svg]:w-4">
           {children}
         </Command>
       </ModalContent>
@@ -29,12 +29,12 @@ export const CommandDialog = ({ children, ...props }) => {
 }
 
 export const CommandInput = forwardRef(({ className, ...props }, ref) => (
-  <div className="flex items-center border-b border-[var(--color-border-subtle)] px-3" cmdk-input-wrapper="">
+  <div className="flex items-center border-b border-[var(--border-subtle)] px-3" cmdk-input-wrapper="">
     <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        'flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-[var(--text-secondary)] disabled:cursor-not-allowed disabled:opacity-50',
+        'flex h-11 w-full bg-transparent py-3 text-[13px] outline-none placeholder:text-[var(--text-tertiary)] disabled:cursor-not-allowed disabled:opacity-50',
         className
       )}
       {...props}
@@ -86,7 +86,7 @@ export const CommandItem = forwardRef(({ className, ...props }, ref) => (
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-[var(--bg-subtle)] aria-selected:text-[var(--text-primary)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'relative flex cursor-default select-none items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-[13px] text-[var(--text-secondary)] outline-none transition-colors aria-selected:bg-[var(--accent-soft)] aria-selected:text-[var(--text-primary)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className
     )}
     {...props}

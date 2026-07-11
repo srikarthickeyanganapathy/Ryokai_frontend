@@ -7,11 +7,11 @@ import { cn } from '@/shared/lib/cn'
 import { normalizePriority } from '@/shared/lib/priority'
 
 const priorityColors = {
-  URGENT: 'bg-red-500/10 text-red-600 border-red-500/20',
-  HIGH: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
-  NORMAL: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
-  LOW: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--color-border-subtle)]',
-  NONE: 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]',
+  URGENT: 'bg-[var(--danger-soft)] text-[var(--danger)] border-transparent',
+  HIGH: 'bg-[var(--warning-soft)] text-[var(--warning)] border-transparent',
+  NORMAL: 'bg-[var(--accent-soft)] text-[var(--accent)] border-transparent',
+  LOW: 'bg-[var(--bg-hover)] text-[var(--text-secondary)] border-transparent',
+  NONE: 'bg-[var(--bg-hover)] text-[var(--text-tertiary)] border-transparent',
 }
 
 export function KanbanTaskCard({ task, onClick }) {
@@ -35,7 +35,7 @@ export function KanbanTaskCard({ task, onClick }) {
       <div 
         ref={setNodeRef} 
         style={style} 
-        className="w-full min-h-[100px] bg-[var(--bg-elevated)]/50 border-2 border-dashed border-[var(--color-border-default)] rounded-xl opacity-50" 
+        className="w-full min-h-[100px] bg-[var(--bg-elevated)]/50 border-2 border-dashed border-[var(--border-default)] rounded-[var(--radius-lg)] opacity-50" 
       />
     )
   }
@@ -47,36 +47,36 @@ export function KanbanTaskCard({ task, onClick }) {
       {...attributes}
       {...listeners}
       onClick={() => onClick && onClick(task)}
-      className="group bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl p-4 shadow-sm hover:shadow-md hover:-translate-y-[2px] hover:border-[var(--color-border-default)] transition-all cursor-grab active:cursor-grabbing mb-3 touch-none"
+      className="group bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[var(--radius-md)] p-3 hover:border-[var(--border-default)] transition-colors cursor-grab active:cursor-grabbing mb-2.5 touch-none"
     >
       <div className="flex items-start justify-between mb-2">
-        <h4 className="text-sm font-medium leading-snug line-clamp-2">
+        <h4 className="text-[13px] font-medium leading-snug line-clamp-2">
           {task.title}
         </h4>
       </div>
 
       <div className="flex items-center flex-wrap gap-2 mt-3">
-        <Badge variant="outline" className={cn("text-[10px]", priorityColors[task.priority])}>
+        <Badge size="xs" className={cn(priorityColors[task.priority])}>
           {normalizePriority(task.priority)}
         </Badge>
       </div>
 
-      <div className="flex items-center justify-between mt-4">
-        <div className="flex items-center text-[var(--text-secondary)] text-xs gap-1">
+      <div className="flex items-center justify-between mt-3">
+        <div className="flex items-center text-[var(--text-tertiary)] text-[11px] gap-1">
           {task.dueDate ? (
             <>
-              <Icons.alert className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+              <Icons.alert className="w-3 h-3" />
               {new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
             </>
           ) : (
-            <span className="text-[var(--text-muted)]">-</span>
+            <span>-</span>
           )}
         </div>
         
         {/* Assignee Avatar */}
         {task.assignedTo && (
           <div 
-            className="w-6 h-6 rounded-full bg-[var(--accent-cyan)] text-white flex items-center justify-center text-[10px] font-medium shadow-sm"
+            className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px] font-medium"
             title={task.assignedTo}
           >
             {task.assignedTo.slice(0, 2).toUpperCase()}

@@ -8,18 +8,18 @@ import { normalizePriority } from '@/shared/lib/priority'
 
 
 const priorityColors = {
-  URGENT: 'bg-red-500/10 text-red-600 border-red-500/20',
-  HIGH: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
-  NORMAL: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
-  LOW: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--color-border-subtle)]',
-  NONE: 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]',
+  URGENT: 'bg-[var(--danger-soft)] text-[var(--danger)] border-transparent',
+  HIGH: 'bg-[var(--warning-soft)] text-[var(--warning)] border-transparent',
+  NORMAL: 'bg-[var(--accent-soft)] text-[var(--accent)] border-transparent',
+  LOW: 'bg-[var(--bg-hover)] text-[var(--text-secondary)] border-transparent',
+  NONE: 'bg-[var(--bg-hover)] text-[var(--text-tertiary)] border-transparent',
 }
 
 const statusIcons = {
-  'To Do': <div className="w-4 h-4 rounded-full border-2 border-[var(--color-border-default)]" />,
-  'In Review': <div className="w-4 h-4 rounded-full border-2 border-[var(--accent-cyan)] border-t-transparent animate-spin-slow" />,
-  'Done': <Icons.check className="w-4 h-4 text-[var(--accent-cyan)]" />,
-  'Needs Work': <Icons.alert className="w-4 h-4 text-orange-500" />,
+  'To Do': <div className="w-3.5 h-3.5 rounded-full border-2 border-[var(--border-strong)]" />,
+  'In Review': <div className="w-3.5 h-3.5 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin-slow" />,
+  'Done': <Icons.check className="w-3.5 h-3.5 text-[var(--accent)]" />,
+  'Needs Work': <Icons.alert className="w-3.5 h-3.5 text-[var(--warning)]" />,
 }
 
 export function TasksTable({ 
@@ -39,7 +39,7 @@ export function TasksTable({
         <div className="flex items-center px-1">
           <input
             type="checkbox"
-            className="w-4 h-4 rounded border-[var(--color-border-default)] bg-[var(--bg-base)] text-[var(--accent-cyan)] focus:ring-[var(--accent-cyan)] cursor-pointer"
+            className="w-3.5 h-3.5 rounded-[var(--radius-xs)] border-[var(--border-default)] bg-[var(--bg-base)] text-[var(--accent)] focus:ring-[var(--accent)] cursor-pointer"
             checked={table.getIsAllPageRowsSelected()}
             onChange={table.getToggleAllPageRowsSelectedHandler()}
           />
@@ -49,7 +49,7 @@ export function TasksTable({
         <div className="flex items-center px-1" onClick={e => e.stopPropagation()}>
           <input
             type="checkbox"
-            className="w-4 h-4 rounded border-[var(--color-border-default)] bg-[var(--bg-base)] text-[var(--accent-cyan)] focus:ring-[var(--accent-cyan)] cursor-pointer"
+            className="w-3.5 h-3.5 rounded-[var(--radius-xs)] border-[var(--border-default)] bg-[var(--bg-base)] text-[var(--accent)] focus:ring-[var(--accent)] cursor-pointer"
             checked={row.getIsSelected()}
             onChange={row.getToggleSelectedHandler()}
           />
@@ -65,9 +65,9 @@ export function TasksTable({
         return (
           <div className="flex items-center gap-3">
             <div className="text-[var(--text-secondary)] shrink-0">
-              {statusIcons[task.status] || <div className="w-4 h-4 rounded-full border-2 border-[var(--color-border-default)]" />}
+              {statusIcons[task.status] || <div className="w-3.5 h-3.5 rounded-full border-2 border-[var(--border-strong)]" />}
             </div>
-            <span className={cn("font-medium truncate max-w-[300px] sm:max-w-[400px]", isDone && "line-through text-[var(--text-secondary)]")}>
+            <span className={cn("text-[13px] font-medium truncate max-w-[300px] sm:max-w-[400px]", isDone && "line-through text-[var(--text-tertiary)]")}>
               {task.title}
             </span>
           </div>
@@ -80,9 +80,9 @@ export function TasksTable({
       cell: ({ row }) => {
         const projectName = row.original.projectName
         const projectId = row.original.projectId
-        if (!projectId) return <span className="text-[var(--text-muted)]">-</span>
+        if (!projectId) return <span className="text-[var(--text-tertiary)]">-</span>
         return (
-          <Badge variant="outline" className="text-xs bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-transparent">
+          <Badge variant="secondary" size="sm">
             {projectName || `Project #${projectId}`}
           </Badge>
         )
@@ -94,7 +94,7 @@ export function TasksTable({
       cell: ({ row }) => {
         const p = row.original.priority
         return (
-          <Badge variant="outline" className={cn("text-xs", priorityColors[p])}>
+          <Badge size="sm" className={cn(priorityColors[p])}>
             {normalizePriority(p)}
           </Badge>
         )
@@ -105,10 +105,9 @@ export function TasksTable({
       header: 'Due',
       cell: ({ row }) => {
         const d = row.original.dueDate
-        if (!d) return <span className="text-[var(--text-muted)]">-</span>
-        // Just formatting nicely for the demo
+        if (!d) return <span className="text-[var(--text-tertiary)]">-</span>
         const dateStr = new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-        return <span className="text-[var(--text-secondary)] text-sm">{dateStr}</span>
+        return <span className="text-[var(--text-secondary)] text-[13px] tabular-nums">{dateStr}</span>
       }
     },
     {
@@ -125,16 +124,16 @@ export function TasksTable({
               onClick={() => onQuickComplete(task)}
               disabled={task.status === 'Done'}
             >
-              <Icons.check className="w-4 h-4" />
+              <Icons.check className="w-3.5 h-3.5" />
             </IconButton>
             <IconButton 
               variant="ghost" 
               size="sm" 
               title="Delete"
-              className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
+              className="text-[var(--text-tertiary)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]"
               onClick={() => onQuickDelete(task)}
             >
-              <Icons.trash2 className="w-4 h-4" />
+              <Icons.trash2 className="w-3.5 h-3.5" />
             </IconButton>
           </div>
         )

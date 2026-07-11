@@ -57,35 +57,35 @@ export function DashboardPage() {
 
   return (
     <motion.div 
-      className="space-y-6 md:space-y-8 pb-12 pr-2"
+      className="space-y-5 md:space-y-6 pb-12"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
       {/* Header */}
-      <motion.div variants={itemVariants} className="space-y-1">
-        <Heading level={2} className="tracking-tight">
+      <motion.div variants={itemVariants} className="space-y-0.5">
+        <Heading level={2} className="tracking-tight text-[20px] font-semibold">
           {getGreeting()}, {user?.name?.split(' ')[0] || 'there'}.
         </Heading>
-        <Text variant="muted">Here is what's happening with your workspace today.</Text>
+        <Text variant="muted" className="text-[13px]">Here's what's happening with your workspace today.</Text>
       </motion.div>
 
       {/* Today's Progress */}
-      <motion.div variants={itemVariants} className="bg-[var(--bg-elevated)] p-6 rounded-2xl border border-[var(--color-border-subtle)] shadow-sm">
-        <div className="flex justify-between items-end mb-4">
-          <Text variant="muted" className="uppercase tracking-widest text-xs font-semibold">
+      <motion.div variants={itemVariants} className="bg-[var(--bg-elevated)] p-4 rounded-[var(--radius-lg)] border border-[var(--border-subtle)]">
+        <div className="flex justify-between items-end mb-3">
+          <Text variant="muted" className="uppercase tracking-wider text-[11px] font-semibold">
             Today's Progress
           </Text>
-          <Text className="text-2xl font-light text-[var(--text-primary)]">
+          <Text className="text-lg font-medium text-[var(--text-primary)] tabular-nums">
             {stats.completionRate}%
           </Text>
         </div>
-        <div className="h-2 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
+        <div className="h-1.5 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${stats.completionRate}%` }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="h-full bg-[var(--accent-cyan)] shadow-[0_0_10px_var(--accent-cyan)]"
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="h-full bg-[var(--accent)] rounded-full"
           />
         </div>
       </motion.div>
@@ -96,21 +96,21 @@ export function DashboardPage() {
       </motion.div>
 
       {/* First Grid Row: Projects & Deadlines */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8">
-        <div className="h-[350px]">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-5">
+        <div className="h-[320px]">
           <ProjectsOverview />
         </div>
-        <div className="h-[350px]">
+        <div className="h-[320px]">
           <UpcomingDeadlines tasks={tasks} isLoading={isTasksLoading} />
         </div>
       </motion.div>
 
       {/* Second Grid Row: Recent Activity & Workload */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8">
-        <div className="h-[350px]">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-5">
+        <div className="h-[320px]">
           <RecentTasksList tasks={recentTasks} isLoading={isTasksLoading} />
         </div>
-        <div className="h-[350px]">
+        <div className="h-[320px]">
           <WorkloadMatrix data={stats.workloadData} />
         </div>
       </motion.div>

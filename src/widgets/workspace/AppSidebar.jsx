@@ -32,25 +32,22 @@ export function AppSidebar({ isOpen, onClose }) {
   ]
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-[var(--bg-elevated)] border-r border-[var(--color-border-subtle)] w-64 shadow-sm relative z-20">
-      
+    <div className="flex flex-col h-full bg-[var(--bg-subtle)] border-r border-[var(--border-subtle)] w-60 relative z-20">
+
       {/* Brand Header */}
-      <div className="h-16 flex items-center px-6 border-b border-[var(--color-border-subtle)]">
+      <div className="h-12 flex items-center px-3 border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-2 text-[var(--text-primary)]">
-          <div className="w-6 h-6 rounded-md bg-[var(--accent-cyan)] flex items-center justify-center shadow-sm">
-            <Icons.dashboard className="w-3.5 h-3.5 text-white" />
+          <div className="w-5 h-5 rounded-[var(--radius-sm)] bg-[var(--accent)] flex items-center justify-center">
+            <Icons.dashboard className="w-3 h-3 text-white" />
           </div>
-          <span className="font-semibold tracking-tight">Ryokai</span>
+          <span className="text-[13px] font-semibold tracking-tight">Ryokai</span>
         </div>
       </div>
 
       {/* Main Navigation */}
-      <div className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
-        <Text size="xs" variant="muted" className="px-3 mb-2 font-medium uppercase tracking-wider">
-          Workspace
-        </Text>
+      <div className="flex-1 py-3 px-2 space-y-3 overflow-y-auto custom-scrollbar">
 
-        <div className="px-3 mb-4">
+        <div className="px-1">
           <Select
             value={workspaceMode === 'ORG' && activeOrganization ? activeOrganization.id.toString() : 'PERSONAL'}
             onValueChange={(val) => {
@@ -65,7 +62,7 @@ export function AppSidebar({ isOpen, onClose }) {
               }
             }}
           >
-            <SelectTrigger className="w-full bg-[var(--bg-subtle)] border-none shadow-none h-9 text-sm">
+            <SelectTrigger className="w-full bg-[var(--bg-elevated)] border-[var(--border-subtle)] h-8 text-[12px]">
               <SelectValue placeholder="Select Workspace" />
             </SelectTrigger>
             <SelectContent>
@@ -87,47 +84,50 @@ export function AppSidebar({ isOpen, onClose }) {
           </Select>
         </div>
         
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/app'}
-            className={({ isActive }) => cn(
-              "relative flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors group",
-              isActive 
-                ? "text-[var(--text-primary)] bg-[var(--bg-subtle)]" 
-                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]/50"
-            )}
-          >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <motion.div 
-                    layoutId="sidebar-active-indicator"
-                    className="absolute left-0 top-[10%] bottom-[10%] w-[2px] bg-[var(--text-primary)] rounded-r-full"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  />
-                )}
-                <item.icon className="w-4 h-4" />
-                <span>{item.label}</span>
-              </>
-            )}
-          </NavLink>
-        ))}
+        <div className="space-y-[2px]">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/app'}
+              className={({ isActive }) => cn(
+                "relative flex items-center gap-2.5 px-2 h-7 rounded-[var(--radius-sm)] text-[13px] font-medium transition-colors group",
+                isActive
+                  ? "text-[var(--text-primary)] bg-[var(--bg-hover)]"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
+              )}
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <motion.div
+                      layoutId="sidebar-active-indicator"
+                      className="absolute left-0 top-[18%] bottom-[18%] w-[2px] bg-[var(--accent)] rounded-full"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    />
+                  )}
+                  <item.icon className="w-[15px] h-[15px]" strokeWidth={2} />
+                  <span>{item.label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </div>
       </div>
 
       {/* User Footer */}
-      <div className="p-4 border-t border-[var(--color-border-subtle)]">
-        <div className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer">
-          <Avatar size="sm">
+      <div className="p-2 border-t border-[var(--border-subtle)]">
+        <div className="flex items-center gap-2 px-1.5 py-1.5 rounded-[var(--radius-sm)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer">
+          <Avatar size="xs">
             <AvatarImage src={user?.avatarUrl} />
             <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <Text size="sm" className="font-medium truncate">{user?.name || 'User'}</Text>
-            <Text size="xs" variant="muted" className="truncate">{user?.email}</Text>
+            <Text size="xs" className="font-medium truncate leading-tight">{user?.name || 'User'}</Text>
+            <Text size="xs" variant="muted" className="truncate leading-tight text-[11px]">{user?.email}</Text>
           </div>
         </div>
       </div>
@@ -150,7 +150,7 @@ export function AppSidebar({ isOpen, onClose }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onClose}
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              className="absolute inset-0 bg-[var(--bg-overlay)]"
             />
             <motion.div 
               initial={{ x: '-100%' }}

@@ -35,7 +35,7 @@ export function WeeklyProgressChart({ data = mockData, isLoading }) {
   return (
     <Card className="h-full flex flex-col group relative overflow-hidden">
       {/* Subtle Breathing Gradient */}
-      <div className="absolute top-[-50%] right-[-10%] w-[80%] h-[150%] bg-[var(--accent-cyan)]/5 blur-[100px] rounded-full pointer-events-none transition-opacity duration-1000 opacity-50 group-hover:opacity-100" />
+      
       
       <CardHeader className="relative z-10 pb-4">
         <CardTitle className="flex items-center justify-between">

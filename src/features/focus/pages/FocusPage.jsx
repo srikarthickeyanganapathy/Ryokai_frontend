@@ -100,7 +100,7 @@ export function FocusPage() {
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="h-full bg-[var(--accent-cyan)] shadow-[0_0_10px_var(--accent-cyan)]"
+              className="h-full bg-[var(--accent)] rounded-full"
             />
           </div>
         </div>
@@ -114,7 +114,7 @@ export function FocusPage() {
           {currentTask ? (
             <motion.div 
               layoutId={currentTask.id}
-              className="group flex items-start gap-6 p-6 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] hover:border-[var(--accent-cyan)] transition-all shadow-lg"
+              className="group flex items-start gap-5 p-5 rounded-[var(--radius-lg)] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--accent-border)] transition-all"
             >
               <button 
                 onClick={completeCurrent}
@@ -143,7 +143,7 @@ export function FocusPage() {
               </div>
             </motion.div>
           ) : (
-            <div className="text-center p-12 rounded-2xl border border-dashed border-[var(--color-border-subtle)]">
+            <div className="text-center p-12 rounded-[var(--radius-lg)] border border-dashed border-[var(--border-default)]">
               <CheckCircle2 className="w-12 h-12 mx-auto text-[var(--accent-cyan)] mb-4 opacity-50" />
               <Heading level={4} className="mb-2">All caught up</Heading>
               <Text variant="muted">You have completed all your tasks for today.</Text>
