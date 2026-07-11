@@ -33,7 +33,7 @@ export function DataTable({
     onRowSelectionChange: setRowSelection,
     state: {
       sorting,
-      rowSelection,
+      ...(rowSelection !== undefined ? { rowSelection } : {}),
     },
     enableRowSelection: true,
   })

@@ -1,5 +1,6 @@
 import api from '@/lib/api'
 import { setAccessToken, setRefreshToken, clearTokens, getRefreshToken } from '../lib/tokens'
+import { normalizeUser } from './user.api'
 
 export const authAPI = {
   login: async (credentials) => {
@@ -9,13 +10,17 @@ export const authAPI = {
     setRefreshToken(tokens.refreshToken)
     // Step 2: GET /users/me to fetch the full user object
     const { data: user } = await api.get('/users/me')
-    return { user, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken }
+    return { user: normalizeUser(user), accessToken: tokens.accessToken, refreshToken: tokens.refreshToken }
   },
 
   register: async (userData) => {
-    // Backend returns { message, userId } — no tokens on registration
-    const { data } = await api.post('/auth/register', userData)
-    return data
+    // Backend returns JwtResponseDTO { accessToken, refreshToken, expiresIn, user } on 201 CREATED
+    const { data: tokens } = await api.post('/auth/register', userData)
+    setAccessToken(tokens.accessToken)
+    setRefreshToken(tokens.refreshToken)
+    // Fetch the full user profile
+    const { data: user } = await api.get('/users/me')
+    return { user: normalizeUser(user), accessToken: tokens.accessToken, refreshToken: tokens.refreshToken }
   },
 
   logout: async () => {
@@ -39,7 +44,7 @@ export const authAPI = {
 
   getCurrentUser: async () => {
     const { data } = await api.get('/users/me')
-    return data
+    return normalizeUser(data)
   },
 
   forgotPassword: async (email) => {

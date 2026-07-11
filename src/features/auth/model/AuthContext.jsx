@@ -1,13 +1,15 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import React, { createContext, useEffect, useState, useCallback } from 'react'
 import { getAccessToken, clearTokens } from '../lib/tokens'
 import { authAPI } from '../api/auth.api'
 import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
 
 export const AuthContext = createContext(null)
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [isInitializing, setIsInitializing] = useState(true)
+  const queryClient = useQueryClient()
 
   const checkAuth = useCallback(async () => {
     try {
@@ -51,6 +53,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setUser(null)
       clearTokens()
+      queryClient.clear()
     }
   }
 

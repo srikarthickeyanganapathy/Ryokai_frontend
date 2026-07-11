@@ -12,14 +12,16 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { KanbanColumn } from './KanbanColumn'
 import { KanbanTaskCard } from './KanbanTaskCard'
 import { normalizeStatus, getKanbanColumnForTask, KANBAN_COLUMNS, toBackendStatus } from '@/shared/lib/status'
-import { useSubmitTask, useApproveTask, useRejectTask, useReassignTask, useUpdateTask } from '@/features/tasks/hooks/useTasks'
+import { useSubmitTask, useApproveTask, useRejectTask, useReassignTask, useUpdateTask, useCompletePersonalTask } from '@/features/tasks/hooks/useTasks'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { usePermissions } from '@/context/usePermissions'
 import { useWorkspace } from '@/context/WorkspaceContext'
 import { toast } from 'sonner'
 
 export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange }) {
   const [activeTask, setActiveTask] = useState(null)
   const { user } = useAuth()
+  const { canReview } = usePermissions()
   const { workspaceMode } = useWorkspace()
 
   const columns = workspaceMode === 'PERSONAL' 
@@ -32,6 +34,8 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
   const reassignMutation = useReassignTask();
   const updateTaskMutation = useUpdateTask();
 
+  const completePersonalTaskMutation = useCompletePersonalTask();
+
   const handleStatusTransition = (task, targetColumn) => {
     let targetStatus = toBackendStatus(targetColumn);
     const currentStatus = toBackendStatus(task.currentStatus);
@@ -39,7 +43,11 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
     if (workspaceMode === 'PERSONAL') {
       targetStatus = targetColumn === 'Done' ? 'COMPLETED' : 'TODO'
       if (targetStatus === currentStatus) return;
-      updateTaskMutation.mutate({ id: task.id, payload: { status: targetStatus } })
+      if (targetStatus === 'COMPLETED') {
+        completePersonalTaskMutation.mutate(task.id)
+      } else {
+        updateTaskMutation.mutate({ id: task.id, payload: { status: targetStatus } })
+      }
       return;
     }
 
@@ -56,13 +64,31 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
         toast.error('Can only approve tasks that are In Review');
         return;
       }
+      if (!canReview) {
+        toast.error('You do not have permission to review tasks');
+        return;
+      }
+      if (task.assignedTo === user?.username) {
+        toast.error('You cannot approve your own task');
+        return;
+      }
       approveMutation.mutate(task.id);
     } else if (targetStatus === 'REJECTED') {
       if (currentStatus !== 'SUBMITTED') {
         toast.error('Can only reject tasks that are In Review');
         return;
       }
-      rejectMutation.mutate({ id: task.id, reason: 'Moved to Needs Work on Kanban' });
+      if (!canReview) {
+        toast.error('You do not have permission to review tasks');
+        return;
+      }
+      if (task.assignedTo === user?.username) {
+        toast.error('You cannot reject your own task');
+        return;
+      }
+      const reason = window.prompt("Please provide a reason for rejection:");
+      if (reason === null) return; // User cancelled
+      rejectMutation.mutate({ id: task.id, reason: reason || 'Moved to Needs Work on Kanban' });
     } else if (targetStatus === 'ASSIGNED') {
       // Reassign back to self: backend expects assigneeId (Long), the UserResponseDTO id
       reassignMutation.mutate({ taskId: task.id, newAssigneeId: user?.id });

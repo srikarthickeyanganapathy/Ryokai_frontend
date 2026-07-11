@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { isToday, parseISO } from 'date-fns'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
-import { useTaskList, useUpdateTask } from '@/features/tasks/hooks/useTasks'
+import { useTaskList, useUpdateTask, useCompletePersonalTask, useSubmitTask } from '@/features/tasks/hooks/useTasks'
 import { CheckCircle2, Play, Circle, Maximize2, Settings } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
 import { normalizeStatus, isDoneStatus, toBackendStatus } from '@/shared/lib/status'
@@ -11,6 +11,8 @@ import { normalizeStatus, isDoneStatus, toBackendStatus } from '@/shared/lib/sta
 export function FocusPage() {
   const { data: tasks = [], isLoading } = useTaskList()
   const updateTaskMutation = useUpdateTask()
+  const completePersonalTaskMutation = useCompletePersonalTask()
+  const submitTaskMutation = useSubmitTask()
 
   const { todayTasks, currentTask, remainingTasks, remainingTime, progress } = useMemo(() => {
     
@@ -42,10 +44,16 @@ export function FocusPage() {
 
   const completeCurrent = () => {
     if (currentTask) {
-      updateTaskMutation.mutate({
-        id: currentTask.id,
-        payload: { status: toBackendStatus('Done') }
-      })
+      if (currentTask.isPersonal) {
+        completePersonalTaskMutation.mutate(currentTask.id)
+      } else {
+        // org task: if ASSIGNED or REJECTED, can submit it. If already SUBMITTED, we leave it to approve.
+        // For simplicity in FocusMode, submit it if possible.
+        const st = currentTask.currentStatus?.toUpperCase()
+        if (st === 'ASSIGNED' || st === 'REJECTED') {
+          submitTaskMutation.mutate(currentTask.id)
+        }
+      }
     }
   }
 

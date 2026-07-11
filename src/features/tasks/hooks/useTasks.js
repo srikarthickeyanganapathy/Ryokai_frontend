@@ -41,12 +41,17 @@ export const useCreateTask = () => {
   return useMutation({
     mutationFn: async (payload) => {
       // Ensure required fields: assigneeUsername defaults to current user, priority defaults to NORMAL
+      const isPersonalMode = workspaceMode === 'PERSONAL';
       const taskPayload = {
         ...payload,
         assigneeUsername: payload.assigneeUsername || user?.username,
-        creatorUsername: payload.creatorUsername || user?.username,
         priority: payload.priority || 'NORMAL',
-        isPersonal: payload.isPersonal ?? (workspaceMode === 'PERSONAL'),
+        isPersonal: isPersonalMode ? true : (payload.isPersonal || false),
+        // Backend expects LocalDateTime — empty string "" causes Jackson 500.
+        // Convert empty/falsy dueDate to null so backend ignores it.
+        dueDate: payload.dueDate || null,
+        // teamId: ensure it's a number or null
+        teamId: payload.teamId ? Number(payload.teamId) : null,
       };
       // Status transitions are handled by workflow endpoints (submit/approve/reject),
       // not by updateTask — TaskUpdateRequestDTO has no status field.
@@ -74,6 +79,23 @@ export const useSubmitTask = () => {
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to submit task');
+    },
+    onSettled: (_, __, id) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
+    },
+  });
+};
+
+export const useCompletePersonalTask = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => taskApi.completePersonalTask(id),
+    onSuccess: () => {
+      toast.success('Task marked as complete');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || 'Failed to complete task');
     },
     onSettled: (_, __, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
@@ -279,6 +301,21 @@ export const useDeleteTask = () => {
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to delete task');
+    },
+  });
+};
+
+export const useArchiveTask = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => taskApi.archiveTask(id),
+    onSuccess: (_, id) => {
+      toast.success('Task archived successfully');
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || 'Failed to archive task');
     },
   });
 };

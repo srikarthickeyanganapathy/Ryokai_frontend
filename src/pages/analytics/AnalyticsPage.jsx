@@ -15,18 +15,19 @@ export function AnalyticsPage() {
   const stats = useMemo(() => {
     if (!rawStats) return null
 
-    // Mapping DashboardStatsDTO from backend to UI expected format
+    // Mapping DashboardStatsDTO from backend to UI — using correct field meanings
     return {
       completionRate: rawStats.myCompletionRate || 0,
-      velocity: rawStats.doneCount || 0, // Using doneCount as proxy for velocity for now
-      created: rawStats.totalTasks || 0,
-      finished: rawStats.doneCount || 0,
-      overdue: rawStats.overdueCount || 0,
-      dueToday: rawStats.todoCount || 0, // Mocking dueToday with todoCount
-      blocked: rawStats.revisionsCount || 0, // Using revisionsCount for blocked proxy
+      totalTasks: rawStats.totalTasks || 0,
+      doneCount: rawStats.doneCount || 0,
+      overdueCount: rawStats.overdueCount || 0,
+      todoCount: rawStats.todoCount || 0,       // ASSIGNED tasks count
+      inReviewCount: rawStats.inReviewCount || 0, // SUBMITTED tasks count
+      revisionsCount: rawStats.revisionsCount || 0, // REJECTED tasks count
+      assignedToMe: rawStats.assignedToMeCount || 0,
       avgTime: 0, // Backend doesn't provide this yet
       
-      // Formatting status breakdown for priority chart (mock mapping)
+      // Status breakdown for chart
       priorityData: rawStats.statusBreakdown ? rawStats.statusBreakdown.map(s => ({
         name: s.status,
         value: s.count
@@ -76,7 +77,7 @@ export function AnalyticsPage() {
     )
   }
 
-  if (!stats || stats.created === 0) {
+  if (!stats || stats.totalTasks === 0) {
     return (
       <div className="flex flex-col h-[calc(100vh-8rem)] overflow-y-auto pr-2 pb-10">
         <div className="mb-6">
@@ -113,44 +114,41 @@ export function AnalyticsPage() {
           title="Completion Rate" 
           value={`${stats.completionRate}%`} 
           icon={CheckCircle2} 
-          trend={+5} 
         />
         <StatCard 
-          title="Velocity (Total Done)" 
-          value={stats.velocity} 
-          icon={TrendingUp} 
-          trend={+12} 
-        />
-        <StatCard 
-          title="Average Time" 
-          value={`${stats.avgTime}h`} 
-          icon={Timer} 
-          trend={0} 
-        />
-        <StatCard 
-          title="Assigned" 
-          value={stats.dueToday} 
-          icon={Clock} 
-        />
-        <StatCard 
-          title="Overdue Tasks" 
-          value={stats.overdue} 
-          icon={AlertCircle} 
-          trend={stats.overdue > 0 ? -1 : 0} 
-        />
-        <StatCard 
-          title="Rejected" 
-          value={stats.blocked} 
-          icon={ShieldAlert} 
-        />
-        <StatCard 
-          title="Tasks Created" 
-          value={stats.created} 
+          title="Total Tasks" 
+          value={stats.totalTasks} 
           icon={PlusCircle} 
         />
         <StatCard 
-          title="Tasks Finished" 
-          value={stats.finished} 
+          title="Assigned to Me" 
+          value={stats.assignedToMe} 
+          icon={Clock} 
+        />
+        <StatCard 
+          title="In Review" 
+          value={stats.inReviewCount} 
+          icon={TrendingUp} 
+        />
+        <StatCard 
+          title="Overdue" 
+          value={stats.overdueCount} 
+          icon={AlertCircle} 
+          trend={stats.overdueCount > 0 ? -1 : 0} 
+        />
+        <StatCard 
+          title="Needs Work" 
+          value={stats.revisionsCount} 
+          icon={ShieldAlert} 
+        />
+        <StatCard 
+          title="To Do" 
+          value={stats.todoCount} 
+          icon={Timer} 
+        />
+        <StatCard 
+          title="Done" 
+          value={stats.doneCount} 
           icon={CheckCircle2} 
         />
       </div>

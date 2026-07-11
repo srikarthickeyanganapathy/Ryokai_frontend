@@ -1,13 +1,13 @@
-import React from 'react'
+import React, { forwardRef } from 'react'
 import { cn } from '@/shared/lib/cn'
 
-export function Heading({ 
+export const Heading = forwardRef(function Heading({ 
   level = 1, 
   children, 
   className, 
   variant = 'default',
   ...props 
-}) {
+}, ref) {
   const Tag = `h${level}`
   
   const sizes = {
@@ -27,6 +27,7 @@ export function Heading({
 
   return (
     <Tag 
+      ref={ref}
       className={cn(
         sizes[level],
         variants[variant],
@@ -37,4 +38,4 @@ export function Heading({
       {children}
     </Tag>
   )
-}
+})

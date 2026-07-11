@@ -2,161 +2,106 @@
 @import './shared/styles/tokens.css';
 
 /*
-  Design System: Premium SaaS
-  Dark Mode First. Glassmorphism, subtle borders, high contrast.
+  Ryokai — design system
+  Dense, quiet, keyboard-first. Chrome recedes; the accent (Radix Iris)
+  is spent only on focus, primary actions, and selection state.
+  Tokens live in tokens.css; this file mirrors them into Tailwind's
+  @theme so utility classes (bg-base, text-secondary, rounded-md, ...)
+  stay in sync with the same source of truth.
 */
 
 @theme {
-  --color-bg-base: #09090b;
-  /* Almost black */
-  --color-bg-subtle: #0f0f13;
-  --color-bg-elevated: #18181b;
-  /* Dark gray for cards */
-  --color-surface-card: rgba(24, 24, 27, 0.6);
-  --color-surface-hover: rgba(39, 39, 42, 0.8);
+  --color-bg-base: var(--bg-base);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-hover: var(--bg-hover);
 
-  /* Accents */
-  --color-accent-blue: #3b82f6;
-  --color-accent-purple: #8b5cf6;
-  --color-accent-emerald: #10b981;
-  --color-accent-red: #ef4444;
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
 
-  /* Typography */
-  --color-text-primary: #fafafa;
-  --color-text-secondary: #a1a1aa;
-  --color-text-muted: #71717a;
+  --color-border-subtle: var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
 
-  /* Borders */
-  --color-border-subtle: rgba(255, 255, 255, 0.05);
-  --color-border-default: rgba(255, 255, 255, 0.1);
-  --color-border-strong: rgba(255, 255, 255, 0.2);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
 
-  /* Legacy Aliases (mapping to keep existing components from breaking totally) */
-  --bg-primary: var(--color-bg-base);
-  --bg-secondary: var(--color-bg-subtle);
-  --bg-tertiary: var(--color-bg-elevated);
-  --bg-elevated: var(--color-surface-card);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
 
-  --text-primary: var(--color-text-primary);
-  --text-secondary: var(--color-text-secondary);
-  --text-tertiary: var(--color-text-muted);
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --accent: var(--color-accent-blue);
-  --accent-hover: #60a5fa;
-  --accent-soft: rgba(59, 130, 246, 0.1);
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
 
-  --danger: var(--color-accent-red);
-  --warning: #f59e0b;
-  --success: var(--color-accent-emerald);
-
-  --font-sans: "Inter", "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-  --radius-panel: 24px;
-  --radius-card: 16px;
-  --radius-input: 8px;
-
-  /* Premium deep shadows */
-  --shadow-subtle: 0 4px 24px rgba(0, 0, 0, 0.4);
-  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 40px rgba(59, 130, 246, 0.15);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
 }
 
 @layer utilities {
-  .glass {
-    background-color: var(--color-surface-card);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--color-border-subtle);
-    box-shadow: var(--shadow-subtle);
-    border-radius: var(--radius-card);
-  }
-
-  .glass-interactive {
-    background-color: transparent;
-    border: 1px solid transparent;
-    border-radius: var(--radius-card);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    will-change: transform, box-shadow, background-color;
-  }
-
-  .glass-interactive:hover {
-    background-color: var(--color-surface-hover);
-    border: 1px solid var(--color-border-default);
-    box-shadow: var(--shadow-card);
-    transform: translateY(-2px);
-  }
-
-  .glass-panel {
-    background-color: rgba(9, 9, 11, 0.7);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--color-border-default);
-    border-radius: var(--radius-panel);
-    box-shadow: var(--shadow-card);
-  }
-
-  .noise-bg {
-    position: relative;
-  }
-
-  .noise-bg::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 50;
-    opacity: 0.4;
-  }
-
-  .text-gradient {
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    background-image: linear-gradient(135deg, #fafafa, #a1a1aa);
-  }
-
+  /* Thin, unobtrusive scrollbars — present but never loud */
   .custom-scrollbar {
     &::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
-
     &::-webkit-scrollbar-track {
       background: transparent;
     }
-
     &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 9999px;
+      background: var(--border-strong);
+      border-radius: 999px;
     }
-
     &::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.2);
+      background: var(--text-tertiary);
     }
   }
 
+  /* Crisp single-ring focus state, no double halo */
   .focus-ring {
     &:focus-visible {
       outline: none;
-      box-shadow: 0 0 0 2px var(--color-bg-base), 0 0 0 4px var(--color-accent-blue);
+      box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent);
     }
+  }
+
+  /* Keyboard shortcut chip, e.g. inside the command menu trigger */
+  .kbd {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1;
+    color: var(--text-tertiary);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xs);
+    padding: 3px 5px;
   }
 }
 
 @layer base {
-  body {
-    background-color: var(--color-bg-base);
-    color: var(--color-text-primary);
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    min-height: 100vh;
-    overflow-x: hidden;
+  * {
+    border-color: var(--border-subtle);
   }
 
   ::selection {
-    background-color: rgba(59, 130, 246, 0.3);
-    color: #fafafa;
+    background-color: var(--accent-soft);
+    color: var(--text-primary);
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  html:not(.dark) {
+    color-scheme: light;
   }
 }

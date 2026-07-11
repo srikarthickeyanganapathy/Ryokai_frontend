@@ -10,6 +10,11 @@ export const queryKeys = {
     history: (id) => [...queryKeys.tasks.detail(id), 'history'],
     attachments: (id) => [...queryKeys.tasks.detail(id), 'attachments'],
   },
+  templates: {
+    all: ['taskTemplates'],
+    list: () => [...queryKeys.templates.all, 'list'],
+    detail: (id) => [...queryKeys.templates.all, 'detail', id],
+  },
   users: {
     all: ['users'],
     me: () => [...queryKeys.users.all, 'me'],

@@ -1,19 +1,26 @@
 import api from '@/lib/api';
 
+export const normalizeUser = (user) => {
+  if (user && user.fullName && !user.name) {
+    user.name = user.fullName;
+  }
+  return user;
+};
+
 export const getMe = async () => {
   const { data } = await api.get('/users/me');
-  return data;
+  return normalizeUser(data);
 };
 
 export const getAllUsers = async () => {
   const { data } = await api.get('/users');
-  return data;
+  return Array.isArray(data) ? data.map(normalizeUser) : data;
 };
 
 export const updateProfile = async (profileData) => {
   // profileData: { email, fullName, bio, emailNotificationsEnabled }
   const { data } = await api.put('/users/me', profileData);
-  return data;
+  return normalizeUser(data);
 };
 
 export const changePassword = async (currentPassword, newPassword) => {
@@ -27,6 +34,7 @@ export const uploadAvatar = async (file) => {
   const { data } = await api.post('/users/me/avatar', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
+  // Backend returns { avatarUrl: '...' }, not a UserResponseDTO
   return data;
 };
 

@@ -10,9 +10,9 @@ export const Surface = forwardRef(({
 }, ref) => {
   const variants = {
     flat: 'bg-[var(--bg-base)] border border-transparent',
-    elevated: 'bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] shadow-[var(--shadow-level-1)]',
-    glass: 'bg-[var(--bg-glass)] backdrop-blur-xl border border-[var(--color-border-default)] shadow-[var(--shadow-level-2)]',
-    outlined: 'bg-transparent border border-[var(--color-border-strong)]',
+    elevated: 'bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-[var(--shadow-xs)]',
+    glass: 'bg-[var(--bg-elevated)] border border-[var(--border-default)] shadow-[var(--shadow-sm)]',
+    outlined: 'bg-transparent border border-[var(--border-strong)]',
   }
 
   const radii = {

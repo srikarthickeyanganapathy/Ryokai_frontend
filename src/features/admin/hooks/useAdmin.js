@@ -138,3 +138,18 @@ export const useDeleteOrganization = () => {
   });
 };
 
+// --- Users (Admin Role Assignment) ---
+
+export const useAssignUserRoles = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, roleNames }) => adminApi.assignUserRoles(userId, roleNames),
+    onSuccess: () => {
+      toast.success('User roles updated');
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || 'Failed to update user roles');
+    },
+  });
+};

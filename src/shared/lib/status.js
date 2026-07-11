@@ -54,13 +54,13 @@ export const toBackendStatus = (status) => {
 /** Check if a status represents a "done/completed" state */
 export const isDoneStatus = (status) => {
   const upper = String(status || '').toUpperCase();
-  return upper === 'APPROVED' || upper === 'COMPLETED';
+  return upper === 'APPROVED' || upper === 'COMPLETED' || upper === 'DONE';
 };
 
 /** Check if a status represents an "active/in progress" state */
 export const isActiveStatus = (status) => {
   const upper = String(status || '').toUpperCase();
-  return upper === 'TODO' || upper === 'ASSIGNED' || upper === 'SUBMITTED' || upper === 'REJECTED';
+  return upper === 'TODO' || upper === 'ASSIGNED' || upper === 'SUBMITTED' || upper === 'REJECTED' || upper === 'TO DO' || upper === 'IN REVIEW' || upper === 'NEEDS WORK';
 };
 
 /** Kanban column IDs mapped to backend status enums */

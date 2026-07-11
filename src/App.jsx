@@ -1,67 +1,80 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "@/app/providers/AppProvider";
-import UIDesignSystem from "@/pages/ui";
 
 import { AuthLayout } from "@/app/layouts/AuthLayout";
-import { ProtectedRoute } from "@/app/router/ProtectedRoute";
+import { ProtectedRoute, AdminRoute } from "@/app/router/ProtectedRoute";
 import { PublicRoute } from "@/app/router/PublicRoute";
-import { LoginPage } from "@/pages/auth/LoginPage";
-import { RegisterPage } from "@/pages/auth/RegisterPage";
-import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
-import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
-import { VerifyEmailPage } from "@/pages/auth/VerifyEmailPage";
-import { SessionExpiredPage } from "@/pages/auth/SessionExpiredPage";
-
+import { SessionExpiredListener } from "@/app/router/SessionExpiredListener";
 import { MainLayout } from "@/app/layouts/MainLayout";
-import { DashboardPage } from "@/pages/workspace/DashboardPage";
-import { TasksPage } from "@/pages/tasks/TasksPage";
-import { ProjectsPage } from "@/pages/projects/ProjectsPage";
-import { ProjectDetailPage } from "@/pages/projects/projectdetailpage";
-import { OrganizationsPage } from "@/pages/organizations/OrganizationsPage";
-import { OrganizationDetailPage } from "@/pages/organizations/OrganizationDetailPage";
-import { AnalyticsPage } from "@/pages/analytics/AnalyticsPage";
-import { FocusPage } from "@/features/focus/pages/FocusPage";
-import { SessionsPage } from "@/pages/settings/SessionsPage";
+import { RouteLoader } from "@/shared/ui/RouteLoader";
+
+// Route-level code splitting: each page ships as its own chunk instead of
+// one ~1.5MB bundle, so first paint only pays for auth/shell + the current
+// screen. Matches the "instant" feel of Linear/Vercel — nothing to do with
+// visuals, purely load-time.
+const UIDesignSystem = lazy(() => import("@/pages/ui"));
+const LoginPage = lazy(() => import("@/pages/auth/LoginPage").then(m => ({ default: m.LoginPage })));
+const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage").then(m => ({ default: m.RegisterPage })));
+const ForgotPasswordPage = lazy(() => import("@/pages/auth/ForgotPasswordPage").then(m => ({ default: m.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import("@/pages/auth/ResetPasswordPage").then(m => ({ default: m.ResetPasswordPage })));
+const VerifyEmailPage = lazy(() => import("@/pages/auth/VerifyEmailPage").then(m => ({ default: m.VerifyEmailPage })));
+const SessionExpiredPage = lazy(() => import("@/pages/auth/SessionExpiredPage").then(m => ({ default: m.SessionExpiredPage })));
+const DashboardPage = lazy(() => import("@/pages/workspace/DashboardPage").then(m => ({ default: m.DashboardPage })));
+const TasksPage = lazy(() => import("@/pages/tasks/TasksPage").then(m => ({ default: m.TasksPage })));
+const ProjectsPage = lazy(() => import("@/pages/projects/ProjectsPage").then(m => ({ default: m.ProjectsPage })));
+const ProjectDetailPage = lazy(() => import("@/pages/projects/projectdetailpage").then(m => ({ default: m.ProjectDetailPage })));
+const OrganizationsPage = lazy(() => import("@/pages/organizations/OrganizationsPage").then(m => ({ default: m.OrganizationsPage })));
+const OrganizationDetailPage = lazy(() => import("@/pages/organizations/OrganizationDetailPage").then(m => ({ default: m.OrganizationDetailPage })));
+const AnalyticsPage = lazy(() => import("@/pages/analytics/AnalyticsPage").then(m => ({ default: m.AnalyticsPage })));
+const AdminPage = lazy(() => import("@/pages/admin/AdminPage").then(m => ({ default: m.AdminPage })));
+const FocusPage = lazy(() => import("@/features/focus/pages/FocusPage").then(m => ({ default: m.FocusPage })));
+const SessionsPage = lazy(() => import("@/pages/settings/SessionsPage").then(m => ({ default: m.SessionsPage })));
 
 export default function App() {
   return (
     <Router>
+      <SessionExpiredListener />
       <AppProvider>
-        <Routes>
-          {/* Public Auth Routes */}
-          <Route element={<PublicRoute />}>
-            <Route element={<AuthLayout />}>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/verify-email" element={<VerifyEmailPage />} />
-              <Route path="/session-expired" element={<SessionExpiredPage />} />
+        <Suspense fallback={<RouteLoader />}>
+          <Routes>
+            {/* Public Auth Routes */}
+            <Route element={<PublicRoute />}>
+              <Route element={<AuthLayout />}>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/verify-email" element={<VerifyEmailPage />} />
+                <Route path="/session-expired" element={<SessionExpiredPage />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Protected App Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<MainLayout />}>
-              <Route path="/app" element={<DashboardPage />} />
-              <Route path="/app/tasks" element={<TasksPage />} />
-              <Route path="/app/projects" element={<ProjectsPage />} />
-              <Route path="/app/projects/:projectId" element={<ProjectDetailPage />} />
-              <Route path="/app/organizations" element={<OrganizationsPage />} />
-              <Route path="/app/organizations/:orgId" element={<OrganizationDetailPage />} />
-              <Route path="/app/analytics" element={<AnalyticsPage />} />
-              <Route path="/app/focus" element={<FocusPage />} />
-              <Route path="/app/sessions" element={<SessionsPage />} />
+            {/* Protected App Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<MainLayout />}>
+                <Route path="/app" element={<DashboardPage />} />
+                <Route path="/app/tasks" element={<TasksPage />} />
+                <Route path="/app/projects" element={<ProjectsPage />} />
+                <Route path="/app/projects/:projectId" element={<ProjectDetailPage />} />
+                <Route path="/app/organizations" element={<OrganizationsPage />} />
+                <Route path="/app/organizations/:orgId" element={<OrganizationDetailPage />} />
+                <Route path="/app/analytics" element={<AnalyticsPage />} />
+                <Route element={<AdminRoute />}>
+                  <Route path="/app/admin" element={<AdminPage />} />
+                </Route>
+                <Route path="/app/focus" element={<FocusPage />} />
+                <Route path="/app/sessions" element={<SessionsPage />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Phase 2: Design System Showcase */}
-          <Route path="/ui" element={<UIDesignSystem />} />
-          
-          {/* Fallback routing */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
+            {/* Phase 2: Design System Showcase */}
+            <Route path="/ui" element={<UIDesignSystem />} />
+
+            {/* Fallback routing */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </Suspense>
       </AppProvider>
     </Router>
   );

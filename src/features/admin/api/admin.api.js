@@ -1,4 +1,4 @@
-import api from '../../../src/lib/api';
+import api from '@/lib/api';
 
 // --- Roles ---
 
@@ -69,3 +69,10 @@ export const deleteOrganization = async (orgId) => {
   await api.delete(`/admin/organizations/${orgId}`);
 };
 
+// --- Users (Admin Role Assignment) ---
+
+export const assignUserRoles = async (userId, roleNames) => {
+  // roleNames: List<String>
+  const { data } = await api.put(`/admin/users/${userId}/roles`, roleNames);
+  return data;
+};

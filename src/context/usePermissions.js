@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useAuth } from '@/features/auth/model/AuthContext';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useOrganizations, useOrgMembers } from '@/features/organizations/hooks/useOrganizations';
 
 /**
@@ -26,13 +26,23 @@ export const usePermissions = () => {
   const { data: membersData } = useOrgMembers(userOrg?.id);
   const membersList = useMemo(() => membersData?.content || membersData || [], [membersData]);
 
-  // Find the current user's membership to get their actual orgRole
-  const myMembership = useMemo(
-    () => membersList.find(m => m.username === user?.username),
-    [membersList, user?.username]
-  );
+  // Find the current user's membership to get their actual orgRole.
+  // Prefer userId match (more reliable than username string formatting).
+  const myMembership = useMemo(() => {
+    if (!user) return null;
+    return (
+      membersList.find(m => m.userId != null && user.id != null && m.userId === user.id) ||
+      membersList.find(m => m.username === user?.username) ||
+      null
+    );
+  }, [membersList, user]);
 
-  const orgRole = myMembership?.orgRole || null;
+  const rawOrgRole = myMembership?.orgRole || null;
+
+  // Normalize orgRole (backend typically returns ADMIN/DIRECTOR/... but be defensive)
+  const orgRole = typeof rawOrgRole === 'string'
+    ? rawOrgRole.replace(/^ROLE_/, '').toUpperCase()
+    : null;
 
   // Derived role checks based on ACTUAL org role
   const isOrgAdmin = orgRole === 'ADMIN';
@@ -43,7 +53,8 @@ export const usePermissions = () => {
   // Computed permission flags
   const canManage = isSuperAdmin || isOrgAdmin;
   const canAssign = isSuperAdmin || isOrgAdmin || isDirector || isManager;
-  const canReview = isSuperAdmin || isOrgAdmin || isDirector || isManager;
+  // Note: SUPER_ADMIN cannot review tasks (SuperAdminStrategy.canReview() returns false)
+  const canReview = isOrgAdmin || isDirector || isManager;
   const canCreateTeam = isSuperAdmin || isOrgAdmin || isDirector || isManager;
 
   return {

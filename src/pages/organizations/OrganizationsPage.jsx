@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
@@ -26,6 +27,10 @@ export function OrganizationsPage() {
   const filteredOrgs = organizations.filter(org => 
     org.name.toLowerCase().includes(globalFilter.toLowerCase())
   )
+
+  if (!isLoading && !isError && organizations.length > 0) {
+    return <Navigate to={`/app/organizations/${organizations[0].id}`} replace />
+  }
 
   return (
     <div className="flex flex-col min-h-full">

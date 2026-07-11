@@ -78,13 +78,12 @@ export function TasksTable({
       accessorKey: 'projectId',
       header: 'Project',
       cell: ({ row }) => {
+        const projectName = row.original.projectName
         const projectId = row.original.projectId
         if (!projectId) return <span className="text-[var(--text-muted)]">-</span>
-        // Ideally we'd look up the project title from a map or joined query.
-        // For the mock, we'll just show the ID formatted nicely.
         return (
-          <Badge variant="outline" className="text-xs bg-[var(--bg-subtle)] text-[var(--text-secondary)] font-mono border-transparent">
-            {projectId}
+          <Badge variant="outline" className="text-xs bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-transparent">
+            {projectName || `Project #${projectId}`}
           </Badge>
         )
       }

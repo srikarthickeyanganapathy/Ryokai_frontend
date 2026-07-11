@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { useTaskList, useUpdateTask, useDeleteTask, useSubmitTask, useApproveTask, useReassignTask } from '@/features/tasks/hooks/useTasks'
+import { useTaskList, useUpdateTask, useDeleteTask, useSubmitTask, useApproveTask, useReassignTask, useCompletePersonalTask } from '@/features/tasks/hooks/useTasks'
 import { TasksToolbar } from '@/widgets/tasks/TasksToolbar'
 import { TasksTable } from '@/widgets/tasks/TasksTable'
 import { KanbanBoard } from '@/widgets/tasks/KanbanBoard'
@@ -13,11 +13,14 @@ import { Icons } from '@/shared/ui/Icons'
 import { normalizeStatus, toBackendStatus } from '@/shared/lib/status'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useWorkspace } from '@/context/WorkspaceContext'
+import { useUsersList } from '@/features/auth/hooks/useUser'
+import { usePermissions } from '@/context/usePermissions'
 
 export function TasksPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const viewMode = searchParams.get('view') || 'list'
   const { user } = useAuth()
+  const { canReview } = usePermissions()
   
   const setViewMode = (mode) => {
     setSearchParams(params => {
@@ -35,12 +38,42 @@ export function TasksPage() {
   
   const { workspaceMode, activeOrganization } = useWorkspace()
 
-  // Data Fetching — uses backend-compatible status filter
-  const { data: tasks, isLoading } = useTaskList({ 
-    search: globalFilter,
-    status: activeView === 'completed' ? 'APPROVED' : undefined,
+  // Data Fetching
+  const { data: rawTasks, isLoading } = useTaskList({ 
     scope: workspaceMode === 'PERSONAL' ? 'personal' : 'org'
   })
+  
+  const tasks = useMemo(() => {
+    if (!rawTasks) return []
+    let result = rawTasks
+
+    if (globalFilter) {
+      const lowerSearch = globalFilter.toLowerCase()
+      result = result.filter(t => t.title?.toLowerCase().includes(lowerSearch) || t.description?.toLowerCase().includes(lowerSearch))
+    }
+
+    if (activeView === 'archived') {
+      result = result.filter(t => t.archived)
+    } else {
+      result = result.filter(t => !t.archived)
+      
+      if (activeView === 'assigned') {
+        result = result.filter(t => t.assignedTo === user?.username)
+      } else if (activeView === 'completed') {
+        result = result.filter(t => t.status === 'Done')
+      } else if (activeView === 'today') {
+        const today = new Date().toDateString()
+        result = result.filter(t => t.dueDate && new Date(t.dueDate).toDateString() === today)
+      } else if (activeView === 'upcoming') {
+        const today = new Date()
+        result = result.filter(t => t.dueDate && new Date(t.dueDate) > today)
+      }
+    }
+
+    return result
+  }, [rawTasks, activeView, globalFilter, user])
+  
+  const { data: allUsers } = useUsersList()
   
   // Mutations
   const updateTaskMutation = useUpdateTask()
@@ -49,15 +82,25 @@ export function TasksPage() {
   const approveTaskMutation = useApproveTask()
   const reassignTaskMutation = useReassignTask()
 
+  const completePersonalTaskMutation = useCompletePersonalTask()
+
   const handleQuickComplete = (task) => {
     const current = task.currentStatus?.toUpperCase()
     if (task.isPersonal) {
-      updateTaskMutation.mutate({ id: task.id, payload: { status: 'COMPLETED' } })
+      completePersonalTaskMutation.mutate(task.id)
     } else if (current === 'ASSIGNED' || current === 'REJECTED') {
       submitTaskMutation.mutate(task.id, {
         onSuccess: () => toast.success(`Task "${task.title}" submitted for review.`)
       })
     } else if (current === 'SUBMITTED') {
+      if (!canReview) {
+        toast.error('You do not have permission to review tasks');
+        return;
+      }
+      if (task.assignedTo === user?.username) {
+        toast.error('You cannot approve your own task');
+        return;
+      }
       approveTaskMutation.mutate(task.id, {
         onSuccess: () => toast.success(`Task "${task.title}" completed.`)
       })
@@ -80,18 +123,28 @@ export function TasksPage() {
 
   const handleBulkComplete = () => {
     const selectedIds = Object.keys(rowSelection).map(Number)
+    let skipped = 0;
     selectedIds.forEach(id => {
       const task = tasks?.find(t => t.id === id)
       if (!task) return
       const current = task.currentStatus?.toUpperCase()
-      if (current === 'ASSIGNED' || current === 'REJECTED') {
+      if (task.isPersonal) {
+        completePersonalTaskMutation.mutate(task.id)
+      } else if (current === 'ASSIGNED' || current === 'REJECTED') {
         submitTaskMutation.mutate(task.id)
-        approveTaskMutation.mutate(task.id)
       } else if (current === 'SUBMITTED') {
+        if (!canReview || task.assignedTo === user?.username) {
+          skipped++
+          return
+        }
         approveTaskMutation.mutate(task.id)
       }
     })
-    toast.success(`Processing ${selectedIds.length} task(s)...`)
+    if (skipped > 0) {
+      toast.error(`${skipped} task(s) skipped due to review permissions`);
+    } else {
+      toast.success(`Processing ${selectedIds.length} task(s)...`)
+    }
     setRowSelection({})
   }
 
@@ -104,11 +157,17 @@ export function TasksPage() {
 
   const handleBulkAssign = () => {
     if (!assignInput.trim()) return
+    const targetUser = allUsers?.find(u => u.username.toLowerCase() === assignInput.trim().toLowerCase())
+    if (!targetUser) {
+      toast.error(`User "${assignInput}" not found`)
+      return
+    }
+
     const selectedIds = Object.keys(rowSelection).map(Number)
     selectedIds.forEach(id => {
-      reassignTaskMutation.mutate({ taskId: id, newAssigneeId: assignInput.trim() })
+      reassignTaskMutation.mutate({ taskId: id, newAssigneeId: targetUser.id })
     })
-    toast.success(`Reassigned ${selectedIds.length} task(s) to ${assignInput}`)
+    toast.success(`Reassigned ${selectedIds.length} task(s) to ${targetUser.username}`)
     setAssignInput('')
     setShowAssignInput(false)
     setRowSelection({})
@@ -178,9 +237,26 @@ export function TasksPage() {
               <button onClick={handleBulkComplete} className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent-cyan)] transition-colors">
                 Complete
               </button>
-              <button onClick={() => { setShowAssignInput(true); setAssignInput('') }} className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
-                Assign
-              </button>
+              {showAssignInput ? (
+                <form 
+                  onSubmit={(e) => { e.preventDefault(); handleBulkAssign(); }}
+                  className="flex items-center gap-2"
+                >
+                  <input 
+                    type="text" 
+                    value={assignInput}
+                    onChange={(e) => setAssignInput(e.target.value)}
+                    placeholder="Assignee username" 
+                    className="text-sm px-2 py-1 bg-transparent border-b border-[var(--color-border-subtle)] focus:outline-none focus:border-[var(--accent-cyan)] text-[var(--text-primary)] w-32"
+                    autoFocus
+                  />
+                  <button type="submit" className="text-sm font-medium text-[var(--accent-cyan)] hover:text-[var(--accent-cyan-hover)] transition-colors">Save</button>
+                </form>
+              ) : (
+                <button onClick={() => { setShowAssignInput(true); setAssignInput('') }} className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                  Assign
+                </button>
+              )}
               <button onClick={handleBulkDelete} className="text-sm font-medium text-[var(--text-secondary)] hover:text-red-500 transition-colors">
                 Delete
               </button>

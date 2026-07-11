@@ -7,7 +7,11 @@ import { cn } from '@/shared/lib/cn'
 import { useCreateTask } from '@/features/tasks/hooks/useTasks'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { TaskForm } from './TaskForm'
+import { BulkCreateTaskModal } from './BulkCreateTaskModal'
 import { Heading } from '@/shared/ui/Typography'
+import { Users } from 'lucide-react'
+
+import { useWorkspace } from '@/context/WorkspaceContext'
 
 const views = [
   { id: 'all', label: 'All' },
@@ -15,11 +19,15 @@ const views = [
   { id: 'today', label: 'Today' },
   { id: 'upcoming', label: 'Upcoming' },
   { id: 'completed', label: 'Completed' },
+  { id: 'archived', label: 'Archived' },
 ]
 
 export function TasksToolbar({ activeView, onViewChange, globalFilter, setGlobalFilter, viewMode, setViewMode }) {
   const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false)
+  const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false)
   const createTaskMutation = useCreateTask()
+  const { workspaceMode } = useWorkspace()
+  const isPersonalMode = workspaceMode === 'PERSONAL'
 
   const handleCreateTask = (payload) => {
     createTaskMutation.mutate(payload, {
@@ -107,6 +115,18 @@ export function TasksToolbar({ activeView, onViewChange, globalFilter, setGlobal
             </button>
           </div>
 
+          {!isPersonalMode && (
+            <Button 
+              variant="outline"
+              size="sm" 
+              className="h-9 gap-2 shadow-sm"
+              onClick={() => setIsBulkCreateOpen(true)}
+            >
+              <Users className="w-4 h-4" />
+              Bulk Create
+            </Button>
+          )}
+
           <Button 
             size="sm" 
             className="h-9 gap-2 shadow-sm"
@@ -128,6 +148,8 @@ export function TasksToolbar({ activeView, onViewChange, globalFilter, setGlobal
           />
         </ModalContent>
       </Modal>
+
+      <BulkCreateTaskModal open={isBulkCreateOpen} onOpenChange={setIsBulkCreateOpen} />
     </div>
   )
 }

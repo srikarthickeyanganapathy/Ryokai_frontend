@@ -196,7 +196,7 @@ export const useLeaveRequestStatus = (orgId) => {
 export const useUpdateMemberRole = (orgId) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, orgRole }) => orgApi.updateMemberRole(orgId, userId, { orgRole }),
+    mutationFn: ({ userId, roleId }) => orgApi.updateMemberRole(orgId, userId, { roleId }),
     onSuccess: () => {
       toast.success('Member role updated');
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.members(orgId) });
@@ -233,6 +233,44 @@ export const useRemoveTeamMember = () => {
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to remove team member');
+    },
+  });
+};
+
+// --- Org Roles Management ---
+
+export const useOrgRoles = (orgId) => {
+  return useQuery({
+    queryKey: ['organizations', orgId, 'roles'],
+    queryFn: () => orgApi.getOrgRoles(orgId),
+    enabled: !!orgId,
+  });
+};
+
+export const useCreateOrgRole = (orgId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload) => orgApi.createOrgRole(orgId, payload),
+    onSuccess: () => {
+      toast.success('Role created');
+      queryClient.invalidateQueries({ queryKey: ['organizations', orgId, 'roles'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to create role');
+    },
+  });
+};
+
+export const useUpdateOrgRolePermissions = (orgId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ roleId, permissionNames }) => orgApi.updateOrgRolePermissions(orgId, roleId, { permissionNames }),
+    onSuccess: () => {
+      toast.success('Permissions updated');
+      queryClient.invalidateQueries({ queryKey: ['organizations', orgId, 'roles'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to update permissions');
     },
   });
 };

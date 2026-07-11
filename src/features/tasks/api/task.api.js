@@ -10,6 +10,7 @@ const normalizeChecklistItem = (item) => ({
 /** Normalize backend task: split comma-separated tags into array */
 const normalizeTask = (t) => ({
   ...t,
+  assignee: t.assignedTo,
   status: normalizeStatus(t.currentStatus),
   tags: t.tags ? t.tags.split(',').map(s => s.trim()).filter(Boolean) : [],
   checklists: Array.isArray(t.checklists) ? t.checklists.map(normalizeChecklistItem) : t.checklists,
@@ -38,6 +39,11 @@ export const createPersonalTask = async (payload) => {
 
 export const bulkAssign = async (payload) => {
   const { data } = await api.post('/tasks/bulk-assign', payload);
+  return Array.isArray(data) ? data.map(normalizeTask) : normalizeTask(data);
+};
+
+export const completePersonalTask = async (id) => {
+  const { data } = await api.post(`/tasks/${id}/complete`);
   return normalizeTask(data);
 };
 
@@ -97,12 +103,17 @@ export const addDependency = async (taskId, blocksTaskId) => {
 
 export const updateTask = async (taskId, payload) => {
   const { data } = await api.put(`/tasks/${taskId}`, payload);
-  return data;
+  return normalizeTask(data);
 };
 
 export const deleteTask = async (taskId) => {
   // Returns 204 No Content
   await api.delete(`/tasks/${taskId}`);
+};
+
+export const archiveTask = async (taskId) => {
+  const { data } = await api.put(`/tasks/${taskId}/archive`);
+  return normalizeTask(data);
 };
 
 export const removeDependency = async (taskId, depId) => {

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   AlertCircle,
   CheckCircle2,
@@ -24,7 +25,8 @@ import {
   Building2,
   Plus,
   Loader2,
-  Trash2
+  Trash2,
+  Shield
 } from 'lucide-react'
 
 const GithubIcon = ({ className, ...props }) => (
@@ -93,4 +95,5 @@ export const Icons = {
   plus: Plus,
   spinner: Loader2,
   trash2: Trash2,
+  shield: Shield,
 }

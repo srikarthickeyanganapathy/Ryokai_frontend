@@ -7,7 +7,11 @@ import { Icons } from '@/shared/ui/Icons'
 import { Badge } from '@/shared/ui/Badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card'
 import { Skeleton } from '@/shared/ui/Skeleton'
-import { useProject } from '@/features/projects/hooks/useProjects'
+import { Modal, ModalContent } from '@/shared/ui/Modal'
+import { useProject, useUpdateProject, useDeleteProject } from '@/features/projects/hooks/useProjects'
+import { ProjectForm } from '@/widgets/projects/ProjectForm'
+import { useWorkspace } from '@/context/WorkspaceContext'
+import { useNavigate } from 'react-router-dom'
 import { cn } from '@/shared/lib/cn'
 
 function formatDate(isoString) {
@@ -25,7 +29,30 @@ const statusColors = {
 
 export function ProjectDetailPage() {
   const { projectId } = useParams()
+  const navigate = useNavigate()
+  const { workspaceMode } = useWorkspace()
   const { data: project, isLoading, isError } = useProject(Number(projectId))
+  
+  const updateProjectMutation = useUpdateProject()
+  const deleteProjectMutation = useDeleteProject()
+
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false)
+
+  const handleEditProject = (payload) => {
+    updateProjectMutation.mutate({ id: Number(projectId), updates: payload }, {
+      onSuccess: () => setIsEditModalOpen(false)
+    })
+  }
+
+  const handleDeleteProject = () => {
+    deleteProjectMutation.mutate(Number(projectId), {
+      onSuccess: () => {
+        setIsDeleteModalOpen(false)
+        navigate('/app/projects')
+      }
+    })
+  }
 
   if (isLoading) {
     return (
@@ -82,6 +109,10 @@ export function ProjectDetailPage() {
           {project.description && (
             <Text variant="muted" className="mt-1 max-w-2xl">{project.description}</Text>
           )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>Edit</Button>
+          <Button variant="outline" size="sm" className="text-red-500 hover:text-red-600 hover:border-red-500" onClick={() => setIsDeleteModalOpen(true)}>Delete</Button>
         </div>
       </div>
 
@@ -148,6 +179,40 @@ export function ProjectDetailPage() {
           </div>
         </CardContent>
       </Card>
+
+      <Modal open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <ModalContent className="sm:max-w-xl">
+          <Heading level={3} className="mb-4">Edit Project</Heading>
+          <ProjectForm
+            defaultValues={{
+              name: project.name,
+              description: project.description || '',
+              organizationId: project.organizationId || '',
+              teamId: project.teamId || '',
+              dueDate: project.dueDate ? project.dueDate.slice(0, 16) : '',
+            }}
+            onSubmit={handleEditProject}
+            isLoading={updateProjectMutation.isPending}
+            workspaceMode={workspaceMode}
+          />
+        </ModalContent>
+      </Modal>
+
+      <Modal open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <ModalContent className="sm:max-w-md">
+          <Heading level={3} className="mb-4 text-red-500">Delete Project</Heading>
+          <Text className="mb-6">
+            Are you sure you want to delete <strong>{project.name}</strong>? This action cannot be undone and will delete all associated tasks.
+          </Text>
+          <div className="flex justify-end gap-3">
+            <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleDeleteProject} isLoading={deleteProjectMutation.isPending} className="bg-red-500 hover:bg-red-600 text-white">
+              Yes, Delete
+            </Button>
+          </div>
+        </ModalContent>
+      </Modal>
+
     </motion.div>
   )
 }

@@ -3,21 +3,30 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button, IconButton } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
-import { useInviteMember } from '@/features/organizations/hooks/useOrganizations'
+import { useInviteMember, useOrgRoles } from '@/features/organizations/hooks/useOrganizations'
 
 export function InviteMemberModal({ isOpen, onClose, orgId }) {
   const [username, setUsername] = useState('')
-  const [orgRole, setOrgRole] = useState('EMPLOYEE')
+  const [roleId, setRoleId] = useState('')
   
+  const { data: roles = [], isLoading: rolesLoading } = useOrgRoles(orgId)
   const inviteMutation = useInviteMember(orgId)
+
+  // Set default role when roles load
+  React.useEffect(() => {
+    if (roles.length > 0 && !roleId) {
+      const employeeRole = roles.find(r => r.name === 'EMPLOYEE') || roles[0]
+      setRoleId(employeeRole.id)
+    }
+  }, [roles, roleId])
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!username) return
-    inviteMutation.mutate({ username, orgRole }, {
+    if (!username || !roleId) return
+    inviteMutation.mutate({ username, roleId }, {
       onSuccess: () => {
         setUsername('')
-        setOrgRole('EMPLOYEE')
+        setRoleId('') // will be reset by effect next time
         onClose()
       }
     })
@@ -57,14 +66,18 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-[var(--text-secondary)]">Role</label>
               <select
-                value={orgRole}
-                onChange={(e) => setOrgRole(e.target.value)}
-                className="w-full bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-cyan)]/50 transition-all"
+                value={roleId}
+                onChange={(e) => setRoleId(e.target.value)}
+                disabled={rolesLoading}
+                className="w-full bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-cyan)]/50 transition-all disabled:opacity-50"
               >
-                <option value="EMPLOYEE">Employee</option>
-                <option value="MANAGER">Manager</option>
-                <option value="DIRECTOR">Director</option>
-                <option value="ADMIN">Admin</option>
+                {rolesLoading ? (
+                  <option value="">Loading roles...</option>
+                ) : (
+                  roles.map(role => (
+                    <option key={role.id} value={role.id}>{role.name}</option>
+                  ))
+                )}
               </select>
             </div>
 

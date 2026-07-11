@@ -2,65 +2,158 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   Ryokai Design Tokens
+   One source of truth. Every color/radius/shadow in the app should trace
+   back to a variable defined here — components consume var(--x), Tailwind
+   utilities consume the @theme mirror in index.css.
+   ========================================================================== */
+
 @layer base {
   :root {
-    /* Base Colors (Light Theme Defaults) */
-    --bg-base: #FAFAFA;
+    /* ---- Surfaces (light) ---- */
+    --bg-base: #FFFFFF;
+    --bg-subtle: #FAFAFA;
     --bg-elevated: #FFFFFF;
-    --bg-glass: rgba(255, 255, 255, 0.7);
-    
-    --text-primary: #111111;
-    --text-secondary: #666666;
-    --text-tertiary: #999999;
-    
-    /* Accents */
-    --accent-cyan: #00B8C4;
-    --accent-magenta: #E00035;
-    --accent-violet: #5C00D1;
+    --bg-overlay: rgba(9, 9, 11, 0.45);
+    --bg-hover: #F2F2F3;
 
-    /* Semantics */
-    --success: #00C851;
-    --warning: #FFBB33;
-    --error: #FF4444;
+    /* ---- Text (light) ---- */
+    --text-primary: #0F0F11;
+    --text-secondary: #63636C;
+    --text-tertiary: #9A9AA2;
+    --text-on-accent: #FFFFFF;
 
-    /* Elevation & Shadows */
-    --shadow-level-0: none;
-    --shadow-level-1: 0px 4px 12px rgba(0,0,0, 0.05);
-    --shadow-level-2: 0px 8px 24px rgba(0,0,0, 0.1);
-    --shadow-level-3: 0px 24px 48px rgba(0,0,0, 0.15);
+    /* ---- Borders (light) ---- */
+    --border-subtle: rgba(15, 15, 17, 0.06);
+    --border-default: rgba(15, 15, 17, 0.10);
+    --border-strong: rgba(15, 15, 17, 0.16);
 
-    /* Radii */
-    --radius-sm: 4px;
+    /* ---- Accent: Radix Iris — the one color that carries meaning ---- */
+    --accent: #5B5BD6;
+    --accent-hover: #4747C2;
+    --accent-active: #3D3DA8;
+    --accent-soft: rgba(91, 91, 214, 0.10);
+    --accent-border: rgba(91, 91, 214, 0.28);
+
+    /* ---- Semantic ---- */
+    --success: #1A9A6C;
+    --success-soft: rgba(26, 154, 108, 0.10);
+    --warning: #B8720A;
+    --warning-soft: rgba(184, 114, 10, 0.10);
+    --danger: #D33D51;
+    --danger-soft: rgba(211, 61, 81, 0.10);
+
+    /* ---- Elevation ---- */
+    --shadow-xs: 0 1px 2px rgba(15, 15, 17, 0.04);
+    --shadow-sm: 0 1px 3px rgba(15, 15, 17, 0.08), 0 1px 2px rgba(15, 15, 17, 0.04);
+    --shadow-md: 0 4px 16px rgba(15, 15, 17, 0.10);
+    --shadow-lg: 0 16px 40px rgba(15, 15, 17, 0.14);
+
+    /* ---- Radii ---- */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
     --radius-md: 8px;
-    --radius-lg: 12px;
-    --radius-pill: 9999px;
+    --radius-lg: 10px;
+    --radius-xl: 14px;
+    --radius-pill: 999px;
+
+    /* ---- Motion ---- */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-fast: 120ms;
+    --duration-base: 160ms;
+
+    /* ------------------------------------------------------------------
+       Compatibility aliases — legacy variable names used throughout the
+       component tree, mapped onto the canonical tokens above. Custom
+       properties resolve lazily, so these stay correct across themes
+       even though they're declared once. Keeps every screen in sync
+       from a single edit here instead of touching each component.
+       ------------------------------------------------------------------ */
+    --color-border-subtle: var(--border-subtle);
+    --color-border-default: var(--border-default);
+    --color-border-strong: var(--border-strong);
+    --text-muted: var(--text-tertiary);
+    --accent-cyan: var(--accent);
+    --accent-cyan-hover: var(--accent-hover);
+    --accent-violet: var(--accent);
+    --accent-green: var(--success);
+    --accent-red: var(--danger);
+    --error: var(--danger);
+    --color-accent-red: var(--danger);
+    --color-accent-emerald: var(--success);
+    --color-accent-blue: var(--accent);
+    --color-completed: var(--success);
+    --color-added: var(--success);
+    --color-bg-base: var(--bg-base);
+    --color-bg-subtle: var(--bg-subtle);
+    --color-bg-elevated: var(--bg-elevated);
+    --color-text-primary: var(--text-primary);
+    --color-text-secondary: var(--text-secondary);
+    --color-text-muted: var(--text-tertiary);
+    --color-surface-card: var(--bg-elevated);
+    --color-surface-hover: var(--bg-hover);
+    --bg-glass: var(--bg-elevated);
+    --bg-default: var(--bg-base);
+    --shadow-subtle: var(--shadow-sm);
+    --shadow-card: var(--shadow-md);
+    --shadow-level-1: var(--shadow-sm);
+    --shadow-level-2: var(--shadow-md);
+    --radius-input: var(--radius-md);
+    --radius-card: var(--radius-lg);
+    --radius-panel: var(--radius-xl);
+    --color-desktop: var(--accent);
+    --color-mobile: var(--success);
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
-  /* Dark Theme Canonical */
   .dark {
-    --bg-base: #050505;
-    --bg-elevated: #0E0E0E;
-    --bg-glass: rgba(20, 20, 20, 0.6);
-    
-    --text-primary: #FFFFFF;
-    --text-secondary: #888888;
-    --text-tertiary: #555555;
-    
-    --accent-cyan: #00F0FF;
-    --accent-magenta: #FF003C;
-    --accent-violet: #7000FF;
+    /* ---- Surfaces (dark) ---- */
+    --bg-base: #09090B;
+    --bg-subtle: #0D0D10;
+    --bg-elevated: #111113;
+    --bg-overlay: rgba(5, 5, 6, 0.6);
+    --bg-hover: #1A1A1E;
 
-    --success: #00FF66;
-    --warning: #FFD600;
-    --error: #FF2A2A;
+    /* ---- Text (dark) ---- */
+    --text-primary: #EDEDEF;
+    --text-secondary: #9A9AA2;
+    --text-tertiary: #6C6C76;
+    --text-on-accent: #FFFFFF;
 
-    --shadow-level-1: 0px 4px 12px rgba(0,0,0, 0.2);
-    --shadow-level-2: 0px 8px 24px rgba(0,0,0, 0.4);
-    --shadow-level-3: 0px 24px 48px rgba(0,0,0, 0.6);
+    /* ---- Borders (dark) ---- */
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-default: rgba(255, 255, 255, 0.10);
+    --border-strong: rgba(255, 255, 255, 0.16);
+
+    /* ---- Accent ---- */
+    --accent: #6E6ADF;
+    --accent-hover: #8482E8;
+    --accent-active: #5B5BD6;
+    --accent-soft: rgba(110, 106, 223, 0.14);
+    --accent-border: rgba(110, 106, 223, 0.32);
+
+    /* ---- Semantic ---- */
+    --success: #3DD68C;
+    --success-soft: rgba(61, 214, 140, 0.12);
+    --warning: #F0A93E;
+    --warning-soft: rgba(240, 169, 62, 0.12);
+    --danger: #F0506E;
+    --danger-soft: rgba(240, 80, 110, 0.12);
+
+    /* ---- Elevation ---- */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.55);
   }
 
   body {
-    @apply bg-[var(--bg-base)] text-[var(--text-primary)] antialiased;
-    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }

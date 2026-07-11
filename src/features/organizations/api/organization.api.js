@@ -20,8 +20,23 @@ export const getOrgMembers = async (orgId) => {
   return data;
 };
 
-export const inviteMember = async (orgId, { username, orgRole }) => {
-  const { data } = await api.post(`/organizations/${orgId}/invites`, { username, orgRole });
+export const inviteMember = async (orgId, { username, roleId }) => {
+  const { data } = await api.post(`/organizations/${orgId}/invites`, { username, roleId });
+  return data;
+};
+
+export const getOrgRoles = async (orgId) => {
+  const { data } = await api.get(`/organizations/${orgId}/roles`);
+  return data;
+};
+
+export const createOrgRole = async (orgId, payload) => {
+  const { data } = await api.post(`/organizations/${orgId}/roles`, payload);
+  return data;
+};
+
+export const updateOrgRolePermissions = async (orgId, roleId, payload) => {
+  const { data } = await api.put(`/organizations/${orgId}/roles/${roleId}/permissions`, payload);
   return data;
 };
 

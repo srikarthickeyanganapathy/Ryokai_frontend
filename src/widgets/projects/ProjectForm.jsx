@@ -22,6 +22,7 @@ export function ProjectForm({ onSubmit, defaultValues, isLoading, workspaceMode 
       organizationId: data.organizationId ? parseInt(data.organizationId, 10) : null,
       teamId: data.teamId ? parseInt(data.teamId, 10) : null,
       dueDate: data.dueDate || null,
+      isPersonal: workspaceMode === 'PERSONAL',
     }
     onSubmit(payload)
   }

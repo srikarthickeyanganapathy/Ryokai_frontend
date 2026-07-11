@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
@@ -7,15 +7,49 @@ import { Badge } from '@/shared/ui/Badge'
 import { cn } from '@/shared/lib/cn'
 import { normalizePriority } from '@/shared/lib/priority'
 import { ChecklistForm } from './ChecklistForm'
-import { useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, useUpdateTask } from '@/features/tasks/hooks/useTasks'
+import { useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, useUpdateTask, useArchiveTask } from '@/features/tasks/hooks/useTasks'
+import { Archive } from 'lucide-react'
 
 export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
   const addChecklistItem = useAddChecklistItem(task?.id)
   const toggleChecklistItem = useToggleChecklistItem(task?.id)
   const deleteChecklistItem = useDeleteChecklistItem(task?.id)
   const updateTask = useUpdateTask()
+  const archiveTaskMutation = useArchiveTask()
   const [localEdits, setLocalEdits] = useState({})
   const [isDirty, setIsDirty] = useState(false)
+  const [syncedTaskId, setSyncedTaskId] = useState(task?.id)
+  const titleRef = useRef(null)
+  const descRef = useRef(null)
+
+  // Reset local edit state during render when the task changes, rather than
+  // in an effect — avoids an extra commit/cascading render for state that's
+  // purely derived from `task.id` changing (see react.dev "Resetting state
+  // when a prop changes").
+  if (task?.id !== syncedTaskId) {
+    setSyncedTaskId(task?.id)
+    setLocalEdits({})
+    setIsDirty(false)
+  }
+
+  // Sync contentEditable refs when the task changes (imperative DOM write,
+  // genuinely belongs in an effect since it's synchronizing with the DOM).
+  useEffect(() => {
+    if (task) {
+      if (titleRef.current) titleRef.current.textContent = task.title || ''
+      if (descRef.current) descRef.current.textContent = task.description || ''
+    }
+  }, [task?.id])
+
+  const handleArchive = () => {
+    if (confirm('Are you sure you want to archive this task?')) {
+      archiveTaskMutation.mutate(task.id, {
+        onSuccess: () => {
+          onClose()
+        }
+      })
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -49,6 +83,9 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
                 )}
               </div>
               <div className="flex items-center gap-2">
+                <IconButton variant="ghost" onClick={handleArchive} title="Archive Task">
+                  <Archive className="w-4 h-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors" />
+                </IconButton>
                 <IconButton variant="ghost" title="Copy Link">
                   <Icons.settings className="w-4 h-4" /> {/* Placeholder for link/share */}
                 </IconButton>
@@ -66,16 +103,18 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
                 <section>
                   <Heading 
                     level={2} 
+                    ref={titleRef}
                     contentEditable 
                     suppressContentEditableWarning
-                    onInput={(e) => {
-                      setLocalEdits(prev => ({ ...prev, title: e.currentTarget.textContent }))
-                      setIsDirty(true)
+                    onBlur={() => {
+                      const text = titleRef.current?.textContent || ''
+                      if (text !== task.title) {
+                        setLocalEdits(prev => ({ ...prev, title: text }))
+                        setIsDirty(true)
+                      }
                     }}
                     className="text-2xl font-semibold tracking-tight mb-6 outline-none hover:bg-[var(--bg-subtle)] p-2 -ml-2 rounded transition-colors cursor-text"
-                  >
-                    {task.title}
-                  </Heading>
+                  />
                   
                   {/* Attributes Grid */}
                   <div className="grid grid-cols-2 gap-y-4 gap-x-8 text-sm">
@@ -126,16 +165,18 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
                 <section>
                   <Heading level={4} className="mb-4">Description</Heading>
                   <div 
+                    ref={descRef}
                     contentEditable
                     suppressContentEditableWarning
-                    onInput={(e) => {
-                      setLocalEdits(prev => ({ ...prev, description: e.currentTarget.textContent }))
-                      setIsDirty(true)
+                    onBlur={() => {
+                      const text = descRef.current?.textContent || ''
+                      if (text !== (task.description || '')) {
+                        setLocalEdits(prev => ({ ...prev, description: text }))
+                        setIsDirty(true)
+                      }
                     }}
                     className="text-[var(--text-secondary)] min-h-[100px] outline-none hover:bg-[var(--bg-subtle)] p-3 -mx-3 rounded-md transition-colors cursor-text whitespace-pre-wrap"
-                  >
-                    {task.description || ''}
-                  </div>
+                  />
                 </section>
 
                 {/* Checklist */}

@@ -6,6 +6,7 @@ import { Text } from '@/shared/ui/Typography'
 import { cn } from '@/shared/lib/cn'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useWorkspace } from '@/context/WorkspaceContext'
+import { usePermissions } from '@/context/usePermissions'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar'
 import {
   Select,
@@ -15,18 +16,20 @@ import {
   SelectValue,
 } from '@/shared/ui/Select'
 
-const navItems = [
-  { icon: Icons.layoutDashboard, label: 'Dashboard', to: '/app' },
-  { icon: Icons.checkCircle, label: 'Focus', to: '/app/focus' },
-  { icon: Icons.listTodo, label: 'Tasks', to: '/app/tasks' },
-  { icon: Icons.folderClosed, label: 'Projects', to: '/app/projects' },
-  { icon: Icons.building, label: 'Organizations', to: '/app/organizations' },
-  { icon: Icons.barChart2, label: 'Analytics', to: '/app/analytics' },
-]
-
 export function AppSidebar({ isOpen, onClose }) {
   const { user } = useAuth()
   const { workspaceMode, setWorkspaceMode, activeOrganization, setActiveOrganization, organizations } = useWorkspace()
+  const { isSuperAdmin } = usePermissions()
+
+  const navItems = [
+    { icon: Icons.layoutDashboard, label: 'Dashboard', to: '/app' },
+    { icon: Icons.checkCircle, label: 'Focus', to: '/app/focus' },
+    { icon: Icons.listTodo, label: 'Tasks', to: '/app/tasks' },
+    { icon: Icons.folderClosed, label: 'Projects', to: '/app/projects' },
+    { icon: Icons.building, label: 'Organizations', to: '/app/organizations' },
+    { icon: Icons.barChart2, label: 'Analytics', to: '/app/analytics' },
+    ...(isSuperAdmin ? [{ icon: Icons.shield, label: 'Admin', to: '/app/admin' }] : []),
+  ]
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-[var(--bg-elevated)] border-r border-[var(--color-border-subtle)] w-64 shadow-sm relative z-20">
