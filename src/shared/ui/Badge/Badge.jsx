@@ -3,7 +3,7 @@ import { cn } from '@/shared/lib/cn'
 
 export function Badge({ className, variant = 'default', size = 'md', ...props }) {
   const badgeVariants = {
-    default: 'bg-[var(--bg-hover)] text-[var(--text-secondary)] border border-transparent',
+    default: 'bg-[var(--bg-hover)] text-[var(--text-secondary)] border border-[var(--border-subtle)]',
     primary: 'bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)]',
     secondary: 'bg-[var(--bg-elevated)] text-[var(--text-primary)] border border-[var(--border-default)]',
     success: 'bg-[var(--success-soft)] text-[var(--success)] border border-transparent',
@@ -21,7 +21,7 @@ export function Badge({ className, variant = 'default', size = 'md', ...props })
   return (
     <div
       className={cn(
-        'inline-flex items-center justify-center font-medium leading-none whitespace-nowrap',
+        'inline-flex items-center justify-center font-medium leading-none whitespace-nowrap transition-colors duration-[var(--duration-base)] ease-[var(--ease-out)]',
         badgeVariants[variant],
         badgeSizes[size],
         className

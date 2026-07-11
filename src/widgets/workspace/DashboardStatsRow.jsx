@@ -29,13 +29,13 @@ export function DashboardStatsRow({ stats, isLoading }) {
       {defaultStats.map((stat, i) => (
         <Card 
           key={i} 
-          className="group hover:-translate-y-0.5 transition-transform duration-200"
+          className="group hover:-translate-y-0.5 hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] transition-[transform,border-color,box-shadow] duration-[var(--duration-base)] ease-[var(--ease-out)]"
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-[var(--text-secondary)]">
               {stat.label}
             </CardTitle>
-            <stat.icon className={`h-4 w-4 ${stat.color || 'text-[var(--text-secondary)]'}`} />
+            <stat.icon className={`h-4 w-4 ${stat.color || 'text-[var(--text-secondary)]'} group-hover:text-[var(--accent)] transition-colors duration-[var(--duration-base)]`} />
           </CardHeader>
           <CardContent>
             <Heading level={2} className="tracking-tight">{stat.value}</Heading>

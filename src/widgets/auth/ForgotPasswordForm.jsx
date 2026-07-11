@@ -40,8 +40,8 @@ export function ForgotPasswordForm() {
 
   if (isSubmitted) {
     return (
-      <div className="p-4 bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] rounded-lg">
-        <Text variant="muted" className="text-center">
+      <div className="glass-panel p-4 rounded-[var(--radius-lg)]">
+        <Text variant="muted" className="text-center text-[13px]">
           If an account exists for <span className="font-medium text-[var(--text-primary)]">{form.getValues('email')}</span>, we have sent a password reset link. Please check your inbox.
         </Text>
       </div>
@@ -58,7 +58,7 @@ export function ForgotPasswordForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="name@example.com" {...field} />
+                <Input placeholder="name@example.com" size="lg" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

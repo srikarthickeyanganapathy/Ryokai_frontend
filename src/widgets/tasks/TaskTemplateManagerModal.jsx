@@ -7,6 +7,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select';
 import { useForm } from 'react-hook-form';
 import { Trash2, Edit2, Plus } from 'lucide-react';
+import { Text } from '@/shared/ui/Typography';
 
 export function TaskTemplateManagerModal({ open, onOpenChange }) {
   const { data: templates = [], isLoading } = useTaskTemplates();
@@ -43,29 +44,29 @@ export function TaskTemplateManagerModal({ open, onOpenChange }) {
             onClose={() => setIsFormOpen(false)} 
           />
         ) : (
-          <div className="space-y-4 mt-4 overflow-y-auto">
+          <div className="space-y-4 mt-4 overflow-y-auto custom-scrollbar">
             <div className="flex justify-end">
               <Button onClick={handleCreate} size="sm" className="flex items-center gap-2">
                 <Plus className="w-4 h-4" /> New Template
               </Button>
             </div>
             {isLoading ? (
-              <p>Loading templates...</p>
+              <Text variant="muted" className="text-sm text-center py-4">Loading templates...</Text>
             ) : templates.length === 0 ? (
-              <p className="text-sm text-gray-500 text-center py-4">No templates found.</p>
+              <Text variant="muted" className="text-sm text-center py-4">No templates found.</Text>
             ) : (
               <div className="space-y-2">
                 {templates.map((template) => (
-                  <div key={template.id} className="flex items-center justify-between p-3 border rounded-md">
+                  <div key={template.id} className="flex items-center justify-between p-3 border border-[var(--color-border-subtle)] rounded-[var(--radius-md)] bg-[var(--bg-base)] hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] transition-[border-color,box-shadow] duration-[var(--duration-base)]">
                     <div>
-                      <p className="font-medium text-sm">{template.name}</p>
-                      <p className="text-xs text-gray-500">{template.defaultTitle}</p>
+                      <Text className="font-medium text-sm">{template.name}</Text>
+                      <Text variant="muted" size="xs">{template.defaultTitle}</Text>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <Button variant="ghost" size="icon" onClick={() => handleEdit(template)}>
                         <Edit2 className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(template.id)} className="text-red-500 hover:text-red-700">
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(template.id)} className="text-[var(--danger)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>

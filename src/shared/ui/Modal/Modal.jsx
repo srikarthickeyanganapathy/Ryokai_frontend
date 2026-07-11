@@ -13,7 +13,7 @@ const ModalOverlay = forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'fixed inset-0 z-50 bg-[var(--bg-overlay)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-[var(--duration-base)]',
+      'fixed inset-0 z-50 bg-[var(--bg-overlay)] backdrop-blur-[3px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-[var(--duration-base)]',
       className
     )}
     {...props}
@@ -27,7 +27,7 @@ export const ModalContent = forwardRef(({ className, children, ...props }, ref) 
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-[var(--border-default)] bg-[var(--bg-elevated)] p-6 shadow-[var(--shadow-lg)] duration-150 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] sm:rounded-[var(--radius-lg)]',
+        'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-[var(--border-default)] bg-[var(--bg-elevated)] p-6 shadow-[var(--shadow-lg),var(--inset-highlight)] duration-[var(--duration-slow)] ease-[var(--ease-spring)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.96] data-[state=open]:zoom-in-[0.96] sm:rounded-[var(--radius-lg)]',
         className
       )}
       {...props}
@@ -55,7 +55,7 @@ ModalFooter.displayName = 'ModalFooter'
 export const ModalTitle = forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-lg font-semibold leading-none tracking-tight text-[var(--text-primary)]', className)}
+    className={cn('text-[16px] font-semibold leading-tight tracking-[-0.012em] text-[var(--text-primary)]', className)}
     {...props}
   />
 ))
@@ -64,7 +64,7 @@ ModalTitle.displayName = DialogPrimitive.Title.displayName
 export const ModalDescription = forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-sm text-[var(--text-secondary)]', className)}
+    className={cn('text-[13px] leading-[1.5] text-[var(--text-secondary)]', className)}
     {...props}
   />
 ))

@@ -34,10 +34,10 @@ export function MiniAgenda({ tasks = [], onTaskClick }) {
     <div 
       key={task.id} 
       onClick={() => onTaskClick(task)}
-      className="p-3 mb-2 bg-[var(--bg-base)] border border-[var(--color-border-subtle)] rounded-lg cursor-pointer hover:border-[var(--accent-cyan)] transition-colors group"
+      className="p-3 mb-2 bg-[var(--bg-base)] border border-[var(--color-border-subtle)] rounded-lg cursor-pointer hover:border-[var(--accent)] transition-colors group"
     >
       <div className="flex items-start justify-between gap-2">
-        <Text size="sm" className="font-medium group-hover:text-[var(--accent-cyan)] transition-colors line-clamp-2">
+        <Text size="sm" className="font-medium group-hover:text-[var(--accent)] transition-colors line-clamp-2">
           {task.type === 'MILESTONE' && '🎯 '}
           {task.title}
         </Text>
@@ -63,7 +63,7 @@ export function MiniAgenda({ tasks = [], onTaskClick }) {
         
         <div>
           <Text size="sm" className="font-medium text-[var(--text-secondary)] mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[var(--accent-cyan)] animate-pulse"></span>
+            <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse"></span>
             Today
           </Text>
           {agendaItems.today.length === 0 ? (

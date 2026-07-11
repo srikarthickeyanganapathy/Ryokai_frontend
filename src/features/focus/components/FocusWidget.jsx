@@ -21,17 +21,17 @@ export function FocusWidget() {
   }, [tasks])
 
   return (
-    <div className="relative overflow-hidden p-5 rounded-[var(--radius-lg)] bg-[var(--bg-elevated)] border border-[var(--border-default)] hover:border-[var(--accent-border)] transition-colors group">
+    <div className="relative overflow-hidden p-5 rounded-[var(--radius-lg)] glass-panel hover:shadow-[var(--accent-glow)] hover:-translate-y-[1px] transition-[box-shadow,transform] duration-[var(--duration-base)] ease-[var(--ease-out)] group">
       
       {/* Background glow */}
-      <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-[var(--accent-cyan)]/10 rounded-full blur-3xl group-hover:bg-[var(--accent-cyan)]/20 transition-colors" />
+      <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-[var(--accent)]/10 rounded-full blur-3xl group-hover:bg-[var(--accent)]/20 transition-colors duration-[var(--duration-slow)]" />
 
       <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div>
           <Heading level={3} className="text-[var(--text-primary)] mb-2 flex items-center gap-2">
             <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-cyan)] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-[var(--accent-cyan)]"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-[var(--accent)]"></span>
             </span>
             Ready to focus?
           </Heading>
@@ -40,7 +40,7 @@ export function FocusWidget() {
           </Text>
         </div>
 
-        <Button asChild size="lg" className="shrink-0 bg-[var(--text-primary)] text-[var(--bg-base)] hover:bg-[var(--text-secondary)] rounded-full px-8">
+        <Button asChild size="lg" className="shrink-0 bg-[var(--text-primary)] text-[var(--bg-base)] hover:bg-[var(--text-secondary)] rounded-full px-8 hover:shadow-[var(--shadow-md)]">
           <Link to="/app/focus">
             Enter Focus Mode
             <ArrowRight className="w-4 h-4 ml-2" />

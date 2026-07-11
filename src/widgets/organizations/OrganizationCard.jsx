@@ -18,18 +18,18 @@ export function OrganizationCard({ organization }) {
     <Link to={`/app/organizations/${id}`} className="block">
       <motion.div 
         whileHover={{ y: -2 }}
-        className="group relative bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl p-6 transition-all hover:shadow-md hover:border-[var(--color-border-default)] h-full flex flex-col"
+        className="group relative bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-6 transition-all duration-[var(--duration-base)] hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] h-full flex flex-col"
       >
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
             <div 
-              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-sm bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)]"
+              className="w-10 h-10 rounded-[var(--radius-md)] flex items-center justify-center shrink-0 shadow-sm bg-[var(--accent-soft)] text-[var(--accent)]"
             >
               <Icons.workspace className="w-5 h-5" />
             </div>
             <div>
-              <Heading level={4} className="group-hover:text-[var(--accent-cyan)] transition-colors line-clamp-1">
+              <Heading level={4} className="group-hover:text-[var(--accent)] transition-colors line-clamp-1">
                 {name}
               </Heading>
               <Text size="sm" variant="muted" className="mt-0.5 line-clamp-2">{description || 'No description provided'}</Text>

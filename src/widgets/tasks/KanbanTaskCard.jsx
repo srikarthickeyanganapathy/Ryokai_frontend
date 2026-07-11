@@ -47,7 +47,7 @@ export function KanbanTaskCard({ task, onClick }) {
       {...attributes}
       {...listeners}
       onClick={() => onClick && onClick(task)}
-      className="group bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[var(--radius-md)] p-3 hover:border-[var(--border-default)] transition-colors cursor-grab active:cursor-grabbing mb-2.5 touch-none"
+      className="group bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[var(--radius-md)] shadow-[var(--inset-highlight-soft)] p-3 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-md),var(--inset-highlight)] hover:-translate-y-[1px] transition-[border-color,box-shadow,transform] duration-[var(--duration-base)] ease-[var(--ease-out)] cursor-grab active:cursor-grabbing active:scale-[0.98] mb-2.5 touch-none"
     >
       <div className="flex items-start justify-between mb-2">
         <h4 className="text-[13px] font-medium leading-snug line-clamp-2">

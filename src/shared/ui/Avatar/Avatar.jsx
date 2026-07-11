@@ -15,7 +15,7 @@ export const Avatar = forwardRef(({ className, size = 'md', ...props }, ref) => 
     <AvatarPrimitive.Root
       ref={ref}
       className={cn(
-        'relative flex shrink-0 overflow-hidden rounded-full border border-[var(--color-border-subtle)] bg-[var(--bg-elevated)]',
+        'relative flex shrink-0 overflow-hidden rounded-full border border-[var(--border-subtle)] bg-[var(--bg-elevated)] shadow-[var(--inset-highlight-soft)]',
         sizes[size],
         className
       )}

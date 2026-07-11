@@ -15,6 +15,7 @@ import { OrgRolesTab } from '@/widgets/organizations/OrgRolesTab'
 import { useUpdateMemberRole, useOrgRoles } from '@/features/organizations/hooks/useOrganizations'
 import { cn } from '@/shared/lib/cn'
 import { usePermissions } from '@/context/usePermissions'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
 
 function formatDate(isoString) {
   if (!isoString) return '—'
@@ -54,9 +55,9 @@ export function OrganizationDetailPage() {
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-4 w-full max-w-md" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          <Skeleton className="h-32 rounded-xl" />
-          <Skeleton className="h-32 rounded-xl" />
-          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-32 rounded-[var(--radius-lg)]" />
+          <Skeleton className="h-32 rounded-[var(--radius-lg)]" />
+          <Skeleton className="h-32 rounded-[var(--radius-lg)]" />
         </div>
       </div>
     )
@@ -64,8 +65,8 @@ export function OrganizationDetailPage() {
 
   if (isError) {
     return (
-      <div className="text-center py-20 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl border-dashed">
-        <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4 text-red-500">
+      <div className="text-center py-20 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] border-dashed">
+        <div className="w-12 h-12 rounded-full bg-[var(--danger-soft)] flex items-center justify-center mx-auto mb-4 text-[var(--danger)]">
           <Icons.x className="w-6 h-6" />
         </div>
         <Heading level={3}>Failed to load organization</Heading>
@@ -78,7 +79,7 @@ export function OrganizationDetailPage() {
 
   if (!org) {
     return (
-      <div className="text-center py-20 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl border-dashed">
+      <div className="text-center py-20 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] border-dashed">
         <Heading level={3}>Organization not found</Heading>
         <Text variant="muted" className="mt-2">The organization you're looking for doesn't exist.</Text>
       </div>
@@ -93,9 +94,9 @@ export function OrganizationDetailPage() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <Heading level={2} className="tracking-tight mb-2">{org.name}</Heading>
+        <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-2">{org.name}</Heading>
         {org.description && (
-          <Text variant="muted" className="max-w-2xl">{org.description}</Text>
+          <Text variant="muted" className="max-w-2xl text-[13px]">{org.description}</Text>
         )}
       </motion.div>
 
@@ -116,7 +117,7 @@ export function OrganizationDetailPage() {
             {activeTab === tab.id && (
               <motion.div
                 layoutId="org-tab"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--text-primary)]"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)] shadow-[0_0_6px_var(--accent)]"
               />
             )}
           </button>
@@ -129,11 +130,11 @@ export function OrganizationDetailPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
-            className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl p-6"
+            className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-6 hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] transition-[border-color,box-shadow] duration-[var(--duration-base)]"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-[var(--accent-cyan)]/10 flex items-center justify-center">
-                <Icons.user className="w-5 h-5 text-[var(--accent-cyan)]" />
+              <div className="w-10 h-10 rounded-[var(--radius-md)] bg-[var(--accent-soft)] flex items-center justify-center">
+                <Icons.user className="w-5 h-5 text-[var(--accent)]" />
               </div>
               <Text variant="muted" size="sm">Members</Text>
             </div>
@@ -148,11 +149,11 @@ export function OrganizationDetailPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl p-6"
+            className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-6 hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] transition-[border-color,box-shadow] duration-[var(--duration-base)]"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-[var(--accent-violet)]/10 flex items-center justify-center">
-                <Icons.workspace className="w-5 h-5 text-[var(--accent-violet)]" />
+              <div className="w-10 h-10 rounded-[var(--radius-md)] bg-[var(--accent-soft)] flex items-center justify-center">
+                <Icons.workspace className="w-5 h-5 text-[var(--accent)]" />
               </div>
               <Text variant="muted" size="sm">Teams</Text>
             </div>
@@ -167,11 +168,11 @@ export function OrganizationDetailPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl p-6"
+            className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-6 hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] transition-[border-color,box-shadow] duration-[var(--duration-base)]"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-[var(--accent-green)]/10 flex items-center justify-center">
-                <Icons.tasks className="w-5 h-5 text-[var(--accent-green)]" />
+              <div className="w-10 h-10 rounded-[var(--radius-md)] bg-[var(--success-soft)] flex items-center justify-center">
+                <Icons.tasks className="w-5 h-5 text-[var(--success)]" />
               </div>
               <Text variant="muted" size="sm">Created</Text>
             </div>
@@ -197,14 +198,14 @@ export function OrganizationDetailPage() {
           </div>
           {membersLoading ? (
             <div className="space-y-3">
-              {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 rounded-lg" />)}
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 rounded-[var(--radius-md)]" />)}
             </div>
           ) : members.length === 0 ? (
-            <div className="text-center py-10 bg-[var(--bg-elevated)] border border-dashed border-[var(--color-border-subtle)] rounded-xl">
+            <div className="text-center py-10 bg-[var(--bg-elevated)] border border-dashed border-[var(--color-border-subtle)] rounded-[var(--radius-lg)]">
               <Text variant="muted">No members yet.</Text>
             </div>
           ) : (
-            <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl divide-y divide-[var(--color-border-subtle)]">
+            <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] divide-y divide-[var(--color-border-subtle)]">
               {members.map((member, i) => {
                 // orgRole on a membership is always one of this org's own roles
                 // (ADMIN/DIRECTOR/MANAGER/EMPLOYEE or a custom one) — it is never
@@ -212,9 +213,9 @@ export function OrganizationDetailPage() {
                 // organization membership entirely.
                 const currentRole = roles.find(r => r.name === member.orgRole)
                 return (
-                  <div key={member.userId || i} className="flex items-center justify-between px-5 py-3">
+                  <div key={member.userId || i} className="flex items-center justify-between px-5 py-3 hover:bg-[var(--bg-hover)] transition-colors duration-[var(--duration-base)]">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center text-sm font-medium">
+                      <div className="w-8 h-8 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-sm font-medium">
                         {member.username?.charAt(0)?.toUpperCase() || '?'}
                       </div>
                       <div>
@@ -222,22 +223,20 @@ export function OrganizationDetailPage() {
                       </div>
                     </div>
                     <div>
-                      <select
-                        value={currentRole?.id ?? ''}
-                        onChange={(e) => updateRoleMutation.mutate({ userId: member.userId, roleId: e.target.value })}
+                      <Select
+                        value={currentRole?.id?.toString() ?? ''}
+                        onValueChange={(val) => updateRoleMutation.mutate({ userId: member.userId, roleId: val })}
                         disabled={!canManage || updateRoleMutation.isPending}
-                        className={cn(
-                          "bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] rounded-md px-2 py-1 text-sm focus:outline-none focus:border-[var(--accent-cyan)]",
-                          (!canManage || updateRoleMutation.isPending) && "opacity-50 cursor-not-allowed"
-                        )}
                       >
-                        {!currentRole && (
-                          <option value="" disabled>{member.orgRole || 'Unknown role'}</option>
-                        )}
-                        {roles.map(role => (
-                          <option key={role.id} value={role.id}>{role.name}</option>
-                        ))}
-                      </select>
+                        <SelectTrigger className="w-[160px] h-8 text-xs">
+                          <SelectValue placeholder={member.orgRole || 'Unknown role'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {roles.map(role => (
+                            <SelectItem key={role.id} value={role.id.toString()}>{role.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 )
@@ -261,16 +260,16 @@ export function OrganizationDetailPage() {
           </div>
           {teamsLoading ? (
             <div className="space-y-3">
-              {[1, 2].map(i => <Skeleton key={i} className="h-12 rounded-lg" />)}
+              {[1, 2].map(i => <Skeleton key={i} className="h-12 rounded-[var(--radius-md)]" />)}
             </div>
           ) : teams.length === 0 ? (
-            <div className="text-center py-10 bg-[var(--bg-elevated)] border border-dashed border-[var(--color-border-subtle)] rounded-xl">
+            <div className="text-center py-10 bg-[var(--bg-elevated)] border border-dashed border-[var(--color-border-subtle)] rounded-[var(--radius-lg)]">
               <Text variant="muted">No teams created yet.</Text>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {teams.map((team, i) => (
-                <div key={team.id || i} className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl p-5 flex flex-col">
+                <div key={team.id || i} className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-5 flex flex-col hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] transition-[border-color,box-shadow] duration-[var(--duration-base)]">
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
                       <Heading level={4} className="text-base">{team.name}</Heading>
@@ -310,8 +309,8 @@ export function OrganizationDetailPage() {
           <div className="flex items-center justify-between mb-4">
             <Heading level={3}>Organization Admin Settings</Heading>
           </div>
-          <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl p-6">
-            <Text variant="muted" className="mb-6">
+          <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-6">
+            <Text variant="muted" className="mb-6 text-[13px]">
               Manage organization-level roles, permissions, and settings here. This section allows you to configure your organization's custom roles and manage its security policies.
             </Text>
             <OrgRolesTab orgId={orgId} roles={roles} rolesLoading={rolesLoading} />

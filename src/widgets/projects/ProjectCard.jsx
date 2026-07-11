@@ -27,15 +27,15 @@ export function ProjectCard({ project }) {
   return (
     <Link to={`/app/projects/${id}`} className="block">
       <motion.div 
-        whileHover={{ y: -1 }}
-        transition={{ duration: 0.12 }}
-        className="group relative bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] p-5 transition-colors hover:border-[var(--border-default)] h-full flex flex-col"
+        whileHover={{ y: -3 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+        className="group relative bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] p-5 transition-[border-color,box-shadow] duration-[var(--duration-base)] ease-[var(--ease-out)] hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] h-full flex flex-col"
       >
         {/* Header (Project & Status) */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <div 
-              className="w-9 h-9 rounded-[var(--radius-sm)] flex items-center justify-center shrink-0"
+              className="w-9 h-9 rounded-[var(--radius-sm)] flex items-center justify-center shrink-0 transition-transform duration-[var(--duration-base)] ease-[var(--ease-spring)] group-hover:scale-110"
               style={{ backgroundColor: `${safeColor}18`, color: safeColor }}
             >
               <Icons.projects className="w-4 h-4" />

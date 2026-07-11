@@ -40,7 +40,7 @@ export function DataTable({
 
   return (
     <div className="w-full h-full flex flex-col bg-[var(--bg-base)]">
-      <div className="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-elevated)] overflow-hidden flex-1 flex flex-col">
+      <div className="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-elevated)] shadow-[var(--shadow-xs),var(--inset-highlight-soft)] overflow-hidden flex-1 flex flex-col">
         <div className="overflow-x-auto flex-1">
           <table className="w-full text-[13px] text-left">
             <thead className="bg-[var(--bg-subtle)] border-b border-[var(--border-subtle)] sticky top-0 z-10">
@@ -50,7 +50,7 @@ export function DataTable({
                     return (
                       <th
                         key={header.id}
-                        className="h-8 px-3 align-middle font-medium text-[11px] uppercase tracking-wide text-[var(--text-tertiary)] whitespace-nowrap bg-[var(--bg-subtle)]"
+                        className="h-9 px-3 align-middle font-semibold text-[11px] uppercase tracking-[0.04em] text-[var(--text-tertiary)] whitespace-nowrap bg-[var(--bg-subtle)]"
                       >
                         {header.isPlaceholder
                           ? null

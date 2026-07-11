@@ -45,7 +45,7 @@ export function TasksToolbar({ activeView, onViewChange, globalFilter, setGlobal
             key={view.id}
             onClick={() => onViewChange(view.id)}
             className={cn(
-              "relative pb-2.5 text-[13px] font-medium transition-colors whitespace-nowrap",
+              "relative pb-2.5 text-[13px] font-medium transition-colors duration-[var(--duration-base)] whitespace-nowrap",
               activeView === view.id 
                 ? "text-[var(--text-primary)]" 
                 : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
@@ -55,8 +55,8 @@ export function TasksToolbar({ activeView, onViewChange, globalFilter, setGlobal
             {activeView === view.id && (
               <motion.div
                 layoutId="active-view-tab"
-                className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[var(--accent)]"
-                transition={{ duration: 0.15 }}
+                className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[var(--accent)] shadow-[0_0_6px_var(--accent)]"
+                transition={{ type: 'spring', stiffness: 500, damping: 38 }}
               />
             )}
           </button>
@@ -96,24 +96,25 @@ export function TasksToolbar({ activeView, onViewChange, globalFilter, setGlobal
           
           {/* Segmented Buttons for List/Board/Calendar */}
           <div className="hidden sm:flex items-center bg-[var(--bg-subtle)] rounded-[var(--radius-md)] p-0.5 border border-[var(--border-subtle)] mr-1">
-            <button 
-              onClick={() => setViewMode('list')}
-              className={cn("px-2.5 py-1 text-[12px] font-medium rounded-[var(--radius-sm)] transition-colors", viewMode === 'list' ? "bg-[var(--bg-elevated)] shadow-[var(--shadow-xs)] text-[var(--text-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")}
-            >
-              List
-            </button>
-            <button 
-              onClick={() => setViewMode('board')}
-              className={cn("px-2.5 py-1 text-[12px] font-medium rounded-[var(--radius-sm)] transition-colors", viewMode === 'board' ? "bg-[var(--bg-elevated)] shadow-[var(--shadow-xs)] text-[var(--text-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")}
-            >
-              Board
-            </button>
-            <button 
-              onClick={() => setViewMode('calendar')}
-              className={cn("px-2.5 py-1 text-[12px] font-medium rounded-[var(--radius-sm)] transition-colors", viewMode === 'calendar' ? "bg-[var(--bg-elevated)] shadow-[var(--shadow-xs)] text-[var(--text-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]")}
-            >
-              Calendar
-            </button>
+            {['list', 'board', 'calendar'].map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setViewMode(mode)}
+                className={cn(
+                  "relative px-2.5 py-1 text-[12px] font-medium rounded-[var(--radius-sm)] transition-colors duration-[var(--duration-base)] capitalize",
+                  viewMode === mode ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                )}
+              >
+                {viewMode === mode && (
+                  <motion.div
+                    layoutId="view-mode-pill"
+                    className="absolute inset-0 bg-[var(--bg-elevated)] shadow-[var(--shadow-xs),var(--inset-highlight-soft)] rounded-[var(--radius-sm)]"
+                    transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                  />
+                )}
+                <span className="relative">{mode}</span>
+              </button>
+            ))}
           </div>
 
           {!isPersonalMode && (

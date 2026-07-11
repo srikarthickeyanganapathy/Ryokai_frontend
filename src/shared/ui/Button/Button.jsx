@@ -3,8 +3,8 @@ import { cn } from '@/shared/lib/cn'
 import { Slot } from '@radix-ui/react-slot'
 
 export const buttonVariants = {
-  primary: 'bg-[var(--accent)] text-[var(--text-on-accent)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-active)] shadow-[var(--shadow-xs)]',
-  secondary: 'bg-[var(--bg-elevated)] text-[var(--text-primary)] border border-[var(--border-default)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)]',
+  primary: 'bg-[var(--accent)] text-[var(--text-on-accent)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-active)] shadow-[var(--shadow-xs),var(--inset-highlight-soft)] hover:shadow-[var(--accent-glow),var(--inset-highlight)]',
+  secondary: 'bg-[var(--bg-elevated)] text-[var(--text-primary)] border border-[var(--border-default)] shadow-[var(--inset-highlight-soft)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)]',
   ghost: 'bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]',
   outline: 'bg-transparent text-[var(--text-primary)] border border-[var(--border-default)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)]',
   danger: 'bg-[var(--danger)] text-white hover:brightness-110 active:brightness-95',
@@ -37,9 +37,9 @@ export const Button = forwardRef(({
       disabled={isDisabled}
       className={cn(
         'inline-flex items-center justify-center font-medium select-none',
-        'transition-[background-color,border-color,color,filter] duration-[var(--duration-fast)] ease-[var(--ease-out)]',
+        'transition-[background-color,border-color,color,filter,box-shadow,transform] duration-[var(--duration-base)] ease-[var(--ease-out)]',
         'focus-ring cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed disabled:pointer-events-none',
-        'active:scale-[0.985]',
+        'active:scale-[0.97] active:duration-[var(--duration-fast)]',
         buttonVariants[variant],
         buttonSizes[size],
         className

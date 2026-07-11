@@ -8,7 +8,7 @@ export function AuthLayout() {
     <div className="flex min-h-screen w-full bg-[var(--bg-base)] text-[var(--text-primary)]">
 
       {/* LEFT SIDE — Brand */}
-      <div className="hidden lg:flex lg:w-[42%] relative bg-[var(--bg-subtle)] border-r border-[var(--border-subtle)] flex-col justify-between p-10 overflow-hidden">
+      <div className="hidden lg:flex lg:w-[42%] relative bg-[var(--bg-subtle)] border-r border-[var(--border-subtle)] flex-col justify-between p-10 overflow-hidden mesh-bg shadow-[var(--inset-highlight-soft)]">
         {/* Quiet dot-grid texture, faded toward the edges — no color, no glow */}
         <div
           className="absolute inset-0 z-0 opacity-[0.35]"
@@ -22,12 +22,12 @@ export function AuthLayout() {
 
         <div className="relative z-10">
           <div className="flex items-center gap-2 text-[var(--text-primary)] mb-16">
-            <div className="w-6 h-6 rounded-[var(--radius-sm)] bg-[var(--accent)] flex items-center justify-center">
+            <div className="w-6 h-6 rounded-[var(--radius-sm)] bg-gradient-to-b from-[var(--accent-hover)] to-[var(--accent-active)] shadow-[var(--inset-highlight),0_1px_2px_rgba(0,0,0,0.2)] flex items-center justify-center">
               <Icons.dashboard className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="text-[14px] font-semibold tracking-tight">Ryokai</span>
+            <span className="text-[14px] font-semibold tracking-[-0.01em]">Ryokai</span>
           </div>
-          <Heading level={2} className="max-w-sm font-semibold tracking-tight mb-3 text-[28px] leading-[1.15]">
+          <Heading level={2} className="max-w-sm mb-3">
             Organize work, quietly.
           </Heading>
           <Text variant="muted" className="max-w-sm text-[14px] leading-relaxed">
@@ -45,13 +45,13 @@ export function AuthLayout() {
 
         {/* Mobile brand mark */}
         <div className="absolute top-8 left-8 flex lg:hidden items-center gap-2">
-          <div className="w-6 h-6 rounded-[var(--radius-sm)] bg-[var(--accent)] flex items-center justify-center">
+          <div className="w-6 h-6 rounded-[var(--radius-sm)] bg-gradient-to-b from-[var(--accent-hover)] to-[var(--accent-active)] shadow-[var(--inset-highlight),0_1px_2px_rgba(0,0,0,0.2)] flex items-center justify-center">
             <Icons.dashboard className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="text-[13px] font-semibold tracking-tight">Ryokai</span>
+          <span className="text-[13px] font-semibold tracking-[-0.01em]">Ryokai</span>
         </div>
 
-        <div className="w-full max-w-[360px] animate-in fade-in zoom-in-[0.98] duration-200">
+        <div className="w-full max-w-[360px] spring-in">
           <Outlet />
         </div>
 

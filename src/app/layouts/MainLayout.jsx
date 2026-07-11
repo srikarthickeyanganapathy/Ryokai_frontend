@@ -24,8 +24,8 @@ export function MainLayout() {
         <AppTopbar onMenuClick={() => setSidebarOpen(true)} />
 
         {/* Dynamic Page Content */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden relative">
-          <div className="mx-auto max-w-[1400px] w-full h-full p-4 md:p-8">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden relative mesh-bg custom-scrollbar">
+          <div className="mx-auto max-w-[1400px] w-full p-4 md:p-8">
             <Outlet />
           </div>
         </main>

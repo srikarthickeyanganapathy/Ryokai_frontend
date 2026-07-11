@@ -55,11 +55,11 @@ export function VerifyEmailPage() {
 
   return (
     <div className="flex flex-col items-center justify-center text-center space-y-6">
-      <div className="w-16 h-16 rounded-full bg-[var(--accent-cyan)]/10 flex items-center justify-center mb-2">
-        <Mail className="w-8 h-8 text-[var(--accent-cyan)]" />
+      <div className="w-16 h-16 rounded-full bg-[var(--accent-soft)] flex items-center justify-center mb-2">
+        <Mail className="w-8 h-8 text-[var(--accent)]" />
       </div>
       
-      <Heading level={3} className="tracking-tight">
+      <Heading level={3} className="tracking-tight text-[22px]">
         {status === 'loading' ? 'Verifying...' : 
          status === 'success' ? 'Email verified!' : 
          status === 'already' ? 'Already verified' : 
@@ -68,7 +68,7 @@ export function VerifyEmailPage() {
          'Check your email'}
       </Heading>
       
-      <Text variant="muted" className="max-w-xs">
+      <Text variant="muted" className="max-w-xs text-[13px]">
         {status === 'success' || status === 'already' 
           ? 'Your email address has been successfully verified. You can now access all features.' 
           : status === 'expired' 
@@ -78,10 +78,20 @@ export function VerifyEmailPage() {
           : 'We\'ve sent a verification link to your email address. Please verify to continue.'}
       </Text>
 
+      {(status === 'success' || status === 'already') && (
+        <div className="glass-panel rounded-[var(--radius-lg)] p-4 w-full">
+          <Text variant="muted" className="text-[13px] flex items-center justify-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[var(--success)]" />
+            Verified — you're all set
+          </Text>
+        </div>
+      )}
+
       {status !== 'success' && status !== 'already' && (
         <div className="w-full pt-4">
           <Button 
             variant="outline" 
+            size="lg"
             className="w-full" 
             onClick={handleResend}
             isLoading={isResending}
@@ -92,11 +102,11 @@ export function VerifyEmailPage() {
         </div>
       )}
 
-      <p className="mt-8 px-8 text-center text-sm text-[var(--text-secondary)]">
+      <p className="mt-8 px-8 text-center text-[13px] text-[var(--text-secondary)]">
         Return to{' '}
         <Link 
           to="/app" 
-          className="font-medium text-[var(--text-primary)] hover:text-[var(--accent-cyan)] hover:underline"
+          className="font-medium text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
         >
           Dashboard
         </Link>

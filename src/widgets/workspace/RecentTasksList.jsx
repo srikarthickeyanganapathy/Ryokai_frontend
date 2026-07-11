@@ -1,5 +1,6 @@
 import React from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card'
+import { Skeleton } from '@/shared/ui/Skeleton'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Badge } from '@/shared/ui/Badge'
 import { Icons } from '@/shared/ui/Icons'
@@ -8,34 +9,34 @@ import { cn } from '@/shared/lib/cn'
 import { normalizePriority } from '@/shared/lib/priority'
 
 const priorityColors = {
-  URGENT: 'bg-red-500/10 text-red-600 border-red-500/20',
-  HIGH: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
-  NORMAL: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+  URGENT: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20',
+  HIGH: 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20',
+  NORMAL: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/20',
   LOW: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--color-border-subtle)]',
   NONE: 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]',
 }
 
 const statusIcons = {
   'To Do':       <div className="w-4 h-4 rounded-full border-2 border-[var(--color-border-default)]" />,
-  'In Review':   <div className="w-4 h-4 rounded-full border-2 border-[var(--accent-cyan)] border-t-transparent animate-spin-slow" />,
-  'Done':        <Icons.check className="w-4 h-4 text-[var(--accent-cyan)]" />,
-  'Needs Work':  <Icons.alert className="w-4 h-4 text-orange-500" />,
+  'In Review':   <div className="w-4 h-4 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin-slow" />,
+  'Done':        <Icons.check className="w-4 h-4 text-[var(--accent)]" />,
+  'Needs Work':  <Icons.alert className="w-4 h-4 text-[var(--warning)]" />,
 }
 
 export function RecentTasksList({ tasks = [], isLoading }) {
   if (isLoading) {
     return (
-      <Card className="h-full min-h-[350px] animate-pulse">
+      <Card className="h-full min-h-[350px]">
         <CardHeader className="pb-4 border-b border-[var(--color-border-subtle)]">
-          <div className="h-5 w-40 bg-[var(--bg-subtle)] rounded" />
+          <Skeleton className="h-5 w-40" />
         </CardHeader>
         <CardContent className="pt-4 space-y-4">
           {[1,2,3,4].map(i => (
             <div key={i} className="flex items-center gap-4">
-              <div className="w-4 h-4 rounded-full bg-[var(--bg-subtle)]" />
+              <Skeleton className="w-4 h-4 rounded-full" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 w-3/4 bg-[var(--bg-subtle)] rounded" />
-                <div className="h-3 w-1/4 bg-[var(--bg-subtle)] rounded" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/4" />
               </div>
             </div>
           ))}
@@ -56,12 +57,12 @@ export function RecentTasksList({ tasks = [], isLoading }) {
         </IconButton>
       </CardHeader>
       
-      <CardContent className="flex-1 p-0 overflow-y-auto">
+      <CardContent className="flex-1 p-0 overflow-y-auto custom-scrollbar">
         <div className="divide-y divide-[var(--color-border-subtle)]">
           {tasks.map((task) => (
             <div 
               key={task.id} 
-              className="flex items-start gap-4 p-4 hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer group"
+              className="flex items-start gap-4 p-4 hover:bg-[var(--bg-hover)] transition-colors duration-[var(--duration-base)] ease-[var(--ease-out)] cursor-pointer group"
             >
               <div className="mt-1 text-[var(--text-secondary)]">
                 {statusIcons[task.status]}
@@ -87,7 +88,7 @@ export function RecentTasksList({ tasks = [], isLoading }) {
                 </div>
               </div>
 
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-[var(--duration-base)] ease-[var(--ease-out)]">
                 <IconButton variant="ghost" size="sm" className="h-8 w-8">
                   <Icons.chevronRight className="w-4 h-4" />
                 </IconButton>

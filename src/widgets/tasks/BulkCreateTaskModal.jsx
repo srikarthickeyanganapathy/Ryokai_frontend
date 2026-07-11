@@ -5,7 +5,7 @@ import { useBulkAssign } from '../../features/tasks/hooks/useTasks';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/shared/forms';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/shared/forms';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select';
 import { useUsersList } from '@/features/auth/hooks/useUser';
 import { useWorkspace } from '@/context/WorkspaceContext';
@@ -76,8 +76,8 @@ export function BulkCreateTaskModal({ open, onOpenChange }) {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-2">
             
-            <div className="bg-slate-50 p-3 rounded-md mb-4 border">
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Start from Template (Optional)</label>
+            <div className="bg-[var(--bg-subtle)] p-3 rounded-[var(--radius-md)] mb-4 border border-[var(--color-border-subtle)]">
+              <label className="text-[11px] font-medium text-[var(--text-secondary)] mb-1.5 block uppercase tracking-wider">Start from Template</label>
               <Select onValueChange={handleLoadTemplate}>
                 <SelectTrigger>
                   <SelectValue placeholder="Choose a template to auto-fill..." />
@@ -130,7 +130,7 @@ export function BulkCreateTaskModal({ open, onOpenChange }) {
                   <FormControl>
                     <Input placeholder="user1, user2, user3" {...field} />
                   </FormControl>
-                  <p className="text-xs text-slate-500 mt-1">A separate task will be created for each user.</p>
+                  <FormDescription>A separate task will be created for each user.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

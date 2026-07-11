@@ -73,9 +73,9 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           
-          <div className="flex items-end gap-2 bg-slate-50 p-3 rounded-md mb-4 border">
+          <div className="flex items-end gap-2 bg-[var(--bg-subtle)] p-3 rounded-[var(--radius-md)] mb-4 border border-[var(--color-border-subtle)]">
             <div className="flex-1">
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Start from Template (Optional)</label>
+              <label className="text-[11px] font-medium text-[var(--text-secondary)] mb-1.5 block uppercase tracking-wider">Start from Template</label>
               <Select onValueChange={handleLoadTemplate}>
                 <SelectTrigger>
                   <SelectValue placeholder="Choose a template to auto-fill..." />

@@ -13,13 +13,13 @@ export function EmptyState({
   return (
     <div 
       className={cn(
-        'flex flex-col items-center justify-center p-8 text-center animate-in fade-in-50',
+        'flex flex-col items-center justify-center p-8 text-center rise-in',
         className
       )}
       {...props}
     >
       {Icon && (
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--bg-elevated)] text-[var(--text-secondary)] mb-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-[var(--inset-highlight-soft)] text-[var(--text-secondary)] mb-4 spring-in">
           <Icon className="h-6 w-6" />
         </div>
       )}

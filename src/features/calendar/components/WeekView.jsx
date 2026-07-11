@@ -29,9 +29,9 @@ export function WeekView({ tasks = [], currentDate, isLoading, onTaskClick }) {
 
   const priorityColors = {
     LOW: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--color-border-subtle)]',
-    NORMAL: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    HIGH: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-    URGENT: 'bg-red-500/10 text-red-400 border-red-500/20'
+    NORMAL: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/20',
+    HIGH: 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20',
+    URGENT: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20'
   }
 
   const typeColors = {
@@ -53,7 +53,7 @@ export function WeekView({ tasks = [], currentDate, isLoading, onTaskClick }) {
               </div>
               <div className={cn(
                 "text-lg font-semibold w-8 h-8 mx-auto flex items-center justify-center rounded-full",
-                isToday(day) ? "bg-[var(--accent-cyan)] text-[var(--bg-base)]" : "text-[var(--text-primary)]"
+                isToday(day) ? "bg-[var(--accent)] text-[var(--bg-base)]" : "text-[var(--text-primary)]"
               )}>
                 {format(day, 'd')}
               </div>

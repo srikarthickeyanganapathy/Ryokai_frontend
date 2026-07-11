@@ -1,6 +1,7 @@
 import React from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { Spinner } from '@/shared/ui/Spinner'
 
 export function PublicRoute() {
   const { isAuthenticated, isInitializing } = useAuth()
@@ -8,7 +9,7 @@ export function PublicRoute() {
   if (isInitializing) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--bg-base)]">
-        <div className="w-8 h-8 border-4 border-[var(--accent-cyan)]/20 border-t-[var(--accent-cyan)] rounded-full animate-spin" />
+        <Spinner size="lg" />
       </div>
     )
   }

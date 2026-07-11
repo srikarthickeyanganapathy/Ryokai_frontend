@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Modal, ModalContent } from '@/shared/ui/Modal'
+import React from 'react'
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription } from '@/shared/ui/Modal'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button, IconButton } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
@@ -27,24 +27,24 @@ export function ManageTeamMembersModal({ isOpen, onClose, team, orgMembers }) {
   return (
     <Modal open={isOpen} onOpenChange={onClose}>
       <ModalContent className="sm:max-w-md max-h-[80vh] flex flex-col">
-        <Heading level={3} className="mb-2">Manage Team: {team?.name}</Heading>
-        <Text variant="muted" className="mb-6">
-          Add or remove members for this team.
-        </Text>
+        <ModalHeader>
+          <ModalTitle>Manage Team: {team?.name}</ModalTitle>
+          <ModalDescription>Add or remove members for this team.</ModalDescription>
+        </ModalHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-6 min-h-0 pr-2">
+        <div className="flex-1 overflow-y-auto space-y-6 min-h-0 pr-2 custom-scrollbar">
           
           {/* Current Members */}
           <section>
-            <Heading level={4} className="mb-3 text-sm text-[var(--text-secondary)] uppercase tracking-wider">Current Members</Heading>
+            <Text className="mb-3 text-[11px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">Current Members</Text>
             {team?.members?.length === 0 ? (
               <Text variant="muted" className="text-sm italic">No members in this team.</Text>
             ) : (
               <div className="space-y-2">
                 {team?.members?.map((member) => (
-                  <div key={member.id} className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)]">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-[var(--accent-violet)] text-white flex items-center justify-center text-xs">
+                  <div key={member.id} className="flex items-center justify-between p-2.5 rounded-[var(--radius-md)] bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)]">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-6 h-6 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-xs font-medium">
                         {member.username?.charAt(0).toUpperCase()}
                       </div>
                       <span className="text-sm font-medium">{member.username}</span>
@@ -52,7 +52,7 @@ export function ManageTeamMembersModal({ isOpen, onClose, team, orgMembers }) {
                     <IconButton 
                       variant="ghost" 
                       size="sm" 
-                      className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                      className="text-[var(--danger)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]"
                       onClick={() => handleRemoveMember(member.id)}
                       disabled={removeMember.isPending}
                     >
@@ -66,20 +66,20 @@ export function ManageTeamMembersModal({ isOpen, onClose, team, orgMembers }) {
 
           {/* Add Members */}
           <section>
-            <Heading level={4} className="mb-3 text-sm text-[var(--text-secondary)] uppercase tracking-wider">Add from Organization</Heading>
+            <Text className="mb-3 text-[11px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">Add from Organization</Text>
             {availableMembers?.length === 0 ? (
               <Text variant="muted" className="text-sm italic">All organization members are already in this team.</Text>
             ) : (
               <div className="space-y-2">
                 {availableMembers?.map((member) => (
-                  <div key={member.userId} className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-base)] border border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)] transition-colors">
-                    <div className="flex items-center gap-2">
+                  <div key={member.userId} className="flex items-center justify-between p-2.5 rounded-[var(--radius-md)] bg-[var(--bg-base)] border border-[var(--color-border-subtle)] hover:border-[var(--accent-border)] transition-colors duration-[var(--duration-base)]">
+                    <div className="flex items-center gap-2.5">
                       <div className="w-6 h-6 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center text-xs font-medium text-[var(--text-secondary)]">
                         {member.username?.charAt(0).toUpperCase()}
                       </div>
                       <div>
                         <div className="text-sm font-medium leading-none">{member.username}</div>
-                        <div className="text-xs text-[var(--text-muted)] mt-1">{member.email}</div>
+                        <div className="text-[11px] text-[var(--text-muted)] mt-1">{member.email}</div>
                       </div>
                     </div>
                     <Button 

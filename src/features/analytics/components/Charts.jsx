@@ -10,7 +10,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card'
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] p-3 rounded-lg shadow-xl backdrop-blur-md">
+      <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] p-3 rounded-[var(--radius-md)] shadow-[var(--shadow-lg)] backdrop-blur-md">
         <p className="text-sm font-medium text-[var(--text-primary)] mb-2">{label}</p>
         {payload.map((entry, index) => (
           <div key={index} className="flex items-center gap-2 text-xs">
@@ -48,15 +48,15 @@ export function CompletionChart({ data }) {
           <AreaChart data={finalData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--accent-cyan)" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="var(--accent-cyan)" stopOpacity={0}/>
+                <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="var(--accent)" stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-subtle)" />
             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} dy={10} />
             <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
             <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="completed" stroke="var(--accent-cyan)" strokeWidth={2} fillOpacity={1} fill="url(#colorCompleted)" />
+            <Area type="monotone" dataKey="completed" stroke="var(--accent)" strokeWidth={2} fillOpacity={1} fill="url(#colorCompleted)" />
           </AreaChart>
         </ResponsiveContainer>
       </CardContent>
@@ -115,7 +115,7 @@ export function ProductivityChart({ data }) {
             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} dy={10} />
             <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="Done" stackId="a" fill="var(--accent-cyan)" radius={[0, 0, 4, 4]} />
+            <Bar dataKey="Done" stackId="a" fill="var(--accent)" radius={[0, 0, 4, 4]} />
             <Bar dataKey="InProgress" stackId="a" fill="#3b82f6" opacity={0.7} />
             <Bar dataKey="Todo" stackId="a" fill="var(--bg-subtle)" radius={[4, 4, 0, 0]} />
           </BarChart>

@@ -174,7 +174,7 @@ export function TasksPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] relative">
+    <div className="flex flex-col min-h-[calc(100vh-8rem)] relative">
       
       {/* Header */}
       <div className="mb-4">
@@ -228,7 +228,7 @@ export function TasksPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[var(--bg-elevated)] border border-[var(--border-default)] shadow-[var(--shadow-lg)] rounded-[var(--radius-pill)] px-5 py-2.5 flex items-center gap-4 z-20"
+              className="absolute bottom-6 left-1/2 -translate-x-1/2 glass-panel shadow-[var(--shadow-lg),var(--inset-highlight)] rounded-[var(--radius-pill)] px-5 py-2.5 flex items-center gap-4 z-20"
             >
               <Text size="sm" className="text-[13px] font-medium mr-2">
                 {Object.keys(rowSelection).length} selected

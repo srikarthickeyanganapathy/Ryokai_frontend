@@ -13,7 +13,7 @@ const DrawerOverlay = forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'fixed inset-0 z-50 bg-[var(--bg-overlay)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+      'fixed inset-0 z-50 bg-[var(--bg-overlay)] backdrop-blur-[2px] transition-opacity duration-[var(--duration-slow)] ease-[var(--ease-out)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
       className
     )}
     {...props}
@@ -33,14 +33,14 @@ export const DrawerContent = forwardRef(({ className, children, side = 'right', 
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          'fixed z-50 gap-4 bg-[var(--bg-elevated)] border-[var(--color-border-subtle)] p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
+          'fixed z-50 gap-4 bg-[var(--bg-elevated)] border-[var(--border-subtle)] p-6 shadow-[var(--shadow-lg),var(--inset-highlight-soft)] ease-[var(--ease-spring)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-[var(--duration-base)] data-[state=open]:duration-[var(--duration-slower)]',
           sideVariants[side],
           className
         )}
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary text-[var(--text-primary)]">
+        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-[var(--radius-xs)] opacity-70 transition-opacity duration-[var(--duration-fast)] hover:opacity-100 hover:bg-[var(--bg-hover)] focus-ring disabled:pointer-events-none text-[var(--text-primary)] p-1">
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
@@ -63,7 +63,7 @@ DrawerFooter.displayName = 'DrawerFooter'
 export const DrawerTitle = forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-lg font-semibold text-[var(--text-primary)]', className)}
+    className={cn('text-[16px] font-semibold leading-tight tracking-[-0.012em] text-[var(--text-primary)]', className)}
     {...props}
   />
 ))
@@ -72,7 +72,7 @@ DrawerTitle.displayName = DialogPrimitive.Title.displayName
 export const DrawerDescription = forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-sm text-[var(--text-secondary)]', className)}
+    className={cn('text-[13px] leading-[1.5] text-[var(--text-secondary)]', className)}
     {...props}
   />
 ))

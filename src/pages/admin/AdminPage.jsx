@@ -1,4 +1,5 @@
 import React from 'react'
+import { motion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { DataTable } from '@/shared/ui/data-table/DataTable'
 import { useUsersList } from '@/features/auth/hooks/useUser'
@@ -80,10 +81,10 @@ export function AdminPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
+    <div className="flex flex-col min-h-[calc(100vh-8rem)]">
       <div className="mb-6">
-        <Heading level={2} className="tracking-tight mb-1">User Administration</Heading>
-        <Text variant="muted">Manage users and their platform roles.</Text>
+        <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-1">User Administration</Heading>
+        <Text variant="muted" className="text-[13px]">Manage users and their platform roles.</Text>
       </div>
 
       <div className="flex items-center gap-6 border-b border-[var(--color-border-subtle)] mb-6">
@@ -92,7 +93,7 @@ export function AdminPage() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              "relative pb-3 text-sm font-medium transition-colors whitespace-nowrap",
+              "relative pb-3 text-sm font-medium transition-colors duration-[var(--duration-base)] whitespace-nowrap",
               activeTab === tab.id 
                 ? "text-[var(--text-primary)]" 
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
@@ -100,13 +101,17 @@ export function AdminPage() {
           >
             {tab.label}
             {activeTab === tab.id && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--text-primary)]" />
+              <motion.div
+                layoutId="admin-active-tab"
+                className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[var(--accent)] shadow-[0_0_6px_var(--accent)]"
+                transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+              />
             )}
           </button>
         ))}
       </div>
 
-      <div className="flex-1 min-h-0 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg shadow-sm overflow-hidden p-4">
+      <div className="flex-1 min-h-0 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] shadow-sm overflow-hidden p-4 transition-colors duration-[var(--duration-base)]">
         {activeTab === 'users' && (
           <DataTable 
             columns={columns}

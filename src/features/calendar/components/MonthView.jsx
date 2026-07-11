@@ -26,13 +26,13 @@ function CalendarDayCell({ day, isCurrentMonth, children, onAddClick }) {
       className={cn(
         "min-h-[120px] p-2 border-b border-r border-[var(--color-border-subtle)] bg-[var(--bg-default)] transition-colors group relative",
         !isCurrentMonth && "bg-[var(--bg-subtle)]/50 opacity-50",
-        isOver && "bg-[var(--bg-elevated)] ring-2 ring-inset ring-[var(--accent-cyan)]/50"
+        isOver && "bg-[var(--bg-elevated)] ring-2 ring-inset ring-[var(--accent)]/50"
       )}
     >
       <div className="flex items-center justify-between mb-2">
         <span className={cn(
           "text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full",
-          isToday(day) ? "bg-[var(--accent-cyan)] text-[var(--bg-base)]" : "text-[var(--text-secondary)]"
+          isToday(day) ? "bg-[var(--accent)] text-[var(--bg-base)]" : "text-[var(--text-secondary)]"
         )}>
           {format(day, 'd')}
         </span>
@@ -65,9 +65,9 @@ function CalendarTaskChip({ task, onClick }) {
   // Color mapping based on priority
   const priorityColors = {
     LOW: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--color-border-subtle)]',
-    NORMAL: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    HIGH: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-    URGENT: 'bg-red-500/10 text-red-400 border-red-500/20'
+    NORMAL: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/20',
+    HIGH: 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20',
+    URGENT: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20'
   }
 
   const typeColors = {

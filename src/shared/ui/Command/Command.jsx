@@ -19,8 +19,8 @@ Command.displayName = CommandPrimitive.displayName
 export const CommandDialog = ({ children, ...props }) => {
   return (
     <Modal {...props}>
-      <ModalContent className="overflow-hidden p-0 shadow-[var(--shadow-lg)] max-w-xl top-[20%] translate-y-0">
-        <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-[var(--text-secondary)] [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-11 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-2 [&_[cmdk-item]_svg]:h-4 [&_[cmdk-item]_svg]:w-4">
+      <ModalContent className="overflow-hidden p-0 border-0 shadow-[var(--accent-glow-lg),var(--inset-highlight)] max-w-xl top-[20%] translate-y-0 data-[state=open]:duration-[var(--duration-slow)] data-[state=open]:zoom-in-[0.97]">
+        <Command className="glass-panel rounded-[var(--radius-lg)] [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-11 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-2 [&_[cmdk-item]_svg]:h-4 [&_[cmdk-item]_svg]:w-4 bg-transparent">
           {children}
         </Command>
       </ModalContent>
@@ -65,7 +65,7 @@ export const CommandGroup = forwardRef(({ className, ...props }, ref) => (
   <CommandPrimitive.Group
     ref={ref}
     className={cn(
-      'overflow-hidden p-1 text-[var(--text-primary)] [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-[var(--text-secondary)]',
+      'overflow-hidden p-1 text-[var(--text-primary)] [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.06em] [&_[cmdk-group-heading]]:text-[var(--text-tertiary)]',
       className
     )}
     {...props}
@@ -86,7 +86,7 @@ export const CommandItem = forwardRef(({ className, ...props }, ref) => (
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex cursor-default select-none items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-[13px] text-[var(--text-secondary)] outline-none transition-colors aria-selected:bg-[var(--accent-soft)] aria-selected:text-[var(--text-primary)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'relative flex cursor-default select-none items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-[13px] text-[var(--text-secondary)] outline-none transition-all duration-[var(--duration-fast)] ease-[var(--ease-out)] aria-selected:bg-[var(--accent-soft)] aria-selected:text-[var(--text-primary)] aria-selected:translate-x-[1px] data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className
     )}
     {...props}

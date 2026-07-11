@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
+import { Input } from '@/shared/ui/Input';
 import { Skeleton } from '@/shared/ui/Skeleton';
-import { Modal, ModalContent } from '@/shared/ui/Modal';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/shared/ui/Modal';
 import { useRoles, useCreateRole, usePermissionsList, useRolePermissions, useAssignRolePermissions, useDeleteRole } from '@/features/admin/hooks/useAdmin';
 import { toast } from 'sonner';
+import { cn } from '@/shared/lib/cn';
 
 export function RolesTab() {
   const { data: roles = [], isLoading: rolesLoading } = useRoles();
@@ -55,21 +57,25 @@ export function RolesTab() {
             Create Role
           </Button>
         </div>
-        <div className="flex-1 overflow-y-auto space-y-2 pr-2">
+        <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
           {roles.map(role => (
             <div 
               key={role.id}
               onClick={() => handleSelectRole(role)}
-              className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+              className={cn(
+                "p-3 rounded-[var(--radius-md)] border cursor-pointer transition-all duration-[var(--duration-base)]",
                 selectedRole?.id === role.id 
-                ? 'bg-[var(--bg-subtle)] border-[var(--accent-cyan)]' 
-                : 'bg-[var(--bg-elevated)] border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)]'
-              }`}
+                  ? "bg-[var(--accent-soft)] border-[var(--accent-border)] text-[var(--text-primary)]" 
+                  : "bg-[var(--bg-elevated)] border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)]"
+              )}
             >
               <div className="flex justify-between items-center mb-1">
                 <Text className="font-medium">{role.name.replace('ROLE_', '')}</Text>
                 {!role.builtin && (
-                  <button onClick={(e) => { e.stopPropagation(); handleDeleteRole(role.id); }} className="text-[var(--text-muted)] hover:text-red-500">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); handleDeleteRole(role.id); }} 
+                    className="text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors text-xs"
+                  >
                     Delete
                   </button>
                 )}
@@ -87,7 +93,7 @@ export function RolesTab() {
         {selectedRole ? (
           <RolePermissionsPanel role={selectedRole} allPermissions={permissions} />
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-muted)] border border-dashed border-[var(--color-border-subtle)] rounded-xl">
+          <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-muted)] border border-dashed border-[var(--color-border-subtle)] rounded-[var(--radius-lg)]">
             <Text>Select a role to manage permissions</Text>
           </div>
         )}
@@ -144,23 +150,26 @@ function RolePermissionsPanel({ role, allPermissions }) {
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {allPermissions.map(perm => {
             const isChecked = selectedPermNames.includes(perm.name);
             return (
               <label 
                 key={perm.id} 
-                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                  isChecked ? 'bg-[var(--bg-subtle)] border-[var(--accent-cyan)]/50' : 'bg-transparent border-[var(--color-border-subtle)]'
-                }`}
+                className={cn(
+                  "flex items-start gap-3 p-3 rounded-[var(--radius-md)] border cursor-pointer transition-all duration-[var(--duration-base)]",
+                  isChecked 
+                    ? "bg-[var(--accent-soft)] border-[var(--accent-border)]" 
+                    : "bg-transparent border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)]"
+                )}
               >
                 <div className="mt-0.5">
                   <input 
                     type="checkbox" 
                     checked={isChecked}
                     onChange={() => handleToggle(perm.name)}
-                    className="w-4 h-4 rounded border-[var(--color-border-default)] text-[var(--accent-cyan)] focus:ring-[var(--accent-cyan)]"
+                    className="w-4 h-4 rounded border-[var(--color-border-default)] text-[var(--accent)] focus:ring-[var(--accent)]"
                   />
                 </div>
                 <div>
@@ -197,23 +206,24 @@ function CreateRoleModal({ isOpen, onClose }) {
   return (
     <Modal open={isOpen} onOpenChange={onClose}>
       <ModalContent className="sm:max-w-md">
-        <Heading level={3} className="mb-4">Create Custom Role</Heading>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <ModalHeader>
+          <ModalTitle>Create Custom Role</ModalTitle>
+        </ModalHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div>
-            <label className="block text-sm font-medium mb-1">Role Name</label>
-            <input
-              type="text"
+            <label className="block text-sm font-medium mb-1.5">Role Name</label>
+            <Input
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="e.g. PROJECT_MANAGER"
-              className="w-full bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] rounded-lg p-2 text-sm focus:outline-none focus:border-[var(--accent-cyan)] uppercase"
+              className="uppercase"
               required
             />
           </div>
-          <div className="flex justify-end gap-3 pt-4">
+          <ModalFooter>
             <Button variant="ghost" type="button" onClick={onClose}>Cancel</Button>
             <Button type="submit" isLoading={createMutation.isPending}>Create</Button>
-          </div>
+          </ModalFooter>
         </form>
       </ModalContent>
     </Modal>

@@ -37,15 +37,15 @@ export function AppSidebar({ isOpen, onClose }) {
       {/* Brand Header */}
       <div className="h-12 flex items-center px-3 border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-2 text-[var(--text-primary)]">
-          <div className="w-5 h-5 rounded-[var(--radius-sm)] bg-[var(--accent)] flex items-center justify-center">
+          <div className="w-5 h-5 rounded-[var(--radius-sm)] bg-gradient-to-b from-[var(--accent-hover)] to-[var(--accent-active)] shadow-[var(--inset-highlight),0_1px_2px_rgba(0,0,0,0.2)] flex items-center justify-center">
             <Icons.dashboard className="w-3 h-3 text-white" />
           </div>
-          <span className="text-[13px] font-semibold tracking-tight">Ryokai</span>
+          <span className="text-[13px] font-semibold tracking-[-0.01em]">Ryokai</span>
         </div>
       </div>
 
       {/* Main Navigation */}
-      <div className="flex-1 py-3 px-2 space-y-3 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 py-3 px-2 space-y-4 overflow-y-auto custom-scrollbar">
 
         <div className="px-1">
           <Select
@@ -84,6 +84,9 @@ export function AppSidebar({ isOpen, onClose }) {
           </Select>
         </div>
         
+        <div className="px-2.5 pt-1 pb-0.5">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--text-tertiary)]">Workspace</span>
+        </div>
         <div className="space-y-[2px]">
           {navItems.map((item) => (
             <NavLink
@@ -91,9 +94,9 @@ export function AppSidebar({ isOpen, onClose }) {
               to={item.to}
               end={item.to === '/app'}
               className={({ isActive }) => cn(
-                "relative flex items-center gap-2.5 px-2 h-7 rounded-[var(--radius-sm)] text-[13px] font-medium transition-colors group",
+                "relative flex items-center gap-2.5 px-2 h-7 rounded-[var(--radius-sm)] text-[13px] font-medium transition-colors duration-150 group",
                 isActive
-                  ? "text-[var(--text-primary)] bg-[var(--bg-hover)]"
+                  ? "text-[var(--text-primary)]"
                   : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
               )}
             >
@@ -101,16 +104,20 @@ export function AppSidebar({ isOpen, onClose }) {
                 <>
                   {isActive && (
                     <motion.div
-                      layoutId="sidebar-active-indicator"
-                      className="absolute left-0 top-[18%] bottom-[18%] w-[2px] bg-[var(--accent)] rounded-full"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
+                      layoutId="sidebar-active-pill"
+                      className="absolute inset-0 rounded-[var(--radius-sm)] bg-[var(--bg-hover)] border border-[var(--border-subtle)]"
+                      transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.6 }}
                     />
                   )}
-                  <item.icon className="w-[15px] h-[15px]" strokeWidth={2} />
-                  <span>{item.label}</span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="sidebar-active-bar"
+                      className="absolute -left-2 top-[22%] bottom-[22%] w-[2.5px] bg-[var(--accent)] rounded-full"
+                      transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.6 }}
+                    />
+                  )}
+                  <item.icon className="relative w-[15px] h-[15px]" strokeWidth={2} />
+                  <span className="relative">{item.label}</span>
                 </>
               )}
             </NavLink>

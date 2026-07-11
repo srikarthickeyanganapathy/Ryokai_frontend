@@ -71,7 +71,7 @@ export function DashboardPage() {
       </motion.div>
 
       {/* Today's Progress */}
-      <motion.div variants={itemVariants} className="bg-[var(--bg-elevated)] p-4 rounded-[var(--radius-lg)] border border-[var(--border-subtle)]">
+      <motion.div variants={itemVariants} className="glass-panel mesh-bg p-4 rounded-[var(--radius-lg)]">
         <div className="flex justify-between items-end mb-3">
           <Text variant="muted" className="uppercase tracking-wider text-[11px] font-semibold">
             Today's Progress
@@ -84,8 +84,8 @@ export function DashboardPage() {
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${stats.completionRate}%` }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="h-full bg-[var(--accent)] rounded-full"
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="h-full rounded-full bg-[var(--accent)] shadow-[0_0_12px_var(--accent)]"
           />
         </div>
       </motion.div>

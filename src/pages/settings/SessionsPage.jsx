@@ -4,6 +4,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { Button } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Skeleton } from '@/shared/ui/Skeleton'
+import { motion } from 'framer-motion'
 import { useSessions, useRevokeSession } from '@/features/auth/hooks/useUser'
 
 function formatDate(isoString) {
@@ -27,10 +28,10 @@ export function SessionsPage() {
   const revokeSession = useRevokeSession()
 
   return (
-    <div className="space-y-6">
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       <div>
-        <Heading level={2} className="tracking-tight">Active Sessions</Heading>
-        <Text variant="muted" className="mt-1">
+        <Heading level={2} className="tracking-tight text-[20px] font-semibold">Active Sessions</Heading>
+        <Text variant="muted" className="mt-1 text-[13px]">
           Manage your active login sessions across devices. Revoke any sessions you don't recognize.
         </Text>
       </div>
@@ -113,6 +114,6 @@ export function SessionsPage() {
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }

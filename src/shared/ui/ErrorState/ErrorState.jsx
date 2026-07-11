@@ -13,15 +13,15 @@ export function ErrorState({
   return (
     <div 
       className={cn(
-        'flex flex-col items-center justify-center p-8 text-center animate-in fade-in-50 bg-[var(--error)]/5 border border-[var(--error)]/20 rounded-lg',
+        'flex flex-col items-center justify-center p-8 text-center rise-in bg-[var(--danger-soft)] border border-[var(--danger)]/20 rounded-[var(--radius-lg)]',
         className
       )}
       {...props}
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--error)]/10 text-[var(--error)] mb-4">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--danger-soft)] text-[var(--danger)] mb-4 spring-in">
         <AlertCircle className="h-6 w-6" />
       </div>
-      <Heading level={4} className="mb-1 text-[var(--error)]">{title}</Heading>
+      <Heading level={4} className="mb-1 text-[var(--danger)]">{title}</Heading>
       <Text variant="muted" size="sm" className="max-w-xs mx-auto mb-4">
         {description}
       </Text>

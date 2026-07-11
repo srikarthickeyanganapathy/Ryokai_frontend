@@ -70,21 +70,21 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 right-0 w-full max-w-2xl bg-[var(--bg-elevated)] shadow-2xl border-l border-[var(--color-border-subtle)] z-50 flex flex-col"
+            className="fixed inset-y-0 right-0 w-full max-w-2xl bg-[var(--bg-elevated)] shadow-[var(--shadow-lg)] border-l border-[var(--color-border-subtle)] z-50 flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border-subtle)]">
               <div className="flex items-center gap-3 text-[var(--text-secondary)]">
                 <Badge variant="outline" className="font-mono text-[10px] uppercase">{task.id}</Badge>
                 {task.status === 'Done' && (
-                  <Badge className="bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/20">
+                  <Badge className="bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]">
                     Completed
                   </Badge>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <IconButton variant="ghost" onClick={handleArchive} title="Archive Task">
-                  <Archive className="w-4 h-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors" />
+                  <Archive className="w-4 h-4" />
                 </IconButton>
                 <IconButton variant="ghost" title="Copy Link">
                   <Icons.settings className="w-4 h-4" /> {/* Placeholder for link/share */}
@@ -96,7 +96,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
             </div>
 
             {/* Content Body */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
               <div className="px-6 py-8 max-w-3xl mx-auto space-y-10">
                 
                 {/* Overview Section */}
@@ -113,7 +113,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
                         setIsDirty(true)
                       }
                     }}
-                    className="text-2xl font-semibold tracking-tight mb-6 outline-none hover:bg-[var(--bg-subtle)] p-2 -ml-2 rounded transition-colors cursor-text"
+                    className="text-2xl font-semibold tracking-tight mb-6 outline-none hover:bg-[var(--bg-subtle)] p-2 -ml-2 rounded-[var(--radius-md)] transition-colors duration-[var(--duration-base)] cursor-text"
                   />
                   
                   {/* Attributes Grid */}
@@ -123,7 +123,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
                         <div className="w-4 h-4 rounded-full border-2 border-[var(--color-border-default)]" />
                         Status
                       </span>
-                      <span className="font-medium cursor-pointer hover:text-[var(--accent-cyan)]">{task.status}</span>
+                      <span className="font-medium cursor-pointer hover:text-[var(--accent)] transition-colors">{task.status}</span>
                     </div>
                     
                     <div className="flex items-center justify-between group">
@@ -139,8 +139,8 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
                         <Icons.user className="w-4 h-4" />
                         Assignee
                       </span>
-                      <span className="font-medium flex items-center gap-2 cursor-pointer hover:text-[var(--accent-cyan)]">
-                        <div className="w-5 h-5 rounded-full bg-[var(--accent-violet)] text-white flex items-center justify-center text-[10px]">
+                      <span className="font-medium flex items-center gap-2 cursor-pointer hover:text-[var(--accent)] transition-colors">
+                        <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[10px]">
                           {(task?.assignedTo || 'U').charAt(0).toUpperCase()}
                         </div>
                         {task.assignedTo || 'Unassigned'}
@@ -152,7 +152,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
                         <Icons.check className="w-4 h-4" />
                         Due Date
                       </span>
-                      <span className="font-medium cursor-pointer hover:text-[var(--accent-cyan)]">
+                      <span className="font-medium cursor-pointer hover:text-[var(--accent)] transition-colors">
                         {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No date'}
                       </span>
                     </div>
@@ -175,7 +175,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
                         setIsDirty(true)
                       }
                     }}
-                    className="text-[var(--text-secondary)] min-h-[100px] outline-none hover:bg-[var(--bg-subtle)] p-3 -mx-3 rounded-md transition-colors cursor-text whitespace-pre-wrap"
+                    className="text-[var(--text-secondary)] min-h-[100px] outline-none hover:bg-[var(--bg-subtle)] p-3 -mx-3 rounded-[var(--radius-md)] transition-colors duration-[var(--duration-base)] cursor-text whitespace-pre-wrap"
                   />
                 </section>
 
@@ -184,15 +184,15 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
                   <Heading level={4} className="mb-4">Checklist</Heading>
                   <div className="space-y-4">
                     {task.checklists?.length > 0 && (
-                      <div className="space-y-2 mb-4">
+                      <div className="space-y-1 mb-4">
                         {task.checklists.map(item => (
-                          <div key={item.id} className="flex items-center justify-between group py-1">
+                          <div key={item.id} className="flex items-center justify-between group py-1.5 px-2 -mx-2 rounded-[var(--radius-sm)] hover:bg-[var(--bg-subtle)] transition-colors duration-[var(--duration-base)]">
                             <div className="flex items-center gap-3">
                               <input 
                                 type="checkbox" 
                                 checked={item.completed} 
                                 onChange={() => toggleChecklistItem.mutate(item.id)}
-                                className="w-4 h-4 cursor-pointer accent-[var(--accent-cyan)]"
+                                className="w-4 h-4 cursor-pointer rounded border-[var(--color-border-default)] text-[var(--accent)] focus:ring-[var(--accent)] bg-transparent"
                               />
                               <span className={cn(
                                 "text-sm transition-colors",
@@ -204,7 +204,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
                             <IconButton 
                               variant="ghost" 
                               size="sm" 
-                              className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-600 transition-opacity"
+                              className="opacity-0 group-hover:opacity-100 text-[var(--danger)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-all duration-[var(--duration-base)]"
                               onClick={() => deleteChecklistItem.mutate(item.id)}
                             >
                               <Icons.x className="w-3 h-3" />
@@ -223,7 +223,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
                 
                 <section>
                   <Heading level={4} className="mb-4">Activity</Heading>
-                  <div className="text-center py-8 text-[var(--text-muted)] text-sm border border-dashed border-[var(--color-border-subtle)] rounded-lg">
+                  <div className="text-center py-8 text-[var(--text-muted)] text-sm border border-dashed border-[var(--color-border-subtle)] rounded-[var(--radius-lg)]">
                     Activity history will appear here.
                   </div>
                 </section>

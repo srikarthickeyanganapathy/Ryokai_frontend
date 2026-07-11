@@ -47,7 +47,7 @@ export function AppTopbar({ onMenuClick }) {
   const unread = typeof unreadCount === 'number' ? unreadCount : 0
 
   return (
-    <header className="h-12 flex items-center justify-between px-3 md:px-4 border-b border-[var(--border-subtle)] bg-[var(--bg-base)] sticky top-0 z-10">
+    <header className="h-12 flex items-center justify-between px-3 md:px-4 border-b border-[var(--border-subtle)] bg-[var(--bg-base)]/70 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-10 shadow-[var(--inset-highlight-soft)]">
 
       <div className="flex items-center gap-4">
         <IconButton
@@ -80,7 +80,7 @@ export function AppTopbar({ onMenuClick }) {
               >
                 <Icons.alert className="w-5 h-5" />
                 {unread > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] flex items-center justify-center rounded-full bg-[var(--accent)] text-white text-[9px] font-semibold leading-none px-1 border-2 border-[var(--bg-base)]">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] flex items-center justify-center rounded-full bg-[var(--accent)] text-white text-[9px] font-semibold leading-none px-1 border-2 border-[var(--bg-base)] shadow-[0_0_8px_var(--accent)]">
                     {unread > 99 ? '99+' : unread}
                   </span>
                 )}
@@ -131,7 +131,7 @@ export function AppTopbar({ onMenuClick }) {
                   <div
                     key={n.id}
                     className={cn(
-                      'flex items-start gap-3 px-3 py-2.5 border-b border-[var(--border-subtle)] last:border-b-0 transition-colors cursor-pointer group',
+                      'flex items-start gap-3 px-3 py-2.5 border-b border-[var(--border-subtle)] last:border-b-0 transition-colors duration-[var(--duration-base)] ease-[var(--ease-out)] cursor-pointer group',
                       !isRead && 'bg-[var(--accent-soft)]',
                       'hover:bg-[var(--bg-hover)]'
                     )}

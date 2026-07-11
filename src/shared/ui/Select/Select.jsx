@@ -11,7 +11,7 @@ export const SelectTrigger = forwardRef(({ className, children, ...props }, ref)
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      'flex h-8 w-full items-center justify-between rounded-[var(--radius-md)] border border-[var(--border-default)] bg-[var(--bg-elevated)] px-3 text-[13px] text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)] focus-ring disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-[var(--text-tertiary)]',
+      'flex h-8 w-full items-center justify-between rounded-[var(--radius-md)] border border-[var(--border-default)] bg-[var(--bg-elevated)] px-3 text-[13px] text-[var(--text-primary)] transition-[border-color,box-shadow] duration-[var(--duration-base)] ease-[var(--ease-out)] hover:border-[var(--border-strong)] focus-ring data-[state=open]:border-[var(--accent)] data-[state=open]:shadow-[var(--accent-glow)] disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-[var(--text-tertiary)]',
       className
     )}
     {...props}
@@ -51,7 +51,7 @@ export const SelectContent = forwardRef(({ className, children, position = 'popp
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        'relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-[var(--radius-md)] border border-[var(--border-default)] bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-[var(--shadow-md)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] duration-[var(--duration-fast)] data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1',
+        'relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-[var(--radius-md)] glass-panel text-[var(--text-primary)] shadow-[var(--shadow-lg),var(--inset-highlight)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.96] data-[state=open]:zoom-in-[0.96] duration-[var(--duration-base)] ease-[var(--ease-spring)] data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1',
         position === 'popper' &&
           'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
         className
@@ -87,7 +87,7 @@ export const SelectItem = forwardRef(({ className, children, ...props }, ref) =>
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex w-full cursor-pointer select-none items-center rounded-[var(--radius-xs)] py-1.5 pl-7 pr-2 text-[13px] text-[var(--text-secondary)] outline-none focus:bg-[var(--bg-hover)] focus:text-[var(--text-primary)] data-[state=checked]:text-[var(--text-primary)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50 transition-colors mx-1',
+      'relative flex w-full cursor-pointer select-none items-center rounded-[var(--radius-xs)] py-1.5 pl-7 pr-2 text-[13px] text-[var(--text-secondary)] outline-none focus:bg-[var(--accent-soft)] focus:text-[var(--text-primary)] data-[state=checked]:text-[var(--text-primary)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50 transition-colors duration-[var(--duration-fast)] mx-1',
       className
     )}
     {...props}

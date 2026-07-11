@@ -39,7 +39,7 @@ export const TableRow = forwardRef(({ className, ...props }, ref) => (
   <tr
     ref={ref}
     className={cn(
-      'border-b border-[var(--color-border-subtle)] transition-colors hover:bg-[var(--bg-subtle)]/50 data-[state=selected]:bg-[var(--bg-subtle)]',
+      'border-b border-[var(--color-border-subtle)] transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-[var(--bg-hover)] data-[state=selected]:bg-[var(--accent-soft)]',
       className
     )}
     {...props}
@@ -51,7 +51,7 @@ export const TableHead = forwardRef(({ className, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      'h-12 px-4 text-left align-middle font-medium text-[var(--text-secondary)] [&:has([role=checkbox])]:pr-0',
+      'h-9 px-3 text-left align-middle text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--text-tertiary)] [&:has([role=checkbox])]:pr-0',
       className
     )}
     {...props}
@@ -62,7 +62,7 @@ TableHead.displayName = 'TableHead'
 export const TableCell = forwardRef(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn('p-4 align-middle text-[var(--text-primary)] [&:has([role=checkbox])]:pr-0', className)}
+    className={cn('px-3 py-2.5 align-middle text-[13px] text-[var(--text-primary)] [&:has([role=checkbox])]:pr-0', className)}
     {...props}
   />
 ))

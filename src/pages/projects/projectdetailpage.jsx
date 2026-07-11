@@ -23,9 +23,9 @@ function formatDate(isoString) {
 
 // Matches Project.ProjectStatus exactly: ACTIVE, COMPLETED, ARCHIVED.
 const statusColors = {
-  ACTIVE: 'bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/20',
-  COMPLETED: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-  ARCHIVED: 'bg-red-500/10 text-red-500 border-red-500/20',
+  ACTIVE: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/20',
+  COMPLETED: 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]/20',
+  ARCHIVED: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20',
 }
 const defaultStatusColor = 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]'
 
@@ -78,7 +78,7 @@ export function ProjectDetailPage() {
   if (isError || !project) {
     return (
       <div className="text-center py-20">
-        <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4 text-red-500">
+        <div className="w-12 h-12 rounded-full bg-[var(--danger-soft)] flex items-center justify-center mx-auto mb-4 text-[var(--danger)]">
           <Icons.x className="w-6 h-6" />
         </div>
         <Heading level={3}>Project not found</Heading>
@@ -114,7 +114,7 @@ export function ProjectDetailPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>Edit</Button>
-          <Button variant="outline" size="sm" className="text-red-500 hover:text-red-600 hover:border-red-500" onClick={() => setIsDeleteModalOpen(true)}>Delete</Button>
+          <Button variant="outline" size="sm" className="text-[var(--danger)] hover:text-[var(--danger)] hover:border-[var(--danger)] hover:bg-[var(--danger-soft)]" onClick={() => setIsDeleteModalOpen(true)}>Delete</Button>
         </div>
       </div>
 
@@ -130,7 +130,7 @@ export function ProjectDetailPage() {
                 initial={{ width: 0 }}
                 animate={{ width: `${project.progress}%` }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                className="h-full rounded-full bg-[var(--accent-cyan)]"
+                className="h-full rounded-full bg-[var(--accent)]"
               />
             </div>
           </CardContent>
@@ -144,7 +144,7 @@ export function ProjectDetailPage() {
         <Card>
           <CardContent className="p-4">
             <Text variant="muted" size="xs" className="uppercase tracking-wider mb-1">Completed</Text>
-            <span className="text-2xl font-bold text-emerald-500">{project.tasksCompleted}</span>
+            <span className="text-2xl font-bold text-[var(--success)]">{project.tasksCompleted}</span>
           </CardContent>
         </Card>
         <Card>
@@ -202,13 +202,13 @@ export function ProjectDetailPage() {
 
       <Modal open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <ModalContent className="sm:max-w-md">
-          <Heading level={3} className="mb-4 text-red-500">Delete Project</Heading>
+          <Heading level={3} className="mb-4 text-[var(--danger)]">Delete Project</Heading>
           <Text className="mb-6">
             Are you sure you want to delete <strong>{project.name}</strong>? This action cannot be undone and will delete all associated tasks.
           </Text>
           <div className="flex justify-end gap-3">
             <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleDeleteProject} isLoading={deleteProjectMutation.isPending} className="bg-red-500 hover:bg-red-600 text-white">
+            <Button onClick={handleDeleteProject} isLoading={deleteProjectMutation.isPending} className="bg-[var(--danger)] hover:bg-[var(--danger)] hover:brightness-110 text-white">
               Yes, Delete
             </Button>
           </div>

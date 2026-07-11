@@ -164,7 +164,7 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
 
   if (isLoading) {
     return (
-      <div className="flex h-full gap-4 overflow-x-auto pb-4">
+      <div className="flex gap-4 pb-4">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="flex flex-col bg-[var(--bg-subtle)] rounded-[var(--radius-lg)] h-full w-[300px] shrink-0 border border-[var(--border-subtle)] p-3 gap-2.5">
             <div className="h-5 w-28 bg-[var(--bg-elevated)] animate-pulse rounded-[var(--radius-xs)]" />
@@ -177,7 +177,7 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
   }
 
   return (
-    <div className="flex h-full gap-4 overflow-x-auto pb-4 items-start">
+    <div className="flex gap-4 pb-4 items-start">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}

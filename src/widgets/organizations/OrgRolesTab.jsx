@@ -4,6 +4,7 @@ import { Heading, Text } from '@/shared/ui/Typography';
 import { Button, IconButton } from '@/shared/ui/Button';
 import { Icons } from '@/shared/ui/Icons';
 import { Badge } from '@/shared/ui/Badge';
+import { Input } from '@/shared/ui/Input';
 import { useCreateOrgRole, useUpdateOrgRolePermissions } from '@/features/organizations/hooks/useOrganizations';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { cn } from '@/shared/lib/cn';
@@ -68,13 +69,12 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
 
         {isCreating && (
           <form onSubmit={handleCreateRole} className="mb-4 flex gap-2">
-            <input
-              type="text"
+            <Input
               value={newRoleName}
               onChange={(e) => setNewRoleName(e.target.value)}
               placeholder="ROLE_NAME"
               autoFocus
-              className="w-full bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-cyan)]/50"
+              className="uppercase"
             />
             <Button type="submit" size="sm" variant="primary" disabled={createRoleMutation.isPending || !newRoleName}>
               Save
@@ -91,9 +91,9 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
               key={role.id}
               onClick={() => setSelectedRole(role)}
               className={cn(
-                "w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors border",
+                "w-full flex items-center justify-between px-4 py-3 rounded-[var(--radius-md)] text-sm font-medium transition-all duration-[var(--duration-base)] border",
                 selectedRole?.id === role.id 
-                  ? "bg-[var(--accent-cyan)]/10 border-[var(--accent-cyan)]/30 text-[var(--text-primary)]" 
+                  ? "bg-[var(--accent-soft)] border-[var(--accent-border)] text-[var(--text-primary)]" 
                   : "bg-transparent border-transparent hover:bg-[var(--bg-subtle)] text-[var(--text-secondary)]"
               )}
             >
@@ -111,7 +111,7 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
             <div className="flex items-center justify-between mb-6">
               <Heading level={4}>Permissions for {selectedRole.name}</Heading>
               {selectedRole.name === 'SUPER_ADMIN' && (
-                <Badge variant="outline" className="text-orange-500 border-orange-500/30">Read-Only</Badge>
+                <Badge variant="outline" className="text-[var(--warning)] border-[var(--warning)]/30">Read-Only</Badge>
               )}
             </div>
 
@@ -122,10 +122,10 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
                   <label 
                     key={permission} 
                     className={cn(
-                      "flex items-start gap-3 p-3 rounded-lg border transition-all cursor-pointer",
+                      "flex items-start gap-3 p-3 rounded-[var(--radius-md)] border transition-all duration-[var(--duration-base)] cursor-pointer",
                       hasPermission 
-                        ? "border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/5" 
-                        : "border-[var(--color-border-subtle)] bg-[var(--bg-subtle)] hover:border-[var(--color-border-subtle)]/80",
+                        ? "border-[var(--accent-border)] bg-[var(--accent-soft)]" 
+                        : "border-[var(--color-border-subtle)] bg-[var(--bg-subtle)] hover:border-[var(--color-border-default)]",
                       selectedRole.name === 'SUPER_ADMIN' ? 'opacity-70 cursor-not-allowed' : ''
                     )}
                   >
@@ -134,11 +134,11 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
                       checked={hasPermission}
                       disabled={selectedRole.name === 'SUPER_ADMIN' || updatePermissionsMutation.isPending}
                       onChange={() => togglePermission(selectedRole, permission)}
-                      className="mt-0.5 w-4 h-4 rounded border-[var(--color-border-subtle)] text-[var(--accent-cyan)] focus:ring-[var(--accent-cyan)]/50 bg-transparent"
+                      className="mt-0.5 w-4 h-4 rounded border-[var(--color-border-subtle)] text-[var(--accent)] focus:ring-[var(--accent)]/50 bg-transparent"
                     />
                     <div>
                       <Text className="text-sm font-medium">{permission}</Text>
-                      <Text variant="muted" size="sm" className="text-xs mt-0.5">
+                      <Text variant="muted" size="sm" className="text-[11px] mt-0.5">
                         {permission.toLowerCase().replace(/_/g, ' ')}
                       </Text>
                     </div>
@@ -148,10 +148,10 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
             </div>
           </div>
         ) : (
-          <div className="h-full flex flex-col items-center justify-center text-center py-20 border border-dashed border-[var(--color-border-subtle)] rounded-xl bg-[var(--bg-subtle)]">
+          <div className="h-full flex flex-col items-center justify-center text-center py-20 border border-dashed border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] bg-[var(--bg-subtle)]">
             <Icons.shield className="w-10 h-10 text-[var(--text-muted)] mb-4" />
             <Heading level={4} className="mb-2">Select a Role</Heading>
-            <Text variant="muted" className="max-w-xs">
+            <Text variant="muted" className="max-w-xs text-[13px]">
               Choose a role from the list to view and manage its permissions.
             </Text>
           </div>

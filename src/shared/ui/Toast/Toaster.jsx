@@ -12,10 +12,10 @@ export const Toaster = ({ ...props }) => {
       toastOptions={{
         classNames: {
           toast:
-            'group toast group-[.toaster]:bg-[var(--bg-elevated)] group-[.toaster]:text-[var(--text-primary)] group-[.toaster]:border-[var(--color-border-subtle)] group-[.toaster]:shadow-lg',
+            'group toast group-[.toaster]:glass-panel group-[.toaster]:text-[var(--text-primary)] group-[.toaster]:shadow-[var(--shadow-lg),var(--inset-highlight)] group-[.toaster]:rounded-[var(--radius-md)]',
           description: 'group-[.toast]:text-[var(--text-secondary)]',
           actionButton:
-            'group-[.toast]:bg-[var(--accent-cyan)] group-[.toast]:text-white',
+            'group-[.toast]:bg-[var(--accent)] group-[.toast]:text-white',
           cancelButton:
             'group-[.toast]:bg-[var(--bg-subtle)] group-[.toast]:text-[var(--text-secondary)]',
         },

@@ -6,7 +6,8 @@ import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { Icons } from '@/shared/ui/Icons';
-import { Modal, ModalContent } from '@/shared/ui/Modal';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/shared/ui/Modal';
+import { Textarea } from '@/shared/ui/Textarea';
 
 export function LeaveRequestsTab({ orgId }) {
   const { data: requests = [], isLoading } = useLeaveRequests(orgId);
@@ -34,7 +35,7 @@ export function LeaveRequestsTab({ orgId }) {
   if (isLoading) {
     return (
       <div className="space-y-4 mt-6">
-        {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
+        {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full rounded-[var(--radius-lg)]" />)}
       </div>
     );
   }
@@ -50,17 +51,17 @@ export function LeaveRequestsTab({ orgId }) {
       </div>
 
       {requests.length === 0 ? (
-        <div className="text-center py-10 bg-[var(--bg-elevated)] border border-dashed border-[var(--color-border-subtle)] rounded-xl">
+        <div className="text-center py-10 bg-[var(--bg-elevated)] border border-dashed border-[var(--color-border-subtle)] rounded-[var(--radius-lg)]">
           <Text variant="muted">No leave requests pending.</Text>
         </div>
       ) : (
         <div className="space-y-3">
           {requests.map((req) => (
-            <div key={req.id} className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl p-4 flex items-center justify-between">
+            <div key={req.id} className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-4 flex items-center justify-between hover:border-[var(--accent-border)] transition-colors duration-[var(--duration-base)]">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <Text className="font-medium text-[var(--text-primary)]">{req.username}</Text>
-                  <Badge variant={req.status === 'APPROVED' ? 'success' : req.status === 'REJECTED' ? 'error' : 'outline'}>
+                  <Badge variant={req.status === 'APPROVED' ? 'success' : req.status === 'REJECTED' ? 'danger' : 'outline'}>
                     {req.status}
                   </Badge>
                 </div>
@@ -68,7 +69,7 @@ export function LeaveRequestsTab({ orgId }) {
                   Reason: {req.reason || 'N/A'} 
                 </Text>
                 {req.adminComment && (
-                  <Text variant="muted" size="sm" className="mt-1 text-[var(--accent-red)]">
+                  <Text variant="muted" size="sm" className="mt-1 text-[var(--danger)]">
                     Admin Comment: {req.adminComment}
                   </Text>
                 )}
@@ -112,23 +113,24 @@ function RequestLeaveModal({ isOpen, onClose, orgId }) {
   return (
     <Modal open={isOpen} onOpenChange={onClose}>
       <ModalContent className="sm:max-w-md">
-        <Heading level={3} className="mb-4">Request Leave</Heading>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <ModalHeader>
+          <ModalTitle>Request Leave</ModalTitle>
+        </ModalHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div>
-            <label className="block text-sm font-medium mb-1">Reason</label>
-            <textarea
+            <label className="block text-sm font-medium mb-1.5">Reason</label>
+            <Textarea
               value={reason}
               onChange={e => setReason(e.target.value)}
               placeholder="E.g., Vacation, Sick leave..."
-              className="w-full bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] rounded-lg p-3 text-sm focus:outline-none focus:border-[var(--accent-cyan)]"
               rows={4}
               required
             />
           </div>
-          <div className="flex justify-end gap-3 pt-4">
+          <ModalFooter>
             <Button variant="ghost" type="button" onClick={onClose}>Cancel</Button>
             <Button type="submit" isLoading={requestMutation.isPending}>Submit Request</Button>
-          </div>
+          </ModalFooter>
         </form>
       </ModalContent>
     </Modal>

@@ -13,7 +13,7 @@ export const PopoverContent = forwardRef(({ className, align = 'center', sideOff
       align={align}
       sideOffset={sideOffset}
       className={cn(
-        'z-50 w-72 rounded-[var(--radius-md)] border border-[var(--border-default)] bg-[var(--bg-elevated)] p-3 text-[var(--text-primary)] shadow-[var(--shadow-md)] outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] duration-[var(--duration-fast)] data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1',
+        'z-50 w-72 rounded-[var(--radius-md)] glass-panel p-3 text-[var(--text-primary)] shadow-[var(--shadow-lg),var(--inset-highlight)] outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.96] data-[state=open]:zoom-in-[0.96] duration-[var(--duration-base)] ease-[var(--ease-spring)] data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1',
         className
       )}
       {...props}

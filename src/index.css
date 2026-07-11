@@ -74,6 +74,52 @@
     }
   }
 
+  /* Raycast-style translucent panel — used for dashboard cards, command palette, popovers */
+  .glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+    border: 1px solid var(--glass-border);
+  }
+
+  /* Soft ambient mesh gradient for hero/dashboard backdrops — subtle, never loud */
+  .mesh-bg {
+    position: relative;
+    isolation: isolate;
+  }
+  .mesh-bg::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(40% 35% at 15% 0%, var(--mesh-1), transparent 70%),
+      radial-gradient(35% 30% at 85% 10%, var(--mesh-2), transparent 70%),
+      radial-gradient(30% 30% at 50% 100%, var(--mesh-3), transparent 70%);
+    filter: blur(60px);
+    opacity: 0.9;
+  }
+
+  /* Accent glow ring — Linear-style emphasis for primary CTAs and active cards */
+  .accent-glow {
+    box-shadow: var(--accent-glow);
+    transition: box-shadow var(--duration-base) var(--ease-out);
+  }
+  .accent-glow:hover {
+    box-shadow: var(--accent-glow-lg);
+  }
+
+  /* Springy entrance — Radix-flavored pop for menus, cards, modals */
+  .spring-in {
+    animation: spring-in var(--duration-slow) var(--ease-spring) both;
+  }
+
+  /* Gentle rising fade for lists / dashboard widgets appearing in sequence */
+  .rise-in {
+    animation: rise-in var(--duration-slow) var(--ease-out) both;
+  }
+
   /* Keyboard shortcut chip, e.g. inside the command menu trigger */
   .kbd {
     font-family: var(--font-mono);
@@ -104,4 +150,22 @@
   html:not(.dark) {
     color-scheme: light;
   }
+
+  * {
+    scroll-behavior: smooth;
+  }
+}
+
+@keyframes spring-in {
+  0% { opacity: 0; transform: scale(0.94) translateY(4px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes rise-in {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
 }

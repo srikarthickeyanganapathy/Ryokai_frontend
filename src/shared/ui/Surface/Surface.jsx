@@ -10,9 +10,10 @@ export const Surface = forwardRef(({
 }, ref) => {
   const variants = {
     flat: 'bg-[var(--bg-base)] border border-transparent',
-    elevated: 'bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-[var(--shadow-xs)]',
-    glass: 'bg-[var(--bg-elevated)] border border-[var(--border-default)] shadow-[var(--shadow-sm)]',
+    elevated: 'bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-[var(--shadow-xs),var(--inset-highlight-soft)]',
+    glass: 'glass-panel shadow-[var(--shadow-sm),var(--inset-highlight-soft)]',
     outlined: 'bg-transparent border border-[var(--border-strong)]',
+    interactive: 'bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-[var(--shadow-xs),var(--inset-highlight-soft)] hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-md),var(--inset-highlight)] hover:-translate-y-[1px] active:translate-y-0 active:shadow-[var(--shadow-xs),var(--inset-highlight-soft)] active:duration-[var(--duration-fast)] cursor-pointer',
   }
 
   const radii = {
@@ -27,7 +28,7 @@ export const Surface = forwardRef(({
     <Component
       ref={ref}
       className={cn(
-        'transition-colors duration-200',
+        'transition-[background-color,border-color,box-shadow,transform] duration-[var(--duration-base)] ease-[var(--ease-out)]',
         variants[variant],
         radii[radius],
         className

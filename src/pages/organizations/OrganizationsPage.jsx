@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
+import { Spinner } from '@/shared/ui/Spinner'
 import { useOrganizations, useCreateOrganization } from '@/features/organizations/hooks/useOrganizations'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { OrganizationForm } from '@/widgets/organizations/OrganizationForm'
@@ -44,12 +45,12 @@ export function OrganizationsPage() {
       </Modal>
 
       {isLoading && (
-        <div className="w-10 h-10 border-2 border-[var(--accent-cyan)] border-t-transparent rounded-full animate-spin" />
+        <Spinner size="lg" />
       )}
 
       {!isLoading && isError && (
         <div className="text-center max-w-md">
-          <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4 text-red-500">
+          <div className="w-12 h-12 rounded-full bg-[var(--danger-soft)] flex items-center justify-center mx-auto mb-4 text-[var(--danger)]">
             <Icons.x className="w-6 h-6" />
           </div>
           <Heading level={3}>Failed to load your organization</Heading>
@@ -64,10 +65,10 @@ export function OrganizationsPage() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center max-w-md bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-2xl p-10"
+          className="text-center max-w-md bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-10"
         >
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--accent-cyan)]/15 to-[var(--accent-violet)]/15 border border-[var(--color-border-subtle)] flex items-center justify-center mx-auto mb-5">
-            <Icons.workspace className="w-6 h-6 text-[var(--accent-cyan)]" />
+          <div className="w-14 h-14 rounded-[var(--radius-lg)] bg-[var(--accent-soft)] border border-[var(--color-border-subtle)] flex items-center justify-center mx-auto mb-5">
+            <Icons.workspace className="w-6 h-6 text-[var(--accent)]" />
           </div>
           <Heading level={3}>Create your organization</Heading>
           <Text variant="muted" className="mt-2 mb-6">

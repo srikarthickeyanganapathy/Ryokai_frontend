@@ -7,7 +7,7 @@ export const Card = forwardRef(({ className, variant = 'elevated', ...props }, r
     ref={ref}
     variant={variant}
     radius="lg"
-    className={cn('text-[var(--text-primary)] shadow-none', className)}
+    className={cn('text-[var(--text-primary)]', className)}
     {...props}
   />
 ))

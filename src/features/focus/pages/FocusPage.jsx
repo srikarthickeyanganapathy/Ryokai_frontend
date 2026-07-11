@@ -64,7 +64,7 @@ export function FocusPage() {
     })
   }
 
-  if (isLoading) return <div className="p-8 text-center">Loading focus...</div>
+  if (isLoading) return <div className="p-8 text-center"><Text variant="muted">Loading focus...</Text></div>
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] py-10 px-4">
@@ -114,11 +114,11 @@ export function FocusPage() {
           {currentTask ? (
             <motion.div 
               layoutId={currentTask.id}
-              className="group flex items-start gap-5 p-5 rounded-[var(--radius-lg)] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--accent-border)] transition-all"
+              className="group flex items-start gap-5 p-5 rounded-[var(--radius-lg)] glass-panel hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] transition-all duration-[var(--duration-base)]"
             >
               <button 
                 onClick={completeCurrent}
-                className="mt-1 shrink-0 text-[var(--text-muted)] hover:text-[var(--accent-cyan)] transition-colors"
+                className="mt-1 shrink-0 text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors duration-[var(--duration-base)]"
               >
                 <Circle className="w-8 h-8" strokeWidth={1.5} />
               </button>
@@ -143,8 +143,8 @@ export function FocusPage() {
               </div>
             </motion.div>
           ) : (
-            <div className="text-center p-12 rounded-[var(--radius-lg)] border border-dashed border-[var(--border-default)]">
-              <CheckCircle2 className="w-12 h-12 mx-auto text-[var(--accent-cyan)] mb-4 opacity-50" />
+            <div className="text-center p-12 rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-default)]">
+              <CheckCircle2 className="w-12 h-12 mx-auto text-[var(--accent)] mb-4 opacity-50" />
               <Heading level={4} className="mb-2">All caught up</Heading>
               <Text variant="muted">You have completed all your tasks for today.</Text>
             </div>
@@ -167,7 +167,7 @@ export function FocusPage() {
               {remainingTasks.slice(0, 4).map(task => (
                 <div 
                   key={task.id}
-                  className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-base)] border border-[var(--color-border-subtle)] hover:bg-[var(--bg-elevated)] transition-colors group cursor-pointer"
+                  className="flex items-center justify-between p-4 rounded-[var(--radius-lg)] bg-[var(--bg-base)] border border-[var(--color-border-subtle)] hover:bg-[var(--bg-elevated)] hover:border-[var(--accent-border)] transition-all duration-[var(--duration-base)] group cursor-pointer"
                   onClick={() => startNext(task)}
                 >
                   <div className="flex items-center gap-4">

@@ -9,7 +9,7 @@ const mockData = []
 const chartConfig = {
   completed: {
     label: "Completed Tasks",
-    color: "var(--accent-cyan)",
+    color: "var(--accent)",
   },
   added: {
     label: "Added Tasks",
@@ -40,7 +40,7 @@ export function WeeklyProgressChart({ data = mockData, isLoading }) {
       <CardHeader className="relative z-10 pb-4">
         <CardTitle className="flex items-center justify-between">
           <span>Weekly Progress</span>
-          <span className="text-sm font-medium text-[var(--accent-cyan)] bg-[var(--accent-cyan)]/10 px-2 py-0.5 rounded-full">
+          <span className="text-sm font-medium text-[var(--accent)] bg-[var(--accent-soft)] px-2 py-0.5 rounded-full">
             On Track
           </span>
         </CardTitle>

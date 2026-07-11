@@ -7,7 +7,7 @@ import { cn } from '@/shared/lib/cn'
  */
 export function FocusRing({ children, className }) {
   return (
-    <div className={cn('focus-within:ring-2 focus-within:ring-[var(--accent-cyan)] focus-within:ring-offset-2 focus-within:ring-offset-[var(--bg-base)] rounded-[inherit]', className)}>
+    <div className={cn('focus-within:outline-none focus-within:shadow-[0_0_0_2px_var(--bg-base),0_0_0_4px_var(--accent)] rounded-[inherit] transition-shadow duration-[var(--duration-base)] ease-[var(--ease-out)]', className)}>
       {children}
     </div>
   )

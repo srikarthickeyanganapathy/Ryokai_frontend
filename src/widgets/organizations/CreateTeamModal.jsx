@@ -1,6 +1,6 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
-import { Modal, ModalContent } from '@/shared/ui/Modal'
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/shared/ui/Modal'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/shared/forms'
 import { Input } from '@/shared/ui/Input'
@@ -29,10 +29,10 @@ export function CreateTeamModal({ isOpen, onClose, orgId }) {
   return (
     <Modal open={isOpen} onOpenChange={onClose}>
       <ModalContent className="sm:max-w-md">
-        <Heading level={3} className="mb-2">Create Team</Heading>
-        <Text variant="muted" className="mb-6">
-          Create a new team within this organization to group members.
-        </Text>
+        <ModalHeader>
+          <ModalTitle>Create Team</ModalTitle>
+          <ModalDescription>Create a new team within this organization to group members.</ModalDescription>
+        </ModalHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -65,14 +65,14 @@ export function CreateTeamModal({ isOpen, onClose, orgId }) {
               )}
             />
 
-            <div className="flex justify-end gap-3 pt-4">
+            <ModalFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
               <Button type="submit" disabled={createTeam.isPending}>
                 {createTeam.isPending ? 'Creating...' : 'Create Team'}
               </Button>
-            </div>
+            </ModalFooter>
           </form>
         </Form>
       </ModalContent>

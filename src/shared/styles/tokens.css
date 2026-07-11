@@ -49,6 +49,11 @@
     --shadow-sm: 0 1px 3px rgba(15, 15, 17, 0.08), 0 1px 2px rgba(15, 15, 17, 0.04);
     --shadow-md: 0 4px 16px rgba(15, 15, 17, 0.10);
     --shadow-lg: 0 16px 40px rgba(15, 15, 17, 0.14);
+    /* Vercel/Linear-style inset top highlight — a hairline of light along
+       the top edge of a raised surface, simulating a physical bevel. Barely
+       visible on its own but reads as "considered" over a flat card. */
+    --inset-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+    --inset-highlight-soft: inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
 
     /* ---- Radii ---- */
     --radius-xs: 4px;
@@ -58,10 +63,28 @@
     --radius-xl: 14px;
     --radius-pill: 999px;
 
-    /* ---- Motion ---- */
+    /* ---- Motion (Radix-flavored springs) ---- */
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
     --duration-fast: 120ms;
     --duration-base: 160ms;
+    --duration-slow: 280ms;
+    --duration-slower: 420ms;
+
+    /* ---- Glow / accent halo (Linear-style focus + active states) ---- */
+    --accent-glow: 0 0 0 1px var(--accent-border), 0 4px 24px -4px rgba(91, 91, 214, 0.35);
+    --accent-glow-lg: 0 0 0 1px var(--accent-border), 0 12px 40px -8px rgba(91, 91, 214, 0.45);
+
+    /* ---- Glass surfaces (Raycast-style dashboard panels) ---- */
+    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(15, 15, 17, 0.08);
+    --glass-blur: 20px;
+
+    /* ---- Mesh gradient stops for hero/dashboard backgrounds ---- */
+    --mesh-1: rgba(91, 91, 214, 0.16);
+    --mesh-2: rgba(211, 61, 81, 0.08);
+    --mesh-3: rgba(26, 154, 108, 0.08);
 
     /* ------------------------------------------------------------------
        Compatibility aliases — legacy variable names used throughout the
@@ -146,6 +169,20 @@
     --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
     --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.55);
+
+    --accent-glow: 0 0 0 1px var(--accent-border), 0 4px 28px -4px rgba(110, 106, 223, 0.45);
+    --accent-glow-lg: 0 0 0 1px var(--accent-border), 0 16px 48px -8px rgba(110, 106, 223, 0.55);
+
+    --inset-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+    --inset-highlight-soft: inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+
+    --glass-bg: rgba(17, 17, 19, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-blur: 24px;
+
+    --mesh-1: rgba(110, 106, 223, 0.22);
+    --mesh-2: rgba(240, 80, 110, 0.10);
+    --mesh-3: rgba(61, 214, 140, 0.10);
   }
 
   body {
@@ -155,5 +192,18 @@
     font-size: 13px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Inter's optional features: single-story 'a', tighter 'i'/'l' spacing,
+       and tabular figures so stat/table numbers don't jitter widths on
+       update — a small detail that reads as "considered" rather than
+       default browser rendering. */
+    font-feature-settings: 'cv11', 'ss01', 'tnum' 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.006em;
+  }
+
+  /* Proportional (non-tabular) figures for prose contexts where numbers
+     shouldn't force fixed width, e.g. long-form text and descriptions. */
+  .text-numeric-proportional {
+    font-variant-numeric: proportional-nums;
   }
 }

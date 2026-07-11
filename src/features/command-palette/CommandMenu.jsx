@@ -36,11 +36,11 @@ export function CommandMenu() {
     <>
       <div 
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-2.5 h-8 text-[13px] text-[var(--text-tertiary)] bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-[var(--radius-md)] cursor-pointer hover:border-[var(--border-strong)] transition-colors w-full max-w-sm"
+        className="flex items-center gap-2 px-2.5 h-8 text-[13px] text-[var(--text-tertiary)] bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-[var(--radius-md)] cursor-pointer shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] hover:border-[var(--border-strong)] hover:text-[var(--text-secondary)] transition-colors w-full max-w-sm"
       >
         <Icons.search className="w-3.5 h-3.5" />
         <span className="flex-1 text-left">Search...</span>
-        <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded-[var(--radius-xs)] border border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-1.5 font-mono text-[10px] font-medium text-[var(--text-tertiary)]">
+        <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded-[var(--radius-xs)] border border-[var(--border-default)] bg-[var(--bg-subtle)] px-1.5 font-mono text-[10px] font-medium text-[var(--text-tertiary)] shadow-[var(--inset-highlight-soft)]">
           <span className="text-xs">⌘</span>K
         </kbd>
       </div>

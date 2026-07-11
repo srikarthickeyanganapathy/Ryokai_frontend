@@ -31,7 +31,7 @@ export const ScrollBar = forwardRef(({ className, orientation = 'vertical', ...p
     )}
     {...props}
   >
-    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-[var(--color-border-strong)] opacity-50 hover:opacity-100 transition-opacity" />
+    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-[var(--border-strong)] opacity-60 hover:opacity-100 transition-opacity duration-[var(--duration-base)]" />
   </ScrollAreaPrimitive.ScrollAreaScrollbar>
 ))
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName

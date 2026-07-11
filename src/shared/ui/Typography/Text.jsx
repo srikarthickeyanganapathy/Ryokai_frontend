@@ -9,11 +9,11 @@ export function Text({
   ...props 
 }) {
   const sizes = {
-    xs: 'text-xs',
-    sm: 'text-sm',
-    md: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-xl',
+    xs: 'text-[11px] leading-[1.5]',
+    sm: 'text-[13px] leading-[1.55]',
+    md: 'text-[14px] leading-[1.6]',
+    lg: 'text-base leading-[1.6]',
+    xl: 'text-lg leading-[1.5]',
   }
 
   const variants = {
@@ -28,7 +28,6 @@ export function Text({
   return (
     <p 
       className={cn(
-        'leading-7',
         sizes[size],
         variants[variant],
         className

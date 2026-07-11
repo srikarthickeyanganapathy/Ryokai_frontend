@@ -10,13 +10,16 @@ export const Heading = forwardRef(function Heading({
 }, ref) {
   const Tag = `h${level}`
   
+  // Restrained scale in the vein of Linear/Vercel — headings inside a dense
+  // product UI don't need Tailwind's default display sizes. Weight and
+  // negative tracking do the work instead of raw size.
   const sizes = {
-    1: 'text-4xl md:text-5xl font-extrabold tracking-tight',
-    2: 'text-3xl md:text-4xl font-bold tracking-tight',
-    3: 'text-2xl md:text-3xl font-semibold tracking-tight',
-    4: 'text-xl md:text-2xl font-semibold tracking-tight',
-    5: 'text-lg md:text-xl font-semibold tracking-tight',
-    6: 'text-base md:text-lg font-semibold tracking-tight',
+    1: 'text-[28px] md:text-[34px] font-semibold tracking-[-0.02em] leading-[1.15]',
+    2: 'text-2xl md:text-[26px] font-semibold tracking-[-0.018em] leading-[1.2]',
+    3: 'text-xl md:text-[22px] font-semibold tracking-[-0.014em] leading-[1.25]',
+    4: 'text-lg font-semibold tracking-[-0.012em] leading-[1.3]',
+    5: 'text-[15px] font-semibold tracking-[-0.008em] leading-[1.35]',
+    6: 'text-[13px] font-semibold tracking-[-0.004em] leading-[1.4] uppercase text-[var(--text-secondary)]',
   }
 
   const variants = {

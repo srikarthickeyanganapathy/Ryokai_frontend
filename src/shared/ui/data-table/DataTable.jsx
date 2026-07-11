@@ -39,7 +39,7 @@ export function DataTable({
   })
 
   return (
-    <div className="w-full h-full flex flex-col bg-[var(--bg-base)]">
+    <div className="w-full flex flex-col bg-[var(--bg-base)]">
       <div className="rounded-md border border-[var(--color-border-subtle)] bg-[var(--bg-elevated)] overflow-hidden flex-1 flex flex-col">
         <div className="overflow-x-auto flex-1">
           <table className="w-full text-sm text-left">
