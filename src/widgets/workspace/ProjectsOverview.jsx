@@ -20,7 +20,7 @@ export function ProjectsOverview() {
           <Text variant="muted" className="text-sm">No active projects.</Text>
         ) : (
           projects.map(project => (
-            <div key={project.id} className="flex flex-col gap-2 p-3 rounded-[var(--radius-md)] border border-[var(--color-border-subtle)] bg-[var(--bg-base)] hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] hover:-translate-y-[1px] transition-[border-color,box-shadow,transform] duration-[var(--duration-base)] ease-[var(--ease-out)]">
+            <div key={project.id} className="flex flex-col gap-2 p-3 rounded-[var(--radius-md)] border border-transparent hover:border-[var(--color-border-subtle)] bg-[var(--bg-base)] hover:bg-[var(--bg-subtle)] transition-colors duration-[var(--duration-fast)]">
               <div className="flex items-center justify-between">
                 <Text size="sm" className="font-medium text-[var(--text-primary)]">
                   {project.name}

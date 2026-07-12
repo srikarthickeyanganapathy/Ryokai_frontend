@@ -46,11 +46,11 @@ export function RecentTasksList({ tasks = [], isLoading }) {
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-4 border-b border-[var(--color-border-subtle)] flex flex-row items-center justify-between">
+    <Card className="h-full flex flex-col shadow-sm border-[var(--border-subtle)]">
+      <CardHeader className="pb-3 pt-4 flex flex-row items-center justify-between border-b-0">
         <div>
-          <CardTitle>Active Tasks</CardTitle>
-          <Text variant="muted" size="sm" className="mt-1">Tasks needing your attention.</Text>
+          <CardTitle className="text-base font-semibold">Active Tasks</CardTitle>
+          <Text variant="muted" size="sm" className="mt-0.5">Tasks needing your attention.</Text>
         </div>
         <IconButton variant="ghost" size="sm">
           <Icons.search className="w-4 h-4" />
@@ -58,11 +58,11 @@ export function RecentTasksList({ tasks = [], isLoading }) {
       </CardHeader>
       
       <CardContent className="flex-1 p-0 overflow-y-auto custom-scrollbar">
-        <div className="divide-y divide-[var(--color-border-subtle)]">
+        <div className="divide-y divide-transparent">
           {tasks.map((task) => (
             <div 
               key={task.id} 
-              className="flex items-start gap-4 p-4 hover:bg-[var(--bg-hover)] transition-colors duration-[var(--duration-base)] ease-[var(--ease-out)] cursor-pointer group"
+              className="flex items-start gap-4 px-5 py-3.5 hover:bg-[var(--bg-subtle)] transition-colors duration-[var(--duration-fast)] cursor-pointer group"
             >
               <div className="mt-1 text-[var(--text-secondary)]">
                 {statusIcons[task.status]}

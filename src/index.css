@@ -15,6 +15,7 @@
   --color-bg-subtle: var(--bg-subtle);
   --color-bg-elevated: var(--bg-elevated);
   --color-bg-hover: var(--bg-hover);
+  --color-bg-hover-strong: var(--bg-hover-strong);
 
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
@@ -144,10 +145,6 @@
   }
 
   html {
-    color-scheme: dark;
-  }
-
-  html:not(.dark) {
     color-scheme: light;
   }
 
@@ -168,4 +165,24 @@
 
 @keyframes shimmer {
   100% { transform: translateX(100%); }
+}
+
+/* --- View Transitions for Theme Toggle --- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+  display: block;
+}
+::view-transition-old(root) {
+  animation: none;
+  z-index: 1;
+}
+::view-transition-new(root) {
+  animation: theme-wipe 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  z-index: 2;
+}
+
+@keyframes theme-wipe {
+  from { clip-path: circle(0% at 100% 0%); }
+  to { clip-path: circle(150% at 100% 0%); }
 }

@@ -12,17 +12,26 @@ export function ThemeProvider({ children, defaultTheme = 'dark', storageKey = 'a
 
   useEffect(() => {
     const root = window.document.documentElement
-    root.classList.remove('light', 'dark')
 
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-      root.classList.add(systemTheme)
-      return
+    const applyTheme = () => {
+      root.classList.remove('light', 'dark')
+
+      if (theme === 'system') {
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light'
+        root.classList.add(systemTheme)
+        return
+      }
+
+      root.classList.add(theme)
     }
 
-    root.classList.add(theme)
+    if (document.startViewTransition) {
+      document.startViewTransition(applyTheme)
+    } else {
+      applyTheme()
+    }
   }, [theme])
 
   const value = {

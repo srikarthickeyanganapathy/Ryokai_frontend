@@ -7,6 +7,7 @@ import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/sha
 import { useRoles, useCreateRole, usePermissionsList, useRolePermissions, useAssignRolePermissions, useDeleteRole } from '@/features/admin/hooks/useAdmin';
 import { toast } from 'sonner';
 import { cn } from '@/shared/lib/cn';
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog';
 
 export function RolesTab() {
   const { data: roles = [], isLoading: rolesLoading } = useRoles();
@@ -15,13 +16,20 @@ export function RolesTab() {
   const [selectedRole, setSelectedRole] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const deleteRoleMutation = useDeleteRole();
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
 
   const handleSelectRole = (role) => {
     setSelectedRole(role);
   };
 
-  const handleDeleteRole = (roleId) => {
-    if (window.confirm('Are you sure you want to delete this role?')) {
+  const handleDeleteRole = async (roleId) => {
+    const ok = await confirm({
+      title: 'Delete this role?',
+      description: 'This permanently removes the role and unassigns it from any members who hold it. This can\'t be undone.',
+      confirmLabel: 'Delete role',
+      danger: true,
+    });
+    if (ok) {
       deleteRoleMutation.mutate(roleId, {
         onSuccess: () => {
           if (selectedRole?.id === roleId) {
@@ -49,6 +57,7 @@ export function RolesTab() {
 
   return (
     <div className="flex gap-6 mt-6 h-full min-h-[500px]">
+      {confirmDialog}
       {/* Roles List Sidebar */}
       <div className="w-1/3 border-r border-[var(--color-border-subtle)] pr-6 flex flex-col">
         <div className="flex justify-between items-center mb-4">

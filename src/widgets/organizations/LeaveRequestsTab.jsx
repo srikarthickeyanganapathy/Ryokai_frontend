@@ -8,6 +8,7 @@ import { Skeleton } from '@/shared/ui/Skeleton';
 import { Icons } from '@/shared/ui/Icons';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/shared/ui/Modal';
 import { Textarea } from '@/shared/ui/Textarea';
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog';
 
 export function LeaveRequestsTab({ orgId }) {
   const { data: requests = [], isLoading } = useLeaveRequests(orgId);
@@ -16,6 +17,7 @@ export function LeaveRequestsTab({ orgId }) {
   const { isSuperAdmin } = usePermissions();
 
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
 
   // We can loosely use isSuperAdmin here, but the backend requires ROLE_MANAGE
   // To keep it simple, we show admin actions if they have permission to manage members.
@@ -25,9 +27,16 @@ export function LeaveRequestsTab({ orgId }) {
     approveMutation.mutate(id);
   };
 
-  const handleReject = (id) => {
-    const reason = window.prompt("Reason for rejection:");
-    if (reason !== null) {
+  const handleReject = async (id) => {
+    const reason = await confirm({
+      title: 'Decline this request',
+      description: 'Optionally let them know why, so they can adjust and resubmit.',
+      requireInput: true,
+      inputPlaceholder: 'Reason for declining…',
+      confirmLabel: 'Decline request',
+      danger: true,
+    });
+    if (reason !== false) {
       rejectMutation.mutate({ requestId: id, comment: reason || 'Declined' });
     }
   };
@@ -42,6 +51,7 @@ export function LeaveRequestsTab({ orgId }) {
 
   return (
     <div className="mt-6">
+      {confirmDialog}
       <div className="flex items-center justify-between mb-4">
         <Heading level={3}>Leave Requests</Heading>
         <Button size="sm" onClick={() => setIsRequestModalOpen(true)}>

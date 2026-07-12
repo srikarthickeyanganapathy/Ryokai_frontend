@@ -2,68 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ==========================================================================
-   Ryokai Design Tokens
-   One source of truth. Every color/radius/shadow in the app should trace
-   back to a variable defined here — components consume var(--x), Tailwind
-   utilities consume the @theme mirror in index.css.
-   ========================================================================== */
-
 @layer base {
   :root {
-    /* ---- Surfaces (light) ---- */
-    --bg-base: #FFFFFF;
-    --bg-subtle: #FAFAFA;
-    --bg-elevated: #FFFFFF;
-    --bg-overlay: rgba(9, 9, 11, 0.45);
-    --bg-hover: #F2F2F3;
+    /* ---- Surfaces (Premium Pure Light) ---- */
+    --bg-base: #FFFFFF; /* Pure white canvas */
+    --bg-subtle: #F7F8F9; /* Very subtle off-white for panels */
+    --bg-sidebar: #F9FAFB; /* Gemini/Linear style sidebar background */
+    --bg-elevated: #FFFFFF; /* Cards, inputs */
+    --bg-overlay: rgba(0, 0, 0, 0.4);
+    --bg-hover: #F3F4F6;
+    --bg-hover-strong: #E5E7EB;
 
-    /* ---- Text (light) ---- */
-    --text-primary: #0F0F11;
-    --text-secondary: #63636C;
-    --text-tertiary: #9A9AA2;
+    /* ---- Text (Crisp Ink) ---- */
+    --text-primary: #111827; /* Near-black */
+    --text-secondary: #4B5563; /* Crisp gray */
+    --text-tertiary: #9CA3AF;
     --text-on-accent: #FFFFFF;
 
-    /* ---- Borders (light) ---- */
-    --border-subtle: rgba(15, 15, 17, 0.06);
-    --border-default: rgba(15, 15, 17, 0.10);
-    --border-strong: rgba(15, 15, 17, 0.16);
+    /* ---- Borders (Hairline) ---- */
+    --border-subtle: #F3F4F6; /* 1px card/sidebar edges */
+    --border-default: #E5E7EB;
+    --border-strong: #D1D5DB;
 
-    /* ---- Accent: Radix Iris — the one color that carries meaning ---- */
-    --accent: #5B5BD6;
-    --accent-hover: #4747C2;
-    --accent-active: #3D3DA8;
-    --accent-soft: rgba(91, 91, 214, 0.10);
-    --accent-border: rgba(91, 91, 214, 0.28);
+    /* ---- Accent: Primary (Royal Blue) ---- */
+    --accent: #4169E1;
+    --accent-hover: #3A5FCD;
+    --accent-active: #27408B;
+    --accent-soft: #E6ECFF;
+    --accent-border: rgba(65, 105, 225, 0.25);
+
+    /* ---- Accent: Secondary (Graphite) ---- */
+    --accent-secondary: #1F2937;
+    --accent-secondary-soft: #F3F4F6;
 
     /* ---- Semantic ---- */
-    --success: #1A9A6C;
-    --success-soft: rgba(26, 154, 108, 0.10);
-    --warning: #B8720A;
-    --warning-soft: rgba(184, 114, 10, 0.10);
-    --danger: #D33D51;
-    --danger-soft: rgba(211, 61, 81, 0.10);
+    --success: #10B981;
+    --success-soft: rgba(16, 185, 129, 0.12);
+    --warning: #F59E0B;
+    --warning-soft: rgba(245, 158, 11, 0.12);
+    --danger: #EF4444;
+    --danger-soft: rgba(239, 68, 68, 0.12);
 
-    /* ---- Elevation ---- */
-    --shadow-xs: 0 1px 2px rgba(15, 15, 17, 0.04);
-    --shadow-sm: 0 1px 3px rgba(15, 15, 17, 0.08), 0 1px 2px rgba(15, 15, 17, 0.04);
-    --shadow-md: 0 4px 16px rgba(15, 15, 17, 0.10);
-    --shadow-lg: 0 16px 40px rgba(15, 15, 17, 0.14);
-    /* Vercel/Linear-style inset top highlight — a hairline of light along
-       the top edge of a raised surface, simulating a physical bevel. Barely
-       visible on its own but reads as "considered" over a flat card. */
-    --inset-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
-    --inset-highlight-soft: inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+    /* ---- Elevation (Soft, Natural) ---- */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.02);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+    --inset-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+    --inset-highlight-soft: inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
 
-    /* ---- Radii ---- */
+    /* ---- Radii (Consistent Scale) ---- */
     --radius-xs: 4px;
     --radius-sm: 6px;
     --radius-md: 8px;
-    --radius-lg: 10px;
-    --radius-xl: 14px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
     --radius-pill: 999px;
 
-    /* ---- Motion (Radix-flavored springs) ---- */
+    /* ---- Motion ---- */
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
     --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
@@ -72,27 +68,21 @@
     --duration-slow: 280ms;
     --duration-slower: 420ms;
 
-    /* ---- Glow / accent halo (Linear-style focus + active states) ---- */
-    --accent-glow: 0 0 0 1px var(--accent-border), 0 4px 24px -4px rgba(91, 91, 214, 0.35);
-    --accent-glow-lg: 0 0 0 1px var(--accent-border), 0 12px 40px -8px rgba(91, 91, 214, 0.45);
+    /* ---- Glow / accent halo ---- */
+    --accent-glow: 0 0 0 1px var(--accent-border), 0 4px 24px -4px rgba(65, 105, 225, 0.25);
+    --accent-glow-lg: 0 0 0 1px var(--accent-border), 0 12px 40px -8px rgba(65, 105, 225, 0.35);
 
-    /* ---- Glass surfaces (Raycast-style dashboard panels) ---- */
-    --glass-bg: rgba(255, 255, 255, 0.6);
-    --glass-border: rgba(15, 15, 17, 0.08);
-    --glass-blur: 20px;
+    /* ---- Glass surfaces ---- */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.05);
+    --glass-blur: 24px;
 
-    /* ---- Mesh gradient stops for hero/dashboard backgrounds ---- */
-    --mesh-1: rgba(91, 91, 214, 0.16);
-    --mesh-2: rgba(211, 61, 81, 0.08);
-    --mesh-3: rgba(26, 154, 108, 0.08);
+    /* ---- Mesh gradient stops ---- */
+    --mesh-1: rgba(232, 138, 166, 0.08);
+    --mesh-2: rgba(111, 214, 217, 0.08);
+    --mesh-3: rgba(255, 255, 255, 0.9);
 
-    /* ------------------------------------------------------------------
-       Compatibility aliases — legacy variable names used throughout the
-       component tree, mapped onto the canonical tokens above. Custom
-       properties resolve lazily, so these stay correct across themes
-       even though they're declared once. Keeps every screen in sync
-       from a single edit here instead of touching each component.
-       ------------------------------------------------------------------ */
+    /* Compatibility aliases */
     --color-border-subtle: var(--border-subtle);
     --color-border-default: var(--border-default);
     --color-border-strong: var(--border-strong);
@@ -131,58 +121,61 @@
   }
 
   .dark {
-    /* ---- Surfaces (dark) ---- */
+    /* ---- Surfaces (Premium Dark) ---- */
     --bg-base: #09090B;
-    --bg-subtle: #0D0D10;
-    --bg-elevated: #111113;
-    --bg-overlay: rgba(5, 5, 6, 0.6);
-    --bg-hover: #1A1A1E;
+    --bg-subtle: #131417;
+    --bg-sidebar: #09090B;
+    --bg-elevated: #18191C;
+    --bg-overlay: rgba(0, 0, 0, 0.8);
+    --bg-hover: #27272A;
+    --bg-hover-strong: #3F3F46;
 
-    /* ---- Text (dark) ---- */
-    --text-primary: #EDEDEF;
-    --text-secondary: #9A9AA2;
-    --text-tertiary: #6C6C76;
+    /* ---- Text (Crisp Light) ---- */
+    --text-primary: #FAFAFA;
+    --text-secondary: #A1A1AA;
+    --text-tertiary: #71717A;
     --text-on-accent: #FFFFFF;
 
-    /* ---- Borders (dark) ---- */
-    --border-subtle: rgba(255, 255, 255, 0.06);
-    --border-default: rgba(255, 255, 255, 0.10);
-    --border-strong: rgba(255, 255, 255, 0.16);
+    /* ---- Borders (Subtle Glass) ---- */
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-default: rgba(255, 255, 255, 0.1);
+    --border-strong: rgba(255, 255, 255, 0.2);
 
-    /* ---- Accent ---- */
-    --accent: #6E6ADF;
-    --accent-hover: #8482E8;
-    --accent-active: #5B5BD6;
-    --accent-soft: rgba(110, 106, 223, 0.14);
-    --accent-border: rgba(110, 106, 223, 0.32);
+    /* ---- Accent: Primary (Royal Blue) ---- */
+    --accent: #5477F5;
+    --accent-hover: #4169E1;
+    --accent-active: #3A5FCD;
+    --accent-soft: rgba(65, 105, 225, 0.2);
+    --accent-border: rgba(65, 105, 225, 0.4);
+
+    /* ---- Accent: Secondary ---- */
+    --accent-secondary: #E5E7EB;
+    --accent-secondary-soft: #374151;
 
     /* ---- Semantic ---- */
-    --success: #3DD68C;
-    --success-soft: rgba(61, 214, 140, 0.12);
-    --warning: #F0A93E;
-    --warning-soft: rgba(240, 169, 62, 0.12);
-    --danger: #F0506E;
-    --danger-soft: rgba(240, 80, 110, 0.12);
+    --success: #10B981;
+    --success-soft: rgba(16, 185, 129, 0.2);
+    --warning: #F59E0B;
+    --warning-soft: rgba(245, 158, 11, 0.2);
+    --danger: #EF4444;
+    --danger-soft: rgba(239, 68, 68, 0.2);
 
-    /* ---- Elevation ---- */
-    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.55);
+    /* ---- Elevation (Darker Shadows) ---- */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -1px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.5);
+    --inset-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    --inset-highlight-soft: inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
 
-    --accent-glow: 0 0 0 1px var(--accent-border), 0 4px 28px -4px rgba(110, 106, 223, 0.45);
-    --accent-glow-lg: 0 0 0 1px var(--accent-border), 0 16px 48px -8px rgba(110, 106, 223, 0.55);
-
-    --inset-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
-    --inset-highlight-soft: inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
-
-    --glass-bg: rgba(17, 17, 19, 0.55);
+    /* ---- Glass surfaces ---- */
+    --glass-bg: rgba(24, 25, 28, 0.6);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-blur: 24px;
 
-    --mesh-1: rgba(110, 106, 223, 0.22);
-    --mesh-2: rgba(240, 80, 110, 0.10);
-    --mesh-3: rgba(61, 214, 140, 0.10);
+    /* ---- Mesh gradient stops ---- */
+    --mesh-1: rgba(232, 138, 166, 0.05);
+    --mesh-2: rgba(111, 214, 217, 0.05);
+    --mesh-3: rgba(0, 0, 0, 0.9);
   }
 
   body {
@@ -192,17 +185,11 @@
     font-size: 13px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Inter's optional features: single-story 'a', tighter 'i'/'l' spacing,
-       and tabular figures so stat/table numbers don't jitter widths on
-       update — a small detail that reads as "considered" rather than
-       default browser rendering. */
     font-feature-settings: 'cv11', 'ss01', 'tnum' 1;
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.006em;
+    letter-spacing: -0.01em;
   }
 
-  /* Proportional (non-tabular) figures for prose contexts where numbers
-     shouldn't force fixed width, e.g. long-form text and descriptions. */
   .text-numeric-proportional {
     font-variant-numeric: proportional-nums;
   }

@@ -6,10 +6,12 @@ import { Icons } from '@/shared/ui/Icons'
 import { Heading } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { useCreateTask } from '@/features/tasks/hooks/useTasks'
+import { cn } from '@/shared/lib/cn'
 
 export function KanbanColumn({ column, tasks, onTaskClick }) {
   const [isQuickAdding, setIsQuickAdding] = useState(false)
   const [newTaskTitle, setNewTaskTitle] = useState('')
+  const [collapsed, setCollapsed] = useState(false)
   const createTaskMutation = useCreateTask()
 
   const { setNodeRef } = useDroppable({
@@ -38,20 +40,43 @@ export function KanbanColumn({ column, tasks, onTaskClick }) {
   }
 
   return (
-    <div className="flex flex-col bg-[var(--bg-subtle)] rounded-[var(--radius-lg)] flex-1 min-w-0 border border-[var(--border-subtle)] transition-colors duration-[var(--duration-base)]">
+    <div className={cn(
+      "flex flex-col bg-[var(--bg-subtle)] rounded-[var(--radius-lg)] border border-[var(--border-subtle)] transition-[width,min-width,flex,background-color] duration-[var(--duration-slow)] ease-[var(--ease-out)]",
+      collapsed ? "w-[52px] min-w-[52px] flex-none" : "flex-1 min-w-0"
+    )}>
       {/* Column Header */}
       <div className="p-4 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center gap-2">
-          <Heading level={4} className="text-sm font-semibold">{column.title}</Heading>
-          <span className="flex items-center justify-center bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-[var(--inset-highlight-soft)] text-[var(--text-secondary)] text-xs font-medium rounded-full w-5 h-5 tabular-nums">
-            {tasks.length}
-          </span>
-        </div>
-        <button className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors duration-[var(--duration-fast)]">
-          <Icons.settings className="w-4 h-4" /> {/* Placeholder for column settings/collapse */}
-        </button>
+        {collapsed ? (
+          <button
+            onClick={() => setCollapsed(false)}
+            className="flex flex-col items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mx-auto"
+            title={`Expand ${column.title}`}
+          >
+            <Icons.chevronRight className="w-4 h-4" />
+            <span className="text-xs font-medium [writing-mode:vertical-rl] rotate-180">{column.title}</span>
+            <span className="text-[10px] font-medium text-[var(--text-tertiary)]">{tasks.length}</span>
+          </button>
+        ) : (
+          <>
+            <div className="flex items-center gap-2">
+              <Heading level={4} className="text-sm font-semibold">{column.title}</Heading>
+              <span className="flex items-center justify-center bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-[var(--inset-highlight-soft)] text-[var(--text-secondary)] text-xs font-medium rounded-full w-5 h-5 tabular-nums">
+                {tasks.length}
+              </span>
+            </div>
+            <button
+              onClick={() => setCollapsed(true)}
+              className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors duration-[var(--duration-fast)]"
+              title="Collapse column"
+            >
+              <Icons.chevronLeft className="w-4 h-4" />
+            </button>
+          </>
+        )}
       </div>
 
+      {collapsed ? null : (
+      <>
       {/* Task List (Droppable Area) */}
       <div className="flex-1 px-3 pb-3 flex flex-col gap-3">
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
@@ -102,11 +127,13 @@ export function KanbanColumn({ column, tasks, onTaskClick }) {
             onClick={() => setIsQuickAdding(true)}
             className="flex items-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-[var(--radius-md)] p-2 text-sm font-medium transition-all duration-[var(--duration-base)] ease-[var(--ease-out)] mt-2"
           >
-            <Icons.check className="w-4 h-4 mr-2" /> {/* Use plus icon ideally, using check as placeholder if plus missing */}
+            <Icons.plus className="w-4 h-4 mr-2" />
             Add Task
           </button>
         )}
       </div>
+      </>
+      )}
     </div>
   )
 }

@@ -26,9 +26,12 @@ const ProjectsPage = lazy(() => import("@/pages/projects/ProjectsPage").then(m =
 const ProjectDetailPage = lazy(() => import("@/pages/projects/projectdetailpage").then(m => ({ default: m.ProjectDetailPage })));
 const OrganizationsPage = lazy(() => import("@/pages/organizations/OrganizationsPage").then(m => ({ default: m.OrganizationsPage })));
 const OrganizationDetailPage = lazy(() => import("@/pages/organizations/OrganizationDetailPage").then(m => ({ default: m.OrganizationDetailPage })));
+const InboxPage = lazy(() => import("@/pages/inbox/InboxPage").then(m => ({ default: m.InboxPage })));
 const AnalyticsPage = lazy(() => import("@/pages/analytics/AnalyticsPage").then(m => ({ default: m.AnalyticsPage })));
 const AdminPage = lazy(() => import("@/pages/admin/AdminPage").then(m => ({ default: m.AdminPage })));
 const FocusPage = lazy(() => import("@/features/focus/pages/FocusPage").then(m => ({ default: m.FocusPage })));
+const ProfilePage = lazy(() => import("@/pages/settings/ProfilePage").then(m => ({ default: m.ProfilePage })));
+const SecurityPage = lazy(() => import("@/pages/settings/SecurityPage").then(m => ({ default: m.SecurityPage })));
 const SessionsPage = lazy(() => import("@/pages/settings/SessionsPage").then(m => ({ default: m.SessionsPage })));
 
 export default function App() {
@@ -64,7 +67,16 @@ export default function App() {
                   <Route path="/app/admin" element={<AdminPage />} />
                 </Route>
                 <Route path="/app/focus" element={<FocusPage />} />
-                <Route path="/app/sessions" element={<SessionsPage />} />
+
+                <Route path="/app/inbox" element={<InboxPage />} />
+                
+                {/* Settings Routes */}
+                <Route path="/app/settings/profile" element={<ProfilePage />} />
+                <Route path="/app/settings/security" element={<SecurityPage />} />
+                <Route path="/app/settings/sessions" element={<SessionsPage />} />
+                
+                {/* Keep legacy route for fallback if needed */}
+                <Route path="/app/sessions" element={<Navigate to="/app/settings/sessions" replace />} />
               </Route>
             </Route>
 

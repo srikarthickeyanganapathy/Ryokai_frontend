@@ -7,7 +7,10 @@ import { Badge } from '@/shared/ui/Badge'
 import { cn } from '@/shared/lib/cn'
 import { normalizePriority } from '@/shared/lib/priority'
 import { ChecklistForm } from './ChecklistForm'
-import { useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, useUpdateTask, useArchiveTask } from '@/features/tasks/hooks/useTasks'
+import { TaskComments, TaskTimeline, TaskDependencies } from './TaskPanelExtras'
+import { useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, useUpdateTask, useArchiveTask, useReassignTask } from '@/features/tasks/hooks/useTasks'
+import { useUsersList } from '@/features/auth/hooks/useUser'
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { Archive } from 'lucide-react'
 
 export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
@@ -16,11 +19,14 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
   const deleteChecklistItem = useDeleteChecklistItem(task?.id)
   const updateTask = useUpdateTask()
   const archiveTaskMutation = useArchiveTask()
+  const reassignTask = useReassignTask()
+  const { data: users = [] } = useUsersList()
   const [localEdits, setLocalEdits] = useState({})
   const [isDirty, setIsDirty] = useState(false)
   const [syncedTaskId, setSyncedTaskId] = useState(task?.id)
   const titleRef = useRef(null)
   const descRef = useRef(null)
+  const [isReassignOpen, setIsReassignOpen] = useState(false)
 
   // Reset local edit state during render when the task changes, rather than
   // in an effect — avoids an extra commit/cascading render for state that's
@@ -139,12 +145,37 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
                         <Icons.user className="w-4 h-4" />
                         Assignee
                       </span>
-                      <span className="font-medium flex items-center gap-2 cursor-pointer hover:text-[var(--accent)] transition-colors">
-                        <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[10px]">
-                          {(task?.assignedTo || 'U').charAt(0).toUpperCase()}
-                        </div>
-                        {task.assignedTo || 'Unassigned'}
-                      </span>
+                      <Popover open={isReassignOpen} onOpenChange={setIsReassignOpen}>
+                        <PopoverTrigger asChild>
+                          <span className="font-medium flex items-center gap-2 cursor-pointer hover:bg-[var(--bg-hover)] p-1 rounded transition-colors -m-1">
+                            <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[10px]">
+                              {(task?.assignedTo || 'U').charAt(0).toUpperCase()}
+                            </div>
+                            {task.assignedTo || 'Unassigned'}
+                          </span>
+                        </PopoverTrigger>
+                        <PopoverContent align="end" className="w-56 p-1">
+                          <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-semibold tracking-wide">Reassign Task</Text>
+                          <div className="space-y-0.5">
+                            {users.map(u => (
+                              <button
+                                key={u.id}
+                                onClick={() => {
+                                  reassignTask.mutate({ taskId: task.id, newAssigneeId: u.id }, {
+                                    onSuccess: () => setIsReassignOpen(false)
+                                  })
+                                }}
+                                className="w-full flex items-center gap-2 px-2 py-1.5 text-[13px] rounded hover:bg-[var(--bg-hover)] transition-colors text-left"
+                              >
+                                <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[10px] shrink-0">
+                                  {u.username.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="truncate">{u.username}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </div>
 
                     <div className="flex items-center justify-between group">
@@ -221,12 +252,17 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
                   </div>
                 </section>
                 
-                <section>
-                  <Heading level={4} className="mb-4">Activity</Heading>
-                  <div className="text-center py-8 text-[var(--text-muted)] text-sm border border-dashed border-[var(--color-border-subtle)] rounded-[var(--radius-lg)]">
-                    Activity history will appear here.
-                  </div>
-                </section>
+                <hr className="border-[var(--color-border-subtle)]" />
+
+                <TaskDependencies task={task} />
+
+                <hr className="border-[var(--color-border-subtle)]" />
+                
+                <TaskComments taskId={task.id} />
+                
+                <hr className="border-[var(--color-border-subtle)]" />
+                
+                <TaskTimeline taskId={task.id} />
 
               </div>
             </div>

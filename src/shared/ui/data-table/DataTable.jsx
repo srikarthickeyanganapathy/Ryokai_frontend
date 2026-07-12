@@ -40,17 +40,17 @@ export function DataTable({
 
   return (
     <div className="w-full flex flex-col bg-[var(--bg-base)]">
-      <div className="rounded-md border border-[var(--color-border-subtle)] bg-[var(--bg-elevated)] overflow-hidden flex-1 flex flex-col">
+      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-subtle)] bg-[var(--bg-base)] overflow-hidden flex-1 flex flex-col shadow-sm">
         <div className="overflow-x-auto flex-1">
           <table className="w-full text-sm text-left">
-            <thead className="bg-[var(--bg-elevated)] border-b-2 border-[var(--color-border-subtle)] sticky top-0 z-10">
+            <thead className="bg-[var(--bg-subtle)] border-b border-[var(--color-border-subtle)] sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
                       <th
                         key={header.id}
-                        className="h-10 px-4 align-middle font-medium text-[var(--text-secondary)] border-r border-[var(--color-border-subtle)] last:border-r-0 whitespace-nowrap bg-[var(--bg-elevated)]"
+                        className="h-9 px-4 align-middle font-medium text-[var(--text-secondary)] whitespace-nowrap bg-[var(--bg-subtle)] text-[12px]"
                       >
                         {header.isPlaceholder
                           ? null
@@ -70,8 +70,8 @@ export function DataTable({
                 Array.from({ length: 5 }).map((_, index) => (
                   <tr key={index} className="border-b border-[var(--color-border-subtle)]">
                     {columns.map((_, cellIndex) => (
-                      <td key={cellIndex} className="p-4 align-middle">
-                        <div className="h-4 w-full bg-[var(--bg-subtle)] rounded animate-pulse" />
+                      <td key={cellIndex} className="p-3 align-middle">
+                        <div className="h-4 w-full bg-[var(--bg-subtle)] rounded-[var(--radius-sm)] animate-pulse" />
                       </td>
                     ))}
                   </tr>
@@ -83,13 +83,13 @@ export function DataTable({
                     key={row.id}
                     onClick={() => onRowClick && onRowClick(row.original)}
                     className={cn(
-                      "border-b border-[var(--color-border-subtle)] transition-all hover:bg-[var(--bg-subtle)] hover:-translate-y-px hover:shadow-sm group",
+                      "border-b border-[var(--color-border-subtle)] transition-colors hover:bg-[var(--bg-subtle)] group",
                       onRowClick && "cursor-pointer",
                       row.getIsSelected() && "bg-[var(--bg-subtle)]"
                     )}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="p-4 align-middle">
+                      <td key={cell.id} className="p-3 align-middle">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
                     ))}

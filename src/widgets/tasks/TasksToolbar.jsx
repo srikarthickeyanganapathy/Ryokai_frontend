@@ -6,10 +6,11 @@ import { Icons } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 import { useCreateTask } from '@/features/tasks/hooks/useTasks'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
+import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
+import { Checkbox } from '@/shared/ui/Checkbox'
 import { TaskForm } from './TaskForm'
 import { BulkCreateTaskModal } from './BulkCreateTaskModal'
-import { Heading } from '@/shared/ui/Typography'
-import { Users } from 'lucide-react'
+import { Heading, Text } from '@/shared/ui/Typography'
 
 import { useWorkspace } from '@/context/WorkspaceContext'
 
@@ -22,9 +23,22 @@ const views = [
   { id: 'archived', label: 'Archived' },
 ]
 
-export function TasksToolbar({ activeView, onViewChange, globalFilter, setGlobalFilter, viewMode, setViewMode }) {
+const PRIORITY_OPTIONS = ['URGENT', 'HIGH', 'NORMAL', 'LOW']
+const SORT_OPTIONS = [
+  { id: 'dueDate', label: 'Due date' },
+  { id: 'priority', label: 'Priority' },
+  { id: 'title', label: 'Title (A–Z)' },
+  { id: 'updated', label: 'Recently updated' },
+]
+
+export function TasksToolbar({
+  activeView, onViewChange, globalFilter, setGlobalFilter, viewMode, setViewMode,
+  priorityFilter = [], onPriorityFilterChange, sortBy = 'dueDate', onSortChange,
+}) {
   const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false)
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [sortOpen, setSortOpen] = useState(false)
   const createTaskMutation = useCreateTask()
   const { workspaceMode } = useWorkspace()
   const isPersonalMode = workspaceMode === 'PERSONAL'
@@ -33,6 +47,11 @@ export function TasksToolbar({ activeView, onViewChange, globalFilter, setGlobal
     createTaskMutation.mutate(payload, {
       onSuccess: () => setIsQuickCreateOpen(false)
     })
+  }
+
+  const togglePriority = (p) => {
+    if (!onPriorityFilterChange) return
+    onPriorityFilterChange(priorityFilter.includes(p) ? priorityFilter.filter(x => x !== p) : [...priorityFilter, p])
   }
 
   return (
@@ -78,17 +97,64 @@ export function TasksToolbar({ activeView, onViewChange, globalFilter, setGlobal
             />
           </div>
           
-          {/* Quick Filters Placeholder */}
-          <Button variant="outline" size="sm" className="hidden sm:flex text-[var(--text-secondary)]">
-            <Icons.settings className="w-3.5 h-3.5 mr-1.5" />
-            Filters
-          </Button>
+          {/* Filters */}
+          <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className={cn("hidden sm:flex text-[var(--text-secondary)]", priorityFilter.length > 0 && "text-[var(--accent)] border-[var(--accent-border)] bg-[var(--accent-soft)]")}>
+                <Icons.filter className="w-3.5 h-3.5 mr-1.5" />
+                Filters
+                {priorityFilter.length > 0 && (
+                  <span className="ml-1.5 w-4 h-4 rounded-full bg-[var(--accent)] text-white text-[10px] flex items-center justify-center font-semibold">
+                    {priorityFilter.length}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-56 p-2">
+              <Text size="xs" variant="muted" className="px-1.5 pb-1.5 uppercase tracking-wide font-semibold">Priority</Text>
+              <div className="space-y-0.5">
+                {PRIORITY_OPTIONS.map(p => (
+                  <label key={p} className="flex items-center gap-2.5 px-1.5 py-1.5 rounded-[var(--radius-sm)] hover:bg-[var(--bg-hover)] cursor-pointer transition-colors">
+                    <Checkbox checked={priorityFilter.includes(p)} onCheckedChange={() => togglePriority(p)} />
+                    <span className="text-[13px] text-[var(--text-primary)] capitalize">{p.toLowerCase()}</span>
+                  </label>
+                ))}
+              </div>
+              {priorityFilter.length > 0 && (
+                <button
+                  onClick={() => onPriorityFilterChange?.([])}
+                  className="w-full text-left mt-1.5 px-1.5 pt-1.5 border-t border-[var(--border-subtle)] text-[12px] font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
+                >
+                  Clear filters
+                </button>
+              )}
+            </PopoverContent>
+          </Popover>
           
-          {/* Sort Placeholder */}
-          <Button variant="outline" size="sm" className="hidden md:flex text-[var(--text-secondary)]">
-            <Icons.chevronDown className="w-3.5 h-3.5 mr-1.5" />
-            Sort
-          </Button>
+          {/* Sort */}
+          <Popover open={sortOpen} onOpenChange={setSortOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="hidden md:flex text-[var(--text-secondary)]">
+                <Icons.sliders className="w-3.5 h-3.5 mr-1.5" />
+                Sort
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-48 p-1.5">
+              {SORT_OPTIONS.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => { onSortChange?.(opt.id); setSortOpen(false) }}
+                  className={cn(
+                    "w-full flex items-center justify-between px-2 py-1.5 rounded-[var(--radius-sm)] text-[13px] transition-colors",
+                    sortBy === opt.id ? "text-[var(--accent)] bg-[var(--accent-soft)] font-medium" : "text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                  )}
+                >
+                  {opt.label}
+                  {sortBy === opt.id && <Icons.check className="w-3.5 h-3.5" />}
+                </button>
+              ))}
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* View Toggles & Quick Create Trigger - Tightened Gap */}
@@ -124,7 +190,7 @@ export function TasksToolbar({ activeView, onViewChange, globalFilter, setGlobal
               className="gap-1.5"
               onClick={() => setIsBulkCreateOpen(true)}
             >
-              <Users className="w-3.5 h-3.5" />
+              <Icons.users className="w-3.5 h-3.5" />
               Bulk Create
             </Button>
           )}

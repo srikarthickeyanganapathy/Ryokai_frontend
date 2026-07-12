@@ -3,6 +3,8 @@ import { DataTable } from '@/shared/ui/data-table/DataTable'
 import { Badge } from '@/shared/ui/Badge'
 import { Icons } from '@/shared/ui/Icons'
 import { IconButton } from '@/shared/ui/Button'
+import { Checkbox } from '@/shared/ui/Checkbox'
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { cn } from '@/shared/lib/cn'
 import { normalizePriority } from '@/shared/lib/priority'
 
@@ -31,27 +33,35 @@ export function TasksTable({
   onQuickComplete,
   onQuickDelete 
 }) {
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
+
+  const handleDelete = async (task) => {
+    const ok = await confirm({
+      title: `Delete "${task.title}"?`,
+      description: 'This removes the task permanently. This can\'t be undone.',
+      confirmLabel: 'Delete task',
+      danger: true,
+    })
+    if (ok) onQuickDelete(task)
+  }
   
   const columns = React.useMemo(() => [
     {
       id: 'select',
       header: ({ table }) => (
         <div className="flex items-center px-1">
-          <input
-            type="checkbox"
-            className="w-4 h-4 rounded border-[var(--color-border-default)] bg-[var(--bg-base)] text-[var(--accent)] focus:ring-[var(--accent)] cursor-pointer"
-            checked={table.getIsAllPageRowsSelected()}
-            onChange={table.getToggleAllPageRowsSelectedHandler()}
+          <Checkbox
+            checked={table.getIsAllPageRowsSelected() ? true : (table.getIsSomePageRowsSelected() ? 'indeterminate' : false)}
+            indeterminate={table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
+            onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
           />
         </div>
       ),
       cell: ({ row }) => (
         <div className="flex items-center px-1" onClick={e => e.stopPropagation()}>
-          <input
-            type="checkbox"
-            className="w-4 h-4 rounded border-[var(--color-border-default)] bg-[var(--bg-base)] text-[var(--accent)] focus:ring-[var(--accent)] cursor-pointer"
+          <Checkbox
             checked={row.getIsSelected()}
-            onChange={row.getToggleSelectedHandler()}
+            onCheckedChange={(v) => row.toggleSelected(!!v)}
           />
         </div>
       ),
@@ -132,7 +142,7 @@ export function TasksTable({
               size="sm" 
               title="Delete"
               className="text-[var(--danger)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]"
-              onClick={() => onQuickDelete(task)}
+              onClick={() => handleDelete(task)}
             >
               <Icons.trash2 className="w-4 h-4" />
             </IconButton>
@@ -140,16 +150,19 @@ export function TasksTable({
         )
       }
     }
-  ], [onQuickComplete, onQuickDelete])
+  ], [onQuickComplete, handleDelete])
 
   return (
-    <DataTable 
-      columns={columns}
-      data={tasks || []}
-      isLoading={isLoading}
-      rowSelection={rowSelection}
-      setRowSelection={setRowSelection}
-      onRowClick={onTaskClick}
-    />
+    <>
+      {confirmDialog}
+      <DataTable 
+        columns={columns}
+        data={tasks || []}
+        isLoading={isLoading}
+        rowSelection={rowSelection}
+        setRowSelection={setRowSelection}
+        onRowClick={onTaskClick}
+      />
+    </>
   )
 }

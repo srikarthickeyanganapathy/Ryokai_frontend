@@ -9,6 +9,7 @@ import { UpcomingDeadlines } from '@/widgets/workspace/UpcomingDeadlines'
 import { RecentTasksList } from '@/widgets/workspace/RecentTasksList'
 import { WorkloadMatrix } from '@/features/analytics/components/Charts'
 import { selectWorkloadMatrix, selectCompletionRate } from '@/features/analytics/lib/selectors'
+import { MiniCalendarWidget } from '@/widgets/workspace/MiniCalendarWidget'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -57,7 +58,7 @@ export function DashboardPage() {
 
   return (
     <motion.div 
-      className="space-y-5 md:space-y-6 pb-12"
+      className="space-y-5 md:space-y-6 pb-12 mesh-bg"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -70,29 +71,36 @@ export function DashboardPage() {
         <Text variant="muted" className="text-[13px]">Here's what's happening with your workspace today.</Text>
       </motion.div>
 
-      {/* Today's Progress */}
-      <motion.div variants={itemVariants} className="glass-panel mesh-bg p-4 rounded-[var(--radius-lg)]">
-        <div className="flex justify-between items-end mb-3">
-          <Text variant="muted" className="uppercase tracking-wider text-[11px] font-semibold">
-            Today's Progress
-          </Text>
-          <Text className="text-lg font-medium text-[var(--text-primary)] tabular-nums">
-            {stats.completionRate}%
-          </Text>
-        </div>
-        <div className="h-1.5 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
-          <motion.div 
-            initial={{ width: 0 }}
-            animate={{ width: `${stats.completionRate}%` }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="h-full rounded-full bg-[var(--accent)] shadow-[0_0_12px_var(--accent)]"
-          />
-        </div>
-      </motion.div>
+      {/* Top Grid Row: Progress, Focus & Calendar */}
+      <motion.div variants={itemVariants} className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-5">
+        <div className="xl:col-span-2 flex flex-col gap-4 md:gap-5">
+          {/* Today's Progress */}
+          <div className="glass-panel mesh-bg p-4 rounded-[var(--radius-lg)]">
+            <div className="flex justify-between items-end mb-3">
+              <Text variant="muted" className="uppercase tracking-wider text-[11px] font-semibold">
+                Today's Progress
+              </Text>
+              <Text className="text-lg font-medium text-[var(--text-primary)] tabular-nums">
+                {stats.completionRate}%
+              </Text>
+            </div>
+            <div className="h-1.5 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: `${stats.completionRate}%` }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="h-full rounded-full bg-[var(--accent)] shadow-[0_0_12px_var(--accent)]"
+              />
+            </div>
+          </div>
 
-      {/* Focus Widget */}
-      <motion.div variants={itemVariants}>
-        <FocusWidget />
+          {/* Focus Widget */}
+          <FocusWidget />
+        </div>
+
+        <div className="xl:col-span-1 h-full min-h-[300px]">
+          <MiniCalendarWidget tasks={tasks} />
+        </div>
       </motion.div>
 
       {/* First Grid Row: Projects & Deadlines */}

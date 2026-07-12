@@ -11,6 +11,8 @@ import { CalendarView } from '@/features/calendar/components/CalendarView'
 import { toast } from 'sonner'
 import { Icons } from '@/shared/ui/Icons'
 import { normalizeStatus, toBackendStatus } from '@/shared/lib/status'
+import { PRIORITY_OPTIONS } from '@/shared/lib/priority'
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useWorkspace } from '@/context/WorkspaceContext'
 import { useUsersList } from '@/features/auth/hooks/useUser'
@@ -31,6 +33,8 @@ export function TasksPage() {
 
   const [activeView, setActiveView] = useState('all')
   const [globalFilter, setGlobalFilter] = useState('')
+  const [priorityFilter, setPriorityFilter] = useState([])
+  const [sortBy, setSortBy] = useState('dueDate')
   const [rowSelection, setRowSelection] = useState({})
   
   // Task Panel State
@@ -70,8 +74,30 @@ export function TasksPage() {
       }
     }
 
+    if (priorityFilter.length > 0) {
+      result = result.filter(t => priorityFilter.includes(String(t.priority).toUpperCase()))
+    }
+
+    const priorityRank = Object.fromEntries(PRIORITY_OPTIONS.map((o, i) => [o.value, i]))
+    result = [...result].sort((a, b) => {
+      if (sortBy === 'priority') {
+        return (priorityRank[String(a.priority).toUpperCase()] ?? 99) - (priorityRank[String(b.priority).toUpperCase()] ?? 99)
+      }
+      if (sortBy === 'title') {
+        return (a.title || '').localeCompare(b.title || '')
+      }
+      if (sortBy === 'updated') {
+        return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0)
+      }
+      // dueDate default — tasks without a due date sink to the bottom
+      if (!a.dueDate && !b.dueDate) return 0
+      if (!a.dueDate) return 1
+      if (!b.dueDate) return -1
+      return new Date(a.dueDate) - new Date(b.dueDate)
+    })
+
     return result
-  }, [rawTasks, activeView, globalFilter, user])
+  }, [rawTasks, activeView, globalFilter, priorityFilter, sortBy, user])
   
   const { data: allUsers } = useUsersList()
   
@@ -118,9 +144,7 @@ export function TasksPage() {
     toast.success(`Task moved to ${newStatus}`)
   }
 
-  const [assignInput, setAssignInput] = useState('')
-  const [showAssignInput, setShowAssignInput] = useState(false)
-
+  const [isBulkAssignOpen, setIsBulkAssignOpen] = useState(false)
   const handleBulkComplete = () => {
     const selectedIds = Object.keys(rowSelection).map(Number)
     let skipped = 0;
@@ -155,21 +179,21 @@ export function TasksPage() {
     setRowSelection({})
   }
 
-  const handleBulkAssign = () => {
-    if (!assignInput.trim()) return
-    const targetUser = allUsers?.find(u => u.username.toLowerCase() === assignInput.trim().toLowerCase())
-    if (!targetUser) {
-      toast.error(`User "${assignInput}" not found`)
-      return
-    }
-
+  const handleBulkAssign = (targetUser) => {
+    if (!targetUser) return
     const selectedIds = Object.keys(rowSelection).map(Number)
-    selectedIds.forEach(id => {
+    
+    // Instead of mapping row index directly as ID, we need to map the selected row indices to task IDs.
+    // Tanstack Table uses row indices by default as the selection keys.
+    // So rowSelection looks like: { "0": true, "2": true }
+    // We get the actual tasks by their index in the tasks array.
+    const actualTaskIds = selectedIds.map(idx => tasks[idx]?.id).filter(Boolean)
+
+    actualTaskIds.forEach(id => {
       reassignTaskMutation.mutate({ taskId: id, newAssigneeId: targetUser.id })
     })
-    toast.success(`Reassigned ${selectedIds.length} task(s) to ${targetUser.username}`)
-    setAssignInput('')
-    setShowAssignInput(false)
+    toast.success(`Reassigned ${actualTaskIds.length} task(s) to ${targetUser.username}`)
+    setIsBulkAssignOpen(false)
     setRowSelection({})
   }
 
@@ -190,6 +214,10 @@ export function TasksPage() {
         setGlobalFilter={setGlobalFilter}
         viewMode={viewMode}
         setViewMode={setViewMode}
+        priorityFilter={priorityFilter}
+        onPriorityFilterChange={setPriorityFilter}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
       />
 
       {/* Main Content Area */}
@@ -237,26 +265,30 @@ export function TasksPage() {
               <button onClick={handleBulkComplete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
                 Complete
               </button>
-              {showAssignInput ? (
-                <form 
-                  onSubmit={(e) => { e.preventDefault(); handleBulkAssign(); }}
-                  className="flex items-center gap-2"
-                >
-                  <input 
-                    type="text" 
-                    value={assignInput}
-                    onChange={(e) => setAssignInput(e.target.value)}
-                    placeholder="Assignee username" 
-                    className="text-[13px] px-2 py-1 bg-transparent border-b border-[var(--border-default)] focus:outline-none focus:border-[var(--accent)] text-[var(--text-primary)] w-32"
-                    autoFocus
-                  />
-                  <button type="submit" className="text-[13px] font-medium text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors">Save</button>
-                </form>
-              ) : (
-                <button onClick={() => { setShowAssignInput(true); setAssignInput('') }} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
-                  Assign
-                </button>
-              )}
+              <Popover open={isBulkAssignOpen} onOpenChange={setIsBulkAssignOpen}>
+                <PopoverTrigger asChild>
+                  <button className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                    Assign
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="center" side="top" className="w-56 p-1 mb-2">
+                  <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-semibold tracking-wide">Assign To</Text>
+                  <div className="space-y-0.5 max-h-[200px] overflow-y-auto custom-scrollbar">
+                    {allUsers?.map(u => (
+                      <button
+                        key={u.id}
+                        onClick={() => handleBulkAssign(u)}
+                        className="w-full flex items-center gap-2 px-2 py-1.5 text-[13px] rounded hover:bg-[var(--bg-hover)] transition-colors text-left"
+                      >
+                        <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[10px] shrink-0">
+                          {u.username.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="truncate">{u.username}</span>
+                      </button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
               <button onClick={handleBulkDelete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
                 Delete
               </button>

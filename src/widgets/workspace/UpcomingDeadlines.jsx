@@ -18,18 +18,18 @@ export function UpcomingDeadlines({ tasks = [], isLoading }) {
   if (isLoading) return <Skeleton className="h-[300px] rounded-[var(--radius-lg)]" />
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
+    <Card className="h-full flex flex-col shadow-sm border-[var(--border-subtle)]">
+      <CardHeader className="pb-3 pt-4 border-b-0">
         <CardTitle className="text-base font-semibold">Upcoming Deadlines</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 overflow-y-auto pr-2 space-y-2.5 custom-scrollbar">
         {deadlines.length === 0 ? (
           <Text variant="muted" className="text-sm">No upcoming deadlines.</Text>
         ) : (
-          deadlines.map(task => {
+            deadlines.map(task => {
             const isOverdue = isBefore(parseISO(task.dueDate), startOfToday())
             return (
-              <div key={task.id} className="flex flex-col gap-1 p-3 rounded-[var(--radius-md)] border border-[var(--color-border-subtle)] bg-[var(--bg-base)] hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] hover:-translate-y-[1px] transition-[border-color,box-shadow,transform] duration-[var(--duration-base)] ease-[var(--ease-out)]">
+              <div key={task.id} className="flex flex-col gap-1 p-3 rounded-[var(--radius-md)] border border-transparent bg-[var(--bg-base)] hover:bg-[var(--bg-subtle)] hover:border-[var(--color-border-subtle)] transition-colors duration-[var(--duration-fast)]">
                 <div className="flex items-start justify-between gap-2">
                   <Text size="sm" className="font-medium text-[var(--text-primary)] line-clamp-1">
                     {task.title}

@@ -17,12 +17,14 @@ import { useAuth } from '@/features/auth/hooks/useAuth'
 import { usePermissions } from '@/context/usePermissions'
 import { useWorkspace } from '@/context/WorkspaceContext'
 import { toast } from 'sonner'
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 
 export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange }) {
   const [activeTask, setActiveTask] = useState(null)
   const { user } = useAuth()
   const { canReview } = usePermissions()
   const { workspaceMode } = useWorkspace()
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
   const columns = workspaceMode === 'PERSONAL' 
     ? KANBAN_COLUMNS.filter(c => c.id === 'To Do' || c.id === 'Done')
@@ -36,7 +38,7 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
 
   const completePersonalTaskMutation = useCompletePersonalTask();
 
-  const handleStatusTransition = (task, targetColumn) => {
+  const handleStatusTransition = async (task, targetColumn) => {
     let targetStatus = toBackendStatus(targetColumn);
     const currentStatus = toBackendStatus(task.currentStatus);
 
@@ -86,8 +88,15 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
         toast.error('You cannot reject your own task');
         return;
       }
-      const reason = window.prompt("Please provide a reason for rejection:");
-      if (reason === null) return; // User cancelled
+      const reason = await confirm({
+        title: 'Send back for rework',
+        description: 'Let them know what needs to change before it can be approved.',
+        requireInput: true,
+        inputPlaceholder: 'e.g. Missing acceptance criteria for edge cases…',
+        confirmLabel: 'Send back',
+        danger: true,
+      });
+      if (reason === false) return; // User cancelled
       rejectMutation.mutate({ id: task.id, reason: reason || 'Moved to Needs Work on Kanban' });
     } else if (targetStatus === 'ASSIGNED') {
       // Reassign back to self: backend expects assigneeId (Long), the UserResponseDTO id
@@ -178,6 +187,7 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
 
   return (
     <div className="flex gap-4 pb-4 items-start">
+      {confirmDialog}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}

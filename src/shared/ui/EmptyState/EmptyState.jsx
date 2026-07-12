@@ -8,12 +8,14 @@ export function EmptyState({
   description, 
   action, 
   className,
+  variant = 'default',
   ...props 
 }) {
   return (
     <div 
       className={cn(
         'flex flex-col items-center justify-center p-8 text-center rise-in',
+        variant === 'hero' && 'mesh-bg',
         className
       )}
       {...props}

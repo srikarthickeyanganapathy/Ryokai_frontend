@@ -3,12 +3,12 @@ import { useNavigate, Link } from 'react-router-dom'
 import { CommandMenu } from '@/features/command-palette'
 import { Icons } from '@/shared/ui/Icons'
 import { IconButton, Button } from '@/shared/ui/Button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
 import { Separator } from '@/shared/ui/Separator'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useTheme } from '@/app/providers/ThemeProvider'
 import {
   useUnreadCount,
   useNotificationList,
@@ -32,9 +32,9 @@ const typeIcons = {
 
 export function AppTopbar({ onMenuClick }) {
   const { user, logout } = useAuth()
+  const { theme, setTheme } = useTheme()
   const navigate = useNavigate()
   const [notifOpen, setNotifOpen] = useState(false)
-  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const { data: unreadCount = 0 } = useUnreadCount()
   const { data: notifications = [], isLoading: notifLoading } = useNotificationList({ size: 20 })
   const markRead = useMarkRead()
@@ -49,7 +49,7 @@ export function AppTopbar({ onMenuClick }) {
   return (
     <header className="h-12 flex items-center justify-between px-3 md:px-4 border-b border-[var(--border-subtle)] bg-[var(--bg-base)]/70 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-10 shadow-[var(--inset-highlight-soft)]">
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 w-[200px]">
         <IconButton
           variant="ghost"
           className="lg:hidden"
@@ -57,18 +57,30 @@ export function AppTopbar({ onMenuClick }) {
         >
           <Icons.menu className="w-5 h-5 text-[var(--text-secondary)]" />
         </IconButton>
+      </div>
 
-        <div className="hidden sm:block w-64 lg:w-72">
+      <div className="flex-1 flex justify-center px-4 max-w-2xl">
+        <div className="hidden sm:block w-full max-w-md">
           <CommandMenu />
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-end gap-3 w-[200px]">
         <div className="sm:hidden">
           <IconButton variant="ghost">
             <Icons.search className="w-5 h-5" />
           </IconButton>
         </div>
+
+        {/* Theme Toggle */}
+        <IconButton
+          variant="ghost"
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+          title="Toggle theme"
+        >
+          {theme === 'dark' ? <Icons.sun className="w-5 h-5" /> : <Icons.moon className="w-5 h-5" />}
+        </IconButton>
 
         {/* Notification Bell */}
         <Popover open={notifOpen} onOpenChange={setNotifOpen}>
@@ -78,7 +90,7 @@ export function AppTopbar({ onMenuClick }) {
                 variant="ghost"
                 className="relative text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               >
-                <Icons.alert className="w-5 h-5" />
+                <Icons.bell className="w-5 h-5" />
                 {unread > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] flex items-center justify-center rounded-full bg-[var(--accent)] text-white text-[9px] font-semibold leading-none px-1 border-2 border-[var(--bg-base)] shadow-[0_0_8px_var(--accent)]">
                     {unread > 99 ? '99+' : unread}
@@ -124,7 +136,7 @@ export function AppTopbar({ onMenuClick }) {
                 </div>
               )}
 
-              {!notifLoading && notifications.map((n) => {
+              {!notifLoading && notifications.slice(0, 5).map((n) => {
                 const IconComponent = typeIcons[n.type] || Icons.alert
                 const isRead = n.isRead !== false
                 return (
@@ -210,47 +222,14 @@ export function AppTopbar({ onMenuClick }) {
           </PopoverContent>
         </Popover>
 
-        {/* User Avatar + Dropdown */}
-        <Popover open={userMenuOpen} onOpenChange={setUserMenuOpen}>
-          <PopoverTrigger asChild>
-            <div>
-              <Avatar size="sm" className="cursor-pointer transition-shadow focus-ring">
-                <AvatarImage src={user?.avatarUrl} />
-                <AvatarFallback>{user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}</AvatarFallback>
-              </Avatar>
-            </div>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-56 p-1.5">
-            <div className="px-2 py-1.5">
-              <Text className="font-medium text-[13px]">{user?.name || user?.username}</Text>
-              {user?.email && (
-                <Text variant="muted" size="xs" className="truncate">{user.email}</Text>
-              )}
-            </div>
-            <Separator className="my-1" />
-            <div className="space-y-0.5">
-              <Link
-                to="/app/sessions"
-                onClick={() => setUserMenuOpen(false)}
-                className="flex items-center gap-2 px-2 h-7 text-[13px] rounded-[var(--radius-sm)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors w-full"
-              >
-                <Icons.settings className="w-3.5 h-3.5" />
-                Settings
-              </Link>
-              <button
-                onClick={async () => {
-                  setUserMenuOpen(false)
-                  await logout()
-                  navigate('/login')
-                }}
-                className="flex items-center gap-2 px-2 h-7 text-[13px] rounded-[var(--radius-sm)] hover:bg-[var(--danger-soft)] text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors w-full text-left"
-              >
-                <Icons.x className="w-3.5 h-3.5" />
-                Logout
-              </button>
-            </div>
-          </PopoverContent>
-        </Popover>
+        {/* Ryokai Logo */}
+        <div className="flex items-center gap-2.5 text-[var(--text-primary)] cursor-pointer overflow-hidden ml-2" onClick={() => navigate('/app')}>
+          <div className="w-5 h-5 rounded-[var(--radius-xs)] bg-[var(--text-primary)] flex items-center justify-center shrink-0">
+            <Icons.dashboard className="w-3 h-3 text-[var(--bg-base)]" strokeWidth={2.5} />
+          </div>
+          <span className="text-[14px] font-semibold tracking-tight truncate hidden sm:block">Ryokai</span>
+        </div>
+
       </div>
 
     </header>
