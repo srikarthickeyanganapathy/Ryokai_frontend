@@ -28,7 +28,9 @@ export function ThemeProvider({ children, defaultTheme = 'dark', storageKey = 'a
     }
 
     if (document.startViewTransition) {
-      document.startViewTransition(applyTheme)
+      const transition = document.startViewTransition(applyTheme)
+      // Catch AbortError if transition is skipped
+      transition.ready.catch(() => {})
     } else {
       applyTheme()
     }

@@ -12,11 +12,35 @@ import {
   isToday
 } from 'date-fns';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/shared/ui/Tooltip';
-import { Text } from '@/shared/ui/Typography';
+import { Text, Heading } from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/cn';
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
+import { Modal, ModalContent } from '@/shared/ui/Modal';
+import { TaskForm } from '@/widgets/tasks/TaskForm';
+import { useCreateTask } from '@/features/tasks/hooks/useTasks';
 
 export function MiniCalendarWidget({ tasks = [] }) {
   const currentDate = new Date();
+  
+  const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false);
+  const [selectedDateForNewTask, setSelectedDateForNewTask] = useState('');
+  const createTaskMutation = useCreateTask();
+
+  const handleCreateTask = (payload) => {
+    createTaskMutation.mutate(payload, {
+      onSuccess: () => setIsQuickCreateOpen(false)
+    });
+  };
+
+  const handleAddClick = (e, date) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // format to datetime-local expected format: YYYY-MM-DDThh:mm
+    const dateStr = format(date, `yyyy-MM-dd'T'${format(new Date(), 'HH:mm')}`);
+    setSelectedDateForNewTask(dateStr);
+    setIsQuickCreateOpen(true);
+  };
 
   // 1. Memoize tasks grouped by date for O(1) lookup
   const tasksByDate = useMemo(() => {
@@ -83,7 +107,7 @@ export function MiniCalendarWidget({ tasks = [] }) {
             return (
               <Tooltip key={dateStr}>
                 <TooltipTrigger asChild>
-                  <div className="relative aspect-square flex items-center justify-center p-0.5">
+                  <div className="relative aspect-square flex items-center justify-center p-0.5 group/cell">
                     <motion.div
                       whileHover={{ scale: 1.15 }}
                       className={cn(
@@ -95,6 +119,14 @@ export function MiniCalendarWidget({ tasks = [] }) {
                     >
                       {format(day, 'd')}
                     </motion.div>
+
+                    {/* Hover Plus Icon */}
+                    <button 
+                      onClick={(e) => handleAddClick(e, day)}
+                      className="absolute -top-1 -right-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)] rounded-full p-0.5 opacity-0 group-hover/cell:opacity-100 transition-all z-20 shadow-sm"
+                    >
+                      <Plus className="w-2.5 h-2.5" strokeWidth={3} />
+                    </button>
 
                     {/* Urgent Indicator (Fast pulse) */}
                     {hasUrgent && (
@@ -154,6 +186,26 @@ export function MiniCalendarWidget({ tasks = [] }) {
           })}
         </div>
       </TooltipProvider>
+
+      {/* Quick Create Modal */}
+      <Modal open={isQuickCreateOpen} onOpenChange={setIsQuickCreateOpen}>
+        <ModalContent className="sm:max-w-xl">
+          <Heading level={3} className="mb-4">Create New Task</Heading>
+          <TaskForm 
+            onSubmit={handleCreateTask} 
+            isLoading={createTaskMutation.isPending} 
+            defaultValues={{
+              title: '',
+              description: '',
+              assigneeUsername: '',
+              priority: 'NORMAL',
+              dueDate: selectedDateForNewTask,
+              tags: '',
+              teamId: '',
+            }}
+          />
+        </ModalContent>
+      </Modal>
     </div>
   )
 }

@@ -6,7 +6,10 @@ import { useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Filter } from 'lucide-react'
 import { format, addMonths, subMonths, addWeeks, subWeeks, startOfToday } from 'date-fns'
 import { Button } from '@/shared/ui/Button'
-import { Text } from '@/shared/ui/Typography'
+import { Text, Heading } from '@/shared/ui/Typography'
+import { Modal, ModalContent } from '@/shared/ui/Modal'
+import { TaskForm } from '@/widgets/tasks/TaskForm'
+import { useCreateTask } from '@/features/tasks/hooks/useTasks'
 
 export function CalendarView({ tasks, isLoading, onTaskClick }) {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -14,6 +17,15 @@ export function CalendarView({ tasks, isLoading, onTaskClick }) {
   
   // Local state for calendar navigation
   const [currentDate, setCurrentDate] = useState(startOfToday())
+  const [quickAddDate, setQuickAddDate] = useState(null)
+  
+  const createTaskMutation = useCreateTask()
+  
+  const handleCreateTask = (payload) => {
+    createTaskMutation.mutate(payload, {
+      onSuccess: () => setQuickAddDate(null)
+    })
+  }
 
   const setMode = (newMode) => {
     setSearchParams(params => {
@@ -90,14 +102,16 @@ export function CalendarView({ tasks, isLoading, onTaskClick }) {
               tasks={tasks} 
               currentDate={currentDate} 
               isLoading={isLoading} 
-              onTaskClick={onTaskClick} 
+              onTaskClick={onTaskClick}
+              onAddClick={(d) => setQuickAddDate(d)}
             />
           ) : (
             <WeekView 
               tasks={tasks} 
               currentDate={currentDate} 
               isLoading={isLoading} 
-              onTaskClick={onTaskClick} 
+              onTaskClick={onTaskClick}
+              onAddClick={(d) => setQuickAddDate(d)}
             />
           )}
         </div>
@@ -107,6 +121,28 @@ export function CalendarView({ tasks, isLoading, onTaskClick }) {
       <div className="w-80 shrink-0 hidden lg:block">
         <MiniAgenda tasks={tasks} currentDate={currentDate} onTaskClick={onTaskClick} />
       </div>
+
+      {/* Quick Create Modal */}
+      <Modal open={!!quickAddDate} onOpenChange={(open) => !open && setQuickAddDate(null)}>
+        <ModalContent className="sm:max-w-xl">
+          <Heading level={3} className="mb-4">Create New Task</Heading>
+          {quickAddDate && (
+            <TaskForm 
+              onSubmit={handleCreateTask} 
+              isLoading={createTaskMutation.isPending} 
+              defaultValues={{
+                title: '',
+                description: '',
+                assigneeUsername: '',
+                priority: 'NORMAL',
+                dueDate: format(quickAddDate, `yyyy-MM-dd'T'${format(new Date(), 'HH:mm')}`),
+                tags: '',
+                teamId: '',
+              }}
+            />
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   )
 }

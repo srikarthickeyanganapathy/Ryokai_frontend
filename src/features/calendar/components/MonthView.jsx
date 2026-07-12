@@ -37,7 +37,11 @@ function CalendarDayCell({ day, isCurrentMonth, children, onAddClick }) {
           {format(day, 'd')}
         </span>
         <button 
-          onClick={() => onAddClick(day)}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            onAddClick(day)
+          }}
           className="opacity-0 group-hover:opacity-100 p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] rounded transition-all"
         >
           <Plus className="w-4 h-4" />
@@ -102,9 +106,8 @@ function CalendarTaskChip({ task, onClick }) {
 
 // --- Main MonthView Component ---
 
-export function MonthView({ tasks = [], currentDate, isLoading, onTaskClick }) {
+export function MonthView({ tasks = [], currentDate, isLoading, onTaskClick, onAddClick }) {
   const updateTaskMutation = useUpdateTask()
-  const [quickAddDate, setQuickAddDate] = useState(null)
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -195,7 +198,7 @@ export function MonthView({ tasks = [], currentDate, isLoading, onTaskClick }) {
                 key={day.toISOString()} 
                 day={day} 
                 isCurrentMonth={isCurrentMonth}
-                onAddClick={(d) => setQuickAddDate(d)}
+                onAddClick={onAddClick}
               >
                 {dayTasks.map(task => (
                   <CalendarTaskChip 

@@ -3,8 +3,10 @@ import { motion } from 'framer-motion'
 import { isToday, parseISO } from 'date-fns'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
+import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
+import { Switch } from '@/shared/ui/Switch'
 import { useTaskList, useUpdateTask, useCompletePersonalTask, useSubmitTask } from '@/features/tasks/hooks/useTasks'
-import { CheckCircle2, Play, Circle, Maximize2, Settings } from 'lucide-react'
+import { CheckCircle2, Play, Circle, Maximize2, Minimize2, Settings } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
 import { normalizeStatus, isDoneStatus, toBackendStatus } from '@/shared/lib/status'
 
@@ -13,6 +15,14 @@ export function FocusPage() {
   const updateTaskMutation = useUpdateTask()
   const completePersonalTaskMutation = useCompletePersonalTask()
   const submitTaskMutation = useSubmitTask()
+
+  const [isFullscreen, setIsFullscreen] = React.useState(false)
+  const [showProgress, setShowProgress] = React.useState(true)
+  const [showNextUp, setShowNextUp] = React.useState(true)
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen)
+  }
 
   const { todayTasks, currentTask, remainingTasks, remainingTime, progress } = useMemo(() => {
     
@@ -67,8 +77,11 @@ export function FocusPage() {
   if (isLoading) return <div className="p-8 text-center"><Text variant="muted">Loading focus...</Text></div>
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] py-10 px-4">
-      <div className="w-full max-w-2xl">
+    <div className={cn(
+      "flex flex-col items-center justify-center py-10 px-4 transition-all duration-[var(--duration-slow)] ease-[var(--ease-out)]",
+      isFullscreen ? "fixed inset-0 z-[100] bg-[var(--bg-base)] overflow-y-auto" : "min-h-[calc(100vh-8rem)]"
+    )}>
+      <div className="w-full max-w-2xl my-auto">
         
         {/* Header Options */}
         <div className="flex items-center justify-between mb-16">
@@ -76,34 +89,53 @@ export function FocusPage() {
             Today's Focus
           </Heading>
           <div className="flex items-center gap-2 text-[var(--text-muted)]">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Settings className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Maximize2 className="w-4 h-4" />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-56 p-4">
+                <Heading level={4} className="text-sm mb-4">Focus Settings</Heading>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Text size="sm">Show Progress</Text>
+                    <Switch checked={showProgress} onCheckedChange={setShowProgress} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Text size="sm">Show Next Up</Text>
+                    <Switch checked={showNextUp} onCheckedChange={setShowNextUp} />
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={toggleFullscreen}>
+              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </Button>
           </div>
         </div>
 
         {/* Progress */}
-        <div className="mb-12">
-          <div className="flex justify-between items-end mb-4">
-            <Text variant="muted" className="uppercase tracking-widest text-xs font-semibold">
-              Progress
-            </Text>
-            <Text className="text-2xl font-light text-[var(--text-primary)]">
-              {progress}%
-            </Text>
+        {showProgress && (
+          <div className="mb-12">
+            <div className="flex justify-between items-end mb-4">
+              <Text variant="muted" className="uppercase tracking-widest text-xs font-semibold">
+                Progress
+              </Text>
+              <Text className="text-2xl font-light text-[var(--text-primary)]">
+                {progress}%
+              </Text>
+            </div>
+            <div className="h-1 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="h-full bg-[var(--accent)] rounded-full"
+              />
+            </div>
           </div>
-          <div className="h-1 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="h-full bg-[var(--accent)] rounded-full"
-            />
-          </div>
-        </div>
+        )}
 
         {/* Current Task */}
         <div className="mb-16">
@@ -152,7 +184,7 @@ export function FocusPage() {
         </div>
 
         {/* Next Up */}
-        {remainingTasks.length > 0 && (
+        {showNextUp && remainingTasks.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-6">
               <Text variant="muted" className="uppercase tracking-widest text-xs font-semibold">

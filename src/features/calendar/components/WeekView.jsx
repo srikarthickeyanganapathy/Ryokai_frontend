@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react'
 import { startOfWeek, endOfWeek, eachDayOfInterval, format, isToday, parseISO } from 'date-fns'
 import { cn } from '@/shared/lib/cn'
+import { Plus } from 'lucide-react'
 
-export function WeekView({ tasks = [], currentDate, isLoading, onTaskClick }) {
+export function WeekView({ tasks = [], currentDate, isLoading, onTaskClick, onAddClick }) {
   
   const days = useMemo(() => {
     const start = startOfWeek(currentDate)
@@ -47,7 +48,7 @@ export function WeekView({ tasks = [], currentDate, isLoading, onTaskClick }) {
         return (
           <div key={dateKey} className="flex-1 border-r border-[var(--color-border-subtle)] last:border-r-0 flex flex-col">
             {/* Header */}
-            <div className="p-3 border-b border-[var(--color-border-subtle)] bg-[var(--bg-subtle)] text-center">
+            <div className="p-3 border-b border-[var(--color-border-subtle)] bg-[var(--bg-subtle)] text-center relative group">
               <div className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1">
                 {format(day, 'EEE')}
               </div>
@@ -57,6 +58,18 @@ export function WeekView({ tasks = [], currentDate, isLoading, onTaskClick }) {
               )}>
                 {format(day, 'd')}
               </div>
+              {onAddClick && (
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onAddClick(day)
+                  }}
+                  className="absolute top-3 right-2 opacity-0 group-hover:opacity-100 p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] rounded transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              )}
             </div>
             
             {/* Tasks List */}
