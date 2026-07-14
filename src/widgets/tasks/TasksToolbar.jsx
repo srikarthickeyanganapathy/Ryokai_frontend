@@ -162,7 +162,7 @@ export function TasksToolbar({
           
           {/* Segmented Buttons for List/Board/Calendar */}
           <div className="hidden sm:flex items-center bg-[var(--bg-subtle)] rounded-[var(--radius-md)] p-0.5 border border-[var(--border-subtle)] mr-1">
-            {['list', 'board', 'calendar'].map((mode) => (
+            {['list', 'board', 'calendar', 'nebula'].map((mode) => (
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}

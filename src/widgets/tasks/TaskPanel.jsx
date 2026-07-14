@@ -12,8 +12,9 @@ import { useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, us
 import { useUsersList } from '@/features/auth/hooks/useUser'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { Archive } from 'lucide-react'
+import { getKanbanColumnForTask } from '@/shared/lib/status'
 
-export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
+export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default' }) {
   const addChecklistItem = useAddChecklistItem(task?.id)
   const toggleChecklistItem = useToggleChecklistItem(task?.id)
   const deleteChecklistItem = useDeleteChecklistItem(task?.id)
@@ -27,6 +28,15 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
   const titleRef = useRef(null)
   const descRef = useRef(null)
   const [isReassignOpen, setIsReassignOpen] = useState(false)
+
+  const DOMAINS = [
+    { id: 'To Do', color: '#e8734a' },
+    { id: 'In Review', color: '#d9a441' },
+    { id: 'Needs Work', color: '#8b7ae8' },
+    { id: 'Done', color: '#4fb8a0' }
+  ];
+  const domainId = task ? getKanbanColumnForTask(task) : null;
+  const taskColor = DOMAINS.find(d => d.id === domainId)?.color || '#ffffff';
 
   // Reset local edit state during render when the task changes, rather than
   // in an effect — avoids an extra commit/cascading render for state that's
@@ -62,13 +72,15 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
       {isOpen && task && (
         <>
           {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-[var(--bg-overlay)] z-40"
-          />
+          {variant !== 'nebula' && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
+              className="fixed inset-0 bg-[var(--bg-overlay)] z-40"
+            />
+          )}
 
           {/* Drawer Panel */}
           <motion.div
@@ -76,7 +88,24 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate }) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 right-0 w-full max-w-2xl bg-[var(--bg-elevated)] shadow-[var(--shadow-lg)] border-l border-[var(--color-border-subtle)] z-50 flex flex-col"
+            className={cn(
+              "z-50 flex flex-col pointer-events-auto",
+              variant === 'nebula'
+                ? "absolute top-6 bottom-6 right-6 w-full max-w-[420px] rounded-2xl backdrop-blur-xl bg-black/40 border-2 text-white overflow-hidden"
+                : "fixed inset-y-0 right-0 w-full max-w-2xl bg-[var(--bg-elevated)] shadow-[var(--shadow-lg)] border-l border-[var(--color-border-subtle)]"
+            )}
+            style={variant === 'nebula' ? {
+              '--bg-elevated': 'transparent',
+              '--bg-subtle': 'rgba(255, 255, 255, 0.05)',
+              '--bg-hover': 'rgba(255, 255, 255, 0.1)',
+              '--text-primary': '#ffffff',
+              '--text-secondary': 'rgba(255, 255, 255, 0.85)',
+              '--text-muted': 'rgba(255, 255, 255, 0.5)',
+              '--color-border-subtle': 'rgba(255, 255, 255, 0.15)',
+              '--color-border-default': 'rgba(255, 255, 255, 0.3)',
+              boxShadow: `0 8px 32px 0 rgba(0,0,0,0.37), 0 0 40px ${taskColor}40`,
+              borderColor: `${taskColor}80`
+            } : {}}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border-subtle)]">

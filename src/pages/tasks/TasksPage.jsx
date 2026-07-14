@@ -8,6 +8,7 @@ import { TasksTable } from '@/widgets/tasks/TasksTable'
 import { KanbanBoard } from '@/widgets/tasks/KanbanBoard'
 import { TaskPanel } from '@/widgets/tasks/TaskPanel'
 import { CalendarView } from '@/features/calendar/components/CalendarView'
+import NebulaView from '@/features/tasks/components/NebulaView'
 import { toast } from 'sonner'
 import { Icons } from '@/shared/ui/Icons'
 import { normalizeStatus, toBackendStatus } from '@/shared/lib/status'
@@ -23,7 +24,7 @@ export function TasksPage() {
   const viewMode = searchParams.get('view') || 'list'
   const { user } = useAuth()
   const { canReview } = usePermissions()
-  
+
   const setViewMode = (mode) => {
     setSearchParams(params => {
       params.set('view', mode)
@@ -36,17 +37,17 @@ export function TasksPage() {
   const [priorityFilter, setPriorityFilter] = useState([])
   const [sortBy, setSortBy] = useState('dueDate')
   const [rowSelection, setRowSelection] = useState({})
-  
+
   // Task Panel State
   const [selectedTask, setSelectedTask] = useState(null)
-  
+
   const { workspaceMode, activeOrganization } = useWorkspace()
 
   // Data Fetching
-  const { data: rawTasks, isLoading } = useTaskList({ 
+  const { data: rawTasks, isLoading } = useTaskList({
     scope: workspaceMode === 'PERSONAL' ? 'personal' : 'org'
   })
-  
+
   const tasks = useMemo(() => {
     if (!rawTasks) return []
     let result = rawTasks
@@ -60,7 +61,7 @@ export function TasksPage() {
       result = result.filter(t => t.archived)
     } else {
       result = result.filter(t => !t.archived)
-      
+
       if (activeView === 'assigned') {
         result = result.filter(t => t.assignedTo === user?.username)
       } else if (activeView === 'completed') {
@@ -98,9 +99,9 @@ export function TasksPage() {
 
     return result
   }, [rawTasks, activeView, globalFilter, priorityFilter, sortBy, user])
-  
+
   const { data: allUsers } = useUsersList()
-  
+
   // Mutations
   const updateTaskMutation = useUpdateTask()
   const deleteTaskMutation = useDeleteTask()
@@ -182,7 +183,7 @@ export function TasksPage() {
   const handleBulkAssign = (targetUser) => {
     if (!targetUser) return
     const selectedIds = Object.keys(rowSelection).map(Number)
-    
+
     // Instead of mapping row index directly as ID, we need to map the selected row indices to task IDs.
     // Tanstack Table uses row indices by default as the selection keys.
     // So rowSelection looks like: { "0": true, "2": true }
@@ -197,9 +198,36 @@ export function TasksPage() {
     setRowSelection({})
   }
 
+  if (viewMode === 'nebula') {
+    return (
+      <div className="fixed inset-0 z-[100] bg-zinc-950">
+        <button
+          onClick={() => setViewMode('list')}
+          className="absolute top-6 right-6 z-50 flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-md border border-white/20 rounded-lg text-white font-medium shadow-lg cursor-pointer"
+        >
+          <Icons.chevronLeft className="w-4 h-4" />
+          Exit Nebula
+        </button>
+        <NebulaView
+          tasks={tasks}
+          onTaskSelect={setSelectedTask}
+        />
+
+        <div className="absolute inset-0 pointer-events-none z-50">
+          <TaskPanel
+            task={selectedTask}
+            isOpen={!!selectedTask}
+            onClose={() => setSelectedTask(null)}
+            variant="nebula"
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col min-h-[calc(100vh-8rem)] relative">
-      
+
       {/* Header */}
       <div className="mb-4">
         <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-0.5">My Tasks</Heading>
@@ -207,7 +235,7 @@ export function TasksPage() {
       </div>
 
       {/* Toolbar */}
-      <TasksToolbar 
+      <TasksToolbar
         activeView={activeView}
         onViewChange={setActiveView}
         globalFilter={globalFilter}
@@ -223,7 +251,7 @@ export function TasksPage() {
       {/* Main Content Area */}
       <div className="flex-1 min-h-0 relative">
         {viewMode === 'list' && (
-          <TasksTable 
+          <TasksTable
             tasks={tasks}
             isLoading={isLoading}
             rowSelection={rowSelection}
@@ -234,7 +262,7 @@ export function TasksPage() {
           />
         )}
         {viewMode === 'board' && (
-          <KanbanBoard 
+          <KanbanBoard
             tasks={tasks}
             isLoading={isLoading}
             onTaskClick={setSelectedTask}
@@ -242,17 +270,17 @@ export function TasksPage() {
           />
         )}
         {viewMode === 'calendar' && (
-          <CalendarView 
+          <CalendarView
             tasks={tasks}
             isLoading={isLoading}
             onTaskClick={setSelectedTask}
           />
         )}
-        
+
         {/* Floating Bulk Action Bar (Appears when rows are selected in List view) */}
         <AnimatePresence>
           {Object.keys(rowSelection).length > 0 && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
@@ -292,7 +320,7 @@ export function TasksPage() {
               <button onClick={handleBulkDelete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
                 Delete
               </button>
-              <button 
+              <button
                 onClick={() => setRowSelection({})}
                 className="ml-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
               >
@@ -304,9 +332,9 @@ export function TasksPage() {
       </div>
 
       {/* The Task Workspace (Panel) */}
-      <TaskPanel 
-        task={selectedTask} 
-        isOpen={!!selectedTask} 
+      <TaskPanel
+        task={selectedTask}
+        isOpen={!!selectedTask}
         onClose={() => setSelectedTask(null)}
       />
 
