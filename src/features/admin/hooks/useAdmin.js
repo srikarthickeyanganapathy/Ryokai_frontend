@@ -153,3 +153,12 @@ export const useAssignUserRoles = () => {
     },
   });
 };
+
+export const useUserRoles = (userId) => {
+  return useQuery({
+    queryKey: [...queryKeys.users.all, userId, 'roles'],
+    queryFn: () => adminApi.getUserRoles(userId),
+    enabled: !!userId,
+  });
+};
+

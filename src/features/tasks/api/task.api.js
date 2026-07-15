@@ -8,11 +8,18 @@ const normalizeChecklistItem = (item) => ({
 })
 
 /** Normalize backend task: split comma-separated tags into array */
+// FIX: backend TaskResponseDTO field is `assignee` (String username), not `assignedTo`.
+//      The old code mapped t.assignedTo which was always undefined — assignee was lost.
+//      Backend also returns `archived` (not `isArchived`), `isPersonal` (via @JsonProperty).
 const normalizeTask = (t) => ({
   ...t,
-  assignee: t.assignedTo,
+  // Backend field is `assignee` (username string). Keep it as-is and also alias to assignedTo
+  // for any component that still reads the old shape.
+  assignedTo: t.assignee ?? t.assignedTo,
+  assignee: t.assignee ?? t.assignedTo,
   status: normalizeStatus(t.currentStatus),
-  tags: t.tags ? t.tags.split(',').map(s => s.trim()).filter(Boolean) : [],
+  currentStatus: t.currentStatus,
+  tags: t.tags ? String(t.tags).split(',').map(s => s.trim()).filter(Boolean) : [],
   checklists: Array.isArray(t.checklists) ? t.checklists.map(normalizeChecklistItem) : t.checklists,
 })
 
@@ -47,8 +54,21 @@ export const completePersonalTask = async (id) => {
   return normalizeTask(data);
 };
 
+// FIX (SM-C01): new endpoint for completing CREW tasks (ASSIGNED -> COMPLETED).
+// Crew tasks follow the no-review pipeline per the spec state machine.
+export const completeCrewTask = async (id) => {
+  const { data } = await api.post(`/tasks/${id}/complete-crew`);
+  return normalizeTask(data);
+};
+
 export const submitTask = async (id) => {
   const { data } = await api.post(`/tasks/${id}/submit`);
+  return normalizeTask(data);
+};
+
+// FIX (SM-M03): new endpoint for recalling a submitted task (SUBMITTED -> ASSIGNED).
+export const recallTask = async (id) => {
+  const { data } = await api.post(`/tasks/${id}/recall`);
   return normalizeTask(data);
 };
 
@@ -57,8 +77,10 @@ export const approveTask = async (id) => {
   return normalizeTask(data);
 };
 
+// FIX (SM-M01): backend now REQUIRES a non-blank reason (@NotBlank on RejectReasonDTO).
+// The body is mandatory — backend returns 400 if reason is missing or blank.
 export const rejectTask = async (id, reason) => {
-  const { data } = await api.post(`/tasks/${id}/reject`, { reason });
+  const { data } = await api.post(`/tasks/${id}/reject`, { reason: reason || '' });
   return normalizeTask(data);
 };
 
@@ -67,8 +89,9 @@ export const getComments = async (id, params) => {
   return data;
 };
 
-export const addComment = async (id, text) => {
-  const { data } = await api.post(`/tasks/${id}/comments`, { text });
+export const addComment = async (id, text, parentId = null) => {
+  // FIX: backend CommentRequestDTO accepts { text, parentId } for threaded comments (V34).
+  const { data } = await api.post(`/tasks/${id}/comments`, { text, parentId });
   return data;
 };
 
@@ -96,9 +119,11 @@ export const getTaskHistory = async (id, params) => {
   return data;
 };
 
-export const addDependency = async (taskId, blocksTaskId) => {
+// FIX: backend TaskDependencyRequestDTO field is `dependsOnId`, NOT `blocksTaskId`.
+// The old code sent { blocksTaskId } which caused a 400 validation error on every dependency add.
+export const addDependency = async (taskId, dependsOnId) => {
   // Returns 201 with empty body — don't read response data
-  await api.post(`/tasks/${taskId}/dependencies`, { blocksTaskId });
+  await api.post(`/tasks/${taskId}/dependencies`, { dependsOnId });
 };
 
 export const updateTask = async (taskId, payload) => {
@@ -111,6 +136,7 @@ export const deleteTask = async (taskId) => {
   await api.delete(`/tasks/${taskId}`);
 };
 
+// FIX (RB-M04): backend now uses ARCHIVE permission (was EDIT). The endpoint path is unchanged.
 export const archiveTask = async (taskId) => {
   const { data } = await api.put(`/tasks/${taskId}/archive`);
   return normalizeTask(data);
@@ -127,43 +153,50 @@ export const reassignTask = async (taskId, newAssigneeId) => {
 };
 
 // --- Attachments ---
+// FIX: backend has NO /tasks/{taskId}/attachments endpoints (no AttachmentController exists).
+// The old code called these endpoints and would get 404 on every attachment operation.
+// These are stubbed out with clear errors until a backend attachment feature is implemented.
+// If you need file attachments, use the TaskEvidence feature instead (POST /tasks/{taskId}/evidence
+// with type=SCREENSHOT for images, or type=LINK for URLs).
 
-/** Normalize attachment: backend uses originalFilename/fileSize/uploadedBy, frontend expects fileName/size/uploader */
-const normalizeAttachment = (att) => ({
-  ...att,
-  fileName: att.fileName ?? att.originalFilename ?? 'unknown',
-  size: att.size ?? att.fileSize ?? 0,
-  uploader: att.uploader ?? att.uploadedBy ?? 'unknown',
-})
-
-const normalizeAttachmentList = (data) => {
-  if (Array.isArray(data)) return data.map(normalizeAttachment);
-  if (data?.content) return { ...data, content: data.content.map(normalizeAttachment) };
-  return data;
-}
-
-export const getAttachments = async (taskId) => {
-  const { data } = await api.get(`/tasks/${taskId}/attachments`);
-  return normalizeAttachmentList(data);
+export const getAttachments = async (_taskId) => {
+  console.warn('[task.api] getAttachments: backend has no attachment endpoints. Use TaskEvidence instead.');
+  return [];
 };
 
-export const uploadAttachment = async (taskId, file) => {
-  const formData = new FormData();
-  formData.append('file', file);
-  const { data } = await api.post(`/tasks/${taskId}/attachments`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
-  return normalizeAttachment(data);
+export const uploadAttachment = async (_taskId, _file) => {
+  throw new Error('Attachments are not supported by the backend. Use TaskEvidence (POST /tasks/{taskId}/evidence) instead.');
 };
 
-export const downloadAttachment = async (taskId, attachmentId) => {
-  const { data } = await api.get(`/tasks/${taskId}/attachments/${attachmentId}`, {
-    responseType: 'blob',
-  });
+export const downloadAttachment = async (_taskId, _attachmentId) => {
+  throw new Error('Attachments are not supported by the backend. Use TaskEvidence instead.');
+};
+
+export const deleteAttachment = async (_taskId, _attachmentId) => {
+  throw new Error('Attachments are not supported by the backend. Use TaskEvidence instead.');
+};
+
+// --- Task Evidence ---
+export const getEvidence = async (taskId) => {
+  const { data } = await api.get(`/tasks/${taskId}/evidence`);
   return data;
 };
 
-export const deleteAttachment = async (taskId, attachmentId) => {
-  // Returns 204 No Content
-  await api.delete(`/tasks/${taskId}/attachments/${attachmentId}`);
+export const addEvidence = async (taskId, payload) => {
+  // payload: { type, url, description }
+  // EvidenceType: LINK | GITHUB | SCREENSHOT | RECORDING | SNIPPET | NOTE
+  const { data } = await api.post(`/tasks/${taskId}/evidence`, payload);
+  return data;
 };
+
+export const deleteEvidence = async (taskId, evidenceId) => {
+  await api.delete(`/tasks/${taskId}/evidence/${evidenceId}`);
+};
+
+// --- Task Claim (Crew Tasks) ---
+export const claimTask = async (taskId) => {
+  const { data } = await api.post(`/tasks/${taskId}/claim`);
+  return data;
+};
+
+

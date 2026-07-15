@@ -36,7 +36,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }) {
       title: '',
       description: '',
       assigneeUsername: '',
-      priority: 'NORMAL',
+      priority: 'MEDIUM',
       dueDate: '',
       tags: '',
       teamId: '',
@@ -168,7 +168,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }) {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="LOW">Low</SelectItem>
-                  <SelectItem value="NORMAL">Normal</SelectItem>
+                  <SelectItem value="MEDIUM">Medium</SelectItem>
                   <SelectItem value="HIGH">High</SelectItem>
                   <SelectItem value="URGENT">Urgent</SelectItem>
                 </SelectContent>

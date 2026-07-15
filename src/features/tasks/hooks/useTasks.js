@@ -40,12 +40,13 @@ export const useCreateTask = () => {
   const { workspaceMode } = useWorkspace();
   return useMutation({
     mutationFn: async (payload) => {
-      // Ensure required fields: assigneeUsername defaults to current user, priority defaults to NORMAL
+      // Ensure required fields: assigneeUsername defaults to current user, priority defaults to MEDIUM
+      // FIX: backend TaskPriority enum is { LOW, MEDIUM, HIGH, URGENT } — 'NORMAL' does not exist.
       const isPersonalMode = workspaceMode === 'PERSONAL';
       const taskPayload = {
         ...payload,
         assigneeUsername: payload.assigneeUsername || user?.username,
-        priority: payload.priority || 'NORMAL',
+        priority: payload.priority || 'MEDIUM',
         isPersonal: isPersonalMode ? true : (payload.isPersonal || false),
         // Backend expects LocalDateTime — empty string "" causes Jackson 500.
         // Convert empty/falsy dueDate to null so backend ignores it.
@@ -96,6 +97,43 @@ export const useCompletePersonalTask = () => {
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to complete task');
+    },
+    onSettled: (_, __, id) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
+    },
+  });
+};
+
+// FIX (SM-C01): new hook for completing CREW tasks (ASSIGNED -> COMPLETED).
+// Crew tasks follow the no-review pipeline per the spec state machine.
+export const useCompleteCrewTask = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => taskApi.completeCrewTask(id),
+    onSuccess: () => {
+      toast.success('Crew task completed');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || 'Failed to complete crew task');
+    },
+    onSettled: (_, __, id) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
+    },
+  });
+};
+
+// FIX (SM-M03): new hook for recalling a submitted task (SUBMITTED -> ASSIGNED).
+export const useRecallTask = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => taskApi.recallTask(id),
+    onSuccess: () => {
+      toast.success('Task recalled');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || 'Failed to recall task');
     },
     onSettled: (_, __, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
@@ -403,5 +441,61 @@ export const useDeleteAttachment = (taskId) => {
   });
 };
 
+// --- Task Evidence Hooks ---
+export const useEvidence = (taskId) => {
+  return useQuery({
+    queryKey: queryKeys.tasks.evidence(taskId),
+    queryFn: () => taskApi.getEvidence(taskId),
+    enabled: !!taskId,
+  });
+};
+
+export const useAddEvidence = (taskId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload) => taskApi.addEvidence(taskId, payload),
+    onSuccess: () => {
+      toast.success('Evidence submitted successfully');
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.evidence(taskId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(taskId) });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || 'Failed to submit evidence');
+    },
+  });
+};
+
+export const useDeleteEvidence = (taskId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (evidenceId) => taskApi.deleteEvidence(taskId, evidenceId),
+    onSuccess: () => {
+      toast.success('Evidence deleted successfully');
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.evidence(taskId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(taskId) });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || 'Failed to delete evidence');
+    },
+  });
+};
+
+// --- Task Claim Hook (Crew tasks) ---
+export const useClaimTask = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (taskId) => taskApi.claimTask(taskId),
+    onSuccess: (_, taskId) => {
+      toast.success('Task claimed successfully');
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(taskId) });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || 'Failed to claim task');
+    },
+  });
+};
+
 // Note: Removing useTaskSubscription temporarily if NotificationProvider import fails. 
 // If it was in use, we'll restore it properly connected to the web socket.
+

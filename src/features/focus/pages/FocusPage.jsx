@@ -5,7 +5,7 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
 import { Switch } from '@/shared/ui/Switch'
-import { useTaskList, useUpdateTask, useCompletePersonalTask, useSubmitTask } from '@/features/tasks/hooks/useTasks'
+import { useTaskList, useUpdateTask, useCompletePersonalTask, useCompleteCrewTask, useSubmitTask } from '@/features/tasks/hooks/useTasks'
 import { CheckCircle2, Play, Circle, Maximize2, Minimize2, Settings } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
 import { normalizeStatus, isDoneStatus, toBackendStatus } from '@/shared/lib/status'
@@ -14,6 +14,8 @@ export function FocusPage() {
   const { data: tasks = [], isLoading } = useTaskList()
   const updateTaskMutation = useUpdateTask()
   const completePersonalTaskMutation = useCompletePersonalTask()
+  // FIX (SM-C01): crew tasks use the complete-crew endpoint
+  const completeCrewTaskMutation = useCompleteCrewTask()
   const submitTaskMutation = useSubmitTask()
 
   const [isFullscreen, setIsFullscreen] = React.useState(false)
@@ -56,6 +58,12 @@ export function FocusPage() {
     if (currentTask) {
       if (currentTask.isPersonal) {
         completePersonalTaskMutation.mutate(currentTask.id)
+      } else if (currentTask.crewId || currentTask.crew) {
+        // FIX (SM-C01): crew tasks follow ASSIGNED -> COMPLETED (no review pipeline)
+        const st = currentTask.currentStatus?.toUpperCase()
+        if (st === 'ASSIGNED') {
+          completeCrewTaskMutation.mutate(currentTask.id)
+        }
       } else {
         // org task: if ASSIGNED or REJECTED, can submit it. If already SUBMITTED, we leave it to approve.
         // For simplicity in FocusMode, submit it if possible.

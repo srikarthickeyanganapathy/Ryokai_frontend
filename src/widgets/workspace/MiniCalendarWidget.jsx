@@ -198,7 +198,7 @@ export function MiniCalendarWidget({ tasks = [] }) {
               title: '',
               description: '',
               assigneeUsername: '',
-              priority: 'NORMAL',
+              priority: 'MEDIUM',
               dueDate: selectedDateForNewTask,
               tags: '',
               teamId: '',

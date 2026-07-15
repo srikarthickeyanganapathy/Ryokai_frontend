@@ -38,6 +38,7 @@ export function AppSidebar({ isOpen, onClose }) {
   const workspaceItems = [
     { icon: Icons.folderClosed, label: 'Projects', to: '/app/projects' },
     { icon: Icons.building, label: 'Organizations', to: '/app/organizations' },
+    { icon: Icons.users, label: 'Crews', to: '/app/crews' },
     { icon: Icons.barChart2, label: 'Analytics', to: '/app/analytics' },
     ...(isSuperAdmin ? [{ icon: Icons.shield, label: 'Admin', to: '/app/admin' }] : []),
   ]

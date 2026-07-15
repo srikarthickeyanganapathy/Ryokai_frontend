@@ -20,8 +20,10 @@ export const updateRole = async (roleId, roleData) => {
 };
 
 export const deleteRole = async (roleId) => {
-  const { data } = await api.delete(`/admin/roles/${roleId}`);
-  return data;
+  // FIX: backend returns 204 No Content (RoleController.deleteRole -> ResponseEntity<Void>).
+  // The old code tried to read `data` from the response, which would be undefined
+  // and could cause issues in the caller. Now we just await the deletion.
+  await api.delete(`/admin/roles/${roleId}`);
 };
 
 // --- Permissions ---
@@ -76,3 +78,9 @@ export const assignUserRoles = async (userId, roleNames) => {
   const { data } = await api.put(`/admin/users/${userId}/roles`, roleNames);
   return data;
 };
+
+export const getUserRoles = async (userId) => {
+  const { data } = await api.get(`/admin/users/${userId}/roles`);
+  return data;
+};
+

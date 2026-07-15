@@ -26,6 +26,9 @@ const ProjectsPage = lazy(() => import("@/pages/projects/ProjectsPage").then(m =
 const ProjectDetailPage = lazy(() => import("@/pages/projects/projectdetailpage").then(m => ({ default: m.ProjectDetailPage })));
 const OrganizationsPage = lazy(() => import("@/pages/organizations/OrganizationsPage").then(m => ({ default: m.OrganizationsPage })));
 const OrganizationDetailPage = lazy(() => import("@/pages/organizations/OrganizationDetailPage").then(m => ({ default: m.OrganizationDetailPage })));
+const CrewsPage = lazy(() => import("@/pages/crews/CrewsPage").then(m => ({ default: m.CrewsPage })));
+const CrewDetailPage = lazy(() => import("@/pages/crews/CrewDetailPage").then(m => ({ default: m.CrewDetailPage })));
+const CrewJoinPage = lazy(() => import("@/pages/crews/CrewJoinPage").then(m => ({ default: m.CrewJoinPage })));
 const InboxPage = lazy(() => import("@/pages/inbox/InboxPage").then(m => ({ default: m.InboxPage })));
 const AnalyticsPage = lazy(() => import("@/pages/analytics/AnalyticsPage").then(m => ({ default: m.AnalyticsPage })));
 const AdminPage = lazy(() => import("@/pages/admin/AdminPage").then(m => ({ default: m.AdminPage })));
@@ -62,6 +65,9 @@ export default function App() {
                 <Route path="/app/projects/:projectId" element={<ProjectDetailPage />} />
                 <Route path="/app/organizations" element={<OrganizationsPage />} />
                 <Route path="/app/organizations/:orgId" element={<OrganizationDetailPage />} />
+                <Route path="/app/crews" element={<CrewsPage />} />
+                <Route path="/app/crews/join" element={<CrewJoinPage />} />
+                <Route path="/app/crews/:crewId" element={<CrewDetailPage />} />
                 <Route path="/app/analytics" element={<AnalyticsPage />} />
                 <Route element={<AdminRoute />}>
                   <Route path="/app/admin" element={<AdminPage />} />

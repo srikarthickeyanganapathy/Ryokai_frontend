@@ -43,7 +43,7 @@ export const taskSchema = z.object({
   description: z.string().optional(),
   assigneeUsername: z.string().min(1, "Assignee is required"),
   creatorUsername: z.string().optional(),
-  priority: z.enum(["URGENT", "HIGH", "NORMAL", "LOW", "NONE"]).default("NORMAL"),
+  priority: z.enum(["URGENT", "HIGH", "MEDIUM", "LOW"]).default("MEDIUM"),
   dueDate: z.string().nullable().optional(),
   tags: z.string().optional(), // Comma-separated string
   isPersonal: z.boolean().default(false),

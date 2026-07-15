@@ -10,11 +10,18 @@ export const getDashboardActivity = async (params) => {
   return data;
 };
 
-export const exportActivity = async (format = 'csv') => {
+export const getTaskActivity = async (taskId, params) => {
+  const { data } = await api.get(`/dashboard/activity/task/${taskId}`, { params });
+  return data;
+};
+
+export const exportActivity = async (params = {}) => {
+  // params: { format: 'csv' | 'pdf', from, to }
   // Correct path per DashboardController — NOT /admin/export/activity
   const { data } = await api.get('/dashboard/activity/export', {
-    params: { format },
+    params,
     responseType: 'blob',
   });
   return data;
 };
+

@@ -23,7 +23,7 @@ const views = [
   { id: 'archived', label: 'Archived' },
 ]
 
-const PRIORITY_OPTIONS = ['URGENT', 'HIGH', 'NORMAL', 'LOW']
+const PRIORITY_OPTIONS = ['URGENT', 'HIGH', 'MEDIUM', 'LOW']
 const SORT_OPTIONS = [
   { id: 'dueDate', label: 'Due date' },
   { id: 'priority', label: 'Priority' },

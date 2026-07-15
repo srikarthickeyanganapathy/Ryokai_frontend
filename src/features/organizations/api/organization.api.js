@@ -107,3 +107,40 @@ export const addTeamMember = async (teamId, userId) => {
 export const removeTeamMember = async (teamId, userId) => {
   await api.delete(`/organizations/teams/${teamId}/members/${userId}`);
 };
+
+// --- Invite Links & Tokens ---
+export const createInviteLink = async (orgId, roleId) => {
+  const { data } = await api.post(`/organizations/${orgId}/invites/link`, { roleId });
+  return data;
+};
+
+export const acceptInviteByToken = async (token) => {
+  const { data } = await api.post(`/invites/token/${token}/accept`);
+  return data;
+};
+
+// --- Org Roles ---
+export const updateOrgRole = async (orgId, roleId, payload) => {
+  const { data } = await api.put(`/organizations/${orgId}/roles/${roleId}`, payload);
+  return data;
+};
+
+export const deleteOrgRole = async (orgId, roleId) => {
+  await api.delete(`/organizations/${orgId}/roles/${roleId}`);
+};
+
+// --- Teams ---
+export const getTeam = async (teamId) => {
+  const { data } = await api.get(`/organizations/teams/${teamId}`);
+  return data;
+};
+
+export const updateTeam = async (teamId, payload) => {
+  const { data } = await api.put(`/organizations/teams/${teamId}`, payload);
+  return data;
+};
+
+export const deleteTeam = async (teamId) => {
+  await api.delete(`/organizations/teams/${teamId}`);
+};
+

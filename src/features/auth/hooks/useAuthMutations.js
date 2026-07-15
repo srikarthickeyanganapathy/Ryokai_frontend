@@ -64,3 +64,20 @@ export const useResetPasswordMutation = () => {
     }
   })
 }
+
+// FIX (SEC-Min01): new logout-all mutation — invalidates ALL sessions by
+// incrementing token_version on the backend. Useful for the Security page
+// "Sign out everywhere" button.
+export const useLogoutAllMutation = () => {
+  const navigate = useNavigate()
+  return useMutation({
+    mutationFn: () => authAPI.logoutAll(),
+    onSuccess: () => {
+      toast.success('Signed out everywhere', { description: 'All your sessions have been revoked.' })
+      navigate('/login', { replace: true })
+    },
+    onError: (error) => {
+      toast.error('Logout Failed', { description: error.message || 'Could not sign out everywhere' })
+    }
+  })
+}

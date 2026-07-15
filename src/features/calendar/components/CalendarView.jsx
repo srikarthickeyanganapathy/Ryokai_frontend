@@ -134,7 +134,7 @@ export function CalendarView({ tasks, isLoading, onTaskClick }) {
                 title: '',
                 description: '',
                 assigneeUsername: '',
-                priority: 'NORMAL',
+                priority: 'MEDIUM',
                 dueDate: format(quickAddDate, `yyyy-MM-dd'T'${format(new Date(), 'HH:mm')}`),
                 tags: '',
                 teamId: '',

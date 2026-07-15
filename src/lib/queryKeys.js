@@ -9,11 +9,21 @@ export const queryKeys = {
     comments: (id) => [...queryKeys.tasks.detail(id), 'comments'],
     history: (id) => [...queryKeys.tasks.detail(id), 'history'],
     attachments: (id) => [...queryKeys.tasks.detail(id), 'attachments'],
+    evidence: (id) => [...queryKeys.tasks.detail(id), 'evidence'],
   },
   templates: {
     all: ['taskTemplates'],
     list: () => [...queryKeys.templates.all, 'list'],
     detail: (id) => [...queryKeys.templates.all, 'detail', id],
+  },
+  crews: {
+    all: ['crews'],
+    list: (filters) => [...queryKeys.crews.all, 'list', { filters }],
+    detail: (id) => [...queryKeys.crews.all, 'detail', id],
+    members: (id) => [...queryKeys.crews.detail(id), 'members'],
+    channels: (id) => [...queryKeys.crews.detail(id), 'channels'],
+    messages: (crewId, channelId) => [...queryKeys.crews.detail(crewId), 'channels', channelId, 'messages'],
+    projects: (id) => [...queryKeys.crews.detail(id), 'projects'],
   },
   users: {
     all: ['users'],

@@ -17,7 +17,7 @@ export const organizationsApi = {
   },
 
   inviteMember: async (id, memberData) => {
-    const { data } = await api.post(`/organizations/${id}/members`, memberData)
+    const { data } = await api.post(`/organizations/${id}/invites`, memberData)
     return data
   },
 

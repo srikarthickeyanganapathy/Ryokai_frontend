@@ -12,7 +12,7 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { KanbanColumn } from './KanbanColumn'
 import { KanbanTaskCard } from './KanbanTaskCard'
 import { normalizeStatus, getKanbanColumnForTask, KANBAN_COLUMNS, toBackendStatus } from '@/shared/lib/status'
-import { useSubmitTask, useApproveTask, useRejectTask, useReassignTask, useUpdateTask, useCompletePersonalTask } from '@/features/tasks/hooks/useTasks'
+import { useSubmitTask, useApproveTask, useRejectTask, useReassignTask, useUpdateTask, useCompletePersonalTask, useCompleteCrewTask, useRecallTask } from '@/features/tasks/hooks/useTasks'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { usePermissions } from '@/context/usePermissions'
 import { useWorkspace } from '@/context/WorkspaceContext'
@@ -37,6 +37,10 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
   const updateTaskMutation = useUpdateTask();
 
   const completePersonalTaskMutation = useCompletePersonalTask();
+  // FIX (SM-C01): crew tasks use the complete-crew endpoint (ASSIGNED -> COMPLETED)
+  const completeCrewTaskMutation = useCompleteCrewTask();
+  // FIX (SM-M03): assignee can recall a SUBMITTED task back to ASSIGNED
+  const recallTaskMutation = useRecallTask();
 
   const handleStatusTransition = async (task, targetColumn) => {
     let targetStatus = toBackendStatus(targetColumn);
@@ -49,6 +53,24 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
         completePersonalTaskMutation.mutate(task.id)
       } else {
         updateTaskMutation.mutate({ id: task.id, payload: { status: targetStatus } })
+      }
+      return;
+    }
+
+    // FIX (SM-C01): crew tasks follow the no-review pipeline (ASSIGNED/TODO <-> COMPLETED).
+    // Any crew member can complete a crew task. No submit/approve/reject transitions.
+    if (task.crewId || task.crew) {
+      if (targetColumn === 'Done') {
+        if (currentStatus === 'ASSIGNED' || currentStatus === 'TODO') {
+          completeCrewTaskMutation.mutate(task.id)
+        } else {
+          toast.error('Crew task must be in To Do to complete')
+        }
+      } else if (targetColumn === 'To Do') {
+        // Moving back from Done to To Do — use reassign to reset to ASSIGNED
+        if (currentStatus === 'COMPLETED') {
+          reassignMutation.mutate({ taskId: task.id, newAssigneeId: user?.id })
+        }
       }
       return;
     }
@@ -99,8 +121,14 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
       if (reason === false) return; // User cancelled
       rejectMutation.mutate({ id: task.id, reason: reason || 'Moved to Needs Work on Kanban' });
     } else if (targetStatus === 'ASSIGNED') {
-      // Reassign back to self: backend expects assigneeId (Long), the UserResponseDTO id
-      reassignMutation.mutate({ taskId: task.id, newAssigneeId: user?.id });
+      // FIX (SM-M03): if the task is SUBMITTED, this is a recall (assignee pulling back).
+      // Otherwise it's a reassign back to self.
+      if (currentStatus === 'SUBMITTED') {
+        recallTaskMutation.mutate(task.id)
+      } else {
+        // Reassign back to self: backend expects assigneeId (Long), the UserResponseDTO id
+        reassignMutation.mutate({ taskId: task.id, newAssigneeId: user?.id });
+      }
     } else {
       if (onTaskStatusChange) {
         onTaskStatusChange(task, targetColumn);

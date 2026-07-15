@@ -18,3 +18,20 @@ export const useDashboardActivity = (params = { page: 0, size: 10 }) => {
     staleTime: 15000,
   });
 };
+
+export const useTaskActivity = (taskId, params = { page: 0, size: 10 }) => {
+  return useQuery({
+    queryKey: [...queryKeys.dashboard.all, 'activity', 'task', taskId, { params }],
+    queryFn: () => dashboardApi.getTaskActivity(taskId, params),
+    select: (data) => data?.content || data || [],
+    enabled: !!taskId,
+    staleTime: 15000,
+  });
+};
+
+export const useExportActivity = () => {
+  return useMutation({
+    mutationFn: (params) => dashboardApi.exportActivity(params),
+  });
+};
+

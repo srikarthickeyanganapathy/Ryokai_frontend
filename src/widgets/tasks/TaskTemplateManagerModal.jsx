@@ -90,7 +90,7 @@ function TemplateForm({ template, onClose }) {
       name: '',
       defaultTitle: '',
       defaultDescription: '',
-      defaultPriority: 'NORMAL',
+      defaultPriority: 'MEDIUM',
     }
   });
 
@@ -166,7 +166,7 @@ function TemplateForm({ template, onClose }) {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="LOW">Low</SelectItem>
-                  <SelectItem value="NORMAL">Normal</SelectItem>
+                  <SelectItem value="MEDIUM">Medium</SelectItem>
                   <SelectItem value="HIGH">High</SelectItem>
                   <SelectItem value="URGENT">Urgent</SelectItem>
                 </SelectContent>

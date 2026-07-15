@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { useTaskList, useUpdateTask, useDeleteTask, useSubmitTask, useApproveTask, useReassignTask, useCompletePersonalTask } from '@/features/tasks/hooks/useTasks'
+import { useTaskList, useUpdateTask, useDeleteTask, useSubmitTask, useApproveTask, useReassignTask, useCompletePersonalTask, useCompleteCrewTask, useRecallTask } from '@/features/tasks/hooks/useTasks'
 import { TasksToolbar } from '@/widgets/tasks/TasksToolbar'
 import { TasksTable } from '@/widgets/tasks/TasksTable'
 import { KanbanBoard } from '@/widgets/tasks/KanbanBoard'
@@ -110,11 +110,25 @@ export function TasksPage() {
   const reassignTaskMutation = useReassignTask()
 
   const completePersonalTaskMutation = useCompletePersonalTask()
+  // FIX (SM-C01): crew tasks follow ASSIGNED -> COMPLETED (no review pipeline).
+  const completeCrewTaskMutation = useCompleteCrewTask()
+  // FIX (SM-M03): assignee can recall a SUBMITTED task back to ASSIGNED.
+  const recallTaskMutation = useRecallTask()
 
   const handleQuickComplete = (task) => {
     const current = task.currentStatus?.toUpperCase()
     if (task.isPersonal) {
       completePersonalTaskMutation.mutate(task.id)
+    } else if (task.crewId || task.crew) {
+      // FIX (SM-C01): crew tasks use the dedicated complete-crew endpoint.
+      // Any crew member can complete a crew task (flat structure, no review).
+      if (current === 'ASSIGNED') {
+        completeCrewTaskMutation.mutate(task.id)
+      } else if (current === 'COMPLETED') {
+        toast.info('Task is already completed')
+      } else {
+        toast.error('Crew task must be in ASSIGNED status to complete')
+      }
     } else if (current === 'ASSIGNED' || current === 'REJECTED') {
       submitTaskMutation.mutate(task.id, {
         onSuccess: () => toast.success(`Task "${task.title}" submitted for review.`)
@@ -155,6 +169,13 @@ export function TasksPage() {
       const current = task.currentStatus?.toUpperCase()
       if (task.isPersonal) {
         completePersonalTaskMutation.mutate(task.id)
+      } else if (task.crewId || task.crew) {
+        // FIX (SM-C01): crew tasks use the complete-crew endpoint
+        if (current === 'ASSIGNED') {
+          completeCrewTaskMutation.mutate(task.id)
+        } else {
+          skipped++
+        }
       } else if (current === 'ASSIGNED' || current === 'REJECTED') {
         submitTaskMutation.mutate(task.id)
       } else if (current === 'SUBMITTED') {
@@ -166,7 +187,7 @@ export function TasksPage() {
       }
     })
     if (skipped > 0) {
-      toast.error(`${skipped} task(s) skipped due to review permissions`);
+      toast.error(`${skipped} task(s) skipped due to review permissions or status`);
     } else {
       toast.success(`Processing ${selectedIds.length} task(s)...`)
     }

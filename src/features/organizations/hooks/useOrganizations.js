@@ -274,3 +274,97 @@ export const useUpdateOrgRolePermissions = (orgId) => {
     },
   });
 };
+
+// --- Invite Link Hooks ---
+export const useCreateInviteLink = (orgId) => {
+  return useMutation({
+    mutationFn: (roleId) => orgApi.createInviteLink(orgId, roleId),
+    onSuccess: () => {
+      toast.success('Shareable invite link created');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to create invite link');
+    },
+  });
+};
+
+export const useAcceptInviteByToken = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (token) => orgApi.acceptInviteByToken(token),
+    onSuccess: () => {
+      toast.success('Joined organization successfully');
+      queryClient.invalidateQueries({ queryKey: ['organizations'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to accept invite');
+    },
+  });
+};
+
+// --- Org Role Hooks ---
+export const useUpdateOrgRole = (orgId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ roleId, payload }) => orgApi.updateOrgRole(orgId, roleId, payload),
+    onSuccess: () => {
+      toast.success('Org role updated');
+      queryClient.invalidateQueries({ queryKey: ['organizations', orgId, 'roles'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to update role');
+    },
+  });
+};
+
+export const useDeleteOrgRole = (orgId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (roleId) => orgApi.deleteOrgRole(orgId, roleId),
+    onSuccess: () => {
+      toast.success('Org role deleted');
+      queryClient.invalidateQueries({ queryKey: ['organizations', orgId, 'roles'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to delete role');
+    },
+  });
+};
+
+// --- Team Hooks ---
+export const useTeam = (teamId) => {
+  return useQuery({
+    queryKey: ['teams', teamId],
+    queryFn: () => orgApi.getTeam(teamId),
+    enabled: !!teamId,
+  });
+};
+
+export const useUpdateTeam = (orgId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ teamId, payload }) => orgApi.updateTeam(teamId, payload),
+    onSuccess: () => {
+      toast.success('Team updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['organizations', orgId, 'teams'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to update team');
+    },
+  });
+};
+
+export const useDeleteTeam = (orgId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (teamId) => orgApi.deleteTeam(teamId),
+    onSuccess: () => {
+      toast.success('Team deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['organizations', orgId, 'teams'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to delete team');
+    },
+  });
+};
+
