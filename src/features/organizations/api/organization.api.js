@@ -144,3 +144,39 @@ export const deleteTeam = async (teamId) => {
   await api.delete(`/organizations/teams/${teamId}`);
 };
 
+export const adminLeave = async (orgId, payload) => {
+  const { data } = await api.post(`/organizations/${orgId}/admin-leave`, payload);
+  return data;
+};
+
+// --- Team Messages ---
+export const getTeamMessages = async (teamId) => {
+  const { data } = await api.get(`/teams/${teamId}/messages`);
+  return data;
+};
+
+export const sendTeamMessage = async (teamId, content) => {
+  const { data } = await api.post(`/teams/${teamId}/messages`, { content });
+  return data;
+};
+
+export const deleteTeamMessage = async (teamId, messageId) => {
+  await api.delete(`/teams/${teamId}/messages/${messageId}`);
+};
+
+
+
+// --- Team Observers ---
+export const getTeamObservers = async (teamId) => {
+  const { data } = await api.get(`/organizations/teams/${teamId}/observers`);
+  return data;
+};
+
+export const addTeamObserver = async (teamId, userId) => {
+  const { data } = await api.post(`/organizations/teams/${teamId}/observers`, { userId });
+  return data;
+};
+
+export const removeTeamObserver = async (teamId, userId) => {
+  await api.delete(`/organizations/teams/${teamId}/observers/${userId}`);
+};

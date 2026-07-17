@@ -17,7 +17,7 @@ export function CrewsPage() {
   const [crewName, setCrewName] = useState('');
   const [crewDesc, setCrewDesc] = useState('');
   const [memberCap, setMemberCap] = useState(10);
-  const [visibility, setVisibility] = useState('PUBLIC');
+  const [visibility, setVisibility] = useState('PUBLIC_LINK');
 
   const { data: crews = [], isLoading, isError, error } = useCrews();
   const createCrewMutation = useCreateCrew();
@@ -41,7 +41,7 @@ export function CrewsPage() {
         setCrewName('');
         setCrewDesc('');
         setMemberCap(10);
-        setVisibility('PUBLIC');
+        setVisibility('PUBLIC_LINK');
       }
     });
   };
@@ -107,7 +107,7 @@ export function CrewsPage() {
                   onChange={(e) => setVisibility(e.target.value)}
                   className="w-full h-9 rounded-md border border-[var(--border-default)] bg-[var(--bg-sidebar)] p-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
                 >
-                  <option value="PUBLIC_LINK">Public</option>
+                  <option value="PUBLIC_LINK">Public Link</option>
                   <option value="INVITE_ONLY">Invite Only</option>
                 </select>
               </div>

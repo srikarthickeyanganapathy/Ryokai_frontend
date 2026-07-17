@@ -15,6 +15,7 @@ export const useCrew = (crewId) => {
     queryKey: queryKeys.crews.detail(crewId),
     queryFn: () => crewApi.getCrew(crewId),
     enabled: !!crewId,
+    refetchInterval: 5000,
   });
 };
 
@@ -66,6 +67,7 @@ export const useCrewMembers = (crewId) => {
     queryKey: queryKeys.crews.members(crewId),
     queryFn: () => crewApi.getCrewMembers(crewId),
     enabled: !!crewId,
+    refetchInterval: 5000,
   });
 };
 

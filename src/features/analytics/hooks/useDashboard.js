@@ -1,12 +1,17 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import * as dashboardApi from '../api/dashboard.api';
 import { queryKeys } from '@/lib/queryKeys';
 
+import { useWorkspace } from '@/context/WorkspaceContext';
+
 export const useDashboardStats = () => {
+  const { workspaceMode, activeOrganization } = useWorkspace();
+  const orgId = activeOrganization?.id;
+
   return useQuery({
-    queryKey: queryKeys.dashboard.stats(),
-    queryFn: () => dashboardApi.getDashboardStats(),
-    staleTime: 30000, // Stats don't need instant refresh
+    queryKey: [...queryKeys.dashboard.stats(), workspaceMode, orgId],
+    queryFn: () => dashboardApi.getDashboardStats({ scope: workspaceMode, orgId }),
+    staleTime: 30000,
   });
 };
 

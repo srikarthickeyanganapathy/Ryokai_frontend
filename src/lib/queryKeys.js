@@ -11,11 +11,7 @@ export const queryKeys = {
     attachments: (id) => [...queryKeys.tasks.detail(id), 'attachments'],
     evidence: (id) => [...queryKeys.tasks.detail(id), 'evidence'],
   },
-  templates: {
-    all: ['taskTemplates'],
-    list: () => [...queryKeys.templates.all, 'list'],
-    detail: (id) => [...queryKeys.templates.all, 'detail', id],
-  },
+
   crews: {
     all: ['crews'],
     list: (filters) => [...queryKeys.crews.all, 'list', { filters }],

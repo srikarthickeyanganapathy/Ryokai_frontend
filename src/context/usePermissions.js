@@ -38,43 +38,82 @@ export const usePermissions = () => {
   }, [membersList, user]);
 
   const rawOrgRole = myMembership?.orgRole || null;
+  const permissions = myMembership?.permissions || [];
 
   // Normalize orgRole (backend typically returns ADMIN/DIRECTOR/... but be defensive)
   const orgRole = typeof rawOrgRole === 'string'
     ? rawOrgRole.replace(/^ROLE_/, '').toUpperCase()
     : null;
 
-  // Derived role checks based on ACTUAL org role
-  const isOrgAdmin = orgRole === 'ADMIN';
-  const isDirector = orgRole === 'DIRECTOR';
-  const isManager = orgRole === 'MANAGER';
-  const isEmployee = orgRole === 'EMPLOYEE';
+  const isAdminOrAbove = isSuperAdmin || orgRole === 'ADMIN';
 
-  // Computed permission flags
-  const canManage = isSuperAdmin || isOrgAdmin;
-  const canAssign = isSuperAdmin || isOrgAdmin || isDirector || isManager;
-  // Note: SUPER_ADMIN cannot review tasks (SuperAdminStrategy.canReview() returns false)
-  const canReview = isOrgAdmin || isDirector || isManager;
-  const canCreateTeam = isSuperAdmin || isOrgAdmin || isDirector || isManager;
+  // Computed permission flags dynamically from DB permissions
+  const canManage = isAdminOrAbove || permissions.includes('ROLE_MANAGE');
+  const canAssign = isAdminOrAbove || permissions.includes('TASK_ASSIGN');
+  const canReview = isAdminOrAbove || permissions.includes('TASK_REVIEW');
+  const canCreateTeam = isAdminOrAbove || permissions.includes('TEAM_CREATE');
+  const canManageTeam = isAdminOrAbove || permissions.includes('TEAM_MANAGE');
+  const canCreateProject = isAdminOrAbove || permissions.includes('PROJECT_CREATE');
+  const canManageProject = isAdminOrAbove || permissions.includes('PROJECT_MANAGE');
+  const canInviteMembers = isAdminOrAbove || permissions.includes('ORG_MEMBER_INVITE');
+  const canRemoveMembers = isAdminOrAbove || permissions.includes('ORG_MEMBER_REMOVE');
+  const canManageLeaveRequests = isAdminOrAbove || permissions.includes('LEAVE_REQUEST_MANAGE');
+  const canManageRoles = isAdminOrAbove || permissions.includes('ROLE_MANAGE');
+  const canManageUsers = isSuperAdmin; // USER_MANAGE is for super admin only now
+  const canViewAnalytics = true; // Analytics page is for the user, not for the org
+
+  // Task-scoped permissions
+  const canViewTask = isAdminOrAbove || permissions.includes('TASK_VIEW');
+  const canCreateTask = true; // Anyone can create personal tasks
+  const canAssignTask = isAdminOrAbove || permissions.includes('TASK_ASSIGN');
+  const canEditTask = isAdminOrAbove || permissions.includes('TASK_EDIT');
+  const canDeleteTask = isAdminOrAbove || permissions.includes('TASK_DELETE');
+  const canReviewTask = isAdminOrAbove || permissions.includes('TASK_REVIEW');
+  const canCommentTask = canViewTask; // Replaced by TASK_VIEW
+  const canChecklistEdit = canEditTask; // Replaced by TASK_EDIT
+  const canDependencyEdit = isAdminOrAbove || permissions.includes('TASK_DEPENDENCY_EDIT');
+  const canReassignTask = isAdminOrAbove || permissions.includes('TASK_REASSIGN');
+  const canArchiveTask = isAdminOrAbove || permissions.includes('TASK_ARCHIVE');
 
   return {
     // Actual role
     orgRole,
     myMembership,
 
-    // Role booleans
+    // Role booleans (Kept for compatibility, but prefer permissions)
     isSuperAdmin,
-    isOrgAdmin,
-    isDirector,
-    isManager,
-    isEmployee,
-    isAdmin: isSuperAdmin, // Legacy: "isAdmin" means platform super admin
+    isOrgAdmin: orgRole === 'ADMIN',
+    isAdmin: isSuperAdmin,
 
     // Permission flags
     canManage,
     canAssign,
     canReview,
     canCreateTeam,
+    canManageTeam,
+    canCreateProject,
+    canManageProject,
+    canInviteMembers,
+    canRemoveMembers,
+    canManageLeaveRequests,
+    canManageRoles,
+    canManageUsers,
+    canViewAnalytics,
+    
+    // Task permissions
+    canViewTask,
+    canCreateTask,
+    canAssignTask,
+    canEditTask,
+    canDeleteTask,
+    canReviewTask,
+    canCommentTask,
+    canChecklistEdit,
+    canDependencyEdit,
+    canReassignTask,
+    canArchiveTask,
+
+    permissions, // Export raw permissions array for complex components
 
     // Org context
     isOrgMember: hasOrg,

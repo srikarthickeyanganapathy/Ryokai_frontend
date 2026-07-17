@@ -17,10 +17,11 @@ import {
 import { Separator } from '@/shared/ui/Separator'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar'
+import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
 export function AppSidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth()
   const { workspaceMode, setWorkspaceMode, activeOrganization, setActiveOrganization, organizations } = useWorkspace()
-  const { isSuperAdmin } = usePermissions()
+  const { isSuperAdmin, canViewAnalytics } = usePermissions()
   const location = useLocation()
   const navigate = useNavigate()
   
@@ -98,25 +99,56 @@ export function AppSidebar({ isOpen, onClose }) {
       
       {/* Brand Header */}
       <div className={cn("flex items-center shrink-0", isCollapsed ? "flex-col justify-center gap-2 py-3" : "h-14 justify-between px-3")}>
-        <div 
-          onClick={() => navigate('/app/settings/profile')}
-          className={cn(
-            "flex items-center gap-2.5 min-w-0 cursor-pointer hover:bg-[var(--bg-hover)] rounded-md transition-colors",
-            isCollapsed ? "p-1" : "p-1.5 flex-1"
-          )}
-        >
-          <Avatar size="sm" className="bg-[#B8720A] text-white shrink-0">
-            <AvatarImage src={user?.avatarUrl} />
-            <AvatarFallback className="bg-[#B8720A] text-white text-[11px] font-medium">
-              {user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
-            </AvatarFallback>
-          </Avatar>
-          {!isCollapsed && (
-            <div className="flex flex-col min-w-0 text-left overflow-hidden">
-              <Text className="text-[13px] font-medium truncate text-[var(--text-primary)] leading-tight">{user?.name || user?.username}</Text>
+        <Popover>
+          <PopoverTrigger asChild>
+            <div 
+              className={cn(
+                "flex items-center gap-2.5 min-w-0 cursor-pointer hover:bg-[var(--bg-hover)] rounded-md transition-colors",
+                isCollapsed ? "p-1" : "p-1.5 flex-1"
+              )}
+            >
+              <Avatar size="sm" className="bg-[#B8720A] text-white shrink-0">
+                <AvatarImage src={user?.avatarUrl} />
+                <AvatarFallback className="bg-[#B8720A] text-white text-[11px] font-medium">
+                  {user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              {!isCollapsed && (
+                <div className="flex flex-col min-w-0 text-left overflow-hidden">
+                  <Text className="text-[13px] font-medium truncate text-[var(--text-primary)] leading-tight">{user?.name || user?.username}</Text>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </PopoverTrigger>
+          <PopoverContent 
+            align="start" 
+            side={isCollapsed ? "right" : "bottom"} 
+            className="w-56 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] p-2 rounded-xl shadow-xl flex flex-col gap-1 z-[9999]"
+          >
+            <Link
+              to="/app/settings/profile"
+              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+            >
+              <Icons.user className="w-4 h-4 text-[var(--text-muted)]" />
+              <span>Profile</span>
+            </Link>
+            <Link
+              to="/app/settings/security"
+              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+            >
+              <Icons.settings className="w-4 h-4 text-[var(--text-muted)]" />
+              <span>Settings</span>
+            </Link>
+            <Separator className="my-1 bg-[var(--color-border-subtle)]" />
+            <button
+              onClick={() => logout()}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[var(--danger)] hover:bg-[var(--danger-soft)]/20 transition-colors w-full text-left font-medium"
+            >
+              <Icons.logout className="w-4 h-4" />
+              <span>Log out</span>
+            </button>
+          </PopoverContent>
+        </Popover>
 
         <button 
           onClick={() => setIsCollapsed(!isCollapsed)}
@@ -194,7 +226,6 @@ export function AppSidebar({ isOpen, onClose }) {
               >
                 <Icons.chevronLeft className="w-4 h-4" />
               </button>
-              {!isCollapsed && <span className="text-[13px] font-medium text-[var(--text-primary)]">Settings</span>}
             </div>
             {renderNavSection(settingsNavItems, 'Account')}
           </>

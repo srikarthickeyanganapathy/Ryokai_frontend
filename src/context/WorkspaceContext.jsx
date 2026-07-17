@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { getUserOrganizations } from '@/features/organizations/api/organization.api';
+import { useOrganizations } from '@/features/organizations/hooks/useOrganizations';
 
 const WorkspaceContext = createContext();
 
@@ -11,35 +11,52 @@ export const WorkspaceProvider = ({ children }) => {
   const [workspaceMode, setWorkspaceMode] = useState('PERSONAL');
   const [activeOrganization, setActiveOrganization] = useState(null);
 
-  // We should also fetch the user's organizations to check if they have one
-  const [organizations, setOrganizations] = useState([]);
-  const [loadingWorkspace, setLoadingWorkspace] = useState(true);
+  // TanStack Query handles caching, auto-fetching, and background updates!
+  // We only enable the query if the user is authenticated.
+  const { data: rawOrganizations, isLoading: loadingWorkspace } = useOrganizations({
+    enabled: !!user
+  });
+  
+  // Default to empty array if undefined/unauthenticated
+  const organizations = rawOrganizations || [];
 
   useEffect(() => {
-    const fetchOrgs = async () => {
-      if (!user) {
-        setOrganizations([]);
-        setLoadingWorkspace(false);
-        return;
-      }
-      try {
-        setLoadingWorkspace(true);
-        const orgs = await getUserOrganizations();
-        setOrganizations(orgs);
-        // Auto-select org if user has one
-        if (orgs.length > 0) {
-          setActiveOrganization(orgs[0]);
-          // Optional: setWorkspaceMode('ORG') if we want to default to org mode
+    // If the user logs out, clean up local state
+    if (!user) {
+      setWorkspaceMode('PERSONAL');
+      setActiveOrganization(null);
+      return;
+    }
+
+    if (organizations.length > 0) {
+      // Auto-select on first load if we don't have an active org
+      if (!activeOrganization) {
+        // Optional: you could auto-switch to ORG mode here if desired:
+        // setWorkspaceMode('ORG');
+        setActiveOrganization(organizations[0]);
+      } else {
+        // SAFETY CHECK: Ensure the currently active organization still exists in the user's fetched list
+        // This handles cases where the user leaves the org, or the org is deleted.
+        const stillExists = organizations.find(org => org.id === activeOrganization.id);
+        
+        if (!stillExists) {
+          // The org is gone! Downgrade them to personal space gracefully.
+          setWorkspaceMode('PERSONAL');
+          setActiveOrganization(null);
+        } else {
+          // The org still exists. Update the state just in case its name/details were updated.
+          setActiveOrganization(stillExists);
         }
-      } catch (error) {
-        console.error('Failed to fetch orgs', error);
-      } finally {
-        setLoadingWorkspace(false);
       }
-    };
-    
-    fetchOrgs();
-  }, [user]);
+    } else {
+      // The user has 0 organizations. 
+      // If they had one selected previously, clear it.
+      if (activeOrganization) {
+        setWorkspaceMode('PERSONAL');
+        setActiveOrganization(null);
+      }
+    }
+  }, [organizations, activeOrganization, user]);
 
   const value = {
     workspaceMode,
@@ -47,7 +64,6 @@ export const WorkspaceProvider = ({ children }) => {
     activeOrganization,
     setActiveOrganization,
     organizations,
-    setOrganizations,
     loadingWorkspace
   };
 

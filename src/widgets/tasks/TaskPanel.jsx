@@ -8,18 +8,40 @@ import { cn } from '@/shared/lib/cn'
 import { normalizePriority } from '@/shared/lib/priority'
 import { ChecklistForm } from './ChecklistForm'
 import { TaskComments, TaskTimeline, TaskDependencies } from './TaskPanelExtras'
-import { useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, useUpdateTask, useArchiveTask, useReassignTask } from '@/features/tasks/hooks/useTasks'
+import { useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, useUpdateTask, useArchiveTask, useDeleteTask, useReassignTask } from '@/features/tasks/hooks/useTasks'
 import { useUsersList } from '@/features/auth/hooks/useUser'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { Archive } from 'lucide-react'
 import { getKanbanColumnForTask } from '@/shared/lib/status'
+import { usePermissions } from '@/context/usePermissions'
+import { useWorkspace } from '@/context/WorkspaceContext'
+import { useAuth } from '@/features/auth/hooks/useAuth'
 
 export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default' }) {
+  const { workspaceMode } = useWorkspace()
+  const isPersonal = workspaceMode === 'PERSONAL'
+  const { user } = useAuth()
+  const { 
+    canArchiveTask, canEditTask, canDeleteTask, canAssignTask, 
+    canChecklistEdit, canDependencyEdit, canCommentTask 
+  } = usePermissions()
+
+  const isCreator = task?.creator?.id === user?.id
+  const isAssignee = task?.assignee?.id === user?.id
+  const hasArchivePerm = isPersonal || canArchiveTask
+  const hasDeletePerm = isPersonal || canDeleteTask || isCreator
+  const hasEditPerm = isPersonal || canEditTask || isCreator || isAssignee
+  const hasAssignPerm = isPersonal || canAssignTask || isCreator || isAssignee
+  const hasChecklistPerm = isPersonal || canChecklistEdit || isCreator || isAssignee
+  const hasDependencyPerm = isPersonal || canDependencyEdit || isCreator || isAssignee
+  const hasCommentPerm = isPersonal || canCommentTask
+
   const addChecklistItem = useAddChecklistItem(task?.id)
   const toggleChecklistItem = useToggleChecklistItem(task?.id)
   const deleteChecklistItem = useDeleteChecklistItem(task?.id)
   const updateTask = useUpdateTask()
   const archiveTaskMutation = useArchiveTask()
+  const deleteTaskMutation = useDeleteTask()
   const reassignTask = useReassignTask()
   const { data: users = [] } = useUsersList()
   const [localEdits, setLocalEdits] = useState({})
@@ -60,6 +82,16 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   const handleArchive = () => {
     if (confirm('Are you sure you want to archive this task?')) {
       archiveTaskMutation.mutate(task.id, {
+        onSuccess: () => {
+          onClose()
+        }
+      })
+    }
+  }
+
+  const handleDelete = () => {
+    if (confirm('Are you sure you want to PERMANENTLY DELETE this task? This action cannot be undone.')) {
+      deleteTaskMutation.mutate(task.id, {
         onSuccess: () => {
           onClose()
         }
@@ -118,9 +150,16 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                 )}
               </div>
               <div className="flex items-center gap-1">
-                <IconButton variant="ghost" onClick={handleArchive} title="Archive Task">
-                  <Archive className="w-4 h-4" />
-                </IconButton>
+                {hasArchivePerm && (
+                  <IconButton variant="ghost" onClick={handleArchive} title="Archive Task">
+                    <Archive className="w-4 h-4" />
+                  </IconButton>
+                )}
+                {hasDeletePerm && (
+                  <IconButton variant="ghost" className="text-[var(--danger)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]" onClick={handleDelete} title="Delete Task">
+                    <Icons.trash2 className="w-4 h-4" />
+                  </IconButton>
+                )}
                 <IconButton variant="ghost" title="Copy Link">
                   <Icons.settings className="w-4 h-4" /> {/* Placeholder for link/share */}
                 </IconButton>
@@ -139,7 +178,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                   <Heading 
                     level={2} 
                     ref={titleRef}
-                    contentEditable 
+                    contentEditable={hasEditPerm} 
                     suppressContentEditableWarning
                     onBlur={() => {
                       const text = titleRef.current?.textContent || ''
@@ -174,37 +213,46 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                         <Icons.user className="w-4 h-4" />
                         Assignee
                       </span>
-                      <Popover open={isReassignOpen} onOpenChange={setIsReassignOpen}>
-                        <PopoverTrigger asChild>
-                          <span className="font-medium flex items-center gap-2 cursor-pointer hover:bg-[var(--bg-hover)] p-1 rounded transition-colors -m-1">
-                            <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[10px]">
-                              {(task?.assignedTo || 'U').charAt(0).toUpperCase()}
+                      {hasAssignPerm ? (
+                        <Popover open={isReassignOpen} onOpenChange={setIsReassignOpen}>
+                          <PopoverTrigger asChild>
+                            <span className="font-medium flex items-center gap-2 cursor-pointer hover:bg-[var(--bg-hover)] p-1 rounded transition-colors -m-1">
+                              <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[10px]">
+                                {(task?.assignedTo || 'U').charAt(0).toUpperCase()}
+                              </div>
+                              {task.assignedTo || 'Unassigned'}
+                            </span>
+                          </PopoverTrigger>
+                          <PopoverContent align="end" className="w-56 p-1">
+                            <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-semibold tracking-wide">Reassign Task</Text>
+                            <div className="space-y-0.5">
+                              {users.map(u => (
+                                <button
+                                  key={u.id}
+                                  onClick={() => {
+                                    reassignTask.mutate({ taskId: task.id, newAssigneeId: u.id }, {
+                                      onSuccess: () => setIsReassignOpen(false)
+                                    })
+                                  }}
+                                  className="w-full flex items-center gap-2 px-2 py-1.5 text-[13px] rounded hover:bg-[var(--bg-hover)] transition-colors text-left"
+                                >
+                                  <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[10px] shrink-0">
+                                    {u.username.charAt(0).toUpperCase()}
+                                  </div>
+                                  <span className="truncate">{u.username}</span>
+                                </button>
+                              ))}
                             </div>
-                            {task.assignedTo || 'Unassigned'}
-                          </span>
-                        </PopoverTrigger>
-                        <PopoverContent align="end" className="w-56 p-1">
-                          <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-semibold tracking-wide">Reassign Task</Text>
-                          <div className="space-y-0.5">
-                            {users.map(u => (
-                              <button
-                                key={u.id}
-                                onClick={() => {
-                                  reassignTask.mutate({ taskId: task.id, newAssigneeId: u.id }, {
-                                    onSuccess: () => setIsReassignOpen(false)
-                                  })
-                                }}
-                                className="w-full flex items-center gap-2 px-2 py-1.5 text-[13px] rounded hover:bg-[var(--bg-hover)] transition-colors text-left"
-                              >
-                                <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[10px] shrink-0">
-                                  {u.username.charAt(0).toUpperCase()}
-                                </div>
-                                <span className="truncate">{u.username}</span>
-                              </button>
-                            ))}
+                          </PopoverContent>
+                        </Popover>
+                      ) : (
+                        <span className="font-medium flex items-center gap-2 p-1 rounded -m-1">
+                          <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[10px]">
+                            {(task?.assignedTo || 'U').charAt(0).toUpperCase()}
                           </div>
-                        </PopoverContent>
-                      </Popover>
+                          {task.assignedTo || 'Unassigned'}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center justify-between group">
@@ -226,7 +274,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                   <Heading level={4} className="mb-4">Description</Heading>
                   <div 
                     ref={descRef}
-                    contentEditable
+                    contentEditable={hasEditPerm}
                     suppressContentEditableWarning
                     onBlur={() => {
                       const text = descRef.current?.textContent || ''
@@ -251,8 +299,9 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                               <input 
                                 type="checkbox" 
                                 checked={item.completed} 
+                                disabled={!hasChecklistPerm}
                                 onChange={() => toggleChecklistItem.mutate(item.id)}
-                                className="w-4 h-4 cursor-pointer rounded border-[var(--color-border-default)] text-[var(--accent)] focus:ring-[var(--accent)] bg-transparent"
+                                className="w-4 h-4 cursor-pointer rounded border-[var(--color-border-default)] text-[var(--accent)] focus:ring-[var(--accent)] bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                               />
                               <span className={cn(
                                 "text-sm transition-colors",
@@ -261,33 +310,37 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                                 {item.text}
                               </span>
                             </div>
-                            <IconButton 
-                              variant="ghost" 
-                              size="sm" 
-                              className="opacity-0 group-hover:opacity-100 text-[var(--danger)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-all duration-[var(--duration-base)]"
-                              onClick={() => deleteChecklistItem.mutate(item.id)}
-                            >
-                              <Icons.x className="w-3 h-3" />
-                            </IconButton>
+                            {hasChecklistPerm && (
+                              <IconButton 
+                                variant="ghost" 
+                                size="sm" 
+                                className="opacity-0 group-hover:opacity-100 text-[var(--danger)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-all duration-[var(--duration-base)]"
+                                onClick={() => deleteChecklistItem.mutate(item.id)}
+                              >
+                                <Icons.x className="w-3 h-3" />
+                              </IconButton>
+                            )}
                           </div>
                         ))}
                       </div>
                     )}
                     
-                    <ChecklistForm 
-                      onSubmit={(data) => addChecklistItem.mutate(data.text)}
-                      isLoading={addChecklistItem.isPending}
-                    />
+                    {hasChecklistPerm && (
+                      <ChecklistForm 
+                        onSubmit={(data) => addChecklistItem.mutate(data.text)}
+                        isLoading={addChecklistItem.isPending}
+                      />
+                    )}
                   </div>
                 </section>
                 
                 <hr className="border-[var(--color-border-subtle)]" />
 
-                <TaskDependencies task={task} />
+                <TaskDependencies task={task} hasDependencyPerm={hasDependencyPerm} />
 
                 <hr className="border-[var(--color-border-subtle)]" />
                 
-                <TaskComments taskId={task.id} />
+                <TaskComments taskId={task.id} hasCommentPerm={hasCommentPerm} />
                 
                 <hr className="border-[var(--color-border-subtle)]" />
                 

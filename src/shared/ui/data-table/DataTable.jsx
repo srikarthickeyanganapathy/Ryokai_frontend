@@ -9,6 +9,8 @@ import {
 import { cn } from '@/shared/lib/cn'
 import { Text, Heading } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
+import { EmptyState } from '@/shared/ui/EmptyState'
+import { Icons } from '@/shared/ui/Icons'
 
 export function DataTable({
   columns,
@@ -98,16 +100,19 @@ export function DataTable({
               ) : (
                 // Empty State
                 <tr>
-                  <td colSpan={columns.length} className="h-64 text-center">
-                    <div className="flex flex-col items-center justify-center space-y-3">
-                      <Heading level={4} className="tracking-tight">{emptyStateTitle}</Heading>
-                      <Text variant="muted">{emptyStateDescription}</Text>
-                      {emptyStateAction && (
-                        <div className="pt-2">
-                          {emptyStateAction}
-                        </div>
-                      )}
-                    </div>
+                  <td colSpan={columns.length} className="p-6">
+                    <EmptyState
+                      icon={Icons.inbox}
+                      title={emptyStateTitle}
+                      description={emptyStateDescription}
+                      actionLabel={emptyStateAction ? "Add New" : undefined}
+                      onAction={undefined} // If emptyStateAction is a component, we just render it below.
+                    />
+                    {emptyStateAction && (
+                      <div className="flex justify-center mt-[-1rem] pb-4">
+                        {emptyStateAction}
+                      </div>
+                    )}
                   </td>
                 </tr>
               )}

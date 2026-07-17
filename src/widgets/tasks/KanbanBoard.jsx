@@ -67,15 +67,20 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
           toast.error('Crew task must be in To Do to complete')
         }
       } else if (targetColumn === 'To Do') {
-        // Moving back from Done to To Do — use reassign to reset to ASSIGNED
         if (currentStatus === 'COMPLETED') {
-          reassignMutation.mutate({ taskId: task.id, newAssigneeId: user?.id })
+          toast.error('Completed crew tasks cannot be reopened')
         }
       }
       return;
     }
 
     if (targetStatus === currentStatus) return;
+
+    // Block moving APPROVED tasks back or anywhere else
+    if (currentStatus === 'APPROVED') {
+      toast.error('Approved tasks are completed and cannot be moved.');
+      return;
+    }
 
     if (targetStatus === 'SUBMITTED') {
       if (currentStatus !== 'ASSIGNED' && currentStatus !== 'REJECTED') {
@@ -122,12 +127,10 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
       rejectMutation.mutate({ id: task.id, reason: reason || 'Moved to Needs Work on Kanban' });
     } else if (targetStatus === 'ASSIGNED') {
       // FIX (SM-M03): if the task is SUBMITTED, this is a recall (assignee pulling back).
-      // Otherwise it's a reassign back to self.
       if (currentStatus === 'SUBMITTED') {
         recallTaskMutation.mutate(task.id)
       } else {
-        // Reassign back to self: backend expects assigneeId (Long), the UserResponseDTO id
-        reassignMutation.mutate({ taskId: task.id, newAssigneeId: user?.id });
+        toast.error('Tasks cannot be moved back to To Do unless they are In Review (Recall)');
       }
     } else {
       if (onTaskStatusChange) {

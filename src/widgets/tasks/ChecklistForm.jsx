@@ -39,8 +39,8 @@ export function ChecklistForm({ onSubmit, isLoading }) {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isLoading} size="icon" className="shrink-0">
-          {isLoading ? <Icons.spinner className="w-4 h-4 animate-spin" /> : <Icons.plus className="w-4 h-4" />}
+        <Button type="submit" isLoading={isLoading} size="icon" className="shrink-0">
+          {!isLoading && <Icons.plus className="w-4 h-4" />}
         </Button>
       </form>
     </Form>

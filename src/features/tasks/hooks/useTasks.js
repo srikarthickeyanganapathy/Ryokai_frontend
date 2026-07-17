@@ -61,9 +61,11 @@ export const useCreateTask = () => {
       }
       return await taskApi.assignTask(taskPayload);
     },
-    onSuccess: () => {
-      toast.success('Task created successfully');
+    onSuccess: (data, variables) => {
+      const taskTitle = data?.title || variables?.title || 'Task';
+      toast.success(`'${taskTitle}' created successfully`);
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to create task');
@@ -75,8 +77,9 @@ export const useSubmitTask = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id) => taskApi.submitTask(id),
-    onSuccess: () => {
-      toast.success('Task submitted for review');
+    onSuccess: (data) => {
+      const title = data?.title || 'Task';
+      toast.success(`'${title}' submitted for review`);
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to submit task');
@@ -84,6 +87,7 @@ export const useSubmitTask = () => {
     onSettled: (_, __, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
   });
 };
@@ -92,8 +96,9 @@ export const useCompletePersonalTask = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id) => taskApi.completePersonalTask(id),
-    onSuccess: () => {
-      toast.success('Task marked as complete');
+    onSuccess: (data) => {
+      const title = data?.title || 'Task';
+      toast.success(`'${title}' marked as complete`);
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to complete task');
@@ -101,6 +106,7 @@ export const useCompletePersonalTask = () => {
     onSettled: (_, __, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
   });
 };
@@ -111,8 +117,9 @@ export const useCompleteCrewTask = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id) => taskApi.completeCrewTask(id),
-    onSuccess: () => {
-      toast.success('Crew task completed');
+    onSuccess: (data) => {
+      const title = data?.title || 'Crew task';
+      toast.success(`'${title}' completed`);
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to complete crew task');
@@ -120,6 +127,7 @@ export const useCompleteCrewTask = () => {
     onSettled: (_, __, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
   });
 };
@@ -129,8 +137,9 @@ export const useRecallTask = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id) => taskApi.recallTask(id),
-    onSuccess: () => {
-      toast.success('Task recalled');
+    onSuccess: (data) => {
+      const title = data?.title || 'Task';
+      toast.success(`'${title}' recalled to draft`);
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to recall task');
@@ -161,8 +170,9 @@ export const useApproveTask = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id) => taskApi.approveTask(id),
-    onSuccess: () => {
-      toast.success('Task approved');
+    onSuccess: (data) => {
+      const title = data?.title || 'Task';
+      toast.success(`'${title}' approved and completed`);
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to approve task');
@@ -170,6 +180,7 @@ export const useApproveTask = () => {
     onSettled: (_, __, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
   });
 };
@@ -178,8 +189,9 @@ export const useRejectTask = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, reason }) => taskApi.rejectTask(id, reason),
-    onSuccess: () => {
-      toast.success('Task rejected');
+    onSuccess: (data) => {
+      const title = data?.title || 'Task';
+      toast.success(`'${title}' rejected and sent back`);
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to reject task');
@@ -187,6 +199,7 @@ export const useRejectTask = () => {
     onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(variables.id) });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
   });
 };
@@ -336,6 +349,7 @@ export const useDeleteTask = () => {
     onSuccess: () => {
       toast.success('Task deleted');
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to delete task');

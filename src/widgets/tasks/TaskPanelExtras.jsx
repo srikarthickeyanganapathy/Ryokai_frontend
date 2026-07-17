@@ -9,7 +9,7 @@ import { useComments, useAddComment, useTaskHistory, useAddDependency, useRemove
 import { cn } from '@/shared/lib/cn'
 import { formatDistanceToNow } from 'date-fns'
 
-export function TaskComments({ taskId }) {
+export function TaskComments({ taskId, hasCommentPerm }) {
   const { data: comments = [], isLoading } = useComments(taskId)
   const addComment = useAddComment(taskId)
   const [text, setText] = useState('')
@@ -51,18 +51,20 @@ export function TaskComments({ taskId }) {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <Input 
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Add a comment..."
-          className="flex-1"
-          disabled={addComment.isPending}
-        />
-        <Button type="submit" disabled={!text.trim() || addComment.isPending}>
-          Post
-        </Button>
-      </form>
+      {hasCommentPerm && (
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <Input 
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Add a comment..."
+            className="flex-1"
+            disabled={addComment.isPending}
+          />
+          <Button type="submit" disabled={!text.trim() || addComment.isPending}>
+            Post
+          </Button>
+        </form>
+      )}
     </section>
   )
 }
@@ -99,8 +101,8 @@ export function TaskTimeline({ taskId }) {
   )
 }
 
-export function TaskDependencies({ task }) {
-  const { data: allTasks = [] } = useTaskList()
+export function TaskDependencies({ task, hasDependencyPerm }) {
+  const { data: allTasks = [] } = useTaskList(task?.projectId ? { projectId: task.projectId } : {})
   const addDependency = useAddDependency(task?.id)
   const removeDependency = useRemoveDependency(task?.id)
   const [selectedId, setSelectedId] = useState('')
@@ -132,23 +134,25 @@ export function TaskDependencies({ task }) {
                 <Icons.lock className="w-3.5 h-3.5 text-[var(--danger)]" />
                 <Text size="sm" className="text-[var(--danger)]">{dep.title}</Text>
               </div>
-              <IconButton 
-                variant="ghost" 
-                size="sm" 
-                className="text-[var(--danger)] hover:bg-[var(--danger)]/10"
-                onClick={() => removeDependency.mutate(dep.id)}
-              >
-                <Icons.x className="w-3.5 h-3.5" />
-              </IconButton>
+              {hasDependencyPerm && (
+                <IconButton 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-[var(--danger)] hover:bg-[var(--danger)]/10"
+                  onClick={() => removeDependency.mutate(dep.id)}
+                >
+                  <Icons.x className="w-3.5 h-3.5" />
+                </IconButton>
+              )}
             </div>
           ))}
         </div>
       )}
 
-      {task?.blocking?.length > 0 && (
+      {task?.blocks?.length > 0 && (
         <div className="space-y-2 mb-4">
           <Text size="sm" className="font-medium">Blocking:</Text>
-          {task.blocking.map(dep => (
+          {task?.blocks?.map(dep => (
             <div key={dep.id} className="flex items-center justify-between p-2 rounded-[var(--radius-sm)] bg-[var(--warning-soft)] border border-[var(--warning)]/20">
               <div className="flex items-center gap-2">
                 <Icons.alert className="w-3.5 h-3.5 text-[var(--warning)]" />
@@ -159,23 +163,25 @@ export function TaskDependencies({ task }) {
         </div>
       )}
 
-      <div className="flex gap-2">
-        <Select value={selectedId} onValueChange={setSelectedId}>
-          <SelectTrigger className="flex-1">
-            <SelectValue placeholder="Add a blocking task..." />
-          </SelectTrigger>
-          <SelectContent>
-            {availableTasks.map(t => (
-              <SelectItem key={t.id} value={t.id.toString()}>
-                {t.title}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button onClick={handleAdd} disabled={!selectedId || addDependency.isPending}>
-          Add
-        </Button>
-      </div>
+      {hasDependencyPerm && (
+        <div className="flex gap-2">
+          <Select value={selectedId} onValueChange={setSelectedId}>
+            <SelectTrigger className="flex-1">
+              <SelectValue placeholder="Add a blocking task..." />
+            </SelectTrigger>
+            <SelectContent>
+              {availableTasks.map(t => (
+                <SelectItem key={t.id} value={t.id.toString()}>
+                  {t.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={handleAdd} disabled={!selectedId || addDependency.isPending}>
+            Add
+          </Button>
+        </div>
+      )}
     </section>
   )
 }

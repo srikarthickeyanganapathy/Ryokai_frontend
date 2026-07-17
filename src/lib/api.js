@@ -117,6 +117,13 @@ api.interceptors.response.use(
 
       if (error.response.status === 403) {
         toast.error("You don't have permission to do that");
+      } else if (error.response.status === 400 && error.response.data) {
+        // Extract detailed validation errors from Spring Boot responses
+        const data = error.response.data;
+        if (data.errors && typeof data.errors === 'object') {
+          const details = Object.values(data.errors).join(', ');
+          data.message = data.message ? `${data.message}: ${details}` : details;
+        }
       } else if (error.response.status === 429) {
         toast.error("Rate limited — please slow down");
       } else if (error.response.status >= 500) {

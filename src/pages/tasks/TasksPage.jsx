@@ -2,7 +2,9 @@ import React, { useState, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { useTaskList, useUpdateTask, useDeleteTask, useSubmitTask, useApproveTask, useReassignTask, useCompletePersonalTask, useCompleteCrewTask, useRecallTask } from '@/features/tasks/hooks/useTasks'
+import { useTaskList, useUpdateTask, useDeleteTask, useSubmitTask, useApproveTask, useReassignTask, useCompletePersonalTask, useCompleteCrewTask, useRecallTask, useRejectTask } from '@/features/tasks/hooks/useTasks'
+import { Modal, ModalContent } from '@/shared/ui/Modal'
+import { TaskForm } from '@/widgets/tasks/TaskForm'
 import { TasksToolbar } from '@/widgets/tasks/TasksToolbar'
 import { TasksTable } from '@/widgets/tasks/TasksTable'
 import { KanbanBoard } from '@/widgets/tasks/KanbanBoard'
@@ -11,6 +13,7 @@ import { CalendarView } from '@/features/calendar/components/CalendarView'
 import NebulaView from '@/features/tasks/components/NebulaView'
 import { toast } from 'sonner'
 import { Icons } from '@/shared/ui/Icons'
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { normalizeStatus, toBackendStatus } from '@/shared/lib/status'
 import { PRIORITY_OPTIONS } from '@/shared/lib/priority'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
@@ -24,6 +27,7 @@ export function TasksPage() {
   const viewMode = searchParams.get('view') || 'list'
   const { user } = useAuth()
   const { canReview } = usePermissions()
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
   const setViewMode = (mode) => {
     setSearchParams(params => {
@@ -114,6 +118,8 @@ export function TasksPage() {
   const completeCrewTaskMutation = useCompleteCrewTask()
   // FIX (SM-M03): assignee can recall a SUBMITTED task back to ASSIGNED.
   const recallTaskMutation = useRecallTask()
+  const rejectTaskMutation = useRejectTask()
+  const [reassignTaskData, setReassignTaskData] = useState(null)
 
   const handleQuickComplete = (task) => {
     const current = task.currentStatus?.toUpperCase()
@@ -161,11 +167,11 @@ export function TasksPage() {
 
   const [isBulkAssignOpen, setIsBulkAssignOpen] = useState(false)
   const handleBulkComplete = () => {
-    const selectedIds = Object.keys(rowSelection).map(Number)
+    const selectedIndices = Object.keys(rowSelection).map(Number)
+    const selectedTasks = selectedIndices.map(idx => tasks[idx]).filter(Boolean)
     let skipped = 0;
-    selectedIds.forEach(id => {
-      const task = tasks?.find(t => t.id === id)
-      if (!task) return
+
+    selectedTasks.forEach(task => {
       const current = task.currentStatus?.toUpperCase()
       if (task.isPersonal) {
         completePersonalTaskMutation.mutate(task.id)
@@ -186,18 +192,42 @@ export function TasksPage() {
         approveTaskMutation.mutate(task.id)
       }
     })
+
     if (skipped > 0) {
       toast.error(`${skipped} task(s) skipped due to review permissions or status`);
     } else {
-      toast.success(`Processing ${selectedIds.length} task(s)...`)
+      toast.success(`Processing ${selectedTasks.length} task(s)...`)
     }
     setRowSelection({})
   }
 
   const handleBulkDelete = () => {
-    const selectedIds = Object.keys(rowSelection).map(Number)
-    selectedIds.forEach(id => deleteTaskMutation.mutate(id))
-    toast.success(`Deleted ${selectedIds.length} task(s)`)
+    const selectedIndices = Object.keys(rowSelection).map(Number)
+    const actualTaskIds = selectedIndices.map(idx => tasks[idx]?.id).filter(Boolean)
+    actualTaskIds.forEach(id => deleteTaskMutation.mutate(id))
+    toast.success(`Deleted ${actualTaskIds.length} task(s)`)
+    setRowSelection({})
+  }
+
+  const handleBulkSubmit = () => {
+    const selectedIndices = Object.keys(rowSelection).map(Number)
+    const selectedTasks = selectedIndices.map(idx => tasks[idx]).filter(Boolean)
+    let skipped = 0
+
+    selectedTasks.forEach(task => {
+      const current = task.currentStatus?.toUpperCase()
+      if (!task.isPersonal && !task.crewId && !task.crew && (current === 'ASSIGNED' || current === 'REJECTED')) {
+        submitTaskMutation.mutate(task.id)
+      } else {
+        skipped++
+      }
+    })
+
+    if (skipped > 0) {
+      toast.error(`${skipped} task(s) could not be submitted (must be org tasks in ASSIGNED/REJECTED status)`)
+    } else {
+      toast.success(`Submitting ${selectedTasks.length} task(s) for review...`)
+    }
     setRowSelection({})
   }
 
@@ -216,6 +246,58 @@ export function TasksPage() {
     })
     toast.success(`Reassigned ${actualTaskIds.length} task(s) to ${targetUser.username}`)
     setIsBulkAssignOpen(false)
+    setRowSelection({})
+  }
+
+  const handleOpenReassignModal = () => {
+    const selectedIndices = Object.keys(rowSelection).map(Number)
+    const selectedTasks = selectedIndices.map(idx => tasks[idx]).filter(Boolean)
+    if (selectedTasks.length === 0) return
+    setReassignTaskData(selectedTasks[0])
+  }
+
+  const handleReassignSubmit = (payload) => {
+    if (!reassignTaskData) return
+    const targetUser = allUsers?.find(u => u.username === payload.assigneeUsername)
+    if (targetUser) {
+      reassignTaskMutation.mutate({ taskId: reassignTaskData.id, newAssigneeId: targetUser.id }, {
+        onSuccess: () => {
+          setReassignTaskData(null)
+          setRowSelection({})
+        }
+      })
+    }
+  }
+
+  const handleBulkReject = async () => {
+    const reason = await confirm({
+      title: 'Send back for rework',
+      description: 'Let them know what needs to change before it can be approved.',
+      requireInput: true,
+      inputPlaceholder: 'e.g. Missing acceptance criteria for edge cases…',
+      confirmLabel: 'Send back',
+      danger: true,
+    });
+    if (reason === false) return; // User cancelled
+    
+    const selectedIndices = Object.keys(rowSelection).map(Number)
+    const selectedTasks = selectedIndices.map(idx => tasks[idx]).filter(Boolean)
+    let skipped = 0
+
+    selectedTasks.forEach(task => {
+      const current = task.currentStatus?.toUpperCase()
+      if (current === 'SUBMITTED') {
+        rejectTaskMutation.mutate({ id: task.id, reason: reason || 'Rework requested' })
+      } else {
+        skipped++
+      }
+    })
+
+    if (skipped > 0) {
+      toast.error(`${skipped} task(s) skipped (only SUBMITTED tasks can be rejected)`)
+    } else {
+      toast.success(`Rejecting ${selectedTasks.length} task(s)...`)
+    }
     setRowSelection({})
   }
 
@@ -312,32 +394,21 @@ export function TasksPage() {
               </Text>
               <div className="h-4 w-px bg-[var(--border-default)]" />
               <button onClick={handleBulkComplete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
-                Complete
+                {workspaceMode === 'PERSONAL' ? 'Complete' : 'Approve'}
               </button>
-              <Popover open={isBulkAssignOpen} onOpenChange={setIsBulkAssignOpen}>
-                <PopoverTrigger asChild>
-                  <button className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
-                    Assign
+              {workspaceMode !== 'PERSONAL' && (
+                <>
+                  <button onClick={handleBulkSubmit} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                    Submit
                   </button>
-                </PopoverTrigger>
-                <PopoverContent align="center" side="top" className="w-56 p-1 mb-2">
-                  <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-semibold tracking-wide">Assign To</Text>
-                  <div className="space-y-0.5 max-h-[200px] overflow-y-auto custom-scrollbar">
-                    {allUsers?.map(u => (
-                      <button
-                        key={u.id}
-                        onClick={() => handleBulkAssign(u)}
-                        className="w-full flex items-center gap-2 px-2 py-1.5 text-[13px] rounded hover:bg-[var(--bg-hover)] transition-colors text-left"
-                      >
-                        <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[10px] shrink-0">
-                          {u.username.charAt(0).toUpperCase()}
-                        </div>
-                        <span className="truncate">{u.username}</span>
-                      </button>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
+                  <button onClick={handleOpenReassignModal} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                    Reassign
+                  </button>
+                  <button onClick={handleBulkReject} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
+                    Reject
+                  </button>
+                </>
+              )}
               <button onClick={handleBulkDelete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
                 Delete
               </button>
@@ -358,6 +429,29 @@ export function TasksPage() {
         isOpen={!!selectedTask}
         onClose={() => setSelectedTask(null)}
       />
+
+      <Modal open={!!reassignTaskData} onOpenChange={(open) => !open && setReassignTaskData(null)}>
+        <ModalContent className="sm:max-w-xl bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] p-6">
+          <Heading level={3} className="mb-4 text-[var(--text-primary)]">Reassign Task</Heading>
+          {reassignTaskData && (
+            <TaskForm 
+              defaultValues={{
+                title: reassignTaskData.title,
+                description: reassignTaskData.description,
+                priority: reassignTaskData.priority,
+                dueDate: reassignTaskData.dueDate ? new Date(reassignTaskData.dueDate).toISOString().slice(0, 16) : '',
+                assigneeUsername: reassignTaskData.assignedTo || '',
+                tags: reassignTaskData.tags || '',
+                teamId: reassignTaskData.teamId ? reassignTaskData.teamId.toString() : ''
+              }}
+              onSubmit={handleReassignSubmit} 
+              isLoading={updateTaskMutation.isPending} 
+            />
+          )}
+        </ModalContent>
+      </Modal>
+
+      {confirmDialog}
 
     </div>
   )

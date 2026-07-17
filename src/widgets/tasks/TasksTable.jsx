@@ -120,37 +120,8 @@ export function TasksTable({
         const dateStr = new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
         return <span className="text-[var(--text-secondary)] text-sm">{dateStr}</span>
       }
-    },
-    {
-      id: 'actions',
-      header: '',
-      cell: ({ row }) => {
-        const task = row.original
-        return (
-          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-[var(--duration-base)]" onClick={e => e.stopPropagation()}>
-            <IconButton 
-              variant="ghost" 
-              size="sm" 
-              title="Mark Complete"
-              onClick={() => onQuickComplete(task)}
-              disabled={task.status === 'Done'}
-            >
-              <Icons.check className="w-4 h-4" />
-            </IconButton>
-            <IconButton 
-              variant="ghost" 
-              size="sm" 
-              title="Delete"
-              className="text-[var(--danger)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]"
-              onClick={() => handleDelete(task)}
-            >
-              <Icons.trash2 className="w-4 h-4" />
-            </IconButton>
-          </div>
-        )
-      }
     }
-  ], [onQuickComplete, handleDelete])
+  ], [])
 
   return (
     <>

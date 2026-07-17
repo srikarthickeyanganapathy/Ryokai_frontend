@@ -8,6 +8,7 @@ export const Toaster = ({ ...props }) => {
   return (
     <Sonner
       theme={theme}
+      position="bottom-right"
       className="toaster group"
       toastOptions={{
         classNames: {

@@ -61,7 +61,7 @@ export function OrganizationForm({ onSubmit, defaultValues, isLoading }) {
           )}
         />
 
-        <Button type="submit" disabled={isLoading} className="w-full">
+        <Button type="submit" isLoading={isLoading} className="w-full">
           {isLoading ? 'Saving...' : 'Save Organization'}
         </Button>
       </form>

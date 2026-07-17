@@ -13,6 +13,7 @@ import { BulkCreateTaskModal } from './BulkCreateTaskModal'
 import { Heading, Text } from '@/shared/ui/Typography'
 
 import { useWorkspace } from '@/context/WorkspaceContext'
+import { usePermissions } from '@/context/usePermissions'
 
 const views = [
   { id: 'all', label: 'All' },
@@ -42,6 +43,7 @@ export function TasksToolbar({
   const createTaskMutation = useCreateTask()
   const { workspaceMode } = useWorkspace()
   const isPersonalMode = workspaceMode === 'PERSONAL'
+  const canCreate = true // Anyone can create personal/assigned tasks
 
   const handleCreateTask = (payload) => {
     createTaskMutation.mutate(payload, {
@@ -183,7 +185,7 @@ export function TasksToolbar({
             ))}
           </div>
 
-          {!isPersonalMode && (
+          {!isPersonalMode && canCreate && (
             <Button 
               variant="outline"
               size="sm" 
@@ -195,14 +197,16 @@ export function TasksToolbar({
             </Button>
           )}
 
-          <Button 
-            size="sm" 
-            className="gap-1.5"
-            onClick={() => setIsQuickCreateOpen(true)}
-          >
-            <Icons.tasks className="w-3.5 h-3.5" />
-            New Task
-          </Button>
+          {canCreate && (
+            <Button 
+              size="sm" 
+              className="gap-1.5"
+              onClick={() => setIsQuickCreateOpen(true)}
+            >
+              <Icons.tasks className="w-3.5 h-3.5" />
+              New Task
+            </Button>
+          )}
         </div>
       </div>
 

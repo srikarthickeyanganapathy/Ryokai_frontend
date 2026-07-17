@@ -3,10 +3,11 @@ import * as orgApi from '../api/organization.api';
 import { queryKeys } from '@/lib/queryKeys';
 import { toast } from 'sonner';
 
-export const useOrganizations = () => {
+export const useOrganizations = (options = {}) => {
   return useQuery({
     queryKey: queryKeys.organizations.all,
     queryFn: () => orgApi.getUserOrganizations(),
+    ...options,
   });
 };
 
@@ -100,6 +101,8 @@ export const useRemoveMember = (orgId) => {
     onSuccess: () => {
       toast.success('Member removed');
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.members(orgId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.teams(orgId) });
+      queryClient.invalidateQueries({ queryKey: ['teams'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to remove member');
@@ -200,6 +203,7 @@ export const useUpdateMemberRole = (orgId) => {
     onSuccess: () => {
       toast.success('Member role updated');
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.members(orgId) });
+      queryClient.invalidateQueries({ queryKey: ['teams'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to update role');
@@ -213,9 +217,10 @@ export const useAddTeamMember = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ teamId, userId }) => orgApi.addTeamMember(teamId, userId),
-    onSuccess: () => {
+    onSuccess: (_, { teamId }) => {
       toast.success('Member added to team');
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['teams', teamId] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to add team member');
@@ -227,9 +232,10 @@ export const useRemoveTeamMember = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ teamId, userId }) => orgApi.removeTeamMember(teamId, userId),
-    onSuccess: () => {
+    onSuccess: (_, { teamId }) => {
       toast.success('Member removed from team');
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['teams', teamId] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to remove team member');
@@ -295,6 +301,7 @@ export const useAcceptInviteByToken = () => {
     onSuccess: () => {
       toast.success('Joined organization successfully');
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to accept invite');
@@ -337,6 +344,7 @@ export const useTeam = (teamId) => {
     queryKey: ['teams', teamId],
     queryFn: () => orgApi.getTeam(teamId),
     enabled: !!teamId,
+    refetchInterval: 5000,
   });
 };
 
@@ -344,9 +352,10 @@ export const useUpdateTeam = (orgId) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ teamId, payload }) => orgApi.updateTeam(teamId, payload),
-    onSuccess: () => {
+    onSuccess: (_, { teamId }) => {
       toast.success('Team updated successfully');
       queryClient.invalidateQueries({ queryKey: ['organizations', orgId, 'teams'] });
+      queryClient.invalidateQueries({ queryKey: ['teams', teamId] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to update team');
@@ -368,3 +377,83 @@ export const useDeleteTeam = (orgId) => {
   });
 };
 
+export const useAdminLeave = (orgId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload) => orgApi.adminLeave(orgId, payload),
+    onSuccess: () => {
+      toast.success('Left organization successfully');
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to leave organization');
+    },
+  });
+};
+
+// --- Team Messages ---
+export const useTeamMessages = (teamId) => {
+  return useQuery({
+    queryKey: ['teams', teamId, 'messages'],
+    queryFn: () => orgApi.getTeamMessages(teamId),
+    enabled: !!teamId,
+    refetchInterval: 5000,
+  });
+};
+
+export const useSendTeamMessage = (teamId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (content) => orgApi.sendTeamMessage(teamId, content),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['teams', teamId, 'messages'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to send message');
+    },
+  });
+};
+
+export const useDeleteTeamMessage = (teamId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (messageId) => orgApi.deleteTeamMessage(teamId, messageId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['teams', teamId, 'messages'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to delete message');
+    },
+  });
+};
+
+
+
+// --- Team Observers ---
+export const useTeamObservers = (teamId) => {
+  return useQuery({
+    queryKey: ['teams', teamId, 'observers'],
+    queryFn: () => orgApi.getTeamObservers(teamId),
+    enabled: !!teamId,
+  });
+};
+
+export const useAddTeamObserver = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ teamId, userId }) => orgApi.addTeamObserver(teamId, userId),
+    onSuccess: (_, { teamId }) => {
+      queryClient.invalidateQueries({ queryKey: ['teams', teamId, 'observers'] });
+    },
+  });
+};
+
+export const useRemoveTeamObserver = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ teamId, userId }) => orgApi.removeTeamObserver(teamId, userId),
+    onSuccess: (_, { teamId }) => {
+      queryClient.invalidateQueries({ queryKey: ['teams', teamId, 'observers'] });
+    },
+  });
+};

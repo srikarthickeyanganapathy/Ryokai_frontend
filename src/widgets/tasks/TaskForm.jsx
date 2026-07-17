@@ -4,17 +4,14 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { Input } from '@/shared/ui/Input'
 import { Button } from '@/shared/ui/Button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
-import { useTaskTemplates } from '../../features/tasks/hooks/useTaskTemplates'
-import { TaskTemplateManagerModal } from './TaskTemplateManagerModal'
 import { Settings } from 'lucide-react'
 import { useWorkspace } from '@/context/WorkspaceContext'
 import { useQuery } from '@tanstack/react-query'
-import { getOrgMembers } from '@/features/organizations/api/organization.api'
+import { getOrgMembers, getOrgTeams } from '@/features/organizations/api/organization.api'
+import { getProjects } from '@/features/projects/api/project.api'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 
 export function TaskForm({ onSubmit, defaultValues, isLoading }) {
-  const [isTemplateManagerOpen, setIsTemplateManagerOpen] = useState(false)
-  const { data: templates = [] } = useTaskTemplates()
   const { workspaceMode, activeOrganization } = useWorkspace()
   const isPersonalMode = workspaceMode === 'PERSONAL'
   const { user } = useAuth()
@@ -30,6 +27,18 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }) {
     
     return members.filter(m => m.username !== user.username)
   }, [isPersonalMode, user, members])
+
+  const { data: teams = [] } = useQuery({
+    queryKey: ['orgTeams', activeOrganization?.id],
+    queryFn: () => getOrgTeams(activeOrganization?.id),
+    enabled: !!activeOrganization?.id && !isPersonalMode
+  })
+
+  const { data: projects = [] } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => getProjects(),
+    enabled: !isPersonalMode
+  })
   
   const form = useForm({
     defaultValues: defaultValues || {
@@ -40,23 +49,16 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }) {
       dueDate: '',
       tags: '',
       teamId: '',
+      projectId: '',
     },
   })
-
-  const handleLoadTemplate = (templateId) => {
-    const template = templates.find(t => t.id === parseInt(templateId, 10))
-    if (template) {
-      if (template.defaultTitle) form.setValue('title', template.defaultTitle)
-      if (template.defaultDescription) form.setValue('description', template.defaultDescription)
-      if (template.defaultPriority) form.setValue('priority', template.defaultPriority)
-    }
-  }
 
   const handleSubmit = (data) => {
     // Format the payload before submission
     const payload = {
       ...data,
       teamId: data.teamId ? parseInt(data.teamId, 10) : null,
+      projectId: data.projectId ? parseInt(data.projectId, 10) : null,
       tags: data.tags || '',
       // Empty string dueDate causes Jackson 500 — convert to null
       dueDate: data.dueDate || null,
@@ -66,32 +68,8 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }) {
 
   return (
     <>
-      <TaskTemplateManagerModal 
-        open={isTemplateManagerOpen} 
-        onOpenChange={setIsTemplateManagerOpen} 
-      />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          
-          <div className="flex items-end gap-2 bg-[var(--bg-subtle)] p-3 rounded-[var(--radius-md)] mb-4 border border-[var(--color-border-subtle)]">
-            <div className="flex-1">
-              <label className="text-[11px] font-medium text-[var(--text-secondary)] mb-1.5 block uppercase tracking-wider">Start from Template</label>
-              <Select onValueChange={handleLoadTemplate}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a template to auto-fill..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {templates.map(t => (
-                    <SelectItem key={t.id} value={t.id.toString()}>{t.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button type="button" variant="outline" size="icon" onClick={() => setIsTemplateManagerOpen(true)} title="Manage Templates">
-              <Settings className="w-4 h-4" />
-            </Button>
-          </div>
-
           <FormField
             control={form.control}
           name="title"
@@ -185,7 +163,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }) {
             <FormItem>
               <FormLabel>Due Date</FormLabel>
               <FormControl>
-                <Input type="datetime-local" {...field} />
+                <Input type="date" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -206,7 +184,72 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }) {
           )}
         />
 
-        <Button type="submit" disabled={isLoading} className="w-full">
+        {!isPersonalMode && (
+          <div className="grid grid-cols-2 gap-4 border-t pt-4 mt-2">
+            <FormField
+              control={form.control}
+              name="teamId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Team (Optional)</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Global (No Team)" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Global (No Team)</SelectItem>
+                      {teams.map(t => (
+                        <SelectItem key={t.id} value={t.id.toString()}>
+                          {t.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="projectId"
+              render={({ field }) => {
+                // Only show projects that belong to the selected team (if a team is selected)
+                // If no team is selected, we might want to hide project or show global projects.
+                const currentTeamId = form.watch('teamId');
+                const filteredProjects = currentTeamId 
+                  ? projects.filter(p => p.team?.id?.toString() === currentTeamId)
+                  : projects.filter(p => !p.team);
+                  
+                return (
+                  <FormItem>
+                    <FormLabel>Project (Optional)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="No Project" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">No Project</SelectItem>
+                        {filteredProjects.map(p => (
+                          <SelectItem key={p.id} value={p.id.toString()}>
+                            {p.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )
+              }}
+            />
+          </div>
+        )}
+
+        <Button type="submit" isLoading={isLoading} className="w-full">
           {isLoading ? 'Saving...' : 'Save Task'}
         </Button>
       </form>

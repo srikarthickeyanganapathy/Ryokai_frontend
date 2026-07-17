@@ -18,7 +18,8 @@ export const useLoginMutation = () => {
       navigate(from, { replace: true })
     },
     onError: (error) => {
-      toast.error('Login Failed', { description: error.message || 'Invalid credentials' })
+      const description = error.response?.data?.message || error.message || 'Invalid credentials'
+      toast.error('Login Failed', { description })
     },
   })
 }
@@ -33,7 +34,8 @@ export const useRegisterMutation = () => {
       navigate('/login', { replace: true })
     },
     onError: (error) => {
-      toast.error('Registration Failed', { description: error.message || 'Could not create account' })
+      const description = error.response?.data?.message || error.message || 'Could not create account'
+      toast.error('Registration Failed', { description })
     },
   })
 }
@@ -45,7 +47,8 @@ export const useForgotPasswordMutation = () => {
       toast.success('Reset link sent!', { description: 'Please check your email.' })
     },
     onError: (error) => {
-      toast.error('Request Failed', { description: error.message || 'Could not send reset link' })
+      const description = error.response?.data?.message || error.message || 'Could not send reset link'
+      toast.error('Request Failed', { description })
     }
   })
 }
@@ -60,7 +63,8 @@ export const useResetPasswordMutation = () => {
       navigate('/login', { replace: true })
     },
     onError: (error) => {
-      toast.error('Reset Failed', { description: error.message || 'The token may have expired.' })
+      const description = error.response?.data?.message || error.message || 'The token may have expired.'
+      toast.error('Reset Failed', { description })
     }
   })
 }
@@ -77,7 +81,8 @@ export const useLogoutAllMutation = () => {
       navigate('/login', { replace: true })
     },
     onError: (error) => {
-      toast.error('Logout Failed', { description: error.message || 'Could not sign out everywhere' })
+      const description = error.response?.data?.message || error.message || 'Could not sign out everywhere'
+      toast.error('Logout Failed', { description })
     }
   })
 }

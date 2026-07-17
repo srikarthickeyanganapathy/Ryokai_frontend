@@ -5,6 +5,7 @@ import { Button } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
 import { Input } from '@/shared/ui/Input'
 import { useProjects, useCreateProject } from '@/features/projects/hooks/useProjects'
+import { usePermissions } from '@/context/usePermissions'
 import { ProjectCard } from '@/widgets/projects/ProjectCard'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { ProjectForm } from '@/widgets/projects/ProjectForm'
@@ -15,6 +16,8 @@ export function ProjectsPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   
   const { workspaceMode, activeOrganization } = useWorkspace()
+  const { canCreateProject } = usePermissions()
+  const canCreate = workspaceMode === 'PERSONAL' || canCreateProject
   
   const { data: allProjects = [], isLoading, isError, error } = useProjects({ search: globalFilter })
   const createProjectMutation = useCreateProject()
@@ -52,10 +55,12 @@ export function ProjectsPage() {
               className="pl-8" 
             />
           </div>
-          <Button size="sm" className="shrink-0 gap-1.5" onClick={() => setIsCreateOpen(true)}>
-            <Icons.projects className="w-3.5 h-3.5" />
-            New Project
-          </Button>
+          {canCreate && (
+            <Button size="sm" className="shrink-0 gap-1.5" onClick={() => setIsCreateOpen(true)}>
+              <Icons.projects className="w-3.5 h-3.5" />
+              New Project
+            </Button>
+          )}
         </div>
       </div>
 
@@ -67,7 +72,7 @@ export function ProjectsPage() {
               name: '',
               description: '',
               organizationId: workspaceMode === 'ORG' && activeOrganization ? activeOrganization.id.toString() : '',
-              teamId: '',
+              teamId: 'none',
               dueDate: '',
             }}
             onSubmit={handleCreateProject}
@@ -133,7 +138,7 @@ export function ProjectsPage() {
           </div>
           <Heading level={3} className="text-[15px] font-semibold">No projects found</Heading>
           <Text variant="muted" className="mt-2 mb-6 max-w-md mx-auto">Get started by creating a new project to organize your tasks.</Text>
-          <Button onClick={() => setIsCreateOpen(true)}>Create Project</Button>
+          {canCreate && <Button onClick={() => setIsCreateOpen(true)}>Create Project</Button>}
         </div>
       )}
 

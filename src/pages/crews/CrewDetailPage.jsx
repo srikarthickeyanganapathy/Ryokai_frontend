@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { Icons } from '@/shared/ui/Icons';
@@ -122,7 +122,7 @@ export function CrewDetailPage() {
           <TasksTab crewId={crewId} tasks={crewTasks} />
         )}
         {activeTab === 'channels' && (
-          <ChannelsTab crewId={crewId} channels={channels} />
+          <ChannelsTab crewId={crewId} channels={channels} isCreator={crew?.myRole === 'CREATOR'} />
         )}
         {activeTab === 'projects' && (
           <ProjectsTab crewId={crewId} sharedProjects={sharedProjects} allProjects={allProjects} />
@@ -306,7 +306,7 @@ function TasksTab({ crewId, tasks }) {
 }
 
 /* ==================== CHANNELS TAB ==================== */
-function ChannelsTab({ crewId, channels }) {
+function ChannelsTab({ crewId, channels, isCreator }) {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [channelName, setChannelName] = useState('');
@@ -348,9 +348,11 @@ function ChannelsTab({ crewId, channels }) {
       <div className="md:col-span-1 border-r border-[var(--border-subtle)] pr-4 space-y-4">
         <div className="flex items-center justify-between">
           <Heading level={3} className="text-[14px] font-semibold mb-0">Channels</Heading>
-          <Button size="xs" variant="outline" className="p-1 h-7 w-7" onClick={() => setIsCreateOpen(true)}>
-            <Icons.plus className="w-4 h-4" />
-          </Button>
+          {isCreator && (
+            <Button size="xs" variant="outline" className="p-1 h-7 w-7" onClick={() => setIsCreateOpen(true)}>
+              <Icons.plus className="w-4 h-4" />
+            </Button>
+          )}
         </div>
 
         <Modal open={isCreateOpen} onOpenChange={setIsCreateOpen}>
@@ -400,12 +402,14 @@ function ChannelsTab({ crewId, channels }) {
                 <Icons.message className="w-3.5 h-3.5 shrink-0" />
                 {chan.name}
               </span>
-              <button
-                onClick={(e) => handleDeleteChannel(chan.id, e)}
-                className="text-[var(--text-tertiary)] hover:text-red-500 opacity-0 hover:opacity-100 group-hover:opacity-100 p-0.5 rounded transition-opacity"
-              >
-                <Icons.trash2 className="w-3 h-3" />
-              </button>
+              {isCreator && (
+                <button
+                  onClick={(e) => handleDeleteChannel(chan.id, e)}
+                  className="text-[var(--text-tertiary)] hover:text-red-500 opacity-0 hover:opacity-100 group-hover:opacity-100 p-0.5 rounded transition-opacity"
+                >
+                  <Icons.trash2 className="w-3 h-3" />
+                </button>
+              )}
             </div>
           ))}
           {channels.length === 0 && (
@@ -505,12 +509,12 @@ function ChannelChatBox({ crewId, channel }) {
             <div key={msg.id} className="group flex items-start gap-3 hover:bg-[var(--bg-hover)] p-1.5 rounded-md transition-colors">
               <Avatar size="sm" className="bg-[var(--accent-cyan)] text-white">
                 <AvatarFallback className="text-[10px] font-semibold">
-                  {msg.sender?.charAt(0).toUpperCase() || 'U'}
+                  {msg.authorUsername?.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-[12.5px] font-semibold text-[var(--text-primary)]">@{msg.sender}</span>
+                  <span className="text-[12.5px] font-semibold text-[var(--text-primary)]">@{msg.authorUsername}</span>
                   <span className="text-[10px] text-[var(--text-tertiary)]">{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
                 <p className="text-[13px] text-[var(--text-secondary)] mt-0.5 break-words">{msg.content}</p>
@@ -635,16 +639,16 @@ function ProjectsTab({ crewId, sharedProjects, allProjects }) {
       ) : (
         <div className="space-y-2">
           {sharedProjects.map((proj) => (
-            <div key={proj.id} className="flex items-center justify-between p-3 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-[var(--radius-md)]">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-md bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)] font-semibold">
+            <div key={proj.id} className="flex items-center justify-between p-3 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-[var(--radius-md)] transition-colors hover:bg-[var(--bg-hover)]">
+              <Link to={`/app/projects/${proj.id}`} className="flex items-center gap-3 flex-1 min-w-0 group cursor-pointer">
+                <div className="w-8 h-8 rounded-md bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)] font-semibold shrink-0 transition-colors group-hover:bg-[var(--accent)] group-hover:text-white">
                   {proj.name.charAt(0).toUpperCase()}
                 </div>
-                <div>
-                  <Heading level={4} className="text-[14px] font-semibold mb-0.5">{proj.name}</Heading>
-                  <Text className="text-[12px] text-[var(--text-secondary)]">{proj.description}</Text>
+                <div className="min-w-0">
+                  <Heading level={4} className="text-[14px] font-semibold mb-0.5 group-hover:text-[var(--accent)] transition-colors truncate">{proj.name}</Heading>
+                  <Text className="text-[12px] text-[var(--text-secondary)] truncate">{proj.description}</Text>
                 </div>
-              </div>
+              </Link>
               <Button
                 variant="outline"
                 size="sm"

@@ -14,7 +14,7 @@ export function LeaveRequestsTab({ orgId }) {
   const { data: requests = [], isLoading } = useLeaveRequests(orgId);
   const approveMutation = useApproveLeave(orgId);
   const rejectMutation = useRejectLeave(orgId);
-  const { isSuperAdmin } = usePermissions();
+  const { canManageLeaveRequests } = usePermissions();
 
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const { confirm, dialog: confirmDialog } = useConfirmDialog();
@@ -85,7 +85,7 @@ export function LeaveRequestsTab({ orgId }) {
                 )}
               </div>
               
-              {req.status === 'PENDING' && (
+              {req.status === 'PENDING' && canManageLeaveRequests && (
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={() => handleReject(req.id)}>Reject</Button>
                   <Button size="sm" onClick={() => handleApprove(req.id)}>Approve</Button>

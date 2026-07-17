@@ -1,7 +1,7 @@
 import api from '@/lib/api';
 
-export const getDashboardStats = async () => {
-  const { data } = await api.get('/dashboard/stats');
+export const getDashboardStats = async (params = {}) => {
+  const { data } = await api.get('/dashboard/stats', { params });
   return data;
 };
 
