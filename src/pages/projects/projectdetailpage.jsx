@@ -383,6 +383,8 @@ export function ProjectDetailPage() {
               teamId: project.teamId ? project.teamId.toString() : '',
               projectId: projectId.toString(),
             }}
+            fixedProjectId={projectId}
+            fixedTeamId={project.teamId}
             onSubmit={handleAddTaskSubmit}
             isLoading={createTaskMutation.isPending}
           />

@@ -605,9 +605,9 @@ function ProjectsTab({ crewId, sharedProjects, allProjects }) {
     });
   };
 
-  // Filter out projects that are already shared
+  // Filter out projects that are already shared, and only allow personal projects (no org/team)
   const shareableProjects = allProjects.filter(
-    proj => !sharedProjects.some(sp => sp.id === proj.id)
+    proj => !sharedProjects.some(sp => sp.id === proj.id) && !proj.organizationId && !proj.teamId
   );
 
   return (

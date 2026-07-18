@@ -1,28 +1,20 @@
 import { QueryClient } from '@tanstack/react-query'
 
+// NOTE: This file is NOT used by the app. The actual QueryClient is in @/lib/queryClient.
+// Keeping this file in sync for reference. See src/lib/queryClient.js for the active config.
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Data is considered fresh for 5 minutes
-      staleTime: 5 * 60 * 1000, 
-      
-      // Keep unused data in cache for 30 minutes
-      gcTime: 30 * 60 * 1000, 
-      
-      // Retry failing requests exactly once
-      retry: 1, 
-      
-      // Don't refetch every time the user tabs back to the app
-      refetchOnWindowFocus: false,
-      
-      // In a strict enterprise app, we want predictable fetching
+      staleTime: 15000,
+      gcTime: 300000,
+      retry: 1,
+      refetchOnWindowFocus: true,
       refetchOnMount: true,
-      
-      // Global error boundary handling (Phase 2 integration)
       throwOnError: false, 
     },
     mutations: {
-      retry: 0, // Never retry mutations automatically to prevent duplicate actions
+      retry: 0,
       throwOnError: false,
     },
   },

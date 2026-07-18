@@ -55,6 +55,9 @@ export const useDeleteCrew = () => {
     onSuccess: () => {
       toast.success('Crew deleted successfully');
       queryClient.invalidateQueries({ queryKey: queryKeys.crews.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to delete crew');
@@ -78,6 +81,7 @@ export const useInviteCrewMember = (crewId) => {
     onSuccess: () => {
       toast.success('Crew invitation sent');
       queryClient.invalidateQueries({ queryKey: queryKeys.crews.members(crewId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.detail(crewId) });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to send invitation');
@@ -104,6 +108,7 @@ export const useAcceptCrewInvite = () => {
     onSuccess: () => {
       toast.success('Joined crew successfully');
       queryClient.invalidateQueries({ queryKey: queryKeys.crews.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to accept invite');
@@ -118,6 +123,8 @@ export const useRemoveCrewMember = (crewId) => {
     onSuccess: () => {
       toast.success('Crew member removed');
       queryClient.invalidateQueries({ queryKey: queryKeys.crews.members(crewId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.detail(crewId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to remove member');
@@ -132,6 +139,9 @@ export const useLeaveCrew = (crewId) => {
     onSuccess: () => {
       toast.success('Left crew successfully');
       queryClient.invalidateQueries({ queryKey: queryKeys.crews.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.detail(crewId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to leave crew');
@@ -205,6 +215,7 @@ export const useCreateCrewChannel = (crewId) => {
     onSuccess: () => {
       toast.success('Channel created successfully');
       queryClient.invalidateQueries({ queryKey: queryKeys.crews.channels(crewId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.detail(crewId) });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to create channel');
@@ -219,6 +230,7 @@ export const useDeleteCrewChannel = (crewId) => {
     onSuccess: () => {
       toast.success('Channel deleted successfully');
       queryClient.invalidateQueries({ queryKey: queryKeys.crews.channels(crewId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.detail(crewId) });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to delete channel');
@@ -281,6 +293,7 @@ export const useConvertMessageToTask = (crewId, channelId) => {
     onSuccess: () => {
       toast.success('Message converted to task');
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to convert message');
@@ -295,6 +308,7 @@ export const useCreateCrewTask = (crewId) => {
     onSuccess: () => {
       toast.success('Crew task created successfully');
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to create crew task');

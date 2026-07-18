@@ -30,6 +30,8 @@ export const useAssignTask = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
     },
   });
 };
@@ -68,6 +70,8 @@ export const useCreateTask = () => {
       toast.success(`'${taskTitle}' created successfully`);
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to create task');
@@ -90,6 +94,7 @@ export const useSubmitTask = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
   });
 };
@@ -109,6 +114,7 @@ export const useCompletePersonalTask = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
   });
 };
@@ -130,6 +136,7 @@ export const useCompleteCrewTask = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
   });
 };
@@ -149,6 +156,8 @@ export const useRecallTask = () => {
     onSettled: (_, __, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
   });
 };
@@ -160,6 +169,8 @@ export const useBulkAssign = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to bulk assign tasks');
@@ -182,6 +193,7 @@ export const useApproveTask = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
   });
 };
@@ -201,6 +213,7 @@ export const useRejectTask = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(variables.id) });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
   });
 };
@@ -336,6 +349,8 @@ export const useUpdateTask = () => {
       toast.success('Task updated');
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to update task');
@@ -351,6 +366,7 @@ export const useDeleteTask = () => {
       toast.success('Task deleted');
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to delete task');
@@ -366,6 +382,7 @@ export const useArchiveTask = () => {
       toast.success('Task archived successfully');
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to archive task');
@@ -411,6 +428,7 @@ export const useReassignTask = () => {
       toast.success('Task reassigned');
       if (taskId) queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(taskId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to reassign task');
@@ -504,6 +522,7 @@ export const useClaimTask = () => {
       toast.success('Task claimed successfully');
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(taskId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to claim task');

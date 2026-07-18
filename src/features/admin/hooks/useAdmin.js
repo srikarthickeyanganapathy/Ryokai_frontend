@@ -103,6 +103,7 @@ export const useSuspendOrganization = () => {
     onSuccess: () => {
       toast.success('Organization suspended');
       queryClient.invalidateQueries({ queryKey: ['admin', 'organizations'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to suspend organization');
@@ -117,6 +118,7 @@ export const useActivateOrganization = () => {
     onSuccess: () => {
       toast.success('Organization activated');
       queryClient.invalidateQueries({ queryKey: ['admin', 'organizations'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to activate organization');
@@ -131,6 +133,7 @@ export const useDeleteOrganization = () => {
     onSuccess: () => {
       toast.success('Organization deleted');
       queryClient.invalidateQueries({ queryKey: ['admin', 'organizations'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to delete organization');

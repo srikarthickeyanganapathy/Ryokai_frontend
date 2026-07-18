@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as orgApi from '../api/organization.api';
 import { queryKeys } from '@/lib/queryKeys';
 import { toast } from 'sonner';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export const useOrganizations = (options = {}) => {
   return useQuery({
@@ -26,6 +27,7 @@ export const useCreateOrganization = () => {
     onSuccess: () => {
       toast.success('Organization created');
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to create organization');
@@ -65,13 +67,16 @@ export const useMyInvites = () => {
 
 export const useAcceptInvite = () => {
   const queryClient = useQueryClient();
+  const { refreshUser } = useAuth();
   return useMutation({
     mutationFn: (inviteId) => orgApi.acceptInvite(inviteId),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Organization joined');
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.invites() });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
+      await refreshUser();
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to accept invite');
@@ -103,6 +108,8 @@ export const useRemoveMember = (orgId) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.members(orgId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.teams(orgId) });
       queryClient.invalidateQueries({ queryKey: ['teams'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to remove member');
@@ -126,6 +133,7 @@ export const useCreateTeam = (orgId) => {
     onSuccess: () => {
       toast.success('Team created');
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.teams(orgId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to create team');
@@ -157,6 +165,8 @@ export const useApproveLeave = (orgId) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.leaveRequests(orgId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.members(orgId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to approve leave');
@@ -203,6 +213,7 @@ export const useUpdateMemberRole = (orgId) => {
     onSuccess: () => {
       toast.success('Member role updated');
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.members(orgId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(orgId) });
       queryClient.invalidateQueries({ queryKey: ['teams'] });
     },
     onError: (error) => {
@@ -221,6 +232,7 @@ export const useAddTeamMember = () => {
       toast.success('Member added to team');
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
       queryClient.invalidateQueries({ queryKey: ['teams', teamId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.teams(undefined) });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to add team member');
@@ -236,6 +248,7 @@ export const useRemoveTeamMember = () => {
       toast.success('Member removed from team');
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
       queryClient.invalidateQueries({ queryKey: ['teams', teamId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to remove team member');
@@ -296,12 +309,14 @@ export const useCreateInviteLink = (orgId) => {
 
 export const useAcceptInviteByToken = () => {
   const queryClient = useQueryClient();
+  const { refreshUser } = useAuth();
   return useMutation({
     mutationFn: (token) => orgApi.acceptInviteByToken(token),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Joined organization successfully');
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      await refreshUser();
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to accept invite');
@@ -370,6 +385,7 @@ export const useDeleteTeam = (orgId) => {
     onSuccess: () => {
       toast.success('Team deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['organizations', orgId, 'teams'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to delete team');
@@ -384,6 +400,9 @@ export const useAdminLeave = (orgId) => {
     onSuccess: () => {
       toast.success('Left organization successfully');
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to leave organization');

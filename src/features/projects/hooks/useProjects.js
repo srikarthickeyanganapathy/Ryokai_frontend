@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { projectsApi } from '../api'
 import { queryKeys } from '@/lib/queryKeys'
+import { toast } from 'sonner'
 
 export function useProjects(filters = {}) {
   return useQuery({
@@ -23,7 +24,12 @@ export function useCreateProject() {
   return useMutation({
     mutationFn: projectsApi.createProject,
     onSuccess: () => {
+      toast.success('Project created successfully')
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || 'Failed to create project')
     },
   })
 }
@@ -33,8 +39,13 @@ export function useUpdateProject() {
   return useMutation({
     mutationFn: ({ id, updates }) => projectsApi.updateProject(id, updates),
     onSuccess: (data) => {
+      toast.success('Project updated successfully')
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all })
       queryClient.setQueryData(queryKeys.projects.detail(data.id), data)
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all })
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || 'Failed to update project')
     },
   })
 }
@@ -44,7 +55,13 @@ export function useDeleteProject() {
   return useMutation({
     mutationFn: projectsApi.deleteProject,
     onSuccess: () => {
+      toast.success('Project deleted successfully')
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || 'Failed to delete project')
     },
   })
 }

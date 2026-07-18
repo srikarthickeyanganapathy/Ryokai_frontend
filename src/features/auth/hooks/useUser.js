@@ -20,11 +20,14 @@ export const useUsersList = () => {
 
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
+  const { refreshUser } = useAuth();
   return useMutation({
     mutationFn: (profileData) => userApi.updateProfile(profileData),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Profile updated successfully');
       queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
+      // Sync AuthContext.user so sidebar/header reflects the new name immediately
+      await refreshUser();
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to update profile');
@@ -34,11 +37,14 @@ export const useUpdateProfile = () => {
 
 export const useUploadAvatar = () => {
   const queryClient = useQueryClient();
+  const { refreshUser } = useAuth();
   return useMutation({
     mutationFn: (file) => userApi.uploadAvatar(file),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Avatar uploaded successfully');
       queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
+      // Sync AuthContext.user so header avatar updates immediately
+      await refreshUser();
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to upload avatar');

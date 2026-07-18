@@ -25,13 +25,18 @@ export const useLoginMutation = () => {
 }
 
 export const useRegisterMutation = () => {
+  const { login } = useAuth()
   const navigate = useNavigate()
 
   return useMutation({
     mutationFn: (userData) => authAPI.register(userData),
-    onSuccess: (data) => {
-      toast.success('Account Created!', { description: data?.message || 'Please check your email to verify your account.' })
-      navigate('/login', { replace: true })
+    onSuccess: ({ user }) => {
+      // Auto-login after registration — the backend already returns tokens
+      // in the JwtResponseDTO, so we use them directly instead of forcing
+      // the user to re-enter credentials on the login page.
+      login(user)
+      toast.success('Account Created!', { description: 'Welcome to Ryokai!' })
+      navigate('/app', { replace: true })
     },
     onError: (error) => {
       const description = error.response?.data?.message || error.message || 'Could not create account'

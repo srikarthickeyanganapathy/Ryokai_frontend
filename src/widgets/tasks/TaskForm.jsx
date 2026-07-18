@@ -11,7 +11,7 @@ import { getOrgMembers, getOrgTeams } from '@/features/organizations/api/organiz
 import { projectsApi } from '@/features/projects/api'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 
-export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask }) {
+export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, fixedProjectId, fixedTeamId }) {
   const { workspaceMode, activeOrganization } = useWorkspace()
   
   // FE Bug Fix: if the task is explicitly tied to a project or team, it is NOT a personal task.
@@ -210,7 +210,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask })
           )}
         />
 
-        {!isPersonalMode && (
+        {!isPersonalMode && !fixedProjectId && !fixedTeamId && (
           <div className="grid grid-cols-2 gap-4 border-t pt-4 mt-2">
             <FormField
               control={form.control}
@@ -218,7 +218,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask })
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Team (Optional)</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value?.toString() || ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Global (No Team)" />
@@ -252,7 +252,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask })
                 return (
                   <FormItem>
                     <FormLabel>Project (Optional)</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value?.toString() || ""}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="No Project" />

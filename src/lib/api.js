@@ -7,20 +7,19 @@ const api = axios.create({
   withCredentials: false
 });
 
-let isRefreshing = false;
-let failedQueue = [];
+// We no longer use proactive refresh because cross-tab race conditions on the timer
+// cause the backend to detect token reuse and revoke all sessions.
+// Instead, we use Web Locks API in the reactive interceptor to cleanly handle concurrency.
 
-const processQueue = (error, token = null) => {
-  failedQueue.forEach(prom => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-  failedQueue = [];
-};
+export function scheduleProactiveRefresh(accessToken) {
+  // Deprecated - kept as no-op so we don't break other files calling it until they are updated
+}
 
+export function cancelProactiveRefresh() {
+  // Deprecated
+}
+
+// --- Request Interceptor ---
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('jwt_token');
@@ -32,6 +31,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// --- Date Array Transform ---
 const transformDateArrays = (obj) => {
   if (obj === null || obj === undefined || typeof obj !== 'object') return obj;
 
@@ -60,6 +60,7 @@ const transformDateArrays = (obj) => {
   return obj;
 };
 
+// --- Response Interceptor ---
 api.interceptors.response.use(
   (response) => {
     if (response.data) {
@@ -72,46 +73,54 @@ api.interceptors.response.use(
 
     if (error.response) {
       if (error.response.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/login' && originalRequest.url !== '/auth/refresh') {
-        if (isRefreshing) {
-          return new Promise(function (resolve, reject) {
-            failedQueue.push({ resolve, reject });
-          }).then(token => {
-            originalRequest.headers['Authorization'] = 'Bearer ' + token;
-            return api(originalRequest);
-          }).catch(err => {
-            return Promise.reject(err);
-          });
-        }
-
         originalRequest._retry = true;
-        isRefreshing = true;
+        
+        const currentToken = localStorage.getItem('jwt_token');
 
         try {
-          const refreshToken = localStorage.getItem('jwt_refresh');
-          if (!refreshToken) {
-            throw new Error("No refresh token");
+          const doRefresh = async () => {
+            // If another request/tab already refreshed the token while we waited for the lock, just use it
+            const newToken = localStorage.getItem('jwt_token');
+            if (newToken && newToken !== currentToken) {
+              originalRequest.headers['Authorization'] = 'Bearer ' + newToken;
+              return api(originalRequest);
+            }
+
+            const refreshToken = localStorage.getItem('jwt_refresh');
+            if (!refreshToken) throw new Error("No refresh token");
+
+            let data;
+            try {
+              const response = await axios.post(`${api.defaults.baseURL}/auth/refresh`, { refreshToken });
+              data = response.data;
+            } catch (firstAttemptError) {
+              const status = firstAttemptError?.response?.status;
+              if (status === 429 || !firstAttemptError.response) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                const retryResponse = await axios.post(`${api.defaults.baseURL}/auth/refresh`, { refreshToken });
+                data = retryResponse.data;
+              } else {
+                throw firstAttemptError;
+              }
+            }
+
+            localStorage.setItem('jwt_token', data.accessToken);
+            localStorage.setItem('jwt_refresh', data.refreshToken);
+            originalRequest.headers['Authorization'] = 'Bearer ' + data.accessToken;
+            return api(originalRequest);
+          };
+
+          // Use Web Locks API to prevent cross-tab and intra-tab race conditions!
+          if (typeof navigator !== 'undefined' && navigator.locks) {
+            return await navigator.locks.request('ryokai_refresh_lock', doRefresh);
+          } else {
+            return await doRefresh();
           }
-
-          const { data } = await axios.post(`${api.defaults.baseURL}/auth/refresh`, { refreshToken });
-
-          localStorage.setItem('jwt_token', data.accessToken);
-          localStorage.setItem('jwt_refresh', data.refreshToken);
-
-
-          originalRequest.headers['Authorization'] = 'Bearer ' + data.accessToken;
-
-          processQueue(null, data.accessToken);
-
-          return api(originalRequest);
         } catch (refreshError) {
-          processQueue(refreshError, null);
           localStorage.removeItem('jwt_token');
           localStorage.removeItem('jwt_refresh');
-          window.location.href = '/login';
-          toast.error("Session expired, please log in again");
+          window.dispatchEvent(new Event('session-expired'));
           return Promise.reject(refreshError);
-        } finally {
-          isRefreshing = false;
         }
       }
 
