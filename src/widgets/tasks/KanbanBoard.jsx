@@ -83,9 +83,30 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
     }
 
     if (targetStatus === 'SUBMITTED') {
-      if (currentStatus !== 'ASSIGNED' && currentStatus !== 'REJECTED') {
+      if (currentStatus !== 'ASSIGNED' && currentStatus !== 'REJECTED' && currentStatus !== 'TODO') {
          toast.error('Can only submit tasks that are To Do or Needs Work');
          return;
+      }
+      // FE Bug #4 Fix: After backend Bug #2 fix, rejected tasks have no assignee.
+      // Must reassign-to-self first, then submit after reassignment completes.
+      if (currentStatus === 'REJECTED' && !task.assignedTo && !task.assignee) {
+        if (!user?.id) {
+          toast.error('Cannot determine your user ID for reassignment.');
+          return;
+        }
+        toast.info('Claiming rejected task before resubmitting…');
+        reassignMutation.mutate(
+          { taskId: task.id, newAssigneeId: user.id },
+          {
+            onSuccess: () => {
+              submitMutation.mutate(task.id);
+            },
+            onError: (error) => {
+              toast.error(error.response?.data?.message || 'Failed to claim task. You may not have reassign permission.');
+            }
+          }
+        );
+        return;
       }
       submitMutation.mutate(task.id);
     } else if (targetStatus === 'APPROVED') {

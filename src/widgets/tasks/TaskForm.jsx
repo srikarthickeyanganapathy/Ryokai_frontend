@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/shared/forms'
 import { Input } from '@/shared/ui/Input'
@@ -8,12 +8,17 @@ import { Settings } from 'lucide-react'
 import { useWorkspace } from '@/context/WorkspaceContext'
 import { useQuery } from '@tanstack/react-query'
 import { getOrgMembers, getOrgTeams } from '@/features/organizations/api/organization.api'
-import { getProjects } from '@/features/projects/api/project.api'
+import { projectsApi } from '@/features/projects/api'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 
-export function TaskForm({ onSubmit, defaultValues, isLoading }) {
+export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask }) {
   const { workspaceMode, activeOrganization } = useWorkspace()
-  const isPersonalMode = workspaceMode === 'PERSONAL'
+  
+  // FE Bug Fix: if the task is explicitly tied to a project or team, it is NOT a personal task.
+  const hasOrgContext = !!defaultValues?.projectId || !!defaultValues?.teamId;
+  const isPersonalMode = isPersonalTask !== undefined 
+    ? isPersonalTask 
+    : (workspaceMode === 'PERSONAL' && !hasOrgContext);
   const { user } = useAuth()
   
   const { data: members = [] } = useQuery({
@@ -36,7 +41,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }) {
 
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => getProjects(),
+    queryFn: () => projectsApi.getProjects(),
     enabled: !isPersonalMode
   })
   
@@ -52,6 +57,12 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }) {
       projectId: '',
     },
   })
+
+  // FE Bug #1 Fix: Reset assignee when team changes to prevent cross-team picks
+  const watchedTeamId = form.watch('teamId')
+  useEffect(() => {
+    form.setValue('assigneeUsername', '')
+  }, [watchedTeamId])
 
   const handleSubmit = (data) => {
     // Format the payload before submission
@@ -104,31 +115,46 @@ export function TaskForm({ onSubmit, defaultValues, isLoading }) {
             control={form.control}
             name="assigneeUsername"
             rules={{ required: 'Assignee username is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Assignee Username</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select assignee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {assignableMembers.map(m => (
-                      <SelectItem key={m.username} value={m.username}>
-                        {m.username} ({m.orgRole})
-                      </SelectItem>
-                    ))}
-                    {assignableMembers.length === 0 && (
-                      <SelectItem value="_empty" disabled>
-                        No other members available
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              // FE Bug #1 Fix: Filter assignees by the currently selected team
+              const currentTeamId = form.watch('teamId');
+              const selectedTeam = currentTeamId
+                ? teams.find(t => t.id.toString() === currentTeamId)
+                : null;
+
+              const filteredAssignees = selectedTeam
+                ? members.filter(m =>
+                    m.username !== user.username &&
+                    selectedTeam.members?.some(tm => tm.username === m.username)
+                  )
+                : assignableMembers;
+
+              return (
+                <FormItem>
+                  <FormLabel>Assignee Username</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select assignee" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {filteredAssignees.map(m => (
+                        <SelectItem key={m.username} value={m.username}>
+                          {m.username} ({m.orgRole})
+                        </SelectItem>
+                      ))}
+                      {filteredAssignees.length === 0 && (
+                        <SelectItem value="_empty" disabled>
+                          {selectedTeam ? 'No team members available' : 'No other members available'}
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )
+            }}
           />
         )}
 

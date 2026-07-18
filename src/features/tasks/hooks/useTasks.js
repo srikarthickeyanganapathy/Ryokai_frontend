@@ -42,7 +42,9 @@ export const useCreateTask = () => {
     mutationFn: async (payload) => {
       // Ensure required fields: assigneeUsername defaults to current user, priority defaults to MEDIUM
       // FIX: backend TaskPriority enum is { LOW, MEDIUM, HIGH, URGENT } — 'NORMAL' does not exist.
-      const isPersonalMode = workspaceMode === 'PERSONAL';
+      // Check if the payload explicitly links to an org entity
+      const hasOrgContext = !!payload.projectId || !!payload.teamId || !!payload.organizationId;
+      const isPersonalMode = workspaceMode === 'PERSONAL' && !hasOrgContext;
       const taskPayload = {
         ...payload,
         assigneeUsername: payload.assigneeUsername || user?.username,
@@ -156,7 +158,6 @@ export const useBulkAssign = () => {
   return useMutation({
     mutationFn: (payload) => taskApi.bulkAssign(payload),
     onSuccess: (data) => {
-      toast.success(`Successfully created tasks!`);
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
     },

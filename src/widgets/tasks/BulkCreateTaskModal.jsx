@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { useBulkAssign } from '../../features/tasks/hooks/useTasks';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/shared/ui/Modal';
@@ -46,9 +47,15 @@ export function BulkCreateTaskModal({ open, onOpenChange }) {
     };
 
     bulkAssignMutation.mutate(payload, {
-      onSuccess: () => {
+      onSuccess: (data) => {
         form.reset();
         onOpenChange(false);
+        const failed = Object.entries(data?.failedAssignees || {});
+        if (failed.length > 0) {
+          toast.warning(`${failed.length} assignment(s) failed: ${failed.map(([u,e]) => `${u} (${e})`).join(', ')}`);
+        } else {
+          toast.success('Tasks assigned successfully');
+        }
       }
     });
   };

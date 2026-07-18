@@ -35,7 +35,11 @@ export const getTasks = async (params) => {
 };
 
 export const assignTask = async (payload) => {
-  const { data } = await api.post('/tasks/assign', { ...payload, tags: toBackendTags(payload.tags) });
+  const { crewId, ...rest } = payload;
+  if (crewId) {
+    console.warn('[task.api] assignTask: crewId is not allowed here. Use createCrewTask instead.');
+  }
+  const { data } = await api.post('/tasks/assign', { ...rest, tags: toBackendTags(rest.tags) });
   return normalizeTask(data);
 };
 
@@ -46,7 +50,11 @@ export const createPersonalTask = async (payload) => {
 
 export const bulkAssign = async (payload) => {
   const { data } = await api.post('/tasks/bulk-assign', payload);
-  return Array.isArray(data) ? data.map(normalizeTask) : normalizeTask(data);
+  if (Array.isArray(data)) return data.map(normalizeTask);
+  return {
+    ...data,
+    successfulTasks: Array.isArray(data.successfulTasks) ? data.successfulTasks.map(normalizeTask) : []
+  };
 };
 
 export const completePersonalTask = async (id) => {
@@ -80,7 +88,10 @@ export const approveTask = async (id) => {
 // FIX (SM-M01): backend now REQUIRES a non-blank reason (@NotBlank on RejectReasonDTO).
 // The body is mandatory — backend returns 400 if reason is missing or blank.
 export const rejectTask = async (id, reason) => {
-  const { data } = await api.post(`/tasks/${id}/reject`, { reason: reason || '' });
+  if (!reason || reason.trim() === '') {
+    throw new Error('Reason is required to reject a task');
+  }
+  const { data } = await api.post(`/tasks/${id}/reject`, { reason });
   return normalizeTask(data);
 };
 

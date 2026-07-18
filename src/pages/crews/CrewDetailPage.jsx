@@ -25,6 +25,7 @@ import {
   useSendChannelMessage,
   useConvertMessageToTask,
   useCreateCrewTask,
+  useTransferCrewOwnership,
 } from '@/features/crews/hooks/useCrews';
 import { toast } from 'sonner';
 
@@ -128,7 +129,7 @@ export function CrewDetailPage() {
           <ProjectsTab crewId={crewId} sharedProjects={sharedProjects} allProjects={allProjects} />
         )}
         {activeTab === 'members' && (
-          <MembersTab crewId={crewId} members={members} memberCap={crew.memberCap} />
+          <MembersTab crewId={crewId} members={members} memberCap={crew.memberCap} isCreator={crew?.myRole === 'CREATOR'} />
         )}
       </div>
     </div>
@@ -667,13 +668,14 @@ function ProjectsTab({ crewId, sharedProjects, allProjects }) {
 }
 
 /* ==================== MEMBERS TAB ==================== */
-function MembersTab({ crewId, members, memberCap }) {
+function MembersTab({ crewId, members, memberCap, isCreator }) {
   const [email, setEmail] = useState('');
   const [inviteLink, setInviteLink] = useState('');
 
   const inviteMutation = useInviteCrewMember(crewId);
   const inviteLinkMutation = useCreateCrewInviteLink(crewId);
   const removeMutation = useRemoveCrewMember(crewId);
+  const transferOwnershipMutation = useTransferCrewOwnership(crewId);
 
   const handleInvite = (e) => {
     e.preventDefault();
@@ -717,17 +719,34 @@ function MembersTab({ crewId, members, memberCap }) {
                     <span className="text-[10px] text-[var(--text-tertiary)] ml-2 uppercase font-mono">{member.role}</span>
                   </div>
                 </div>
-                {/* Remove member button */}
-                <button
-                  onClick={() => {
-                    if (window.confirm(`Remove member @${member.username}?`)) {
-                      removeMutation.mutate(member.userId);
-                    }
-                  }}
-                  className="text-[var(--text-tertiary)] hover:text-red-500 p-1"
-                >
-                  <Icons.trash2 className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex items-center gap-2">
+                  {isCreator && member.role !== 'CREATOR' && (
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="text-[11px] h-7 px-2 border-[var(--border-default)]"
+                      onClick={() => {
+                        if (window.confirm(`Transfer crew ownership to @${member.username}? You will be demoted to MEMBER.`)) {
+                          transferOwnershipMutation.mutate(member.userId);
+                        }
+                      }}
+                      isLoading={transferOwnershipMutation.isPending && transferOwnershipMutation.variables === member.userId}
+                    >
+                      Make Owner
+                    </Button>
+                  )}
+                  {/* Remove member button */}
+                  <button
+                    onClick={() => {
+                      if (window.confirm(`Remove member @${member.username}?`)) {
+                        removeMutation.mutate(member.userId);
+                      }
+                    }}
+                    className="text-[var(--text-tertiary)] hover:text-red-500 p-1"
+                  >
+                    <Icons.trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

@@ -7,7 +7,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { cn } from '@/shared/lib/cn'
 import { normalizePriority } from '@/shared/lib/priority'
 import { ChecklistForm } from './ChecklistForm'
-import { TaskComments, TaskTimeline, TaskDependencies } from './TaskPanelExtras'
+import { TaskComments, TaskTimeline, TaskDependencies, TaskEvidence } from './TaskPanelExtras'
 import { useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, useUpdateTask, useArchiveTask, useDeleteTask, useReassignTask } from '@/features/tasks/hooks/useTasks'
 import { useUsersList } from '@/features/auth/hooks/useUser'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
@@ -31,9 +31,9 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   const hasArchivePerm = isPersonal || canArchiveTask
   const hasDeletePerm = isPersonal || canDeleteTask || isCreator
   const hasEditPerm = isPersonal || canEditTask || isCreator || isAssignee
-  const hasAssignPerm = isPersonal || canAssignTask || isCreator || isAssignee
+  const hasAssignPerm = isPersonal || canAssignTask || isCreator
   const hasChecklistPerm = isPersonal || canChecklistEdit || isCreator || isAssignee
-  const hasDependencyPerm = isPersonal || canDependencyEdit || isCreator || isAssignee
+  const hasDependencyPerm = isPersonal || canDependencyEdit || isCreator
   const hasCommentPerm = isPersonal || canCommentTask
 
   const addChecklistItem = useAddChecklistItem(task?.id)
@@ -337,6 +337,10 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                 <hr className="border-[var(--color-border-subtle)]" />
 
                 <TaskDependencies task={task} hasDependencyPerm={hasDependencyPerm} />
+
+                <hr className="border-[var(--color-border-subtle)]" />
+                
+                <TaskEvidence taskId={task.id} hasEditPerm={canEditTask || isCreator} />
 
                 <hr className="border-[var(--color-border-subtle)]" />
                 

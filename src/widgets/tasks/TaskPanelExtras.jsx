@@ -4,8 +4,9 @@ import { Icons } from '@/shared/ui/Icons'
 import { IconButton, Button } from '@/shared/ui/Button'
 import { Avatar, AvatarFallback } from '@/shared/ui/Avatar'
 import { Input } from '@/shared/ui/Input'
+import { Badge } from '@/shared/ui/Badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
-import { useComments, useAddComment, useTaskHistory, useAddDependency, useRemoveDependency, useTaskList } from '@/features/tasks/hooks/useTasks'
+import { useComments, useAddComment, useTaskHistory, useAddDependency, useRemoveDependency, useTaskList, useEvidence, useAddEvidence, useDeleteEvidence } from '@/features/tasks/hooks/useTasks'
 import { cn } from '@/shared/lib/cn'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -185,3 +186,100 @@ export function TaskDependencies({ task, hasDependencyPerm }) {
     </section>
   )
 }
+
+export function TaskEvidence({ taskId, hasEditPerm }) {
+  const { data: evidence = [], isLoading } = useEvidence(taskId)
+  const addEvidence = useAddEvidence(taskId)
+  const deleteEvidence = useDeleteEvidence(taskId)
+  const [type, setType] = useState('LINK')
+  const [url, setUrl] = useState('')
+  const [description, setDescription] = useState('')
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (!url.trim()) return
+    addEvidence.mutate({ type, url, description }, {
+      onSuccess: () => {
+        setUrl('')
+        setDescription('')
+        setType('LINK')
+      }
+    })
+  }
+
+  return (
+    <section>
+      <Heading level={4} className="mb-4">Evidence</Heading>
+      
+      <div className="space-y-2 mb-4">
+        {isLoading && <Text variant="muted" size="sm">Loading evidence...</Text>}
+        {!isLoading && evidence.length === 0 && (
+          <Text variant="muted" size="sm">No evidence attached.</Text>
+        )}
+        {evidence.map(item => (
+          <div key={item.id} className="flex items-center justify-between p-3 rounded-[var(--radius-sm)] bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)]">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">{item.type}</Badge>
+                <a href={item.url} target="_blank" rel="noreferrer" className="text-[var(--primary)] hover:underline text-sm font-medium">
+                  {item.url}
+                </a>
+              </div>
+              {item.description && <Text size="xs" variant="muted">{item.description}</Text>}
+            </div>
+            {hasEditPerm && (
+              <IconButton 
+                variant="ghost" 
+                size="sm" 
+                className="text-[var(--danger)] hover:bg-[var(--danger)]/10"
+                onClick={() => deleteEvidence.mutate(item.id)}
+              >
+                <Icons.x className="w-4 h-4" />
+              </IconButton>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {hasEditPerm && (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <Select value={type} onValueChange={setType}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="LINK">Link</SelectItem>
+                <SelectItem value="GITHUB">GitHub</SelectItem>
+                <SelectItem value="SCREENSHOT">Screenshot</SelectItem>
+                <SelectItem value="RECORDING">Recording</SelectItem>
+                <SelectItem value="SNIPPET">Snippet</SelectItem>
+                <SelectItem value="NOTE">Note</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input 
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="URL..."
+              className="flex-1"
+              disabled={addEvidence.isPending}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Input 
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Description (optional)..."
+              className="flex-1"
+              disabled={addEvidence.isPending}
+            />
+            <Button type="submit" disabled={!url.trim() || addEvidence.isPending}>
+              Add
+            </Button>
+          </div>
+        </form>
+      )}
+    </section>
+  )
+}
+

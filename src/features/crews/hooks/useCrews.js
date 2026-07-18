@@ -139,6 +139,21 @@ export const useLeaveCrew = (crewId) => {
   });
 };
 
+export const useTransferCrewOwnership = (crewId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (newOwnerId) => crewApi.transferCrewOwnership(crewId, newOwnerId),
+    onSuccess: () => {
+      toast.success('Ownership transferred successfully');
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.detail(crewId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.members(crewId) });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to transfer ownership');
+    },
+  });
+};
+
 export const useCrewProjects = (crewId) => {
   return useQuery({
     queryKey: queryKeys.crews.projects(crewId),

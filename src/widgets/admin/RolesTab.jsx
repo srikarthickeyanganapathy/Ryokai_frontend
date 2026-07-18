@@ -4,7 +4,7 @@ import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/shared/ui/Modal';
-import { useRoles, useCreateRole, usePermissionsList, useRolePermissions, useAssignRolePermissions, useDeleteRole } from '@/features/admin/hooks/useAdmin';
+import { useRoles, useCreateRole, usePermissionsList, useRolePermissions, useAssignRolePermissions, useDeleteRole, useUpdateRole } from '@/features/admin/hooks/useAdmin';
 import { toast } from 'sonner';
 import { cn } from '@/shared/lib/cn';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog';
@@ -15,12 +15,23 @@ export function RolesTab() {
   
   const [selectedRole, setSelectedRole] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const deleteRoleMutation = useDeleteRole();
   const { confirm, dialog: confirmDialog } = useConfirmDialog();
 
   const handleSelectRole = (role) => {
     setSelectedRole(role);
   };
+
+  // Update selectedRole when roles data changes so the panel stays synced
+  React.useEffect(() => {
+    if (selectedRole && roles.length) {
+      const updated = roles.find(r => r.id === selectedRole.id);
+      if (updated && updated.name !== selectedRole.name) {
+        setSelectedRole(updated);
+      }
+    }
+  }, [roles, selectedRole]);
 
   const handleDeleteRole = async (roleId) => {
     const ok = await confirm({
@@ -100,7 +111,11 @@ export function RolesTab() {
       {/* Permissions Grid Panel */}
       <div className="flex-1 flex flex-col">
         {selectedRole ? (
-          <RolePermissionsPanel role={selectedRole} allPermissions={permissions} />
+          <RolePermissionsPanel 
+            role={selectedRole} 
+            allPermissions={permissions} 
+            onEdit={() => setIsUpdateModalOpen(true)}
+          />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-muted)] border border-dashed border-[var(--color-border-subtle)] rounded-[var(--radius-lg)]">
             <Text>Select a role to manage permissions</Text>
@@ -112,11 +127,19 @@ export function RolesTab() {
         isOpen={isCreateModalOpen} 
         onClose={() => setIsCreateModalOpen(false)} 
       />
+
+      {selectedRole && (
+        <UpdateRoleModal
+          isOpen={isUpdateModalOpen}
+          onClose={() => setIsUpdateModalOpen(false)}
+          role={selectedRole}
+        />
+      )}
     </div>
   );
 }
 
-function RolePermissionsPanel({ role, allPermissions }) {
+function RolePermissionsPanel({ role, allPermissions, onEdit }) {
   const { data: rolePerms = [], isLoading } = useRolePermissions(role.id);
   const assignMutation = useAssignRolePermissions();
   
@@ -151,7 +174,12 @@ function RolePermissionsPanel({ role, allPermissions }) {
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border-subtle)] pb-4">
         <div>
-          <Heading level={3}>{role.name.replace('ROLE_', '')}</Heading>
+          <div className="flex items-center gap-2">
+            <Heading level={3} className="mb-0">{role.name.replace('ROLE_', '')}</Heading>
+            {!role.builtin && (
+              <Button size="xs" variant="outline" onClick={onEdit} className="h-7 px-2">Edit Role</Button>
+            )}
+          </div>
           <Text variant="muted" size="sm">{role.category}</Text>
         </div>
         <Button onClick={handleSave} isLoading={assignMutation.isPending}>
@@ -232,6 +260,70 @@ function CreateRoleModal({ isOpen, onClose }) {
           <ModalFooter>
             <Button variant="ghost" type="button" onClick={onClose}>Cancel</Button>
             <Button type="submit" isLoading={createMutation.isPending}>Create</Button>
+          </ModalFooter>
+        </form>
+      </ModalContent>
+    </Modal>
+  );
+}
+
+function UpdateRoleModal({ isOpen, onClose, role }) {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const updateMutation = useUpdateRole();
+
+  React.useEffect(() => {
+    if (role) {
+      setName(role.name.replace('ROLE_', ''));
+      setDescription(role.description || '');
+    }
+  }, [role, isOpen]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    
+    updateMutation.mutate({ 
+      roleId: role.id, 
+      roleData: { 
+        name: name.toUpperCase(),
+        description: description 
+      } 
+    }, {
+      onSuccess: () => {
+        onClose();
+      }
+    });
+  };
+
+  return (
+    <Modal open={isOpen} onOpenChange={onClose}>
+      <ModalContent className="sm:max-w-md">
+        <ModalHeader>
+          <ModalTitle>Edit Role</ModalTitle>
+        </ModalHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Role Name</label>
+            <Input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="e.g. PROJECT_MANAGER"
+              className="uppercase"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Description (Optional)</label>
+            <Input
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="Role description..."
+            />
+          </div>
+          <ModalFooter>
+            <Button variant="ghost" type="button" onClick={onClose}>Cancel</Button>
+            <Button type="submit" isLoading={updateMutation.isPending}>Save</Button>
           </ModalFooter>
         </form>
       </ModalContent>

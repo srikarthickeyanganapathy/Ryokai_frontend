@@ -56,6 +56,11 @@ export const crewApi = {
     await api.post(`/crews/${crewId}/leave`);
   },
 
+  transferCrewOwnership: async (crewId, newOwnerId) => {
+    const { data } = await api.put(`/crews/${crewId}/transfer-ownership/${newOwnerId}`);
+    return data;
+  },
+
   // --- Projects ---
   getCrewProjects: async (crewId) => {
     const { data } = await api.get(`/crews/${crewId}/projects`);
