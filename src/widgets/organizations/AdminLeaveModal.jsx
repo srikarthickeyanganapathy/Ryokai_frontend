@@ -39,7 +39,7 @@ export function AdminLeaveModal({ isOpen, onClose, orgId, members = [] }) {
     adminLeaveMutation.mutate(payload, {
       onSuccess: () => {
         onClose()
-        navigate('/dashboard')
+        navigate('/app')
       }
     })
   }

@@ -8,6 +8,7 @@ import {
   DndContext, closestCenter, MouseSensor, TouchSensor, useSensor, useSensors 
 } from '@dnd-kit/core'
 import { useUpdateTask } from '@/features/tasks/hooks/useTasks'
+import { useUpdateEvent } from '@/features/calendar/hooks/useCalendar'
 import { useDroppable } from '@dnd-kit/core'
 import { useDraggable } from '@dnd-kit/core'
 import { cn } from '@/shared/lib/cn'
@@ -104,10 +105,37 @@ function CalendarTaskChip({ task, onClick }) {
   )
 }
 
+function CalendarEventChip({ event, onClick }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `event-${event.id}`,
+    data: { ...event, __type: 'event' },
+  })
+  const style = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    zIndex: isDragging ? 50 : 1,
+    opacity: isDragging ? 0.8 : 1,
+  } : undefined
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      onClick={(e) => { if (!isDragging) onClick(event) }}
+      className="px-2 py-1 text-xs rounded border truncate cursor-grab active:cursor-grabbing bg-[var(--info-soft,rgba(59,130,246,0.1))] text-blue-400 border-blue-500/20 flex items-center gap-1.5"
+    >
+      <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+      {event.title}
+    </div>
+  )
+}
+
 // --- Main MonthView Component ---
 
-export function MonthView({ tasks = [], currentDate, isLoading, onTaskClick, onAddClick }) {
+export function MonthView({ tasks = [], events = [], currentDate, isLoading, onTaskClick, onEventClick, onAddClick }) {
   const updateTaskMutation = useUpdateTask()
+  const updateEventMutation = useUpdateEvent()
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -131,23 +159,31 @@ export function MonthView({ tasks = [], currentDate, isLoading, onTaskClick, onA
 
   const handleDragEnd = (event) => {
     const { active, over } = event
-    
     if (!over) return
 
+    const newDateStr = over.id
+    const dragged = active.data.current
+
+    if (dragged?.__type === 'event') {
+      const eventId = dragged.id
+      const original = events.find(e => e.id === eventId)
+      if (!original) return
+      const durationMs = new Date(original.endTime) - new Date(original.startTime)
+      const newStart = new Date(newDateStr)
+      newStart.setHours(new Date(original.startTime).getHours(), new Date(original.startTime).getMinutes())
+      const newEnd = new Date(newStart.getTime() + durationMs)
+      updateEventMutation.mutate({
+        id: eventId,
+        payload: { ...original, startTime: newStart.toISOString(), endTime: newEnd.toISOString() },
+      })
+      return
+    }
+
+    // Existing task-drag path
     const taskId = active.id
-    const newDateStr = over.id // format: yyyy-MM-dd
-    
     const task = tasks.find(t => t.id === taskId)
     if (!task) return
-
-    // Update task dueDate
-    // Append time if needed, or just set it as a date string
-    const newDueDate = new Date(newDateStr).toISOString()
-    
-    updateTaskMutation.mutate({
-      id: taskId,
-      payload: { dueDate: newDueDate }
-    })
+    updateTaskMutation.mutate({ id: taskId, payload: { dueDate: new Date(newDateStr).toISOString() } })
   }
 
   // Group tasks by date
@@ -155,7 +191,6 @@ export function MonthView({ tasks = [], currentDate, isLoading, onTaskClick, onA
     const map = {}
     tasks.forEach(task => {
       if (task.dueDate) {
-        // Basic grouping by date string (ignoring time for this simple map)
         const dateKey = format(parseISO(task.dueDate), 'yyyy-MM-dd')
         if (!map[dateKey]) map[dateKey] = []
         map[dateKey].push(task)
@@ -163,6 +198,18 @@ export function MonthView({ tasks = [], currentDate, isLoading, onTaskClick, onA
     })
     return map
   }, [tasks])
+
+  const eventsByDate = useMemo(() => {
+    const map = {}
+    events.forEach(ev => {
+      if (ev.startTime) {
+        const dateKey = format(parseISO(ev.startTime), 'yyyy-MM-dd')
+        if (!map[dateKey]) map[dateKey] = []
+        map[dateKey].push(ev)
+      }
+    })
+    return map
+  }, [events])
 
   if (isLoading) {
     return <div className="p-8 text-center text-[var(--text-muted)]">Loading calendar...</div>
@@ -191,6 +238,7 @@ export function MonthView({ tasks = [], currentDate, isLoading, onTaskClick, onA
           {days.map((day, i) => {
             const dateKey = format(day, 'yyyy-MM-dd')
             const dayTasks = tasksByDate[dateKey] || []
+            const dayEvents = eventsByDate[dateKey] || []
             const isCurrentMonth = isSameMonth(day, currentDate)
             
             return (
@@ -205,6 +253,13 @@ export function MonthView({ tasks = [], currentDate, isLoading, onTaskClick, onA
                     key={task.id} 
                     task={task} 
                     onClick={onTaskClick}
+                  />
+                ))}
+                {dayEvents.map(ev => (
+                  <CalendarEventChip 
+                    key={ev.id} 
+                    event={ev} 
+                    onClick={onEventClick}
                   />
                 ))}
               </CalendarDayCell>

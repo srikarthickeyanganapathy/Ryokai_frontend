@@ -23,17 +23,20 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   const { user } = useAuth()
   const { 
     canArchiveTask, canEditTask, canDeleteTask, canAssignTask, 
-    canChecklistEdit, canDependencyEdit, canCommentTask 
+    canChecklistEdit, canDependencyEdit, canCommentTask, canAlter 
   } = usePermissions()
 
-  const isCreator = task?.creator?.id === user?.id
-  const isAssignee = task?.assignee?.id === user?.id
-  const hasArchivePerm = isPersonal || canArchiveTask
-  const hasDeletePerm = isPersonal || canDeleteTask || isCreator
-  const hasEditPerm = isPersonal || canEditTask || isCreator || isAssignee
-  const hasAssignPerm = isPersonal || canAssignTask || isCreator
-  const hasChecklistPerm = isPersonal || canChecklistEdit || isCreator || isAssignee
-  const hasDependencyPerm = isPersonal || canDependencyEdit || isCreator
+  const isCreator = task?.creator === user?.username
+  const isAssignee = task?.assignee === user?.username
+  const canAlterCreator = canAlter(task?.creator)
+  const canAlterAssignee = canAlter(task?.assignee)
+
+  const hasArchivePerm = (isPersonal || canArchiveTask) && canAlterCreator
+  const hasDeletePerm = (isPersonal || canDeleteTask || isCreator) && canAlterCreator
+  const hasEditPerm = (isPersonal || canEditTask || isCreator || isAssignee) && canAlterCreator
+  const hasAssignPerm = (isPersonal || canAssignTask || isCreator) && canAlterCreator && canAlterAssignee
+  const hasChecklistPerm = (isPersonal || canChecklistEdit || isCreator || isAssignee) && canAlterCreator
+  const hasDependencyPerm = (isPersonal || canDependencyEdit || isCreator) && canAlterCreator
   const hasCommentPerm = isPersonal || canCommentTask
 
   const addChecklistItem = useAddChecklistItem(task?.id)
@@ -44,6 +47,11 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   const deleteTaskMutation = useDeleteTask()
   const reassignTask = useReassignTask()
   const { data: users = [] } = useUsersList()
+  const assignableUsers = React.useMemo(() => {
+    if (!task) return []
+    if (task.teamId) return users.filter(u => u.teamId === task.teamId)
+    return users
+  }, [users, task?.teamId])
   const [localEdits, setLocalEdits] = useState({})
   const [isDirty, setIsDirty] = useState(false)
   const [syncedTaskId, setSyncedTaskId] = useState(task?.id)
@@ -226,7 +234,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                           <PopoverContent align="end" className="w-56 p-1">
                             <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-semibold tracking-wide">Reassign Task</Text>
                             <div className="space-y-0.5">
-                              {users.map(u => (
+                              {assignableUsers.map(u => (
                                 <button
                                   key={u.id}
                                   onClick={() => {

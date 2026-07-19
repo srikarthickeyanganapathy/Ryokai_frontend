@@ -207,7 +207,7 @@ export const deleteEvidence = async (taskId, evidenceId) => {
 // --- Task Claim (Crew Tasks) ---
 export const claimTask = async (taskId) => {
   const { data } = await api.post(`/tasks/${taskId}/claim`);
-  return data;
+  return normalizeTask(data);
 };
 
 

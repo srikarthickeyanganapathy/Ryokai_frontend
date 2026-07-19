@@ -3,7 +3,7 @@ import { startOfWeek, endOfWeek, eachDayOfInterval, format, isToday, parseISO } 
 import { cn } from '@/shared/lib/cn'
 import { Plus } from 'lucide-react'
 
-export function WeekView({ tasks = [], currentDate, isLoading, onTaskClick, onAddClick }) {
+export function WeekView({ tasks = [], events = [], currentDate, isLoading, onTaskClick, onEventClick, onAddClick }) {
   
   const days = useMemo(() => {
     const start = startOfWeek(currentDate)
@@ -23,6 +23,18 @@ export function WeekView({ tasks = [], currentDate, isLoading, onTaskClick, onAd
     })
     return map
   }, [tasks])
+
+  const eventsByDate = useMemo(() => {
+    const map = {}
+    events.forEach(ev => {
+      if (ev.startTime) {
+        const dateKey = format(parseISO(ev.startTime), 'yyyy-MM-dd')
+        if (!map[dateKey]) map[dateKey] = []
+        map[dateKey].push(ev)
+      }
+    })
+    return map
+  }, [events])
 
   if (isLoading) {
     return <div className="p-8 text-center text-[var(--text-muted)]">Loading week...</div>
@@ -44,6 +56,7 @@ export function WeekView({ tasks = [], currentDate, isLoading, onTaskClick, onAd
       {days.map(day => {
         const dateKey = format(day, 'yyyy-MM-dd')
         const dayTasks = tasksByDate[dateKey] || []
+        const dayEvents = eventsByDate[dateKey] || []
         
         return (
           <div key={dateKey} className="flex-1 border-r border-[var(--color-border-subtle)] last:border-r-0 flex flex-col">
@@ -72,7 +85,7 @@ export function WeekView({ tasks = [], currentDate, isLoading, onTaskClick, onAd
               )}
             </div>
             
-            {/* Tasks List */}
+            {/* Tasks and Events List */}
             <div className="flex-1 p-2 bg-[var(--bg-base)] flex flex-col gap-2 overflow-y-auto">
               {dayTasks.map(task => {
                 const colorClass = task.type === 'MILESTONE' ? typeColors.MILESTONE : (priorityColors[task.priority] || priorityColors.NORMAL)
@@ -99,6 +112,21 @@ export function WeekView({ tasks = [], currentDate, isLoading, onTaskClick, onAd
                   </div>
                 )
               })}
+              {dayEvents.map(ev => (
+                <div
+                  key={`event-${ev.id}`}
+                  onClick={() => onEventClick && onEventClick(ev)}
+                  className="p-3 rounded-md border cursor-pointer hover:shadow-md transition-all text-sm bg-[var(--info-soft,rgba(59,130,246,0.1))] text-blue-400 border-blue-500/20 flex items-start gap-2"
+                >
+                  <span className="w-2 h-2 mt-1.5 rounded-full bg-blue-400 shrink-0" />
+                  <div>
+                    <div className="font-medium mb-0.5">{ev.title}</div>
+                    <div className="text-xs opacity-75">
+                      {ev.isAllDay ? 'All Day' : `${format(parseISO(ev.startTime), 'h:mm a')} - ${format(parseISO(ev.endTime), 'h:mm a')}`}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )

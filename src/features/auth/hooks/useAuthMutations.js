@@ -8,7 +8,9 @@ export const useLoginMutation = () => {
   const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const from = location.state?.from?.pathname || '/app'
+  const from = location.state?.from 
+    ? `${location.state.from.pathname}${location.state.from.search || ''}`
+    : '/app'
 
   return useMutation({
     mutationFn: (credentials) => authAPI.login(credentials),
@@ -27,6 +29,10 @@ export const useLoginMutation = () => {
 export const useRegisterMutation = () => {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const from = location.state?.from 
+    ? `${location.state.from.pathname}${location.state.from.search || ''}`
+    : '/app'
 
   return useMutation({
     mutationFn: (userData) => authAPI.register(userData),
@@ -36,7 +42,7 @@ export const useRegisterMutation = () => {
       // the user to re-enter credentials on the login page.
       login(user)
       toast.success('Account Created!', { description: 'Welcome to Ryokai!' })
-      navigate('/app', { replace: true })
+      navigate(from, { replace: true })
     },
     onError: (error) => {
       const description = error.response?.data?.message || error.message || 'Could not create account'

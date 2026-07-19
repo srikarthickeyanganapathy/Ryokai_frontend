@@ -68,7 +68,17 @@ import {
   Globe,
   Info,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  Rocket,
+  Compass,
+  FileText,
+  Target,
+  Megaphone,
+  Scale,
+  Network,
+  Hash,
+  KanbanSquare,
+  Pencil
 } from 'lucide-react'
 
 const GithubIcon = ({ className, ...props }) => (
@@ -180,4 +190,14 @@ export const Icons = {
   info: Info,
   sidebarClose: PanelLeftClose,
   sidebarOpen: PanelLeft,
+  rocket: Rocket,
+  compass: Compass,
+  fileText: FileText,
+  target: Target,
+  megaphone: Megaphone,
+  scale: Scale,
+  network: Network,
+  hash: Hash,
+  kanban: KanbanSquare,
+  pencil: Pencil,
 }

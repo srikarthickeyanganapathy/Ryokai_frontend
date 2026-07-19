@@ -5,14 +5,16 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
 import { Switch } from '@/shared/ui/Switch'
-import { useTaskList, useUpdateTask, useCompletePersonalTask, useCompleteCrewTask, useSubmitTask } from '@/features/tasks/hooks/useTasks'
+import { useTaskList, useUpdateTask, useCompletePersonalTask, useCompleteCrewTask, useSubmitTask, useClaimTask } from '@/features/tasks/hooks/useTasks'
 import { CheckCircle2, Play, Circle, Maximize2, Minimize2, Settings } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
 import { normalizeStatus, isDoneStatus, toBackendStatus } from '@/shared/lib/status'
+import { FocusTimer } from '../components/FocusTimer'
 
 export function FocusPage() {
   const { data: tasks = [], isLoading } = useTaskList()
   const updateTaskMutation = useUpdateTask()
+  const claimTaskMutation = useClaimTask()
   const completePersonalTaskMutation = useCompletePersonalTask()
   // FIX (SM-C01): crew tasks use the complete-crew endpoint
   const completeCrewTaskMutation = useCompleteCrewTask()
@@ -76,10 +78,12 @@ export function FocusPage() {
   }
 
   const startNext = (task) => {
-    updateTaskMutation.mutate({
-      id: task.id,
-      payload: { status: toBackendStatus('In Progress') }
-    })
+    if (task.crewId || task.crew) {
+      const st = task.currentStatus?.toUpperCase()
+      if (st === 'TODO') {
+        claimTaskMutation.mutate(task.id)
+      }
+    }
   }
 
   if (isLoading) return <div className="p-8 text-center"><Text variant="muted">Loading focus...</Text></div>
@@ -179,6 +183,9 @@ export function FocusPage() {
                       Project
                     </span>
                   )}
+                </div>
+                <div className="mt-5">
+                  <FocusTimer task={currentTask} />
                 </div>
               </div>
             </motion.div>

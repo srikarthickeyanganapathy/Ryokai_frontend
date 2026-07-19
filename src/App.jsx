@@ -26,6 +26,8 @@ const ProjectsPage = lazy(() => import("@/pages/projects/ProjectsPage").then(m =
 const ProjectDetailPage = lazy(() => import("@/pages/projects/projectdetailpage").then(m => ({ default: m.ProjectDetailPage })));
 const OrganizationsPage = lazy(() => import("@/pages/organizations/OrganizationsPage").then(m => ({ default: m.OrganizationsPage })));
 const OrganizationDetailPage = lazy(() => import("@/pages/organizations/OrganizationDetailPage").then(m => ({ default: m.OrganizationDetailPage })));
+const DirectoryPage = lazy(() => import("@/pages/organizations/DirectoryPage").then(m => ({ default: m.DirectoryPage })));
+const AnnouncementsPage = lazy(() => import("@/pages/organizations/AnnouncementsPage").then(m => ({ default: m.AnnouncementsPage })));
 const CrewsPage = lazy(() => import("@/pages/crews/CrewsPage").then(m => ({ default: m.CrewsPage })));
 const CrewDetailPage = lazy(() => import("@/pages/crews/CrewDetailPage").then(m => ({ default: m.CrewDetailPage })));
 const TeamDetailPage = lazy(() => import("@/pages/teams/TeamDetailPage").then(m => ({ default: m.TeamDetailPage })));
@@ -37,6 +39,8 @@ const FocusPage = lazy(() => import("@/features/focus/pages/FocusPage").then(m =
 const ProfilePage = lazy(() => import("@/pages/settings/ProfilePage").then(m => ({ default: m.ProfilePage })));
 const SecurityPage = lazy(() => import("@/pages/settings/SecurityPage").then(m => ({ default: m.SecurityPage })));
 const SessionsPage = lazy(() => import("@/pages/settings/SessionsPage").then(m => ({ default: m.SessionsPage })));
+const ComingSoonPage = lazy(() => import("@/pages/placeholder/ComingSoonPage").then(m => ({ default: m.ComingSoonPage })));
+const CalendarPage = lazy(() => import("@/pages/calendar/CalendarPage").then(m => ({ default: m.CalendarPage })));
 
 export default function App() {
   return (
@@ -85,6 +89,22 @@ export default function App() {
                 
                 {/* Keep legacy route for fallback if needed */}
                 <Route path="/app/sessions" element={<Navigate to="/app/settings/sessions" replace />} />
+
+                {/* ═══ New Workspace Placeholder Routes ═══ */}
+                {/* Personal workspace */}
+                <Route path="/app/notes" element={<ComingSoonPage />} />
+                <Route path="/app/calendar" element={<CalendarPage />} />
+                <Route path="/app/saved" element={<ComingSoonPage />} />
+                
+                {/* Organization workspace */}
+                <Route path="/app/goals" element={<ComingSoonPage />} />
+                <Route path="/app/directory" element={<DirectoryPage />} />
+                <Route path="/app/announcements" element={<AnnouncementsPage />} />
+                <Route path="/app/workload" element={<ComingSoonPage />} />
+                
+                {/* Crews workspace */}
+                <Route path="/app/crews/discover" element={<ComingSoonPage />} />
+                <Route path="/app/crews/tasks" element={<ComingSoonPage />} />
               </Route>
             </Route>
 

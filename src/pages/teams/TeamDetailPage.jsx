@@ -72,7 +72,13 @@ export function TeamDetailPage() {
     return team.members?.some(m => m.username === user.username)
   }, [team, user])
 
-  const isAuthorized = canManage || isMember
+  const isObserver = useMemo(() => {
+    if (!team || !user) return false
+    return team.observers?.some(o => o.username === user.username)
+  }, [team, user])
+
+  const isAuthorized = canManage || isMember || isObserver
+  const isReadOnly = isObserver && !canManage
 
   // Filter Tasks & Projects belonging to this team
   const teamTasks = useMemo(() => {
@@ -176,6 +182,9 @@ export function TeamDetailPage() {
           <div className="flex items-center gap-3">
             <Heading level={2} className="tracking-tight text-[22px] font-semibold mb-0.5">{team.name}</Heading>
             <Badge variant="outline" className="bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]">Team Portal</Badge>
+            {isReadOnly && (
+              <Badge variant="outline" className="bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20">Read-Only Observer</Badge>
+            )}
           </div>
           <Text variant="muted" className="text-[13px]">{team.description || 'No description provided.'}</Text>
         </div>
@@ -267,7 +276,7 @@ export function TeamDetailPage() {
                         </div>
                         <p className="text-sm text-[var(--text-secondary)] break-words whitespace-pre-wrap">{msg.content}</p>
                       </div>
-                      {(isAuthor || canManage) && (
+                      {(isAuthor || canManage) && !isReadOnly && (
                         <IconButton
                           variant="ghost"
                           size="sm"
@@ -285,18 +294,24 @@ export function TeamDetailPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            <form onSubmit={handleSendMessage} className="p-4 border-t border-[var(--color-border-subtle)] flex gap-2">
-              <input
-                type="text"
-                value={messageInput}
-                onChange={e => setMessageInput(e.target.value)}
-                placeholder="Message team discussions..."
-                className="flex-1 px-3 py-2 bg-[var(--bg-subtle)] border border-[var(--color-border-default)] rounded-[var(--radius-md)] text-sm focus:outline-none focus:border-[var(--accent-border)] text-[var(--text-primary)]"
-              />
-              <Button type="submit" size="sm" className="px-4">
-                Send
-              </Button>
-            </form>
+            {isReadOnly ? (
+              <div className="p-4 border-t border-[var(--color-border-subtle)] text-center text-sm text-[var(--text-muted)]">
+                Observers cannot send messages to the team chat.
+              </div>
+            ) : (
+              <form onSubmit={handleSendMessage} className="p-4 border-t border-[var(--color-border-subtle)] flex gap-2">
+                <input
+                  type="text"
+                  value={messageInput}
+                  onChange={e => setMessageInput(e.target.value)}
+                  placeholder="Message team discussions..."
+                  className="flex-1 px-3 py-2 bg-[var(--bg-subtle)] border border-[var(--color-border-default)] rounded-[var(--radius-md)] text-sm focus:outline-none focus:border-[var(--accent-border)] text-[var(--text-primary)]"
+                />
+                <Button type="submit" size="sm" className="px-4">
+                  Send
+                </Button>
+              </form>
+            )}
           </div>
         )}
 
@@ -305,7 +320,7 @@ export function TeamDetailPage() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <Heading level={3} className="text-base font-semibold">Team Projects</Heading>
-              {canCreateProject && (
+              {canCreateProject && !isReadOnly && (
                 <Button size="sm" className="gap-1.5" onClick={() => setIsCreateProjectOpen(true)}>
                   <Icons.plus className="w-3.5 h-3.5" />
                   New Project
@@ -316,7 +331,7 @@ export function TeamDetailPage() {
             {teamProjects.length === 0 ? (
               <div className="text-center py-12 bg-[var(--bg-elevated)] border border-dashed border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] flex flex-col items-center justify-center gap-3">
                 <Text variant="muted">No projects assigned to this team.</Text>
-                {canCreateProject && (
+                {canCreateProject && !isReadOnly && (
                   <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setIsCreateProjectOpen(true)}>
                     <Icons.plus className="w-3.5 h-3.5" />
                     Create First Project
@@ -370,7 +385,7 @@ export function TeamDetailPage() {
                           {normalizePriority(task.priority)}
                         </Badge>
                         
-                        {canAssignTask && (
+                        {canAssignTask && !isReadOnly && (
                           <Popover open={assigningTaskId === task.id} onOpenChange={open => setAssigningTaskId(open ? task.id : null)}>
                             <PopoverTrigger asChild>
                               <Button variant="outline" size="xs">

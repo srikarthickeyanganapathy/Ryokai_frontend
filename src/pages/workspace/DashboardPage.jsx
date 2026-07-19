@@ -2,7 +2,9 @@ import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useWorkspace } from '@/context/WorkspaceContext'
 import { useTaskList } from '@/features/tasks/hooks/useTasks'
+import { Navigate } from 'react-router-dom'
 import { FocusWidget } from '@/features/focus/components/FocusWidget'
 import { ProjectsOverview } from '@/widgets/workspace/ProjectsOverview'
 import { UpcomingDeadlines } from '@/widgets/workspace/UpcomingDeadlines'
@@ -37,6 +39,7 @@ function getGreeting() {
 
 export function DashboardPage() {
   const { user } = useAuth()
+  const { workspaceMode, activeOrganization } = useWorkspace()
   const { data: tasks = [], isLoading: isTasksLoading } = useTaskList()
 
   // Derive recent tasks from the real tasks array (sorted by updatedAt desc, top 4)
@@ -56,6 +59,15 @@ export function DashboardPage() {
     }
   }, [tasks])
 
+  // If user is in CREWS mode, redirect to the Crews Dashboard
+  if (workspaceMode === 'CREWS') {
+    return <Navigate to="/app/crews" replace />
+  }
+
+  const subtitle = workspaceMode === 'ORG' && activeOrganization
+    ? `Here's what's happening at ${activeOrganization.name} today.`
+    : "Here's what's happening with your workspace today."
+
   return (
     <motion.div 
       className="space-y-5 md:space-y-6 pb-12 mesh-bg"
@@ -68,7 +80,7 @@ export function DashboardPage() {
         <Heading level={2} className="tracking-tight text-[20px] font-semibold">
           {getGreeting()}, {user?.name?.split(' ')[0] || 'there'}.
         </Heading>
-        <Text variant="muted" className="text-[13px]">Here's what's happening with your workspace today.</Text>
+        <Text variant="muted" className="text-[13px]">{subtitle}</Text>
       </motion.div>
 
       {/* Top Grid Row: Progress, Focus & Calendar */}

@@ -60,6 +60,7 @@ export const usePermissions = () => {
   const canManageLeaveRequests = isAdminOrAbove || permissions.includes('LEAVE_REQUEST_MANAGE');
   const canManageRoles = isAdminOrAbove || permissions.includes('ROLE_MANAGE');
   const canManageUsers = isSuperAdmin; // USER_MANAGE is for super admin only now
+  const canManageAnnouncements = isAdminOrAbove || permissions.includes('ANNOUNCEMENT_MANAGE');
   const canViewAnalytics = true; // Analytics page is for the user, not for the org
 
   // Task-scoped permissions
@@ -74,6 +75,20 @@ export const usePermissions = () => {
   const canDependencyEdit = isAdminOrAbove || permissions.includes('TASK_DEPENDENCY_EDIT');
   const canReassignTask = isAdminOrAbove || permissions.includes('TASK_REASSIGN');
   const canArchiveTask = isAdminOrAbove || permissions.includes('TASK_ARCHIVE');
+
+  // Helper to enforce rank-based power dynamics in UI
+  const canAlter = (targetUsername) => {
+    if (isSuperAdmin) return true;
+    if (!targetUsername) return true;
+    if (user?.username === targetUsername) return true;
+    
+    const myPriority = myMembership?.rolePriority ?? 999;
+    const targetMember = membersList.find(m => m.username === targetUsername);
+    if (!targetMember) return true;
+    
+    const targetPriority = targetMember.rolePriority ?? 999;
+    return myPriority <= targetPriority;
+  };
 
   return {
     // Actual role
@@ -98,6 +113,7 @@ export const usePermissions = () => {
     canManageLeaveRequests,
     canManageRoles,
     canManageUsers,
+    canManageAnnouncements,
     canViewAnalytics,
     
     // Task permissions
@@ -112,6 +128,7 @@ export const usePermissions = () => {
     canDependencyEdit,
     canReassignTask,
     canArchiveTask,
+    canAlter,
 
     permissions, // Export raw permissions array for complex components
 

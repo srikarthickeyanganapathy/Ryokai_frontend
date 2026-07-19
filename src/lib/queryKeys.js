@@ -61,4 +61,17 @@ export const queryKeys = {
     leaveRequests: (id) => ['organizations', id, 'leave-requests'],
     invites: () => [...queryKeys.organizations.all, 'invites'],
   },
+  announcements: {
+    all: ['announcements'],
+    list: (orgId) => [...queryKeys.announcements.all, 'list', orgId],
+    detail: (id) => [...queryKeys.announcements.all, 'detail', id],
+  },
+  calendarEvents: {
+    all: ['calendarEvents'],
+    range: (start, end) => [...queryKeys.calendarEvents.all, 'range', start, end],
+  },
+  focus: {
+    active: ['focus', 'active'],
+    history: (params) => ['focus', 'history', params],
+  },
 };

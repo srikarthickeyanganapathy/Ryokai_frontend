@@ -7,7 +7,7 @@ const WorkspaceContext = createContext();
 export const WorkspaceProvider = ({ children }) => {
   const { user } = useAuth();
   
-  // 'PERSONAL' or 'ORG'
+  // 'PERSONAL', 'ORG', or 'CREWS'
   const [workspaceMode, setWorkspaceMode] = useState('PERSONAL');
   const [activeOrganization, setActiveOrganization] = useState(null);
 
@@ -57,6 +57,13 @@ export const WorkspaceProvider = ({ children }) => {
       }
     }
   }, [organizations, activeOrganization, user]);
+
+  // If the user switches to ORG but has no org, fallback to PERSONAL
+  useEffect(() => {
+    if (workspaceMode === 'ORG' && organizations.length === 0) {
+      setWorkspaceMode('PERSONAL');
+    }
+  }, [workspaceMode, organizations]);
 
   const value = {
     workspaceMode,
