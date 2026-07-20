@@ -15,9 +15,10 @@ import { LeaveRequestsTab } from '@/widgets/organizations/LeaveRequestsTab'
 import { OrgRolesTab } from '@/widgets/organizations/OrgRolesTab'
 import { useUpdateMemberRole, useOrgRoles, useRemoveMember } from '@/features/organizations/hooks/useOrganizations'
 import { cn } from '@/shared/lib/cn'
-import { usePermissions } from '@/context/usePermissions'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { toast } from 'sonner'
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
 
 function formatDate(isoString) {
@@ -36,6 +37,7 @@ export function OrganizationDetailPage() {
   const { data: teams = [], isLoading: teamsLoading } = useOrgTeams(orgId)
   const { data: roles = [], isLoading: rolesLoading } = useOrgRoles(orgId)
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
   const [createTeamModalOpen, setCreateTeamModalOpen] = useState(false)
   const [adminLeaveModalOpen, setAdminLeaveModalOpen] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState(null)
@@ -268,8 +270,8 @@ export function OrganizationDetailPage() {
                             variant="danger"
                             size="sm"
                             title="Remove Member"
-                            onClick={() => {
-                              if (window.confirm(`Are you sure you want to remove ${member.username}?`)) {
+                            onClick={async () => {
+                              if (await confirm({ title: `Are you sure you want to remove ${member.username}?`, danger: true })) {
                                 removeMemberMutation.mutate(member.userId)
                               }
                             }}
@@ -419,6 +421,7 @@ export function OrganizationDetailPage() {
         orgId={orgId}
         members={members}
       />
+      {confirmDialog}
     </div>
   )
 }

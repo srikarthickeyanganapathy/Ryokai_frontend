@@ -1,4 +1,4 @@
-import api from '@/lib/api'
+import api from '@/shared/api/api'
 import { setAccessToken, setRefreshToken, clearTokens, getRefreshToken } from '../lib/tokens'
 import { normalizeUser } from './user.api'
 

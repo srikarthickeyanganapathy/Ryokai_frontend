@@ -1,3 +1,5 @@
+import { Button } from '@/shared/ui/Button';
+
 import React, { useMemo, useState } from 'react'
 import { 
   startOfMonth, endOfMonth, startOfWeek, endOfWeek, 
@@ -37,7 +39,7 @@ function CalendarDayCell({ day, isCurrentMonth, children, onAddClick }) {
         )}>
           {format(day, 'd')}
         </span>
-        <button 
+        <Button 
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
@@ -46,7 +48,7 @@ function CalendarDayCell({ day, isCurrentMonth, children, onAddClick }) {
           className="opacity-0 group-hover:opacity-100 p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] rounded transition-all"
         >
           <Plus className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
       <div className="flex flex-col gap-1">
         {children}

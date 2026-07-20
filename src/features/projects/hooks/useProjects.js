@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { projectsApi } from '../api'
-import { queryKeys } from '@/lib/queryKeys'
+import { queryKeys } from '@/shared/api/queryKeys'
 import { toast } from 'sonner'
 
 export function useProjects(filters = {}) {

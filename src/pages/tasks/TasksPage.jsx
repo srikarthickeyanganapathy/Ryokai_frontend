@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from 'react'
+import { Button } from '@/shared/ui/Button';
+
+import React, { useState, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
@@ -9,7 +11,6 @@ import { TasksToolbar } from '@/widgets/tasks/TasksToolbar'
 import { TasksTable } from '@/widgets/tasks/TasksTable'
 import { KanbanBoard } from '@/widgets/tasks/KanbanBoard'
 import { TaskPanel } from '@/widgets/tasks/TaskPanel'
-import { CalendarView } from '@/features/calendar/components/CalendarView'
 import NebulaView from '@/features/tasks/components/NebulaView'
 import { toast } from 'sonner'
 import { Icons } from '@/shared/ui/Icons'
@@ -18,9 +19,9 @@ import { normalizeStatus, toBackendStatus } from '@/shared/lib/status'
 import { PRIORITY_OPTIONS } from '@/shared/lib/priority'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { useAuth } from '@/features/auth/hooks/useAuth'
-import { useWorkspace } from '@/context/WorkspaceContext'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { useUsersList } from '@/features/auth/hooks/useUser'
-import { usePermissions } from '@/context/usePermissions'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 
 export function TasksPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -103,6 +104,17 @@ export function TasksPage() {
 
     return result
   }, [rawTasks, activeView, globalFilter, priorityFilter, sortBy, user])
+
+  // Open task from URL if specified (e.g. from Saved items)
+  useEffect(() => {
+    const openTaskId = searchParams.get('openTaskId')
+    if (openTaskId && tasks && tasks.length > 0) {
+      const targetTask = tasks.find(t => String(t.id) === String(openTaskId))
+      if (targetTask && (!selectedTask || selectedTask.id !== targetTask.id)) {
+        setSelectedTask(targetTask)
+      }
+    }
+  }, [searchParams, tasks, selectedTask])
 
   const { data: allUsers } = useUsersList()
 
@@ -304,13 +316,13 @@ export function TasksPage() {
   if (viewMode === 'nebula') {
     return (
       <div className="fixed inset-0 z-[100] bg-zinc-950">
-        <button
+        <Button
           onClick={() => setViewMode('list')}
           className="absolute top-6 right-6 z-50 flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-md border border-white/20 rounded-lg text-white font-medium shadow-lg cursor-pointer"
         >
           <Icons.chevronLeft className="w-4 h-4" />
           Exit Nebula
-        </button>
+        </Button>
         <NebulaView
           tasks={tasks}
           onTaskSelect={setSelectedTask}
@@ -372,13 +384,6 @@ export function TasksPage() {
             onTaskStatusChange={handleTaskStatusChange}
           />
         )}
-        {viewMode === 'calendar' && (
-          <CalendarView
-            tasks={tasks}
-            isLoading={isLoading}
-            onTaskClick={setSelectedTask}
-          />
-        )}
 
         {/* Floating Bulk Action Bar (Appears when rows are selected in List view) */}
         <AnimatePresence>
@@ -393,31 +398,31 @@ export function TasksPage() {
                 {Object.keys(rowSelection).length} selected
               </Text>
               <div className="h-4 w-px bg-[var(--border-default)]" />
-              <button onClick={handleBulkComplete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+              <Button onClick={handleBulkComplete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
                 {workspaceMode === 'PERSONAL' ? 'Complete' : 'Approve'}
-              </button>
+              </Button>
               {workspaceMode !== 'PERSONAL' && (
                 <>
-                  <button onClick={handleBulkSubmit} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                  <Button onClick={handleBulkSubmit} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
                     Submit
-                  </button>
-                  <button onClick={handleOpenReassignModal} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                  </Button>
+                  <Button onClick={handleOpenReassignModal} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
                     Reassign
-                  </button>
-                  <button onClick={handleBulkReject} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
+                  </Button>
+                  <Button onClick={handleBulkReject} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
                     Reject
-                  </button>
+                  </Button>
                 </>
               )}
-              <button onClick={handleBulkDelete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
+              <Button onClick={handleBulkDelete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
                 Delete
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setRowSelection({})}
                 className="ml-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
               >
                 <Icons.x className="w-4 h-4" />
-              </button>
+              </Button>
             </motion.div>
           )}
         </AnimatePresence>
@@ -427,7 +432,15 @@ export function TasksPage() {
       <TaskPanel
         task={selectedTask}
         isOpen={!!selectedTask}
-        onClose={() => setSelectedTask(null)}
+        onClose={() => {
+          setSelectedTask(null)
+          if (searchParams.has('openTaskId')) {
+            setSearchParams(params => {
+              params.delete('openTaskId')
+              return params
+            }, { replace: true })
+          }
+        }}
       />
 
       <Modal open={!!reassignTaskData} onOpenChange={(open) => !open && setReassignTaskData(null)}>

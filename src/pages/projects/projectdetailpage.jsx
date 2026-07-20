@@ -12,7 +12,8 @@ import { useProject, useUpdateProject, useDeleteProject } from '@/features/proje
 import { useTeam, useOrgMembers } from '@/features/organizations/hooks/useOrganizations'
 import { useCrewMembers } from '@/features/crews/hooks/useCrews'
 import { ProjectForm } from '@/widgets/projects/ProjectForm'
-import { useWorkspace } from '@/context/WorkspaceContext'
+import { CrewProjectShareModal } from '@/widgets/projects/CrewProjectShareModal'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { useTaskList, useCreateTask, useReassignTask } from '@/features/tasks/hooks/useTasks'
 import { TaskForm } from '@/widgets/tasks/TaskForm'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
@@ -42,7 +43,7 @@ const priorityColors = {
   NONE: 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]',
 }
 
-import { usePermissions } from '@/context/usePermissions'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 
 export function ProjectDetailPage() {
   const { projectId } = useParams()
@@ -52,6 +53,7 @@ export function ProjectDetailPage() {
   
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false)
   const [assigningTaskId, setAssigningTaskId] = useState(null)
 
@@ -106,6 +108,7 @@ export function ProjectDetailPage() {
       projectId: Number(projectId),
       teamId: project?.teamId || null,
       organizationId: project?.organizationId || null,
+      crewId: crewId || null,
     }, {
       onSuccess: () => {
         setIsAddTaskOpen(false)
@@ -181,6 +184,12 @@ export function ProjectDetailPage() {
         </div>
         {canManageProject && (
           <div className="flex items-center gap-2">
+            {workspaceMode === 'PERSONAL' && (
+              <Button variant="outline" size="sm" onClick={() => setIsShareModalOpen(true)}>
+                <Icons.users className="w-3.5 h-3.5 mr-1" />
+                Share
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>Edit</Button>
             <Button variant="outline" size="sm" className="text-[var(--danger)] hover:text-[var(--danger)] hover:border-[var(--danger)] hover:bg-[var(--danger-soft)]" onClick={() => setIsDeleteModalOpen(true)}>Delete</Button>
           </div>
@@ -390,6 +399,15 @@ export function ProjectDetailPage() {
           />
         </ModalContent>
       </Modal>
+
+      {/* Share Project Modal */}
+      {project && (
+        <CrewProjectShareModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          project={project}
+        />
+      )}
 
     </motion.div>
   )

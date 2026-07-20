@@ -11,11 +11,12 @@ import { useProjects, useCreateProject } from '@/features/projects/hooks/useProj
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { ProjectForm } from '@/widgets/projects/ProjectForm'
 import { useAuth } from '@/features/auth/hooks/useAuth'
-import { usePermissions } from '@/context/usePermissions'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 import { toast } from 'sonner'
 import { cn } from '@/shared/lib/cn'
 import { normalizePriority } from '@/shared/lib/priority'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog'
 
 const priorityColors = {
   URGENT: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20',
@@ -27,6 +28,7 @@ const priorityColors = {
 
 export function TeamDetailPage() {
   const { orgId, teamId } = useParams()
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
   const navigate = useNavigate()
   const { user } = useAuth()
   const { canManageTeam, canCreateProject, canAssignTask } = usePermissions()
@@ -120,8 +122,8 @@ export function TeamDetailPage() {
     })
   }
 
-  const handleDeleteMessage = (messageId) => {
-    if (window.confirm('Are you sure you want to delete this message?')) {
+  const handleDeleteMessage = async (messageId) => {
+    if (await confirm({ title: 'Are you sure you want to delete this message?', danger: true })) {
       deleteMessageMutation.mutate(messageId)
     }
   }
@@ -145,6 +147,7 @@ export function TeamDetailPage() {
           <Skeleton className="h-32 rounded-[var(--radius-lg)]" />
           <Skeleton className="h-32 rounded-[var(--radius-lg)]" />
         </div>
+        {confirmDialog}
       </div>
     )
   }

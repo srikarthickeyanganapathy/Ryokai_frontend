@@ -19,6 +19,7 @@ import { useState } from 'react';
 import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { TaskForm } from '@/widgets/tasks/TaskForm';
 import { useCreateTask } from '@/features/tasks/hooks/useTasks';
+import { Button } from '@/shared/ui/Button';
 
 export function MiniCalendarWidget({ tasks = [] }) {
   const currentDate = new Date();
@@ -121,12 +122,12 @@ export function MiniCalendarWidget({ tasks = [] }) {
                     </motion.div>
 
                     {/* Hover Plus Icon */}
-                    <button 
+                    <Button 
                       onClick={(e) => handleAddClick(e, day)}
                       className="absolute -top-1 -right-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)] rounded-full p-0.5 opacity-0 group-hover/cell:opacity-100 transition-all z-20 shadow-sm"
                     >
                       <Plus className="w-2.5 h-2.5" strokeWidth={3} />
-                    </button>
+                    </Button>
 
                     {/* Urgent Indicator (Fast pulse) */}
                     {hasUrgent && (

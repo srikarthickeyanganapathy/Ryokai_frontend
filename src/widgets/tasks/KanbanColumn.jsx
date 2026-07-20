@@ -1,3 +1,5 @@
+import { Input } from '@/shared/ui/Input';
+
 import React, { useState } from 'react'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDroppable } from '@dnd-kit/core'
@@ -47,7 +49,7 @@ export function KanbanColumn({ column, tasks, onTaskClick }) {
       {/* Column Header */}
       <div className="p-4 flex items-center justify-between sticky top-0 z-10">
         {collapsed ? (
-          <button
+          <Button
             onClick={() => setCollapsed(false)}
             className="flex flex-col items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mx-auto"
             title={`Expand ${column.title}`}
@@ -55,7 +57,7 @@ export function KanbanColumn({ column, tasks, onTaskClick }) {
             <Icons.chevronRight className="w-4 h-4" />
             <span className="text-xs font-medium [writing-mode:vertical-rl] rotate-180">{column.title}</span>
             <span className="text-[10px] font-medium text-[var(--text-tertiary)]">{tasks.length}</span>
-          </button>
+          </Button>
         ) : (
           <>
             <div className="flex items-center gap-2">
@@ -64,13 +66,13 @@ export function KanbanColumn({ column, tasks, onTaskClick }) {
                 {tasks.length}
               </span>
             </div>
-            <button
+            <Button
               onClick={() => setCollapsed(true)}
               className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors duration-[var(--duration-fast)]"
               title="Collapse column"
             >
               <Icons.chevronLeft className="w-4 h-4" />
-            </button>
+            </Button>
           </>
         )}
       </div>
@@ -93,7 +95,7 @@ export function KanbanColumn({ column, tasks, onTaskClick }) {
             onSubmit={handleQuickAdd}
             className="bg-[var(--bg-elevated)] border border-[var(--accent-border)] rounded-[var(--radius-lg)] p-3 shadow-[var(--accent-glow),var(--inset-highlight)] mt-2 spring-in"
           >
-            <input
+            <Input
               autoFocus
               type="text"
               value={newTaskTitle}
@@ -123,13 +125,13 @@ export function KanbanColumn({ column, tasks, onTaskClick }) {
             </div>
           </form>
         ) : (
-          <button 
+          <Button 
             onClick={() => setIsQuickAdding(true)}
             className="flex items-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-[var(--radius-md)] p-2 text-sm font-medium transition-all duration-[var(--duration-base)] ease-[var(--ease-out)] mt-2"
           >
             <Icons.plus className="w-4 h-4 mr-2" />
             Add Task
-          </button>
+          </Button>
         )}
       </div>
       </>

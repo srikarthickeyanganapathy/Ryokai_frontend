@@ -1,4 +1,4 @@
-import api from '@/lib/api';
+import api from '@/shared/api/api';
 
 export const normalizeUser = (user) => {
   if (user && user.fullName && !user.name) {

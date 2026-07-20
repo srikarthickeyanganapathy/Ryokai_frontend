@@ -1,9 +1,19 @@
-import api from '@/lib/api';
+import api from '@/shared/api/api';
 
 export const crewApi = {
   // --- Crew CRUD ---
   getCrews: async () => {
     const { data } = await api.get('/crews');
+    return data;
+  },
+
+  discoverCrews: async ({ keyword = '', page = 0, size = 20 } = {}) => {
+    const { data } = await api.get('/crews/discover', { params: { keyword, page, size } });
+    return data;
+  },
+
+  joinPublicCrew: async (crewId) => {
+    const { data } = await api.post(`/crews/${crewId}/join`);
     return data;
   },
 

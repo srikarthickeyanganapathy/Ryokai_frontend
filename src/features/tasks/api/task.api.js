@@ -1,4 +1,4 @@
-import api from '@/lib/api';
+import api from '@/shared/api/api';
 import { normalizeStatus } from '@/shared/lib/status';
 
 /** Normalize checklist item: backend uses isCompleted, frontend expects completed */
@@ -36,10 +36,15 @@ export const getTasks = async (params) => {
 
 export const assignTask = async (payload) => {
   const { crewId, ...rest } = payload;
-  if (crewId) {
-    console.warn('[task.api] assignTask: crewId is not allowed here. Use createCrewTask instead.');
-  }
   const { data } = await api.post('/tasks/assign', { ...rest, tags: toBackendTags(rest.tags) });
+  return normalizeTask(data);
+};
+
+export const createCrewTask = async (payload) => {
+  const { crewId, ...rest } = payload;
+  const { data } = await api.post('/tasks/crew', { ...rest, tags: toBackendTags(rest.tags) }, {
+    params: { crewId }
+  });
   return normalizeTask(data);
 };
 

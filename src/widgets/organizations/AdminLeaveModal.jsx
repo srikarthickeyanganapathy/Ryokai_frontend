@@ -1,3 +1,5 @@
+import { Label } from '@/shared/ui/Typography/Label';
+
 import React, { useState, useEffect } from 'react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
@@ -65,7 +67,7 @@ export function AdminLeaveModal({ isOpen, onClose, orgId, members = [] }) {
               </Text>
               
               <div className="grid grid-cols-2 gap-3">
-                <button
+                <Button
                   type="button"
                   onClick={() => setMode('transfer')}
                   className={`p-4 rounded-xl border-2 text-left transition-all ${
@@ -76,9 +78,9 @@ export function AdminLeaveModal({ isOpen, onClose, orgId, members = [] }) {
                 >
                   <Text className="font-semibold text-sm block mb-1">Transfer Admin Role</Text>
                   <Text size="xs" variant="muted">Pass ownership to another member</Text>
-                </button>
+                </Button>
 
-                <button
+                <Button
                   type="button"
                   onClick={() => setMode('dissolve')}
                   className={`p-4 rounded-xl border-2 text-left transition-all ${
@@ -89,12 +91,12 @@ export function AdminLeaveModal({ isOpen, onClose, orgId, members = [] }) {
                 >
                   <Text className="font-semibold text-sm block mb-1 text-[var(--danger)]">Dissolve Organization</Text>
                   <Text size="xs" variant="muted">Remove all members and delete org</Text>
-                </button>
+                </Button>
               </div>
 
               {mode === 'transfer' ? (
                 <div className="space-y-2 pt-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Select Successor Admin</label>
+                  <Label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Select Successor Admin</Label>
                   <Select
                     value={successorUserId}
                     onValueChange={setSuccessorUserId}

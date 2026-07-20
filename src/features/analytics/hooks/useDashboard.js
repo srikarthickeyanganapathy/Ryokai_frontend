@@ -1,8 +1,8 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import * as dashboardApi from '../api/dashboard.api';
-import { queryKeys } from '@/lib/queryKeys';
+import { queryKeys } from '@/shared/api/queryKeys';
 
-import { useWorkspace } from '@/context/WorkspaceContext';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
 export const useDashboardStats = () => {
   const { workspaceMode, activeOrganization } = useWorkspace();

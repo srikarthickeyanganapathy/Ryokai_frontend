@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLeaveRequests, useApproveLeave, useRejectLeave, useRequestLeave } from '@/features/organizations/hooks/useOrganizations';
-import { usePermissions } from '@/context/usePermissions';
+import { usePermissions } from '@/shared/hooks/usePermissions';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
@@ -9,6 +9,7 @@ import { Icons } from '@/shared/ui/Icons';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/shared/ui/Modal';
 import { Textarea } from '@/shared/ui/Textarea';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { Label } from '@/shared/ui/Typography/Label';
 
 export function LeaveRequestsTab({ orgId }) {
   const { data: requests = [], isLoading } = useLeaveRequests(orgId);
@@ -128,7 +129,7 @@ function RequestLeaveModal({ isOpen, onClose, orgId }) {
         </ModalHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div>
-            <label className="block text-sm font-medium mb-1.5">Reason</label>
+            <Label className="block text-sm font-medium mb-1.5">Reason</Label>
             <Textarea
               value={reason}
               onChange={e => setReason(e.target.value)}

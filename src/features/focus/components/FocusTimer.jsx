@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Play, Square, Timer as TimerIcon } from 'lucide-react'
-import { cn } from '@/lib/cn'
+import { cn } from '@/shared/lib/cn'
 import { useActiveFocus, useStartFocus, useStopFocus } from '../hooks/useFocus'
 
 export function FocusTimer({ task }) {

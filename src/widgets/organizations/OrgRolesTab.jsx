@@ -8,6 +8,7 @@ import { Input } from '@/shared/ui/Input';
 import { useCreateOrgRole, useUpdateOrgRolePermissions, useUpdateOrgRole } from '@/features/organizations/hooks/useOrganizations';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { cn } from '@/shared/lib/cn';
+import { Label } from '@/shared/ui/Typography/Label';
 
 const ALL_PERMISSIONS = [
   'TASK_VIEW', 'TASK_ASSIGN', 'TASK_EDIT', 'TASK_DELETE',
@@ -139,7 +140,7 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
         {isCreating && (
           <form onSubmit={handleCreateRole} className="mb-5 flex flex-col gap-3 p-4 border border-[var(--color-border-subtle)] rounded-xl bg-[var(--bg-subtle)]/50">
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block mb-1">Role Name</label>
+              <Label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block mb-1">Role Name</Label>
               <Input
                 value={newRoleName}
                 onChange={(e) => setNewRoleName(e.target.value)}
@@ -149,7 +150,7 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block mb-1">Priority (0 is highest)</label>
+              <Label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block mb-1">Priority (0 is highest)</Label>
               <Input
                 type="number"
                 min="0"
@@ -171,7 +172,7 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
 
         <div className="space-y-2">
           {roles.map(role => (
-            <button
+            <Button
               key={role.id}
               onClick={() => setSelectedRole(role)}
               className={cn(
@@ -186,7 +187,7 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
                 <span className="text-[10px] text-[var(--text-muted)] font-normal">Priority: {role.priority ?? 100}</span>
               </div>
               {role.name === 'ADMIN' && <Icons.lock className="w-3.5 h-3.5 text-[var(--text-muted)]" />}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -204,9 +205,9 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
             
             {selectedRole.name !== 'ADMIN' && (
               <div className="mb-6 max-w-xs">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block mb-1">
+                <Label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block mb-1">
                   Role Priority (0 is highest)
-                </label>
+                </Label>
                 <Input
                   type="number"
                   min="0"
@@ -221,7 +222,7 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
               {ALL_PERMISSIONS.map(permission => {
                 const hasPermission = localPermissions.includes(permission);
                 return (
-                  <label 
+                  <Label 
                     key={permission} 
                     className={cn(
                       "flex items-start gap-3 p-3 rounded-[var(--radius-md)] border transition-all duration-[var(--duration-base)] cursor-pointer",
@@ -231,7 +232,7 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
                       selectedRole.name === 'ADMIN' ? 'opacity-70 cursor-not-allowed' : ''
                     )}
                   >
-                    <input
+                    <Input
                       type="checkbox"
                       checked={hasPermission}
                       disabled={selectedRole.name === 'ADMIN' || updatePermissionsMutation.isPending}
@@ -244,7 +245,7 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
                         {permission.toLowerCase().replace(/_/g, ' ')}
                       </Text>
                     </div>
-                  </label>
+                  </Label>
                 );
               })}
             </div>

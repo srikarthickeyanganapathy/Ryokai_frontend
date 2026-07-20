@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as adminApi from '../api/admin.api';
-import { queryKeys } from '@/lib/queryKeys';
+import { queryKeys } from '@/shared/api/queryKeys';
 import { toast } from 'sonner';
 
 // --- Roles ---

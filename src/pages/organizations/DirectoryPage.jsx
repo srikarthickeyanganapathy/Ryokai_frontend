@@ -1,11 +1,11 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { useWorkspace } from '@/context/WorkspaceContext'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { useOrgMembers } from '@/features/organizations/hooks/useOrganizations'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Search, Mail, Shield, User as UserIcon } from 'lucide-react'
 import { useState, useMemo } from 'react'
-import { cn } from '@/lib/cn'
+import { cn } from '@/shared/lib/cn'
 
 export function DirectoryPage() {
   const { activeOrganization } = useWorkspace()

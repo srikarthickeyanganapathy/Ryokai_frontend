@@ -9,6 +9,7 @@ import { useCrews, useCreateCrew } from '@/features/crews/hooks/useCrews';
 import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar';
 import { toast } from 'sonner';
+import { Label } from '@/shared/ui/Typography/Label';
 
 export function CrewsPage() {
   const navigate = useNavigate();
@@ -82,7 +83,7 @@ export function CrewsPage() {
           <Heading level={3} className="mb-4">Create Crew</Heading>
           <form onSubmit={handleCreateCrew} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-[12px] font-medium text-[var(--text-secondary)]">Name</label>
+              <Label className="text-[12px] font-medium text-[var(--text-secondary)]">Name</Label>
               <Input
                 value={crewName}
                 onChange={(e) => setCrewName(e.target.value)}
@@ -91,7 +92,7 @@ export function CrewsPage() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[12px] font-medium text-[var(--text-secondary)]">Description</label>
+              <Label className="text-[12px] font-medium text-[var(--text-secondary)]">Description</Label>
               <textarea
                 value={crewDesc}
                 onChange={(e) => setCrewDesc(e.target.value)}
@@ -101,7 +102,7 @@ export function CrewsPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[12px] font-medium text-[var(--text-secondary)]">Visibility</label>
+                <Label className="text-[12px] font-medium text-[var(--text-secondary)]">Visibility</Label>
                 <select
                   value={visibility}
                   onChange={(e) => setVisibility(e.target.value)}
@@ -112,7 +113,7 @@ export function CrewsPage() {
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-[12px] font-medium text-[var(--text-secondary)]">Member Cap</label>
+                <Label className="text-[12px] font-medium text-[var(--text-secondary)]">Member Cap</Label>
                 <Input
                   type="number"
                   value={memberCap}

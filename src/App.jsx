@@ -30,6 +30,8 @@ const DirectoryPage = lazy(() => import("@/pages/organizations/DirectoryPage").t
 const AnnouncementsPage = lazy(() => import("@/pages/organizations/AnnouncementsPage").then(m => ({ default: m.AnnouncementsPage })));
 const CrewsPage = lazy(() => import("@/pages/crews/CrewsPage").then(m => ({ default: m.CrewsPage })));
 const CrewDetailPage = lazy(() => import("@/pages/crews/CrewDetailPage").then(m => ({ default: m.CrewDetailPage })));
+const CrewDiscoverPage = lazy(() => import("@/pages/crews/CrewDiscoverPage").then(m => ({ default: m.CrewDiscoverPage })));
+const CrewTasksPage = lazy(() => import("@/pages/crews/CrewTasksPage").then(m => ({ default: m.CrewTasksPage })));
 const TeamDetailPage = lazy(() => import("@/pages/teams/TeamDetailPage").then(m => ({ default: m.TeamDetailPage })));
 const CrewJoinPage = lazy(() => import("@/pages/crews/CrewJoinPage").then(m => ({ default: m.CrewJoinPage })));
 const InboxPage = lazy(() => import("@/pages/inbox/InboxPage").then(m => ({ default: m.InboxPage })));
@@ -39,9 +41,12 @@ const FocusPage = lazy(() => import("@/features/focus/pages/FocusPage").then(m =
 const ProfilePage = lazy(() => import("@/pages/settings/ProfilePage").then(m => ({ default: m.ProfilePage })));
 const SecurityPage = lazy(() => import("@/pages/settings/SecurityPage").then(m => ({ default: m.SecurityPage })));
 const SessionsPage = lazy(() => import("@/pages/settings/SessionsPage").then(m => ({ default: m.SessionsPage })));
-const ComingSoonPage = lazy(() => import("@/pages/placeholder/ComingSoonPage").then(m => ({ default: m.ComingSoonPage })));
 const CalendarPage = lazy(() => import("@/pages/calendar/CalendarPage").then(m => ({ default: m.CalendarPage })));
-
+const NotesPage = lazy(() => import("@/pages/notes/NotesPage").then(m => ({ default: m.NotesPage })));
+const SavedPage = lazy(() => import("@/pages/saved/SavedPage").then(m => ({ default: m.SavedPage })));
+const WorkloadPage = lazy(() => import("@/pages/workload/WorkloadPage").then(m => ({ default: m.WorkloadPage })));
+const GoalsPage = lazy(() => import("@/pages/goals/GoalsPage").then(m => ({ default: m.GoalsPage })));
+const WhiteboardPage = lazy(() => import("@/pages/whiteboards/WhiteboardPage").then(m => ({ default: m.WhiteboardPage })));
 export default function App() {
   return (
     <Router>
@@ -74,6 +79,7 @@ export default function App() {
                 <Route path="/app/crews" element={<CrewsPage />} />
                 <Route path="/app/crews/join" element={<CrewJoinPage />} />
                 <Route path="/app/crews/:crewId" element={<CrewDetailPage />} />
+                <Route path="/app/crews/:crewId/whiteboards/:boardId" element={<WhiteboardPage />} />
                 <Route path="/app/analytics" element={<AnalyticsPage />} />
                 <Route element={<AdminRoute />}>
                   <Route path="/app/admin" element={<AdminPage />} />
@@ -92,19 +98,19 @@ export default function App() {
 
                 {/* ═══ New Workspace Placeholder Routes ═══ */}
                 {/* Personal workspace */}
-                <Route path="/app/notes" element={<ComingSoonPage />} />
+                <Route path="/app/notes" element={<NotesPage />} />
                 <Route path="/app/calendar" element={<CalendarPage />} />
-                <Route path="/app/saved" element={<ComingSoonPage />} />
+                <Route path="/app/saved" element={<SavedPage />} />
                 
                 {/* Organization workspace */}
-                <Route path="/app/goals" element={<ComingSoonPage />} />
+                <Route path="/app/goals" element={<GoalsPage />} />
                 <Route path="/app/directory" element={<DirectoryPage />} />
                 <Route path="/app/announcements" element={<AnnouncementsPage />} />
-                <Route path="/app/workload" element={<ComingSoonPage />} />
+                <Route path="/app/workload" element={<WorkloadPage />} />
                 
                 {/* Crews workspace */}
-                <Route path="/app/crews/discover" element={<ComingSoonPage />} />
-                <Route path="/app/crews/tasks" element={<ComingSoonPage />} />
+                <Route path="/app/crews/discover" element={<CrewDiscoverPage />} />
+                <Route path="/app/crews/tasks" element={<CrewTasksPage />} />
               </Route>
             </Route>
 

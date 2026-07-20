@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as userApi from '../api/user.api';
-import { queryKeys } from '@/lib/queryKeys';
+import { queryKeys } from '@/shared/api/queryKeys';
 import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 

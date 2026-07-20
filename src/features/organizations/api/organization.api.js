@@ -1,4 +1,4 @@
-import api from '@/lib/api';
+import api from '@/shared/api/api';
 
 export const getUserOrganizations = async () => {
   const { data } = await api.get('/organizations');

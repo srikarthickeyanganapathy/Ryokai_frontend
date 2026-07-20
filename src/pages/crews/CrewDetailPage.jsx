@@ -27,12 +27,17 @@ import {
   useCreateCrewTask,
   useTransferCrewOwnership,
 } from '@/features/crews/hooks/useCrews';
+import { useWhiteboards, useCreateWhiteboard, useDeleteWhiteboard } from '@/features/whiteboards/hooks/useWhiteboards';
 import { toast } from 'sonner';
+import { Label } from '@/shared/ui/Typography/Label';
+
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
 
 export function CrewDetailPage() {
   const { crewId } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('tasks');
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
 
   // Queries
   const { data: crew, isLoading: isCrewLoading } = useCrew(crewId);
@@ -45,8 +50,8 @@ export function CrewDetailPage() {
   // Leave Crew Mutation
   const leaveCrewMutation = useLeaveCrew(crewId);
 
-  const handleLeaveCrew = () => {
-    if (window.confirm('Are you sure you want to leave this crew?')) {
+  const handleLeaveCrew = async () => {
+    if (await confirm({ title: 'Are you sure you want to leave this crew?', danger: true })) {
       leaveCrewMutation.mutate(null, {
         onSuccess: () => navigate('/app/crews')
       });
@@ -100,9 +105,10 @@ export function CrewDetailPage() {
           { id: 'tasks', label: 'Tasks', icon: Icons.listTodo },
           { id: 'channels', label: 'Chat & Channels', icon: Icons.message },
           { id: 'projects', label: 'Projects', icon: Icons.folderClosed },
+          { id: 'whiteboards', label: 'Whiteboards', icon: Icons.edit || Icons.edit },
           { id: 'members', label: 'Members', icon: Icons.users },
         ].map((tab) => (
-          <button
+          <Button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 pb-3 text-[14px] font-medium border-b-2 transition-colors shrink-0 ${
@@ -113,7 +119,7 @@ export function CrewDetailPage() {
           >
             <tab.icon className="w-4 h-4" />
             {tab.label}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -125,13 +131,17 @@ export function CrewDetailPage() {
         {activeTab === 'channels' && (
           <ChannelsTab crewId={crewId} channels={channels} isCreator={crew?.myRole === 'CREATOR'} />
         )}
-        {activeTab === 'projects' && (
+        { activeTab === 'projects' && (
           <ProjectsTab crewId={crewId} sharedProjects={sharedProjects} allProjects={allProjects} />
         )}
-        {activeTab === 'members' && (
+        { activeTab === 'whiteboards' && (
+          <WhiteboardsTab crewId={crewId} isCreator={crew?.myRole === 'CREATOR'} />
+        )}
+        { activeTab === 'members' && (
           <MembersTab crewId={crewId} members={members} memberCap={crew.memberCap} isCreator={crew?.myRole === 'CREATOR'} />
         )}
       </div>
+      {confirmDialog}
     </div>
   );
 }
@@ -183,7 +193,7 @@ function TasksTab({ crewId, tasks }) {
           <Heading level={3} className="mb-4">Create Crew Task</Heading>
           <form onSubmit={handleCreateTask} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-[12px] font-medium text-[var(--text-secondary)]">Task Title</label>
+              <Label className="text-[12px] font-medium text-[var(--text-secondary)]">Task Title</Label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -192,7 +202,7 @@ function TasksTab({ crewId, tasks }) {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[12px] font-medium text-[var(--text-secondary)]">Description</label>
+              <Label className="text-[12px] font-medium text-[var(--text-secondary)]">Description</Label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -202,7 +212,7 @@ function TasksTab({ crewId, tasks }) {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[12px] font-medium text-[var(--text-secondary)]">Priority</label>
+                <Label className="text-[12px] font-medium text-[var(--text-secondary)]">Priority</Label>
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
@@ -215,7 +225,7 @@ function TasksTab({ crewId, tasks }) {
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-[12px] font-medium text-[var(--text-secondary)]">Due Date</label>
+                <Label className="text-[12px] font-medium text-[var(--text-secondary)]">Due Date</Label>
                 <Input
                   type="date"
                   value={dueDate}
@@ -312,6 +322,7 @@ function ChannelsTab({ crewId, channels, isCreator }) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [channelName, setChannelName] = useState('');
   const [channelType, setChannelType] = useState('TEXT');
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
 
   const createChannelMutation = useCreateCrewChannel(crewId);
   const deleteChannelMutation = useDeleteCrewChannel(crewId);
@@ -332,9 +343,9 @@ function ChannelsTab({ crewId, channels, isCreator }) {
     });
   };
 
-  const handleDeleteChannel = (id, e) => {
+  const handleDeleteChannel = async (id, e) => {
     e.stopPropagation();
-    if (window.confirm('Delete this channel and all its messages?')) {
+    if (await confirm({ title: 'Delete this channel and all its messages?', danger: true })) {
       deleteChannelMutation.mutate(id, {
         onSuccess: () => {
           if (selectedChannel?.id === id) setSelectedChannel(null);
@@ -361,7 +372,7 @@ function ChannelsTab({ crewId, channels, isCreator }) {
             <Heading level={3} className="mb-3 text-[16px]">New Channel</Heading>
             <form onSubmit={handleCreateChannel} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-[11px] font-medium text-[var(--text-secondary)]">Channel Name</label>
+                <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Channel Name</Label>
                 <Input
                   value={channelName}
                   onChange={(e) => setChannelName(e.target.value)}
@@ -370,7 +381,7 @@ function ChannelsTab({ crewId, channels, isCreator }) {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-medium text-[var(--text-secondary)]">Type</label>
+                <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Type</Label>
                 <select
                   value={channelType}
                   onChange={(e) => setChannelType(e.target.value)}
@@ -404,12 +415,12 @@ function ChannelsTab({ crewId, channels, isCreator }) {
                 {chan.name}
               </span>
               {isCreator && (
-                <button
+                <Button
                   onClick={(e) => handleDeleteChannel(chan.id, e)}
                   className="text-[var(--text-tertiary)] hover:text-red-500 opacity-0 hover:opacity-100 group-hover:opacity-100 p-0.5 rounded transition-opacity"
                 >
                   <Icons.trash2 className="w-3 h-3" />
-                </button>
+                </Button>
               )}
             </div>
           ))}
@@ -431,6 +442,7 @@ function ChannelsTab({ crewId, channels, isCreator }) {
           </div>
         )}
       </div>
+      {confirmDialog}
     </div>
   );
 }
@@ -540,7 +552,7 @@ function ChannelChatBox({ crewId, channel }) {
           <Heading level={3} className="mb-3 text-[15px]">Convert Message to Task</Heading>
           <form onSubmit={handleConvertToTask} className="space-y-3">
             <div className="space-y-1">
-              <label className="text-[11px] font-medium text-[var(--text-secondary)]">Task Title</label>
+              <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Task Title</Label>
               <Input
                 value={taskTitle}
                 onChange={(e) => setTaskTitle(e.target.value)}
@@ -549,7 +561,7 @@ function ChannelChatBox({ crewId, channel }) {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[11px] font-medium text-[var(--text-secondary)]">Priority</label>
+                <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Priority</Label>
                 <select
                   value={taskPriority}
                   onChange={(e) => setTaskPriority(e.target.value)}
@@ -562,7 +574,7 @@ function ChannelChatBox({ crewId, channel }) {
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-medium text-[var(--text-secondary)]">Due Date</label>
+                <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Due Date</Label>
                 <Input
                   type="date"
                   value={taskDueDate}
@@ -671,6 +683,7 @@ function ProjectsTab({ crewId, sharedProjects, allProjects }) {
 function MembersTab({ crewId, members, memberCap, isCreator }) {
   const [email, setEmail] = useState('');
   const [inviteLink, setInviteLink] = useState('');
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
 
   const inviteMutation = useInviteCrewMember(crewId);
   const inviteLinkMutation = useCreateCrewInviteLink(crewId);
@@ -725,8 +738,8 @@ function MembersTab({ crewId, members, memberCap, isCreator }) {
                       variant="outline"
                       size="xs"
                       className="text-[11px] h-7 px-2 border-[var(--border-default)]"
-                      onClick={() => {
-                        if (window.confirm(`Transfer crew ownership to @${member.username}? You will be demoted to MEMBER.`)) {
+                      onClick={async () => {
+                        if (await confirm({ title: `Transfer crew ownership to @${member.username}? You will be demoted to MEMBER.`, danger: true })) {
                           transferOwnershipMutation.mutate(member.userId);
                         }
                       }}
@@ -736,16 +749,16 @@ function MembersTab({ crewId, members, memberCap, isCreator }) {
                     </Button>
                   )}
                   {/* Remove member button */}
-                  <button
-                    onClick={() => {
-                      if (window.confirm(`Remove member @${member.username}?`)) {
+                  <Button
+                    onClick={async () => {
+                      if (await confirm({ title: `Remove member @${member.username}?`, danger: true })) {
                         removeMutation.mutate(member.userId);
                       }
                     }}
                     className="text-[var(--text-tertiary)] hover:text-red-500 p-1"
                   >
                     <Icons.trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}
@@ -760,7 +773,7 @@ function MembersTab({ crewId, members, memberCap, isCreator }) {
           </div>
 
           <form onSubmit={handleInvite} className="space-y-2">
-            <label className="text-[11px] font-medium text-[var(--text-secondary)]">Invite by Email</label>
+            <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Invite by Email</Label>
             <div className="flex gap-2">
               <Input
                 type="email"
@@ -775,7 +788,7 @@ function MembersTab({ crewId, members, memberCap, isCreator }) {
           </form>
 
           <div className="border-t border-[var(--border-subtle)] pt-4 space-y-3">
-            <label className="text-[11px] font-medium text-[var(--text-secondary)]">Generate Invite Link</label>
+            <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Generate Invite Link</Label>
             <Button
               variant="outline"
               size="sm"
@@ -809,6 +822,110 @@ function MembersTab({ crewId, members, memberCap, isCreator }) {
           </div>
         </div>
       </div>
+      {confirmDialog}
+    </div>
+  );
+}
+
+/* ==================== WHITEBOARDS TAB ==================== */
+function WhiteboardsTab({ crewId, isCreator }) {
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [boardTitle, setBoardTitle] = useState('');
+  
+  const { data: whiteboards = [], isLoading } = useWhiteboards(crewId);
+  const createBoardMutation = useCreateWhiteboard(crewId);
+  const deleteBoardMutation = useDeleteWhiteboard(crewId);
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
+
+  const handleCreate = (e) => {
+    e.preventDefault();
+    if (!boardTitle.trim()) return;
+    createBoardMutation.mutate(boardTitle, {
+      onSuccess: () => {
+        setIsCreateOpen(false);
+        setBoardTitle('');
+      }
+    });
+  };
+
+  const handleDelete = async (e, boardId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (await confirm({ title: 'Delete this whiteboard?', danger: true })) {
+      deleteBoardMutation.mutate(boardId);
+    }
+  };
+
+  if (isLoading) return <div className="p-8 text-center"><Icons.spinner className="w-6 h-6 animate-spin mx-auto text-[var(--accent)]" /></div>;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-end justify-between border-b border-[var(--border-subtle)] pb-4">
+        <div>
+          <Heading level={3} className="text-[15px] font-semibold mb-1">Crew Whiteboards</Heading>
+          <Text className="text-[12px] text-[var(--text-tertiary)]">Collaborate in real-time on a shared canvas.</Text>
+        </div>
+        <Button size="sm" className="gap-1.5" onClick={() => setIsCreateOpen(true)}>
+          <Icons.plus className="w-3.5 h-3.5" />
+          New Whiteboard
+        </Button>
+      </div>
+
+      <Modal open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <ModalContent className="sm:max-w-sm">
+          <Heading level={3} className="mb-3 text-[16px]">Create Whiteboard</Heading>
+          <form onSubmit={handleCreate} className="space-y-4">
+            <div className="space-y-1">
+              <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Board Title</Label>
+              <Input
+                value={boardTitle}
+                onChange={(e) => setBoardTitle(e.target.value)}
+                placeholder="Architecture Diagram, Sprint Retrospective..."
+                required
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+              <Button type="submit" size="sm" isLoading={createBoardMutation.isPending}>Create</Button>
+            </div>
+          </form>
+        </ModalContent>
+      </Modal>
+
+      {whiteboards.length === 0 ? (
+        <div className="text-center py-12 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-[var(--radius-lg)] border-dashed">
+          <Icons.edit className="w-8 h-8 text-[var(--text-tertiary)] mx-auto mb-2" />
+          <Heading level={4} className="text-[14px] font-medium text-[var(--text-secondary)]">No whiteboards yet</Heading>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {whiteboards.map(board => (
+            <Link key={board.id} to={`/app/crews/${crewId}/whiteboards/${board.id}`} className="group block">
+              <div className="flex flex-col p-4 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-[var(--radius-lg)] hover:bg-[var(--bg-hover)] transition-colors h-full">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center">
+                      <Icons.edit className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <Heading level={4} className="text-[14px] font-semibold leading-tight line-clamp-1">{board.title}</Heading>
+                      <Text className="text-[10px] text-[var(--text-tertiary)]">
+                        Updated {new Date(board.updatedAt).toLocaleDateString()}
+                      </Text>
+                    </div>
+                  </div>
+                  {isCreator && (
+                    <Button onClick={(e) => handleDelete(e, board.id)} className="text-[var(--text-tertiary)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Icons.trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+      {confirmDialog}
     </div>
   );
 }

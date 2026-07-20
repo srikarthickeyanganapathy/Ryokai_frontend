@@ -2,12 +2,14 @@ import React, { createContext, useContext, useEffect, useRef, useState, useCallb
 import { Client } from '@stomp/stompjs'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { queryKeys } from '@/lib/queryKeys'
+import { queryKeys } from '@/shared/api/queryKeys'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 
 const RealtimeContext = createContext({
   connected: false,
   subscribeToTask: () => () => {},
+  subscribeToTopic: () => () => {},
+  publish: () => {},
 })
 
 export const useRealtime = () => useContext(RealtimeContext)
@@ -90,8 +92,26 @@ export function RealtimeProvider({ children }) {
     return () => sub.unsubscribe()
   }, [])
 
+  // Generic subscribe to any topic
+  const subscribeToTopic = useCallback((topic, onUpdate) => {
+    if (!clientRef.current?.active || !topic) return () => {}
+    const sub = clientRef.current.subscribe(topic, (msg) => {
+      try {
+        onUpdate(JSON.parse(msg.body))
+      } catch { /* ignore malformed messages */ }
+    })
+    return () => sub.unsubscribe()
+  }, [])
+
+  // Generic publish method
+  const publish = useCallback((destination, body) => {
+    if (clientRef.current?.connected) {
+      clientRef.current.publish({ destination, body: JSON.stringify(body) })
+    }
+  }, [])
+
   return (
-    <RealtimeContext.Provider value={{ connected, subscribeToTask }}>
+    <RealtimeContext.Provider value={{ connected, subscribeToTask, subscribeToTopic, publish }}>
       {children}
     </RealtimeContext.Provider>
   )

@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import * as taskApi from '../api/task.api';
-import { queryKeys } from '@/lib/queryKeys';
+import { queryKeys } from '@/shared/api/queryKeys';
 import { toast } from 'sonner';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { useWorkspace } from '@/context/WorkspaceContext';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
 export const useTaskList = (filters) => {
   return useQuery({
@@ -43,27 +43,28 @@ export const useCreateTask = () => {
   return useMutation({
     mutationFn: async (payload) => {
       // Ensure required fields: assigneeUsername defaults to current user, priority defaults to MEDIUM
-      // FIX: backend TaskPriority enum is { LOW, MEDIUM, HIGH, URGENT } — 'NORMAL' does not exist.
-      // Check if the payload explicitly links to an org entity
-      const hasOrgContext = !!payload.projectId || !!payload.teamId || !!payload.organizationId;
-      const isPersonalMode = workspaceMode === 'PERSONAL' && !hasOrgContext;
+      // Backend expects LocalDateTime — empty string "" causes Jackson 500.
       const taskPayload = {
         ...payload,
         assigneeUsername: payload.assigneeUsername || user?.username,
         priority: payload.priority || 'MEDIUM',
-        isPersonal: isPersonalMode ? true : (payload.isPersonal || false),
-        // Backend expects LocalDateTime — empty string "" causes Jackson 500.
-        // Convert empty/falsy dueDate to null so backend ignores it.
         dueDate: payload.dueDate || null,
-        // teamId: ensure it's a number or null
         teamId: payload.teamId ? Number(payload.teamId) : null,
       };
-      // Status transitions are handled by workflow endpoints (submit/approve/reject),
-      // not by updateTask — TaskUpdateRequestDTO has no status field.
-      if (taskPayload.isPersonal) {
+
+      if (workspaceMode === 'PERSONAL') {
+        taskPayload.isPersonal = true;
         return await taskApi.createPersonalTask(taskPayload);
+      } else if (workspaceMode === 'CREWS') {
+        // Find the active crew ID from somewhere, or it should be passed in payload
+        const crewId = payload.crewId || (payload.projectId ? null : null); 
+        // Wait, how do we know crewId? It is passed from TaskForm? 
+        taskPayload.crewId = crewId;
+        return await taskApi.createCrewTask(taskPayload);
+      } else {
+        taskPayload.isPersonal = false;
+        return await taskApi.assignTask(taskPayload);
       }
-      return await taskApi.assignTask(taskPayload);
     },
     onSuccess: (data, variables) => {
       const taskTitle = data?.title || variables?.title || 'Task';

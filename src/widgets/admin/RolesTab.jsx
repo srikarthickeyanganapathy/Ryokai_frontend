@@ -8,6 +8,7 @@ import { useRoles, useCreateRole, usePermissionsList, useRolePermissions, useAss
 import { toast } from 'sonner';
 import { cn } from '@/shared/lib/cn';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { Label } from '@/shared/ui/Typography/Label';
 
 export function RolesTab() {
   const { data: roles = [], isLoading: rolesLoading } = useRoles();
@@ -92,12 +93,12 @@ export function RolesTab() {
               <div className="flex justify-between items-center mb-1">
                 <Text className="font-medium">{role.name.replace('ROLE_', '')}</Text>
                 {!role.builtin && (
-                  <button 
+                  <Button 
                     onClick={(e) => { e.stopPropagation(); handleDeleteRole(role.id); }} 
                     className="text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors text-xs"
                   >
                     Delete
-                  </button>
+                  </Button>
                 )}
               </div>
               <Text variant="muted" size="sm">
@@ -192,7 +193,7 @@ function RolePermissionsPanel({ role, allPermissions, onEdit }) {
           {allPermissions.map(perm => {
             const isChecked = selectedPermNames.includes(perm.name);
             return (
-              <label 
+              <Label 
                 key={perm.id} 
                 className={cn(
                   "flex items-start gap-3 p-3 rounded-[var(--radius-md)] border cursor-pointer transition-all duration-[var(--duration-base)]",
@@ -202,7 +203,7 @@ function RolePermissionsPanel({ role, allPermissions, onEdit }) {
                 )}
               >
                 <div className="mt-0.5">
-                  <input 
+                  <Input 
                     type="checkbox" 
                     checked={isChecked}
                     onChange={() => handleToggle(perm.name)}
@@ -213,7 +214,7 @@ function RolePermissionsPanel({ role, allPermissions, onEdit }) {
                   <Text className="font-medium text-sm mb-0.5">{perm.name}</Text>
                   <Text variant="muted" size="sm">{perm.description || 'No description available.'}</Text>
                 </div>
-              </label>
+              </Label>
             );
           })}
         </div>
@@ -248,7 +249,7 @@ function CreateRoleModal({ isOpen, onClose }) {
         </ModalHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div>
-            <label className="block text-sm font-medium mb-1.5">Role Name</label>
+            <Label className="block text-sm font-medium mb-1.5">Role Name</Label>
             <Input
               value={name}
               onChange={e => setName(e.target.value)}
@@ -304,7 +305,7 @@ function UpdateRoleModal({ isOpen, onClose, role }) {
         </ModalHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div>
-            <label className="block text-sm font-medium mb-1.5">Role Name</label>
+            <Label className="block text-sm font-medium mb-1.5">Role Name</Label>
             <Input
               value={name}
               onChange={e => setName(e.target.value)}
@@ -314,7 +315,7 @@ function UpdateRoleModal({ isOpen, onClose, role }) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1.5">Description (Optional)</label>
+            <Label className="block text-sm font-medium mb-1.5">Description (Optional)</Label>
             <Input
               value={description}
               onChange={e => setDescription(e.target.value)}

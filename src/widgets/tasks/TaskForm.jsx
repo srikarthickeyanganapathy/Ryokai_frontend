@@ -5,7 +5,7 @@ import { Input } from '@/shared/ui/Input'
 import { Button } from '@/shared/ui/Button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
 import { Settings } from 'lucide-react'
-import { useWorkspace } from '@/context/WorkspaceContext'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { useQuery } from '@tanstack/react-query'
 import { getOrgMembers, getOrgTeams } from '@/features/organizations/api/organization.api'
 import { projectsApi } from '@/features/projects/api'
@@ -110,7 +110,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
           )}
         />
 
-        {!isPersonalMode && (
+        {workspaceMode === 'ORG' && (
           <FormField
             control={form.control}
             name="assigneeUsername"

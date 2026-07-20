@@ -1,3 +1,5 @@
+import { Button } from '@/shared/ui/Button';
+
 import React, { useMemo } from 'react'
 import { startOfWeek, endOfWeek, eachDayOfInterval, format, isToday, parseISO } from 'date-fns'
 import { cn } from '@/shared/lib/cn'
@@ -72,7 +74,7 @@ export function WeekView({ tasks = [], events = [], currentDate, isLoading, onTa
                 {format(day, 'd')}
               </div>
               {onAddClick && (
-                <button 
+                <Button 
                   onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
@@ -81,7 +83,7 @@ export function WeekView({ tasks = [], events = [], currentDate, isLoading, onTa
                   className="absolute top-3 right-2 opacity-0 group-hover:opacity-100 p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] rounded transition-all"
                 >
                   <Plus className="w-4 h-4" />
-                </button>
+                </Button>
               )}
             </div>
             

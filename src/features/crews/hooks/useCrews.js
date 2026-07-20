@@ -1,12 +1,34 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { crewApi } from '../api/crew.api';
-import { queryKeys } from '@/lib/queryKeys';
+import { queryKeys } from '@/shared/api/queryKeys';
 import { toast } from 'sonner';
 
 export const useCrews = () => {
   return useQuery({
     queryKey: queryKeys.crews.all,
     queryFn: () => crewApi.getCrews(),
+  });
+};
+
+export const useDiscoverCrews = (params) => {
+  return useQuery({
+    queryKey: [...queryKeys.crews.all, 'discover', params],
+    queryFn: () => crewApi.discoverCrews(params),
+    placeholderData: (prev) => prev, // keep previous page while typing/paginating
+  });
+};
+
+export const useJoinPublicCrew = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (crewId) => crewApi.joinPublicCrew(crewId),
+    onSuccess: () => {
+      toast.success('Joined crew');
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.all });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to join crew');
+    },
   });
 };
 

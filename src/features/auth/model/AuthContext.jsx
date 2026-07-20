@@ -3,7 +3,7 @@ import { getAccessToken, clearTokens } from '../lib/tokens'
 import { authAPI } from '../api/auth.api'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
-import { scheduleProactiveRefresh, cancelProactiveRefresh } from '@/lib/api'
+import { scheduleProactiveRefresh, cancelProactiveRefresh } from '@/shared/api/api'
 
 export const AuthContext = createContext(null)
 

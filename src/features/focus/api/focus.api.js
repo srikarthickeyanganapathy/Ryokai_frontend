@@ -1,4 +1,4 @@
-import api from '@/lib/api';
+import api from '@/shared/api/api';
 
 export const startFocusSession = (taskId) =>
   api.post('/focus/start', taskId ? { taskId } : {}).then(r => r.data);

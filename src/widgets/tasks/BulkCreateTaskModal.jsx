@@ -8,7 +8,7 @@ import { Input } from '@/shared/ui/Input';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/shared/forms';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select';
 import { useUsersList } from '@/features/auth/hooks/useUser';
-import { useWorkspace } from '@/context/WorkspaceContext';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
 export function BulkCreateTaskModal({ open, onOpenChange }) {
   const { data: allUsers = [] } = useUsersList();

@@ -1,3 +1,6 @@
+
+import { Input } from '@/shared/ui/Input';
+
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
@@ -13,8 +16,8 @@ import { useUsersList } from '@/features/auth/hooks/useUser'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { Archive } from 'lucide-react'
 import { getKanbanColumnForTask } from '@/shared/lib/status'
-import { usePermissions } from '@/context/usePermissions'
-import { useWorkspace } from '@/context/WorkspaceContext'
+import { usePermissions } from '@/shared/hooks/usePermissions'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 
 export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default' }) {
@@ -235,7 +238,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                             <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-semibold tracking-wide">Reassign Task</Text>
                             <div className="space-y-0.5">
                               {assignableUsers.map(u => (
-                                <button
+                                <Button
                                   key={u.id}
                                   onClick={() => {
                                     reassignTask.mutate({ taskId: task.id, newAssigneeId: u.id }, {
@@ -248,7 +251,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                                     {u.username.charAt(0).toUpperCase()}
                                   </div>
                                   <span className="truncate">{u.username}</span>
-                                </button>
+                                </Button>
                               ))}
                             </div>
                           </PopoverContent>
@@ -304,7 +307,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                         {task.checklists.map(item => (
                           <div key={item.id} className="flex items-center justify-between group py-1.5 px-2 -mx-2 rounded-[var(--radius-sm)] hover:bg-[var(--bg-subtle)] transition-colors duration-[var(--duration-base)]">
                             <div className="flex items-center gap-3">
-                              <input 
+                              <Input 
                                 type="checkbox" 
                                 checked={item.completed} 
                                 disabled={!hasChecklistPerm}

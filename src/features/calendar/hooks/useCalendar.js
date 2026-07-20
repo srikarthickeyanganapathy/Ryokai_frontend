@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as calendarApi from '../api/calendar.api';
-import { queryKeys } from '@/lib/queryKeys';
+import { queryKeys } from '@/shared/api/queryKeys';
 import { toast } from 'sonner';
 
 export function useCalendarEvents(start, end) {

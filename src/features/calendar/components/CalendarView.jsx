@@ -4,7 +4,7 @@ import { WeekView } from './WeekView'
 import { MiniAgenda } from './MiniAgenda'
 import { useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Filter } from 'lucide-react'
-import { format, addMonths, subMonths, addWeeks, subWeeks, startOfToday } from 'date-fns'
+import { format, addMonths, subMonths, addWeeks, subWeeks, startOfToday, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns'
 import { Button } from '@/shared/ui/Button'
 import { Text, Heading } from '@/shared/ui/Typography'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
@@ -95,18 +95,18 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onVis
           <div className="flex items-center gap-2">
             {/* View Mode Toggle */}
             <div className="flex items-center bg-[var(--bg-subtle)] rounded-md p-0.5 border border-[var(--color-border-subtle)]">
-              <button 
+              <Button 
                 onClick={() => setMode('month')}
                 className={`px-3 py-1.5 text-xs font-medium rounded-sm transition-colors ${mode === 'month' ? 'bg-[var(--bg-elevated)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
               >
                 Month
-              </button>
-              <button 
+              </Button>
+              <Button 
                 onClick={() => setMode('week')}
                 className={`px-3 py-1.5 text-xs font-medium rounded-sm transition-colors ${mode === 'week' ? 'bg-[var(--bg-elevated)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
               >
                 Week
-              </button>
+              </Button>
             </div>
             
             {/* Filter */}
@@ -152,20 +152,20 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onVis
       <Modal open={!!quickAddDate} onOpenChange={(open) => !open && setQuickAddDate(null)}>
         <ModalContent className="sm:max-w-xl">
           <div className="flex items-center gap-1 mb-4 bg-[var(--bg-subtle)] rounded-md p-0.5 w-fit border border-[var(--color-border-subtle)]">
-            <button
+            <Button
               onClick={() => setCreateType('event')}
               className={cn('px-3 py-1.5 text-xs font-medium rounded-sm transition-colors',
                 createType === 'event' ? 'bg-[var(--bg-elevated)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-secondary)]')}
             >
               Event
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setCreateType('task')}
               className={cn('px-3 py-1.5 text-xs font-medium rounded-sm transition-colors',
                 createType === 'task' ? 'bg-[var(--bg-elevated)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-secondary)]')}
             >
               Task
-            </button>
+            </Button>
           </div>
 
           {createType === 'task' ? (

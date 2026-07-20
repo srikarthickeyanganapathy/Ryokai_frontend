@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 import React, { useState } from 'react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
@@ -221,9 +223,9 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <Badge variant="secondary">{item.type}</Badge>
-                <a href={item.url} target="_blank" rel="noreferrer" className="text-[var(--primary)] hover:underline text-sm font-medium">
+                <Link to={item.url} target="_blank" rel="noreferrer" className="text-[var(--primary)] hover:underline text-sm font-medium">
                   {item.url}
-                </a>
+                </Link>
               </div>
               {item.description && <Text size="xs" variant="muted">{item.description}</Text>}
             </div>

@@ -1,4 +1,4 @@
-import api from '@/lib/api';
+import api from '@/shared/api/api';
 
 export const getAnnouncements = async (orgId, params) => {
   const response = await api.get(`/organizations/${orgId}/announcements`, { params });

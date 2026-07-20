@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useWorkspace } from '@/context/WorkspaceContext';
-import { usePermissions } from '@/context/usePermissions';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
+import { usePermissions } from '@/shared/hooks/usePermissions';
 import { useAnnouncements, useCreateAnnouncement, useDeleteAnnouncement } from '@/features/organizations/hooks/useAnnouncements';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Megaphone, Plus, Trash2, Clock, Loader2 } from 'lucide-react';
 import { formatRelative } from 'date-fns';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { Modal } from '@/shared/ui/Modal';
+import { Modal, ModalContent, ModalHeader, ModalTitle } from '@/shared/ui/Modal';
+import { Button } from '@/shared/ui/Button';
+import { Input } from '@/shared/ui/Input';
+import { Textarea } from '@/shared/ui/Textarea';
+import { Label } from '@/shared/ui/Typography/Label';
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
 
 export function AnnouncementsPage() {
   const { activeOrganization } = useWorkspace();
   const { user } = useAuth();
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
   
   // Do not rely on usePermissions().userOrg here, use the active org context.
   const { canManageAnnouncements } = usePermissions();
@@ -25,6 +31,12 @@ export function AnnouncementsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   if (!activeOrganization) return null;
+
+  const handleDelete = async (id) => {
+    if (await confirm({ title: 'Are you sure you want to delete this announcement?', danger: true })) {
+      deleteMutation.mutate(id);
+    }
+  };
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -46,13 +58,13 @@ export function AnnouncementsPage() {
           </div>
 
           {canManageAnnouncements && (
-            <button
+            <Button
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium rounded-lg transition-colors"
             >
               <Plus className="h-4 w-4" />
               New Post
-            </button>
+            </Button>
           )}
         </motion.div>
 
@@ -96,17 +108,13 @@ export function AnnouncementsPage() {
                       </div>
 
                       {(canManageAnnouncements || announcement.author.id === user?.id) && (
-                        <button
-                          onClick={() => {
-                            if (window.confirm('Delete this announcement?')) {
-                              deleteMutation.mutate(announcement.id);
-                            }
-                          }}
+                        <Button
+                          onClick={() => handleDelete(announcement.id)}
                           disabled={deleteMutation.isPending}
                           className="p-2 text-white/20 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
                         >
                           <Trash2 className="h-4 w-4" />
-                        </button>
+                        </Button>
                       )}
                     </div>
                     
@@ -126,6 +134,7 @@ export function AnnouncementsPage() {
         onClose={() => setIsModalOpen(false)} 
         orgId={orgId} 
       />
+      {confirmDialog}
     </div>
   );
 }
@@ -149,11 +158,15 @@ function CreateAnnouncementModal({ isOpen, onClose, orgId }) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="New Announcement">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-xs font-medium text-white/60 mb-1.5">Title</label>
-          <input
+    <Modal open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <ModalContent className="sm:max-w-lg">
+        <ModalHeader>
+          <ModalTitle>New Announcement</ModalTitle>
+        </ModalHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <div>
+          <Label className="block text-xs font-medium text-white/60 mb-1.5">Title</Label>
+          <Input
             type="text"
             required
             value={title}
@@ -163,7 +176,7 @@ function CreateAnnouncementModal({ isOpen, onClose, orgId }) {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-white/60 mb-1.5">Message</label>
+          <Label className="block text-xs font-medium text-white/60 mb-1.5">Message</Label>
           <textarea
             required
             value={content}
@@ -175,22 +188,23 @@ function CreateAnnouncementModal({ isOpen, onClose, orgId }) {
         </div>
         
         <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-          <button
+          <Button
             type="button"
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-white/60 hover:text-white/90 hover:bg-white/5 rounded-lg transition-colors"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
             disabled={createMutation.isPending || !title.trim() || !content.trim()}
             className="px-4 py-2 text-sm font-medium bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors disabled:opacity-50"
           >
             {createMutation.isPending ? 'Posting...' : 'Post Announcement'}
-          </button>
+          </Button>
         </div>
       </form>
+      </ModalContent>
     </Modal>
   );
 }

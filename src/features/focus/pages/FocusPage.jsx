@@ -160,12 +160,12 @@ export function FocusPage() {
               layoutId={currentTask.id}
               className="group flex items-start gap-5 p-5 rounded-[var(--radius-lg)] glass-panel hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] transition-all duration-[var(--duration-base)]"
             >
-              <button 
+              <Button 
                 onClick={completeCurrent}
                 className="mt-1 shrink-0 text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors duration-[var(--duration-base)]"
               >
                 <Circle className="w-8 h-8" strokeWidth={1.5} />
-              </button>
+              </Button>
               
               <div className="flex-1 min-w-0">
                 <h2 className="text-3xl font-medium text-[var(--text-primary)] leading-tight mb-3">

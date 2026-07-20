@@ -1,4 +1,4 @@
-import api from '@/lib/api';
+import api from '@/shared/api/api';
 
 export const getCalendarEvents = (start, end) =>
   api.get('/calendar-events', { params: { start, end } }).then(r => r.data);

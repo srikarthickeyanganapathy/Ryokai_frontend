@@ -1,3 +1,6 @@
+
+import { Label } from '@/shared/ui/Typography/Label';
+
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Input } from '@/shared/ui/Input'
@@ -12,8 +15,8 @@ import { TaskForm } from './TaskForm'
 import { BulkCreateTaskModal } from './BulkCreateTaskModal'
 import { Heading, Text } from '@/shared/ui/Typography'
 
-import { useWorkspace } from '@/context/WorkspaceContext'
-import { usePermissions } from '@/context/usePermissions'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 
 const views = [
   { id: 'all', label: 'All' },
@@ -62,7 +65,7 @@ export function TasksToolbar({
       {/* 1. Views Tabs (Primary Hierarchy) */}
       <div className="flex items-center gap-5 border-b border-[var(--border-subtle)] overflow-x-auto no-scrollbar">
         {views.map(view => (
-          <button
+          <Button
             key={view.id}
             onClick={() => onViewChange(view.id)}
             className={cn(
@@ -80,7 +83,7 @@ export function TasksToolbar({
                 transition={{ type: 'spring', stiffness: 500, damping: 38 }}
               />
             )}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -116,19 +119,19 @@ export function TasksToolbar({
               <Text size="xs" variant="muted" className="px-1.5 pb-1.5 uppercase tracking-wide font-semibold">Priority</Text>
               <div className="space-y-0.5">
                 {PRIORITY_OPTIONS.map(p => (
-                  <label key={p} className="flex items-center gap-2.5 px-1.5 py-1.5 rounded-[var(--radius-sm)] hover:bg-[var(--bg-hover)] cursor-pointer transition-colors">
+                  <Label key={p} className="flex items-center gap-2.5 px-1.5 py-1.5 rounded-[var(--radius-sm)] hover:bg-[var(--bg-hover)] cursor-pointer transition-colors">
                     <Checkbox checked={priorityFilter.includes(p)} onCheckedChange={() => togglePriority(p)} />
                     <span className="text-[13px] text-[var(--text-primary)] capitalize">{p.toLowerCase()}</span>
-                  </label>
+                  </Label>
                 ))}
               </div>
               {priorityFilter.length > 0 && (
-                <button
+                <Button
                   onClick={() => onPriorityFilterChange?.([])}
                   className="w-full text-left mt-1.5 px-1.5 pt-1.5 border-t border-[var(--border-subtle)] text-[12px] font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
                 >
                   Clear filters
-                </button>
+                </Button>
               )}
             </PopoverContent>
           </Popover>
@@ -143,7 +146,7 @@ export function TasksToolbar({
             </PopoverTrigger>
             <PopoverContent align="start" className="w-48 p-1.5">
               {SORT_OPTIONS.map(opt => (
-                <button
+                <Button
                   key={opt.id}
                   onClick={() => { onSortChange?.(opt.id); setSortOpen(false) }}
                   className={cn(
@@ -153,7 +156,7 @@ export function TasksToolbar({
                 >
                   {opt.label}
                   {sortBy === opt.id && <Icons.check className="w-3.5 h-3.5" />}
-                </button>
+                </Button>
               ))}
             </PopoverContent>
           </Popover>
@@ -164,8 +167,8 @@ export function TasksToolbar({
           
           {/* Segmented Buttons for List/Board/Calendar */}
           <div className="hidden sm:flex items-center bg-[var(--bg-subtle)] rounded-[var(--radius-md)] p-0.5 border border-[var(--border-subtle)] mr-1">
-            {['list', 'board', 'calendar', 'nebula'].map((mode) => (
-              <button
+            {['list', 'board', 'nebula'].map((mode) => (
+              <Button
                 key={mode}
                 onClick={() => setViewMode(mode)}
                 className={cn(
@@ -181,7 +184,7 @@ export function TasksToolbar({
                   />
                 )}
                 <span className="relative">{mode}</span>
-              </button>
+              </Button>
             ))}
           </div>
 

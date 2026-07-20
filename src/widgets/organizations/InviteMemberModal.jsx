@@ -1,3 +1,5 @@
+import { Label } from '@/shared/ui/Typography/Label';
+
 import React, { useState } from 'react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
@@ -42,7 +44,7 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-2">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">Username</label>
+            <Label className="text-sm font-medium text-[var(--text-secondary)]">Username</Label>
             <Input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -52,7 +54,7 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">Role</label>
+            <Label className="text-sm font-medium text-[var(--text-secondary)]">Role</Label>
             <Select
               value={roleId}
               onValueChange={setRoleId}

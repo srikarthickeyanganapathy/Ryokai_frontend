@@ -5,11 +5,11 @@ import { Button } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
 import { Input } from '@/shared/ui/Input'
 import { useProjects, useCreateProject } from '@/features/projects/hooks/useProjects'
-import { usePermissions } from '@/context/usePermissions'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 import { ProjectCard } from '@/widgets/projects/ProjectCard'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { ProjectForm } from '@/widgets/projects/ProjectForm'
-import { useWorkspace } from '@/context/WorkspaceContext'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
 export function ProjectsPage() {
   const [globalFilter, setGlobalFilter] = useState('')

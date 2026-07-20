@@ -1,3 +1,5 @@
+import { Button } from '@/shared/ui/Button';
+
 import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -5,8 +7,8 @@ import { Icons } from '@/shared/ui/Icons'
 import { Text } from '@/shared/ui/Typography'
 import { cn } from '@/shared/lib/cn'
 import { useAuth } from '@/features/auth/hooks/useAuth'
-import { useWorkspace } from '@/context/WorkspaceContext'
-import { usePermissions } from '@/context/usePermissions'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useCrews } from '@/features/crews/hooks/useCrews'
 import {
   Select,
@@ -260,17 +262,17 @@ export function AppSidebar({ isOpen, onClose }) {
               <span>Settings</span>
             </Link>
             <Separator className="my-1 bg-[var(--color-border-subtle)]" />
-            <button
+            <Button
               onClick={() => logout()}
               className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[var(--danger)] hover:bg-[var(--danger-soft)]/20 transition-colors w-full text-left font-medium"
             >
               <Icons.logout className="w-4 h-4" />
               <span>Log out</span>
-            </button>
+            </Button>
           </PopoverContent>
         </Popover>
 
-        <button 
+        <Button 
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
             "text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors p-1.5 rounded-md hover:bg-[var(--bg-hover)] hidden lg:flex shrink-0",
@@ -282,7 +284,7 @@ export function AppSidebar({ isOpen, onClose }) {
           ) : (
             <Icons.sidebarClose className="w-4 h-4" />
           )}
-        </button>
+        </Button>
       </div>
 
       {/* ═══ Workspace Switcher (Top position) ═══ */}
@@ -335,13 +337,13 @@ export function AppSidebar({ isOpen, onClose }) {
         {isSettingsMode && (
           <>
             <div className={cn("pb-4 flex items-center", isCollapsed ? "justify-center px-2" : "px-4 gap-2")}>
-              <button 
+              <Button 
                 onClick={() => navigate('/app')}
                 className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 rounded-md hover:bg-[var(--bg-hover)] transition-colors"
                 title={isCollapsed ? "Back to app" : undefined}
               >
                 <Icons.chevronLeft className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
             {renderNavSection(settingsNavItems, 'Account')}
           </>

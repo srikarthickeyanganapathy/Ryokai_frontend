@@ -1,4 +1,4 @@
-import api from '@/lib/api';
+import api from '@/shared/api/api';
 
 export const projectsApi = {
   getProjects: async (filters = {}) => {
@@ -25,5 +25,10 @@ export const projectsApi = {
 
   deleteProject: async (id) => {
     await api.delete(`/projects/${id}`);
+  },
+
+  shareToCrew: async (id, payload) => {
+    const { data } = await api.post(`/projects/${id}/share/crew`, payload);
+    return data;
   },
 };
