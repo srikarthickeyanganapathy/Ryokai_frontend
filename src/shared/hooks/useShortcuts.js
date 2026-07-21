@@ -49,7 +49,7 @@ export function useShortcuts() {
       const sequence = keyBuffer.current
 
       if (sequence === 'gc') {
-        navigate('/app/tasks?view=calendar')
+        navigate('/app/calendar')
         keyBuffer.current = ''
       } else if (sequence === 'gl') {
         navigate('/app/tasks?view=list')

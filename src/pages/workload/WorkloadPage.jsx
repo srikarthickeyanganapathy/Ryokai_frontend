@@ -3,7 +3,7 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useWorkload } from '@/features/workload/hooks/useWorkload'
 import { cn } from '@/shared/lib/cn'
-import { DataTable } from '@/shared/ui/DataTable/DataTable'
+import { DataTable } from '@/shared/ui/data-table/DataTable'
 
 const COLUMNS = [
   { key: 'todoCount', label: 'To Do' },
