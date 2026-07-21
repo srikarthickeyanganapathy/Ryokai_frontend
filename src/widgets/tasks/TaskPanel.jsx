@@ -19,6 +19,9 @@ import { getKanbanColumnForTask } from '@/shared/lib/status'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useRealtime } from '@/app/providers/RealTimeProvider'
+import { useQueryClient } from '@tanstack/react-query'
+import { queryKeys } from '@/shared/api/queryKeys'
 
 export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default' }) {
   const { workspaceMode } = useWorkspace()
@@ -61,6 +64,20 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   const titleRef = useRef(null)
   const descRef = useRef(null)
   const [isReassignOpen, setIsReassignOpen] = useState(false)
+
+  const { subscribeToTask } = useRealtime()
+  const queryClient = useQueryClient()
+
+  // Real-time task subscription
+  useEffect(() => {
+    if (isOpen && task?.id) {
+      return subscribeToTask(task.id, (updatedTask) => {
+        // When someone else updates the task, refresh the cache to pull the latest
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(task.id) })
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.lists() })
+      })
+    }
+  }, [isOpen, task?.id, subscribeToTask, queryClient])
 
   const DOMAINS = [
     { id: 'To Do', color: '#e8734a' },

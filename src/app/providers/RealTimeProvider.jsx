@@ -20,6 +20,11 @@ export function RealtimeProvider({ children }) {
   const [connected, setConnected] = useState(false)
   const queryClient = useQueryClient()
 
+  // Track dynamic subscriptions so they can queue while disconnected and resubscribe automatically
+  const pendingSubscriptions = useRef(new Map())
+  const activeSubscriptions = useRef(new Map())
+  const subCounter = useRef(0)
+
   const connect = useCallback(() => {
     const token = localStorage.getItem('jwt_token')
     if (!token || clientRef.current?.active) return
@@ -62,8 +67,21 @@ export function RealtimeProvider({ children }) {
           toast.warning('Your session was terminated from another device')
           window.location.href = '/login'
         })
+
+        // Apply any dynamic subscriptions that were queued before we connected
+        for (const [id, req] of pendingSubscriptions.current.entries()) {
+          if (!activeSubscriptions.current.has(id)) {
+            const sub = client.subscribe(req.topic, (msg) => {
+              try { req.onUpdate(JSON.parse(msg.body)) } catch { /* ignore */ }
+            })
+            activeSubscriptions.current.set(id, sub)
+          }
+        }
       },
-      onDisconnect: () => setConnected(false),
+      onDisconnect: () => {
+        setConnected(false)
+        activeSubscriptions.current.clear() // Force recreation on next connect
+      },
       onStompError: (frame) => {
         console.error('STOMP error:', frame.headers?.['message'] || frame)
       },
@@ -81,27 +99,37 @@ export function RealtimeProvider({ children }) {
     }
   }, [connect, user])
 
-  // Subscribe to a specific task's updates (for live-editing in TaskPanel)
-  const subscribeToTask = useCallback((taskId, onUpdate) => {
-    if (!clientRef.current?.active || !taskId) return () => {}
-    const sub = clientRef.current.subscribe(`/topic/tasks/${taskId}`, (msg) => {
-      try {
-        onUpdate(JSON.parse(msg.body))
-      } catch { /* ignore malformed messages */ }
-    })
-    return () => sub.unsubscribe()
-  }, [])
-
   // Generic subscribe to any topic
   const subscribeToTopic = useCallback((topic, onUpdate) => {
-    if (!clientRef.current?.active || !topic) return () => {}
-    const sub = clientRef.current.subscribe(topic, (msg) => {
-      try {
-        onUpdate(JSON.parse(msg.body))
-      } catch { /* ignore malformed messages */ }
-    })
-    return () => sub.unsubscribe()
+    if (!topic) return () => {}
+    
+    const id = String(subCounter.current++)
+    pendingSubscriptions.current.set(id, { topic, onUpdate })
+    
+    // If already connected, apply immediately
+    if (clientRef.current?.connected) {
+      const sub = clientRef.current.subscribe(topic, (msg) => {
+        try {
+          onUpdate(JSON.parse(msg.body))
+        } catch { /* ignore */ }
+      })
+      activeSubscriptions.current.set(id, sub)
+    }
+    
+    return () => {
+      pendingSubscriptions.current.delete(id)
+      const activeSub = activeSubscriptions.current.get(id)
+      if (activeSub) {
+        activeSub.unsubscribe()
+        activeSubscriptions.current.delete(id)
+      }
+    }
   }, [])
+
+  // Subscribe to a specific task's updates (for live-editing in TaskPanel)
+  const subscribeToTask = useCallback((taskId, onUpdate) => {
+    return subscribeToTopic(taskId ? `/topic/tasks/${taskId}` : null, onUpdate)
+  }, [subscribeToTopic])
 
   // Generic publish method
   const publish = useCallback((destination, body) => {
