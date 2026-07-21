@@ -155,16 +155,18 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
         <ModalContent className="sm:max-w-xl">
           <div className="flex items-center gap-1 mb-4 bg-[var(--bg-subtle)] rounded-md p-0.5 w-fit border border-[var(--color-border-subtle)]">
             <Button
+              variant="ghost"
               onClick={() => setCreateType('event')}
-              className={cn('px-3 py-1.5 text-xs font-medium rounded-sm transition-colors',
-                createType === 'event' ? 'bg-[var(--bg-elevated)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-secondary)]')}
+              className={cn('px-3 py-1.5 text-xs font-medium rounded-sm transition-colors h-auto min-h-0',
+                createType === 'event' ? 'bg-[var(--bg-elevated)] shadow-sm text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]' : 'text-[var(--text-secondary)] hover:bg-transparent hover:text-[var(--text-primary)]')}
             >
               Event
             </Button>
             <Button
+              variant="ghost"
               onClick={() => setCreateType('task')}
-              className={cn('px-3 py-1.5 text-xs font-medium rounded-sm transition-colors',
-                createType === 'task' ? 'bg-[var(--bg-elevated)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-secondary)]')}
+              className={cn('px-3 py-1.5 text-xs font-medium rounded-sm transition-colors h-auto min-h-0',
+                createType === 'task' ? 'bg-[var(--bg-elevated)] shadow-sm text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]' : 'text-[var(--text-secondary)] hover:bg-transparent hover:text-[var(--text-primary)]')}
             >
               Task
             </Button>
@@ -187,6 +189,7 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
           ) : (
             <EventForm 
               onSubmit={handleCreate} 
+              onCancel={() => setQuickAddDate(null)}
               isLoading={createEventMutation.isPending} 
               defaultValues={{
                 title: '', description: '',

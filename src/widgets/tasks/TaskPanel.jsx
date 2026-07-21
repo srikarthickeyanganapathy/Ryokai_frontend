@@ -151,8 +151,8 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
             className={cn(
               "z-50 flex flex-col pointer-events-auto",
               variant === 'nebula'
-                ? "absolute top-6 bottom-6 right-6 w-full max-w-[420px] rounded-2xl backdrop-blur-xl bg-black/40 border-2 text-white overflow-hidden"
-                : "fixed inset-y-0 right-0 w-full max-w-2xl bg-[var(--bg-elevated)] shadow-[var(--shadow-lg)] border-l border-[var(--color-border-subtle)]"
+                ? "absolute top-6 bottom-6 right-6 w-full max-w-[420px] rounded-3xl backdrop-blur-2xl bg-black/40 border-2 text-white overflow-hidden"
+                : "fixed top-2 bottom-2 right-2 w-full max-w-2xl bg-[var(--bg-elevated)]/90 backdrop-blur-3xl shadow-2xl border border-[var(--color-border-subtle)] rounded-3xl overflow-hidden"
             )}
             style={variant === 'nebula' ? {
               '--bg-elevated': 'transparent',

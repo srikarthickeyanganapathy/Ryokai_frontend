@@ -25,13 +25,14 @@ const TasksPage = lazy(() => import("@/pages/tasks/TasksPage").then(m => ({ defa
 const ProjectsPage = lazy(() => import("@/pages/projects/ProjectsPage").then(m => ({ default: m.ProjectsPage })));
 const ProjectDetailPage = lazy(() => import("@/pages/projects/ProjectDetailPage").then(m => ({ default: m.ProjectDetailPage })));
 const OrganizationsPage = lazy(() => import("@/pages/organizations/OrganizationsPage").then(m => ({ default: m.OrganizationsPage })));
-const OrganizationDetailPage = lazy(() => import("@/pages/organizations/OrganizationDetailPage").then(m => ({ default: m.OrganizationDetailPage })));
+const OrganizationSettingsPage = lazy(() => import("@/pages/organizations/OrganizationSettingsPage").then(m => ({ default: m.OrganizationSettingsPage })));
 const DirectoryPage = lazy(() => import("@/pages/organizations/DirectoryPage").then(m => ({ default: m.DirectoryPage })));
 const AnnouncementsPage = lazy(() => import("@/pages/organizations/AnnouncementsPage").then(m => ({ default: m.AnnouncementsPage })));
 const CrewsPage = lazy(() => import("@/pages/crews/CrewsPage").then(m => ({ default: m.CrewsPage })));
 const CrewDetailPage = lazy(() => import("@/pages/crews/CrewDetailPage").then(m => ({ default: m.CrewDetailPage })));
 const CrewDiscoverPage = lazy(() => import("@/pages/crews/CrewDiscoverPage").then(m => ({ default: m.CrewDiscoverPage })));
 const CrewTasksPage = lazy(() => import("@/pages/crews/CrewTasksPage").then(m => ({ default: m.CrewTasksPage })));
+const TeamsPage = lazy(() => import("@/pages/teams/TeamsPage").then(m => ({ default: m.TeamsPage })));
 const TeamDetailPage = lazy(() => import("@/pages/teams/TeamDetailPage").then(m => ({ default: m.TeamDetailPage })));
 const CrewJoinPage = lazy(() => import("@/pages/crews/CrewJoinPage").then(m => ({ default: m.CrewJoinPage })));
 const InboxPage = lazy(() => import("@/pages/inbox/InboxPage").then(m => ({ default: m.InboxPage })));
@@ -74,7 +75,8 @@ export default function App() {
                 <Route path="/app/projects" element={<ProjectsPage />} />
                 <Route path="/app/projects/:projectId" element={<ProjectDetailPage />} />
                 <Route path="/app/organizations" element={<OrganizationsPage />} />
-                <Route path="/app/organizations/:orgId" element={<OrganizationDetailPage />} />
+                <Route path="/app/organizations/:orgId" element={<OrganizationSettingsPage />} />
+                <Route path="/app/teams" element={<TeamsPage />} />
                 <Route path="/app/organizations/:orgId/teams/:teamId" element={<TeamDetailPage />} />
                 <Route path="/app/crews" element={<CrewsPage />} />
                 <Route path="/app/crews/join" element={<CrewJoinPage />} />

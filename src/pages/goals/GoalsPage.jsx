@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { Plus, Target, ChevronDown } from 'lucide-react'
 import { Button } from '@/shared/ui/Button'
-import { Heading, Text } from '@/shared/ui/Typography'
-import { Modal, ModalContent } from '@/shared/ui/Modal'
+import { Heading, Text, Label } from '@/shared/ui/Typography'
+import { Modal, ModalContent, ModalHeader, ModalTitle } from '@/shared/ui/Modal'
 import { Input } from '@/shared/ui/Input'
 import { cn } from '@/shared/lib/cn'
 import { usePermissions } from '@/shared/hooks/usePermissions'
@@ -115,18 +115,48 @@ export function GoalsPage() {
       <Modal open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
         <ModalContent className="sm:max-w-lg">
           {editing && (
-            <div className="space-y-4">
-              <Input placeholder="Goal title" value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} />
-              <div className="grid grid-cols-2 gap-3">
-                <Input placeholder="Period (e.g. Q1 2024)" value={editing.period} onChange={(e) => setEditing({ ...editing, period: e.target.value })} />
-                <Input placeholder="Description" value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} />
+            <>
+              <ModalHeader>
+                <ModalTitle>{editing.id ? 'Edit Goal' : 'New Goal'}</ModalTitle>
+              </ModalHeader>
+              <div className="space-y-5 mt-4">
+                <div className="space-y-1.5">
+                  <Label>Goal Title</Label>
+                  <Input placeholder="e.g., Launch Q3 Marketing Campaign" value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label>Period</Label>
+                    <Input placeholder="e.g. Q1 2024" value={editing.period} onChange={(e) => setEditing({ ...editing, period: e.target.value })} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Description</Label>
+                    <Input placeholder="Brief overview" value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label>Start Date</Label>
+                    <Input type="date" value={editing.startDate} onChange={(e) => setEditing({ ...editing, startDate: e.target.value })} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>End Date</Label>
+                    <Input type="date" value={editing.endDate} onChange={(e) => setEditing({ ...editing, endDate: e.target.value })} />
+                  </div>
+                </div>
+                
+                <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-subtle)]">
+                  <Button variant="ghost" onClick={() => setEditing(null)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSave} disabled={createGoal.isPending}>
+                    {createGoal.isPending ? 'Saving...' : 'Create Goal'}
+                  </Button>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Input type="date" value={editing.startDate} onChange={(e) => setEditing({ ...editing, startDate: e.target.value })} />
-                <Input type="date" value={editing.endDate} onChange={(e) => setEditing({ ...editing, endDate: e.target.value })} />
-              </div>
-              <Button onClick={handleSave} disabled={createGoal.isPending} className="w-full">Create Goal</Button>
-            </div>
+            </>
           )}
         </ModalContent>
       </Modal>

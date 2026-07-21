@@ -41,8 +41,8 @@ export function DataTable({
   })
 
   return (
-    <div className="w-full flex flex-col bg-[var(--bg-base)]">
-      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-subtle)] bg-[var(--bg-base)] overflow-hidden flex-1 flex flex-col shadow-sm">
+    <div className="w-full flex flex-col bg-transparent">
+      <div className="rounded-[var(--radius-2xl)] border border-[var(--color-border-subtle)] bg-[var(--bg-elevated)] overflow-hidden flex-1 flex flex-col shadow-[var(--shadow-md)]">
         <div className="overflow-x-auto flex-1">
           <table className="w-full text-sm text-left">
             <thead className="bg-[var(--bg-subtle)] border-b border-[var(--color-border-subtle)] sticky top-0 z-10">

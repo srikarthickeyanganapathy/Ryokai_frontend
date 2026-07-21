@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Pin, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/shared/ui/Button'
-import { Heading, Text } from '@/shared/ui/Typography'
-import { Modal, ModalContent } from '@/shared/ui/Modal'
+import { Heading, Text, Label } from '@/shared/ui/Typography'
+import { Modal, ModalContent, ModalHeader, ModalTitle } from '@/shared/ui/Modal'
 import { Input } from '@/shared/ui/Input'
 import { Textarea } from '@/shared/ui/Textarea'
 import { cn } from '@/shared/lib/cn'
@@ -100,35 +100,59 @@ export function NotesPage() {
       <Modal open={!!editing} onOpenChange={(open) => !open && close()}>
         <ModalContent className="sm:max-w-lg">
           {editing && (
-            <div className="space-y-4">
-              <Input
-                placeholder="Title"
-                value={editing.title}
-                onChange={(e) => setEditing({ ...editing, title: e.target.value })}
-              />
-              <Textarea
-                placeholder="Take a note…"
-                rows={8}
-                value={editing.content}
-                onChange={(e) => setEditing({ ...editing, content: e.target.value })}
-              />
-              <div className="flex items-center gap-2">
-                {COLORS.map(c => (
-                  <Button
-                    key={c}
-                    onClick={() => setEditing({ ...editing, color: c })}
-                    className={cn(
-                      'w-6 h-6 rounded-full border-2',
-                      editing.color === c ? 'border-[var(--accent)]' : 'border-[var(--color-border-subtle)]'
-                    )}
-                    style={{ background: c === 'default' ? 'var(--bg-subtle)' : `var(--${c}, currentColor)` }}
+            <>
+              <ModalHeader>
+                <ModalTitle>{editing.id ? 'Edit Note' : 'New Note'}</ModalTitle>
+              </ModalHeader>
+              <div className="space-y-5 mt-4">
+                <div className="space-y-1.5">
+                  <Label>Title</Label>
+                  <Input
+                    placeholder="e.g., Project Ideas"
+                    value={editing.title}
+                    onChange={(e) => setEditing({ ...editing, title: e.target.value })}
                   />
-                ))}
+                </div>
+                
+                <div className="space-y-1.5">
+                  <Label>Note Content</Label>
+                  <Textarea
+                    placeholder="Start typing your note…"
+                    rows={8}
+                    value={editing.content}
+                    onChange={(e) => setEditing({ ...editing, content: e.target.value })}
+                  />
+                </div>
+                
+                <div className="space-y-2 pt-2">
+                  <Label>Color Theme</Label>
+                  <div className="flex items-center gap-3">
+                    {COLORS.map(c => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setEditing({ ...editing, color: c })}
+                        className={cn(
+                          'w-10 h-10 rounded-full border-2 transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--accent)]',
+                          editing.color === c ? 'border-[var(--accent)] shadow-sm' : 'border-transparent'
+                        )}
+                        style={{ background: c === 'default' ? 'var(--bg-subtle)' : `var(--${c}, currentColor)` }}
+                        aria-label={`Select ${c} color`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-subtle)]">
+                  <Button variant="ghost" onClick={close}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSave} disabled={createNote.isPending || updateNote.isPending}>
+                    {createNote.isPending || updateNote.isPending ? 'Saving...' : 'Save Note'}
+                  </Button>
+                </div>
               </div>
-              <Button onClick={handleSave} disabled={createNote.isPending || updateNote.isPending} className="w-full">
-                Save
-              </Button>
-            </div>
+            </>
           )}
         </ModalContent>
       </Modal>

@@ -50,6 +50,7 @@ export function KanbanColumn({ column, tasks, onTaskClick }) {
       <div className="p-4 flex items-center justify-between sticky top-0 z-10">
         {collapsed ? (
           <Button
+            variant="ghost"
             onClick={() => setCollapsed(false)}
             className="flex flex-col items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mx-auto"
             title={`Expand ${column.title}`}
@@ -67,6 +68,7 @@ export function KanbanColumn({ column, tasks, onTaskClick }) {
               </span>
             </div>
             <Button
+              variant="ghost"
               onClick={() => setCollapsed(true)}
               className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors duration-[var(--duration-fast)]"
               title="Collapse column"
@@ -126,8 +128,9 @@ export function KanbanColumn({ column, tasks, onTaskClick }) {
           </form>
         ) : (
           <Button 
+            variant="ghost"
             onClick={() => setIsQuickAdding(true)}
-            className="flex items-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-[var(--radius-md)] p-2 text-sm font-medium transition-all duration-[var(--duration-base)] ease-[var(--ease-out)] mt-2"
+            className="flex items-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-full p-2 text-sm font-medium transition-all duration-[var(--duration-base)] ease-[var(--ease-out)] mt-2"
           >
             <Icons.plus className="w-4 h-4 mr-2" />
             Add Task

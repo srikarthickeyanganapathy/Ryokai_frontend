@@ -60,12 +60,13 @@ export function AppSidebar({ isOpen, onClose }) {
 
   const orgWorkspaceItems = [
     { icon: Icons.folderClosed, label: 'Projects', to: '/app/projects' },
-    { icon: Icons.users, label: 'Teams', to: '/app/organizations' },
+    { icon: Icons.users, label: 'Teams', to: '/app/teams' },
     { icon: Icons.target, label: 'Goals & OKRs', to: '/app/goals' },
     { icon: Icons.network, label: 'Directory', to: '/app/directory' },
     { icon: Icons.megaphone, label: 'Announcements', to: '/app/announcements' },
     { icon: Icons.scale, label: 'Workload', to: '/app/workload' },
     { icon: Icons.barChart2, label: 'Analytics', to: '/app/analytics' },
+    { icon: Icons.settings, label: 'Settings', to: '/app/organizations' },
     ...(isSuperAdmin ? [{ icon: Icons.shield, label: 'Admin', to: '/app/admin' }] : []),
   ]
 
@@ -215,21 +216,21 @@ export function AppSidebar({ isOpen, onClose }) {
 
   const sidebarContent = (
     <div className={cn(
-      "flex flex-col h-full bg-[var(--bg-sidebar)] relative z-20 border-r border-[var(--border-subtle)] transition-all duration-300",
+      "flex flex-col h-full bg-[var(--bg-subtle)]/40 backdrop-blur-xl relative z-20 transition-all duration-300",
       isCollapsed ? "w-[68px]" : "w-[240px]"
     )}>
       
       {/* Brand Header */}
-      <div className={cn("flex items-center shrink-0", isCollapsed ? "flex-col justify-center gap-2 py-3" : "h-14 justify-between px-3")}>
+      <div className={cn("flex items-center shrink-0 mt-2", isCollapsed ? "flex-col justify-center gap-2 py-3" : "h-14 justify-between px-3")}>
         <Popover>
           <PopoverTrigger asChild>
             <div 
               className={cn(
-                "flex items-center gap-2.5 min-w-0 cursor-pointer hover:bg-[var(--bg-hover)] rounded-md transition-colors",
+                "flex items-center gap-2.5 min-w-0 cursor-pointer hover:bg-[var(--bg-hover)] rounded-full transition-all duration-300",
                 isCollapsed ? "p-1" : "p-1.5 flex-1"
               )}
             >
-              <Avatar size="sm" className="bg-[#B8720A] text-white shrink-0">
+              <Avatar size="sm" className="bg-[#B8720A] text-white shrink-0 shadow-sm">
                 <AvatarImage src={user?.avatarUrl} />
                 <AvatarFallback className="bg-[#B8720A] text-white text-[11px] font-medium">
                   {user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
@@ -237,7 +238,7 @@ export function AppSidebar({ isOpen, onClose }) {
               </Avatar>
               {!isCollapsed && (
                 <div className="flex flex-col min-w-0 text-left overflow-hidden">
-                  <Text className="text-[13px] font-medium truncate text-[var(--text-primary)] leading-tight">{user?.name || user?.username}</Text>
+                  <Text className="text-[13px] font-semibold truncate text-[var(--text-primary)] leading-tight">{user?.name || user?.username}</Text>
                 </div>
               )}
             </div>
@@ -245,26 +246,27 @@ export function AppSidebar({ isOpen, onClose }) {
           <PopoverContent 
             align="start" 
             side={isCollapsed ? "right" : "bottom"} 
-            className="w-56 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] p-2 rounded-xl shadow-xl flex flex-col gap-1 z-[9999]"
+            className="w-56 bg-[var(--bg-elevated)]/90 backdrop-blur-xl border border-[var(--border-subtle)] p-2 rounded-2xl shadow-xl flex flex-col gap-1 z-[9999] transition-all"
           >
             <Link
               to="/app/settings/profile"
-              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
             >
               <Icons.user className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Profile</span>
             </Link>
             <Link
               to="/app/settings/security"
-              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
             >
               <Icons.settings className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Settings</span>
             </Link>
-            <Separator className="my-1 bg-[var(--color-border-subtle)]" />
+            <Separator className="my-1 bg-[var(--border-subtle)]" />
             <Button
+              variant="ghost"
               onClick={() => logout()}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[var(--danger)] hover:bg-[var(--danger-soft)]/20 transition-colors w-full text-left font-medium"
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-[var(--danger)] hover:bg-[var(--danger-soft)]/20 transition-colors w-full text-left font-medium"
             >
               <Icons.logout className="w-4 h-4" />
               <span>Log out</span>
@@ -273,9 +275,10 @@ export function AppSidebar({ isOpen, onClose }) {
         </Popover>
 
         <Button 
+          variant="ghost"
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
-            "text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors p-1.5 rounded-md hover:bg-[var(--bg-hover)] hidden lg:flex shrink-0",
+            "text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-all duration-300 p-1.5 rounded-full hover:bg-[var(--bg-hover)] hidden lg:flex shrink-0",
             isCollapsed && "mt-1"
           )}
         >
@@ -289,30 +292,30 @@ export function AppSidebar({ isOpen, onClose }) {
 
       {/* ═══ Workspace Switcher (Top position) ═══ */}
       {!isSettingsMode && !isCollapsed && (
-        <div className="px-3 py-2">
+        <div className="px-4 py-2">
           <Select
             value={getDropdownValue()}
             onValueChange={handleDropdownChange}
           >
-            <SelectTrigger className="w-full bg-[var(--bg-subtle)] border-[var(--color-border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--bg-hover)] h-9 text-[12px] font-semibold rounded-lg px-3 transition-colors shadow-none">
+            <SelectTrigger className="w-full bg-[var(--bg-elevated)]/50 backdrop-blur-md border border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--bg-hover)] h-10 text-[12px] font-semibold rounded-full px-4 transition-all duration-300 shadow-sm">
               <SelectValue placeholder="Select Workspace" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="PERSONAL">
+            <SelectContent className="rounded-2xl border-[var(--border-subtle)] bg-[var(--bg-elevated)]/95 backdrop-blur-xl shadow-lg">
+              <SelectItem value="PERSONAL" className="rounded-xl">
                 <div className="flex items-center gap-2">
                   <Icons.user className="w-4 h-4" />
                   <span>Personal Space</span>
                 </div>
               </SelectItem>
               {organizations.map(org => (
-                <SelectItem key={org.id} value={`org-${org.id}`}>
+                <SelectItem key={org.id} value={`org-${org.id}`} className="rounded-xl">
                   <div className="flex items-center gap-2">
                     <Icons.building className="w-4 h-4" />
                     <span>{org.name}</span>
                   </div>
                 </SelectItem>
               ))}
-              <SelectItem value="CREWS">
+              <SelectItem value="CREWS" className="rounded-xl">
                 <div className="flex items-center gap-2">
                   <Icons.rocket className="w-4 h-4" />
                   <span>Crews</span>
@@ -339,7 +342,7 @@ export function AppSidebar({ isOpen, onClose }) {
             <div className={cn("pb-4 flex items-center", isCollapsed ? "justify-center px-2" : "px-4 gap-2")}>
               <Button 
                 onClick={() => navigate('/app')}
-                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 rounded-md hover:bg-[var(--bg-hover)] transition-colors"
+                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 rounded-full hover:bg-[var(--bg-hover)] transition-all duration-300"
                 title={isCollapsed ? "Back to app" : undefined}
               >
                 <Icons.chevronLeft className="w-4 h-4" />
@@ -350,7 +353,6 @@ export function AppSidebar({ isOpen, onClose }) {
         )}
       </div>
 
-      {/* User footer removed, moved to top */}
     </div>
   )
 
@@ -370,14 +372,14 @@ export function AppSidebar({ isOpen, onClose }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onClose}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
             />
             <motion.div 
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute inset-y-0 left-0 h-full bg-[var(--bg-sidebar)] shadow-xl"
+              className="absolute inset-y-0 left-0 h-full bg-[var(--bg-base)]/80 backdrop-blur-xl shadow-2xl rounded-r-3xl overflow-hidden"
             >
               {sidebarContent}
             </motion.div>
