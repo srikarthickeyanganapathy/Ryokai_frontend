@@ -11,11 +11,11 @@ export const buttonVariants = {
 }
 
 const buttonSizes = {
-  xs: 'h-6 px-2 text-xs rounded-[var(--radius-xs)] gap-1',
-  sm: 'h-7 px-2.5 text-xs rounded-[var(--radius-sm)] gap-1.5',
-  md: 'h-8 px-3.5 text-[13px] rounded-[var(--radius-md)] gap-1.5',
-  lg: 'h-10 px-4 text-sm rounded-[var(--radius-md)] gap-2',
-  xl: 'h-12 px-6 text-sm rounded-[var(--radius-lg)] gap-2',
+  xs: 'h-6 px-3 text-xs rounded-full gap-1',
+  sm: 'h-7 px-3.5 text-xs rounded-full gap-1.5',
+  md: 'h-8 px-4 text-[13px] rounded-full gap-1.5',
+  lg: 'h-10 px-5 text-sm rounded-full gap-2',
+  xl: 'h-12 px-6 text-sm rounded-full gap-2',
 }
 
 export const Button = forwardRef(({
@@ -64,11 +64,11 @@ Button.displayName = 'Button'
 
 export const IconButton = forwardRef(({ className, size = 'md', ...props }, ref) => {
   const iconSizes = {
-    xs: 'h-6 w-6 rounded-[var(--radius-xs)]',
-    sm: 'h-7 w-7 rounded-[var(--radius-sm)]',
-    md: 'h-8 w-8 rounded-[var(--radius-md)]',
-    lg: 'h-10 w-10 rounded-[var(--radius-md)]',
-    xl: 'h-12 w-12 rounded-[var(--radius-lg)]',
+    xs: 'h-6 w-6 rounded-full',
+    sm: 'h-7 w-7 rounded-full',
+    md: 'h-8 w-8 rounded-full',
+    lg: 'h-10 w-10 rounded-full',
+    xl: 'h-12 w-12 rounded-full',
   }
 
   return (

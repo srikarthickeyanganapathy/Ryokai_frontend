@@ -13,10 +13,10 @@ export function Badge({ className, variant = 'default', size = 'md', ...props })
   }
 
   const badgeSizes = {
-    xs: 'text-[10px] px-1.5 py-0.5 rounded-[var(--radius-xs)]',
-    sm: 'text-[11px] px-1.5 py-0.5 rounded-[var(--radius-xs)]',
-    md: 'text-[11px] px-2 py-0.5 rounded-[var(--radius-sm)]',
-    lg: 'text-xs px-2.5 py-1 rounded-[var(--radius-sm)]',
+    xs: 'text-[10px] px-1.5 py-0.5 rounded-full',
+    sm: 'text-[11px] px-1.5 py-0.5 rounded-full',
+    md: 'text-[11px] px-2 py-0.5 rounded-full',
+    lg: 'text-xs px-2.5 py-1 rounded-full',
   }
 
   return (

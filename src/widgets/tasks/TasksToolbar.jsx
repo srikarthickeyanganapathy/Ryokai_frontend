@@ -170,14 +170,14 @@ export function TasksToolbar({
         <div className="flex items-center gap-2 shrink-0">
           
           {/* Segmented Buttons for List/Board/Calendar */}
-          <div className="hidden sm:flex items-center bg-[var(--bg-subtle)] rounded-[var(--radius-md)] p-0.5 border border-[var(--border-subtle)] mr-1">
+          <div className="hidden sm:flex items-center bg-[var(--bg-subtle)] rounded-full p-0.5 border border-[var(--border-subtle)] mr-1">
             {['list', 'board', 'nebula'].map((mode) => (
               <Button
                 key={mode}
                 variant="ghost"
                 onClick={() => setViewMode(mode)}
                 className={cn(
-                  "relative px-2.5 py-1 text-[12px] font-medium rounded-[var(--radius-sm)] transition-colors duration-[var(--duration-base)] capitalize hover:bg-transparent",
+                  "relative px-3 py-1 text-[12px] font-medium rounded-full transition-colors duration-[var(--duration-base)] capitalize hover:bg-transparent",
                   viewMode === mode ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 )}
                 aria-label={`View as ${mode}`}
@@ -185,7 +185,7 @@ export function TasksToolbar({
                 {viewMode === mode && (
                   <motion.div
                     layoutId="view-mode-pill"
-                    className="absolute inset-0 bg-[var(--bg-elevated)] shadow-[var(--shadow-xs),var(--inset-highlight-soft)] rounded-[var(--radius-sm)]"
+                    className="absolute inset-0 bg-[var(--bg-elevated)] shadow-[var(--shadow-xs),var(--inset-highlight-soft)] rounded-full"
                     transition={{ type: 'spring', stiffness: 500, damping: 38 }}
                   />
                 )}
