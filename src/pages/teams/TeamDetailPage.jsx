@@ -157,7 +157,7 @@ export function TeamDetailPage() {
       <div className="text-center py-12">
         <Icons.alert className="w-12 h-12 text-[var(--danger)] mx-auto mb-4" />
         <Heading level={3} className="text-lg font-bold mb-2">Team Not Found</Heading>
-        <Button onClick={() => navigate(`/app/organizations/${orgId}`)}>Back to Organization</Button>
+        <Button variant="outline" onClick={() => navigate(`/app/organizations/${orgId}`)}>Back to Organization</Button>
       </div>
     )
   }
@@ -170,7 +170,7 @@ export function TeamDetailPage() {
         <Text variant="muted" className="max-w-md mb-6">
           You are not a member of this team, and do not have organization manager permissions to view this portal.
         </Text>
-        <Button onClick={() => navigate(`/app/organizations/${orgId}`)}>
+        <Button variant="outline" onClick={() => navigate(`/app/organizations/${orgId}`)}>
           Back to Organization
         </Button>
       </div>

@@ -161,6 +161,7 @@ export function FocusPage() {
               className="group flex items-start gap-5 p-5 rounded-[var(--radius-lg)] glass-panel hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] transition-all duration-[var(--duration-base)]"
             >
               <Button 
+                variant="ghost"
                 onClick={completeCurrent}
                 className="mt-1 shrink-0 text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors duration-[var(--duration-base)]"
               >

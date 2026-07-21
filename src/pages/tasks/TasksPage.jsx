@@ -398,26 +398,27 @@ export function TasksPage() {
                 {Object.keys(rowSelection).length} selected
               </Text>
               <div className="h-4 w-px bg-[var(--border-default)]" />
-              <Button onClick={handleBulkComplete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+              <Button variant="ghost" onClick={handleBulkComplete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
                 {workspaceMode === 'PERSONAL' ? 'Complete' : 'Approve'}
               </Button>
               {workspaceMode !== 'PERSONAL' && (
                 <>
-                  <Button onClick={handleBulkSubmit} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                  <Button variant="ghost" onClick={handleBulkSubmit} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
                     Submit
                   </Button>
-                  <Button onClick={handleOpenReassignModal} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                  <Button variant="ghost" onClick={handleOpenReassignModal} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
                     Reassign
                   </Button>
-                  <Button onClick={handleBulkReject} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
+                  <Button variant="ghost" onClick={handleBulkReject} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
                     Reject
                   </Button>
                 </>
               )}
-              <Button onClick={handleBulkDelete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
+              <Button variant="ghost" onClick={handleBulkDelete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
                 Delete
               </Button>
               <Button
+                variant="ghost"
                 onClick={() => setRowSelection({})}
                 className="ml-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
               >

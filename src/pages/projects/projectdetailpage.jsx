@@ -370,7 +370,7 @@ export function ProjectDetailPage() {
           </Text>
           <div className="flex justify-end gap-3">
             <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleDeleteProject} isLoading={deleteProjectMutation.isPending} className="bg-[var(--danger)] hover:bg-[var(--danger)] hover:brightness-110 text-white">
+            <Button variant="danger" onClick={handleDeleteProject} isLoading={deleteProjectMutation.isPending}>
               Yes, Delete
             </Button>
           </div>

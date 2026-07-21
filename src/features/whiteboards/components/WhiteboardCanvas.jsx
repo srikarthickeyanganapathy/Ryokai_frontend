@@ -169,7 +169,7 @@ export function WhiteboardCanvas({ crewId, boardId, initialSnapshot }) {
           onChange={(e) => setStrokeWidth(Number(e.target.value))}
           className="w-24"
         />
-        <Button onClick={handleClear} className="ml-auto text-sm text-[var(--text-muted)] hover:text-[var(--danger)]">
+        <Button variant="ghost" onClick={handleClear} className="ml-auto text-sm text-[var(--text-muted)] hover:text-[var(--danger)]">
           Clear board
         </Button>
       </div>

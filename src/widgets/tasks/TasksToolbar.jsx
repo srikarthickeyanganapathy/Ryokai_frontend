@@ -129,6 +129,7 @@ export function TasksToolbar({
               </div>
               {priorityFilter.length > 0 && (
                 <Button
+                  variant="ghost"
                   onClick={() => onPriorityFilterChange?.([])}
                   className="w-full text-left mt-1.5 px-1.5 pt-1.5 border-t border-[var(--border-subtle)] text-[12px] font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
                 >
@@ -150,6 +151,7 @@ export function TasksToolbar({
               {SORT_OPTIONS.map(opt => (
                 <Button
                   key={opt.id}
+                  variant="ghost"
                   onClick={() => { onSortChange?.(opt.id); setSortOpen(false) }}
                   className={cn(
                     "w-full flex items-center justify-between px-2 py-1.5 rounded-[var(--radius-sm)] text-[13px] transition-colors",

@@ -83,10 +83,10 @@ export function NotesPage() {
               <div className="flex items-start justify-between gap-2 mb-2">
                 <Heading level={4} className="line-clamp-1">{note.title || 'Untitled'}</Heading>
                 <div className="flex items-center gap-1 shrink-0">
-                  <Button onClick={(e) => { e.stopPropagation(); togglePin(note) }}>
+                  <Button variant="ghost" onClick={(e) => { e.stopPropagation(); togglePin(note) }}>
                     <Pin className={cn('w-4 h-4', note.isPinned ? 'fill-[var(--accent)] text-[var(--accent)]' : 'text-[var(--text-muted)]')} />
                   </Button>
-                  <Button onClick={(e) => { e.stopPropagation(); deleteNote.mutate(note.id) }}>
+                  <Button variant="ghost" onClick={(e) => { e.stopPropagation(); deleteNote.mutate(note.id) }}>
                     <Trash2 className="w-4 h-4 text-[var(--text-muted)] hover:text-[var(--danger)]" />
                   </Button>
                 </div>

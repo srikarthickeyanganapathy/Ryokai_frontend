@@ -96,12 +96,14 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onVis
             {/* View Mode Toggle */}
             <div className="flex items-center bg-[var(--bg-subtle)] rounded-md p-0.5 border border-[var(--color-border-subtle)]">
               <Button 
+                variant="ghost"
                 onClick={() => setMode('month')}
                 className={`px-3 py-1.5 text-xs font-medium rounded-sm transition-colors ${mode === 'month' ? 'bg-[var(--bg-elevated)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
               >
                 Month
               </Button>
               <Button 
+                variant="ghost"
                 onClick={() => setMode('week')}
                 className={`px-3 py-1.5 text-xs font-medium rounded-sm transition-colors ${mode === 'week' ? 'bg-[var(--bg-elevated)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
               >

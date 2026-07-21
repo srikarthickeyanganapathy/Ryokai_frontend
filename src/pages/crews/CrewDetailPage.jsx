@@ -110,8 +110,9 @@ export function CrewDetailPage() {
         ].map((tab) => (
           <Button
             key={tab.id}
+            variant="ghost"
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 pb-3 text-[14px] font-medium border-b-2 transition-colors shrink-0 ${
+            className={`flex items-center gap-2 pb-3 text-[14px] font-medium border-b-2 transition-colors shrink-0 rounded-none hover:bg-transparent ${
               activeTab === tab.id
                 ? 'border-[var(--accent)] text-[var(--accent)] font-semibold'
                 : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -915,7 +916,7 @@ function WhiteboardsTab({ crewId, isCreator }) {
                     </div>
                   </div>
                   {isCreator && (
-                    <Button onClick={(e) => handleDelete(e, board.id)} className="text-[var(--text-tertiary)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" onClick={(e) => handleDelete(e, board.id)} className="text-[var(--text-tertiary)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Icons.trash2 className="w-4 h-4" />
                     </Button>
                   )}

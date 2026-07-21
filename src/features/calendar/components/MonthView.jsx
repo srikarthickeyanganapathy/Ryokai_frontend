@@ -40,6 +40,7 @@ function CalendarDayCell({ day, isCurrentMonth, children, onAddClick }) {
           {format(day, 'd')}
         </span>
         <Button 
+          variant="ghost"
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()

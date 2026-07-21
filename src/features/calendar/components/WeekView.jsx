@@ -75,6 +75,7 @@ export function WeekView({ tasks = [], events = [], currentDate, isLoading, onTa
               </div>
               {onAddClick && (
                 <Button 
+                  variant="ghost"
                   onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
