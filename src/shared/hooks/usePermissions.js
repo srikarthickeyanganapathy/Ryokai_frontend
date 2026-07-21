@@ -99,7 +99,6 @@ export const usePermissions = () => {
     // Role booleans (Kept for compatibility, but prefer permissions)
     isSuperAdmin,
     isOrgAdmin: orgRole === 'ADMIN',
-    isAdmin: isSuperAdmin,
 
     // Permission flags
     canManage,

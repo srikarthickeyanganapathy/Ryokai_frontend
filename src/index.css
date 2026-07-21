@@ -21,6 +21,7 @@
   --color-text-secondary: var(--text-secondary);
   --color-text-tertiary: var(--text-tertiary);
 
+  /* Note: These resolve lazily against the cascade, so they automatically pick up .dark mode values. No need to redefine them in .dark */
   --color-border-subtle: var(--border-subtle);
   --color-border-default: var(--border-default);
   --color-border-strong: var(--border-strong);
