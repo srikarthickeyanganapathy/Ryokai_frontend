@@ -188,7 +188,16 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
   }
 
   const handleDragOver = (event) => {
+    // We intentionally do nothing on drag over for API mutations.
+    // Real API transitions should only happen on drop (dragEnd), 
+    // otherwise hovering over a column will trigger unintended business logic
+    // like task approvals or completions before the user commits to the drop.
+  }
+
+  const handleDragEnd = (event) => {
     const { active, over } = event
+    setActiveTask(null)
+
     if (!over) return
 
     const activeId = active.id
@@ -196,31 +205,27 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
 
     if (activeId === overId) return
 
-    const isActiveTask = active.data.current?.type === 'Task'
-    const isOverTask = over.data.current?.type === 'Task'
-    const isOverColumn = over.data.current?.type === 'Column'
+    const isActiveTask = active?.data?.current?.type === 'Task'
+    const isOverTask = over?.data?.current?.type === 'Task'
+    const isOverColumn = over?.data?.current?.type === 'Column'
 
     // Get current column of active task based on its status
     const activeColumn = getKanbanColumnForTask(active.data.current.task)
 
-    // If dropping a task over a column
+    // Dropped a task over a column
     if (isActiveTask && isOverColumn) {
       if (activeColumn !== overId) {
         handleStatusTransition(active.data.current.task, overId)
       }
     }
 
-    // If dropping a task over another task (adopt the target task's column)
+    // Dropped a task over another task (adopt target's column)
     if (isActiveTask && isOverTask) {
       const overColumn = getKanbanColumnForTask(over.data.current.task)
       if (activeColumn !== overColumn) {
         handleStatusTransition(active.data.current.task, overColumn)
       }
     }
-  }
-
-  const handleDragEnd = (event) => {
-    setActiveTask(null)
   }
 
   if (isLoading) {

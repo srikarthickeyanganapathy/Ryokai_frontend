@@ -30,18 +30,31 @@ export function WhiteboardCanvas({ crewId, boardId, initialSnapshot }) {
     // Set actual canvas resolution to match display size
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect()
+      if (canvas.width === rect.width && canvas.height === rect.height) return
+
+      // Cache the existing canvas content before resizing clears it
+      const snapshot = canvas.width > 0 && canvas.height > 0 ? canvas.toDataURL() : null
+
       canvas.width = rect.width
       canvas.height = rect.height
+
+      const ctx = canvas.getContext('2d')
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      ctxRef.current = ctx
+
+      // Restore the drawing
+      if (snapshot) {
+        const img = new Image()
+        img.onload = () => ctx.drawImage(img, 0, 0)
+        img.src = snapshot
+      }
     }
     resizeCanvas()
     window.addEventListener('resize', resizeCanvas)
 
-    const ctx = canvas.getContext('2d')
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
-    ctxRef.current = ctx
-
     if (initialSnapshot) {
+      const ctx = ctxRef.current
       const img = new Image()
       img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
       img.src = initialSnapshot
