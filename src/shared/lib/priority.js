@@ -13,6 +13,13 @@ export const PRIORITY_OPTIONS = [
   { value: 'LOW',    label: 'Low',    color: 'gray' },
 ]
 
+export const PRIORITY_COLORS = {
+  URGENT: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger-border)]',
+  HIGH: 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning-border)]',
+  MEDIUM: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]',
+  LOW: 'bg-[var(--bg-hover)] text-[var(--text-secondary)] border-[var(--border-subtle)]',
+}
+
 /** Normalize any priority value to a display label */
 export const normalizePriority = (p) => {
   if (!p) return 'Medium'

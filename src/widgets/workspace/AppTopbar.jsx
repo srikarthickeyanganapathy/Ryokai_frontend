@@ -49,7 +49,7 @@ export function AppTopbar({ onMenuClick }) {
   return (
     <header className="h-12 flex items-center justify-between px-3 md:px-4 border-b border-[var(--border-subtle)] bg-[var(--bg-base)]/70 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-10 shadow-[var(--inset-highlight-soft)]">
 
-      <div className="flex items-center gap-4 w-[200px]">
+      <div className="flex items-center gap-4 flex-1 sm:min-w-[200px]">
         <IconButton
           variant="ghost"
           className="lg:hidden"
@@ -65,7 +65,7 @@ export function AppTopbar({ onMenuClick }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 w-[200px]">
+      <div className="flex items-center justify-end gap-1 sm:gap-3 flex-1 sm:min-w-[200px]">
         <div className="sm:hidden">
           <IconButton variant="ghost">
             <Icons.search className="w-5 h-5" />

@@ -55,7 +55,7 @@ export function SecurityPage() {
                     <FormItem className="space-y-0">
                       <SettingsRow label="Current Password" description="Enter your existing password">
                         <FormControl>
-                          <Input type="password" placeholder="Enter current password" className="w-[300px]" {...field} />
+                          <Input type="password" placeholder="Enter current password" className="w-full max-w-[300px]" {...field} />
                         </FormControl>
                         <FormMessage />
                       </SettingsRow>
@@ -74,7 +74,7 @@ export function SecurityPage() {
                     <FormItem className="space-y-0">
                       <SettingsRow label="New Password" description="Must be at least 8 characters">
                         <FormControl>
-                          <Input type="password" placeholder="Enter new password" className="w-[300px]" {...field} />
+                          <Input type="password" placeholder="Enter new password" className="w-full max-w-[300px]" {...field} />
                         </FormControl>
                         <FormMessage />
                       </SettingsRow>
@@ -93,7 +93,7 @@ export function SecurityPage() {
                     <FormItem className="space-y-0">
                       <SettingsRow label="Confirm Password" description="Re-enter your new password to confirm">
                         <FormControl>
-                          <Input type="password" placeholder="Confirm new password" className="w-[300px]" {...field} />
+                          <Input type="password" placeholder="Confirm new password" className="w-full max-w-[300px]" {...field} />
                         </FormControl>
                         <FormMessage />
                       </SettingsRow>

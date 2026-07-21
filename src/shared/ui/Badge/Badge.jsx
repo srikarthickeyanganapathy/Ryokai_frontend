@@ -9,6 +9,7 @@ export function Badge({ className, variant = 'default', size = 'md', ...props })
     success: 'bg-[var(--success-soft)] text-[var(--success)] border border-transparent',
     warning: 'bg-[var(--warning-soft)] text-[var(--warning)] border border-transparent',
     danger: 'bg-[var(--danger-soft)] text-[var(--danger)] border border-transparent',
+    outline: 'bg-transparent text-[var(--text-primary)] border border-[var(--border-default)]',
   }
 
   const badgeSizes = {

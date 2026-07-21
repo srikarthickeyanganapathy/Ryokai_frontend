@@ -4,15 +4,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { Icons } from '@/shared/ui/Icons'
 import { Badge } from '@/shared/ui/Badge'
 import { cn } from '@/shared/lib/cn'
-import { normalizePriority } from '@/shared/lib/priority'
-
-const priorityColors = {
-  URGENT: 'bg-[var(--danger-soft)] text-[var(--danger)] border-transparent',
-  HIGH: 'bg-[var(--warning-soft)] text-[var(--warning)] border-transparent',
-  NORMAL: 'bg-[var(--accent-soft)] text-[var(--accent)] border-transparent',
-  LOW: 'bg-[var(--bg-hover)] text-[var(--text-secondary)] border-transparent',
-  NONE: 'bg-[var(--bg-hover)] text-[var(--text-tertiary)] border-transparent',
-}
+import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
 
 export function KanbanTaskCard({ task, onClick }) {
   const {
@@ -56,7 +48,7 @@ export function KanbanTaskCard({ task, onClick }) {
       </div>
 
       <div className="flex items-center flex-wrap gap-2 mt-3">
-        <Badge size="xs" className={cn(priorityColors[task.priority])}>
+        <Badge size="xs" className={cn(PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM)}>
           {normalizePriority(task.priority)}
         </Badge>
       </div>

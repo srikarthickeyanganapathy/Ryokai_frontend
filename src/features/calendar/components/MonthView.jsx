@@ -13,6 +13,7 @@ import { useUpdateTask } from '@/features/tasks/hooks/useTasks'
 import { useUpdateEvent } from '@/features/calendar/hooks/useCalendar'
 import { useDroppable } from '@dnd-kit/core'
 import { useDraggable } from '@dnd-kit/core'
+import { PRIORITY_COLORS } from '@/shared/lib/priority'
 import { cn } from '@/shared/lib/cn'
 import { Plus } from 'lucide-react'
 
@@ -71,18 +72,13 @@ function CalendarTaskChip({ task, onClick }) {
   } : undefined
 
   // Color mapping based on priority
-  const priorityColors = {
-    LOW: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--color-border-subtle)]',
-    NORMAL: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/20',
-    HIGH: 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20',
-    URGENT: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20'
-  }
+
 
   const typeColors = {
     MILESTONE: 'bg-purple-500/10 text-purple-400 border-purple-500/20 ring-1 ring-purple-500/30'
   }
 
-  const colorClass = task.type === 'MILESTONE' ? typeColors.MILESTONE : (priorityColors[task.priority] || priorityColors.NORMAL)
+  const colorClass = task.type === 'MILESTONE' ? typeColors.MILESTONE : (PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM)
 
   return (
     <div

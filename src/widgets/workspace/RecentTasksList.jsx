@@ -6,15 +6,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { Icons } from '@/shared/ui/Icons'
 import { IconButton } from '@/shared/ui/Button'
 import { cn } from '@/shared/lib/cn'
-import { normalizePriority } from '@/shared/lib/priority'
-
-const priorityColors = {
-  URGENT: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20',
-  HIGH: 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20',
-  NORMAL: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/20',
-  LOW: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--color-border-subtle)]',
-  NONE: 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]',
-}
+import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
 
 const statusIcons = {
   'To Do':       <div className="w-4 h-4 rounded-full border-2 border-[var(--color-border-default)]" />,
@@ -78,7 +70,7 @@ export function RecentTasksList({ tasks = [], isLoading }) {
                   {task.title}
                 </Text>
                 <div className="flex items-center gap-3 mt-1.5">
-                  <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", priorityColors[task.priority])}>
+                  <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM)}>
                     {normalizePriority(task.priority)}
                   </Badge>
                   <Text size="xs" variant="muted" className="flex items-center gap-1">

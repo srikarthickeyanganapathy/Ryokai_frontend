@@ -2,6 +2,7 @@ import { Button } from '@/shared/ui/Button';
 
 import React, { useMemo } from 'react'
 import { startOfWeek, endOfWeek, eachDayOfInterval, format, isToday, parseISO } from 'date-fns'
+import { PRIORITY_COLORS } from '@/shared/lib/priority'
 import { cn } from '@/shared/lib/cn'
 import { Plus } from 'lucide-react'
 
@@ -42,12 +43,7 @@ export function WeekView({ tasks = [], events = [], currentDate, isLoading, onTa
     return <div className="p-8 text-center text-[var(--text-muted)]">Loading week...</div>
   }
 
-  const priorityColors = {
-    LOW: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--color-border-subtle)]',
-    NORMAL: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/20',
-    HIGH: 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20',
-    URGENT: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20'
-  }
+
 
   const typeColors = {
     MILESTONE: 'bg-purple-500/10 text-purple-400 border-purple-500/20 ring-1 ring-purple-500/30'
@@ -91,7 +87,7 @@ export function WeekView({ tasks = [], events = [], currentDate, isLoading, onTa
             {/* Tasks and Events List */}
             <div className="flex-1 p-2 bg-[var(--bg-base)] flex flex-col gap-2 overflow-y-auto">
               {dayTasks.map(task => {
-                const colorClass = task.type === 'MILESTONE' ? typeColors.MILESTONE : (priorityColors[task.priority] || priorityColors.NORMAL)
+                const colorClass = task.type === 'MILESTONE' ? typeColors.MILESTONE : (PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM)
                 
                 return (
                   <div

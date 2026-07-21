@@ -64,7 +64,7 @@ export function ProfilePage() {
                     <FormItem className="space-y-0">
                       <SettingsRow label="Full Name" description="Your display name across Ryokai">
                         <FormControl>
-                          <Input placeholder="Enter your full name" className="w-[300px]" {...field} />
+                          <Input placeholder="Enter your full name" className="w-full max-w-[300px]" {...field} />
                         </FormControl>
                         <FormMessage />
                       </SettingsRow>
@@ -83,7 +83,7 @@ export function ProfilePage() {
                     <FormItem className="space-y-0">
                       <SettingsRow label="Email Address" description="The email associated with your account">
                         <FormControl>
-                          <Input type="email" placeholder="Enter your email" className="w-[300px]" {...field} />
+                          <Input type="email" placeholder="Enter your email" className="w-full max-w-[300px]" {...field} />
                         </FormControl>
                         <FormMessage />
                       </SettingsRow>
@@ -101,7 +101,7 @@ export function ProfilePage() {
                         <FormControl>
                           <Textarea 
                             placeholder="Tell us a little bit about yourself" 
-                            className="resize-none h-20 w-[300px]" 
+                            className="resize-none h-20 w-full max-w-[300px]" 
                             {...field} 
                           />
                         </FormControl>

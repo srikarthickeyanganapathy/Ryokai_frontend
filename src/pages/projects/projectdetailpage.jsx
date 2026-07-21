@@ -19,6 +19,7 @@ import { TaskForm } from '@/widgets/tasks/TaskForm'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { toast } from 'sonner'
 import { cn } from '@/shared/lib/cn'
+import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
 
 function formatDate(isoString) {
   if (!isoString) return '—'
@@ -34,14 +35,7 @@ const statusColors = {
 }
 const defaultStatusColor = 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]'
 
-const priorityColors = {
-  URGENT: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20',
-  HIGH: 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20',
-  MEDIUM: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/20',
-  NORMAL: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/20',
-  LOW: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--color-border-subtle)]',
-  NONE: 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]',
-}
+
 
 import { usePermissions } from '@/shared/hooks/usePermissions'
 
@@ -293,7 +287,7 @@ export function ProjectDetailPage() {
                   </div>
 
                   <div className="flex items-center gap-3 shrink-0">
-                    <Badge className={cn("text-xs capitalize mr-1", priorityColors[task.priority] || priorityColors.MEDIUM)}>
+                    <Badge className={cn("text-xs capitalize mr-1", PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM)}>
                       {task.priority?.toLowerCase() || 'medium'}
                     </Badge>
                     {canAssignTask && (

@@ -14,17 +14,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { toast } from 'sonner'
 import { cn } from '@/shared/lib/cn'
-import { normalizePriority } from '@/shared/lib/priority'
-import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
-import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog'
-
-const priorityColors = {
-  URGENT: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20',
-  HIGH: 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20',
-  NORMAL: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/20',
-  LOW: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--color-border-subtle)]',
-  NONE: 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]',
-}
+import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
 
 export function TeamDetailPage() {
   const { orgId, teamId } = useParams()
@@ -384,7 +374,7 @@ export function TeamDetailPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Badge className={cn("text-xs mr-2", priorityColors[task.priority])}>
+                        <Badge className={cn("text-xs mr-2", PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM)}>
                           {normalizePriority(task.priority)}
                         </Badge>
                         

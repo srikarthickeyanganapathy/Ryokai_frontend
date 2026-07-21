@@ -6,16 +6,7 @@ import { IconButton } from '@/shared/ui/Button'
 import { Checkbox } from '@/shared/ui/Checkbox'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { cn } from '@/shared/lib/cn'
-import { normalizePriority } from '@/shared/lib/priority'
-
-
-const priorityColors = {
-  URGENT: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20',
-  HIGH: 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20',
-  NORMAL: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/20',
-  LOW: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--color-border-subtle)]',
-  NONE: 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]',
-}
+import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
 
 const statusIcons = {
   'To Do': <div className="w-4 h-4 rounded-full border-2 border-[var(--color-border-default)]" />,
@@ -104,7 +95,7 @@ export function TasksTable({
       cell: ({ row }) => {
         const p = row.original.priority
         return (
-          <Badge variant="outline" className={cn("text-xs", priorityColors[p])}>
+          <Badge variant="outline" className={cn("text-xs", PRIORITY_COLORS[p] || PRIORITY_COLORS.MEDIUM)}>
             {normalizePriority(p)}
           </Badge>
         )

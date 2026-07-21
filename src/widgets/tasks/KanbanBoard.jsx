@@ -227,7 +227,7 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
     return (
       <div className="flex gap-4 pb-4">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="flex flex-col bg-[var(--bg-subtle)] rounded-[var(--radius-lg)] h-full w-[300px] shrink-0 border border-[var(--border-subtle)] p-3 gap-2.5">
+          <div key={i} className="flex flex-col bg-[var(--bg-subtle)] rounded-[var(--radius-lg)] h-full w-[85vw] max-w-[320px] sm:w-[320px] shrink-0 border border-[var(--border-subtle)] p-3 gap-2.5">
             <div className="h-5 w-28 bg-[var(--bg-elevated)] animate-pulse rounded-[var(--radius-xs)]" />
             <div className="h-20 bg-[var(--bg-elevated)] animate-pulse rounded-[var(--radius-md)]" />
             <div className="h-28 bg-[var(--bg-elevated)] animate-pulse rounded-[var(--radius-md)]" />
