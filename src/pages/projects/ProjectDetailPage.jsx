@@ -28,11 +28,8 @@ function formatDate(isoString) {
   })
 }
 
-const statusColors = {
-  ACTIVE: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/20',
-  COMPLETED: 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]/20',
-  ARCHIVED: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20',
-}
+import { normalizeStatus, PROJECT_STATUS_COLORS } from '@/shared/lib/status'
+
 const defaultStatusColor = 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]'
 
 
@@ -168,7 +165,7 @@ export function ProjectDetailPage() {
               <Icons.chevronLeft className="w-5 h-5" />
             </Link>
             <Heading level={2} className="tracking-tight text-[22px] font-semibold mb-0">{project.name}</Heading>
-            <Badge variant="outline" className={cn('text-xs uppercase', statusColors[project.status] || defaultStatusColor)}>
+            <Badge variant="outline" className={cn('text-xs uppercase', PROJECT_STATUS_COLORS[project.status] || defaultStatusColor)}>
               {project.status}
             </Badge>
           </div>

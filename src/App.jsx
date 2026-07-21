@@ -23,7 +23,7 @@ const SessionExpiredPage = lazy(() => import("@/pages/auth/SessionExpiredPage").
 const DashboardPage = lazy(() => import("@/pages/workspace/DashboardPage").then(m => ({ default: m.DashboardPage })));
 const TasksPage = lazy(() => import("@/pages/tasks/TasksPage").then(m => ({ default: m.TasksPage })));
 const ProjectsPage = lazy(() => import("@/pages/projects/ProjectsPage").then(m => ({ default: m.ProjectsPage })));
-const ProjectDetailPage = lazy(() => import("@/pages/projects/projectdetailpage").then(m => ({ default: m.ProjectDetailPage })));
+const ProjectDetailPage = lazy(() => import("@/pages/projects/ProjectDetailPage").then(m => ({ default: m.ProjectDetailPage })));
 const OrganizationsPage = lazy(() => import("@/pages/organizations/OrganizationsPage").then(m => ({ default: m.OrganizationsPage })));
 const OrganizationDetailPage = lazy(() => import("@/pages/organizations/OrganizationDetailPage").then(m => ({ default: m.OrganizationDetailPage })));
 const DirectoryPage = lazy(() => import("@/pages/organizations/DirectoryPage").then(m => ({ default: m.DirectoryPage })));

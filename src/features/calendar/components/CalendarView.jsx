@@ -14,7 +14,7 @@ import { useCreateTask } from '@/features/tasks/hooks/useTasks'
 import { useCreateEvent } from '@/features/calendar/hooks/useCalendar'
 import { cn } from '@/shared/lib/cn'
 
-export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onVisibleRangeChange }) {
+export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEventClick, onVisibleRangeChange }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const mode = searchParams.get('mode') || 'month'
   
@@ -128,7 +128,7 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onVis
               currentDate={currentDate} 
               isLoading={isLoading} 
               onTaskClick={onTaskClick}
-              onEventClick={(ev) => console.log('Event clicked:', ev)}
+              onEventClick={onEventClick}
               onAddClick={(d) => setQuickAddDate(d)}
             />
           ) : (
@@ -138,7 +138,7 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onVis
               currentDate={currentDate} 
               isLoading={isLoading} 
               onTaskClick={onTaskClick}
-              onEventClick={(ev) => console.log('Event clicked:', ev)}
+              onEventClick={onEventClick}
               onAddClick={(d) => setQuickAddDate(d)}
             />
           )}
@@ -147,7 +147,7 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onVis
 
       {/* Mini Agenda */}
       <div className="w-80 shrink-0 hidden lg:block">
-        <MiniAgenda tasks={tasks} events={events} currentDate={currentDate} onTaskClick={onTaskClick} onEventClick={(ev) => console.log('Event clicked:', ev)} />
+        <MiniAgenda tasks={tasks} events={events} currentDate={currentDate} onTaskClick={onTaskClick} onEventClick={onEventClick} />
       </div>
 
       {/* Quick Create Modal */}

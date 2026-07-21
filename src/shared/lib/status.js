@@ -71,6 +71,12 @@ export const KANBAN_COLUMNS = [
   { id: 'Done',        title: 'Done',        backendStatus: ['APPROVED', 'COMPLETED'] },
 ];
 
+export const PROJECT_STATUS_COLORS = {
+  ACTIVE: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/20',
+  COMPLETED: 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]/20',
+  ARCHIVED: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20',
+};
+
 /** Given a task's backend status, return which kanban column it belongs to */
 export const getKanbanColumnForTask = (task) => {
   const rawStatus = String(task.currentStatus || '').toUpperCase().replace(/\s+/g, '_');
