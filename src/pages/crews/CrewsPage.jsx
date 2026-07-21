@@ -53,16 +53,16 @@ export function CrewsPage() {
   );
 
   return (
-    <div className="flex flex-col min-h-full">
+    <div className="flex flex-col min-h-full" role="region" aria-label="Crews">
       {/* Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
         <div>
-          <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-0.5">Crews</Heading>
+          <Heading level={1} className="tracking-tight text-[20px] font-semibold mb-0.5">Crews</Heading>
           <Text variant="muted" className="text-[13px]">Collaborate in lightweight flat-structured spaces.</Text>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative w-full sm:w-64">
-            <Icons.search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-tertiary)]" />
+            <Icons.search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-tertiary)]" aria-hidden="true" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

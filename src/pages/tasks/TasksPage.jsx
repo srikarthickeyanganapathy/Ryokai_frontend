@@ -2,7 +2,7 @@ import { Button } from '@/shared/ui/Button';
 
 import React, { useState, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { useTaskList, useUpdateTask, useDeleteTask, useSubmitTask, useApproveTask, useReassignTask, useCompletePersonalTask, useCompleteCrewTask, useRecallTask, useRejectTask } from '@/features/tasks/hooks/useTasks'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
@@ -341,11 +341,11 @@ export function TasksPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-8rem)] relative">
+    <div className="flex flex-col min-h-[calc(100vh-8rem)] relative" role="region" aria-label="Tasks">
 
       {/* Header */}
       <div className="mb-4">
-        <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-0.5">My Tasks</Heading>
+        <Heading level={1} className="tracking-tight text-[20px] font-semibold mb-0.5">My Tasks</Heading>
         <Text variant="muted" className="text-[13px]">Stay focused. Finish what matters.</Text>
       </div>
 

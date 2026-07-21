@@ -7,7 +7,7 @@ export function RegisterPage() {
   return (
     <>
       <div className="flex flex-col space-y-1.5 mb-8">
-        <Heading level={3} className="tracking-tight text-[22px]">Create an account</Heading>
+        <Heading level={1} className="tracking-tight text-[22px]">Create an account</Heading>
         <Text variant="muted" className="text-[13px]">Enter your details below to create your account</Text>
       </div>
       

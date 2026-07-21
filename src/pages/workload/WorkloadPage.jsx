@@ -45,8 +45,8 @@ export function WorkloadPage() {
   if (!userOrg) return <Text variant="muted" className="p-8">Join an organization to view workload.</Text>
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4 h-full flex flex-col">
-      <Heading level={2} className="mb-6">Resource Workload Matrix</Heading>
+    <div className="max-w-5xl mx-auto py-8 px-4 h-full flex flex-col" role="region" aria-label="Resource workload">
+      <Heading level={1} className="mb-6">Resource Workload Matrix</Heading>
       
       <div className="flex-1 min-h-0">
         <DataTable 

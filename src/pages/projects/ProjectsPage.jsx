@@ -37,17 +37,17 @@ export function ProjectsPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-full">
+    <div className="flex flex-col min-h-full" role="region" aria-label="Projects">
       
       {/* Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
         <div>
-          <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-0.5">Projects</Heading>
+          <Heading level={1} className="tracking-tight text-[20px] font-semibold mb-0.5">Projects</Heading>
           <Text variant="muted" className="text-[13px]">Organize work across your teams.</Text>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative w-full sm:w-64">
-            <Icons.search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-tertiary)]" />
+            <Icons.search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-tertiary)]" aria-hidden="true" />
             <Input 
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}

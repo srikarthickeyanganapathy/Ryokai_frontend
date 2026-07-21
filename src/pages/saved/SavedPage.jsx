@@ -22,8 +22,8 @@ export function SavedPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
-      <Heading level={2} className="mb-6">Saved Items</Heading>
+    <div className="max-w-4xl mx-auto py-8 px-4" role="region" aria-label="Saved items">
+      <Heading level={1} className="mb-6">Saved Items</Heading>
 
       {isLoading ? (
         <Text variant="muted">Loading…</Text>

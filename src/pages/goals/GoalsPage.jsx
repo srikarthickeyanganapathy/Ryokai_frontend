@@ -47,9 +47,9 @@ export function GoalsPage() {
   if (!orgId) return <Text variant="muted" className="p-8">Join an organization to view goals.</Text>
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
+    <div className="max-w-4xl mx-auto py-8 px-4" role="region" aria-label="Goals and OKRs">
       <div className="flex items-center justify-between mb-6">
-        <Heading level={2}>Goals & OKRs</Heading>
+        <Heading level={1}>Goals & OKRs</Heading>
         {canManageGoals && (
           <Button onClick={openNew} className="gap-2">
             <Plus className="w-4 h-4" /> New Goal

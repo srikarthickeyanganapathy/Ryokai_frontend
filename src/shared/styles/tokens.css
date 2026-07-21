@@ -72,6 +72,10 @@
     --accent-glow: 0 0 0 1px var(--accent-border), 0 4px 24px -4px rgba(65, 105, 225, 0.25);
     --accent-glow-lg: 0 0 0 1px var(--accent-border), 0 12px 40px -8px rgba(65, 105, 225, 0.35);
 
+    /* ---- Accessibility ---- */
+    --focus-ring: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent);
+    --focus-ring-inset: inset 0 0 0 2px var(--accent);
+
     /* ---- Glass surfaces ---- */
     --glass-bg: rgba(255, 255, 255, 0.7);
     --glass-border: rgba(0, 0, 0, 0.05);

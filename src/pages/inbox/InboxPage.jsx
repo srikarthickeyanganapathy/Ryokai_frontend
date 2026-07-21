@@ -35,12 +35,12 @@ export function InboxPage() {
   const unreadCount = notifications.filter(n => n.isRead === false).length
 
   return (
-    <div className="flex flex-col h-full max-w-4xl mx-auto py-8 px-4 sm:px-6">
+    <div className="flex flex-col h-full max-w-4xl mx-auto py-8 px-4 sm:px-6" role="region" aria-label="Inbox">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <Heading level={2} className="tracking-tight text-[24px] font-semibold mb-1">Inbox</Heading>
+          <Heading level={1} className="tracking-tight text-[24px] font-semibold mb-1">Inbox</Heading>
           <Text variant="muted" className="text-[14px]">
             {unreadCount > 0 ? `You have ${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}.` : "You're all caught up."}
           </Text>

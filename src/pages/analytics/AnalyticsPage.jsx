@@ -126,11 +126,11 @@ export function AnalyticsPage() {
   }
 
   return (
-    <div className="flex flex-col pb-12">
+    <div className="flex flex-col pb-12" role="region" aria-label="Analytics">
 
       <div className="mb-8">
-        <Heading level={2} className="tracking-tight text-[24px] font-semibold mb-1.5 flex items-center gap-2">
-          <LayoutDashboard className="w-5 h-5 text-[var(--accent)]" />
+        <Heading level={1} className="tracking-tight text-[24px] font-semibold mb-1.5 flex items-center gap-2">
+          <LayoutDashboard className="w-5 h-5 text-[var(--accent)]" aria-hidden="true" />
           Analytics Engine
         </Heading>
         <Text variant="muted" className="text-[14px]">Measure your progress. Optimize your workflow.</Text>

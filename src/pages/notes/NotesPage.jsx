@@ -55,9 +55,9 @@ export function NotesPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4">
+    <div className="max-w-6xl mx-auto py-8 px-4" role="region" aria-label="Notes">
       <div className="flex items-center justify-between mb-6">
-        <Heading level={2}>Notes</Heading>
+        <Heading level={1}>Notes</Heading>
         <Button onClick={openNew} className="gap-2">
           <Plus className="w-4 h-4" /> New Note
         </Button>

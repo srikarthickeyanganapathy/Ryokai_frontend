@@ -67,13 +67,15 @@ export function TasksToolbar({
         {views.map(view => (
           <Button
             key={view.id}
+            variant="ghost"
             onClick={() => onViewChange(view.id)}
             className={cn(
-              "relative pb-2.5 text-[13px] font-medium transition-colors duration-[var(--duration-base)] whitespace-nowrap",
+              "relative pb-2.5 px-1 text-[13px] font-medium transition-colors duration-[var(--duration-base)] whitespace-nowrap rounded-none hover:bg-transparent",
               activeView === view.id 
                 ? "text-[var(--text-primary)]" 
                 : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
             )}
+            aria-current={activeView === view.id ? 'page' : undefined}
           >
             {view.label}
             {activeView === view.id && (
@@ -170,11 +172,13 @@ export function TasksToolbar({
             {['list', 'board', 'nebula'].map((mode) => (
               <Button
                 key={mode}
+                variant="ghost"
                 onClick={() => setViewMode(mode)}
                 className={cn(
-                  "relative px-2.5 py-1 text-[12px] font-medium rounded-[var(--radius-sm)] transition-colors duration-[var(--duration-base)] capitalize",
+                  "relative px-2.5 py-1 text-[12px] font-medium rounded-[var(--radius-sm)] transition-colors duration-[var(--duration-base)] capitalize hover:bg-transparent",
                   viewMode === mode ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 )}
+                aria-label={`View as ${mode}`}
               >
                 {viewMode === mode && (
                   <motion.div
