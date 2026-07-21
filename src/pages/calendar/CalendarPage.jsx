@@ -31,6 +31,19 @@ export function CalendarPage() {
 
   return (
     <div className="h-full flex flex-col relative">
+      {/* 🧭 ORIENT MODE STICKY HEADER */}
+      <div className="pb-3 border-b border-[var(--color-border-subtle)] px-4 pt-4 shrink-0 flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
+              ORIENT Mode
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)]">• Schedule Matrix & Event Telemetry</span>
+          </div>
+          <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-0">Calendar & Task Deadlines</Heading>
+        </div>
+      </div>
+
       <CalendarView
         tasks={tasks}
         events={events}

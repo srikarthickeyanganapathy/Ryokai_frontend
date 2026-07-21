@@ -167,9 +167,9 @@ export function TaskDependencies({ task, hasDependencyPerm }) {
       )}
 
       {hasDependencyPerm && (
-        <div className="flex gap-2">
+        <div className="space-y-2">
           <Select value={selectedId} onValueChange={setSelectedId}>
-            <SelectTrigger className="flex-1">
+            <SelectTrigger className="w-full text-xs">
               <SelectValue placeholder="Add a blocking task..." />
             </SelectTrigger>
             <SelectContent>
@@ -180,8 +180,8 @@ export function TaskDependencies({ task, hasDependencyPerm }) {
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={handleAdd} disabled={!selectedId || addDependency.isPending}>
-            Add
+          <Button onClick={handleAdd} disabled={!selectedId || addDependency.isPending} size="sm" variant="outline" className="w-full text-xs">
+            Add Dependency
           </Button>
         </div>
       )}

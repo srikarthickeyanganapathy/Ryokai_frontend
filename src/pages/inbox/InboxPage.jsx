@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
@@ -11,6 +11,7 @@ import {
   useDeleteNotification,
 } from '@/features/notifications/hooks/useNotifications'
 import { useAcceptInvite, useDeclineInvite } from '@/features/organizations/hooks/useOrganizations'
+import { NotificationPanel } from '@/widgets/notifications/NotificationPanel'
 
 const typeIcons = {
   TASK_ASSIGNED: Icons.tasks,
@@ -24,6 +25,10 @@ const typeIcons = {
 }
 
 export function InboxPage() {
+  const [filterTab, setFilterTab] = useState('ALL') // ALL | UNREAD | MENTIONS | INVITES
+  const [activeNotification, setActiveNotification] = useState(null)
+  const [isPanelOpen, setIsPanelOpen] = useState(false)
+
   const { data: notifications = [], isLoading: notifLoading } = useNotificationList({ size: 100 })
   const markRead = useMarkRead()
   const markAllRead = useMarkAllRead()
@@ -33,18 +38,42 @@ export function InboxPage() {
   const declineInviteMutation = useDeclineInvite()
 
   const unreadCount = notifications.filter(n => n.isRead === false).length
+  const mentionsCount = notifications.filter(n => n.type === 'MENTION').length
+  const invitesCount = notifications.filter(n => n.type === 'ORG_INVITE_RECEIVED').length
+
+  const filteredNotifications = useMemo(() => {
+    if (filterTab === 'UNREAD') return notifications.filter(n => n.isRead === false)
+    if (filterTab === 'MENTIONS') return notifications.filter(n => n.type === 'MENTION')
+    if (filterTab === 'INVITES') return notifications.filter(n => n.type === 'ORG_INVITE_RECEIVED')
+    return notifications
+  }, [notifications, filterTab])
+
+  const openNotification = (n) => {
+    setActiveNotification(n)
+    setIsPanelOpen(true)
+    if (n.isRead === false) {
+      markRead.mutate(n.id)
+    }
+  }
 
   return (
-    <div className="flex flex-col h-full max-w-4xl mx-auto py-8 px-4 sm:px-6" role="region" aria-label="Inbox">
+    <div className="flex flex-col h-full max-w-4xl mx-auto space-y-6" role="region" aria-label="Inbox">
       
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      {/* 🧭 ORIENT MODE STICKY HEADER */}
+      <div className="pb-4 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
         <div>
-          <Heading level={1} className="tracking-tight text-[24px] font-semibold mb-1">Inbox</Heading>
-          <Text variant="muted" className="text-[14px]">
-            {unreadCount > 0 ? `You have ${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}.` : "You're all caught up."}
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
+              ORIENT Mode
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)]">• Action Stream & Telemetry</span>
+          </div>
+          <Heading level={2} className="tracking-tight text-[22px] font-semibold mb-0">Action Inbox & Telemetry</Heading>
+          <Text variant="muted" className="text-[13px] mt-1">
+            {unreadCount > 0 ? `You have ${unreadCount} unread action${unreadCount === 1 ? '' : 's'} requiring attention.` : "You're completely caught up."}
           </Text>
         </div>
+
         {unreadCount > 0 && (
           <Button
             variant="outline"
@@ -58,8 +87,36 @@ export function InboxPage() {
         )}
       </div>
 
-      {/* List */}
-      <div className="flex-1 bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] shadow-sm overflow-hidden flex flex-col">
+      {/* FILTER TABS */}
+      <div className="flex items-center gap-2 border-b border-[var(--color-border-subtle)] pb-2">
+        {[
+          { id: 'ALL', label: 'All Activity', count: notifications.length },
+          { id: 'UNREAD', label: 'Unread', count: unreadCount },
+          { id: 'MENTIONS', label: 'Mentions', count: mentionsCount },
+          { id: 'INVITES', label: 'Invitations', count: invitesCount },
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setFilterTab(tab.id)}
+            className={cn(
+              'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5',
+              filterTab === tab.id
+                ? 'bg-[var(--accent-soft)] text-[var(--accent)] font-semibold'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]'
+            )}
+          >
+            {tab.label}
+            {tab.count > 0 && (
+              <span className={cn('px-1.5 py-0.2 rounded-full font-mono text-[10px]', filterTab === tab.id ? 'bg-[var(--accent)] text-white' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)]')}>
+                {tab.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* LIST CONTAINER */}
+      <div className="flex-1 bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] shadow-sm overflow-hidden flex flex-col min-h-0">
         {notifLoading && (
           <div className="p-6 space-y-6">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -74,32 +131,35 @@ export function InboxPage() {
           </div>
         )}
 
-        {!notifLoading && notifications.length === 0 && (
+        {!notifLoading && filteredNotifications.length === 0 && (
           <div className="py-24 flex flex-col items-center justify-center text-center">
             <div className="w-12 h-12 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center mb-4">
               <Icons.inbox className="w-6 h-6 text-[var(--text-tertiary)]" />
             </div>
-            <Heading level={4}>Nothing to see here</Heading>
-            <Text variant="muted" className="mt-1">Your inbox is empty.</Text>
+            <Heading level={4} className="text-base font-semibold">Zero pending actions</Heading>
+            <Text variant="muted" className="mt-1 text-xs">No notifications match your current filter.</Text>
           </div>
         )}
 
-        {!notifLoading && notifications.length > 0 && (
+        {!notifLoading && filteredNotifications.length > 0 && (
           <div className="divide-y divide-[var(--border-subtle)] overflow-y-auto custom-scrollbar">
-            {notifications.map((n) => {
+            {filteredNotifications.map((n) => {
               const IconComponent = typeIcons[n.type] || Icons.alert
               const isRead = n.isRead !== false
+              const isSelected = activeNotification?.id === n.id && isPanelOpen
               
               return (
                 <div
                   key={n.id}
                   className={cn(
-                    'flex items-start gap-4 p-5 transition-colors duration-[var(--duration-fast)] ease-out cursor-default group',
-                    !isRead ? 'bg-[var(--accent-soft)]' : 'bg-[var(--bg-base)] hover:bg-[var(--bg-subtle)]'
+                    'flex items-start gap-4 p-5 transition-colors duration-[var(--duration-fast)] ease-out cursor-pointer group',
+                    isSelected
+                      ? 'bg-[var(--accent-soft)] border-l-4 border-l-[var(--accent)]'
+                      : !isRead
+                      ? 'bg-[var(--accent-soft)]/40 hover:bg-[var(--bg-subtle)]'
+                      : 'bg-[var(--bg-base)] hover:bg-[var(--bg-subtle)]'
                   )}
-                  onClick={() => {
-                    if (!isRead) markRead.mutate(n.id)
-                  }}
+                  onClick={() => openNotification(n)}
                 >
                   <div className={cn(
                     'w-10 h-10 rounded-full flex items-center justify-center shrink-0 border',
@@ -117,7 +177,7 @@ export function InboxPage() {
                           {n.title}
                         </Text>
                         {n.message && (
-                          <Text variant="muted" className="text-[13px] mt-1.5 leading-relaxed">
+                          <Text variant="muted" className="text-[13px] mt-1.5 leading-relaxed line-clamp-2">
                             {n.message}
                           </Text>
                         )}
@@ -194,6 +254,16 @@ export function InboxPage() {
           </div>
         )}
       </div>
+
+      {/* OUTLOOK-STYLE RIGHT ACTION PANEL */}
+      <NotificationPanel
+        notification={activeNotification}
+        isOpen={isPanelOpen}
+        onClose={() => {
+          setIsPanelOpen(false)
+          setActiveNotification(null)
+        }}
+      />
     </div>
   )
 }

@@ -67,27 +67,52 @@ export function CrewDetailPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-full">
-      {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[var(--border-subtle)] mb-6">
+    <div className="flex flex-col min-h-full space-y-6">
+      
+      {/* 🤝 COLLABORATE MODE STICKY HEADER & SQUAD PRESENCE BANNER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[var(--color-border-subtle)]">
         <div className="flex items-center gap-4">
-          <Avatar size="lg" className="bg-[var(--accent-violet)] text-white">
+          <Avatar size="lg" className="bg-[var(--accent-violet)] text-white shadow-md">
             <AvatarImage src={crew.avatarUrl} />
             <AvatarFallback className="bg-[var(--accent-violet)] text-white text-[20px] font-semibold">
               {crew.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
+                COLLABORATE Mode
+              </span>
+              <span className="text-[11px] text-[var(--text-muted)]">• {members.length} Squad Members</span>
+            </div>
+            <div className="flex items-center gap-3">
               <Heading level={2} className="tracking-tight text-[22px] font-semibold mb-0">{crew.name}</Heading>
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-[var(--bg-hover)] border border-[var(--border-subtle)] font-mono text-[var(--text-secondary)]">
+              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] font-mono text-[var(--text-secondary)]">
                 {crew.visibility}
               </span>
             </div>
             <Text className="text-[13px] text-[var(--text-secondary)] mt-1">{crew.description || 'No description provided.'}</Text>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-3">
+          {/* Member Avatars Stack */}
+          <div className="hidden lg:flex items-center -space-x-2 mr-2">
+            {members.slice(0, 5).map(m => (
+              <div key={m.userId} className="relative group">
+                <Avatar size="sm" className="border-2 border-[var(--bg-elevated)] bg-[var(--accent)] text-white font-bold text-[10px]">
+                  <AvatarFallback>{(m.username || 'U').charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-[var(--bg-elevated)]" />
+              </div>
+            ))}
+            {members.length > 5 && (
+              <span className="text-[10px] text-[var(--text-muted)] pl-3 font-mono font-semibold">
+                +{members.length - 5}
+              </span>
+            )}
+          </div>
+
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/app/crews')}>
             <Icons.chevronLeft className="w-3.5 h-3.5" />
             Back to Crews

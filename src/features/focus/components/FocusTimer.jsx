@@ -1,140 +1,264 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Text } from '@/shared/ui/Typography'
-import { Button } from '@/shared/ui/Button'
-import { Play, Square, Timer as TimerIcon } from 'lucide-react'
+import { Text, Heading } from '@/shared/ui/Typography'
+import { Button, IconButton } from '@/shared/ui/Button'
+import { Play, Pause, RotateCcw, SkipForward, Sparkles, Flame, CheckCircle, Volume2, VolumeX } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
 import { useActiveFocus, useStartFocus, useStopFocus } from '../hooks/useFocus'
 
-export function FocusTimer({ task }) {
+const POMODORO_MODES = [
+  { id: 'focus', label: '25m Focus', minutes: 25, accent: 'var(--accent)' },
+  { id: 'shortBreak', label: '5m Break', minutes: 5, accent: '#10B981' },
+  { id: 'longBreak', label: '15m Reset', minutes: 15, accent: '#8B5CF6' },
+]
+
+export function FocusTimer({ task, onTaskComplete }) {
   const { data: activeSession, isLoading: activeLoading } = useActiveFocus()
   const startMutation = useStartFocus()
   const stopMutation = useStopFocus()
 
-  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const [mode, setMode] = useState('focus') // 'focus' | 'shortBreak' | 'longBreak'
+  const [isRunning, setIsRunning] = useState(false)
+  const [timeLeft, setTimeLeft] = useState(25 * 60)
+  const [completedPomodoros, setCompletedPomodoros] = useState(1)
+  const [soundEnabled, setSoundEnabled] = useState(true)
+
+  const currentMode = POMODORO_MODES.find(m => m.id === mode) || POMODORO_MODES[0]
+  const totalSeconds = currentMode.minutes * 60
+  const progressPercent = Math.min(100, Math.max(0, ((totalSeconds - timeLeft) / totalSeconds) * 100))
+
   const intervalRef = useRef(null)
-  const lastTickRef = useRef(null)
 
-  const status = activeSession ? 'running' : 'idle'
+  // Switch modes and set countdown target
+  const selectMode = (newModeId) => {
+    const target = POMODORO_MODES.find(m => m.id === newModeId) || POMODORO_MODES[0]
+    setMode(newModeId)
+    setIsRunning(false)
+    setTimeLeft(target.minutes * 60)
+  }
 
-  // Hydrate elapsed time from the server-known startedAt on mount / when
-  // an active session is (re)discovered — this is what makes a page
-  // refresh resume the clock correctly instead of resetting to 0.
+  // Handle countdown interval
   useEffect(() => {
-    if (activeSession?.startedAt) {
-      const startedMs = new Date(activeSession.startedAt).getTime()
-      setElapsedSeconds(Math.max(0, Math.round((Date.now() - startedMs) / 1000)))
-      startInterval()
+    if (isRunning) {
+      intervalRef.current = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(intervalRef.current)
+            setIsRunning(false)
+            playChime()
+
+            if (mode === 'focus') {
+              setCompletedPomodoros(c => c + 1)
+              // Auto suggest short break
+              selectMode('shortBreak')
+            } else {
+              selectMode('focus')
+            }
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
     } else {
-      stopInterval()
-      setElapsedSeconds(0)
+      if (intervalRef.current) clearInterval(intervalRef.current)
     }
-    return stopInterval
-  }, [activeSession?.id])
 
-  const stopInterval = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [isRunning, mode])
+
+  // Play gentle Web Audio API chime
+  const playChime = () => {
+    if (!soundEnabled) return
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime) // D5
+      gain.gain.setValueAtTime(0.1, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5)
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start()
+      osc.stop(ctx.currentTime + 1.5)
+    } catch (e) {
+      // Audio context fallback
     }
   }
 
-  const startInterval = () => {
-    stopInterval()
-    lastTickRef.current = Date.now()
-    intervalRef.current = setInterval(() => {
-      const now = Date.now()
-      const deltaSec = Math.round((now - lastTickRef.current) / 1000)
-      lastTickRef.current = now
-      setElapsedSeconds(prev => prev + deltaSec)
-    }, 1000)
-  }
-
-  const handleStart = useCallback(() => {
-    startMutation.mutate(task?.id)
-  }, [task?.id, startMutation])
-
-  const handleStop = useCallback(() => {
-    if (activeSession?.id) {
+  const toggleStartPause = () => {
+    if (!isRunning && mode === 'focus' && task?.id) {
+      startMutation.mutate(task.id)
+    } else if (isRunning && activeSession?.id) {
       stopMutation.mutate(activeSession.id)
     }
-  }, [activeSession?.id, stopMutation])
-
-  const formatTime = (totalSeconds) => {
-    const h = Math.floor(totalSeconds / 3600)
-    const m = Math.floor((totalSeconds % 3600) / 60)
-    const s = totalSeconds % 60
-    const pad = (n) => String(n).padStart(2, '0')
-    return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`
+    setIsRunning(!isRunning)
   }
 
-  if (activeLoading) return null
+  const resetTimer = () => {
+    setIsRunning(false)
+    setTimeLeft(totalSeconds)
+  }
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    const pad = (n) => String(n).padStart(2, '0')
+    return `${pad(m)}:${pad(s)}`
+  }
+
+  // SVG Circular Ring calculation
+  const radius = 110
+  const circumference = 2 * Math.PI * radius
+  const strokeDashoffset = circumference - (progressPercent / 100) * circumference
 
   return (
-    <div className="flex items-center gap-4 p-4 rounded-[var(--radius-lg)] glass-panel border border-[var(--color-border-subtle)]">
-      <div className="flex items-center gap-3 min-w-[140px]">
-        <div
-          className={cn(
-            'relative flex h-9 w-9 items-center justify-center rounded-full shrink-0',
-            status === 'running'
-              ? 'bg-[var(--accent)]/15 text-[var(--accent)]'
-              : 'bg-[var(--bg-subtle)] text-[var(--text-muted)]'
-          )}
-        >
-          {status === 'running' && (
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-20" />
-          )}
-          <TimerIcon className="w-4 h-4 relative z-10" strokeWidth={1.75} />
-        </div>
-        <div>
-          <Text
+    <div className="flex flex-col items-center justify-center space-y-6 sm:space-y-8 w-full max-w-lg mx-auto py-2 sm:py-4 select-none">
+      
+      {/* POMODORO MODE SELECTOR PILLS */}
+      <div className="flex items-center flex-wrap justify-center gap-1 bg-[var(--bg-elevated)]/80 backdrop-blur-md border border-[var(--color-border-subtle)] p-1 rounded-2xl sm:rounded-full shadow-inner">
+        {POMODORO_MODES.map(m => (
+          <button
+            key={m.id}
+            type="button"
+            onClick={() => selectMode(m.id)}
             className={cn(
-              'text-2xl font-medium tabular-nums leading-none',
-              status === 'idle' ? 'text-[var(--text-muted)]' : 'text-[var(--text-primary)]'
+              'px-3 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold tracking-wide transition-all duration-300 flex items-center gap-1.5',
+              mode === m.id
+                ? 'bg-[var(--accent)] text-white shadow-md scale-105'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             )}
           >
-            {formatTime(elapsedSeconds)}
-          </Text>
-          <Text size="sm" variant="muted" className="mt-0.5">
-            {status === 'running' ? 'Focusing…' : 'Not started'}
-          </Text>
+            {m.id === 'focus' && <Flame className="w-3.5 h-3.5" />}
+            {m.id === 'shortBreak' && <Sparkles className="w-3.5 h-3.5" />}
+            {m.id === 'longBreak' && <RotateCcw className="w-3.5 h-3.5" />}
+            {m.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ZEN CIRCULAR POMODORO CLOCK */}
+      <div className="relative flex items-center justify-center">
+        {/* Ambient Pulsing Glow Circle */}
+        <div 
+          className={cn(
+            "absolute inset-0 rounded-full blur-2xl transition-opacity duration-1000",
+            isRunning ? "opacity-30 animate-pulse bg-[var(--accent)]" : "opacity-0 bg-transparent"
+          )}
+        />
+
+        <svg className="w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 transform -rotate-90">
+          {/* Background Track Circle */}
+          <circle
+            cx="144"
+            cy="144"
+            r={radius}
+            stroke="var(--color-border-subtle)"
+            strokeWidth="8"
+            fill="transparent"
+          />
+          {/* Active Progress Ring */}
+          <circle
+            cx="144"
+            cy="144"
+            r={radius}
+            stroke={currentMode.accent}
+            strokeWidth="9"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+            fill="transparent"
+            className="transition-all duration-1000 ease-linear"
+          />
+        </svg>
+
+        {/* Center Clock Display */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-1">
+          <motion.span 
+            key={timeLeft}
+            initial={{ scale: 0.98 }}
+            animate={{ scale: 1 }}
+            className="text-4xl sm:text-5xl font-mono font-bold tracking-tighter text-[var(--text-primary)]"
+          >
+            {formatTime(timeLeft)}
+          </motion.span>
+
+          <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[var(--text-muted)] font-semibold">
+            {isRunning ? (mode === 'focus' ? 'Deep Focus...' : 'Resting...') : 'Paused'}
+          </span>
         </div>
       </div>
 
-      <div className="w-px h-8 bg-[var(--color-border-subtle)]" />
-
-      <div className="flex items-center gap-2">
-        <AnimatePresence mode="wait" initial={false}>
-          {status === 'idle' && (
-            <motion.div key="start" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.15 }}>
-              <Button
-                size="sm"
-                onClick={handleStart}
-                disabled={!task || startMutation.isPending}
-                className="rounded-full gap-1.5 bg-[var(--accent)] text-[var(--bg-base)] hover:opacity-90"
-              >
-                <Play className="w-3.5 h-3.5" fill="currentColor" />
-                Start Focus
-              </Button>
-            </motion.div>
-          )}
-
-          {status === 'running' && (
-            <motion.div key="running-controls" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.15 }} className="flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleStop}
-                disabled={stopMutation.isPending}
-                className="rounded-full gap-1.5"
-              >
-                <Square className="w-3 h-3" />
-                Stop
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      {/* POMODORO CYCLE TRACKER */}
+      <div className="flex items-center gap-3">
+        <Text className="text-xs font-mono text-[var(--text-muted)] uppercase tracking-wider">
+          Pomodoros:
+        </Text>
+        <div className="flex items-center gap-1.5">
+          {[1, 2, 3, 4].map(idx => (
+            <div
+              key={idx}
+              className={cn(
+                "w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300",
+                idx <= completedPomodoros
+                  ? "bg-[var(--accent)] shadow-[0_0_8px_var(--accent)] scale-110"
+                  : "bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)]"
+              )}
+              title={`Pomodoro Session ${idx}`}
+            />
+          ))}
+        </div>
       </div>
+
+      {/* CONTROLS TOOLBAR */}
+      <div className="flex items-center gap-3 sm:gap-4">
+        <IconButton
+          variant="outline"
+          size="lg"
+          title="Reset Timer"
+          onClick={resetTimer}
+          className="rounded-full w-10 h-10 sm:w-11 sm:h-11 border-[var(--color-border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+        >
+          <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
+        </IconButton>
+
+        <Button
+          size="lg"
+          onClick={toggleStartPause}
+          className={cn(
+            "rounded-full px-6 sm:px-8 py-5 sm:py-6 text-xs sm:text-sm font-semibold tracking-wide gap-2 shadow-lg transition-all duration-300 hover:scale-105",
+            isRunning ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[var(--accent)] text-white hover:opacity-90"
+          )}
+        >
+          {isRunning ? (
+            <>
+              <Pause className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
+              Pause Focus
+            </>
+          ) : (
+            <>
+              <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5" />
+              Start Focus
+            </>
+          )}
+        </Button>
+
+        <IconButton
+          variant="outline"
+          size="lg"
+          title={soundEnabled ? "Mute Chime" : "Enable Chime"}
+          onClick={() => setSoundEnabled(!soundEnabled)}
+          className={cn(
+            "rounded-full w-10 h-10 sm:w-11 sm:h-11 border-[var(--color-border-subtle)] transition-colors",
+            soundEnabled ? "text-[var(--accent)]" : "text-[var(--text-muted)]"
+          )}
+        >
+          {soundEnabled ? <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" /> : <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" />}
+        </IconButton>
+      </div>
+
     </div>
   )
 }

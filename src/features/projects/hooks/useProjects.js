@@ -65,3 +65,19 @@ export function useDeleteProject() {
     },
   })
 }
+
+export function useUnshareProjectFromCrew() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ projectId, crewId }) => projectsApi.unshareFromCrew(projectId, crewId),
+    onSuccess: (_, { projectId }) => {
+      toast.success('Project unshared from crew')
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.detail(projectId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.all })
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || 'Failed to unshare project')
+    },
+  })
+}

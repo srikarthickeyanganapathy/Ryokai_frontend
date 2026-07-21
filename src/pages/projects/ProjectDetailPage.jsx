@@ -8,9 +8,9 @@ import { Badge } from '@/shared/ui/Badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
-import { useProject, useUpdateProject, useDeleteProject } from '@/features/projects/hooks/useProjects'
+import { useProject, useUpdateProject, useDeleteProject, useUnshareProjectFromCrew } from '@/features/projects/hooks/useProjects'
 import { useTeam, useOrgMembers } from '@/features/organizations/hooks/useOrganizations'
-import { useCrewMembers } from '@/features/crews/hooks/useCrews'
+import { useCrewMembers, useCrews } from '@/features/crews/hooks/useCrews'
 import { ProjectForm } from '@/widgets/projects/ProjectForm'
 import { CrewProjectShareModal } from '@/widgets/projects/CrewProjectShareModal'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
@@ -62,6 +62,8 @@ export function ProjectDetailPage() {
 
   const updateProjectMutation = useUpdateProject()
   const deleteProjectMutation = useDeleteProject()
+  const unshareMutation = useUnshareProjectFromCrew()
+  const { data: userCrews = [] } = useCrews()
 
   // Fetch Crew members if shared
   const crewId = project?.sharedCrewIds && project.sharedCrewIds.length > 0 ? project.sharedCrewIds[0] : null
@@ -189,9 +191,9 @@ export function ProjectDetailPage() {
 
       {/* Progress & Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="border border-[var(--color-border-subtle)]">
           <CardContent className="p-4">
-            <Text variant="muted" size="xs" className="uppercase tracking-wider mb-1">Progress</Text>
+            <Text variant="muted" size="xs" className="uppercase tracking-wider font-semibold mb-1">Progress</Text>
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-[var(--text-primary)]">{project.progress}%</span>
             </div>
@@ -205,133 +207,195 @@ export function ProjectDetailPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border border-[var(--color-border-subtle)]">
           <CardContent className="p-4">
-            <Text variant="muted" size="xs" className="uppercase tracking-wider mb-1">Total Tasks</Text>
+            <Text variant="muted" size="xs" className="uppercase tracking-wider font-semibold mb-1">Total Tasks</Text>
             <span className="text-2xl font-bold text-[var(--text-primary)]">{project.tasksTotal}</span>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border border-[var(--color-border-subtle)]">
           <CardContent className="p-4">
-            <Text variant="muted" size="xs" className="uppercase tracking-wider mb-1">Completed</Text>
+            <Text variant="muted" size="xs" className="uppercase tracking-wider font-semibold mb-1">Completed</Text>
             <span className="text-2xl font-bold text-[var(--success)]">{project.tasksCompleted}</span>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border border-[var(--color-border-subtle)]">
           <CardContent className="p-4">
-            <Text variant="muted" size="xs" className="uppercase tracking-wider mb-1">Due Date</Text>
+            <Text variant="muted" size="xs" className="uppercase tracking-wider font-semibold mb-1">Due Date</Text>
             <span className="text-2xl font-bold text-[var(--text-primary)]">{formatDate(project.dueDate)}</span>
           </CardContent>
         </Card>
       </div>
 
-      {/* Project Details */}
-      <Card>
-        <CardContent className="p-5 space-y-3">
-          {project.organizationName && (
-            <div className="flex items-center gap-2 text-[13px]">
-              <Icons.projects className="w-4 h-4 text-[var(--text-muted)]" />
-              <Text variant="muted">Organization:</Text>
-              <Text className="font-medium">{project.organizationName}</Text>
-            </div>
-          )}
-          {project.teamName && (
-            <div className="flex items-center gap-2 text-[13px]">
-              <Icons.team className="w-4 h-4 text-[var(--text-muted)]" />
-              <Text variant="muted">Team:</Text>
-              <Text className="font-medium">{project.teamName}</Text>
-            </div>
-          )}
-          <div className="flex items-center gap-2 text-[13px]">
-            <Icons.user className="w-4 h-4 text-[var(--text-muted)]" />
-            <Text variant="muted">Created by:</Text>
-            <Text className="font-medium">{project.createdBy || 'System'}</Text>
-          </div>
-        </CardContent>
-      </Card>
+      {/* 2-COLUMN PROJECT ROOM STAGE (70% Canvas / 30% Rail) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-      {/* Tasks & Deliverables Backlog */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-[var(--color-border-subtle)]">
-          <div>
-            <CardTitle className="text-base font-semibold">Tasks & Deliverables</CardTitle>
-            <Text variant="muted" size="sm" className="mt-0.5">Manage and assign task items specific to this project.</Text>
-          </div>
-          <Button size="sm" className="gap-1.5" onClick={() => setIsAddTaskOpen(true)}>
-            <Icons.plus className="w-3.5 h-3.5" />
-            Add Task
-          </Button>
-        </CardHeader>
-        <CardContent className="p-0">
-          {projectTasks.length === 0 ? (
-            <div className="text-center py-10 text-[var(--text-tertiary)]">
-              No tasks inside this project. Click 'Add Task' to create one!
-            </div>
-          ) : (
-            <div className="divide-y divide-[var(--color-border-subtle)]">
-              {projectTasks.map((task) => (
-                <div key={task.id} className="p-4 flex items-center justify-between hover:bg-[var(--bg-hover)] transition-colors">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-2 h-2 rounded-full bg-[var(--accent)]" />
-                    <div className="min-w-0">
-                      <span className={cn("font-medium text-sm block truncate text-[var(--text-primary)]", task.status === 'Done' && "line-through text-[var(--text-secondary)]")}>
-                        {task.title}
-                      </span>
-                      <span className="text-xs text-[var(--text-muted)] mt-0.5 block">
-                        Status: {task.status} | Assigned to: {task.assignedTo || 'Unassigned'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 shrink-0">
-                    <Badge className={cn("text-xs capitalize mr-1", PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM)}>
-                      {task.priority?.toLowerCase() || 'medium'}
-                    </Badge>
-                    {canAssignTask && (
-                      <Popover open={assigningTaskId === task.id} onOpenChange={open => setAssigningTaskId(open ? task.id : null)}>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" size="xs">
-                            Assign
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent align="end" className="w-56 p-1 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] shadow-[var(--shadow-lg)]">
-                          <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-semibold tracking-wide border-b border-[var(--color-border-subtle)]">
-                            {project.teamId ? 'Assign Team Member' : 'Assign Org Member'}
-                          </Text>
-                          <div className="space-y-0.5 max-h-48 overflow-y-auto mt-1 custom-scrollbar">
-                            {assignableMembers.map(m => {
-                              // Support team members list (m.username) or org members list (m.username)
-                              const username = m.username || m.name
-                              const id = m.userId || m.id
-                              return (
-                                <button
-                                  key={id}
-                                  onClick={() => handleAssignTask(task.id, id, username)}
-                                  className="w-full flex items-center gap-2 px-2 py-1.5 text-[13px] rounded hover:bg-[var(--bg-hover)] transition-colors text-left"
-                                >
-                                  <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[10px] shrink-0 font-bold">
-                                    {username.charAt(0).toUpperCase()}
-                                  </div>
-                                  <span className="truncate text-[var(--text-primary)]">{username}</span>
-                                </button>
-                              )
-                            })}
-                            {assignableMembers.length === 0 && (
-                              <div className="text-center py-4 text-xs text-[var(--text-muted)]">
-                                No members available to assign.
-                              </div>
-                            )}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    )}
-                  </div>
+        {/* Left Main Canvas (70% / 8 Cols) — Tasks & Backlog */}
+        <div className="lg:col-span-8 space-y-6">
+          <Card className="border border-[var(--color-border-subtle)]">
+            <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-[var(--color-border-subtle)]">
+              <div>
+                <CardTitle className="text-base font-semibold">Tasks & Deliverables</CardTitle>
+                <Text variant="muted" size="sm" className="mt-0.5">Manage and assign task items specific to this project.</Text>
+              </div>
+              <Button size="sm" className="gap-1.5" onClick={() => setIsAddTaskOpen(true)}>
+                <Icons.plus className="w-3.5 h-3.5" />
+                Add Task
+              </Button>
+            </CardHeader>
+            <CardContent className="p-0">
+              {projectTasks.length === 0 ? (
+                <div className="text-center py-12 text-[var(--text-tertiary)]">
+                  No tasks inside this project. Click 'Add Task' to create one!
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              ) : (
+                <div className="divide-y divide-[var(--color-border-subtle)]">
+                  {projectTasks.map((task) => (
+                    <div key={task.id} className="p-4 flex items-center justify-between hover:bg-[var(--bg-hover)] transition-colors">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-2 h-2 rounded-full bg-[var(--accent)]" />
+                        <div className="min-w-0">
+                          <span className={cn("font-medium text-sm block truncate text-[var(--text-primary)]", task.status === 'Done' && "line-through text-[var(--text-secondary)]")}>
+                            {task.title}
+                          </span>
+                          <span className="text-xs text-[var(--text-muted)] mt-0.5 block">
+                            Status: {task.status} | Assigned to: {task.assignedTo || 'Unassigned'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0">
+                        <Badge className={cn("text-xs capitalize mr-1", PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM)}>
+                          {task.priority?.toLowerCase() || 'medium'}
+                        </Badge>
+                        {canAssignTask && (
+                          <Popover open={assigningTaskId === task.id} onOpenChange={open => setAssigningTaskId(open ? task.id : null)}>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" size="xs">
+                                Assign
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent align="end" className="w-56 p-1 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] shadow-[var(--shadow-lg)]">
+                              <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-semibold tracking-wide border-b border-[var(--color-border-subtle)]">
+                                {project.teamId ? 'Assign Team Member' : 'Assign Org Member'}
+                              </Text>
+                              <div className="space-y-0.5 max-h-48 overflow-y-auto mt-1 custom-scrollbar">
+                                {assignableMembers.map(m => {
+                                  const username = m.username || m.name
+                                  const id = m.userId || m.id
+                                  return (
+                                    <button
+                                      key={id}
+                                      onClick={() => handleAssignTask(task.id, id, username)}
+                                      className="w-full flex items-center gap-2 px-2 py-1.5 text-[13px] rounded hover:bg-[var(--bg-hover)] transition-colors text-left"
+                                    >
+                                      <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[10px] shrink-0 font-bold">
+                                        {username.charAt(0).toUpperCase()}
+                                      </div>
+                                      <span className="truncate text-[var(--text-primary)]">{username}</span>
+                                    </button>
+                                  )
+                                })}
+                                {assignableMembers.length === 0 && (
+                                  <div className="text-center py-4 text-xs text-[var(--text-muted)]">
+                                    No members available to assign.
+                                  </div>
+                                )}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Telemetry & Governance Rail (30% / 4 Cols) */}
+        <div className="lg:col-span-4 space-y-6">
+
+          {/* Shared Crews Governance */}
+          <Card className="border border-[var(--color-border-subtle)]">
+            <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-[var(--color-border-subtle)]">
+              <div>
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <Icons.users className="w-4 h-4 text-[var(--accent)]" />
+                  Shared Crews Access
+                </CardTitle>
+                <Text variant="muted" size="sm" className="mt-0.5">Crews with task access.</Text>
+              </div>
+              {workspaceMode === 'PERSONAL' && canManageProject && (
+                <Button size="xs" variant="outline" onClick={() => setIsShareModalOpen(true)}>
+                  Share
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent className="p-4 space-y-2">
+              {(!project.sharedCrewIds || project.sharedCrewIds.length === 0) ? (
+                <Text variant="muted" size="sm">Not shared with any crews yet.</Text>
+              ) : (
+                project.sharedCrewIds.map(sharedCrewId => {
+                  const crewObj = userCrews.find(c => String(c.id) === String(sharedCrewId))
+                  return (
+                    <div key={sharedCrewId} className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)]">
+                      <div className="flex items-center gap-3">
+                        <div className="w-7 h-7 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center font-bold text-xs shrink-0">
+                          {crewObj?.name?.charAt(0).toUpperCase() || 'C'}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="font-semibold text-xs block truncate text-[var(--text-primary)]">{crewObj?.name || `Crew #${sharedCrewId}`}</span>
+                          <span className="text-[11px] text-[var(--text-muted)]">Shared access</span>
+                        </div>
+                      </div>
+                      {canManageProject && (
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          className="text-red-500 hover:text-red-600 hover:bg-red-500/10 border-red-500/20"
+                          onClick={() => unshareMutation.mutate({ projectId: Number(projectId), crewId: sharedCrewId })}
+                          isLoading={unshareMutation.isPending}
+                        >
+                          Unshare
+                        </Button>
+                      )}
+                    </div>
+                  )
+                })
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Project Details */}
+          <Card className="border border-[var(--color-border-subtle)]">
+            <CardHeader className="pb-2 border-b border-[var(--color-border-subtle)]">
+              <CardTitle className="text-base font-semibold">Metadata & Scope</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-3">
+              {project.organizationName && (
+                <div className="flex items-center justify-between text-xs">
+                  <Text variant="muted">Organization</Text>
+                  <Text className="font-medium">{project.organizationName}</Text>
+                </div>
+              )}
+              {project.teamName && (
+                <div className="flex items-center justify-between text-xs">
+                  <Text variant="muted">Team</Text>
+                  <Text className="font-medium">{project.teamName}</Text>
+                </div>
+              )}
+              <div className="flex items-center justify-between text-xs">
+                <Text variant="muted">Created by</Text>
+                <Text className="font-medium">{project.createdBy || 'System'}</Text>
+              </div>
+            </CardContent>
+          </Card>
+
+        </div>
+
+      </div>
 
       {/* Edit Project Modal */}
       <Modal open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>

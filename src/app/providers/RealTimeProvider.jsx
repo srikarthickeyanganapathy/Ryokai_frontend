@@ -83,7 +83,10 @@ export function RealtimeProvider({ children }) {
         activeSubscriptions.current.clear() // Force recreation on next connect
       },
       onStompError: (frame) => {
-        console.error('STOMP error:', frame.headers?.['message'] || frame)
+        const msg = frame.headers?.['message'] || 'STOMP session closed'
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[RealtimeProvider] STOMP notice:', msg)
+        }
       },
     })
 

@@ -63,13 +63,19 @@ export function OrganizationSettingsPage() {
 
   return (
     <div className="flex flex-col min-h-full">
-      {/* Header */}
+      {/* ⚙️ MANAGE MODE STICKY HEADER */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
+        className="mb-8 pb-4 border-b border-[var(--color-border-subtle)]"
       >
-        <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-2">{org.name}</Heading>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
+            MANAGE Mode
+          </span>
+          <span className="text-[11px] text-[var(--text-muted)]">• Organization Administration</span>
+        </div>
+        <Heading level={2} className="tracking-tight text-[22px] font-semibold mb-1">{org.name}</Heading>
         {org.description && (
           <Text variant="muted" className="max-w-2xl text-[13px]">{org.description}</Text>
         )}

@@ -36,34 +36,30 @@ export const authAPI = {
   logout: async () => {
     const refreshToken = getRefreshToken()
     try {
-      // Backend expects { refreshToken } in the body (TokenRefreshRequestDTO).
-      await api.post('/auth/logout', { refreshToken })
+      // Backend SessionController expects { refreshToken } in the body.
+      await api.post('/session/logout', { refreshToken })
     } finally {
       clearTokens()
     }
   },
 
-  // FIX (SEC-Min01): new logout-all endpoint — invalidates ALL sessions by
-  // incrementing token_version and deleting all refresh tokens. The backend
-  // resolves the user from the Authorization header (access token), so no
-  // body is required. We pass an empty body for safety.
+  // FIX (SEC-Min01): logout-all endpoint in SessionController.
   logoutAll: async () => {
     try {
-      await api.post('/auth/logout-all', {})
+      await api.post('/session/logout-all', {})
     } finally {
       clearTokens()
     }
   },
 
-  // FIX: backend endpoint is GET /auth/verify-email?token=..., NOT POST.
-  // The old code used POST which would return 405 Method Not Allowed.
+  // Backend SessionController GET /session/verify-email?token=...
   verifyEmail: async (token) => {
-    const { data } = await api.get(`/auth/verify-email`, { params: { token } })
+    const { data } = await api.get(`/session/verify-email`, { params: { token } })
     return data
   },
 
   resendVerification: async (email) => {
-    const { data } = await api.post('/auth/resend-verification', { email })
+    const { data } = await api.post('/session/resend-verification', { email })
     return data
   },
 

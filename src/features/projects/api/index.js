@@ -31,4 +31,8 @@ export const projectsApi = {
     const { data } = await api.post(`/projects/${id}/share/crew`, payload);
     return data;
   },
+
+  unshareFromCrew: async (projectId, crewId) => {
+    await api.delete(`/crews/${crewId}/projects/${projectId}`);
+  },
 };

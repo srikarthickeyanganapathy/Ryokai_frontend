@@ -99,12 +99,24 @@ export default function NebulaView({ tasks, onTaskSelect }) {
         )}
       </div>
 
+      {/* Top Center Spatial HUD Header */}
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 bg-black/60 backdrop-blur-xl border border-white/15 px-4 py-2 rounded-2xl shadow-2xl">
+        <div className="flex items-center gap-2 border-r border-white/10 pr-3">
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]" />
+          <span className="text-xs font-semibold uppercase tracking-widest text-white/90">3D Nebula Matrix</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-white/70 font-mono">
+          <span>{tasks.length} Nodes</span>
+          <span>• Click node to inspect</span>
+        </div>
+      </div>
+
       {/* Zoom controls */}
-      <div className="absolute top-6 left-6 z-30 flex flex-col gap-2">
-        <div className="flex flex-col bg-black/40 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden shadow-lg">
+      <div className="absolute top-6 left-6 z-30 flex flex-col gap-3">
+        <div className="flex flex-col bg-black/50 backdrop-blur-xl border border-white/15 rounded-2xl overflow-hidden shadow-2xl">
           <button
             onClick={() => graphControlsRef.current?.zoomIn()}
-            className="p-2.5 hover:bg-white/10 transition-colors text-white/80 hover:text-white"
+            className="p-3 hover:bg-white/10 transition-colors text-white/80 hover:text-white"
             title="Zoom in"
           >
             <ZoomIn size={16} />
@@ -112,7 +124,7 @@ export default function NebulaView({ tasks, onTaskSelect }) {
           <div className="h-px bg-white/10" />
           <button
             onClick={() => graphControlsRef.current?.zoomOut()}
-            className="p-2.5 hover:bg-white/10 transition-colors text-white/80 hover:text-white"
+            className="p-3 hover:bg-white/10 transition-colors text-white/80 hover:text-white"
             title="Zoom out"
           >
             <ZoomOut size={16} />
@@ -120,7 +132,7 @@ export default function NebulaView({ tasks, onTaskSelect }) {
           <div className="h-px bg-white/10" />
           <button
             onClick={() => graphControlsRef.current?.resetView()}
-            className="p-2.5 hover:bg-white/10 transition-colors text-white/80 hover:text-white"
+            className="p-3 hover:bg-white/10 transition-colors text-white/80 hover:text-white"
             title="Reset view"
           >
             <Maximize2 size={16} />
@@ -128,12 +140,13 @@ export default function NebulaView({ tasks, onTaskSelect }) {
         </div>
 
         {/* Compact legend */}
-        <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl px-3 py-2.5 shadow-lg">
+        <div className="bg-black/50 backdrop-blur-xl border border-white/15 rounded-2xl px-4 py-3 shadow-2xl space-y-1">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-white/50 mb-1">Status Orbits</div>
           {DOMAINS.map(d => (
-            <div key={d.id} className="flex items-center gap-2 py-1 text-xs text-white/70">
+            <div key={d.id} className="flex items-center gap-2 py-0.5 text-xs text-white/80">
               <span
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: d.color, boxShadow: `0 0 6px ${d.color}` }}
+                className="w-2.5 h-2.5 rounded-full"
+                style={{ backgroundColor: d.color, boxShadow: `0 0 8px ${d.color}` }}
               />
               {d.name}
             </div>

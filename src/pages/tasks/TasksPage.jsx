@@ -1,7 +1,7 @@
 import { Button } from '@/shared/ui/Button';
 
 import React, { useState, useMemo, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { useTaskList, useUpdateTask, useDeleteTask, useSubmitTask, useApproveTask, useReassignTask, useCompletePersonalTask, useCompleteCrewTask, useRecallTask, useRejectTask } from '@/features/tasks/hooks/useTasks'
@@ -313,6 +313,12 @@ export function TasksPage() {
     setRowSelection({})
   }
 
+  const navigate = useNavigate()
+  const reviewCount = useMemo(() => {
+    if (!rawTasks) return 0
+    return rawTasks.filter(t => (t.status || '').toUpperCase() === 'SUBMITTED' || (t.status || '').toUpperCase() === 'IN REVIEW').length
+  }, [rawTasks])
+
   if (viewMode === 'nebula') {
     return (
       <div className="fixed inset-0 z-[100] bg-zinc-950">
@@ -341,12 +347,36 @@ export function TasksPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-8rem)] relative" role="region" aria-label="Tasks">
+    <div className="flex flex-col min-h-[calc(100vh-8rem)] relative space-y-4" role="region" aria-label="Tasks">
 
-      {/* Header */}
-      <div className="mb-4">
-        <Heading level={1} className="tracking-tight text-[20px] font-semibold mb-0.5">My Tasks</Heading>
-        <Text variant="muted" className="text-[13px]">Stay focused. Finish what matters.</Text>
+      {/* ⚡ EXECUTE MODE STICKY HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border-subtle)]">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
+              EXECUTE Mode
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)]">• {tasks.length} Work Items</span>
+            {reviewCount > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/30 text-[10px] font-mono font-medium">
+                {reviewCount} Awaiting Review
+              </span>
+            )}
+          </div>
+          <Heading level={1} className="tracking-tight text-[22px] font-semibold mb-0">Tasks Engine</Heading>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5 text-xs text-[var(--accent)] border-[var(--accent-border)] hover:bg-[var(--accent-soft)]"
+            onClick={() => navigate('/app/focus')}
+          >
+            <Icons.play className="w-3.5 h-3.5 fill-current" />
+            Launch Focus Engine
+          </Button>
+        </div>
       </div>
 
       {/* Toolbar */}

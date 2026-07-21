@@ -72,7 +72,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response) {
-      if (error.response.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/login' && originalRequest.url !== '/auth/refresh') {
+      if (error.response.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/login' && originalRequest.url !== '/session/refresh') {
         originalRequest._retry = true;
         
         const currentToken = localStorage.getItem('jwt_token');
@@ -91,13 +91,13 @@ api.interceptors.response.use(
 
             let data;
             try {
-              const response = await axios.post(`${api.defaults.baseURL}/auth/refresh`, { refreshToken });
+              const response = await axios.post(`${api.defaults.baseURL}/session/refresh`, { refreshToken });
               data = response.data;
             } catch (firstAttemptError) {
               const status = firstAttemptError?.response?.status;
               if (status === 429 || !firstAttemptError.response) {
                 await new Promise(resolve => setTimeout(resolve, 2000));
-                const retryResponse = await axios.post(`${api.defaults.baseURL}/auth/refresh`, { refreshToken });
+                const retryResponse = await axios.post(`${api.defaults.baseURL}/session/refresh`, { refreshToken });
                 data = retryResponse.data;
               } else {
                 throw firstAttemptError;
