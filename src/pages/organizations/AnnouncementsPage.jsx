@@ -41,25 +41,31 @@ export function AnnouncementsPage() {
     <div className="flex-1 overflow-y-auto">
       <div className="h-full px-6 py-8 md:px-10 lg:px-12 max-w-4xl mx-auto space-y-8">
         
-        {/* Header Section */}
+        {/* 📢 ANNOUNCEMENTS MODE HEADER */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-6"
+          className="flex items-center justify-between gap-4 border-b border-[var(--color-border-subtle)] pb-4"
         >
           <div>
-            <Heading level={2} className="tracking-tight text-[24px] font-semibold text-[var(--text-primary)]">
-              Announcements
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
+                ANNOUNCEMENTS Mode
+              </span>
+              <span className="text-[11px] text-[var(--text-muted)]">• {activeOrganization.name} Broadcasts</span>
+            </div>
+            <Heading level={1} className="tracking-tight text-[22px] font-semibold text-[var(--text-primary)] mb-0">
+              Announcements & Broadcasts
             </Heading>
-            <Text variant="muted" className="text-[14px] mt-1">
-              Broadcasts and updates for {activeOrganization.name}
+            <Text variant="muted" className="text-[13px] mt-1">
+              Organization-wide news, operational updates, and announcements.
             </Text>
           </div>
 
           {canManageAnnouncements && (
             <Button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium rounded-lg transition-colors"
+              className="flex items-center gap-2"
             >
               <Plus className="h-4 w-4" />
               New Post

@@ -120,7 +120,7 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
         </div>
 
         {/* Calendar Grid */}
-        <div className="flex-1 overflow-auto bg-[var(--bg-base)]">
+        <div className="flex-1 overflow-hidden bg-[var(--bg-base)] flex flex-col min-h-0">
           {mode === 'month' ? (
             <MonthView 
               tasks={tasks}

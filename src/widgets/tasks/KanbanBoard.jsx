@@ -42,56 +42,96 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
   // FIX (SM-M03): assignee can recall a SUBMITTED task back to ASSIGNED
   const recallTaskMutation = useRecallTask();
 
+  // Optimistic local state for drag & drop transitions
+  const [localTaskMap, setLocalTaskMap] = useState({})
+
+  // Keep local map in sync with incoming tasks, preserving any ongoing optimistic updates
+  const effectiveTasks = useMemo(() => {
+    if (!tasks) return []
+    return tasks.map(t => {
+      const override = localTaskMap[t.id]
+      return override ? { ...t, ...override } : t
+    })
+  }, [tasks, localTaskMap])
+
+  const rollbackTask = (taskId) => {
+    setLocalTaskMap(prev => {
+      const copy = { ...prev }
+      delete copy[taskId]
+      return copy
+    })
+  }
+
   const handleStatusTransition = async (task, targetColumn) => {
     let targetStatus = toBackendStatus(targetColumn);
     const currentStatus = toBackendStatus(task.currentStatus);
 
+    // Optimistically update local task state immediately on drop
+    const optimisticStatus = targetStatus === 'COMPLETED' ? 'Done' : targetColumn
+    setLocalTaskMap(prev => ({
+      ...prev,
+      [task.id]: { currentStatus: optimisticStatus, status: optimisticStatus }
+    }))
+
+    const onError = (error) => {
+      toast.error(error?.response?.data?.message || 'Action failed — reverting task position')
+      rollbackTask(task.id)
+    }
+
     if (workspaceMode === 'PERSONAL') {
       targetStatus = targetColumn === 'Done' ? 'COMPLETED' : 'TODO'
-      if (targetStatus === currentStatus) return;
+      if (targetStatus === currentStatus) {
+        rollbackTask(task.id)
+        return;
+      }
       if (targetStatus === 'COMPLETED') {
-        completePersonalTaskMutation.mutate(task.id)
+        completePersonalTaskMutation.mutate(task.id, { onError })
       } else {
-        updateTaskMutation.mutate({ id: task.id, payload: { status: targetStatus } })
+        updateTaskMutation.mutate({ id: task.id, payload: { status: targetStatus } }, { onError })
       }
       return;
     }
 
     // FIX (SM-C01): crew tasks follow the no-review pipeline (ASSIGNED/TODO <-> COMPLETED).
-    // Any crew member can complete a crew task. No submit/approve/reject transitions.
     if (task.crewId || task.crew) {
       if (targetColumn === 'Done') {
         if (currentStatus === 'ASSIGNED' || currentStatus === 'TODO') {
-          completeCrewTaskMutation.mutate(task.id)
+          completeCrewTaskMutation.mutate(task.id, { onError })
         } else {
           toast.error('Crew task must be in To Do to complete')
+          rollbackTask(task.id)
         }
       } else if (targetColumn === 'To Do') {
         if (currentStatus === 'COMPLETED') {
           toast.error('Completed crew tasks cannot be reopened')
+          rollbackTask(task.id)
         }
       }
       return;
     }
 
-    if (targetStatus === currentStatus) return;
+    if (targetStatus === currentStatus) {
+      rollbackTask(task.id)
+      return;
+    }
 
     // Block moving APPROVED tasks back or anywhere else
     if (currentStatus === 'APPROVED') {
       toast.error('Approved tasks are completed and cannot be moved.');
+      rollbackTask(task.id)
       return;
     }
 
     if (targetStatus === 'SUBMITTED') {
       if (currentStatus !== 'ASSIGNED' && currentStatus !== 'REJECTED' && currentStatus !== 'TODO') {
          toast.error('Can only submit tasks that are To Do or Needs Work');
+         rollbackTask(task.id)
          return;
       }
-      // FE Bug #4 Fix: After backend Bug #2 fix, rejected tasks have no assignee.
-      // Must reassign-to-self first, then submit after reassignment completes.
       if (currentStatus === 'REJECTED' && !task.assignedTo && !task.assignee) {
         if (!user?.id) {
           toast.error('Cannot determine your user ID for reassignment.');
+          rollbackTask(task.id)
           return;
         }
         toast.info('Claiming rejected task before resubmitting…');
@@ -99,41 +139,48 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
           { taskId: task.id, newAssigneeId: user.id },
           {
             onSuccess: () => {
-              submitMutation.mutate(task.id);
+              submitMutation.mutate(task.id, { onError });
             },
             onError: (error) => {
-              toast.error(error.response?.data?.message || 'Failed to claim task. You may not have reassign permission.');
+              toast.error(error.response?.data?.message || 'Failed to claim task.');
+              rollbackTask(task.id)
             }
           }
         );
         return;
       }
-      submitMutation.mutate(task.id);
+      submitMutation.mutate(task.id, { onError });
     } else if (targetStatus === 'APPROVED') {
       if (currentStatus !== 'SUBMITTED') {
         toast.error('Can only approve tasks that are In Review');
+        rollbackTask(task.id)
         return;
       }
       if (!canReview) {
         toast.error('You do not have permission to review tasks');
+        rollbackTask(task.id)
         return;
       }
       if (task.assignedTo === user?.username) {
         toast.error('You cannot approve your own task');
+        rollbackTask(task.id)
         return;
       }
-      approveMutation.mutate(task.id);
+      approveMutation.mutate(task.id, { onError });
     } else if (targetStatus === 'REJECTED') {
       if (currentStatus !== 'SUBMITTED') {
         toast.error('Can only reject tasks that are In Review');
+        rollbackTask(task.id)
         return;
       }
       if (!canReview) {
         toast.error('You do not have permission to review tasks');
+        rollbackTask(task.id)
         return;
       }
       if (task.assignedTo === user?.username) {
         toast.error('You cannot reject your own task');
+        rollbackTask(task.id)
         return;
       }
       const reason = await confirm({
@@ -144,14 +191,17 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
         confirmLabel: 'Send back',
         danger: true,
       });
-      if (reason === false) return; // User cancelled
-      rejectMutation.mutate({ id: task.id, reason: reason || 'Moved to Needs Work on Kanban' });
+      if (reason === false) {
+        rollbackTask(task.id)
+        return; // User cancelled
+      }
+      rejectMutation.mutate({ id: task.id, reason: reason || 'Moved to Needs Work on Kanban' }, { onError });
     } else if (targetStatus === 'ASSIGNED') {
-      // FIX (SM-M03): if the task is SUBMITTED, this is a recall (assignee pulling back).
       if (currentStatus === 'SUBMITTED') {
-        recallTaskMutation.mutate(task.id)
+        recallTaskMutation.mutate(task.id, { onError })
       } else {
         toast.error('Tasks cannot be moved back to To Do unless they are In Review (Recall)');
+        rollbackTask(task.id)
       }
     } else {
       if (onTaskStatusChange) {
@@ -164,12 +214,12 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
   const tasksByColumn = useMemo(() => {
     const acc = {}
     columns.forEach(col => acc[col.id] = [])
-    tasks?.forEach(task => {
+    effectiveTasks?.forEach(task => {
       const columnId = getKanbanColumnForTask(task)
       if (acc[columnId]) acc[columnId].push(task)
     })
     return acc
-  }, [tasks, columns])
+  }, [effectiveTasks, columns])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

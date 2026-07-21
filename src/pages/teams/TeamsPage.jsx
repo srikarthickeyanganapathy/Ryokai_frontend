@@ -36,16 +36,19 @@ export function TeamsPage() {
 
   return (
     <div className="flex flex-col min-h-full">
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <Heading level={2} className="tracking-tight text-[24px] font-semibold mb-2">Teams</Heading>
-        <Text variant="muted" className="max-w-2xl text-[14px]">
-          Manage teams within {activeOrganization.name}.
-        </Text>
-      </motion.div>
+      {/* ⚙️ MANAGE MODE STICKY HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-6 border-b border-[var(--color-border-subtle)]">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
+              MANAGE Mode
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)]">• {activeOrganization.name}</span>
+          </div>
+          <Heading level={1} className="tracking-tight text-[22px] font-semibold mb-0">Teams Directory</Heading>
+          <Text variant="muted" className="text-[13px]">Manage team divisions, project permissions, and member assignments.</Text>
+        </div>
+      </div>
 
       <section>
         <div className="flex items-center justify-between mb-4">

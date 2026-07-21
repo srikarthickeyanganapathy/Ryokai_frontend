@@ -69,18 +69,24 @@ export function DirectoryPage() {
     <div className="flex-1 overflow-y-auto">
       <div className="h-full px-6 py-8 md:px-10 lg:px-12 max-w-7xl mx-auto space-y-8">
         
-        {/* Header Section */}
+        {/* 👥 DIRECTORY MODE HEADER */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6"
+          className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[var(--color-border-subtle)]"
         >
           <div>
-            <Heading level={2} className="tracking-tight text-[24px] font-semibold text-[var(--text-primary)]">
-              Directory
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
+                DIRECTORY Mode
+              </span>
+              <span className="text-[11px] text-[var(--text-muted)]">• {members.length} Members</span>
+            </div>
+            <Heading level={1} className="tracking-tight text-[22px] font-semibold text-[var(--text-primary)] mb-0">
+              Organization Directory
             </Heading>
-            <Text variant="muted" className="text-[14px] mt-1">
-              {members.length} members in {activeOrganization.name}
+            <Text variant="muted" className="text-[13px] mt-1">
+              Roster, permissions, leave requests, and role administration for {activeOrganization.name}.
             </Text>
           </div>
           

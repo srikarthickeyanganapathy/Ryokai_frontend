@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="28" fill="#030712"/>
+  <defs>
+    <radialGradient id="c" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="30%" stop-color="#E0F2FE"/>
+      <stop offset="65%" stop-color="#0284C7" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#030712" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="v" cx="50%" cy="50%" r="50%">
+      <stop offset="35%" stop-color="#00F0FF" stop-opacity="0"/>
+      <stop offset="70%" stop-color="#38BDF8" stop-opacity="0.95"/>
+      <stop offset="88%" stop-color="#0284C7" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#030712" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="b" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E0F2FE" stop-opacity="0.2"/>
+      <stop offset="50%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Swirling Accretion Disk -->
+  <ellipse cx="50" cy="50" rx="44" ry="24" stroke="url(#v)" stroke-width="8" transform="rotate(-22 50 50)" opacity="0.9"/>
+  <ellipse cx="50" cy="50" rx="38" ry="20" stroke="#00F0FF" stroke-width="2" stroke-dasharray="4 5" transform="rotate(-22 50 50)" opacity="0.7"/>
+
+  <!-- Starfield Accents -->
+  <circle cx="36" cy="68" r="2" fill="#FDE047"/>
+  <circle cx="84" cy="18" r="1.5" fill="#BAE6FD"/>
+  <circle cx="15" cy="20" r="1.2" fill="#FFFFFF"/>
+
+  <!-- Relativistic Jet Beam -->
+  <line x1="22" y1="2" x2="78" y2="98" stroke="url(#b)" stroke-width="4.5" stroke-linecap="round"/>
+  <line x1="22" y1="2" x2="78" y2="98" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- Pulsar Core -->
+  <circle cx="50" cy="50" r="22" fill="url(#c)"/>
+  <circle cx="50" cy="50" r="6" fill="#FFFFFF"/>
+</svg>

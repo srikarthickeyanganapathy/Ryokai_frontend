@@ -128,12 +128,20 @@ export function AnalyticsPage() {
   return (
     <div className="flex flex-col pb-12" role="region" aria-label="Analytics">
 
-      <div className="mb-8">
-        <Heading level={1} className="tracking-tight text-[24px] font-semibold mb-1.5 flex items-center gap-2">
-          <LayoutDashboard className="w-5 h-5 text-[var(--accent)]" aria-hidden="true" />
-          Analytics Engine
-        </Heading>
-        <Text variant="muted" className="text-[14px]">Measure your progress. Optimize your workflow.</Text>
+      <div className="mb-6 pb-4 border-b border-[var(--color-border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
+              ANALYTICS Mode
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)]">• Execution Velocity & Task Metrics</span>
+          </div>
+          <Heading level={1} className="tracking-tight text-[22px] font-semibold mb-0 flex items-center gap-2">
+            <LayoutDashboard className="w-5 h-5 text-[var(--accent)]" aria-hidden="true" />
+            Analytics Engine
+          </Heading>
+          <Text variant="muted" className="text-[13px]">Measure execution velocity, workload completion, and team performance telemetry.</Text>
+        </div>
       </div>
 
       <motion.div

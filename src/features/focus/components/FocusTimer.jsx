@@ -115,7 +115,7 @@ export function FocusTimer({ task, onTaskComplete }) {
   const strokeDashoffset = circumference - (progressPercent / 100) * circumference
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-6 sm:space-y-8 w-full max-w-lg mx-auto py-2 sm:py-4 select-none">
+    <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4 w-full max-w-lg mx-auto py-1 select-none">
       
       {/* POMODORO MODE SELECTOR PILLS */}
       <div className="flex items-center flex-wrap justify-center gap-1 bg-[var(--bg-elevated)]/80 backdrop-blur-md border border-[var(--color-border-subtle)] p-1 rounded-2xl sm:rounded-full shadow-inner">
@@ -149,7 +149,7 @@ export function FocusTimer({ task, onTaskComplete }) {
           )}
         />
 
-        <svg className="w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 transform -rotate-90">
+        <svg viewBox="0 0 288 288" className="w-44 h-44 sm:w-52 sm:h-52 md:w-56 md:h-56 transform -rotate-90">
           {/* Background Track Circle */}
           <circle
             cx="144"
@@ -180,7 +180,7 @@ export function FocusTimer({ task, onTaskComplete }) {
             key={timeLeft}
             initial={{ scale: 0.98 }}
             animate={{ scale: 1 }}
-            className="text-4xl sm:text-5xl font-mono font-bold tracking-tighter text-[var(--text-primary)]"
+            className="text-3xl sm:text-4xl md:text-5xl font-mono font-bold tracking-tighter text-[var(--text-primary)]"
           >
             {formatTime(timeLeft)}
           </motion.span>
@@ -213,33 +213,33 @@ export function FocusTimer({ task, onTaskComplete }) {
       </div>
 
       {/* CONTROLS TOOLBAR */}
-      <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-3 sm:gap-4 pt-1">
         <IconButton
           variant="outline"
           size="lg"
           title="Reset Timer"
           onClick={resetTimer}
-          className="rounded-full w-10 h-10 sm:w-11 sm:h-11 border-[var(--color-border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          className="rounded-full w-9 h-9 sm:w-10 sm:h-10 border-[var(--color-border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
         >
-          <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
+          <RotateCcw className="w-4 h-4" />
         </IconButton>
 
         <Button
           size="lg"
           onClick={toggleStartPause}
           className={cn(
-            "rounded-full px-6 sm:px-8 py-5 sm:py-6 text-xs sm:text-sm font-semibold tracking-wide gap-2 shadow-lg transition-all duration-300 hover:scale-105",
+            "rounded-full h-10 sm:h-11 px-6 sm:px-8 text-xs sm:text-sm font-semibold tracking-wide gap-2 shadow-lg transition-all duration-300 hover:scale-105",
             isRunning ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[var(--accent)] text-white hover:opacity-90"
           )}
         >
           {isRunning ? (
             <>
-              <Pause className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
+              <Pause className="w-4 h-4 fill-current" />
               Pause Focus
             </>
           ) : (
             <>
-              <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5" />
+              <Play className="w-4 h-4 fill-current ml-0.5" />
               Start Focus
             </>
           )}
@@ -251,11 +251,11 @@ export function FocusTimer({ task, onTaskComplete }) {
           title={soundEnabled ? "Mute Chime" : "Enable Chime"}
           onClick={() => setSoundEnabled(!soundEnabled)}
           className={cn(
-            "rounded-full w-10 h-10 sm:w-11 sm:h-11 border-[var(--color-border-subtle)] transition-colors",
+            "rounded-full w-9 h-9 sm:w-10 sm:h-10 border-[var(--color-border-subtle)] transition-colors",
             soundEnabled ? "text-[var(--accent)]" : "text-[var(--text-muted)]"
           )}
         >
-          {soundEnabled ? <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" /> : <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" />}
+          {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
         </IconButton>
       </div>
 

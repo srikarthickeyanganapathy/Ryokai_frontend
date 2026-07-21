@@ -16,6 +16,7 @@ import { useDraggable } from '@dnd-kit/core'
 import { PRIORITY_COLORS } from '@/shared/lib/priority'
 import { cn } from '@/shared/lib/cn'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 
 // --- Drag & Drop Sub-components ---
 
@@ -28,14 +29,14 @@ function CalendarDayCell({ day, isCurrentMonth, children, onAddClick }) {
     <div 
       ref={setNodeRef}
       className={cn(
-        "min-h-[120px] p-2 border-b border-r border-[var(--color-border-subtle)] bg-[var(--bg-default)] transition-colors group relative",
+        "h-full min-h-0 p-1.5 sm:p-2 border-b border-r border-[var(--color-border-subtle)] bg-[var(--bg-default)] transition-colors group relative flex flex-col overflow-hidden",
         !isCurrentMonth && "bg-[var(--bg-subtle)]/50 opacity-50",
         isOver && "bg-[var(--bg-elevated)] ring-2 ring-inset ring-[var(--accent)]/50"
       )}
     >
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-1 shrink-0">
         <span className={cn(
-          "text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full",
+          "text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full",
           isToday(day) ? "bg-[var(--accent)] text-[var(--bg-base)]" : "text-[var(--text-secondary)]"
         )}>
           {format(day, 'd')}
@@ -47,12 +48,12 @@ function CalendarDayCell({ day, isCurrentMonth, children, onAddClick }) {
             e.stopPropagation()
             onAddClick(day)
           }}
-          className="opacity-0 group-hover:opacity-100 p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] rounded transition-all"
+          className="opacity-0 group-hover:opacity-100 p-0.5 w-5 h-5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] rounded transition-all flex items-center justify-center"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
         </Button>
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar flex-1 min-h-0 pr-0.5">
         {children}
       </div>
     </div>
@@ -136,6 +137,40 @@ export function MonthView({ tasks = [], events = [], currentDate, isLoading, onT
   const updateTaskMutation = useUpdateTask()
   const updateEventMutation = useUpdateEvent()
 
+  // Optimistic date overrides map
+  const [taskDateOverrides, setTaskDateOverrides] = useState({})
+  const [eventDateOverrides, setEventDateOverrides] = useState({})
+
+  const effectiveTasks = useMemo(() => {
+    return tasks.map(t => {
+      const override = taskDateOverrides[t.id]
+      return override ? { ...t, dueDate: override } : t
+    })
+  }, [tasks, taskDateOverrides])
+
+  const effectiveEvents = useMemo(() => {
+    return events.map(e => {
+      const override = eventDateOverrides[e.id]
+      return override ? { ...e, startTime: override.startTime, endTime: override.endTime } : e
+    })
+  }, [events, eventDateOverrides])
+
+  const rollbackTaskDate = (taskId) => {
+    setTaskDateOverrides(prev => {
+      const copy = { ...prev }
+      delete copy[taskId]
+      return copy
+    })
+  }
+
+  const rollbackEventDate = (eventId) => {
+    setEventDateOverrides(prev => {
+      const copy = { ...prev }
+      delete copy[eventId]
+      return copy
+    })
+  }
+
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
@@ -171,24 +206,55 @@ export function MonthView({ tasks = [], events = [], currentDate, isLoading, onT
       const newStart = new Date(newDateStr)
       newStart.setHours(new Date(original.startTime).getHours(), new Date(original.startTime).getMinutes())
       const newEnd = new Date(newStart.getTime() + durationMs)
-      updateEventMutation.mutate({
-        id: eventId,
-        payload: { ...original, startTime: newStart.toISOString(), endTime: newEnd.toISOString() },
-      })
+
+      // Optimistically update event position immediately
+      setEventDateOverrides(prev => ({
+        ...prev,
+        [eventId]: { startTime: newStart.toISOString(), endTime: newEnd.toISOString() }
+      }))
+
+      updateEventMutation.mutate(
+        {
+          id: eventId,
+          payload: { ...original, startTime: newStart.toISOString(), endTime: newEnd.toISOString() },
+        },
+        {
+          onError: (err) => {
+            toast.error(err?.response?.data?.message || 'Failed to update event date — reverting position')
+            rollbackEventDate(eventId)
+          }
+        }
+      )
       return
     }
 
-    // Existing task-drag path
+    // Task-drag path
     const taskId = active.id
     const task = tasks.find(t => t.id === taskId)
     if (!task) return
-    updateTaskMutation.mutate({ id: taskId, payload: { dueDate: new Date(newDateStr).toISOString() } })
+    const newDueDateIso = new Date(newDateStr).toISOString()
+
+    // Optimistically update task position immediately
+    setTaskDateOverrides(prev => ({
+      ...prev,
+      [taskId]: newDueDateIso
+    }))
+
+    updateTaskMutation.mutate(
+      { id: taskId, payload: { dueDate: newDueDateIso } },
+      {
+        onError: (err) => {
+          toast.error(err?.response?.data?.message || 'Failed to update task deadline — reverting position')
+          rollbackTaskDate(taskId)
+        }
+      }
+    )
   }
 
   // Group tasks by date
   const tasksByDate = useMemo(() => {
     const map = {}
-    tasks.forEach(task => {
+    effectiveTasks.forEach(task => {
       if (task.dueDate) {
         const dateKey = format(parseISO(task.dueDate), 'yyyy-MM-dd')
         if (!map[dateKey]) map[dateKey] = []
@@ -196,11 +262,11 @@ export function MonthView({ tasks = [], events = [], currentDate, isLoading, onT
       }
     })
     return map
-  }, [tasks])
+  }, [effectiveTasks])
 
   const eventsByDate = useMemo(() => {
     const map = {}
-    events.forEach(ev => {
+    effectiveEvents.forEach(ev => {
       if (ev.startTime) {
         const dateKey = format(parseISO(ev.startTime), 'yyyy-MM-dd')
         if (!map[dateKey]) map[dateKey] = []
@@ -208,7 +274,7 @@ export function MonthView({ tasks = [], events = [], currentDate, isLoading, onT
       }
     })
     return map
-  }, [events])
+  }, [effectiveEvents])
 
   if (isLoading) {
     return <div className="p-8 text-center text-[var(--text-muted)]">Loading calendar...</div>

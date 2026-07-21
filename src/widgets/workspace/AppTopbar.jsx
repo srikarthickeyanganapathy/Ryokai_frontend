@@ -7,6 +7,7 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
 import { Separator } from '@/shared/ui/Separator'
 import { Skeleton } from '@/shared/ui/Skeleton'
+import { RyokaiLogo } from '@/shared/ui/Logo/RyokaiLogo'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useTheme } from '@/app/providers/ThemeProvider'
 import {
@@ -222,12 +223,9 @@ export function AppTopbar({ onMenuClick }) {
           </PopoverContent>
         </Popover>
 
-        {/* Ryokai Logo */}
-        <div className="flex items-center gap-2.5 text-[var(--text-primary)] cursor-pointer overflow-hidden ml-2" onClick={() => navigate('/app')}>
-          <div className="w-5 h-5 rounded-[var(--radius-xs)] bg-[var(--text-primary)] flex items-center justify-center shrink-0">
-            <Icons.dashboard className="w-3 h-3 text-[var(--bg-base)]" strokeWidth={2.5} />
-          </div>
-          <span className="text-[14px] font-semibold tracking-tight truncate hidden sm:block">Ryokai</span>
+        {/* New Ryokai Gradient Logo */}
+        <div className="cursor-pointer ml-2" onClick={() => navigate('/app')}>
+          <RyokaiLogo size="sm" />
         </div>
 
       </div>

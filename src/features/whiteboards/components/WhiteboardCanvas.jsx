@@ -2,6 +2,7 @@ import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 
 import React, { useRef, useEffect, useState } from 'react'
+import { cn } from '@/shared/lib/cn'
 import { useRealtime } from '@/app/providers/RealTimeProvider'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { saveSnapshot } from '../api/whiteboard.api'
@@ -167,25 +168,51 @@ export function WhiteboardCanvas({ crewId, boardId, initialSnapshot }) {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex items-center gap-3 p-3 border-b border-[var(--color-border-subtle)] shrink-0 z-10 bg-[var(--bg-base)]">
-        {COLORS.map(c => (
-          <Button
-            key={c}
-            onClick={() => setColor(c)}
-            className="w-6 h-6 rounded-full border-2"
-            style={{ background: c, borderColor: color === c ? 'var(--accent)' : 'transparent' }}
-          />
-        ))}
-        <Input
-          type="range" min="1" max="12" value={strokeWidth}
-          onChange={(e) => setStrokeWidth(Number(e.target.value))}
-          className="w-24"
-        />
-        <Button variant="ghost" onClick={handleClear} className="ml-auto text-sm text-[var(--text-muted)] hover:text-[var(--danger)]">
-          Clear board
+    <div className="flex flex-col h-full overflow-hidden relative">
+      {/* Floating Toolbar Palette */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 px-4 py-2 bg-[var(--bg-elevated)]/90 backdrop-blur-xl border border-[var(--color-border-subtle)] rounded-full shadow-2xl">
+        {/* Color Swatches */}
+        <div className="flex items-center gap-2 pr-3 border-r border-[var(--color-border-subtle)]">
+          {COLORS.map(c => (
+            <button
+              key={c}
+              onClick={() => setColor(c)}
+              className={cn(
+                "w-6 h-6 rounded-full transition-transform duration-200 hover:scale-110",
+                color === c ? "ring-2 ring-offset-2 ring-[var(--accent)] ring-offset-[var(--bg-elevated)] scale-110" : "opacity-80 hover:opacity-100"
+              )}
+              style={{ backgroundColor: c }}
+            />
+          ))}
+        </div>
+
+        {/* Stroke Size Presets */}
+        <div className="flex items-center gap-1 pr-3 border-r border-[var(--color-border-subtle)]">
+          {[2, 4, 8].map(w => (
+            <button
+              key={w}
+              onClick={() => setStrokeWidth(w)}
+              className={cn(
+                "px-2.5 py-1 text-[11px] font-mono rounded-full font-semibold transition-all",
+                strokeWidth === w ? "bg-[var(--accent)] text-white" : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]"
+              )}
+            >
+              {w}px
+            </button>
+          ))}
+        </div>
+
+        {/* Clear Board Action */}
+        <Button 
+          variant="ghost" 
+          size="xs" 
+          onClick={handleClear} 
+          className="text-xs text-[var(--danger)] hover:bg-rose-500/10 hover:text-rose-500 rounded-full px-3"
+        >
+          Clear Canvas
         </Button>
       </div>
+
       <canvas
         ref={canvasRef}
         className="flex-1 w-full bg-[var(--bg-base)] touch-none cursor-crosshair"

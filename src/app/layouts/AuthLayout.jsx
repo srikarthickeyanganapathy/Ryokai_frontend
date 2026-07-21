@@ -2,6 +2,7 @@ import React from 'react'
 import { Outlet } from 'react-router-dom'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
+import { RyokaiLogo } from '@/shared/ui/Logo/RyokaiLogo'
 
 export function AuthLayout() {
   return (
@@ -9,7 +10,7 @@ export function AuthLayout() {
 
       {/* LEFT SIDE — Brand */}
       <div className="hidden lg:flex lg:w-[42%] relative bg-[var(--bg-subtle)] border-r border-[var(--border-subtle)] flex-col justify-between p-10 overflow-hidden mesh-bg shadow-[var(--inset-highlight-soft)]">
-        {/* Quiet dot-grid texture, faded toward the edges — no color, no glow */}
+        {/* Quiet dot-grid texture */}
         <div
           className="absolute inset-0 z-0 opacity-[0.35]"
           style={{
@@ -21,11 +22,8 @@ export function AuthLayout() {
         />
 
         <div className="relative z-10">
-          <div className="flex items-center gap-2 text-[var(--text-primary)] mb-16">
-            <div className="w-6 h-6 rounded-[var(--radius-sm)] bg-gradient-to-b from-[var(--accent-hover)] to-[var(--accent-active)] shadow-[var(--inset-highlight),0_1px_2px_rgba(0,0,0,0.2)] flex items-center justify-center">
-              <Icons.dashboard className="w-3.5 h-3.5 text-white" />
-            </div>
-            <span className="text-[14px] font-semibold tracking-[-0.01em]">Ryokai</span>
+          <div className="mb-16">
+            <RyokaiLogo size="lg" />
           </div>
           <Heading level={2} className="max-w-sm mb-3">
             Organize work, quietly.
@@ -45,10 +43,7 @@ export function AuthLayout() {
 
         {/* Mobile brand mark */}
         <div className="absolute top-8 left-8 flex lg:hidden items-center gap-2">
-          <div className="w-6 h-6 rounded-[var(--radius-sm)] bg-gradient-to-b from-[var(--accent-hover)] to-[var(--accent-active)] shadow-[var(--inset-highlight),0_1px_2px_rgba(0,0,0,0.2)] flex items-center justify-center">
-            <Icons.dashboard className="w-3.5 h-3.5 text-white" />
-          </div>
-          <span className="text-[13px] font-semibold tracking-[-0.01em]">Ryokai</span>
+          <RyokaiLogo size="sm" />
         </div>
 
         <div className="w-full max-w-[360px] spring-in">

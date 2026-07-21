@@ -27,13 +27,13 @@ export const ModalContent = forwardRef(({ className, children, ...props }, ref) 
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-[var(--border-default)] bg-[var(--bg-elevated)] p-6 shadow-[var(--shadow-lg),var(--inset-highlight)] duration-[var(--duration-slow)] ease-[var(--ease-spring)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.96] data-[state=open]:zoom-in-[0.96] sm:rounded-[var(--radius-lg)]',
+        'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-[var(--color-border-subtle)] bg-[var(--bg-elevated)] p-6 shadow-2xl duration-300 ease-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.96] data-[state=open]:zoom-in-[0.96] sm:rounded-2xl',
         className
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-[var(--radius-xs)] opacity-60 transition-opacity hover:opacity-100 focus-ring disabled:pointer-events-none text-[var(--text-primary)]">
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-1 opacity-60 transition-opacity hover:opacity-100 focus-ring disabled:pointer-events-none text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>

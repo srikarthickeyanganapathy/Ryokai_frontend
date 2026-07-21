@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Heading, Text } from '@/shared/ui/Typography';
-import { Button } from '@/shared/ui/Button';
+import { Button, IconButton } from '@/shared/ui/Button';
 import { Icons } from '@/shared/ui/Icons';
 import { Input } from '@/shared/ui/Input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar';
@@ -30,7 +31,7 @@ import {
 import { useWhiteboards, useCreateWhiteboard, useDeleteWhiteboard } from '@/features/whiteboards/hooks/useWhiteboards';
 import { toast } from 'sonner';
 import { Label } from '@/shared/ui/Typography/Label';
-
+import { cn } from '@/shared/lib/cn';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
 
 export function CrewDetailPage() {
@@ -67,90 +68,64 @@ export function CrewDetailPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-full space-y-6">
+    <div className="flex flex-col min-h-full space-y-4">
       
-      {/* 🤝 COLLABORATE MODE STICKY HEADER & SQUAD PRESENCE BANNER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[var(--color-border-subtle)]">
-        <div className="flex items-center gap-4">
-          <Avatar size="lg" className="bg-[var(--accent-violet)] text-white shadow-md">
-            <AvatarImage src={crew.avatarUrl} />
-            <AvatarFallback className="bg-[var(--accent-violet)] text-white text-[20px] font-semibold">
-              {crew.name.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
-                COLLABORATE Mode
-              </span>
-              <span className="text-[11px] text-[var(--text-muted)]">• {members.length} Squad Members</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Heading level={2} className="tracking-tight text-[22px] font-semibold mb-0">{crew.name}</Heading>
-              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] font-mono text-[var(--text-secondary)]">
-                {crew.visibility}
-              </span>
-            </div>
-            <Text className="text-[13px] text-[var(--text-secondary)] mt-1">{crew.description || 'No description provided.'}</Text>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Member Avatars Stack */}
-          <div className="hidden lg:flex items-center -space-x-2 mr-2">
-            {members.slice(0, 5).map(m => (
-              <div key={m.userId} className="relative group">
-                <Avatar size="sm" className="border-2 border-[var(--bg-elevated)] bg-[var(--accent)] text-white font-bold text-[10px]">
-                  <AvatarFallback>{(m.username || 'U').charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-[var(--bg-elevated)]" />
-              </div>
+      {/* 🧭 GLITCH-FREE UNDERLINED NAVIGATION BAR */}
+      <div className="relative border-b border-[var(--border-subtle)] mb-5">
+        <div className="flex items-center justify-between">
+          {/* Left: Underlined Tabs */}
+          <div className="flex items-center gap-6 overflow-x-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {[
+              { id: 'tasks', label: 'Tasks', icon: Icons.listTodo, badge: crewTasks.length },
+              { id: 'channels', label: 'Chat & Channels', icon: Icons.message, badge: channels.length },
+              { id: 'projects', label: 'Projects', icon: Icons.folderClosed, badge: sharedProjects.length },
+              { id: 'whiteboards', label: 'Whiteboards', icon: Icons.edit },
+              { id: 'members', label: 'Members', icon: Icons.users, badge: members.length },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "relative py-2.5 px-0.5 text-[13px] font-medium transition-colors whitespace-nowrap flex items-center gap-2 bg-transparent border-none cursor-pointer",
+                  activeTab === tab.id
+                    ? "text-[var(--text-primary)] font-semibold"
+                    : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+                )}
+              >
+                <tab.icon className="w-3.5 h-3.5" />
+                <span>{tab.label}</span>
+                {tab.badge !== undefined && (
+                  <span className="text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[var(--text-muted)] font-medium">
+                    {tab.badge}
+                  </span>
+                )}
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="crew-detail-active-tab-line"
+                    className="absolute -bottom-[1px] left-0 right-0 h-[2px] bg-[var(--accent)] shadow-[0_0_8px_var(--accent)]"
+                    transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                  />
+                )}
+              </button>
             ))}
-            {members.length > 5 && (
-              <span className="text-[10px] text-[var(--text-muted)] pl-3 font-mono font-semibold">
-                +{members.length - 5}
-              </span>
-            )}
           </div>
 
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/app/crews')}>
-            <Icons.chevronLeft className="w-3.5 h-3.5" />
-            Back to Crews
-          </Button>
-          <Button variant="danger" size="sm" className="gap-1.5" onClick={handleLeaveCrew} isLoading={leaveCrewMutation.isPending}>
-            <Icons.logout className="w-3.5 h-3.5" />
-            Leave Crew
-          </Button>
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 shrink-0 pb-2">
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/app/crews')}>
+              <Icons.chevronLeft className="w-3.5 h-3.5" />
+              Back to Crews
+            </Button>
+            <Button variant="danger" size="sm" className="gap-1.5" onClick={handleLeaveCrew} isLoading={leaveCrewMutation.isPending}>
+              <Icons.logout className="w-3.5 h-3.5" />
+              Leave Crew
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Tabs Menu */}
-      <div className="flex border-b border-[var(--border-subtle)] mb-6 overflow-x-auto gap-4">
-        {[
-          { id: 'tasks', label: 'Tasks', icon: Icons.listTodo },
-          { id: 'channels', label: 'Chat & Channels', icon: Icons.message },
-          { id: 'projects', label: 'Projects', icon: Icons.folderClosed },
-          { id: 'whiteboards', label: 'Whiteboards', icon: Icons.edit || Icons.edit },
-          { id: 'members', label: 'Members', icon: Icons.users },
-        ].map((tab) => (
-          <Button
-            key={tab.id}
-            variant="ghost"
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 pb-3 text-[14px] font-medium border-b-2 transition-colors shrink-0 rounded-none hover:bg-transparent ${
-              activeTab === tab.id
-                ? 'border-[var(--accent)] text-[var(--accent)] font-semibold'
-                : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-          </Button>
-        ))}
-      </div>
-
-      {/* Tab Panels */}
-      <div className="flex-1">
+      {/* 🎨 FEATURE STAGE */}
+      <div className="flex-1 min-h-0">
         {activeTab === 'tasks' && (
           <TasksTab crewId={crewId} tasks={crewTasks} />
         )}
@@ -342,16 +317,27 @@ function TasksTab({ crewId, tasks }) {
   );
 }
 
-/* ==================== CHANNELS TAB ==================== */
+/* ==================== DISCORD-STYLE CHANNELS TAB ==================== */
 function ChannelsTab({ crewId, channels, isCreator }) {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [channelName, setChannelName] = useState('');
   const [channelType, setChannelType] = useState('TEXT');
   const { confirm, dialog: confirmDialog } = useConfirmDialog();
+  const { data: members = [] } = useCrewMembers(crewId);
 
   const createChannelMutation = useCreateCrewChannel(crewId);
   const deleteChannelMutation = useDeleteCrewChannel(crewId);
+
+  // Auto-select first channel on load
+  useEffect(() => {
+    if (!selectedChannel && channels.length > 0) {
+      setSelectedChannel(channels[0]);
+    }
+  }, [channels, selectedChannel]);
+
+  const textChannels = useMemo(() => channels.filter(c => c.type !== 'VOICE'), [channels]);
+  const voiceChannels = useMemo(() => channels.filter(c => c.type === 'VOICE'), [channels]);
 
   const handleCreateChannel = (e) => {
     e.preventDefault();
@@ -361,10 +347,11 @@ function ChannelsTab({ crewId, channels, isCreator }) {
       name: channelName,
       type: channelType
     }, {
-      onSuccess: () => {
+      onSuccess: (newChan) => {
         setIsCreateOpen(false);
         setChannelName('');
         setChannelType('TEXT');
+        if (newChan) setSelectedChannel(newChan);
       }
     });
   };
@@ -374,50 +361,63 @@ function ChannelsTab({ crewId, channels, isCreator }) {
     if (await confirm({ title: 'Delete this channel and all its messages?', danger: true })) {
       deleteChannelMutation.mutate(id, {
         onSuccess: () => {
-          if (selectedChannel?.id === id) setSelectedChannel(null);
+          if (selectedChannel?.id === id) setSelectedChannel(channels.find(c => c.id !== id) || null);
         }
       });
     }
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 min-h-[400px]">
-      {/* Sidebar List */}
-      <div className="md:col-span-1 border-r border-[var(--border-subtle)] pr-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <Heading level={3} className="text-[14px] font-semibold mb-0">Channels</Heading>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-210px)] min-h-[500px]">
+      
+      {/* 1. DISCORD LEFT CHANNEL SIDEBAR (3 Cols) */}
+      <div className="lg:col-span-3 flex flex-col bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-2xl p-3 overflow-hidden shadow-sm">
+        
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between px-2 pb-3 mb-2 border-b border-[var(--color-border-subtle)] shrink-0">
+          <div className="flex items-center gap-2">
+            <Icons.message className="w-4 h-4 text-[var(--accent)]" />
+            <span className="font-bold text-xs uppercase tracking-wider text-[var(--text-primary)] font-mono">Channels</span>
+          </div>
           {isCreator && (
-            <Button size="xs" variant="outline" className="p-1 h-7 w-7" onClick={() => setIsCreateOpen(true)}>
-              <Icons.plus className="w-4 h-4" />
+            <Button 
+              size="xs" 
+              variant="outline" 
+              className="p-1 h-6 w-6 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]" 
+              onClick={() => setIsCreateOpen(true)}
+              title="Create Channel"
+            >
+              <Icons.plus className="w-3.5 h-3.5" />
             </Button>
           )}
         </div>
 
+        {/* Modal: New Channel */}
         <Modal open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <ModalContent className="sm:max-w-xs">
-            <Heading level={3} className="mb-3 text-[16px]">New Channel</Heading>
+            <Heading level={3} className="mb-3 text-base">New Channel</Heading>
             <form onSubmit={handleCreateChannel} className="space-y-4">
               <div className="space-y-1">
-                <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Channel Name</Label>
+                <Label className="text-xs font-medium text-[var(--text-secondary)]">Channel Name</Label>
                 <Input
                   value={channelName}
                   onChange={(e) => setChannelName(e.target.value)}
-                  placeholder="general, design..."
+                  placeholder="general, dev-lounge..."
                   required
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Type</Label>
+                <Label className="text-xs font-medium text-[var(--text-secondary)]">Channel Type</Label>
                 <select
                   value={channelType}
                   onChange={(e) => setChannelType(e.target.value)}
-                  className="w-full h-9 rounded-md border border-[var(--border-default)] bg-[var(--bg-sidebar)] p-2 text-sm text-[var(--text-primary)]"
+                  className="w-full h-9 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--bg-subtle)] p-2 text-xs text-[var(--text-primary)] font-medium"
                 >
-                  <option value="TEXT">Text Chat</option>
-                  <option value="VOICE">Voice Room</option>
+                  <option value="TEXT"># Text Channel</option>
+                  <option value="VOICE">🔊 Voice Room</option>
                 </select>
               </div>
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-2 pt-2">
                 <Button type="button" variant="outline" size="sm" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
                 <Button type="submit" size="sm" isLoading={createChannelMutation.isPending}>Create</Button>
               </div>
@@ -425,55 +425,147 @@ function ChannelsTab({ crewId, channels, isCreator }) {
           </ModalContent>
         </Modal>
 
-        <div className="space-y-1">
-          {channels.map((chan) => (
-            <div
-              key={chan.id}
-              onClick={() => setSelectedChannel(chan)}
-              className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors text-[13px] ${
-                selectedChannel?.id === chan.id
-                  ? 'bg-[var(--accent-soft)] text-[var(--accent)] font-medium'
-                  : 'hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]'
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <Icons.message className="w-3.5 h-3.5 shrink-0" />
-                {chan.name}
-              </span>
-              {isCreator && (
-                <Button
-                  onClick={(e) => handleDeleteChannel(chan.id, e)}
-                  className="text-[var(--text-tertiary)] hover:text-red-500 opacity-0 hover:opacity-100 group-hover:opacity-100 p-0.5 rounded transition-opacity"
-                >
-                  <Icons.trash2 className="w-3 h-3" />
-                </Button>
+        {/* Channel Categories List */}
+        <div className="flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-1">
+          {/* TEXT CHANNELS CATEGORY */}
+          <div>
+            <div className="px-2 pb-1.5 text-[10px] font-mono uppercase tracking-wider font-bold text-[var(--text-muted)] flex items-center justify-between">
+              <span>Text Channels</span>
+              <span className="text-[9px]">{textChannels.length}</span>
+            </div>
+            <div className="space-y-0.5">
+              {textChannels.map((chan) => {
+                const isActive = selectedChannel?.id === chan.id;
+                return (
+                  <div
+                    key={chan.id}
+                    onClick={() => setSelectedChannel(chan)}
+                    className={cn(
+                      "group flex items-center justify-between px-2.5 py-1.5 rounded-xl cursor-pointer transition-all duration-150 text-xs font-medium",
+                      isActive
+                        ? "bg-[var(--accent)] text-white font-bold shadow-md shadow-[var(--accent)]/20"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]"
+                    )}
+                  >
+                    <span className="flex items-center gap-2 truncate">
+                      <span className={cn("font-bold text-sm font-mono", isActive ? "text-white" : "text-[var(--text-muted)]")}>#</span>
+                      <span className="truncate">{chan.name}</span>
+                    </span>
+                    {isCreator && (
+                      <button
+                        onClick={(e) => handleDeleteChannel(chan.id, e)}
+                        className={cn(
+                          "opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:text-rose-400",
+                          isActive ? "text-white/80 hover:text-white" : "text-[var(--text-muted)]"
+                        )}
+                        title="Delete Channel"
+                      >
+                        <Icons.trash2 className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+              {textChannels.length === 0 && (
+                <p className="text-[11px] text-[var(--text-muted)] italic px-2 py-1">No text channels.</p>
               )}
             </div>
-          ))}
-          {channels.length === 0 && (
-            <p className="text-[12px] text-[var(--text-tertiary)] italic p-2">No channels yet.</p>
+          </div>
+
+          {/* VOICE CHANNELS CATEGORY */}
+          {voiceChannels.length > 0 && (
+            <div>
+              <div className="px-2 pb-1.5 text-[10px] font-mono uppercase tracking-wider font-bold text-[var(--text-muted)] flex items-center justify-between">
+                <span>Voice Rooms</span>
+                <span className="text-[9px]">{voiceChannels.length}</span>
+              </div>
+              <div className="space-y-0.5">
+                {voiceChannels.map((chan) => {
+                  const isActive = selectedChannel?.id === chan.id;
+                  return (
+                    <div
+                      key={chan.id}
+                      onClick={() => setSelectedChannel(chan)}
+                      className={cn(
+                        "group flex items-center justify-between px-2.5 py-1.5 rounded-xl cursor-pointer transition-all duration-150 text-xs font-medium",
+                        isActive
+                          ? "bg-[var(--accent)] text-white font-bold shadow-md"
+                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]"
+                      )}
+                    >
+                      <span className="flex items-center gap-2 truncate">
+                        <span className="text-sm">🔊</span>
+                        <span className="truncate">{chan.name}</span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           )}
         </div>
+
       </div>
 
-      {/* Chat Area */}
-      <div className="md:col-span-3 flex flex-col bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-[var(--radius-lg)] p-4 min-h-[400px]">
+      {/* 2. DISCORD CENTER CHAT CANVAS (6 Cols) */}
+      <div className="lg:col-span-6 flex flex-col bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-2xl overflow-hidden shadow-sm">
         {selectedChannel ? (
           <ChannelChatBox crewId={crewId} channel={selectedChannel} />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-            <Icons.message className="w-10 h-10 text-[var(--text-tertiary)] mb-2" />
-            <Heading level={4} className="text-[14px] font-medium text-[var(--text-secondary)]">Select a Channel</Heading>
-            <Text variant="muted" className="text-[12px] mt-1">Choose a channel from the left menu to start messaging.</Text>
+            <Icons.message className="w-12 h-12 text-[var(--accent)] mb-3 opacity-60" />
+            <Heading level={4} className="text-base font-bold text-[var(--text-primary)]">Select a Channel</Heading>
+            <Text variant="muted" className="text-xs mt-1">Choose a channel from the left sidebar to start chatting.</Text>
           </div>
         )}
       </div>
+
+      {/* 3. DISCORD RIGHT SQUAD MEMBER RAIL (3 Cols) */}
+      <div className="lg:col-span-3 flex flex-col bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-2xl p-3 overflow-hidden shadow-sm hidden lg:flex">
+        <div className="px-2 pb-3 mb-2 border-b border-[var(--color-border-subtle)] shrink-0 flex items-center justify-between">
+          <span className="font-bold text-xs uppercase tracking-wider text-[var(--text-primary)] font-mono">Squad Members</span>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] font-semibold">
+            {members.length}
+          </span>
+        </div>
+
+        <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-1">
+          <div className="px-2 text-[10px] font-mono uppercase tracking-wider font-bold text-[var(--text-muted)] mb-1">
+            ONLINE — {members.length}
+          </div>
+
+          {members.map((m) => (
+            <div key={m.userId} className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer group">
+              <div className="relative shrink-0">
+                <Avatar size="sm" className="bg-[var(--accent)] text-white font-bold text-[10px]">
+                  <AvatarFallback>{(m.username || 'U').charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-[var(--bg-elevated)]" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="text-xs font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--accent)] transition-colors">
+                    @{m.username}
+                  </span>
+                  {m.role === 'CREATOR' && (
+                    <span className="text-[9px] font-mono font-bold uppercase text-amber-500 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20">
+                      👑 Owner
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] text-[var(--text-muted)] block truncate">Active in crew</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {confirmDialog}
     </div>
   );
 }
 
-/* Chat Feed Component */
+/* Discord Chat Feed Component */
 function ChannelChatBox({ crewId, channel }) {
   const [msgContent, setMsgContent] = useState('');
   const [isConvertOpen, setIsConvertOpen] = useState(false);
@@ -524,47 +616,59 @@ function ChannelChatBox({ crewId, channel }) {
   };
 
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col h-full">
       {/* Active Channel Header */}
-      <div className="pb-3 border-b border-[var(--border-subtle)] mb-4 flex items-center justify-between">
-        <div>
-          <Heading level={4} className="text-[14px] font-semibold mb-0">#{channel.name}</Heading>
-          <span className="text-[11px] text-[var(--text-tertiary)] uppercase font-mono tracking-wider">{channel.type}</span>
+      <div className="px-4 py-3 border-b border-[var(--color-border-subtle)] flex items-center justify-between shrink-0 bg-[var(--bg-elevated)]">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-lg font-mono text-[var(--accent)]">#</span>
+          <div>
+            <Heading level={4} className="text-sm font-bold mb-0 text-[var(--text-primary)]">{channel.name}</Heading>
+            <Text size="xs" variant="muted" className="text-[11px]">Channel chat & message stream</Text>
+          </div>
         </div>
+        <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] text-[var(--text-muted)] uppercase">
+          {channel.type}
+        </span>
       </div>
 
-      {/* Message Feed */}
-      <div className="flex-1 overflow-y-auto space-y-3 pr-2 max-h-[300px] min-h-[250px] mb-4 flex flex-col justify-end">
+      {/* Discord Message Feed */}
+      <div className="flex-1 p-4 overflow-y-auto space-y-4 custom-scrollbar">
         {isLoading ? (
-          <div className="text-center py-4">
-            <Icons.spinner className="w-5 h-5 animate-spin mx-auto text-[var(--accent)]" />
+          <div className="text-center py-12">
+            <Icons.spinner className="w-6 h-6 animate-spin mx-auto text-[var(--accent)]" />
           </div>
         ) : messages.length === 0 ? (
-          <div className="text-center py-8 text-[12.5px] text-[var(--text-tertiary)]">
-            No messages here. Say hello!
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center font-bold text-xl mb-3 font-mono">
+              #
+            </div>
+            <Heading level={3} className="text-base font-bold">Welcome to #{channel.name}!</Heading>
+            <Text variant="muted" className="text-xs mt-1">This is the start of the #{channel.name} channel.</Text>
           </div>
         ) : (
           messages.map((msg) => (
-            <div key={msg.id} className="group flex items-start gap-3 hover:bg-[var(--bg-hover)] p-1.5 rounded-md transition-colors">
-              <Avatar size="sm" className="bg-[var(--accent-cyan)] text-white">
-                <AvatarFallback className="text-[10px] font-semibold">
+            <div key={msg.id} className="group flex items-start gap-3 p-2 rounded-xl hover:bg-[var(--bg-subtle)] transition-colors relative">
+              <Avatar size="sm" className="bg-[var(--accent)] text-white font-bold text-xs shrink-0 mt-0.5">
+                <AvatarFallback>
                   {msg.authorUsername?.charAt(0).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-[12.5px] font-semibold text-[var(--text-primary)]">@{msg.authorUsername}</span>
-                  <span className="text-[10px] text-[var(--text-tertiary)]">{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-xs font-bold text-[var(--accent)]">@{msg.authorUsername}</span>
+                  <span className="text-[10px] text-[var(--text-muted)] font-mono">
+                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
                 </div>
-                <p className="text-[13px] text-[var(--text-secondary)] mt-0.5 break-words">{msg.content}</p>
+                <p className="text-xs text-[var(--text-primary)] leading-relaxed break-words">{msg.content}</p>
               </div>
               <Button
                 size="xs"
                 variant="outline"
-                className="opacity-0 group-hover:opacity-100 transition-opacity h-6 text-[10px] gap-1 px-2"
+                className="opacity-0 group-hover:opacity-100 transition-opacity h-6 text-[10px] gap-1 px-2.5 rounded-lg border-[var(--color-border-subtle)] bg-[var(--bg-elevated)] shrink-0"
                 onClick={() => handleConvertOpen(msg)}
               >
-                <Icons.listTodo className="w-3 h-3" />
+                <Icons.listTodo className="w-3 h-3 text-[var(--accent)]" />
                 Convert to Task
               </Button>
             </div>
@@ -575,10 +679,10 @@ function ChannelChatBox({ crewId, channel }) {
       {/* Convert to Task Modal */}
       <Modal open={isConvertOpen} onOpenChange={setIsConvertOpen}>
         <ModalContent className="sm:max-w-sm">
-          <Heading level={3} className="mb-3 text-[15px]">Convert Message to Task</Heading>
+          <Heading level={3} className="mb-3 text-base">Convert Message to Task</Heading>
           <form onSubmit={handleConvertToTask} className="space-y-3">
             <div className="space-y-1">
-              <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Task Title</Label>
+              <Label className="text-xs font-medium text-[var(--text-secondary)]">Task Title</Label>
               <Input
                 value={taskTitle}
                 onChange={(e) => setTaskTitle(e.target.value)}
@@ -587,11 +691,11 @@ function ChannelChatBox({ crewId, channel }) {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Priority</Label>
+                <Label className="text-xs font-medium text-[var(--text-secondary)]">Priority</Label>
                 <select
                   value={taskPriority}
                   onChange={(e) => setTaskPriority(e.target.value)}
-                  className="w-full h-9 rounded-md border border-[var(--border-default)] bg-[var(--bg-sidebar)] p-2 text-sm text-[var(--text-primary)]"
+                  className="w-full h-9 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--bg-subtle)] p-2 text-xs text-[var(--text-primary)]"
                 >
                   <option value="LOW">Low</option>
                   <option value="MEDIUM">Medium</option>
@@ -600,7 +704,7 @@ function ChannelChatBox({ crewId, channel }) {
                 </select>
               </div>
               <div className="space-y-1">
-                <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Due Date</Label>
+                <Label className="text-xs font-medium text-[var(--text-secondary)]">Due Date</Label>
                 <Input
                   type="date"
                   value={taskDueDate}
@@ -616,16 +720,20 @@ function ChannelChatBox({ crewId, channel }) {
         </ModalContent>
       </Modal>
 
-      {/* Send Message Input */}
-      <form onSubmit={handleSend} className="flex gap-2">
-        <Input
-          value={msgContent}
-          onChange={(e) => setMsgContent(e.target.value)}
-          placeholder={`Message #${channel.name}...`}
-          className="flex-1"
-        />
-        <Button type="submit" size="sm" isLoading={sendMessageMutation.isPending}>Send</Button>
-      </form>
+      {/* Discord Message Bar Input */}
+      <div className="p-3 border-t border-[var(--color-border-subtle)] bg-[var(--bg-elevated)] shrink-0">
+        <form onSubmit={handleSend} className="flex gap-2">
+          <Input
+            value={msgContent}
+            onChange={(e) => setMsgContent(e.target.value)}
+            placeholder={`Message #${channel.name}...`}
+            className="flex-1 text-xs h-10 rounded-xl"
+          />
+          <Button type="submit" size="sm" isLoading={sendMessageMutation.isPending} className="h-10 px-4 rounded-xl">
+            Send
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }
@@ -705,16 +813,24 @@ function ProjectsTab({ crewId, sharedProjects, allProjects }) {
   );
 }
 
-/* ==================== MEMBERS TAB ==================== */
+/* ==================== DIRECTORY-STYLE MEMBERS TAB ==================== */
 function MembersTab({ crewId, members, memberCap, isCreator }) {
   const [email, setEmail] = useState('');
   const [inviteLink, setInviteLink] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const { confirm, dialog: confirmDialog } = useConfirmDialog();
 
   const inviteMutation = useInviteCrewMember(crewId);
   const inviteLinkMutation = useCreateCrewInviteLink(crewId);
   const removeMutation = useRemoveCrewMember(crewId);
   const transferOwnershipMutation = useTransferCrewOwnership(crewId);
+
+  const filteredMembers = useMemo(() => {
+    return members.filter(m => 
+      m.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.role?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [members, searchQuery]);
 
   const handleInvite = (e) => {
     e.preventDefault();
@@ -728,8 +844,6 @@ function MembersTab({ crewId, members, memberCap, isCreator }) {
   const handleCreateInviteLink = () => {
     inviteLinkMutation.mutate(null, {
       onSuccess: (data) => {
-        // Assume backend returns CrewInviteDTO with an invite id/token
-        // Build join invite accept URL
         const link = `${window.location.origin}/app/crews/join?inviteId=${data.id || data.inviteId}`;
         setInviteLink(link);
       }
@@ -738,87 +852,141 @@ function MembersTab({ crewId, members, memberCap, isCreator }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Member list */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center border-b border-[var(--border-subtle)] pb-2">
-            <Heading level={3} className="text-[15px] font-semibold mb-0">Crew Members ({members.length}/{memberCap})</Heading>
-          </div>
-          <div className="space-y-2">
-            {members.map((member) => (
-              <div key={member.userId} className="flex items-center justify-between p-2.5 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-[var(--radius-md)]">
-                <div className="flex items-center gap-3">
-                  <Avatar size="sm" className="bg-[var(--accent-orange)] text-white">
-                    <AvatarFallback className="text-[11px] font-semibold">
-                      {member.username?.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <span className="text-[13px] font-semibold text-[var(--text-primary)]">@{member.username}</span>
-                    <span className="text-[10px] text-[var(--text-tertiary)] ml-2 uppercase font-mono">{member.role}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {isCreator && member.role !== 'CREATOR' && (
-                    <Button
-                      variant="outline"
-                      size="xs"
-                      className="text-[11px] h-7 px-2 border-[var(--border-default)]"
-                      onClick={async () => {
-                        if (await confirm({ title: `Transfer crew ownership to @${member.username}? You will be demoted to MEMBER.`, danger: true })) {
-                          transferOwnershipMutation.mutate(member.userId);
-                        }
-                      }}
-                      isLoading={transferOwnershipMutation.isPending && transferOwnershipMutation.variables === member.userId}
-                    >
-                      Make Owner
-                    </Button>
-                  )}
-                  {/* Remove member button */}
-                  <Button
-                    onClick={async () => {
-                      if (await confirm({ title: `Remove member @${member.username}?`, danger: true })) {
-                        removeMutation.mutate(member.userId);
-                      }
-                    }}
-                    className="text-[var(--text-tertiary)] hover:text-red-500 p-1"
-                  >
-                    <Icons.trash2 className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Top Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--color-border-subtle)]">
+        <div>
+          <Heading level={3} className="text-base font-bold text-[var(--text-primary)] mb-0">
+            Crew Members ({members.length}/{memberCap})
+          </Heading>
+          <Text variant="muted" className="text-xs mt-0.5">
+            Active collaborators and squad participants.
+          </Text>
         </div>
 
-        {/* Invite Area */}
-        <div className="space-y-6 bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded-[var(--radius-lg)] p-4">
+        <div className="flex items-center gap-3">
+          <Input
+            placeholder="Search members..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-48 text-xs h-8"
+          />
+        </div>
+      </div>
+
+      {/* Main Grid & Invite Split */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Left 2 Cols: Member Cards Grid */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {filteredMembers.map((member, index) => (
+              <motion.div
+                key={member.userId}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] hover:border-[var(--accent-soft)] rounded-2xl p-4 shadow-sm transition-all duration-200"
+              >
+                <div className="flex items-start gap-3">
+                  <Avatar size="md" className="bg-[var(--accent)] text-white font-bold shrink-0">
+                    <AvatarFallback>{member.username?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+                  </Avatar>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <Heading level={4} className="text-sm font-bold text-[var(--text-primary)] truncate mb-0">
+                        @{member.username}
+                      </Heading>
+                      <span className={cn(
+                        "text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full uppercase border",
+                        member.role === 'CREATOR' 
+                          ? "bg-amber-500/10 text-amber-500 border-amber-500/20" 
+                          : "bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--color-border-subtle)]"
+                      )}>
+                        {member.role === 'CREATOR' ? '👑 Owner' : member.role}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-[var(--text-muted)] truncate mb-3">
+                      {member.username}@ryokai.app
+                    </p>
+
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--color-border-subtle)]">
+                      {isCreator && member.role !== 'CREATOR' && (
+                        <Button
+                          variant="outline"
+                          size="xs"
+                          className="h-7 text-[11px]"
+                          onClick={async () => {
+                            if (await confirm({ title: `Transfer crew ownership to @${member.username}? You will be demoted to MEMBER.`, danger: true })) {
+                              transferOwnershipMutation.mutate(member.userId);
+                            }
+                          }}
+                          isLoading={transferOwnershipMutation.isPending && transferOwnershipMutation.variables === member.userId}
+                        >
+                          Make Owner
+                        </Button>
+                      )}
+
+                      <IconButton
+                        variant="danger"
+                        size="sm"
+                        className="h-7 w-7"
+                        title="Remove Member"
+                        onClick={async () => {
+                          if (await confirm({ title: `Remove member @${member.username}?`, danger: true })) {
+                            removeMutation.mutate(member.userId);
+                          }
+                        }}
+                        disabled={removeMutation.isPending}
+                      >
+                        <Icons.trash2 className="w-3.5 h-3.5" />
+                      </IconButton>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {filteredMembers.length === 0 && (
+            <div className="text-center py-12 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-2xl border-dashed">
+              <Icons.users className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2" />
+              <Heading level={4} className="text-xs font-semibold text-[var(--text-secondary)]">No members found</Heading>
+            </div>
+          )}
+        </div>
+
+        {/* Right 1 Col: Invite Box */}
+        <div className="lg:col-span-1 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-2xl p-5 shadow-sm space-y-5 h-fit">
           <div>
-            <Heading level={3} className="text-[14px] font-semibold mb-1">Add Crew Members</Heading>
-            <Text className="text-[12px] text-[var(--text-tertiary)]">Invite someone new to collaborate in this crew.</Text>
+            <Heading level={3} className="text-sm font-bold text-[var(--text-primary)] mb-1">Add Crew Members</Heading>
+            <Text variant="muted" className="text-xs">Invite collaborators to join your squad.</Text>
           </div>
 
           <form onSubmit={handleInvite} className="space-y-2">
-            <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Invite by Email</Label>
+            <Label className="text-xs font-medium text-[var(--text-secondary)]">Invite by Email</Label>
             <div className="flex gap-2">
               <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="colleague@company.com"
-                className="flex-1"
+                className="flex-1 text-xs h-9"
                 required
               />
-              <Button type="submit" size="sm" isLoading={inviteMutation.isPending}>Send Invite</Button>
+              <Button type="submit" size="sm" isLoading={inviteMutation.isPending} className="h-9">
+                Send
+              </Button>
             </div>
           </form>
 
-          <div className="border-t border-[var(--border-subtle)] pt-4 space-y-3">
-            <Label className="text-[11px] font-medium text-[var(--text-secondary)]">Generate Invite Link</Label>
+          <div className="border-t border-[var(--color-border-subtle)] pt-4 space-y-3">
+            <Label className="text-xs font-medium text-[var(--text-secondary)]">Shareable Join Link</Label>
             <Button
               variant="outline"
               size="sm"
-              className="w-full gap-1.5"
+              className="w-full gap-1.5 h-9 text-xs"
               onClick={handleCreateInviteLink}
               isLoading={inviteLinkMutation.isPending}
             >
@@ -827,12 +995,8 @@ function MembersTab({ crewId, members, memberCap, isCreator }) {
             </Button>
             
             {inviteLink && (
-              <div className="flex gap-2 mt-2">
-                <Input
-                  value={inviteLink}
-                  readOnly
-                  className="text-[12px] bg-[var(--bg-sidebar)] flex-1 select-all"
-                />
+              <div className="p-2.5 bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] rounded-xl text-xs flex items-center justify-between gap-2">
+                <span className="truncate text-[var(--text-secondary)] font-mono text-[11px]">{inviteLink}</span>
                 <Button
                   size="sm"
                   variant="outline"

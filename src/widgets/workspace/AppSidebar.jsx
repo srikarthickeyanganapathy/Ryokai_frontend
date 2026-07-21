@@ -220,74 +220,69 @@ export function AppSidebar({ isOpen, onClose }) {
       isCollapsed ? "w-[68px]" : "w-[240px]"
     )}>
       
-      {/* Brand Header */}
-      <div className={cn("flex items-center shrink-0 mt-2", isCollapsed ? "flex-col justify-center gap-2 py-3" : "h-14 justify-between px-3")}>
-        <Popover>
-          <PopoverTrigger asChild>
-            <div 
-              className={cn(
-                "flex items-center gap-2.5 min-w-0 cursor-pointer hover:bg-[var(--bg-hover)] rounded-full transition-all duration-300",
-                isCollapsed ? "p-1" : "p-1.5 flex-1"
-              )}
-            >
-              <Avatar size="sm" className="bg-[#B8720A] text-white shrink-0 shadow-sm">
-                <AvatarImage src={user?.avatarUrl} />
-                <AvatarFallback className="bg-[#B8720A] text-white text-[11px] font-medium">
-                  {user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
-              {!isCollapsed && (
+      {/* Brand & User Profile Header */}
+      <div className={cn("flex items-center shrink-0 mt-2", isCollapsed ? "justify-center py-3" : "h-14 justify-between px-3")}>
+        {!isCollapsed && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <div className="flex items-center gap-2.5 min-w-0 cursor-pointer hover:bg-[var(--bg-hover)] p-1.5 rounded-full transition-all duration-200 flex-1">
+                <Avatar size="sm" className="bg-[var(--accent)] text-white shrink-0 shadow-sm">
+                  <AvatarImage src={user?.avatarUrl} />
+                  <AvatarFallback className="bg-[var(--accent)] text-white text-[11px] font-bold">
+                    {user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="flex flex-col min-w-0 text-left overflow-hidden">
-                  <Text className="text-[13px] font-semibold truncate text-[var(--text-primary)] leading-tight">{user?.name || user?.username}</Text>
+                  <Text className="text-[13px] font-bold truncate text-[var(--text-primary)] leading-tight">
+                    {user?.name || user?.username}
+                  </Text>
                 </div>
-              )}
-            </div>
-          </PopoverTrigger>
-          <PopoverContent 
-            align="start" 
-            side={isCollapsed ? "right" : "bottom"} 
-            className="w-56 bg-[var(--bg-elevated)]/90 backdrop-blur-xl border border-[var(--border-subtle)] p-2 rounded-2xl shadow-xl flex flex-col gap-1 z-[9999] transition-all"
-          >
-            <Link
-              to="/app/settings/profile"
-              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+              </div>
+            </PopoverTrigger>
+            <PopoverContent 
+              align="start" 
+              className="w-56 bg-[var(--bg-elevated)]/95 backdrop-blur-xl border border-[var(--color-border-subtle)] p-2 rounded-2xl shadow-xl flex flex-col gap-1 z-[9999]"
             >
-              <Icons.user className="w-4 h-4 text-[var(--text-muted)]" />
-              <span>Profile</span>
-            </Link>
-            <Link
-              to="/app/settings/security"
-              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
-            >
-              <Icons.settings className="w-4 h-4 text-[var(--text-muted)]" />
-              <span>Settings</span>
-            </Link>
-            <Separator className="my-1 bg-[var(--border-subtle)]" />
-            <Button
-              variant="ghost"
-              onClick={() => logout()}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-[var(--danger)] hover:bg-[var(--danger-soft)]/20 transition-colors w-full text-left font-medium"
-            >
-              <Icons.logout className="w-4 h-4" />
-              <span>Log out</span>
-            </Button>
-          </PopoverContent>
-        </Popover>
+              <Link
+                to="/app/settings/profile"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+              >
+                <Icons.user className="w-4 h-4 text-[var(--text-muted)]" />
+                <span>Profile</span>
+              </Link>
+              <Link
+                to="/app/settings/security"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+              >
+                <Icons.settings className="w-4 h-4 text-[var(--text-muted)]" />
+                <span>Settings</span>
+              </Link>
+              <Separator className="my-1 bg-[var(--color-border-subtle)]" />
+              <Button
+                variant="ghost"
+                onClick={() => logout()}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[var(--danger)] hover:bg-[var(--danger-soft)]/20 transition-colors w-full text-left font-semibold"
+              >
+                <Icons.logout className="w-4 h-4" />
+                <span>Log out</span>
+              </Button>
+            </PopoverContent>
+          </Popover>
+        )}
 
-        <Button 
-          variant="ghost"
+        <button 
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
-            "text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-all duration-300 p-1.5 rounded-full hover:bg-[var(--bg-hover)] hidden lg:flex shrink-0",
-            isCollapsed && "mt-1"
+            "text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-all duration-200 p-2 rounded-xl hover:bg-[var(--bg-hover)] hidden lg:flex shrink-0 items-center justify-center border border-transparent hover:border-[var(--color-border-subtle)]"
           )}
+          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <Icons.sidebarOpen className="w-4 h-4" />
+            <Icons.sidebarOpen className="w-4 h-4 text-[var(--accent)]" />
           ) : (
             <Icons.sidebarClose className="w-4 h-4" />
           )}
-        </Button>
+        </button>
       </div>
 
       {/* ═══ Workspace Switcher (Top position) ═══ */}
@@ -339,16 +334,20 @@ export function AppSidebar({ isOpen, onClose }) {
 
         {isSettingsMode && (
           <>
-            <div className={cn("pb-4 flex items-center", isCollapsed ? "justify-center px-2" : "px-4 gap-2")}>
-              <Button 
+            <div className={cn("pb-3 flex items-center", isCollapsed ? "justify-center px-2" : "px-3")}>
+              <button 
                 onClick={() => navigate('/app')}
-                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 rounded-full hover:bg-[var(--bg-hover)] transition-all duration-300"
-                title={isCollapsed ? "Back to app" : undefined}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 border border-[var(--color-border-subtle)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent-soft)] hover:bg-[var(--bg-hover)] shadow-sm",
+                  isCollapsed ? "w-9 h-9 justify-center p-0" : "w-full"
+                )}
+                title="Back to Workspace"
               >
-                <Icons.chevronLeft className="w-4 h-4" />
-              </Button>
+                <Icons.chevronLeft className="w-4 h-4 text-[var(--accent)] shrink-0" />
+                {!isCollapsed && <span>Back to Workspace</span>}
+              </button>
             </div>
-            {renderNavSection(settingsNavItems, 'Account')}
+            {renderNavSection(settingsNavItems, 'Account Settings')}
           </>
         )}
       </div>

@@ -53,21 +53,28 @@ export function CrewsPage() {
   );
 
   return (
-    <div className="flex flex-col min-h-full" role="region" aria-label="Crews">
-      {/* Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+    <div className="flex flex-col min-h-full space-y-6" role="region" aria-label="Crews">
+      {/* 🤝 COLLABORATE MODE STICKY HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--color-border-subtle)]">
         <div>
-          <Heading level={1} className="tracking-tight text-[20px] font-semibold mb-0.5">Crews</Heading>
-          <Text variant="muted" className="text-[13px]">Collaborate in lightweight flat-structured spaces.</Text>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
+              COLLABORATE Mode
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)]">• {crews.length} Active Crews</span>
+          </div>
+          <Heading level={1} className="tracking-tight text-[22px] font-semibold mb-0">Crews Hub</Heading>
+          <Text variant="muted" className="text-[13px]">Lightweight flat-structured spaces for mission teams & whiteboards.</Text>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-3">
           <div className="relative w-full sm:w-64">
             <Icons.search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-tertiary)]" aria-hidden="true" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search crews..."
-              className="pl-8"
+              className="pl-8 text-xs"
             />
           </div>
           <Button size="sm" className="shrink-0 gap-1.5" onClick={() => setIsCreateOpen(true)}>
@@ -170,43 +177,48 @@ export function CrewsPage() {
 
       {/* Crews Grid */}
       {!isLoading && !isError && filteredCrews.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredCrews.map((crew) => (
             <motion.div
               key={crew.id}
-              whileHover={{ y: -2 }}
+              whileHover={{ y: -3 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 28 }}
               onClick={() => navigate(`/app/crews/${crew.id}`)}
-              className="flex flex-col p-4 rounded-[var(--radius-lg)] bg-[var(--bg-elevated)] border border-[var(--border-default)] hover:border-[var(--accent-soft)] transition-colors cursor-pointer"
+              className="group relative flex flex-col p-5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] hover:border-[var(--accent-border)] hover:shadow-xl hover:shadow-[var(--accent)]/5 transition-all duration-300 cursor-pointer overflow-hidden justify-between"
             >
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div className="flex items-center gap-3">
-                  <Avatar size="md" className="bg-[var(--accent-violet)] text-white">
-                    <AvatarImage src={crew.avatarUrl} />
-                    <AvatarFallback className="bg-[var(--accent-violet)] text-white text-[14px] font-semibold">
-                      {crew.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <Heading level={4} className="text-[15px] font-semibold leading-snug line-clamp-1">{crew.name}</Heading>
-                    <span className="text-[11px] text-[var(--text-tertiary)] uppercase font-mono tracking-wider">
-                      {crew.visibility}
-                    </span>
+              <div className="space-y-3 relative z-10">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar size="md" className="bg-[var(--accent)] text-white shadow-inner font-bold text-sm">
+                      <AvatarImage src={crew.avatarUrl} />
+                      <AvatarFallback className="bg-[var(--accent)] text-white text-sm font-bold">
+                        {crew.name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <Heading level={4} className="text-base font-bold tracking-tight group-hover:text-[var(--accent)] transition-colors truncate">
+                        {crew.name}
+                      </Heading>
+                      <span className="text-[10px] text-[var(--text-muted)] uppercase font-mono tracking-wider font-semibold">
+                        {crew.visibility}
+                      </span>
+                    </div>
                   </div>
                 </div>
+
+                <Text className="text-xs text-[var(--text-muted)] line-clamp-2 min-h-[36px]">
+                  {crew.description || 'No mission objective defined.'}
+                </Text>
               </div>
 
-              <Text className="text-[13px] text-[var(--text-secondary)] line-clamp-2 mb-4 h-10">
-                {crew.description || 'No description provided.'}
-              </Text>
-
-              <div className="mt-auto flex items-center justify-between border-t border-[var(--border-subtle)] pt-3 text-[12px] text-[var(--text-tertiary)]">
+              <div className="mt-4 flex items-center justify-between border-t border-[var(--color-border-subtle)] pt-3 text-[11px] font-mono text-[var(--text-muted)] relative z-10">
                 <span className="flex items-center gap-1.5">
-                  <Icons.users className="w-3.5 h-3.5" />
-                  Cap: {crew.memberCap}
+                  <Icons.users className="w-3.5 h-3.5 text-[var(--accent)]" />
+                  Capacity: {crew.memberCap}
                 </span>
-                <span className="text-[var(--accent)] font-medium group-hover:underline flex items-center gap-1">
-                  View Crew
-                  <Icons.chevronRight className="w-3 h-3" />
+                <span className="text-[var(--accent)] font-semibold group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                  Launch Mission
+                  <Icons.chevronRight className="w-3.5 h-3.5" />
                 </span>
               </div>
             </motion.div>
