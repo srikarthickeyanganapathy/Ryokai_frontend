@@ -43,7 +43,14 @@ export function CrewDetailPage() {
   // Queries
   const { data: crew, isLoading: isCrewLoading } = useCrew(crewId);
   const { data: members = [] } = useCrewMembers(crewId);
-  const { data: crewTasks = [] } = useTaskList({ crewId });
+  const { data: rawCrewTasks = [] } = useTaskList({ crewId });
+  const crewTasks = useMemo(() => {
+    if (!Array.isArray(rawCrewTasks)) return [];
+    return rawCrewTasks.filter(t => 
+      (t.crewId && String(t.crewId) === String(crewId)) || 
+      (t.crew && String(t.crew.id) === String(crewId))
+    );
+  }, [rawCrewTasks, crewId]);
   const { data: sharedProjects = [] } = useCrewProjects(crewId);
   const { data: allProjects = [] } = useProjects();
   const { data: channels = [] } = useCrewChannels(crewId);

@@ -49,7 +49,7 @@ function DockedUtilityPanel({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-      className="flex-1 flex flex-col min-h-[220px] rounded-[16px] bg-[var(--bg-subtle)]/80 backdrop-blur-xl border border-[var(--color-border-subtle)] shadow-lg shadow-black/40 overflow-hidden"
+      className="flex-1 flex flex-col min-h-[220px] rounded-[18px] bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] shadow-2xl shadow-black/40 overflow-hidden"
     >
       {/* Compact Utility Header */}
       <div className="px-3.5 py-2 bg-[var(--bg-elevated)]/60 border-b border-[var(--color-border-subtle)] flex items-center justify-between shrink-0 select-none">
@@ -261,17 +261,17 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop Overlay (Deeper Blur & 60% Black Overlay) */}
+          {/* Transparent Backdrop (No Blur, No Dark Mask — Nebula / Board is 100% visible) */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-xl z-30 pointer-events-auto"
+            className="fixed inset-0 bg-transparent z-30 pointer-events-auto"
           />
 
           {/* ====================================================================== */}
-          {/* ATTACHED LEFT DOCK COLUMN (16px gap from Inspector, Smooth Reflow) */}
+          {/* ATTACHED LEFT DOCK COLUMN (16px gap from Inspector, Floating) */}
           {/* ====================================================================== */}
           <AnimatePresence>
             {hasAnyUtilityOpen && (
@@ -280,7 +280,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ type: 'spring', damping: 26, stiffness: 260 }}
-                className="fixed top-3 bottom-3 right-[calc(55vw+28px)] w-[360px] md:w-[420px] max-w-[calc(45vw-36px)] z-40 flex flex-col gap-3.5 overflow-hidden pointer-events-auto"
+                className="fixed top-4 bottom-4 right-[calc(52vw+32px)] w-[360px] md:w-[420px] max-w-[calc(48vw-48px)] z-40 flex flex-col gap-3.5 overflow-hidden pointer-events-auto"
               >
                 <AnimatePresence mode="popLayout">
                   {isCommentsOpen && (
@@ -324,14 +324,14 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
           </AnimatePresence>
 
           {/* ====================================================================== */}
-          {/* RIGHT WORKSPACE: TASK INSPECTOR (Main Workspace, Radius 24px) */}
+          {/* RIGHT WORKSPACE: TASK INSPECTOR (Floating IDE Workspace, Radius 20px) */}
           {/* ====================================================================== */}
           <motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-3 bottom-3 right-3 w-[55vw] max-w-[850px] min-w-[440px] z-40 bg-[var(--bg-elevated)]/95 backdrop-blur-2xl shadow-2xl shadow-black/60 border border-[var(--color-border-subtle)] rounded-[24px] overflow-hidden flex flex-col pointer-events-auto"
+            className="fixed top-4 bottom-4 right-4 w-[52vw] max-w-[820px] min-w-[440px] z-40 bg-[var(--bg-elevated)] shadow-2xl shadow-black/50 border border-[var(--color-border-subtle)] rounded-[20px] overflow-hidden flex flex-col pointer-events-auto"
           >
             {/* Task Inspector Header & Active Utility Toggle Controls */}
             <div className="flex items-center justify-between px-6 py-3.5 border-b border-[var(--color-border-subtle)] bg-[var(--bg-subtle)]/40 shrink-0">

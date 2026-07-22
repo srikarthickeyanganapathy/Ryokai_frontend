@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Heading } from '@/shared/ui/Typography'
 import { useTaskList, useCompleteCrewTask, useDeleteTask } from '@/features/tasks/hooks/useTasks'
 import { TasksTable } from '@/widgets/tasks/TasksTable'
@@ -6,7 +6,11 @@ import { TaskPanel } from '@/widgets/tasks/TaskPanel'
 import { toast } from 'sonner'
 
 export function CrewTasksPage() {
-  const { data: tasks = [], isLoading } = useTaskList({ scope: 'crew' })
+  const { data: rawTasks = [], isLoading } = useTaskList({ scope: 'crew' })
+  const tasks = useMemo(() => {
+    if (!Array.isArray(rawTasks)) return []
+    return rawTasks.filter(t => !!(t.crewId || t.crew))
+  }, [rawTasks])
   const [rowSelection, setRowSelection] = useState({})
   const [selectedTask, setSelectedTask] = useState(null)
   

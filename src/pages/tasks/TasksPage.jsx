@@ -341,26 +341,14 @@ export function TasksPage() {
   if (viewMode === 'nebula') {
     return (
       <div className="fixed inset-0 z-[100] bg-zinc-950">
-        <Button
-          onClick={() => setViewMode('list')}
-          className="absolute top-6 right-6 z-50 flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-md border border-white/20 rounded-lg text-white font-medium shadow-lg cursor-pointer"
-        >
-          <Icons.chevronLeft className="w-4 h-4" />
-          Exit Nebula
-        </Button>
         <NebulaView
-          tasks={tasks}
-          onTaskSelect={setSelectedTask}
+          tasks={rawTasks}
+          onTaskSelect={(task) => {
+            if (!task) {
+              setViewMode('list')
+            }
+          }}
         />
-
-        <div className="absolute inset-0 pointer-events-none z-50">
-          <TaskPanel
-            task={selectedTask}
-            isOpen={!!selectedTask}
-            onClose={() => setSelectedTask(null)}
-            variant="nebula"
-          />
-        </div>
       </div>
     )
   }
