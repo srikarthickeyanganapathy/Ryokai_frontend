@@ -150,6 +150,20 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
     }
   }, [isOpen, task?.id, subscribeToTask, queryClient])
 
+  // Sync contentEditable refs when task changes or panel opens
+  useEffect(() => {
+    if (isOpen && task) {
+      if (titleRef.current && titleRef.current.textContent !== task.title) {
+        titleRef.current.textContent = task.title || ''
+      }
+      if (descRef.current && descRef.current.textContent !== (task.description || '')) {
+        descRef.current.textContent = task.description || ''
+      }
+      setLocalEdits({})
+      setIsDirty(false)
+    }
+  }, [isOpen, task?.id, task?.title, task?.description])
+
   const submitTaskMutation = useSubmitTask()
   const approveTaskMutation = useApproveTask()
   const rejectTaskMutation = useRejectTask()
@@ -418,7 +432,9 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                     }
                   }}
                   className="text-2xl font-semibold tracking-tight text-[var(--text-primary)] outline-none hover:bg-[var(--bg-subtle)] p-2 -ml-2 rounded-xl transition-colors duration-[var(--duration-base)] cursor-text"
-                />
+                >
+                  {task?.title || ''}
+                </Heading>
               </div>
 
               {/* Description */}
@@ -435,8 +451,10 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                       setIsDirty(true)
                     }
                   }}
-                  className="text-sm text-[var(--text-secondary)] leading-relaxed min-h-[90px] outline-none hover:bg-[var(--bg-subtle)] p-3 -mx-3 rounded-xl transition-colors duration-[var(--duration-base)] cursor-text whitespace-pre-wrap border border-transparent focus:border-[var(--accent-border)]"
-                />
+                  className="text-sm text-[var(--text-primary)] leading-relaxed min-h-[90px] outline-none hover:bg-[var(--bg-subtle)] p-3 -mx-3 rounded-xl transition-colors duration-[var(--duration-base)] cursor-text whitespace-pre-wrap border border-transparent focus:border-[var(--accent-border)] placeholder:text-[var(--text-tertiary)]"
+                >
+                  {task?.description || (hasEditPerm ? '' : 'No description provided.')}
+                </div>
               </section>
 
               {/* Attributes Card */}
@@ -455,51 +473,53 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                   <Badge variant="outline" className="uppercase font-mono text-[10px]">{task.priority}</Badge>
                 </div>
 
-                {/* Assignee */}
-                <div className="flex items-center justify-between">
-                  <Text size="xs" variant="muted">Assignee</Text>
-                  {hasAssignPerm ? (
-                    <Popover open={isReassignOpen} onOpenChange={setIsReassignOpen}>
-                      <PopoverTrigger asChild>
-                        <span className="font-medium text-xs flex items-center gap-1.5 cursor-pointer hover:bg-[var(--bg-hover)] px-2 py-1 rounded-lg transition-colors">
-                          <div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px] font-bold">
-                            {(task?.assignedTo || 'U').charAt(0).toUpperCase()}
+                {/* Assignee — hidden in personal mode */}
+                {!isPersonal && (
+                  <div className="flex items-center justify-between">
+                    <Text size="xs" variant="muted">Assignee</Text>
+                    {hasAssignPerm ? (
+                      <Popover open={isReassignOpen} onOpenChange={setIsReassignOpen}>
+                        <PopoverTrigger asChild>
+                          <span className="font-medium text-xs flex items-center gap-1.5 cursor-pointer hover:bg-[var(--bg-hover)] px-2 py-1 rounded-lg transition-colors text-[var(--text-primary)]">
+                            <div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px] font-bold">
+                              {(task?.assignedTo || 'U').charAt(0).toUpperCase()}
+                            </div>
+                            {task.assignedTo || 'Unassigned'}
+                          </span>
+                        </PopoverTrigger>
+                        <PopoverContent align="end" className="w-52 p-1">
+                          <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-semibold">Reassign Task</Text>
+                          <div className="space-y-0.5 max-h-48 overflow-y-auto custom-scrollbar">
+                            {assignableUsers.map(u => (
+                              <Button
+                                key={u.id}
+                                variant="ghost"
+                                onClick={() => {
+                                  reassignTask.mutate({ taskId: task.id, newAssigneeId: u.id }, {
+                                    onSuccess: () => setIsReassignOpen(false)
+                                  })
+                                }}
+                                className="w-full flex items-center gap-2 px-2 py-1 text-xs justify-start"
+                              >
+                                <div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px] shrink-0 font-bold">
+                                  {u.username.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="truncate text-[var(--text-primary)]">{u.username}</span>
+                              </Button>
+                            ))}
                           </div>
-                          {task.assignedTo || 'Unassigned'}
-                        </span>
-                      </PopoverTrigger>
-                      <PopoverContent align="end" className="w-52 p-1">
-                        <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-semibold">Reassign Task</Text>
-                        <div className="space-y-0.5 max-h-48 overflow-y-auto custom-scrollbar">
-                          {assignableUsers.map(u => (
-                            <Button
-                              key={u.id}
-                              variant="ghost"
-                              onClick={() => {
-                                reassignTask.mutate({ taskId: task.id, newAssigneeId: u.id }, {
-                                  onSuccess: () => setIsReassignOpen(false)
-                                })
-                              }}
-                              className="w-full flex items-center gap-2 px-2 py-1 text-xs justify-start"
-                            >
-                              <div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px] shrink-0 font-bold">
-                                {u.username.charAt(0).toUpperCase()}
-                              </div>
-                              <span className="truncate">{u.username}</span>
-                            </Button>
-                          ))}
+                        </PopoverContent>
+                      </Popover>
+                    ) : (
+                      <span className="font-medium text-xs flex items-center gap-1.5 text-[var(--text-primary)]">
+                        <div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px]">
+                          {(task?.assignedTo || 'U').charAt(0).toUpperCase()}
                         </div>
-                      </PopoverContent>
-                    </Popover>
-                  ) : (
-                    <span className="font-medium text-xs flex items-center gap-1.5">
-                      <div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px]">
-                        {(task?.assignedTo || 'U').charAt(0).toUpperCase()}
-                      </div>
-                      {task.assignedTo || 'Unassigned'}
-                    </span>
-                  )}
-                </div>
+                        {task.assignedTo || 'Unassigned'}
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Due Date (Editable) */}
                 <div className="flex items-center justify-between">
@@ -518,7 +538,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                       className="bg-transparent border border-[var(--color-border-subtle)] hover:border-[var(--accent-border)] rounded-md px-2 py-0.5 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] cursor-pointer"
                     />
                   ) : (
-                    <Text size="xs" className="font-medium">
+                    <Text size="xs" className="font-medium text-[var(--text-primary)]">
                       {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No deadline'}
                     </Text>
                   )}
@@ -526,107 +546,103 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
               </div>
 
               {/* Side-by-Side Grid: Checklist (Left) & Dependencies (Right) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                 
-                {/* Checklist Column */}
-                <section className="space-y-3">
-                  {/* Checklist Header with Progress */}
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Icons.checkSquare className="w-4 h-4 text-[var(--accent)]" />
-                        <Text size="xs" variant="muted" className="uppercase tracking-wider font-semibold">Checklist</Text>
-                      </div>
-                      {task.checklists?.length > 0 && (
-                        <Badge variant="outline" className="font-mono text-[10px] tabular-nums px-2 py-0.5">
-                          {task.checklists.filter(c => c.completed).length}/{task.checklists.length}
-                        </Badge>
-                      )}
+                {/* Checklist Card */}
+                <div className="space-y-3 bg-[var(--bg-subtle)]/40 p-4 rounded-2xl border border-[var(--color-border-subtle)]">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Icons.checkSquare className="w-3.5 h-3.5 text-[var(--accent)]" />
+                      <Text size="xs" variant="muted" className="uppercase tracking-wider font-semibold">Checklist</Text>
                     </div>
-
-                    {/* Progress Bar */}
-                    {task.checklists?.length > 0 && (() => {
-                      const done = task.checklists.filter(c => c.completed).length
-                      const total = task.checklists.length
-                      const pct = Math.round((done / total) * 100)
-                      return (
-                        <div className="flex items-center gap-2.5">
-                          <Progress value={pct} className="h-1.5 flex-1" />
-                          <Text size="xs" variant="muted" className="font-mono tabular-nums text-[10px] shrink-0 w-8 text-right">
-                            {pct}%
-                          </Text>
-                        </div>
-                      )
-                    })()}
+                    {task.checklists?.length > 0 && (
+                      <Badge variant="outline" className="font-mono text-[10px] tabular-nums px-1.5 py-0">
+                        {task.checklists.filter(c => c.completed).length}/{task.checklists.length}
+                      </Badge>
+                    )}
                   </div>
 
-                  {/* Checklist Items */}
-                  <div className="space-y-1.5">
-                    {task.checklists?.length > 0 ? (
-                      <div className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--bg-subtle)]/30 overflow-hidden divide-y divide-[var(--color-border-subtle)]/50">
-                        <AnimatePresence initial={false}>
-                          {task.checklists.map((item, idx) => (
-                            <motion.div
-                              key={item.id}
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                              className="group"
-                            >
-                              <div className={cn(
-                                "flex items-center gap-3 px-3 py-2.5 transition-colors duration-150",
-                                "hover:bg-[var(--bg-hover)]",
-                                item.completed && "bg-[var(--bg-subtle)]/60"
+                  {/* Progress Bar */}
+                  {task.checklists?.length > 0 && (() => {
+                    const done = task.checklists.filter(c => c.completed).length
+                    const total = task.checklists.length
+                    const pct = Math.round((done / total) * 100)
+                    return (
+                      <div className="flex items-center gap-2">
+                        <Progress value={pct} className="h-1 flex-1" />
+                        <Text size="xs" variant="muted" className="font-mono tabular-nums text-[10px] shrink-0">
+                          {pct}%
+                        </Text>
+                      </div>
+                    )
+                  })()}
+
+                  {/* Items */}
+                  {task.checklists?.length > 0 ? (
+                    <div className="space-y-0.5">
+                      <AnimatePresence initial={false}>
+                        {task.checklists.map((item) => (
+                          <motion.div
+                            key={item.id}
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                            className="group"
+                          >
+                            <div className={cn(
+                              "flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors duration-150",
+                              "hover:bg-[var(--bg-elevated)]/60",
+                              item.completed && "opacity-60"
+                            )}>
+                              <Checkbox
+                                checked={item.completed}
+                                disabled={!hasChecklistPerm}
+                                onCheckedChange={() => toggleChecklistItem.mutate(item.id)}
+                                className="shrink-0"
+                              />
+                              <span className={cn(
+                                "flex-1 text-xs leading-snug select-text transition-all duration-200",
+                                item.completed
+                                  ? "line-through text-[var(--text-muted)]"
+                                  : "text-[var(--text-primary)]"
                               )}>
-                                <Checkbox
-                                  checked={item.completed}
-                                  disabled={!hasChecklistPerm}
-                                  onCheckedChange={() => toggleChecklistItem.mutate(item.id)}
-                                  className="shrink-0"
-                                />
-                                <span className={cn(
-                                  "flex-1 text-sm leading-snug transition-all duration-200 select-text",
-                                  item.completed
-                                    ? "line-through text-[var(--text-muted)] decoration-[var(--text-muted)]/40"
-                                    : "text-[var(--text-primary)]"
-                                )}>
-                                  {item.text}
-                                </span>
-                                {hasChecklistPerm && (
-                                  <IconButton 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] h-6 w-6"
-                                    onClick={() => deleteChecklistItem.mutate(item.id)}
-                                    title="Remove item"
-                                  >
-                                    <Icons.x className="w-3 h-3" />
-                                  </IconButton>
-                                )}
-                              </div>
-                            </motion.div>
-                          ))}
-                        </AnimatePresence>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-6 text-center rounded-xl border border-dashed border-[var(--color-border-subtle)] bg-[var(--bg-subtle)]/20">
-                        <Icons.checkSquare className="w-6 h-6 text-[var(--text-tertiary)] mb-2" />
-                        <Text size="xs" variant="muted">No items yet</Text>
-                      </div>
-                    )}
-                    
-                    {hasChecklistPerm && (
+                                {item.text}
+                              </span>
+                              {hasChecklistPerm && (
+                                <button
+                                  type="button"
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--danger)]"
+                                  onClick={() => deleteChecklistItem.mutate(item.id)}
+                                  title="Remove item"
+                                >
+                                  <Icons.x className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    <div className="py-4 text-center">
+                      <Text size="xs" variant="muted" className="text-[var(--text-tertiary)]">No items yet</Text>
+                    </div>
+                  )}
+                  
+                  {hasChecklistPerm && (
+                    <div className="pt-1 border-t border-[var(--color-border-subtle)]/50">
                       <ChecklistForm 
                         onSubmit={(data) => addChecklistItem.mutate(data.text)}
                         isLoading={addChecklistItem.isPending}
                       />
-                    )}
-                  </div>
-                </section>
+                    </div>
+                  )}
+                </div>
 
-                {/* Dependencies Column */}
-                <div className="space-y-3">
+                {/* Dependencies Card */}
+                <div className="bg-[var(--bg-subtle)]/40 p-4 rounded-2xl border border-[var(--color-border-subtle)]">
                   <TaskDependencies task={task} hasDependencyPerm={hasDependencyPerm} />
                 </div>
 

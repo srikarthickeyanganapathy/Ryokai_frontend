@@ -2,7 +2,7 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { Form, FormField, FormItem, FormControl, FormMessage } from '@/shared/forms'
 import { Input } from '@/shared/ui/Input'
-import { Button } from '@/shared/ui/Button'
+import { IconButton } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
 
 export function ChecklistForm({ onSubmit, isLoading }) {
@@ -33,15 +33,24 @@ export function ChecklistForm({ onSubmit, isLoading }) {
           render={({ field }) => (
             <FormItem className="flex-1 space-y-0">
               <FormControl>
-                <Input placeholder="Add a checklist item..." {...field} />
+                <Input placeholder="Add a checklist item..." className="h-8 text-xs" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" isLoading={isLoading} size="icon" className="shrink-0">
-          {!isLoading && <Icons.plus className="w-4 h-4" />}
-        </Button>
+        <IconButton 
+          type="submit" 
+          variant="outline" 
+          size="sm"
+          disabled={isLoading}
+          className="shrink-0"
+        >
+          {isLoading 
+            ? <Icons.spinner className="w-3.5 h-3.5 animate-spin" /> 
+            : <Icons.plus className="w-3.5 h-3.5" />
+          }
+        </IconButton>
       </form>
     </Form>
   )

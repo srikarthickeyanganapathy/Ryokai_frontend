@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
 import { IconButton, Button } from '@/shared/ui/Button'
@@ -7,6 +7,8 @@ import { Input } from '@/shared/ui/Input'
 import { Badge } from '@/shared/ui/Badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
 import { useComments, useAddComment, useTaskHistory, useAddDependency, useRemoveDependency, useTaskList, useEvidence, useAddEvidence, useDeleteEvidence } from '@/features/tasks/hooks/useTasks'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
+import { filterTasksByWorkspace } from '@/shared/lib/workspaceTaskFilter'
 import { cn } from '@/shared/lib/cn'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
@@ -190,10 +192,15 @@ export function TaskTimeline({ taskId }) {
 }
 
 export function TaskDependencies({ task, hasDependencyPerm }) {
-  const { data: allTasks = [] } = useTaskList(task?.projectId ? { projectId: task.projectId } : {})
+  const { workspaceMode, activeOrganization } = useWorkspace()
+  const { data: rawTasks = [] } = useTaskList(task?.projectId ? { projectId: task.projectId } : {})
   const addDependency = useAddDependency(task?.id)
   const removeDependency = useRemoveDependency(task?.id)
   const [selectedId, setSelectedId] = useState('')
+
+  const allTasks = useMemo(() => {
+    return filterTasksByWorkspace(rawTasks, workspaceMode, activeOrganization)
+  }, [rawTasks, workspaceMode, activeOrganization])
 
   const handleAdd = () => {
     if (selectedId) {
@@ -208,65 +215,94 @@ export function TaskDependencies({ task, hasDependencyPerm }) {
     !task?.blockedBy?.some(dep => dep.id === t.id)
   )
 
+  const totalDeps = (task?.blockedBy?.length || 0) + (task?.blocks?.length || 0)
+
   return (
-    <section>
-      <Heading level={4} className="mb-4">Dependencies</Heading>
-      
+    <section className="space-y-3">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Icons.network className="w-3.5 h-3.5 text-[var(--accent)]" />
+          <Text size="xs" variant="muted" className="uppercase tracking-wider font-semibold">Dependencies</Text>
+        </div>
+        {totalDeps > 0 && (
+          <Badge variant="outline" className="font-mono text-[10px] tabular-nums px-1.5 py-0">
+            {totalDeps}
+          </Badge>
+        )}
+      </div>
+
+      {/* Blocked By */}
       {task?.blockedBy?.length > 0 && (
-        <div className="space-y-2 mb-4">
-          <Text size="sm" className="font-medium">Blocked by:</Text>
+        <div className="space-y-0.5">
+          <Text size="xs" variant="muted" className="text-[10px] uppercase tracking-wider font-medium text-[var(--danger)] px-2 mb-1">Blocked by</Text>
           {task.blockedBy.map(dep => (
-            <div key={dep.id} className="flex items-center justify-between p-2 rounded-[var(--radius-sm)] bg-[var(--danger-soft)] border border-[var(--danger)]/20">
-              <div className="flex items-center gap-2">
-                <Icons.lock className="w-3.5 h-3.5 text-[var(--danger)]" />
-                <Text size="sm" className="text-[var(--danger)]">{dep.title}</Text>
-              </div>
+            <div key={dep.id} className="group flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors duration-150 hover:bg-[var(--bg-elevated)]/60">
+              <Icons.lock className="w-3 h-3 text-[var(--danger)] shrink-0" />
+              <span className="flex-1 text-xs leading-snug text-[var(--text-primary)] truncate">{dep.title}</span>
               {hasDependencyPerm && (
-                <IconButton 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-[var(--danger)] hover:bg-[var(--danger)]/10"
+                <button
+                  type="button"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--danger)]"
                   onClick={() => removeDependency.mutate(dep.id)}
+                  title="Remove dependency"
                 >
-                  <Icons.x className="w-3.5 h-3.5" />
-                </IconButton>
+                  <Icons.x className="w-3 h-3" />
+                </button>
               )}
             </div>
           ))}
         </div>
       )}
 
+      {/* Blocking */}
       {task?.blocks?.length > 0 && (
-        <div className="space-y-2 mb-4">
-          <Text size="sm" className="font-medium">Blocking:</Text>
-          {task?.blocks?.map(dep => (
-            <div key={dep.id} className="flex items-center justify-between p-2 rounded-[var(--radius-sm)] bg-[var(--warning-soft)] border border-[var(--warning)]/20">
-              <div className="flex items-center gap-2">
-                <Icons.alert className="w-3.5 h-3.5 text-[var(--warning)]" />
-                <Text size="sm" className="text-[var(--warning)]">{dep.title}</Text>
-              </div>
+        <div className="space-y-0.5">
+          <Text size="xs" variant="muted" className="text-[10px] uppercase tracking-wider font-medium text-[var(--warning)] px-2 mb-1">Blocking</Text>
+          {task.blocks.map(dep => (
+            <div key={dep.id} className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors duration-150 hover:bg-[var(--bg-elevated)]/60">
+              <Icons.alert className="w-3 h-3 text-[var(--warning)] shrink-0" />
+              <span className="flex-1 text-xs leading-snug text-[var(--text-primary)] truncate">{dep.title}</span>
             </div>
           ))}
         </div>
       )}
 
+      {/* Empty State */}
+      {totalDeps === 0 && !hasDependencyPerm && (
+        <div className="py-4 text-center">
+          <Text size="xs" variant="muted" className="text-[var(--text-tertiary)]">No dependencies</Text>
+        </div>
+      )}
+
+      {/* Add Form */}
       {hasDependencyPerm && (
-        <div className="space-y-2">
-          <Select value={selectedId} onValueChange={setSelectedId}>
-            <SelectTrigger className="w-full text-xs">
-              <SelectValue placeholder="Add a blocking task..." />
-            </SelectTrigger>
-            <SelectContent>
-              {availableTasks.map(t => (
-                <SelectItem key={t.id} value={t.id.toString()}>
-                  {t.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button onClick={handleAdd} disabled={!selectedId || addDependency.isPending} size="sm" variant="outline" className="w-full text-xs">
-            Add Dependency
-          </Button>
+        <div className="pt-1 border-t border-[var(--color-border-subtle)]/50">
+          <div className="flex items-center gap-2">
+            <Select value={selectedId} onValueChange={setSelectedId}>
+              <SelectTrigger className="flex-1 text-xs h-7">
+                <SelectValue placeholder="Add a blocking task..." />
+              </SelectTrigger>
+              <SelectContent>
+                {availableTasks.map(t => (
+                  <SelectItem key={t.id} value={t.id.toString()}>
+                    {t.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <IconButton 
+              type="button"
+              onClick={handleAdd} 
+              disabled={!selectedId || addDependency.isPending} 
+              variant="outline"
+              size="sm"
+              className="shrink-0"
+              title="Add dependency"
+            >
+              <Icons.plus className="w-3.5 h-3.5" />
+            </IconButton>
+          </div>
         </div>
       )}
     </section>
