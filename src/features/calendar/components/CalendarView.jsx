@@ -14,6 +14,8 @@ import { useCreateTask } from '@/features/tasks/hooks/useTasks'
 import { useCreateEvent } from '@/features/calendar/hooks/useCalendar'
 import { cn } from '@/shared/lib/cn'
 
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
+
 export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEventClick, onVisibleRangeChange }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const mode = searchParams.get('mode') || 'month'
@@ -22,6 +24,8 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
   const [currentDate, setCurrentDate] = useState(startOfToday())
   const [quickAddDate, setQuickAddDate] = useState(null)
   const [createType, setCreateType] = useState('event')
+  const [filterType, setFilterType] = useState('all') // 'all', 'tasks', 'events'
+  const [filterOpen, setFilterOpen] = useState(false)
   
   const createTaskMutation = useCreateTask()
   const createEventMutation = useCreateEvent()
@@ -112,10 +116,35 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
             </div>
             
             {/* Filter */}
-            <Button variant="outline" size="sm" className="gap-2">
-              <Filter className="w-4 h-4" />
-              Filters
-            </Button>
+            <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Filter className="w-4 h-4" />
+                  Filters {filterType !== 'all' && `(${filterType})`}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-48 p-2">
+                <Text size="xs" variant="muted" className="px-2 py-1 uppercase tracking-wider font-semibold">View Items</Text>
+                <div className="space-y-1 mt-1">
+                  {[
+                    { id: 'all', label: 'All Items' },
+                    { id: 'tasks', label: 'Tasks Only' },
+                    { id: 'events', label: 'Events Only' }
+                  ].map(item => (
+                    <button
+                      key={item.id}
+                      onClick={() => { setFilterType(item.id); setFilterOpen(false) }}
+                      className={cn(
+                        "w-full text-left px-2 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                        filterType === item.id ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]"
+                      )}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 

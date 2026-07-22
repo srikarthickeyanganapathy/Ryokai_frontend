@@ -7,8 +7,8 @@ export const crewApi = {
     return data;
   },
 
-  discoverCrews: async ({ keyword = '', page = 0, size = 20 } = {}) => {
-    const { data } = await api.get('/crews/discover', { params: { keyword, page, size } });
+  discoverCrews: async () => {
+    const { data } = await api.get('/crews/discover');
     return data;
   },
 

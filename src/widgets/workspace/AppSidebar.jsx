@@ -10,6 +10,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useCrews } from '@/features/crews/hooks/useCrews'
+import { useOrgTeams } from '@/features/organizations/hooks/useOrganizations'
 import {
   Select,
   SelectContent,
@@ -28,6 +29,8 @@ export function AppSidebar({ isOpen, onClose }) {
   const { isSuperAdmin, canViewAnalytics } = usePermissions()
   const { data: crewsData } = useCrews()
   const crews = crewsData || []
+  const { data: teamsData = [] } = useOrgTeams(activeOrganization?.id)
+  const teams = teamsData || []
   const location = useLocation()
   const navigate = useNavigate()
   
@@ -214,6 +217,50 @@ export function AppSidebar({ isOpen, onClose }) {
     )
   }
 
+  const renderTeamsList = () => {
+    if (workspaceMode !== 'ORG' || isCollapsed || !activeOrganization) return null
+    if (teams.length === 0) return null
+
+    return (
+      <div className="mb-6">
+        <div className="px-4 pb-2 flex items-center justify-between">
+          <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--text-tertiary)]">Org Teams</span>
+          <span className="text-[10px] font-mono text-[var(--text-muted)]">{teams.length}</span>
+        </div>
+        <div className="space-y-[2px] px-3">
+          {teams.map((t) => (
+            <NavLink
+              key={t.id}
+              to={`/app/organizations/${activeOrganization.id}/teams/${t.id}`}
+              className={({ isActive }) => cn(
+                "relative flex items-center h-[34px] rounded-full text-[13px] font-medium transition-colors duration-150 group px-3 gap-3 w-full",
+                isActive
+                  ? "text-[var(--accent)]"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
+              )}
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <motion.div
+                      layoutId="sidebar-active-pill"
+                      className="absolute inset-0 rounded-full bg-[var(--accent-soft)]"
+                      transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.6 }}
+                    />
+                  )}
+                  <div className="relative w-[18px] h-[18px] rounded-md bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] flex items-center justify-center text-[9px] font-bold shrink-0">
+                    {t.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="relative truncate">{t.name}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   const sidebarContent = (
     <div className={cn(
       "flex flex-col h-full bg-[var(--bg-subtle)]/40 backdrop-blur-xl relative z-20 transition-all duration-300",
@@ -328,6 +375,7 @@ export function AppSidebar({ isOpen, onClose }) {
           <>
             {renderNavSection(getPrimaryItems(), 'Primary')}
             {getWorkspaceItems() && renderNavSection(getWorkspaceItems(), 'Workspace')}
+            {renderTeamsList()}
             {renderCrewsList()}
           </>
         )}

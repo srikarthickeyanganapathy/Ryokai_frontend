@@ -14,13 +14,11 @@ export function CrewTasksPage() {
   const deleteTaskMutation = useDeleteTask()
 
   const handleQuickComplete = (task) => {
-    const current = task.currentStatus?.toUpperCase()
-    if (current === 'TODO' || current === 'IN_PROGRESS') {
-      completeCrewTaskMutation.mutate(task.id)
-    } else if (current === 'COMPLETED') {
+    const current = (task.currentStatus || task.status || '').toUpperCase().replace(/\s+/g, '_')
+    if (current === 'COMPLETED' || current === 'DONE' || current === 'APPROVED') {
       toast.info('Task is already completed')
     } else {
-      toast.error('Crew task must be in TODO or IN_PROGRESS status to complete')
+      completeCrewTaskMutation.mutate(task.id)
     }
   }
 

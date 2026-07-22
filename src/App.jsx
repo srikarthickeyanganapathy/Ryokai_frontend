@@ -79,6 +79,7 @@ export default function App() {
                 <Route path="/app/teams" element={<TeamsPage />} />
                 <Route path="/app/organizations/:orgId/teams/:teamId" element={<TeamDetailPage />} />
                 <Route path="/app/crews" element={<CrewsPage />} />
+                <Route path="/app/crews/discover" element={<CrewDiscoverPage />} />
                 <Route path="/app/crews/join" element={<CrewJoinPage />} />
                 <Route path="/app/crews/:crewId" element={<CrewDetailPage />} />
                 <Route path="/app/crews/:crewId/whiteboards/:boardId" element={<WhiteboardPage />} />

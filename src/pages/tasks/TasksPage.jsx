@@ -23,6 +23,10 @@ import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { useUsersList } from '@/features/auth/hooks/useUser'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 
+import { filterTasksByWorkspace } from '@/shared/lib/workspaceTaskFilter'
+import { useProjects } from '@/features/projects/hooks/useProjects'
+import { useOrgTeams } from '@/features/organizations/hooks/useOrganizations'
+
 export function TasksPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const viewMode = searchParams.get('view') || 'list'
@@ -40,6 +44,8 @@ export function TasksPage() {
   const [activeView, setActiveView] = useState('all')
   const [globalFilter, setGlobalFilter] = useState('')
   const [priorityFilter, setPriorityFilter] = useState([])
+  const [projectFilter, setProjectFilter] = useState('ALL')
+  const [teamFilter, setTeamFilter] = useState('ALL')
   const [sortBy, setSortBy] = useState('dueDate')
   const [rowSelection, setRowSelection] = useState({})
 
@@ -49,17 +55,33 @@ export function TasksPage() {
   const { workspaceMode, activeOrganization } = useWorkspace()
 
   // Data Fetching
-  const { data: rawTasks, isLoading } = useTaskList({
-    scope: workspaceMode === 'PERSONAL' ? 'personal' : 'org'
-  })
+  const { data: rawTasks = [], isLoading } = useTaskList()
+  const { data: allProjects = [] } = useProjects()
+  const { data: orgTeams = [] } = useOrgTeams(activeOrganization?.id)
+
+  const projectsList = useMemo(() => {
+    return (allProjects || []).map(p => ({ id: p.id, name: p.name }))
+  }, [allProjects])
+
+  const teamsList = useMemo(() => {
+    return (orgTeams || []).map(t => ({ id: t.id, name: t.name }))
+  }, [orgTeams])
 
   const tasks = useMemo(() => {
     if (!rawTasks) return []
-    let result = rawTasks
+    let result = filterTasksByWorkspace(rawTasks, workspaceMode, activeOrganization)
 
     if (globalFilter) {
       const lowerSearch = globalFilter.toLowerCase()
       result = result.filter(t => t.title?.toLowerCase().includes(lowerSearch) || t.description?.toLowerCase().includes(lowerSearch))
+    }
+
+    if (projectFilter !== 'ALL') {
+      result = result.filter(t => String(t.projectId) === String(projectFilter) || String(t.projectName) === String(projectFilter))
+    }
+
+    if (teamFilter !== 'ALL') {
+      result = result.filter(t => String(t.teamId) === String(teamFilter) || String(t.teamName) === String(teamFilter) || String(t.team?.id) === String(teamFilter))
     }
 
     if (activeView === 'archived') {
@@ -103,7 +125,7 @@ export function TasksPage() {
     })
 
     return result
-  }, [rawTasks, activeView, globalFilter, priorityFilter, sortBy, user])
+  }, [rawTasks, workspaceMode, activeOrganization, activeView, globalFilter, priorityFilter, sortBy, user])
 
   // Open task from URL if specified (e.g. from Saved items)
   useEffect(() => {
@@ -138,8 +160,6 @@ export function TasksPage() {
     if (task.isPersonal) {
       completePersonalTaskMutation.mutate(task.id)
     } else if (task.crewId || task.crew) {
-      // FIX (SM-C01): crew tasks use the dedicated complete-crew endpoint.
-      // Any crew member can complete a crew task (flat structure, no review).
       if (current === 'ASSIGNED') {
         completeCrewTaskMutation.mutate(task.id)
       } else if (current === 'COMPLETED') {
@@ -151,25 +171,7 @@ export function TasksPage() {
       submitTaskMutation.mutate(task.id, {
         onSuccess: () => toast.success(`Task "${task.title}" submitted for review.`)
       })
-    } else if (current === 'SUBMITTED') {
-      if (!canReview) {
-        toast.error('You do not have permission to review tasks');
-        return;
-      }
-      if (task.assignedTo === user?.username) {
-        toast.error('You cannot approve your own task');
-        return;
-      }
-      approveTaskMutation.mutate(task.id, {
-        onSuccess: () => toast.success(`Task "${task.title}" completed.`)
-      })
     }
-  }
-
-  const handleQuickDelete = (task) => {
-    deleteTaskMutation.mutate(task.id, {
-      onSuccess: () => toast.success(`Task deleted.`)
-    })
   }
 
   const handleTaskStatusChange = (task, newStatus) => {
@@ -188,7 +190,6 @@ export function TasksPage() {
       if (task.isPersonal) {
         completePersonalTaskMutation.mutate(task.id)
       } else if (task.crewId || task.crew) {
-        // FIX (SM-C01): crew tasks use the complete-crew endpoint
         if (current === 'ASSIGNED') {
           completeCrewTaskMutation.mutate(task.id)
         } else {
@@ -211,6 +212,28 @@ export function TasksPage() {
       toast.success(`Processing ${selectedTasks.length} task(s)...`)
     }
     setRowSelection({})
+  }
+
+  const handleQuickDelete = (taskId) => {
+    deleteTaskMutation.mutate(taskId)
+  }
+
+  const handleBulkApprove = () => {
+    const selectedIndices = Object.keys(rowSelection).map(Number)
+    const selectedTasks = selectedIndices.map(idx => tasks[idx]).filter(Boolean)
+    let skipped = 0
+
+    selectedTasks.forEach(task => {
+      if (task.isPersonal || task.crewId || task.crew) {
+        skipped++
+      } else {
+        if (!canReview || task.assignedTo === user?.username) {
+          skipped++
+          return
+        }
+        approveTaskMutation.mutate(task.id)
+      }
+    })
   }
 
   const handleBulkDelete = () => {
@@ -247,10 +270,6 @@ export function TasksPage() {
     if (!targetUser) return
     const selectedIds = Object.keys(rowSelection).map(Number)
 
-    // Instead of mapping row index directly as ID, we need to map the selected row indices to task IDs.
-    // Tanstack Table uses row indices by default as the selection keys.
-    // So rowSelection looks like: { "0": true, "2": true }
-    // We get the actual tasks by their index in the tasks array.
     const actualTaskIds = selectedIds.map(idx => tasks[idx]?.id).filter(Boolean)
 
     actualTaskIds.forEach(id => {
@@ -291,7 +310,7 @@ export function TasksPage() {
       danger: true,
     });
     if (reason === false) return; // User cancelled
-    
+
     const selectedIndices = Object.keys(rowSelection).map(Number)
     const selectedTasks = selectedIndices.map(idx => tasks[idx]).filter(Boolean)
     let skipped = 0
@@ -391,6 +410,12 @@ export function TasksPage() {
         onPriorityFilterChange={setPriorityFilter}
         sortBy={sortBy}
         onSortChange={setSortBy}
+        projectFilter={projectFilter}
+        onProjectFilterChange={setProjectFilter}
+        teamFilter={teamFilter}
+        onTeamFilterChange={setTeamFilter}
+        projectsList={projectsList}
+        teamsList={teamsList}
       />
 
       {/* Main Content Area */}
@@ -478,7 +503,7 @@ export function TasksPage() {
         <ModalContent className="sm:max-w-xl bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] p-6">
           <Heading level={3} className="mb-4 text-[var(--text-primary)]">Reassign Task</Heading>
           {reassignTaskData && (
-            <TaskForm 
+            <TaskForm
               defaultValues={{
                 title: reassignTaskData.title,
                 description: reassignTaskData.description,
@@ -488,8 +513,8 @@ export function TasksPage() {
                 tags: reassignTaskData.tags || '',
                 teamId: reassignTaskData.teamId ? reassignTaskData.teamId.toString() : ''
               }}
-              onSubmit={handleReassignSubmit} 
-              isLoading={updateTaskMutation.isPending} 
+              onSubmit={handleReassignSubmit}
+              isLoading={updateTaskMutation.isPending}
             />
           )}
         </ModalContent>

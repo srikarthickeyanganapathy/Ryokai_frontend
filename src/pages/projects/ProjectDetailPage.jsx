@@ -66,7 +66,8 @@ export function ProjectDetailPage() {
   const { data: userCrews = [] } = useCrews()
 
   // Fetch Crew members if shared
-  const crewId = project?.sharedCrewIds && project.sharedCrewIds.length > 0 ? project.sharedCrewIds[0] : null
+  const crewId = project?.crewId || (project?.sharedCrewIds && project.sharedCrewIds.length > 0 ? project.sharedCrewIds[0] : null)
+  const isSharedToCrew = !!crewId || (Array.isArray(project?.sharedCrewIds) && project.sharedCrewIds.length > 0)
   const { data: crewMembers = [] } = useCrewMembers(crewId)
 
   // Get assignable members (crew members if shared, team members if team is linked, otherwise org members)
@@ -177,7 +178,7 @@ export function ProjectDetailPage() {
         </div>
         {canManageProject && (
           <div className="flex items-center gap-2">
-            {workspaceMode === 'PERSONAL' && (
+            {workspaceMode === 'PERSONAL' && !isSharedToCrew && (
               <Button variant="outline" size="sm" onClick={() => setIsShareModalOpen(true)}>
                 <Icons.users className="w-3.5 h-3.5 mr-1" />
                 Share
@@ -327,7 +328,7 @@ export function ProjectDetailPage() {
                 </CardTitle>
                 <Text variant="muted" size="sm" className="mt-0.5">Crews with task access.</Text>
               </div>
-              {workspaceMode === 'PERSONAL' && canManageProject && (
+              {workspaceMode === 'PERSONAL' && canManageProject && !isSharedToCrew && (
                 <Button size="xs" variant="outline" onClick={() => setIsShareModalOpen(true)}>
                   Share
                 </Button>

@@ -65,7 +65,7 @@ export const isActiveStatus = (status) => {
 
 /** Kanban column IDs mapped to backend status enums */
 export const KANBAN_COLUMNS = [
-  { id: 'To Do',       title: 'To Do',       backendStatus: ['TODO', 'ASSIGNED'] },
+  { id: 'To Do',       title: 'Assigned',       backendStatus: ['TODO', 'ASSIGNED'] },
   { id: 'In Review',   title: 'In Review',   backendStatus: ['SUBMITTED'] },
   { id: 'Needs Work',  title: 'Needs Work',  backendStatus: ['REJECTED'] },
   { id: 'Done',        title: 'Done',        backendStatus: ['APPROVED', 'COMPLETED'] },

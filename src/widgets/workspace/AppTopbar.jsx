@@ -68,7 +68,12 @@ export function AppTopbar({ onMenuClick }) {
 
       <div className="flex items-center justify-end gap-1 sm:gap-3 flex-1 sm:min-w-[200px]">
         <div className="sm:hidden">
-          <IconButton variant="ghost">
+          <IconButton 
+            variant="ghost"
+            onClick={() => {
+              document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true, bubbles: true }))
+            }}
+          >
             <Icons.search className="w-5 h-5" />
           </IconButton>
         </div>

@@ -90,6 +90,20 @@ export function TasksTable({
       }
     },
     {
+      accessorKey: 'teamId',
+      header: 'Team',
+      cell: ({ row }) => {
+        const teamName = row.original.teamName || row.original.team?.name
+        const teamId = row.original.teamId || row.original.team?.id
+        if (!teamId && !teamName) return <span className="text-[var(--text-muted)]">-</span>
+        return (
+          <Badge variant="outline" className="text-xs bg-indigo-500/10 text-indigo-400 border-indigo-500/20 font-medium">
+            {teamName || `Team #${teamId}`}
+          </Badge>
+        )
+      }
+    },
+    {
       accessorKey: 'priority',
       header: 'Priority',
       cell: ({ row }) => {

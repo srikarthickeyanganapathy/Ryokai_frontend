@@ -77,6 +77,10 @@ export function CrewsPage() {
               className="pl-8 text-xs"
             />
           </div>
+          <Button size="sm" variant="outline" className="shrink-0 gap-1.5" onClick={() => navigate('/app/crews/discover')}>
+            <Icons.users className="w-3.5 h-3.5" />
+            Discover Crews
+          </Button>
           <Button size="sm" className="shrink-0 gap-1.5" onClick={() => setIsCreateOpen(true)}>
             <Icons.plus className="w-3.5 h-3.5" />
             Create Crew
@@ -115,8 +119,9 @@ export function CrewsPage() {
                   onChange={(e) => setVisibility(e.target.value)}
                   className="w-full h-9 rounded-md border border-[var(--border-default)] bg-[var(--bg-sidebar)] p-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
                 >
-                  <option value="PUBLIC_LINK">Public Link</option>
-                  <option value="INVITE_ONLY">Invite Only</option>
+                  <option value="PUBLIC">Public (Discoverable by everyone)</option>
+                  <option value="PUBLIC_LINK">Public Link (Joinable via link, unlisted)</option>
+                  <option value="INVITE_ONLY">Invite Only (Private, invite link required)</option>
                 </select>
               </div>
               <div className="space-y-1">

@@ -79,7 +79,12 @@ import {
   Network,
   Hash,
   KanbanSquare,
-  Pencil
+  Pencil,
+  ThumbsUp,
+  ThumbsDown,
+  Trash,
+  Link,
+  Maximize2
 } from 'lucide-react'
 
 const GithubIcon = ({ className, ...props }) => (
@@ -202,4 +207,11 @@ export const Icons = {
   hash: Hash,
   kanban: KanbanSquare,
   pencil: Pencil,
+  thumbsUp: ThumbsUp,
+  thumbsDown: ThumbsDown,
+  trash: Trash,
+  link: Link,
+  messageSquare: MessageSquare,
+  maximize2: Maximize2,
+  checkSquare: CheckSquare,
 }

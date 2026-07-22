@@ -15,7 +15,11 @@ const statusIcons = {
   'Needs Work':  <Icons.alert className="w-4 h-4 text-[var(--warning)]" />,
 }
 
-export function RecentTasksList({ tasks = [], isLoading }) {
+import { useNavigate } from 'react-router-dom'
+
+export function RecentTasksList({ tasks = [], isLoading, onTaskClick }) {
+  const navigate = useNavigate()
+
   if (isLoading) {
     return (
       <Card className="h-full min-h-[350px]">
@@ -44,7 +48,7 @@ export function RecentTasksList({ tasks = [], isLoading }) {
           <CardTitle className="text-base font-semibold">Active Tasks</CardTitle>
           <Text variant="muted" size="sm" className="mt-0.5">Tasks needing your attention.</Text>
         </div>
-        <IconButton variant="ghost" size="sm">
+        <IconButton variant="ghost" size="sm" onClick={() => navigate('/app/tasks')}>
           <Icons.search className="w-4 h-4" />
         </IconButton>
       </CardHeader>
@@ -54,6 +58,7 @@ export function RecentTasksList({ tasks = [], isLoading }) {
           {tasks.map((task) => (
             <div 
               key={task.id} 
+              onClick={() => onTaskClick?.(task)}
               className="flex items-start gap-4 px-5 py-3.5 hover:bg-[var(--bg-subtle)] transition-colors duration-[var(--duration-fast)] cursor-pointer group"
             >
               <div className="mt-1 text-[var(--text-secondary)]">
@@ -64,7 +69,7 @@ export function RecentTasksList({ tasks = [], isLoading }) {
                 <Text 
                   className={cn(
                     "font-medium truncate transition-colors",
-                    task.status === 'Done' && "line-through text-[var(--text-secondary)]"
+                    (task.status === 'Done' || task.status === 'COMPLETED') && "line-through text-[var(--text-secondary)]"
                   )}
                 >
                   {task.title}
@@ -73,15 +78,17 @@ export function RecentTasksList({ tasks = [], isLoading }) {
                   <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM)}>
                     {normalizePriority(task.priority)}
                   </Badge>
-                  <Text size="xs" variant="muted" className="flex items-center gap-1">
-                    <Icons.alert className="w-3 h-3" />
-                    {task.due}
-                  </Text>
+                  {task.due && (
+                    <Text size="xs" variant="muted" className="flex items-center gap-1">
+                      <Icons.alert className="w-3 h-3" />
+                      {task.due}
+                    </Text>
+                  )}
                 </div>
               </div>
 
               <div className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-[var(--duration-base)] ease-[var(--ease-out)]">
-                <IconButton variant="ghost" size="sm" className="h-8 w-8">
+                <IconButton variant="ghost" size="sm" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onTaskClick?.(task) }}>
                   <Icons.chevronRight className="w-4 h-4" />
                 </IconButton>
               </div>

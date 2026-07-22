@@ -26,7 +26,14 @@ export function ProjectsPage() {
 
   const projects = useMemo(() => {
     return allProjects.filter(p => {
-      const modeMatch = workspaceMode === 'PERSONAL' ? !p.organizationId : p.organizationId === activeOrganization?.id
+      let modeMatch = false
+      if (workspaceMode === 'PERSONAL') {
+        modeMatch = !p.organizationId
+      } else if (workspaceMode === 'CREWS') {
+        modeMatch = !!p.crewId || (Array.isArray(p.sharedCrewIds) && p.sharedCrewIds.length > 0)
+      } else if (workspaceMode === 'ORG') {
+        modeMatch = p.organizationId === activeOrganization?.id
+      }
       if (!modeMatch) return false
       if (activeTab === 'ACTIVE') return p.status !== 'COMPLETED' && p.status !== 'ARCHIVED'
       if (activeTab === 'COMPLETED') return p.status === 'COMPLETED'

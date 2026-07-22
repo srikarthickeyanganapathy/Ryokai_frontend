@@ -109,15 +109,9 @@ export function FocusPage() {
     if (taskToComplete.isPersonal) {
       completePersonalTaskMutation.mutate(taskToComplete.id)
     } else if (taskToComplete.crewId || taskToComplete.crew) {
-      const st = taskToComplete.currentStatus?.toUpperCase()
-      if (st === 'ASSIGNED') {
-        completeCrewTaskMutation.mutate(taskToComplete.id)
-      }
+      completeCrewTaskMutation.mutate(taskToComplete.id)
     } else {
-      const st = taskToComplete.currentStatus?.toUpperCase()
-      if (st === 'ASSIGNED' || st === 'REJECTED') {
-        submitTaskMutation.mutate(taskToComplete.id)
-      }
+      submitTaskMutation.mutate(taskToComplete.id)
     }
   }
 

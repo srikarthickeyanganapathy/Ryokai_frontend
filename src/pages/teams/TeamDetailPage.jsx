@@ -15,6 +15,8 @@ import { usePermissions } from '@/shared/hooks/usePermissions'
 import { toast } from 'sonner'
 import { cn } from '@/shared/lib/cn'
 import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover';
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
 
 export function TeamDetailPage() {
   const { orgId, teamId } = useParams()
@@ -168,27 +170,30 @@ export function TeamDetailPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-8rem)] relative">
+    <div className="flex flex-col min-h-[calc(100vh-8rem)] relative space-y-6">
       {/* Brand Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--color-border-subtle)]">
         <div>
-          <div className="flex items-center gap-3">
-            <Heading level={2} className="tracking-tight text-[22px] font-semibold mb-0.5">{team.name}</Heading>
-            <Badge variant="outline" className="bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]">Team Portal</Badge>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-8 h-8 rounded-xl bg-[var(--accent)] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+              {team.name.charAt(0).toUpperCase()}
+            </div>
+            <Heading level={2} className="tracking-tight text-[22px] font-semibold mb-0">{team.name}</Heading>
+            <Badge variant="outline" className="bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)] text-[10px] font-mono uppercase">Team Portal</Badge>
             {isReadOnly && (
-              <Badge variant="outline" className="bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20">Read-Only Observer</Badge>
+              <Badge variant="outline" className="bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20 text-[10px] font-mono uppercase">Read-Only Observer</Badge>
             )}
           </div>
           <Text variant="muted" className="text-[13px]">{team.description || 'No description provided.'}</Text>
         </div>
-        <Button variant="outline" size="sm" onClick={() => navigate(`/app/organizations/${orgId}`)} className="self-start sm:self-auto">
-          <Icons.chevronLeft className="w-4 h-4 mr-1.5" />
+        <Button variant="outline" size="sm" onClick={() => navigate(`/app/organizations/${orgId}`)} className="self-start sm:self-auto gap-1.5">
+          <Icons.chevronLeft className="w-4 h-4" />
           Back to Org
         </Button>
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex items-center gap-5 border-b border-[var(--border-subtle)] overflow-x-auto no-scrollbar mb-5">
+      <div className="flex items-center gap-5 border-b border-[var(--border-subtle)] overflow-x-auto no-scrollbar mb-2">
         {[
           { id: 'overview', label: 'Overview' },
           { id: 'chat', label: 'Discussions & Chat' },
@@ -201,12 +206,12 @@ export function TeamDetailPage() {
             onClick={() => setActiveTab(tab.id)}
             className={cn(
               "relative pb-2.5 text-[13px] font-medium transition-colors duration-[var(--duration-base)] whitespace-nowrap",
-              activeTab === tab.id ? "text-[var(--text-primary)]" : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+              activeTab === tab.id ? "text-[var(--text-primary)] font-semibold" : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
             )}
           >
             {tab.label}
             {activeTab === tab.id && (
-              <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[var(--accent)] shadow-[0_0_6px_var(--accent)]" />
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--accent)] shadow-[0_0_8px_var(--accent)] rounded-full" />
             )}
           </button>
         ))}
@@ -218,22 +223,22 @@ export function TeamDetailPage() {
         {activeTab === 'overview' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-5">
-                <Text variant="muted" size="sm">Members</Text>
-                <Heading level={3} className="text-3xl font-bold mt-1">{team.members?.length || 0}</Heading>
+              <div className="glass-panel border border-[var(--color-border-subtle)] bg-[var(--bg-elevated)]/70 rounded-2xl p-5 hover:border-[var(--accent-border)] transition-all">
+                <Text variant="muted" size="sm" className="uppercase font-semibold text-[11px] tracking-wider">Members</Text>
+                <Heading level={3} className="text-3xl font-bold mt-1.5">{team.members?.length || 0}</Heading>
               </div>
-              <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-5">
-                <Text variant="muted" size="sm">Active Projects</Text>
-                <Heading level={3} className="text-3xl font-bold mt-1">{teamProjects.length}</Heading>
+              <div className="glass-panel border border-[var(--color-border-subtle)] bg-[var(--bg-elevated)]/70 rounded-2xl p-5 hover:border-[var(--accent-border)] transition-all">
+                <Text variant="muted" size="sm" className="uppercase font-semibold text-[11px] tracking-wider">Active Projects</Text>
+                <Heading level={3} className="text-3xl font-bold mt-1.5">{teamProjects.length}</Heading>
               </div>
-              <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-5">
-                <Text variant="muted" size="sm">Backlog Tasks</Text>
-                <Heading level={3} className="text-3xl font-bold mt-1">{teamTasks.filter(t => !t.assignedTo && t.status !== 'Done').length}</Heading>
+              <div className="glass-panel border border-[var(--color-border-subtle)] bg-[var(--bg-elevated)]/70 rounded-2xl p-5 hover:border-[var(--accent-border)] transition-all">
+                <Text variant="muted" size="sm" className="uppercase font-semibold text-[11px] tracking-wider">Backlog Tasks</Text>
+                <Heading level={3} className="text-3xl font-bold mt-1.5">{teamTasks.filter(t => !t.assignedTo && t.status !== 'Done').length}</Heading>
               </div>
             </div>
 
-            <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-5">
-              <Heading level={3} className="text-lg font-semibold mb-4">Quick Feed</Heading>
+            <div className="glass-panel border border-[var(--color-border-subtle)] bg-[var(--bg-elevated)]/70 rounded-2xl p-6">
+              <Heading level={3} className="text-base font-semibold mb-2">Team Portal</Heading>
               <Text variant="muted" size="sm">Welcome to your team portal. Use the tabs above to engage in chat discussions, track shared projects, and reassign tasks among roster members.</Text>
             </div>
           </div>

@@ -38,6 +38,8 @@ const SORT_OPTIONS = [
 export function TasksToolbar({
   activeView, onViewChange, globalFilter, setGlobalFilter, viewMode, setViewMode,
   priorityFilter = [], onPriorityFilterChange, sortBy = 'dueDate', onSortChange,
+  projectFilter = 'ALL', onProjectFilterChange, teamFilter = 'ALL', onTeamFilterChange,
+  projectsList = [], teamsList = [],
 }) {
   const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false)
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false)
@@ -47,6 +49,8 @@ export function TasksToolbar({
   const { workspaceMode } = useWorkspace()
   const isPersonalMode = workspaceMode === 'PERSONAL'
   const canCreate = true // Anyone can create personal/assigned tasks
+
+  const activeFilterCount = (priorityFilter.length > 0 ? 1 : 0) + (projectFilter !== 'ALL' ? 1 : 0) + (teamFilter !== 'ALL' ? 1 : 0)
 
   const handleCreateTask = (payload) => {
     createTaskMutation.mutate(payload, {
@@ -107,30 +111,67 @@ export function TasksToolbar({
           {/* Filters */}
           <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className={cn("hidden sm:flex text-[var(--text-secondary)]", priorityFilter.length > 0 && "text-[var(--accent)] border-[var(--accent-border)] bg-[var(--accent-soft)]")}>
+              <Button variant="outline" size="sm" className={cn("hidden sm:flex text-[var(--text-secondary)]", activeFilterCount > 0 && "text-[var(--accent)] border-[var(--accent-border)] bg-[var(--accent-soft)]")}>
                 <Icons.filter className="w-3.5 h-3.5 mr-1.5" />
                 Filters
-                {priorityFilter.length > 0 && (
+                {activeFilterCount > 0 && (
                   <span className="ml-1.5 w-4 h-4 rounded-full bg-[var(--accent)] text-white text-[10px] flex items-center justify-center font-semibold">
-                    {priorityFilter.length}
+                    {activeFilterCount}
                   </span>
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="start" className="w-56 p-2">
-              <Text size="xs" variant="muted" className="px-1.5 pb-1.5 uppercase tracking-wide font-semibold">Priority</Text>
+            <PopoverContent align="start" className="w-64 p-3 space-y-3">
+              <Text size="xs" variant="muted" className="px-1.5 pb-0.5 uppercase tracking-wide font-semibold">Priority</Text>
               <div className="space-y-0.5">
                 {PRIORITY_OPTIONS.map(p => (
-                  <Label key={p} className="flex items-center gap-2.5 px-1.5 py-1.5 rounded-[var(--radius-sm)] hover:bg-[var(--bg-hover)] cursor-pointer transition-colors">
+                  <Label key={p} className="flex items-center gap-2.5 px-1.5 py-1 rounded-[var(--radius-sm)] hover:bg-[var(--bg-hover)] cursor-pointer transition-colors">
                     <Checkbox checked={priorityFilter.includes(p)} onCheckedChange={() => togglePriority(p)} />
                     <span className="text-[13px] text-[var(--text-primary)] capitalize">{p.toLowerCase()}</span>
                   </Label>
                 ))}
               </div>
-              {priorityFilter.length > 0 && (
+
+              {projectsList.length > 0 && (
+                <div className="border-t border-[var(--border-subtle)] pt-2 space-y-1">
+                  <Text size="xs" variant="muted" className="uppercase tracking-wide font-semibold">Project Filter</Text>
+                  <select 
+                    value={projectFilter} 
+                    onChange={(e) => onProjectFilterChange?.(e.target.value)}
+                    className="w-full bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+                  >
+                    <option value="ALL">All Projects</option>
+                    {projectsList.map(proj => (
+                      <option key={proj.id} value={String(proj.id)}>{proj.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {teamsList.length > 0 && (
+                <div className="border-t border-[var(--border-subtle)] pt-2 space-y-1">
+                  <Text size="xs" variant="muted" className="uppercase tracking-wide font-semibold">Team Filter</Text>
+                  <select 
+                    value={teamFilter} 
+                    onChange={(e) => onTeamFilterChange?.(e.target.value)}
+                    className="w-full bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+                  >
+                    <option value="ALL">All Teams</option>
+                    {teamsList.map(team => (
+                      <option key={team.id} value={String(team.id)}>{team.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {activeFilterCount > 0 && (
                 <Button
                   variant="ghost"
-                  onClick={() => onPriorityFilterChange?.([])}
+                  onClick={() => {
+                    onPriorityFilterChange?.([])
+                    onProjectFilterChange?.('ALL')
+                    onTeamFilterChange?.('ALL')
+                  }}
                   className="w-full text-left mt-1.5 px-1.5 pt-1.5 border-t border-[var(--border-subtle)] text-[12px] font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
                 >
                   Clear filters

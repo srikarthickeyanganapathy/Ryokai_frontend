@@ -10,11 +10,10 @@ export const useCrews = () => {
   });
 };
 
-export const useDiscoverCrews = (params) => {
+export const useDiscoverCrews = () => {
   return useQuery({
-    queryKey: [...queryKeys.crews.all, 'discover', params],
-    queryFn: () => crewApi.discoverCrews(params),
-    placeholderData: (prev) => prev, // keep previous page while typing/paginating
+    queryKey: [...queryKeys.crews.all, 'discover'],
+    queryFn: () => crewApi.discoverCrews(),
   });
 };
 

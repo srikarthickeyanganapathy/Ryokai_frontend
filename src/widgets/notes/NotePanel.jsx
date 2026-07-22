@@ -290,7 +290,16 @@ export function NotePanel({ note, isOpen, onClose }) {
                 </div>
 
                 {/* MINI NOTEPAD CANVAS EDITOR / PREVIEW CONTAINER */}
-                <div className="flex-1 flex flex-col min-h-0 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl overflow-hidden shadow-xs">
+                <div 
+                  className={cn(
+                    "flex-1 flex flex-col min-h-0 border rounded-xl overflow-hidden shadow-xs transition-colors",
+                    formData.color === 'amber' && "bg-amber-500/10 border-amber-500/30",
+                    formData.color === 'rose' && "bg-rose-500/10 border-rose-500/30",
+                    formData.color === 'sky' && "bg-sky-500/10 border-sky-500/30",
+                    formData.color === 'violet' && "bg-violet-500/10 border-violet-500/30",
+                    (!formData.color || formData.color === 'default') && "bg-[var(--bg-elevated)] border-[var(--color-border-subtle)]"
+                  )}
+                >
                   
                   {activeTab === 'write' ? (
                     <>

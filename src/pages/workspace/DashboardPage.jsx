@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { useTaskList, useCompletePersonalTask, useSubmitTask } from '@/features/tasks/hooks/useTasks';
+import { useTaskList, useCompletePersonalTask, useSubmitTask, useCreateTask } from '@/features/tasks/hooks/useTasks';
 import { Navigate, Link, useNavigate } from 'react-router-dom';
 import { EmptyDashboardState } from '@/widgets/workspace/EmptyDashboardState';
 import { selectWorkloadMatrix } from '@/features/analytics/lib/selectors';
@@ -12,6 +12,7 @@ import { cn } from '@/shared/lib/cn';
 import { useCreateOrganization } from '@/features/organizations/hooks/useOrganizations';
 import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { OrganizationForm } from '@/widgets/organizations/OrganizationForm';
+import { TaskForm } from '@/widgets/tasks/TaskForm';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
 import { Icons } from '@/shared/ui/Icons';
@@ -44,15 +45,25 @@ function getGreeting() {
   return 'Good evening';
 }
 
+import { filterTasksByWorkspace } from '@/shared/lib/workspaceTaskFilter';
+
 export function DashboardPage() {
   const { user } = useAuth();
   const { workspaceMode, activeOrganization, organizations } = useWorkspace();
-  const { data: tasks = [], isLoading: isTasksLoading } = useTaskList();
+
+  const { data: rawTasks = [], isLoading: isTasksLoading } = useTaskList();
+
+  const tasks = useMemo(() => {
+    return filterTasksByWorkspace(rawTasks, workspaceMode, activeOrganization);
+  }, [rawTasks, workspaceMode, activeOrganization]);
+
   const navigate = useNavigate();
   
   const [selectedTask, setSelectedTask] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isTaskCreateOpen, setIsTaskCreateOpen] = useState(false);
   const createOrgMutation = useCreateOrganization();
+  const createTaskMutation = useCreateTask();
   const completePersonalTask = useCompletePersonalTask();
   const submitTask = useSubmitTask();
 
@@ -131,7 +142,7 @@ export function DashboardPage() {
               Create Org
             </Button>
           )}
-          <Button size="sm" className="gap-1.5" onClick={() => document.dispatchEvent(new CustomEvent('open-task-form'))}>
+          <Button size="sm" className="gap-1.5" onClick={() => setIsTaskCreateOpen(true)}>
             <Plus className="w-4 h-4" />
             New Task
           </Button>
@@ -139,10 +150,10 @@ export function DashboardPage() {
       </motion.div>
 
       {/* ⚡ PROACTIVE HERO ACTION CARD ("See → Decide → Act") */}
-      <motion.div variants={itemVariants} className="relative overflow-hidden p-6 rounded-2xl glass-panel border border-[var(--color-border-subtle)] bg-gradient-to-br from-[var(--bg-elevated)]/90 via-[var(--bg-elevated)]/60 to-[var(--bg-subtle)]/40 shadow-sm group">
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-72 h-72 bg-[var(--accent)]/10 rounded-full blur-3xl group-hover:bg-[var(--accent)]/20 transition-colors duration-[var(--duration-slow)] pointer-events-none" />
+      {activeHeroTask ? (
+        <motion.div variants={itemVariants} className="relative overflow-hidden p-6 rounded-2xl glass-panel border border-[var(--color-border-subtle)] bg-gradient-to-br from-[var(--bg-elevated)]/90 via-[var(--bg-elevated)]/60 to-[var(--bg-subtle)]/40 shadow-sm group">
+          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-72 h-72 bg-[var(--accent)]/10 rounded-full blur-3xl group-hover:bg-[var(--accent)]/20 transition-colors duration-[var(--duration-slow)] pointer-events-none" />
 
-        {activeHeroTask ? (
           <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="space-y-2 max-w-2xl">
               <div className="flex items-center gap-2 text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">
@@ -189,22 +200,24 @@ export function DashboardPage() {
               </Button>
             </div>
           </div>
-        ) : (
-          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 py-2">
+        </motion.div>
+      ) : workspaceMode === 'ORG' ? (
+        <motion.div variants={itemVariants} className="relative overflow-hidden p-6 rounded-2xl glass-panel border border-[var(--color-border-subtle)] bg-gradient-to-br from-[var(--bg-elevated)]/90 via-[var(--bg-elevated)]/60 to-[var(--bg-subtle)]/40 shadow-sm group">
+          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 py-1">
             <div>
               <Heading level={4} className="text-base font-semibold text-[var(--text-primary)] flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-[var(--accent)]" />
                 All caught up!
               </Heading>
-              <Text variant="muted" className="text-xs mt-1">No active pending tasks. Create a new task or explore active projects.</Text>
+              <Text variant="muted" className="text-xs mt-1">No active pending tasks for this organization. Create a new task or explore active projects.</Text>
             </div>
-            <Button size="sm" onClick={() => document.dispatchEvent(new CustomEvent('open-task-form'))} className="gap-1.5">
+            <Button size="sm" onClick={() => setIsTaskCreateOpen(true)} className="gap-1.5">
               <Plus className="w-4 h-4" />
               Create Task
             </Button>
           </div>
-        )}
-      </motion.div>
+        </motion.div>
+      ) : null}
 
       {/* 📊 ACTION CANVAS & TELEMETRY RAIL (70% Canvas / 30% Telemetry) */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -235,6 +248,22 @@ export function DashboardPage() {
         isOpen={!!selectedTask}
         onClose={() => setSelectedTask(null)}
       />
+
+      {/* Task Creation Modal */}
+      <Modal open={isTaskCreateOpen} onOpenChange={setIsTaskCreateOpen}>
+        <ModalContent className="sm:max-w-xl">
+          <Heading level={3} className="mb-4">Create New Task</Heading>
+          <TaskForm
+            onSubmit={(payload) => {
+              createTaskMutation.mutate(payload, {
+                onSuccess: () => setIsTaskCreateOpen(false)
+              })
+            }}
+            isLoading={createTaskMutation.isPending}
+            workspaceMode={workspaceMode}
+          />
+        </ModalContent>
+      </Modal>
 
       {/* Organization Creation Modal */}
       <Modal open={isCreateOpen} onOpenChange={setIsCreateOpen}>

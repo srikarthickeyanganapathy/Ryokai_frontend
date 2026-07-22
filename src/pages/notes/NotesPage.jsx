@@ -8,6 +8,14 @@ import { cn } from '@/shared/lib/cn'
 import { useNotes, useDeleteNote, useUpdateNote } from '@/features/notes/hooks/useNotes'
 import { NotePanel } from '@/widgets/notes/NotePanel'
 
+const NOTE_COLOR_STYLES = {
+  default: '',
+  amber: '!bg-amber-500/10 !border-amber-500/30',
+  rose: '!bg-rose-500/10 !border-rose-500/30',
+  sky: '!bg-sky-500/10 !border-sky-500/30',
+  violet: '!bg-violet-500/10 !border-violet-500/30',
+}
+
 export function NotesPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { data: notes = [], isLoading } = useNotes()
@@ -120,7 +128,7 @@ export function NotesPage() {
                     onClick={() => openEdit(note)}
                     className={cn(
                       'break-inside-avoid p-4 rounded-[var(--radius-lg)] glass-panel border border-[var(--accent-border)] bg-[var(--accent-soft)]/20 cursor-pointer hover:shadow-md transition-all group',
-                      note.color && note.color !== 'default' && `bg-[var(--${note.color}-soft,transparent)]`
+                      NOTE_COLOR_STYLES[note.color]
                     )}
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
@@ -156,7 +164,7 @@ export function NotesPage() {
                     onClick={() => openEdit(note)}
                     className={cn(
                       'break-inside-avoid p-4 rounded-[var(--radius-lg)] glass-panel border border-[var(--color-border-subtle)] cursor-pointer hover:shadow-md transition-all group',
-                      note.color && note.color !== 'default' && `bg-[var(--${note.color}-soft,transparent)]`
+                      NOTE_COLOR_STYLES[note.color]
                     )}
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">

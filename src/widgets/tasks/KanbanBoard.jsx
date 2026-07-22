@@ -123,12 +123,14 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
     }
 
     if (targetStatus === 'SUBMITTED') {
-      if (currentStatus !== 'ASSIGNED' && currentStatus !== 'REJECTED' && currentStatus !== 'TODO') {
+      const isAllowedSubmit = ['ASSIGNED', 'TODO', 'TO_DO', 'IN_PROGRESS', 'REJECTED', 'NEEDS_WORK'].includes(currentStatus);
+      if (!isAllowedSubmit) {
          toast.error('Can only submit tasks that are To Do or Needs Work');
          rollbackTask(task.id)
          return;
       }
-      if (currentStatus === 'REJECTED' && !task.assignedTo && !task.assignee) {
+      const isRejected = currentStatus === 'REJECTED' || currentStatus === 'NEEDS_WORK';
+      if (isRejected && !task.assignedTo && !task.assignee) {
         if (!user?.id) {
           toast.error('Cannot determine your user ID for reassignment.');
           rollbackTask(task.id)
@@ -161,7 +163,8 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
         rollbackTask(task.id)
         return;
       }
-      if (task.assignedTo === user?.username) {
+      const taskAssignee = typeof task.assignedTo === 'object' ? task.assignedTo?.username : (task.assignedTo || task.assignee);
+      if (taskAssignee && taskAssignee === user?.username) {
         toast.error('You cannot approve your own task');
         rollbackTask(task.id)
         return;
@@ -178,7 +181,8 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
         rollbackTask(task.id)
         return;
       }
-      if (task.assignedTo === user?.username) {
+      const taskAssignee = typeof task.assignedTo === 'object' ? task.assignedTo?.username : (task.assignedTo || task.assignee);
+      if (taskAssignee && taskAssignee === user?.username) {
         toast.error('You cannot reject your own task');
         rollbackTask(task.id)
         return;
