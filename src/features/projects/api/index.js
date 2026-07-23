@@ -35,4 +35,9 @@ export const projectsApi = {
   unshareFromCrew: async (projectId, crewId) => {
     await api.delete(`/crews/${crewId}/projects/${projectId}`);
   },
+
+  getProjectActivities: async (id, params = {}) => {
+    const { data } = await api.get(`/projects/${id}/activities`, { params });
+    return data;
+  },
 };

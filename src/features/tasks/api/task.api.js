@@ -19,6 +19,8 @@ const normalizeTask = (t) => ({
   assignee: t.assignee ?? t.assignedTo,
   status: normalizeStatus(t.currentStatus),
   currentStatus: t.currentStatus,
+  isLocked: t.isLocked ?? t.locked ?? false,
+  version: t.version ?? 0,
   tags: t.tags ? String(t.tags).split(',').map(s => s.trim()).filter(Boolean) : [],
   checklists: Array.isArray(t.checklists) ? t.checklists.map(normalizeChecklistItem) : t.checklists,
 })
@@ -213,6 +215,12 @@ export const deleteEvidence = async (taskId, evidenceId) => {
 export const claimTask = async (taskId) => {
   const { data } = await api.post(`/tasks/${taskId}/claim`);
   return normalizeTask(data);
+};
+
+// --- Task Activity Log ---
+export const getTaskActivities = async (taskId, params) => {
+  const { data } = await api.get(`/tasks/${taskId}/activities`, { params });
+  return data;
 };
 
 

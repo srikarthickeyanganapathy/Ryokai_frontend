@@ -126,6 +126,13 @@ api.interceptors.response.use(
 
       if (error.response.status === 403) {
         toast.error("You don't have permission to do that");
+      } else if (error.response.status === 409) {
+        const code = error.response.data?.code;
+        if (code === 'OPTIMISTIC_LOCK_CONFLICT') {
+          toast.error("This resource was updated by someone else. Please refresh to get the latest changes.");
+        } else {
+          toast.error(error.response.data?.message || "Conflict error");
+        }
       } else if (error.response.status === 400 && error.response.data) {
         // Extract detailed validation errors from Spring Boot responses
         const data = error.response.data;
