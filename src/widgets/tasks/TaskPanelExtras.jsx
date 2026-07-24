@@ -205,22 +205,34 @@ export function TaskDependencies({ task, hasDependencyPerm }) {
       {task?.blockedBy?.length > 0 && (
         <div className="space-y-0.5">
           <Text size="xs" variant="muted" className="text-[10px] uppercase tracking-wider font-medium text-[var(--danger)] px-2 mb-1">Blocked by</Text>
-          {task.blockedBy.map(dep => (
-            <div key={dep.id} className="group flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors duration-150 hover:bg-[var(--bg-elevated)]/60">
-              <Icons.lock className="w-3 h-3 text-[var(--danger)] shrink-0" />
-              <span className="flex-1 text-xs leading-snug text-[var(--text-primary)] truncate">{dep.title}</span>
-              {hasDependencyPerm && (
-                <button
-                  type="button"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--danger)]"
-                  onClick={() => removeDependency.mutate(dep.id)}
-                  title="Remove dependency"
-                >
-                  <Icons.x className="w-3 h-3" />
-                </button>
-              )}
-            </div>
-          ))}
+          {task.blockedBy.map(dep => {
+            const isResolved = dep.status === 'COMPLETED' || dep.status === 'APPROVED'
+            return (
+              <div key={dep.id} className="group flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors duration-150 hover:bg-[var(--bg-elevated)]/60">
+                {isResolved ? (
+                  <Icons.checkCircle className="w-3 h-3 text-[var(--success)] shrink-0" />
+                ) : (
+                  <Icons.lock className="w-3 h-3 text-[var(--danger)] shrink-0" />
+                )}
+                <span className={`flex-1 text-xs leading-snug truncate ${isResolved ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
+                  {dep.title}
+                </span>
+                <Badge variant={isResolved ? 'success' : 'outline'} className="text-[9px] px-1 py-0 font-mono">
+                  {dep.status || 'PENDING'}
+                </Badge>
+                {hasDependencyPerm && (
+                  <button
+                    type="button"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--danger)]"
+                    onClick={() => removeDependency.mutate(dep.id)}
+                    title="Remove dependency"
+                  >
+                    <Icons.x className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
 
@@ -232,6 +244,9 @@ export function TaskDependencies({ task, hasDependencyPerm }) {
             <div key={dep.id} className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors duration-150 hover:bg-[var(--bg-elevated)]/60">
               <Icons.alert className="w-3 h-3 text-[var(--warning)] shrink-0" />
               <span className="flex-1 text-xs leading-snug text-[var(--text-primary)] truncate">{dep.title}</span>
+              <Badge variant="outline" className="text-[9px] px-1 py-0 font-mono">
+                {dep.status || 'PENDING'}
+              </Badge>
             </div>
           ))}
         </div>
