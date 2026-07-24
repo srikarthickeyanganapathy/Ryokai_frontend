@@ -333,11 +333,12 @@ export const useReorderChecklistItems = (taskId) => {
   });
 };
 
-export const useTaskHistory = (taskId) => {
+export const useTaskHistory = (taskId, params = {}) => {
   return useQuery({
-    queryKey: queryKeys.tasks.history(taskId),
-    queryFn: () => taskApi.getTaskHistory(taskId),
-    select: (data) => data?.content || data || [],
+    queryKey: queryKeys.tasks.history(taskId, params),
+    queryFn: () => taskApi.getTaskHistory(taskId, params),
+    // Pass the full mapped Page<ActivityEvent> through, not just content, so we preserve pagination metadata.
+    select: (data) => data,
     enabled: !!taskId,
   });
 };
@@ -353,8 +354,14 @@ export const useUpdateTask = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || error.message || 'Failed to update task');
+    onError: (error, { id }) => {
+      if (error.response?.status === 409) {
+        // INT-004: Immediately refetch on optimistic lock failure
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(id) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      } else {
+        toast.error(error.response?.data?.message || error.message || 'Failed to update task');
+      }
     },
   });
 };

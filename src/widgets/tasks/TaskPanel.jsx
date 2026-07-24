@@ -12,7 +12,8 @@ import { Progress } from '@/shared/ui/Progress'
 import { cn } from '@/shared/lib/cn'
 import { normalizePriority } from '@/shared/lib/priority'
 import { ChecklistForm } from './ChecklistForm'
-import { TaskComments, TaskTimeline, TaskDependencies, TaskEvidence } from './TaskPanelExtras'
+import { TaskComments, TaskDependencies, TaskEvidence } from './TaskPanelExtras'
+import ActivityTimeline from '@/features/tasks/components/explorers/ActivityTimeline'
 import { 
   useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, 
   useUpdateTask, useArchiveTask, useDeleteTask, useReassignTask,
@@ -315,7 +316,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                       badge="Timeline"
                       onClose={() => setIsActivityOpen(false)}
                     >
-                      <TaskTimeline taskId={task.id} />
+                      <ActivityTimeline taskId={task.id} />
                     </DockedUtilityPanel>
                   )}
                 </AnimatePresence>

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
 import ExplorerNavBar from './ExplorerNavBar'
+import ActivityTimeline from './ActivityTimeline'
 import { Clock, ArrowRightLeft, User, CalendarDays } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
 
@@ -31,13 +32,12 @@ export default function HistoryExplorer({ context, navigator, analysis, onCenter
     return { created, updated, due, daysSinceCreation, daysSinceUpdate, daysUntilDue, isOverdue, isStale, status }
   }, [currentTask])
 
-  // Blocker events (current state)
-  const blockers = useMemo(() => analysis.getBlockers(currentTaskId), [analysis, currentTaskId])
-  const unblocks = useMemo(() => analysis.getUnblocks(currentTaskId), [analysis, currentTaskId])
-
   if (!currentTask || !lifecycle) {
-    return <div className="p-4 text-white/30 text-sm italic">No task selected</div>
+    return <div className="p-4 text-[var(--text-tertiary)] text-sm italic">No task selected</div>
   }
+
+  const assigneeName = typeof currentTask.assignee === 'object' ? currentTask.assignee?.username : (currentTask.assignee || currentTask.assignedTo || 'Unassigned');
+  const creatorName = typeof currentTask.creator === 'object' ? currentTask.creator?.username : (currentTask.creator || currentTask.createdBy || '—');
 
   return (
     <div className="space-y-4">
@@ -45,26 +45,26 @@ export default function HistoryExplorer({ context, navigator, analysis, onCenter
 
       {/* Lifecycle Summary */}
       <div className="grid grid-cols-2 gap-2">
-        <div className="bg-white/5 border border-white/10 rounded-lg p-3">
-          <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Age</div>
-          <div className="text-sm font-bold text-white">
+        <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-3">
+          <div className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider mb-1">Age</div>
+          <div className="text-sm font-bold text-[var(--text-primary)]">
             {lifecycle.daysSinceCreation !== null ? `${lifecycle.daysSinceCreation}d` : '—'}
           </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-lg p-3">
-          <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Last Activity</div>
-          <div className={cn("text-sm font-bold", lifecycle.isStale ? "text-amber-400" : "text-white")}>
+        <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-3">
+          <div className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider mb-1">Last Activity</div>
+          <div className={cn("text-sm font-bold", lifecycle.isStale ? "text-amber-400" : "text-[var(--text-primary)]")}>
             {lifecycle.daysSinceUpdate !== null ? `${lifecycle.daysSinceUpdate}d ago` : '—'}
           </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-lg p-3">
-          <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Deadline</div>
-          <div className={cn("text-sm font-bold", lifecycle.isOverdue ? "text-rose-400" : lifecycle.daysUntilDue !== null && lifecycle.daysUntilDue <= 3 ? "text-amber-400" : "text-white")}>
+        <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-3">
+          <div className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider mb-1">Deadline</div>
+          <div className={cn("text-sm font-bold", lifecycle.isOverdue ? "text-rose-500" : lifecycle.daysUntilDue !== null && lifecycle.daysUntilDue <= 3 ? "text-amber-400" : "text-[var(--text-primary)]")}>
             {lifecycle.daysUntilDue !== null ? (lifecycle.isOverdue ? `${Math.abs(lifecycle.daysUntilDue)}d overdue` : `${lifecycle.daysUntilDue}d left`) : '—'}
           </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-lg p-3">
-          <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Status</div>
+        <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-3">
+          <div className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider mb-1">Status</div>
           <div className="text-sm font-bold" style={{ color: STATUS_COLORS[lifecycle.status] || '#64748b' }}>
             {lifecycle.status}
           </div>
@@ -75,7 +75,7 @@ export default function HistoryExplorer({ context, navigator, analysis, onCenter
       {lifecycle.isStale && (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/25">
           <Clock size={14} className="text-amber-400 shrink-0" />
-          <span className="text-xs text-amber-300">
+          <span className="text-xs text-amber-500 font-medium">
             No activity for {lifecycle.daysSinceUpdate} days — this task may be stalled
           </span>
         </div>
@@ -84,55 +84,14 @@ export default function HistoryExplorer({ context, navigator, analysis, onCenter
       {/* State Timeline (Visual) */}
       <div>
         <div className="flex items-center gap-1.5 mb-3">
-          <ArrowRightLeft size={12} className="text-cyan-400" />
-          <span className="text-[11px] font-semibold text-white/50 uppercase tracking-wider">
-            Timeline
+          <ArrowRightLeft size={12} className="text-[var(--accent)]" />
+          <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider font-mono">
+            Activity Feed
           </span>
         </div>
-        <div className="relative pl-4 border-l border-white/10 space-y-3">
-          {lifecycle.created && (
-            <div className="relative">
-              <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-cyan-500 border-2 border-zinc-950" />
-              <div className="text-[10px] text-white/30 font-mono">{lifecycle.created.toLocaleDateString()}</div>
-              <div className="text-xs text-white/70">Task created</div>
-            </div>
-          )}
-          {currentTask.assignedTo && (
-            <div className="relative">
-              <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-purple-500 border-2 border-zinc-950" />
-              <div className="text-xs text-white/70">Assigned to <span className="text-purple-300 font-medium">{currentTask.assignedTo}</span></div>
-            </div>
-          )}
-          {blockers.length > 0 && (
-            <div className="relative">
-              <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-zinc-950" />
-              <div className="text-xs text-white/70">
-                {blockers.length} blocker{blockers.length > 1 ? 's' : ''} linked
-              </div>
-              <div className="mt-1 space-y-0.5">
-                {blockers.slice(0, 3).map(b => (
-                  <button
-                    key={b.id}
-                    onClick={() => navigator.navigateTo(b.id)}
-                    className="block text-[11px] text-rose-300/70 hover:text-rose-200 transition-colors cursor-pointer truncate"
-                  >
-                    → {b.title}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-          <div className="relative">
-            <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border-2 border-zinc-950"
-              style={{ backgroundColor: STATUS_COLORS[lifecycle.status] || '#64748b' }}
-            />
-            <div className="text-[10px] text-white/30 font-mono">
-              {lifecycle.updated ? lifecycle.updated.toLocaleDateString() : 'Current'}
-            </div>
-            <div className="text-xs text-white/70">
-              Current status: <span className="font-medium" style={{ color: STATUS_COLORS[lifecycle.status] }}>{lifecycle.status}</span>
-            </div>
-          </div>
+        
+        <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-3">
+          <ActivityTimeline taskId={currentTaskId} />
         </div>
       </div>
 
@@ -140,18 +99,18 @@ export default function HistoryExplorer({ context, navigator, analysis, onCenter
       <div>
         <div className="flex items-center gap-1.5 mb-2">
           <User size={12} className="text-purple-400" />
-          <span className="text-[11px] font-semibold text-white/50 uppercase tracking-wider">
+          <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider font-mono">
             Ownership
           </span>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-lg p-3 text-xs">
-          <div className="flex justify-between mb-1">
-            <span className="text-white/40">Assignee</span>
-            <span className="text-white/90 font-medium">{currentTask.assignedTo || currentTask.assignee || 'Unassigned'}</span>
+        <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-3 text-xs space-y-1.5">
+          <div className="flex justify-between items-center">
+            <span className="text-[var(--text-tertiary)]">Assignee</span>
+            <span className="text-[var(--text-primary)] font-medium">{assigneeName}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-white/40">Created by</span>
-            <span className="text-white/90 font-medium">{currentTask.createdBy || '—'}</span>
+          <div className="flex justify-between items-center">
+            <span className="text-[var(--text-tertiary)]">Created by</span>
+            <span className="text-[var(--text-primary)] font-medium">{creatorName}</span>
           </div>
         </div>
       </div>

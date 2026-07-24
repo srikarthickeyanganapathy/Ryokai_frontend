@@ -159,37 +159,6 @@ export function TaskComments({ taskId, hasCommentPerm }) {
   )
 }
 
-export function TaskTimeline({ taskId }) {
-  const { data: history = [], isLoading } = useTaskHistory(taskId)
-
-  if (isLoading) return <Text variant="muted" size="sm">Loading activity...</Text>
-  if (history.length === 0) return (
-    <section>
-      <Heading level={4} className="mb-4">Activity</Heading>
-      <Text variant="muted" size="sm">No activity recorded.</Text>
-    </section>
-  )
-
-  return (
-    <section>
-      <Heading level={4} className="mb-4">Activity</Heading>
-      <div className="space-y-4 pl-1 border-l-2 border-[var(--color-border-subtle)] ml-2">
-        {history.map(item => (
-          <div key={item.id} className="relative pl-6">
-            <div className="absolute w-2.5 h-2.5 rounded-full bg-[var(--accent)] border-2 border-[var(--bg-elevated)] left-[-6px] top-1.5" />
-            <Text size="sm" className="text-[var(--text-primary)]">
-              <span className="font-medium">{item.username}</span> {item.actionType?.toLowerCase().replace('_', ' ')}
-            </Text>
-            <Text size="xs" variant="muted" className="mt-0.5">
-              {item.details && <span className="mr-2">{item.details}</span>}
-              {item.timestamp ? formatDistanceToNow(new Date(item.timestamp), { addSuffix: true }) : ''}
-            </Text>
-          </div>
-        ))}
-      </div>
-    </section>
-  )
-}
 
 export function TaskDependencies({ task, hasDependencyPerm }) {
   const { workspaceMode, activeOrganization } = useWorkspace()

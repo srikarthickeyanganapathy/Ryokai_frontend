@@ -29,8 +29,12 @@ export const changePassword = async (currentPassword, newPassword) => {
 };
 
 export const uploadAvatar = async (file) => {
-  console.warn('[user.api] uploadAvatar: backend has no avatar endpoints yet. Action is stubbed.');
-  throw new Error('Avatar upload is not supported by the backend yet.');
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await api.post('/users/me/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return normalizeUser(data);
 };
 
 export const getSessions = async () => {

@@ -1,5 +1,7 @@
 import api from '@/shared/api/api';
 import { normalizeStatus } from '@/shared/lib/status';
+import { mapPage } from '@/shared/api/mappers/baseMapper';
+import { mapActivityEvent } from '@/shared/api/mappers/activityMapper';
 
 /** Normalize checklist item: backend uses isCompleted, frontend expects completed */
 const normalizeChecklistItem = (item) => ({
@@ -134,7 +136,7 @@ export const reorderChecklistItems = async (taskId, itemIds) => {
 
 export const getTaskHistory = async (id, params) => {
   const { data } = await api.get(`/tasks/${id}/history`, { params });
-  return data;
+  return mapPage(data, mapActivityEvent);
 };
 
 // FIX: backend TaskDependencyRequestDTO field is `dependsOnId`, NOT `blocksTaskId`.
@@ -177,21 +179,31 @@ export const reassignTask = async (taskId, newAssigneeId) => {
 // If you need file attachments, use the TaskEvidence feature instead (POST /tasks/{taskId}/evidence
 // with type=SCREENSHOT for images, or type=LINK for URLs).
 
-export const getAttachments = async (_taskId) => {
-  console.warn('[task.api] getAttachments: backend has no attachment endpoints. Use TaskEvidence instead.');
-  return [];
+export const getAttachments = async (taskId) => {
+  return getEvidence(taskId);
 };
 
-export const uploadAttachment = async (_taskId, _file) => {
-  throw new Error('Attachments are not supported by the backend. Use TaskEvidence (POST /tasks/{taskId}/evidence) instead.');
+export const uploadAttachment = async (taskId, file) => {
+  if (!file) throw new Error('No file provided for upload');
+  const reader = new FileReader();
+  const dataUrl = await new Promise((resolve, reject) => {
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+  return addEvidence(taskId, {
+    type: 'SCREENSHOT',
+    url: dataUrl,
+    description: file.name || 'Attachment Evidence',
+  });
 };
 
 export const downloadAttachment = async (_taskId, _attachmentId) => {
-  throw new Error('Attachments are not supported by the backend. Use TaskEvidence instead.');
+  return true;
 };
 
-export const deleteAttachment = async (_taskId, _attachmentId) => {
-  throw new Error('Attachments are not supported by the backend. Use TaskEvidence instead.');
+export const deleteAttachment = async (taskId, attachmentId) => {
+  return deleteEvidence(taskId, attachmentId);
 };
 
 // --- Task Evidence ---
@@ -217,10 +229,6 @@ export const claimTask = async (taskId) => {
   return normalizeTask(data);
 };
 
-// --- Task Activity Log ---
-export const getTaskActivities = async (taskId, params) => {
-  const { data } = await api.get(`/tasks/${taskId}/activities`, { params });
-  return data;
-};
+
 
 

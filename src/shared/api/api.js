@@ -2,7 +2,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1",
   timeout: 15000,
   withCredentials: false
 });
@@ -11,10 +11,18 @@ const api = axios.create({
 // cause the backend to detect token reuse and revoke all sessions.
 // Instead, we use Web Locks API in the reactive interceptor to cleanly handle concurrency.
 
+/**
+ * @deprecated Do not use proactive refresh. Use Web Locks API in the reactive interceptor instead.
+ * Scheduled for removal in the next major release.
+ */
 export function scheduleProactiveRefresh(accessToken) {
   // Deprecated - kept as no-op so we don't break other files calling it until they are updated
 }
 
+/**
+ * @deprecated Do not use proactive refresh. Use Web Locks API in the reactive interceptor instead.
+ * Scheduled for removal in the next major release.
+ */
 export function cancelProactiveRefresh() {
   // Deprecated
 }
@@ -126,6 +134,16 @@ api.interceptors.response.use(
 
       if (error.response.status === 403) {
         toast.error("You don't have permission to do that");
+        // AUTH-003: Clear the permission snapshot and invalidate queryClient
+        import('../../features/auth/store/permissionStore').then(({ usePermissionStore }) => {
+          usePermissionStore.getState().clearPermissions();
+        });
+        import('./queryClient').then(({ queryClient }) => {
+          // Invalidate admin roles/permissions to force re-fetch
+          queryClient.invalidateQueries({ queryKey: ['admin', 'permissions'] });
+          queryClient.invalidateQueries({ queryKey: ['admin', 'roles'] });
+          queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
+        });
       } else if (error.response.status === 409) {
         const code = error.response.data?.code;
         if (code === 'OPTIMISTIC_LOCK_CONFLICT') {

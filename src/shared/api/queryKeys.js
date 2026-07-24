@@ -7,7 +7,7 @@ export const queryKeys = {
     details: () => [...queryKeys.tasks.all, 'detail'],
     detail: (id) => [...queryKeys.tasks.details(), id],
     comments: (id) => [...queryKeys.tasks.detail(id), 'comments'],
-    history: (id) => [...queryKeys.tasks.detail(id), 'history'],
+    history: (id, params) => [...queryKeys.tasks.detail(id), 'history', { params }],
     attachments: (id) => [...queryKeys.tasks.detail(id), 'attachments'],
     evidence: (id) => [...queryKeys.tasks.detail(id), 'evidence'],
   },

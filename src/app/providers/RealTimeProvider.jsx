@@ -30,8 +30,8 @@ export function RealtimeProvider({ children }) {
     if (!token || clientRef.current?.active) return
 
     // Derive WS URL from the API base: http://localhost:8080/api → http://localhost:8080/ws
-    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
-    const wsUrl = apiBase.replace(/\/api\/?$/, '') + '/ws'
+    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1'
+    const wsUrl = apiBase.replace(/\/api(\/v1)?\/?$/, '') + '/ws'
 
     const client = new Client({
       brokerURL: wsUrl,

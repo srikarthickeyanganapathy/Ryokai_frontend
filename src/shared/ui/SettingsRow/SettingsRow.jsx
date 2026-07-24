@@ -10,9 +10,9 @@ export function SettingsRow({ label, description, children, className }) {
           {label}
         </Text>
         {description && (
-          <Text variant="muted" className="text-[13px] leading-relaxed">
+          <div className="text-[var(--text-secondary)] text-[13px] leading-relaxed">
             {description}
-          </Text>
+          </div>
         )}
       </div>
       <div className="flex-shrink-0">

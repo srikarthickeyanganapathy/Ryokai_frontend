@@ -84,7 +84,10 @@ import {
   ThumbsDown,
   Trash,
   Link,
-  Maximize2
+  Maximize2,
+  Smartphone,
+  Laptop,
+  Monitor
 } from 'lucide-react'
 
 const GithubIcon = ({ className, ...props }) => (
@@ -214,4 +217,7 @@ export const Icons = {
   messageSquare: MessageSquare,
   maximize2: Maximize2,
   checkSquare: CheckSquare,
+  smartphone: Smartphone,
+  laptop: Laptop,
+  monitor: Monitor,
 }

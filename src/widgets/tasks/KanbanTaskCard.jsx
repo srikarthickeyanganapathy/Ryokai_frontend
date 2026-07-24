@@ -1,10 +1,12 @@
 import React from 'react'
+import { motion } from 'framer-motion'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Icons } from '@/shared/ui/Icons'
 import { Badge } from '@/shared/ui/Badge'
 import { cn } from '@/shared/lib/cn'
 import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
+import { hoverScale } from '@/shared/lib/motion'
 
 export function KanbanTaskCard({ task, onClick }) {
   const {
@@ -33,13 +35,14 @@ export function KanbanTaskCard({ task, onClick }) {
   }
 
   return (
-    <div
+    <motion.div
       ref={setNodeRef}
       style={style}
+      whileHover={isDragging ? undefined : hoverScale}
       {...attributes}
       {...listeners}
       onClick={() => onClick && onClick(task)}
-      className="group bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[var(--radius-md)] shadow-[var(--inset-highlight-soft)] p-3 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-md),var(--inset-highlight)] hover:-translate-y-[1px] transition-[border-color,box-shadow,transform] duration-[var(--duration-base)] ease-[var(--ease-out)] cursor-grab active:cursor-grabbing active:scale-[0.98] mb-2.5 touch-none"
+      className="group bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[var(--radius-md)] shadow-[var(--inset-highlight-soft)] p-3 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-md),var(--inset-highlight)] cursor-grab active:cursor-grabbing active:scale-[0.98] mb-2.5 touch-none"
     >
       <div className="flex items-start justify-between mb-2">
         <h4 className="text-[13px] font-medium leading-snug line-clamp-2">
@@ -69,12 +72,12 @@ export function KanbanTaskCard({ task, onClick }) {
         {task.assignedTo && (
           <div 
             className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px] font-medium"
-            title={task.assignedTo}
+            title={typeof task.assignedTo === 'object' ? task.assignedTo.username : task.assignedTo}
           >
-            {task.assignedTo.slice(0, 2).toUpperCase()}
+            {(typeof task.assignedTo === 'object' ? task.assignedTo.username : task.assignedTo).slice(0, 2).toUpperCase()}
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }
