@@ -18,8 +18,9 @@ import {
   useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, 
   useUpdateTask, useArchiveTask, useDeleteTask, useReassignTask,
   useSubmitTask, useApproveTask, useRejectTask, useRecallTask, useClaimTask,
-  useCompletePersonalTask, useCompleteCrewTask
+  useCompletePersonalTask, useCompleteCrewTask, useReorderChecklistItems
 } from '@/features/tasks/hooks/useTasks'
+import { useCrewMembers } from '@/features/crews/hooks/useCrews'
 import { useUsersList } from '@/features/auth/hooks/useUser'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { Archive, CheckCircle2, Send, RotateCcw, UserPlus, XCircle, Link2 } from 'lucide-react'
@@ -32,6 +33,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { toast } from 'sonner'
+import { SaveToggle } from '@/features/saved/components/SaveToggle'
+import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
 
 /**
  * Docked Utility Panel Component for Left Dock Column (VS Code Style)
@@ -113,16 +116,36 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   const addChecklistItem = useAddChecklistItem(task?.id)
   const toggleChecklistItem = useToggleChecklistItem(task?.id)
   const deleteChecklistItem = useDeleteChecklistItem(task?.id)
+  const reorderChecklist = useReorderChecklistItems(task?.id)
+  
+  const handleMoveChecklistItem = (index, direction) => {
+    if (!task?.checklists) return;
+    const items = [...task.checklists];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= items.length) return;
+    
+    const temp = items[index];
+    items[index] = items[targetIndex];
+    items[targetIndex] = temp;
+    
+    reorderChecklist.mutate(items.map(i => i.id));
+  }
+  
   const updateTask = useUpdateTask()
   const archiveTaskMutation = useArchiveTask()
   const deleteTaskMutation = useDeleteTask()
   const reassignTask = useReassignTask()
-  const { data: users = [] } = useUsersList()
+  const { data: orgUsers = [] } = useUsersList()
+  const { data: crewMembersData = [] } = useCrewMembers(task?.crewId || task?.crew?.id)
+  
   const assignableUsers = React.useMemo(() => {
     if (!task) return []
-    if (task.teamId) return users.filter(u => u.teamId === task.teamId)
-    return users
-  }, [users, task?.teamId])
+    if (task.crewId || task.crew) {
+      return crewMembersData.map(m => m.user ? { id: m.user.id, username: m.user.username } : m)
+    }
+    if (task.teamId) return orgUsers.filter(u => u.teamId === task.teamId)
+    return orgUsers
+  }, [orgUsers, crewMembersData, task?.teamId, task?.crewId, task?.crew])
 
   // Independent Attached Utility States (Default: Only Inspector Opens First)
   const [isCommentsOpen, setIsCommentsOpen] = useState(false)
@@ -210,7 +233,40 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
               Complete Task
             </Button>
           )}
-          {currentStatus === 'SUBMITTED' && canReview && (
+        </div>
+      )
+    }
+
+    // Default Org Workflow
+    return (
+      <div className="flex items-center gap-2">
+        {(currentStatus === 'ASSIGNED' || currentStatus === 'REJECTED') && isAssignee && (
+          <Button 
+            size={size}
+            className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white gap-1.5"
+            onClick={() => submitTaskMutation.mutate(task.id)}
+            isLoading={submitTaskMutation.isPending}
+          >
+            <Send className="w-4 h-4" />
+            {currentStatus === 'REJECTED' ? 'Resubmit' : 'Submit'}
+          </Button>
+        )}
+        
+        {currentStatus === 'SUBMITTED' && isAssignee && (
+          <Button 
+            size={size}
+            variant="outline"
+            className="gap-1.5"
+            onClick={() => recallTaskMutation.mutate(task.id)}
+            isLoading={recallTaskMutation.isPending}
+          >
+            <RotateCcw className="w-4 h-4" />
+            Recall
+          </Button>
+        )}
+
+        {currentStatus === 'SUBMITTED' && canReview && (
+          <>
             <Button 
               size={size}
               className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
@@ -220,12 +276,24 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
               <CheckCircle2 className="w-4 h-4" />
               Approve
             </Button>
-          )}
-        </div>
-      )
-    }
-
-    return null
+            <Button 
+              size={size}
+              className="bg-[var(--danger)] hover:bg-[var(--danger-hover)] text-white gap-1.5"
+              onClick={() => {
+                const reason = window.prompt("Rejection reason:");
+                if (reason && reason.trim() !== '') {
+                  rejectTaskMutation.mutate({ id: task.id, reason });
+                }
+              }}
+              isLoading={rejectTaskMutation.isPending}
+            >
+              <XCircle className="w-4 h-4" />
+              Reject
+            </Button>
+          </>
+        )}
+      </div>
+    )
   }
 
   const handleArchive = async () => {
@@ -346,6 +414,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                 <div className="ml-2">
                   {renderStateMachineActions("xs")}
                 </div>
+                <SaveToggle entityType={ENTITY_TYPES.TASK} entityId={task.id} className="ml-1" />
               </div>
 
               {/* Utility Panel Active Toggle Controls */}
@@ -583,7 +652,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                   {task.checklists?.length > 0 ? (
                     <div className="space-y-0.5">
                       <AnimatePresence initial={false}>
-                        {task.checklists.map((item) => (
+                        {task.checklists.map((item, index) => (
                           <motion.div
                             key={item.id}
                             initial={{ opacity: 0, height: 0 }}
@@ -612,14 +681,34 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                                 {item.text}
                               </span>
                               {hasChecklistPerm && (
-                                <button
-                                  type="button"
-                                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--danger)]"
-                                  onClick={() => deleteChecklistItem.mutate(item.id)}
-                                  title="Remove item"
-                                >
-                                  <Icons.x className="w-3 h-3" />
-                                </button>
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                                  <div className="flex flex-col">
+                                    <button
+                                      type="button"
+                                      className="p-0 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed"
+                                      onClick={() => handleMoveChecklistItem(index, 'up')}
+                                      disabled={index === 0 || reorderChecklist.isPending}
+                                    >
+                                      <Icons.chevronUp className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="p-0 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed"
+                                      onClick={() => handleMoveChecklistItem(index, 'down')}
+                                      disabled={index === task.checklists.length - 1 || reorderChecklist.isPending}
+                                    >
+                                      <Icons.chevronDown className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="p-1 rounded text-[var(--text-muted)] hover:text-[var(--danger)]"
+                                    onClick={() => deleteChecklistItem.mutate(item.id)}
+                                    title="Remove item"
+                                  >
+                                    <Icons.x className="w-3 h-3" />
+                                  </button>
+                                </div>
                               )}
                             </div>
                           </motion.div>

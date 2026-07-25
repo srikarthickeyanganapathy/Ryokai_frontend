@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import {
   AlertCircle,
+  Activity,
   CheckCircle2,
   X,
   ChevronRight,
@@ -87,7 +88,12 @@ import {
   Maximize2,
   Smartphone,
   Laptop,
-  Monitor
+  Monitor,
+  Radar,
+  Slash,
+  ShieldAlert,
+  ToggleRight,
+  Key
 } from 'lucide-react'
 
 const GithubIcon = ({ className, ...props }) => (
@@ -124,6 +130,7 @@ const GoogleIcon = ({ className, ...props }) => (
 // Centralized icon exports for standardizing sizes and stroke widths later if needed
 export const Icons = {
   alert: AlertCircle,
+  activity: Activity,
   success: CheckCircle2,
   close: X,
   x: X,
@@ -220,4 +227,11 @@ export const Icons = {
   smartphone: Smartphone,
   laptop: Laptop,
   monitor: Monitor,
+  loader: Loader2,
+  barChart: BarChart2,
+  radar: Radar,
+  slash: Slash,
+  shieldAlert: ShieldAlert,
+  toggleRight: ToggleRight,
+  key: Key,
 }

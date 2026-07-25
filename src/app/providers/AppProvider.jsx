@@ -6,6 +6,7 @@ import { RealtimeProvider } from './RealTimeProvider'
 
 import { WorkspaceProvider } from '@/app/providers/WorkspaceProvider'
 import { Toaster } from '@/shared/ui/Toast'
+import { TooltipProvider } from '@/shared/ui/Tooltip'
 
 export function AppProvider({ children }) {
   return (
@@ -14,8 +15,10 @@ export function AppProvider({ children }) {
         <AuthProvider>
           <WorkspaceProvider>
             <RealtimeProvider>
-              {children}
-              <Toaster />
+              <TooltipProvider delayDuration={200}>
+                {children}
+                <Toaster />
+              </TooltipProvider>
             </RealtimeProvider>
           </WorkspaceProvider>
         </AuthProvider>

@@ -9,13 +9,15 @@ import { Textarea } from '@/shared/ui/Textarea'
 import { Form, FormField, FormItem, FormControl, FormMessage } from '@/shared/forms/Form'
 import { Switch } from '@/shared/ui/Switch'
 import { SettingsRow } from '@/shared/ui/SettingsRow'
-import { useProfile, useUpdateProfile } from '@/features/auth/hooks/useUser'
+import { useProfile, useUpdateProfile, useUploadAvatar } from '@/features/auth/hooks/useUser'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar'
 import { Icons } from '@/shared/ui/Icons'
 
 export function ProfilePage() {
   const { data: user, isLoading } = useProfile()
   const updateProfile = useUpdateProfile()
+  const uploadAvatar = useUploadAvatar()
+  const fileInputRef = React.useRef(null)
 
   const form = useForm({
     defaultValues: {
@@ -41,6 +43,17 @@ export function ProfilePage() {
 
   const handleNotificationToggle = (checked) => {
     updateProfile.mutate({ emailNotificationsEnabled: checked })
+  }
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      uploadAvatar.mutate(file)
+    }
   }
 
   return (
@@ -73,12 +86,22 @@ export function ProfilePage() {
 
         {/* Profile Content */}
         <div className="px-6 pb-6 pt-0 relative flex flex-col sm:flex-row items-center sm:items-end gap-5 -mt-10">
-          <div className="relative group shrink-0">
-            <Avatar size="xl" className="w-20 h-20 bg-[var(--accent)] text-white font-bold text-2xl shadow-xl ring-4 ring-[var(--bg-elevated)]">
+          <div className="relative group shrink-0 cursor-pointer" onClick={handleAvatarClick}>
+            <Avatar size="xl" className="w-20 h-20 bg-[var(--accent)] text-white font-bold text-2xl shadow-xl ring-4 ring-[var(--bg-elevated)] group-hover:opacity-80 transition-opacity">
               <AvatarImage src={user?.avatarUrl} />
               <AvatarFallback>{(user?.name || user?.username || 'U').charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
+            <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <Icons.image className="w-6 h-6 text-white" />
+            </div>
             <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-[var(--bg-elevated)] shadow-sm" title="Online" />
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept="image/*" 
+              onChange={handleAvatarChange} 
+            />
           </div>
 
           <div className="flex-1 text-center sm:text-left min-w-0 space-y-1">

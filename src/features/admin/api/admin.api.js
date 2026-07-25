@@ -3,19 +3,19 @@ import api from '@/shared/api/api';
 // --- Roles ---
 
 export const getRoles = async () => {
-  const { data } = await api.get('/admin/roles');
+  const { data } = await api.get('/platform/roles');
   return data;
 };
 
 export const createRole = async (roleData) => {
   // roleData: { name, description }
-  const { data } = await api.post('/admin/roles', roleData);
+  const { data } = await api.post('/platform/roles', roleData);
   return data;
 };
 
 export const updateRole = async (roleId, roleData) => {
   // roleData: { name, description }
-  const { data } = await api.put(`/admin/roles/${roleId}`, roleData);
+  const { data } = await api.put(`/platform/roles/${roleId}`, roleData);
   return data;
 };
 
@@ -23,64 +23,64 @@ export const deleteRole = async (roleId) => {
   // FIX: backend returns 204 No Content (RoleController.deleteRole -> ResponseEntity<Void>).
   // The old code tried to read `data` from the response, which would be undefined
   // and could cause issues in the caller. Now we just await the deletion.
-  await api.delete(`/admin/roles/${roleId}`);
+  await api.delete(`/platform/roles/${roleId}`);
 };
 
 // --- Permissions ---
 
 export const getPermissions = async () => {
-  const { data } = await api.get('/admin/permissions');
+  const { data } = await api.get('/platform/permissions');
   return data;
 };
 
 export const getRolePermissions = async (roleId) => {
-  const { data } = await api.get(`/admin/roles/${roleId}/permissions`);
+  const { data } = await api.get(`/platform/roles/${roleId}/permissions`);
   return data;
 };
 
 export const assignRolePermissions = async (roleId, permissionNames) => {
   // permissionNames: string[] e.g. ["TASK_VIEW", "TASK_EDIT", "TASK_ASSIGN"]
   // Backend expects AssignPermissionsRequestDTO: { permissionNames: List<String> }
-  const { data } = await api.put(`/admin/roles/${roleId}/permissions`, { permissionNames });
+  const { data } = await api.put(`/platform/roles/${roleId}/permissions`, { permissionNames });
   return data;
 };
 
 // --- Organizations (Super Admin) ---
 
 export const getAdminOrganizations = async () => {
-  const { data } = await api.get('/admin/organizations');
+  const { data } = await api.get('/platform/organizations');
   return data;
 };
 
 export const getAdminOrganization = async (orgId) => {
-  const { data } = await api.get(`/admin/organizations/${orgId}`);
+  const { data } = await api.get(`/platform/organizations/${orgId}`);
   return data;
 };
 
 export const suspendOrganization = async (orgId) => {
-  const { data } = await api.post(`/admin/organizations/${orgId}/suspend`);
+  const { data } = await api.post(`/platform/organizations/${orgId}/suspend`);
   return data;
 };
 
 export const activateOrganization = async (orgId) => {
-  const { data } = await api.post(`/admin/organizations/${orgId}/activate`);
+  const { data } = await api.post(`/platform/organizations/${orgId}/activate`);
   return data;
 };
 
 export const deleteOrganization = async (orgId) => {
-  await api.delete(`/admin/organizations/${orgId}`);
+  await api.delete(`/platform/organizations/${orgId}`);
 };
 
 // --- Users (Admin Role Assignment) ---
 
 export const assignUserRoles = async (userId, roleNames) => {
   // roleNames: List<String>
-  const { data } = await api.put(`/admin/users/${userId}/roles`, roleNames);
+  const { data } = await api.put(`/platform/users/${userId}/roles`, roleNames);
   return data;
 };
 
 export const getUserRoles = async (userId) => {
-  const { data } = await api.get(`/admin/users/${userId}/roles`);
+  const { data } = await api.get(`/platform/users/${userId}/roles`);
   return data;
 };
 

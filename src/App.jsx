@@ -3,16 +3,15 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AppProvider } from "@/app/providers/AppProvider";
 
 import { AuthLayout } from "@/app/layouts/AuthLayout";
-import { ProtectedRoute, AdminRoute } from "@/app/router/ProtectedRoute";
+import { ProtectedRoute, PlatformRoute, TenantRoute } from "@/app/router/ProtectedRoute";
 import { PublicRoute } from "@/app/router/PublicRoute";
+import { RouteResolver } from "@/app/router/RouteResolver";
 import { SessionExpiredListener } from "@/app/router/SessionExpiredListener";
 import { MainLayout } from "@/app/layouts/MainLayout";
+import { PlatformLayout } from "@/app/layouts/PlatformLayout";
 import { RouteLoader } from "@/shared/ui/RouteLoader";
 
-// Route-level code splitting: each page ships as its own chunk instead of
-// one ~1.5MB bundle, so first paint only pays for auth/shell + the current
-// screen. Matches the "instant" feel of Linear/Vercel — nothing to do with
-// visuals, purely load-time.
+// Route-level code splitting
 const UIDesignSystem = lazy(() => import("@/pages/ui"));
 const LoginPage = lazy(() => import("@/pages/auth/LoginPage").then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage").then(m => ({ default: m.RegisterPage })));
@@ -37,7 +36,14 @@ const TeamDetailPage = lazy(() => import("@/pages/teams/TeamDetailPage").then(m 
 const CrewJoinPage = lazy(() => import("@/pages/crews/CrewJoinPage").then(m => ({ default: m.CrewJoinPage })));
 const InboxPage = lazy(() => import("@/pages/inbox/InboxPage").then(m => ({ default: m.InboxPage })));
 const AnalyticsPage = lazy(() => import("@/pages/analytics/AnalyticsPage").then(m => ({ default: m.AnalyticsPage })));
-const AdminPage = lazy(() => import("@/pages/admin/AdminPage").then(m => ({ default: m.AdminPage })));
+
+// Platform Pages
+const PlatformDashboardPage = lazy(() => import("@/pages/platform/PlatformDashboardPage").then(m => ({ default: m.PlatformDashboardPage })));
+const PlatformOrganizationsPage = lazy(() => import("@/pages/platform/PlatformOrganizationsPage").then(m => ({ default: m.PlatformOrganizationsPage })));
+const PlatformUsersPage = lazy(() => import("@/pages/platform/PlatformUsersPage").then(m => ({ default: m.PlatformUsersPage })));
+const PlatformMonitoringPage = lazy(() => import("@/pages/platform/PlatformMonitoringPage").then(m => ({ default: m.PlatformMonitoringPage })));
+const PlatformAuditPage = lazy(() => import("@/pages/platform/PlatformAuditPage").then(m => ({ default: m.PlatformAuditPage })));
+const PlatformSettingsPage = lazy(() => import("@/pages/platform/PlatformSettingsPage").then(m => ({ default: m.PlatformSettingsPage })));
 const FocusPage = lazy(() => import("@/features/focus/pages/FocusPage").then(m => ({ default: m.FocusPage })));
 const ProfilePage = lazy(() => import("@/pages/settings/ProfilePage").then(m => ({ default: m.ProfilePage })));
 const SecurityPage = lazy(() => import("@/pages/settings/SecurityPage").then(m => ({ default: m.SecurityPage })));
@@ -48,6 +54,7 @@ const SavedPage = lazy(() => import("@/pages/saved/SavedPage").then(m => ({ defa
 const WorkloadPage = lazy(() => import("@/pages/workload/WorkloadPage").then(m => ({ default: m.WorkloadPage })));
 const GoalsPage = lazy(() => import("@/pages/goals/GoalsPage").then(m => ({ default: m.GoalsPage })));
 const WhiteboardPage = lazy(() => import("@/pages/whiteboards/WhiteboardPage").then(m => ({ default: m.WhiteboardPage })));
+
 export default function App() {
   return (
     <Router>
@@ -55,6 +62,9 @@ export default function App() {
       <AppProvider>
         <Suspense fallback={<RouteLoader />}>
           <Routes>
+            {/* Core Resolver */}
+            <Route path="/" element={<RouteResolver />} />
+
             {/* Public Auth Routes */}
             <Route element={<PublicRoute />}>
               <Route element={<AuthLayout />}>
@@ -67,61 +77,77 @@ export default function App() {
               </Route>
             </Route>
 
-            {/* Protected App Routes */}
+            {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
-              <Route element={<MainLayout />}>
-                <Route path="/app" element={<DashboardPage />} />
-                <Route path="/app/tasks" element={<TasksPage />} />
-                <Route path="/app/projects" element={<ProjectsPage />} />
-                <Route path="/app/projects/:projectId" element={<ProjectDetailPage />} />
-                <Route path="/app/organizations" element={<OrganizationsPage />} />
-                <Route path="/app/organizations/:orgId" element={<OrganizationSettingsPage />} />
-                <Route path="/app/teams" element={<TeamsPage />} />
-                <Route path="/app/organizations/:orgId/teams/:teamId" element={<TeamDetailPage />} />
-                <Route path="/app/crews" element={<CrewsPage />} />
-                <Route path="/app/crews/discover" element={<CrewDiscoverPage />} />
-                <Route path="/app/crews/join" element={<CrewJoinPage />} />
-                <Route path="/app/crews/:crewId" element={<CrewDetailPage />} />
-                <Route path="/app/crews/:crewId/whiteboards/:boardId" element={<WhiteboardPage />} />
-                <Route path="/app/analytics" element={<AnalyticsPage />} />
-                <Route element={<AdminRoute />}>
-                  <Route path="/app/admin" element={<AdminPage />} />
+              
+              {/* PLATFORM APP (Control Plane) */}
+              <Route path="/platform" element={<PlatformRoute />}>
+                <Route element={<PlatformLayout />}>
+                  {/* Redirect /platform to /platform/dashboard */}
+                  <Route index element={<Navigate to="/platform/dashboard" replace />} />
+                  
+                  <Route path="dashboard" element={<PlatformDashboardPage />} />
+                  <Route path="organizations" element={<PlatformOrganizationsPage />} />
+                  <Route path="users" element={<PlatformUsersPage />} />
+                  <Route path="monitoring" element={<PlatformMonitoringPage />} />
+                  <Route path="audit" element={<PlatformAuditPage />} />
+                  <Route path="health" element={<Navigate to="/platform/monitoring" replace />} />
+                  <Route path="settings" element={<PlatformSettingsPage />} />
                 </Route>
-                <Route path="/app/focus" element={<FocusPage />} />
-
-                <Route path="/app/inbox" element={<InboxPage />} />
-                
-                {/* Settings Routes */}
-                <Route path="/app/settings/profile" element={<ProfilePage />} />
-                <Route path="/app/settings/security" element={<SecurityPage />} />
-                <Route path="/app/settings/sessions" element={<SessionsPage />} />
-                
-                {/* Keep legacy route for fallback if needed */}
-                <Route path="/app/sessions" element={<Navigate to="/app/settings/sessions" replace />} />
-
-                {/* ═══ New Workspace Placeholder Routes ═══ */}
-                {/* Personal workspace */}
-                <Route path="/app/notes" element={<NotesPage />} />
-                <Route path="/app/calendar" element={<CalendarPage />} />
-                <Route path="/app/saved" element={<SavedPage />} />
-                
-                {/* Organization workspace */}
-                <Route path="/app/goals" element={<GoalsPage />} />
-                <Route path="/app/directory" element={<DirectoryPage />} />
-                <Route path="/app/announcements" element={<AnnouncementsPage />} />
-                <Route path="/app/workload" element={<WorkloadPage />} />
-                
-                {/* Crews workspace */}
-                <Route path="/app/crews/discover" element={<CrewDiscoverPage />} />
-                <Route path="/app/crews/tasks" element={<CrewTasksPage />} />
               </Route>
+
+              {/* TENANT APP (Data Plane) */}
+              <Route path="/app" element={<TenantRoute />}>
+                <Route element={<MainLayout />}>
+                  {/* Note: WorkspaceResolver handles organization selection within MainLayout context */}
+                  <Route index element={<DashboardPage />} />
+                  <Route path="tasks" element={<TasksPage />} />
+                  <Route path="projects" element={<ProjectsPage />} />
+                  <Route path="projects/:projectId" element={<ProjectDetailPage />} />
+                  <Route path="organizations" element={<OrganizationsPage />} />
+                  <Route path="organizations/:orgId" element={<OrganizationSettingsPage />} />
+                  <Route path="teams" element={<TeamsPage />} />
+                  <Route path="organizations/:orgId/teams/:teamId" element={<TeamDetailPage />} />
+                  <Route path="crews" element={<CrewsPage />} />
+                  <Route path="crews/discover" element={<CrewDiscoverPage />} />
+                  <Route path="crews/join" element={<CrewJoinPage />} />
+                  <Route path="crews/:crewId" element={<CrewDetailPage />} />
+                  <Route path="crews/:crewId/whiteboards/:boardId" element={<WhiteboardPage />} />
+                  <Route path="analytics" element={<AnalyticsPage />} />
+                  <Route path="focus" element={<FocusPage />} />
+                  <Route path="inbox" element={<InboxPage />} />
+                  
+                  {/* Settings Routes */}
+                  <Route path="settings/profile" element={<ProfilePage />} />
+                  <Route path="settings/security" element={<SecurityPage />} />
+                  <Route path="settings/sessions" element={<SessionsPage />} />
+                  
+                  {/* Keep legacy route for fallback if needed */}
+                  <Route path="sessions" element={<Navigate to="/app/settings/sessions" replace />} />
+
+                  {/* Personal workspace */}
+                  <Route path="notes" element={<NotesPage />} />
+                  <Route path="calendar" element={<CalendarPage />} />
+                  <Route path="saved" element={<SavedPage />} />
+                  
+                  {/* Organization workspace */}
+                  <Route path="goals" element={<GoalsPage />} />
+                  <Route path="directory" element={<DirectoryPage />} />
+                  <Route path="announcements" element={<AnnouncementsPage />} />
+                  <Route path="workload" element={<WorkloadPage />} />
+                  
+                  {/* Crews workspace */}
+                  <Route path="crews/tasks" element={<CrewTasksPage />} />
+                </Route>
+              </Route>
+
             </Route>
 
-            {/* Phase 2: Design System Showcase */}
+            {/* Design System Showcase */}
             <Route path="/ui" element={<UIDesignSystem />} />
 
             {/* Fallback routing */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
       </AppProvider>

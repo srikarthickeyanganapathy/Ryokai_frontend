@@ -15,6 +15,11 @@ export const createOrganization = async (payload) => {
   return data;
 };
 
+export const updateOrganization = async (orgId, payload) => {
+  const { data } = await api.put(`/organizations/${orgId}`, payload);
+  return data;
+};
+
 export const getOrgMembers = async (orgId) => {
   const { data } = await api.get(`/organizations/${orgId}/members`);
   return data;

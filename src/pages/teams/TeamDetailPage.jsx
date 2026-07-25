@@ -5,6 +5,8 @@ import { Button, IconButton } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { Icons } from '@/shared/ui/Icons'
+import { SaveToggle } from '@/features/saved/components/SaveToggle'
+import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
 import { useTeam, useTeamMessages, useSendTeamMessage, useDeleteTeamMessage } from '@/features/organizations/hooks/useOrganizations'
 import { useTaskList, useReassignTask } from '@/features/tasks/hooks/useTasks'
 import { useProjects, useCreateProject } from '@/features/projects/hooks/useProjects'
@@ -183,6 +185,7 @@ export function TeamDetailPage() {
             {isReadOnly && (
               <Badge variant="outline" className="bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20 text-[10px] font-mono uppercase">Read-Only Observer</Badge>
             )}
+            <SaveToggle entityType={ENTITY_TYPES.TEAM} entityId={team.id} className="ml-1" />
           </div>
           <Text variant="muted" className="text-[13px]">{team.description || 'No description provided.'}</Text>
         </div>

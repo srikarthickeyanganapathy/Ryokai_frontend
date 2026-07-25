@@ -2,7 +2,12 @@ import React from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { Spinner } from '@/shared/ui/Spinner'
+import { isPlatformUser } from './RouteResolver'
 
+/**
+ * ProtectedRoute strictly ensures the user is authenticated.
+ * It does NOT handle shell routing.
+ */
 export function ProtectedRoute() {
   const { isAuthenticated, isInitializing } = useAuth()
   const location = useLocation()
@@ -16,38 +21,38 @@ export function ProtectedRoute() {
   }
 
   if (!isAuthenticated) {
-    // Redirect them to the /login page, but save the current location they were
-    // trying to go to when they were redirected. This allows us to send them
-    // along to that page after they login, which is a nicer user experience
-    // than dropping them off on the home page.
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
   return <Outlet />
 }
 
-export function AdminRoute() {
-  const { isAuthenticated, isInitializing, user } = useAuth()
+/**
+ * PlatformRoute ensures the authenticated user belongs to the Control Plane.
+ */
+export function PlatformRoute() {
+  const { user } = useAuth()
   const location = useLocation()
-  
-  const isSuperAdmin = (user?.roles || []).some(r =>
-    (typeof r === 'string' ? r : r?.name)?.includes('SUPER_ADMIN')
-  )
 
-  if (isInitializing) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--bg-base)]">
-        <Spinner size="lg" />
-      </div>
-    )
+  if (!isPlatformUser(user)) {
+    // If a tenant user tries to access platform, send them back to the resolver
+    return <Navigate to="/" replace />
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />
-  }
+  return <Outlet />
+}
 
-  if (!isSuperAdmin) {
-    return <Navigate to="/app" replace />
+/**
+ * TenantRoute ensures the authenticated user belongs to the Data Plane.
+ * Workspace resolution is handled downstream by the TenantLayout.
+ */
+export function TenantRoute() {
+  const { user } = useAuth()
+  const location = useLocation()
+
+  if (isPlatformUser(user)) {
+    // If a platform user tries to access tenant features, send them back to the resolver
+    return <Navigate to="/" replace />
   }
 
   return <Outlet />

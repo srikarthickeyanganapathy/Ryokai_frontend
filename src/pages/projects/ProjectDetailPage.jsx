@@ -20,6 +20,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { toast } from 'sonner'
 import { cn } from '@/shared/lib/cn'
 import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
+import { SaveToggle } from '@/features/saved/components/SaveToggle'
+import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
 
 function formatDate(isoString) {
   if (!isoString) return '—'
@@ -171,6 +173,7 @@ export function ProjectDetailPage() {
             <Badge variant="outline" className={cn('text-xs uppercase', PROJECT_STATUS_COLORS[project.status] || defaultStatusColor)}>
               {project.status}
             </Badge>
+            <SaveToggle entityType={ENTITY_TYPES.PROJECT} entityId={project.id} className="ml-1" />
           </div>
           {project.description && (
             <Text variant="muted" className="mt-1 max-w-2xl text-[13px]">{project.description}</Text>

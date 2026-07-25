@@ -14,6 +14,15 @@ export const useTaskList = (filters) => {
   });
 };
 
+export const useTaskSearch = (searchQuery) => {
+  return useQuery({
+    queryKey: [...queryKeys.tasks.list({ search: searchQuery })],
+    queryFn: () => taskApi.getTasks({ search: searchQuery }),
+    select: (data) => data?.content || data || [],
+    enabled: !!searchQuery,
+  });
+};
+
 export const useAssignTask = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -76,6 +85,52 @@ export const useCreateTask = () => {
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to create task');
+    }
+  });
+};
+
+export const useCreateTaskWithDependencies = () => {
+  const queryClient = useQueryClient();
+  const createTaskMutation = useCreateTask();
+
+  return useMutation({
+    mutationFn: async (payload) => {
+      const { dependsOnIds = [], ...taskPayload } = payload;
+      
+      // 1. Create the task
+      const createdTask = await createTaskMutation.mutateAsync(taskPayload);
+      
+      // 2. Add dependencies sequentially if any exist
+      let failedDependencies = 0;
+      if (dependsOnIds.length > 0) {
+        for (const depId of dependsOnIds) {
+          try {
+            await taskApi.addDependency(createdTask.id, depId);
+          } catch (err) {
+            console.error(`Failed to add dependency ${depId}`, err);
+            failedDependencies++;
+          }
+        }
+      }
+      
+      return { createdTask, failedDependencies, totalDependencies: dependsOnIds.length };
+    },
+    onSuccess: ({ createdTask, failedDependencies, totalDependencies }) => {
+      if (failedDependencies > 0) {
+        toast.warning(`Task created. ${totalDependencies - failedDependencies} of ${totalDependencies} dependencies were attached.`);
+      } else if (totalDependencies > 0) {
+        // toast.success(`Task created with ${totalDependencies} dependencies.`); // Optional, createTask already toasts success
+      }
+      
+      // Invalidate relevant graphs and details
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(createdTask.id) });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+    onError: (error) => {
+      if (error.message !== 'Create failed') {
+        toast.error(error.response?.data?.message || error.message || 'Failed to create task with dependencies');
+      }
     }
   });
 };
@@ -243,7 +298,7 @@ export const useAddComment = (taskId) => {
           content: [...(old.content || []), { 
             id: Date.now(), 
             username: currentUser?.username || 'me',
-            comment: text, 
+            text: text, 
             createdAt: new Date().toISOString() 
           }]
         };
@@ -459,11 +514,12 @@ export const useUploadAttachment = (taskId) => {
   return useMutation({
     mutationFn: (file) => taskApi.uploadAttachment(taskId, file),
     onSuccess: () => {
-      toast.success('Attachment uploaded');
+      toast.success('Evidence uploaded successfully');
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.attachments(taskId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.evidence(taskId) });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || error.message || 'Failed to upload attachment');
+      toast.error(error.response?.data?.message || error.message || 'Failed to upload evidence');
     },
   });
 };

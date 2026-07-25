@@ -4,7 +4,8 @@ import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/shared/ui/Modal';
-import { useRoles, useCreateRole, usePermissionsList, useRolePermissions, useAssignRolePermissions, useDeleteRole, useUpdateRole } from '@/features/admin/hooks/useAdmin';
+import { Badge } from '@/shared/ui/Badge';
+import { useRoles, useCreateRole, useDeleteRole, useUpdateRole } from '@/features/admin/hooks/useAdmin';
 import { toast } from 'sonner';
 import { cn } from '@/shared/lib/cn';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog';
@@ -12,7 +13,6 @@ import { Label } from '@/shared/ui/Typography/Label';
 
 export function RolesTab() {
   const { data: roles = [], isLoading: rolesLoading } = useRoles();
-  const { data: permissions = [], isLoading: permissionsLoading } = usePermissionsList();
   
   const [selectedRole, setSelectedRole] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -52,7 +52,7 @@ export function RolesTab() {
     }
   };
 
-  if (rolesLoading || permissionsLoading) {
+  if (rolesLoading) {
     return (
       <div className="flex gap-6 mt-6 h-full">
         <div className="w-1/3 border-r border-[var(--color-border-subtle)] pr-6">
@@ -102,24 +102,23 @@ export function RolesTab() {
                 )}
               </div>
               <Text variant="muted" size="sm">
-                {role.category}
+                {role.category || 'PLATFORM'}
               </Text>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Permissions Grid Panel */}
+      {/* Role Details Panel */}
       <div className="flex-1 flex flex-col">
         {selectedRole ? (
-          <RolePermissionsPanel 
+          <RoleDetailsPanel 
             role={selectedRole} 
-            allPermissions={permissions} 
             onEdit={() => setIsUpdateModalOpen(true)}
           />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-muted)] border border-dashed border-[var(--color-border-subtle)] rounded-[var(--radius-lg)]">
-            <Text>Select a role to manage permissions</Text>
+            <Text>Select a role to view governance details</Text>
           </div>
         )}
       </div>
@@ -140,37 +139,7 @@ export function RolesTab() {
   );
 }
 
-function RolePermissionsPanel({ role, allPermissions, onEdit }) {
-  const { data: rolePerms = [], isLoading } = useRolePermissions(role.id);
-  const assignMutation = useAssignRolePermissions();
-  
-  // Use permission IDs or names? The hook useAssignRolePermissions says "Sends permission NAME strings, not IDs".
-  // rolePerms should be an array of permissions assigned to this role.
-  const rolePermNames = rolePerms.map(p => typeof p === 'string' ? p : p.name);
-
-  const [selectedPermNames, setSelectedPermNames] = useState(rolePermNames);
-  
-  // Update state when data changes (i.e. changing roles)
-  React.useEffect(() => {
-    setSelectedPermNames(rolePermNames);
-  }, [role.id, isLoading]); // intentionally leaving rolePermNames out of deps to avoid loops
-
-  const handleToggle = (permName) => {
-    if (selectedPermNames.includes(permName)) {
-      setSelectedPermNames(selectedPermNames.filter(n => n !== permName));
-    } else {
-      setSelectedPermNames([...selectedPermNames, permName]);
-    }
-  };
-
-  const handleSave = () => {
-    assignMutation.mutate({ roleId: role.id, permissionNames: selectedPermNames });
-  };
-
-  if (isLoading) {
-    return <Skeleton className="h-40 w-full" />;
-  }
-
+function RoleDetailsPanel({ role, onEdit }) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border-subtle)] pb-4">
@@ -181,42 +150,37 @@ function RolePermissionsPanel({ role, allPermissions, onEdit }) {
               <Button size="xs" variant="outline" onClick={onEdit} className="h-7 px-2">Edit Role</Button>
             )}
           </div>
-          <Text variant="muted" size="sm">{role.category}</Text>
+          <Text variant="muted" size="sm">{role.category || 'PLATFORM'}</Text>
         </div>
-        <Button onClick={handleSave} isLoading={assignMutation.isPending}>
-          Save Permissions
-        </Button>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)] font-semibold px-3 py-1">
+            {role.builtin ? 'Built-in Platform Authority' : 'Custom Platform Role'}
+          </Badge>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {allPermissions.map(perm => {
-            const isChecked = selectedPermNames.includes(perm.name);
-            return (
-              <Label 
-                key={perm.id} 
-                className={cn(
-                  "flex items-start gap-3 p-3 rounded-[var(--radius-md)] border cursor-pointer transition-all duration-[var(--duration-base)]",
-                  isChecked 
-                    ? "bg-[var(--accent-soft)] border-[var(--accent-border)]" 
-                    : "bg-transparent border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)]"
-                )}
-              >
-                <div className="mt-0.5">
-                  <Input 
-                    type="checkbox" 
-                    checked={isChecked}
-                    onChange={() => handleToggle(perm.name)}
-                    className="w-4 h-4 rounded border-[var(--color-border-default)] text-[var(--accent)] focus:ring-[var(--accent)]"
-                  />
-                </div>
-                <div>
-                  <Text className="font-medium text-sm mb-0.5">{perm.name}</Text>
-                  <Text variant="muted" size="sm">{perm.description || 'No description available.'}</Text>
-                </div>
-              </Label>
-            );
-          })}
+      <div className="flex-1 overflow-y-auto custom-scrollbar space-y-6">
+        <div className="p-6 rounded-[var(--radius-lg)] border border-[var(--color-border-subtle)] bg-[var(--bg-card)] shadow-sm space-y-5">
+          <div>
+            <Label className="text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1 block">
+              Governance Scope
+            </Label>
+            <Text className="text-sm font-medium text-[var(--text-primary)]">
+              Platform Control Plane (Global System Authority)
+            </Text>
+            <Text variant="muted" size="sm" className="mt-1 leading-relaxed">
+              {role.description || 'This role operates at the platform administration layer. It governs global identities, organizations, and system-wide configurations across the entire Ryokai ecosystem.'}
+            </Text>
+          </div>
+
+          <div className="border-t border-[var(--color-border-subtle)] pt-4">
+            <Label className="text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1 block">
+              Permission Strategy
+            </Label>
+            <Text className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              Platform-level roles do not utilize granular workspace permissions (such as task assignments, project management, or organization announcement settings). Access authority is enforced globally at the control plane boundary.
+            </Text>
+          </div>
         </div>
       </div>
     </div>

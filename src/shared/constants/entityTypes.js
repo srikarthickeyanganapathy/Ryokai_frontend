@@ -1,0 +1,7 @@
+export const ENTITY_TYPES = {
+  TASK: 'TASK',
+  PROJECT: 'PROJECT',
+  TEAM: 'TEAM',
+  NOTE: 'NOTE',
+  ORGANIZATION: 'ORGANIZATION',
+};

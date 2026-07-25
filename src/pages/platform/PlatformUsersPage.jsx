@@ -1,54 +1,64 @@
-import React from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { DataTable } from '@/shared/ui/data-table/DataTable'
 import { useUsersList } from '@/features/auth/hooks/useUser'
 import { useRoles, useAssignUserRoles } from '@/features/admin/hooks/useAdmin'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
-import { usePermissions } from '@/shared/hooks/usePermissions'
-import { Navigate } from 'react-router-dom'
+import { Input } from '@/shared/ui/Input'
+import { Icons } from '@/shared/ui/Icons'
 import { RolesTab } from '@/widgets/admin/RolesTab'
 import { cn } from '@/shared/lib/cn'
 
-export function AdminPage() {
+export function PlatformUsersPage() {
   const { data: users, isLoading: usersLoading } = useUsersList()
   const { data: roles, isLoading: rolesLoading } = useRoles()
   const assignRolesMutation = useAssignUserRoles()
-  const { isSuperAdmin } = usePermissions()
-  const [activeTab, setActiveTab] = React.useState('users')
+  
+  const [activeTab, setActiveTab] = useState('users')
+  const [searchTerm, setSearchTerm] = useState('')
 
   const tabs = [
-    { id: 'users', label: 'Users' },
-    { id: 'roles', label: 'Roles & Permissions' }
+    { id: 'users', label: 'Global Identities' },
+    { id: 'roles', label: 'Platform Roles' }
   ]
 
-  const handleRoleChange = React.useCallback((userId, newRoleName) => {
+  const handleRoleChange = useCallback((userId, newRoleName) => {
     assignRolesMutation.mutate({ userId, roleNames: [newRoleName] })
   }, [assignRolesMutation])
 
-  const columns = React.useMemo(() => {
+  const filteredUsers = useMemo(() => {
+    if (!users) return []
+    return users.filter(u => 
+      u.username.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (u.email && u.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+  }, [users, searchTerm])
+
+  const columns = useMemo(() => {
     if (!roles) return []
     return [
       {
         accessorKey: 'username',
         header: 'Username',
-        cell: ({ row }) => <span className="font-medium">{row.original.username}</span>
+        cell: ({ row }) => <span className="font-semibold text-[var(--text-primary)]">{row.original.username}</span>
       },
       {
         accessorKey: 'name',
         header: 'Full Name',
-        cell: ({ row }) => <span>{row.original.name || row.original.fullName || '-'}</span>
+        cell: ({ row }) => <span className="text-[var(--text-secondary)]">{row.original.name || row.original.fullName || '-'}</span>
       },
       {
         accessorKey: 'email',
         header: 'Email',
+        cell: ({ row }) => <span className="text-[var(--text-muted)] text-[13px]">{row.original.email}</span>
       },
       {
         id: 'role',
-        header: 'Role',
+        header: 'Platform Role',
         cell: ({ row }) => {
           const user = row.original
-          // user.roles may be objects or strings
           const currentRoleName = Array.isArray(user.roles) && user.roles.length > 0
             ? (typeof user.roles[0] === 'string' ? user.roles[0] : user.roles[0].name)
             : ''
@@ -59,12 +69,12 @@ export function AdminPage() {
               onValueChange={(val) => handleRoleChange(user.id, val)}
               disabled={assignRolesMutation.isPending}
             >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select a role" />
+              <SelectTrigger className="w-[180px] h-8 text-xs">
+                <SelectValue placeholder="No Role" />
               </SelectTrigger>
               <SelectContent>
                 {roles.map(r => (
-                  <SelectItem key={r.id} value={r.name}>
+                  <SelectItem key={r.id} value={r.name} className="text-xs">
                     {r.name.replace('ROLE_', '')}
                   </SelectItem>
                 ))}
@@ -76,15 +86,24 @@ export function AdminPage() {
     ]
   }, [roles, assignRolesMutation.isPending, handleRoleChange])
 
-  if (!isSuperAdmin) {
-    return <Navigate to="/app" replace />
-  }
-
   return (
     <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-      <div className="mb-6">
-        <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-1">User Administration</Heading>
-        <Text variant="muted" className="text-[13px]">Manage users and their platform roles.</Text>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-1">Platform Users</Heading>
+          <Text variant="muted" className="text-[13px]">Manage global identities and assign platform-level roles.</Text>
+        </div>
+        {activeTab === 'users' && (
+          <div className="w-[300px] relative">
+            <Icons.search className="absolute left-2.5 top-2.5 h-4 w-4 text-[var(--text-muted)]" />
+            <Input 
+              placeholder="Search users..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 h-9"
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-6 border-b border-[var(--color-border-subtle)] mb-6">
@@ -115,8 +134,9 @@ export function AdminPage() {
         {activeTab === 'users' && (
           <DataTable 
             columns={columns}
-            data={users || []}
-            isLoading={usersLoading || rolesLoading}
+            data={filteredUsers}
+            loading={usersLoading || rolesLoading}
+            emptyMessage="No users found."
           />
         )}
         

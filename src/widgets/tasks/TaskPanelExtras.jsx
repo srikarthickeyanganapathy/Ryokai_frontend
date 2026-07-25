@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
 import { IconButton, Button } from '@/shared/ui/Button'
@@ -6,12 +6,13 @@ import { Avatar, AvatarFallback } from '@/shared/ui/Avatar'
 import { Input } from '@/shared/ui/Input'
 import { Badge } from '@/shared/ui/Badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
-import { useComments, useAddComment, useTaskHistory, useAddDependency, useRemoveDependency, useTaskList, useEvidence, useAddEvidence, useDeleteEvidence } from '@/features/tasks/hooks/useTasks'
+import { useComments, useAddComment, useTaskHistory, useAddDependency, useRemoveDependency, useTaskList, useEvidence, useAddEvidence, useDeleteEvidence, useUploadAttachment } from '@/features/tasks/hooks/useTasks'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { filterTasksByWorkspace } from '@/shared/lib/workspaceTaskFilter'
 import { cn } from '@/shared/lib/cn'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
+import { FileDropzone } from '@/shared/ui/FileDropzone'
 
 function getDomainFromUrl(url) {
   try {
@@ -297,11 +298,25 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
   const { data: evidence = [], isLoading } = useEvidence(taskId)
   const addEvidence = useAddEvidence(taskId)
   const deleteEvidence = useDeleteEvidence(taskId)
+  const uploadAttachment = useUploadAttachment(taskId)
+  
+  const [activeTab, setActiveTab] = useState('LINK') // 'LINK' or 'UPLOAD'
   const [type, setType] = useState('LINK')
   const [url, setUrl] = useState('')
   const [description, setDescription] = useState('')
   const [copiedId, setCopiedId] = useState(null)
   const [previewImage, setPreviewImage] = useState(null)
+  
+  // Upload specific state
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [filePreviewUrl, setFilePreviewUrl] = useState(null)
+
+  // Cleanup object URL on unmount or when file changes
+  useEffect(() => {
+    return () => {
+      if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl)
+    }
+  }, [filePreviewUrl])
 
   const handleCopy = (id, linkUrl) => {
     navigator.clipboard.writeText(linkUrl)
@@ -310,7 +325,7 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
     setTimeout(() => setCopiedId(null), 2000)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmitLink = (e) => {
     e.preventDefault()
     if (!url.trim()) return
     addEvidence.mutate({ type, url, description }, {
@@ -322,10 +337,48 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
     })
   }
 
+  const handleFilesDrop = (validFiles, errors) => {
+    if (errors && errors.length > 0) {
+      toast.error(errors[0].error)
+    }
+    if (validFiles && validFiles.length > 0) {
+      const file = validFiles[0]
+      setSelectedFile(file)
+      // Revoke old URL if it exists
+      if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl)
+      setFilePreviewUrl(URL.createObjectURL(file))
+      setDescription(file.name)
+    }
+  }
+
+  const handleUploadSubmit = (e) => {
+    e.preventDefault()
+    if (!selectedFile) return
+    uploadAttachment.mutate(selectedFile, {
+      onSuccess: () => {
+        setSelectedFile(null)
+        setDescription('')
+        if (filePreviewUrl) {
+          URL.revokeObjectURL(filePreviewUrl)
+          setFilePreviewUrl(null)
+        }
+      }
+    })
+  }
+
+  const cancelUpload = () => {
+    setSelectedFile(null)
+    setDescription('')
+    if (filePreviewUrl) {
+      URL.revokeObjectURL(filePreviewUrl)
+      setFilePreviewUrl(null)
+    }
+  }
+
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <Heading level={4} className="text-base font-semibold">Evidence & Attachments</Heading>
+        <Heading level={4} className="text-base font-semibold">Evidence</Heading>
         <span className="text-xs text-[var(--text-muted)] font-mono">{evidence.length} Items</span>
       </div>
 
@@ -427,43 +480,98 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
 
       {/* Add Evidence Form */}
       {hasEditPerm && (
-        <form onSubmit={handleSubmit} className="p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] space-y-3 mt-4">
-          <Text size="xs" variant="muted" className="font-semibold uppercase tracking-wider">Add Evidence Link</Text>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Select value={type} onValueChange={setType}>
-              <SelectTrigger className="sm:w-[130px] h-9 text-xs">
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="LINK">Link</SelectItem>
-                <SelectItem value="GITHUB">GitHub</SelectItem>
-                <SelectItem value="SCREENSHOT">Screenshot</SelectItem>
-                <SelectItem value="RECORDING">Recording</SelectItem>
-                <SelectItem value="SNIPPET">Snippet</SelectItem>
-                <SelectItem value="NOTE">Note</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input 
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="Paste URL or media link..."
-              className="flex-1 h-9 text-xs"
-              disabled={addEvidence.isPending}
-            />
+        <div className="p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] space-y-4 mt-4">
+          <div className="flex items-center gap-4 border-b border-[var(--color-border-subtle)] pb-2">
+            <button
+              onClick={() => setActiveTab('LINK')}
+              className={cn("text-xs font-semibold uppercase tracking-wider pb-1 border-b-2 transition-colors", activeTab === 'LINK' ? "border-[var(--accent)] text-[var(--accent)]" : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]")}
+            >
+              Add Link
+            </button>
+            <button
+              onClick={() => setActiveTab('UPLOAD')}
+              className={cn("text-xs font-semibold uppercase tracking-wider pb-1 border-b-2 transition-colors", activeTab === 'UPLOAD' ? "border-[var(--accent)] text-[var(--accent)]" : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]")}
+            >
+              Upload Image
+            </button>
           </div>
-          <div className="flex gap-2">
-            <Input 
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Short title / description (optional)..."
-              className="flex-1 h-9 text-xs"
-              disabled={addEvidence.isPending}
-            />
-            <Button type="submit" size="sm" className="h-9 px-4 shrink-0" disabled={!url.trim() || addEvidence.isPending}>
-              Attach
-            </Button>
-          </div>
-        </form>
+
+          {activeTab === 'LINK' ? (
+            <form onSubmit={handleSubmitLink} className="space-y-3">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Select value={type} onValueChange={setType}>
+                  <SelectTrigger className="sm:w-[130px] h-9 text-xs">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="LINK">Link</SelectItem>
+                    <SelectItem value="GITHUB">GitHub</SelectItem>
+                    <SelectItem value="RECORDING">Recording</SelectItem>
+                    <SelectItem value="SNIPPET">Snippet</SelectItem>
+                    <SelectItem value="NOTE">Note</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input 
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="Paste URL or media link..."
+                  className="flex-1 h-9 text-xs"
+                  disabled={addEvidence.isPending}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Input 
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Short title / description (optional)..."
+                  className="flex-1 h-9 text-xs"
+                  disabled={addEvidence.isPending}
+                />
+                <Button type="submit" size="sm" className="h-9 px-4 shrink-0" disabled={!url.trim() || addEvidence.isPending}>
+                  Attach
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleUploadSubmit} className="space-y-3">
+              {!selectedFile ? (
+                <FileDropzone 
+                  onFilesDrop={handleFilesDrop} 
+                  accept="image/*"
+                  multiple={false}
+                  disabled={uploadAttachment.isPending}
+                />
+              ) : (
+                <div className="space-y-3 border border-[var(--color-border-subtle)] p-3 rounded-lg bg-[var(--bg-subtle)]">
+                  <div className="flex items-start gap-4">
+                    <div className="w-24 h-24 shrink-0 rounded overflow-hidden bg-black/5">
+                      <img src={filePreviewUrl} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <Text className="text-sm font-medium truncate">{selectedFile.name}</Text>
+                      <Text size="xs" variant="muted">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</Text>
+                      <Input 
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Image description (optional)..."
+                        className="w-full h-8 text-xs mt-1"
+                        disabled={uploadAttachment.isPending}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--color-border-subtle)]">
+                    <Button type="button" variant="ghost" size="sm" onClick={cancelUpload} disabled={uploadAttachment.isPending}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" size="sm" disabled={uploadAttachment.isPending}>
+                      {uploadAttachment.isPending ? 'Uploading...' : 'Upload Image'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </form>
+          )}
+        </div>
       )}
 
       {/* Image Preview Overlay Modal */}

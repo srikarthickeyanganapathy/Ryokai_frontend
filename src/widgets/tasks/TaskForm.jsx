@@ -10,9 +10,22 @@ import { useQuery } from '@tanstack/react-query'
 import { getOrgMembers, getOrgTeams } from '@/features/organizations/api/organization.api'
 import { projectsApi } from '@/features/projects/api'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { Textarea } from '@/shared/ui/Textarea'
+import { MultiSelect } from '@/shared/ui/MultiSelect'
+import { useTaskSearch } from '@/features/tasks/hooks/useTasks'
+import { crewApi } from '@/features/crews/api/crew.api'
+import { queryKeys } from '@/shared/api/queryKeys'
 
-export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, fixedProjectId, fixedTeamId }) {
+export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, fixedProjectId, fixedTeamId, fixedCrewId }) {
   const { workspaceMode, activeOrganization } = useWorkspace()
+  const [taskSearchQuery, setTaskSearchQuery] = useState('')
+  const { data: searchTasks = [], isLoading: isSearchLoading } = useTaskSearch(taskSearchQuery)
+
+  const { data: crews = [] } = useQuery({
+    queryKey: queryKeys.crews.all,
+    queryFn: () => crewApi.getCrews(),
+    enabled: workspaceMode === 'CREWS' && !fixedCrewId
+  })
 
   // FE Bug Fix: if the task is explicitly tied to a project or team, it is NOT a personal task.
   const hasOrgContext = !!defaultValues?.projectId || !!defaultValues?.teamId;
@@ -55,6 +68,8 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
       tags: '',
       teamId: '',
       projectId: '',
+      crewId: fixedCrewId ? fixedCrewId.toString() : '',
+      dependsOnIds: [],
     },
   })
 
@@ -65,16 +80,23 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
   }, [watchedTeamId])
 
   const handleSubmit = (data) => {
-    // Format the payload before submission
     const payload = {
       ...data,
       teamId: data.teamId ? parseInt(data.teamId, 10) : null,
       projectId: data.projectId ? parseInt(data.projectId, 10) : null,
+      crewId: data.crewId ? parseInt(data.crewId, 10) : null,
       tags: data.tags || '',
-      // Empty string dueDate causes Jackson 500 — convert to null
       dueDate: data.dueDate || null,
+      dependsOnIds: data.dependsOnIds || [],
     }
     onSubmit(payload)
+  }
+
+  const handleKeyDown = (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      form.handleSubmit(handleSubmit)();
+    }
   }
 
   return (
@@ -103,7 +125,32 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Input placeholder="Task description" {...field} />
+                  <Textarea 
+                    placeholder="Task description... (Ctrl+Enter to save)" 
+                    onKeyDown={handleKeyDown}
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="dependsOnIds"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Dependencies (Blocked By)</FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={searchTasks.map(t => ({ value: t.id, label: t.title }))}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onSearch={setTaskSearchQuery}
+                    placeholder="Search tasks to depend on..."
+                    loading={isSearchLoading}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -210,7 +257,35 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
             )}
           />
 
-          {!isPersonalMode && !fixedProjectId && !fixedTeamId && (
+          {workspaceMode === 'CREWS' && !fixedCrewId && (
+            <FormField
+              control={form.control}
+              name="crewId"
+              rules={{ required: 'Crew is required' }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Crew</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value?.toString() || ""}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Crew" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {crews.map(c => (
+                        <SelectItem key={c.id} value={c.id.toString()}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {!isPersonalMode && workspaceMode === 'ORG' && !fixedProjectId && !fixedTeamId && (
             <div className="grid grid-cols-2 gap-4 border-t pt-4 mt-2">
               <FormField
                 control={form.control}

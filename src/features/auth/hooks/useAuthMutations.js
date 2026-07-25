@@ -10,7 +10,7 @@ export const useLoginMutation = () => {
   const location = useLocation()
   const from = location.state?.from 
     ? `${location.state.from.pathname}${location.state.from.search || ''}`
-    : '/app'
+    : '/' // Redirect to RouteResolver
 
   return useMutation({
     mutationFn: (credentials) => authAPI.login(credentials),
@@ -32,7 +32,7 @@ export const useRegisterMutation = () => {
   const location = useLocation()
   const from = location.state?.from 
     ? `${location.state.from.pathname}${location.state.from.search || ''}`
-    : '/app'
+    : '/' // Redirect to RouteResolver
 
   return useMutation({
     mutationFn: (userData) => authAPI.register(userData),

@@ -6,6 +6,9 @@ import { Heading, Text, Label } from '@/shared/ui/Typography'
 import { cn } from '@/shared/lib/cn'
 import { useUpdateNote, useDeleteNote, useCreateNote } from '@/features/notes/hooks/useNotes'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
+import { toast } from 'sonner'
+import { SaveToggle } from '@/features/saved/components/SaveToggle'
+import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
 import { MarkdownPreviewer } from '@/shared/ui/MarkdownPreviewer'
 
 const COLORS = [
@@ -200,6 +203,15 @@ export function NotePanel({ note, isOpen, onClose }) {
                   >
                     <Pin className={cn('w-4 h-4', formData.isPinned && 'fill-current')} />
                   </IconButton>
+
+                  {!isNew && note?.id && (
+                     <SaveToggle 
+                        entityType={ENTITY_TYPES.NOTE} 
+                        entityId={note.id} 
+                        disabled={updateNote.isPending} 
+                        className="mr-1" 
+                      />
+                  )}
 
                   {!isNew && (
                     <IconButton

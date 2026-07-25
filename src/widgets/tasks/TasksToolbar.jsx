@@ -7,7 +7,7 @@ import { Input } from '@/shared/ui/Input'
 import { Button, IconButton } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
-import { useCreateTask } from '@/features/tasks/hooks/useTasks'
+import { useCreateTaskWithDependencies } from '@/features/tasks/hooks/useTasks'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
 import { Checkbox } from '@/shared/ui/Checkbox'
@@ -45,7 +45,7 @@ export function TasksToolbar({
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [sortOpen, setSortOpen] = useState(false)
-  const createTaskMutation = useCreateTask()
+  const createTaskMutation = useCreateTaskWithDependencies()
   const { workspaceMode } = useWorkspace()
   const isPersonalMode = workspaceMode === 'PERSONAL'
   const canCreate = true // Anyone can create personal/assigned tasks

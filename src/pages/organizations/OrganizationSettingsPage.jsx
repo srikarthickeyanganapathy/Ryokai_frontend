@@ -5,9 +5,14 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { Icons } from '@/shared/ui/Icons'
-import { useOrganization, useOrgMembers, useOrgTeams } from '@/features/organizations/hooks/useOrganizations'
+import { useOrganization, useOrgMembers, useOrgTeams, useUpdateOrganization } from '@/features/organizations/hooks/useOrganizations'
 import { AdminLeaveModal } from '@/widgets/organizations/AdminLeaveModal'
 import { usePermissions } from '@/shared/hooks/usePermissions'
+import { useForm } from 'react-hook-form'
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/shared/forms'
+import { Input } from '@/shared/ui/Input'
+import { Textarea } from '@/shared/ui/Textarea'
+import { Edit2 } from 'lucide-react'
 
 function formatDate(isoString) {
   if (!isoString) return '—'
@@ -23,6 +28,32 @@ export function OrganizationSettingsPage() {
   const { data: teams = [], isLoading: teamsLoading } = useOrgTeams(orgId)
   const [adminLeaveModalOpen, setAdminLeaveModalOpen] = useState(false)
   const { isOrgAdmin } = usePermissions()
+  
+  const [isEditing, setIsEditing] = useState(false)
+  const updateOrgMutation = useUpdateOrganization(orgId)
+  
+  const form = useForm({
+    defaultValues: {
+      name: org?.name || '',
+      description: org?.description || ''
+    }
+  })
+
+  // Reset form when org loads
+  React.useEffect(() => {
+    if (org) {
+      form.reset({
+        name: org.name || '',
+        description: org.description || ''
+      })
+    }
+  }, [org, form])
+
+  const onSubmit = (data) => {
+    updateOrgMutation.mutate(data, {
+      onSuccess: () => setIsEditing(false)
+    })
+  }
   
   if (isLoading) {
     return (
@@ -67,17 +98,65 @@ export function OrganizationSettingsPage() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8 pb-4 border-b border-[var(--color-border-subtle)]"
+        className="mb-8 pb-4 border-b border-[var(--color-border-subtle)] flex items-start justify-between"
       >
-        <div className="flex items-center gap-2 mb-1">
-          <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
-            MANAGE Mode
-          </span>
-          <span className="text-[11px] text-[var(--text-muted)]">• Organization Administration</span>
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
+              MANAGE Mode
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)]">• Organization Administration</span>
+          </div>
+          {isEditing ? (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 space-y-4 max-w-xl">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  rules={{ required: 'Name is required' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Organization Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter organization name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description (Optional)</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="What is this organization about?" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="flex items-center gap-2 pt-2">
+                  <Button type="submit" isLoading={updateOrgMutation.isPending}>Save Changes</Button>
+                  <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+                </div>
+              </form>
+            </Form>
+          ) : (
+            <>
+              <Heading level={2} className="tracking-tight text-[22px] font-semibold mb-1">{org.name}</Heading>
+              {org.description && (
+                <Text variant="muted" className="max-w-2xl text-[13px]">{org.description}</Text>
+              )}
+            </>
+          )}
         </div>
-        <Heading level={2} className="tracking-tight text-[22px] font-semibold mb-1">{org.name}</Heading>
-        {org.description && (
-          <Text variant="muted" className="max-w-2xl text-[13px]">{org.description}</Text>
+        {!isEditing && isOrgAdmin && (
+          <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+            <Edit2 className="w-4 h-4 mr-2" />
+            Edit Profile
+          </Button>
         )}
       </motion.div>
 

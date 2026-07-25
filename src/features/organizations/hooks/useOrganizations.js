@@ -8,6 +8,7 @@ export const useOrganizations = (options = {}) => {
   return useQuery({
     queryKey: queryKeys.organizations.all,
     queryFn: () => orgApi.getUserOrganizations(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
     ...options,
   });
 };
@@ -31,6 +32,22 @@ export const useCreateOrganization = () => {
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to create organization');
+    },
+  });
+};
+
+export const useUpdateOrganization = (orgId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload) => orgApi.updateOrganization(orgId, payload),
+    onSuccess: () => {
+      toast.success('Organization updated');
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(orgId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to update organization');
     },
   });
 };
