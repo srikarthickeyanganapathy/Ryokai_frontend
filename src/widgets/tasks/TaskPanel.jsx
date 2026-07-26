@@ -20,12 +20,12 @@ import {
   useSubmitTask, useApproveTask, useRejectTask, useRecallTask, useClaimTask,
   useCompletePersonalTask, useCompleteCrewTask, useReorderChecklistItems
 } from '@/features/tasks/hooks/useTasks'
-import { useCrewMembers } from '@/features/crews/hooks/useCrews'
+import { useCrewMembers } from '@/features/crew/crews/hooks/useCrews'
 import { useUsersList } from '@/features/auth/hooks/useUser'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { Archive, CheckCircle2, Send, RotateCcw, UserPlus, XCircle, Link2 } from 'lucide-react'
-import { getKanbanColumnForTask } from '@/shared/lib/status'
-import { usePermissions } from '@/shared/hooks/usePermissions'
+import { getKanbanColumnForTask, toBackendStatus } from '@/shared/lib/status'
+import { usePermissions } from '@/features/auth/hooks/usePermissions'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useRealtime } from '@/app/providers/RealTimeProvider'
@@ -33,7 +33,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { toast } from 'sonner'
-import { SaveToggle } from '@/features/saved/components/SaveToggle'
+import { SaveToggle } from '@/features/personal/saved/components/SaveToggle'
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
 
 /**
@@ -100,8 +100,8 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   const creatorUsername = typeof task?.creator === 'object' ? task?.creator?.username : task?.creator
   const assigneeUsername = typeof task?.assignee === 'object' ? task?.assignee?.username : (task?.assignee || task?.assignedTo)
 
-  const isCreator = creatorUsername === user?.username
-  const isAssignee = assigneeUsername === user?.username
+  const isCreator = creatorUsername === user?.username || creatorUsername === user?.id
+  const isAssignee = assigneeUsername === user?.username || assigneeUsername === user?.id || (typeof task?.assignee === 'object' && task?.assignee?.id === user?.id) || (typeof task?.assignedTo === 'object' && task?.assignedTo?.id === user?.id)
   const canAlterCreator = canAlter(creatorUsername)
   const canAlterAssignee = canAlter(assigneeUsername)
 
@@ -145,7 +145,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
     }
     if (task.teamId) return orgUsers.filter(u => u.teamId === task.teamId)
     return orgUsers
-  }, [orgUsers, crewMembersData, task?.teamId, task?.crewId, task?.crew])
+  }, [orgUsers, crewMembersData, task])
 
   // Independent Attached Utility States (Default: Only Inspector Opens First)
   const [isCommentsOpen, setIsCommentsOpen] = useState(false)
@@ -161,6 +161,12 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   const descRef = useRef(null)
   const [isReassignOpen, setIsReassignOpen] = useState(false)
 
+  if (task?.id !== syncedTaskId) {
+    setSyncedTaskId(task?.id)
+    setLocalEdits({})
+    setIsDirty(false)
+  }
+
   const { subscribeToTask } = useRealtime()
   const queryClient = useQueryClient()
 
@@ -168,7 +174,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   useEffect(() => {
     if (isOpen && task?.id) {
       return subscribeToTask(task.id, (updatedTask) => {
-        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(task.id) })
+        queryClient.setQueryData([...queryKeys.tasks.detail(task.id)], updatedTask)
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.lists() })
       })
     }
@@ -183,10 +189,8 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
       if (descRef.current && descRef.current.textContent !== (task.description || '')) {
         descRef.current.textContent = task.description || ''
       }
-      setLocalEdits({})
-      setIsDirty(false)
     }
-  }, [isOpen, task?.id, task?.title, task?.description])
+  }, [isOpen, task])
 
   const submitTaskMutation = useSubmitTask()
   const approveTaskMutation = useApproveTask()
@@ -198,12 +202,13 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
 
   const renderStateMachineActions = (size = "sm") => {
     if (!task) return null
-    const currentStatus = (task.currentStatus || task.status || '').toUpperCase()
+    const currentStatus = toBackendStatus(task.currentStatus || task.status)
     const isCrewTask = !!(task.crewId || task.crew)
     const isTaskPersonal = isPersonal || task.isPersonal
+    const isUnclaimed = !task.assignedTo && !task.assignee || task.assignedTo === 'Unassigned' || task.assignee === 'Unassigned' || task.assignedTo === '' || task.assignee === '';
 
     if (isTaskPersonal) {
-      if (currentStatus !== 'DONE' && currentStatus !== 'COMPLETED') {
+      if (currentStatus !== 'DONE' && currentStatus !== 'COMPLETED' && currentStatus !== 'APPROVED') {
         return (
           <Button 
             size={size} 
@@ -222,7 +227,19 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
     if (isCrewTask) {
       return (
         <div className="flex items-center gap-2">
-          {currentStatus === 'ASSIGNED' && (
+          {isUnclaimed && currentStatus !== 'COMPLETED' && currentStatus !== 'DONE' && (
+            <Button 
+              size={size}
+              variant="outline"
+              className="gap-1.5 border-orange-500/50 text-orange-500 hover:bg-orange-500/10"
+              onClick={() => claimTaskMutation.mutate(task.id)}
+              isLoading={claimTaskMutation.isPending}
+            >
+              <UserPlus className="w-4 h-4" />
+              Claim Task
+            </Button>
+          )}
+          {!isUnclaimed && (currentStatus === 'ASSIGNED' || currentStatus === 'TODO') && (
             <Button 
               size={size}
               className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
@@ -240,7 +257,20 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
     // Default Org Workflow
     return (
       <div className="flex items-center gap-2">
-        {(currentStatus === 'ASSIGNED' || currentStatus === 'REJECTED') && isAssignee && (
+        {isUnclaimed && currentStatus !== 'COMPLETED' && currentStatus !== 'APPROVED' && currentStatus !== 'DONE' && (
+          <Button 
+            size={size}
+            variant="outline"
+            className="gap-1.5 border-orange-500/50 text-orange-500 hover:bg-orange-500/10"
+            onClick={() => claimTaskMutation.mutate(task.id)}
+            isLoading={claimTaskMutation.isPending}
+          >
+            <UserPlus className="w-4 h-4" />
+            Claim Task
+          </Button>
+        )}
+
+        {(currentStatus === 'TODO' || currentStatus === 'ASSIGNED' || currentStatus === 'REJECTED') && (isAssignee || isCreator || canEditTask) && !isUnclaimed && (
           <Button 
             size={size}
             className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white gap-1.5"
@@ -252,7 +282,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
           </Button>
         )}
         
-        {currentStatus === 'SUBMITTED' && isAssignee && (
+        {currentStatus === 'SUBMITTED' && (isAssignee || isCreator || canEditTask) && (
           <Button 
             size={size}
             variant="outline"
@@ -265,7 +295,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
           </Button>
         )}
 
-        {currentStatus === 'SUBMITTED' && canReview && (
+        {currentStatus === 'SUBMITTED' && (canReview || isCreator) && (
           <>
             <Button 
               size={size}

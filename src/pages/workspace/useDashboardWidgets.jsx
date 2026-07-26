@@ -1,5 +1,5 @@
 import React from 'react';
-import { FocusWidget } from '@/features/focus/components/FocusWidget';
+import { FocusWidget } from '@/features/personal/focus/components/FocusWidget';
 import { TodayProgressWidget } from '@/widgets/workspace/TodayProgressWidget';
 import { TaskTimelineWidget } from '@/widgets/workspace/TaskTimelineWidget';
 import { ChecklistProgressWidget } from '@/widgets/workspace/ChecklistProgressWidget';

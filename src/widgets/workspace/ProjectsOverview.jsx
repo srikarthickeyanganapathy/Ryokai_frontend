@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { Text } from '@/shared/ui/Typography'
-import { useProjects } from '@/features/projects/hooks/useProjects'
+import { useProjects } from '@/features/crew/projects/hooks/useProjects'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { useNavigate } from 'react-router-dom'
 

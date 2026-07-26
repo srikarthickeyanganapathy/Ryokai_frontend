@@ -5,7 +5,7 @@ import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { Icons } from '@/shared/ui/Icons';
 import { Input } from '@/shared/ui/Input';
-import { useCrews, useCreateCrew } from '@/features/crews/hooks/useCrews';
+import { useCrews, useCreateCrew } from '@/features/crew/crews/hooks/useCrews';
 import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar';
 import { toast } from 'sonner';

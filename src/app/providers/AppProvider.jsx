@@ -4,8 +4,8 @@ import { queryClient } from '@/shared/api/queryClient'
 import { AuthProvider } from '@/features/auth/model/AuthContext'
 import { RealtimeProvider } from './RealTimeProvider'
 
-import { WorkspaceProvider } from '@/app/providers/WorkspaceProvider'
-import { Toaster } from '@/shared/ui/Toast'
+import { WorkspaceProvider } from './WorkspaceProvider'
+import { Toaster } from './Toaster'
 import { TooltipProvider } from '@/shared/ui/Tooltip'
 
 export function AppProvider({ children }) {

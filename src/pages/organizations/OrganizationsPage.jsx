@@ -5,9 +5,9 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
 import { Spinner } from '@/shared/ui/Spinner'
-import { useOrganizations, useCreateOrganization } from '@/features/organizations/hooks/useOrganizations'
+import { useOrganizations, useCreateOrganization } from '@/features/organization/organizations/hooks/useOrganizations'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
-import { OrganizationForm } from '@/widgets/organizations/OrganizationForm'
+import { OrganizationForm } from '@/features/organization/organizations/components/org-settings/OrganizationForm'
 
 // Backend note: OrganizationMembership has a unique constraint on user_id alone —
 // each user can belong to at most one organization, ever (enforced in

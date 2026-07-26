@@ -16,8 +16,8 @@ import { Icons } from '@/shared/ui/Icons'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { ErrorState } from '@/shared/ui/ErrorState'
 import { Modal, ModalTrigger, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/shared/ui/Modal'
-import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from '@/shared/ui/Drawer'
-import { Toaster, toast } from '@/shared/ui/Toast'
+import { toast } from '@/shared/ui/Toast'
+import { Toaster } from '@/app/providers/Toaster'
 
 // Phase 3 Infrastructure Imports
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem, SelectLabel } from '@/shared/ui/Select'

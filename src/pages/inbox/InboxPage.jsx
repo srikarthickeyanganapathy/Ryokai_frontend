@@ -10,7 +10,7 @@ import {
   useMarkAllRead,
   useDeleteNotification,
 } from '@/features/notifications/hooks/useNotifications'
-import { useAcceptInvite, useDeclineInvite } from '@/features/organizations/hooks/useOrganizations'
+import { useAcceptInvite, useDeclineInvite } from '@/features/organization/organizations/hooks/useOrganizations'
 import { NotificationPanel } from '@/widgets/notifications/NotificationPanel'
 
 const typeIcons = {

@@ -5,9 +5,9 @@ import { Heading, Text, Label } from '@/shared/ui/Typography'
 import { Modal, ModalContent, ModalHeader, ModalTitle } from '@/shared/ui/Modal'
 import { Input } from '@/shared/ui/Input'
 import { cn } from '@/shared/lib/cn'
-import { usePermissions } from '@/shared/hooks/usePermissions'
+import { usePermissions } from '@/features/auth/hooks/usePermissions'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
-import { useGoals, useCreateGoal, useUpdateGoal } from '@/features/goals/hooks/useGoals'
+import { useGoals, useCreateGoal, useUpdateGoal } from '@/features/organization/goals/hooks/useGoals'
 
 const STATUS_COLORS = {
   ON_TRACK: 'text-[var(--accent)] bg-[var(--accent-soft)]',

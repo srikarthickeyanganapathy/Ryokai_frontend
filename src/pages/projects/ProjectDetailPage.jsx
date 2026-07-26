@@ -8,11 +8,11 @@ import { Badge } from '@/shared/ui/Badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
-import { useProject, useUpdateProject, useDeleteProject, useUnshareProjectFromCrew } from '@/features/projects/hooks/useProjects'
-import { useTeam, useOrgMembers } from '@/features/organizations/hooks/useOrganizations'
-import { useCrewMembers, useCrews } from '@/features/crews/hooks/useCrews'
-import { ProjectForm } from '@/widgets/projects/ProjectForm'
-import { CrewProjectShareModal } from '@/widgets/projects/CrewProjectShareModal'
+import { useProject, useUpdateProject, useDeleteProject, useUnshareProjectFromCrew } from '@/features/crew/projects/hooks/useProjects'
+import { useTeam, useOrgMembers } from '@/features/organization/organizations/hooks/useOrganizations'
+import { useCrewMembers, useCrews } from '@/features/crew/crews/hooks/useCrews'
+import { ProjectForm } from '@/features/crew/projects/components/ProjectForm'
+import { CrewProjectShareModal } from '@/features/crew/projects/components/CrewProjectShareModal'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { useTaskList, useCreateTask, useReassignTask } from '@/features/tasks/hooks/useTasks'
 import { TaskForm } from '@/widgets/tasks/TaskForm'
@@ -20,7 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { toast } from 'sonner'
 import { cn } from '@/shared/lib/cn'
 import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
-import { SaveToggle } from '@/features/saved/components/SaveToggle'
+import { SaveToggle } from '@/features/personal/saved/components/SaveToggle'
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
 
 function formatDate(isoString) {
@@ -36,7 +36,7 @@ const defaultStatusColor = 'bg-[var(--bg-subtle)] text-[var(--text-muted)] borde
 
 
 
-import { usePermissions } from '@/shared/hooks/usePermissions'
+import { usePermissions } from '@/features/auth/hooks/usePermissions'
 
 export function ProjectDetailPage() {
   const { projectId } = useParams()

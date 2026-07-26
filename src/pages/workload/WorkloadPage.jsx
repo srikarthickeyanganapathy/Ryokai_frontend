@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { usePermissions } from '@/shared/hooks/usePermissions'
-import { useWorkload } from '@/features/workload/hooks/useWorkload'
+import { usePermissions } from '@/features/auth/hooks/usePermissions'
+import { useWorkload } from '@/features/organization/workload/hooks/useWorkload'
 import { cn } from '@/shared/lib/cn'
 import { DataTable } from '@/shared/ui/data-table/DataTable'
 

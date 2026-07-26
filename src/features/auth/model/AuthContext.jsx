@@ -4,6 +4,7 @@ import { authAPI } from '../api/auth.api'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { scheduleProactiveRefresh, cancelProactiveRefresh } from '@/shared/api/api'
+import { usePermissionStore } from '../store/permissionStore'
 
 export const AuthContext = createContext(null)
 
@@ -56,10 +57,19 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
+    const handleAuthForbidden = () => {
+      usePermissionStore.getState().clearPermissions()
+      queryClient.invalidateQueries({ queryKey: ['admin', 'permissions'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'roles'] })
+      queryClient.invalidateQueries({ queryKey: ['users', 'me'] })
+    }
+
     window.addEventListener('session-expired', handleSessionExpired)
+    window.addEventListener('auth-forbidden', handleAuthForbidden)
     document.addEventListener('visibilitychange', handleVisibilityChange)
     return () => {
       window.removeEventListener('session-expired', handleSessionExpired)
+      window.removeEventListener('auth-forbidden', handleAuthForbidden)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [checkAuth, queryClient])

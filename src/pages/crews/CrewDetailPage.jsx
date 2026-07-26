@@ -8,7 +8,7 @@ import { Input } from '@/shared/ui/Input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar';
 import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { useTaskList, useCompleteCrewTask, useClaimTask } from '@/features/tasks/hooks/useTasks';
-import { useProjects } from '@/features/projects/hooks/useProjects';
+import { useProjects } from '@/features/crew/projects/hooks/useProjects';
 import {
   useCrew,
   useCrewMembers,
@@ -27,8 +27,8 @@ import {
   useConvertMessageToTask,
   useCreateCrewTask,
   useTransferCrewOwnership,
-} from '@/features/crews/hooks/useCrews';
-import { useWhiteboards, useCreateWhiteboard, useDeleteWhiteboard } from '@/features/whiteboards/hooks/useWhiteboards';
+} from '@/features/crew/crews/hooks/useCrews';
+import { useWhiteboards, useCreateWhiteboard, useDeleteWhiteboard } from '@/features/crew/whiteboards/hooks/useWhiteboards';
 import { toast } from 'sonner';
 import { Label } from '@/shared/ui/Typography/Label';
 import { cn } from '@/shared/lib/cn';

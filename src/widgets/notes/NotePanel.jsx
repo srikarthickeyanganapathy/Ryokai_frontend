@@ -4,10 +4,10 @@ import { Pin, Trash2, X, Check, Save, StickyNote, Bold, Italic, Heading as Headi
 import { Button, IconButton } from '@/shared/ui/Button'
 import { Heading, Text, Label } from '@/shared/ui/Typography'
 import { cn } from '@/shared/lib/cn'
-import { useUpdateNote, useDeleteNote, useCreateNote } from '@/features/notes/hooks/useNotes'
+import { useUpdateNote, useDeleteNote, useCreateNote } from '@/features/personal/notes/hooks/useNotes'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { toast } from 'sonner'
-import { SaveToggle } from '@/features/saved/components/SaveToggle'
+import { SaveToggle } from '@/features/personal/saved/components/SaveToggle'
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
 import { MarkdownPreviewer } from '@/shared/ui/MarkdownPreviewer'
 

@@ -7,13 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Settings } from 'lucide-react'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { useQuery } from '@tanstack/react-query'
-import { getOrgMembers, getOrgTeams } from '@/features/organizations/api/organization.api'
-import { projectsApi } from '@/features/projects/api'
+import { getOrgMembers, getOrgTeams } from '@/features/organization/organizations/api/organization.api'
+import { projectsApi } from '@/features/crew/projects/api'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { Textarea } from '@/shared/ui/Textarea'
 import { MultiSelect } from '@/shared/ui/MultiSelect'
 import { useTaskSearch } from '@/features/tasks/hooks/useTasks'
-import { crewApi } from '@/features/crews/api/crew.api'
+import { crewApi } from '@/features/crew/crews/api/crew.api'
 import { queryKeys } from '@/shared/api/queryKeys'
 
 export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, fixedProjectId, fixedTeamId, fixedCrewId }) {

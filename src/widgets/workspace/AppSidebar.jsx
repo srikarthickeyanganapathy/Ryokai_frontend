@@ -8,9 +8,9 @@ import { Text } from '@/shared/ui/Typography'
 import { cn } from '@/shared/lib/cn'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
-import { usePermissions } from '@/shared/hooks/usePermissions'
-import { useCrews } from '@/features/crews/hooks/useCrews'
-import { useOrgTeams } from '@/features/organizations/hooks/useOrganizations'
+import { usePermissions } from '@/features/auth/hooks/usePermissions'
+import { useCrews } from '@/features/crew/crews/hooks/useCrews'
+import { useOrgTeams } from '@/features/organization/organizations/hooks/useOrganizations'
 import {
   Select,
   SelectContent,

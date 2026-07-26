@@ -134,16 +134,7 @@ api.interceptors.response.use(
 
       if (error.response.status === 403) {
         toast.error("You don't have permission to do that");
-        // AUTH-003: Clear the permission snapshot and invalidate queryClient
-        import('../../features/auth/store/permissionStore').then(({ usePermissionStore }) => {
-          usePermissionStore.getState().clearPermissions();
-        });
-        import('./queryClient').then(({ queryClient }) => {
-          // Invalidate admin roles/permissions to force re-fetch
-          queryClient.invalidateQueries({ queryKey: ['admin', 'permissions'] });
-          queryClient.invalidateQueries({ queryKey: ['admin', 'roles'] });
-          queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
-        });
+        window.dispatchEvent(new Event('auth-forbidden'));
       } else if (error.response.status === 409) {
         const code = error.response.data?.code;
         if (code === 'OPTIMISTIC_LOCK_CONFLICT') {

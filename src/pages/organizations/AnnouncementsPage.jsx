@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { usePermissions } from '@/shared/hooks/usePermissions';
-import { useAnnouncements, useCreateAnnouncement, useDeleteAnnouncement } from '@/features/organizations/hooks/useAnnouncements';
+import { usePermissions } from '@/features/auth/hooks/usePermissions';
+import { useAnnouncements, useCreateAnnouncement, useDeleteAnnouncement } from '@/features/organization/organizations/hooks/useAnnouncements';
 import { Heading, Text, Label } from '@/shared/ui/Typography';
 import { Megaphone, Plus, Trash2, Clock, Loader2 } from 'lucide-react';
 import { formatRelative } from 'date-fns';

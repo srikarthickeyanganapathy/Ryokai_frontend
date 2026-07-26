@@ -3,8 +3,8 @@ import { Button } from '@/shared/ui/Button';
 import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
-import { WhiteboardCanvas } from '@/features/whiteboards/components/WhiteboardCanvas'
-import { useWhiteboards } from '@/features/whiteboards/hooks/useWhiteboards'
+import { WhiteboardCanvas } from '@/features/crew/whiteboards/components/WhiteboardCanvas'
+import { useWhiteboards } from '@/features/crew/whiteboards/hooks/useWhiteboards'
 import { Text } from '@/shared/ui/Typography'
 
 export function WhiteboardPage() {

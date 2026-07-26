@@ -21,11 +21,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { useUsersList } from '@/features/auth/hooks/useUser'
-import { usePermissions } from '@/shared/hooks/usePermissions'
+import { usePermissions } from '@/features/auth/hooks/usePermissions'
 
 import { filterTasksByWorkspace } from '@/shared/lib/workspaceTaskFilter'
-import { useProjects } from '@/features/projects/hooks/useProjects'
-import { useOrgTeams } from '@/features/organizations/hooks/useOrganizations'
+import { useProjects } from '@/features/crew/projects/hooks/useProjects'
+import { useOrgTeams } from '@/features/organization/organizations/hooks/useOrganizations'
 
 export function TasksPage() {
   const [searchParams, setSearchParams] = useSearchParams()

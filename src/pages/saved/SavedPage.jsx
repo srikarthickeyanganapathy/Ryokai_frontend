@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Bookmark, X } from 'lucide-react'
 import { Button } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { useSavedItems, useToggleSave } from '@/features/saved/hooks/useSaved'
+import { useSavedItems, useToggleSave } from '@/features/personal/saved/hooks/useSaved'
 
 const routeFor = (item) => {
   switch (item.entityType) {

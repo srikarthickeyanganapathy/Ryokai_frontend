@@ -5,7 +5,7 @@ import { Button } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Input } from '@/shared/ui/Input'
 import { cn } from '@/shared/lib/cn'
-import { useNotes, useDeleteNote, useUpdateNote } from '@/features/notes/hooks/useNotes'
+import { useNotes, useDeleteNote, useUpdateNote } from '@/features/personal/notes/hooks/useNotes'
 import { NotePanel } from '@/widgets/notes/NotePanel'
 
 const NOTE_COLOR_STYLES = {

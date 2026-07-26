@@ -5,7 +5,7 @@ import { Button, IconButton } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { cn } from '@/shared/lib/cn'
 import { useMarkRead, useDeleteNotification } from '@/features/notifications/hooks/useNotifications'
-import { useAcceptInvite, useDeclineInvite } from '@/features/organizations/hooks/useOrganizations'
+import { useAcceptInvite, useDeclineInvite } from '@/features/organization/organizations/hooks/useOrganizations'
 import { TaskPanel } from '@/widgets/tasks/TaskPanel'
 import { useTaskList } from '@/features/tasks/hooks/useTasks'
 

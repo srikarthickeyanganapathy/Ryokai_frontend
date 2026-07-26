@@ -4,7 +4,7 @@ import { Search, Users } from 'lucide-react'
 import { Input } from '@/shared/ui/Input'
 import { Button } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { useDiscoverCrews, useJoinPublicCrew } from '@/features/crews/hooks/useCrews'
+import { useDiscoverCrews, useJoinPublicCrew } from '@/features/crew/crews/hooks/useCrews'
 
 export function CrewDiscoverPage() {
   const navigate = useNavigate()

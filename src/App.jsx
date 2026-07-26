@@ -44,7 +44,7 @@ const PlatformUsersPage = lazy(() => import("@/pages/platform/PlatformUsersPage"
 const PlatformMonitoringPage = lazy(() => import("@/pages/platform/PlatformMonitoringPage").then(m => ({ default: m.PlatformMonitoringPage })));
 const PlatformAuditPage = lazy(() => import("@/pages/platform/PlatformAuditPage").then(m => ({ default: m.PlatformAuditPage })));
 const PlatformSettingsPage = lazy(() => import("@/pages/platform/PlatformSettingsPage").then(m => ({ default: m.PlatformSettingsPage })));
-const FocusPage = lazy(() => import("@/features/focus/pages/FocusPage").then(m => ({ default: m.FocusPage })));
+const FocusPage = lazy(() => import("@/pages/focus/FocusPage").then(m => ({ default: m.FocusPage })));
 const ProfilePage = lazy(() => import("@/pages/settings/ProfilePage").then(m => ({ default: m.ProfilePage })));
 const SecurityPage = lazy(() => import("@/pages/settings/SecurityPage").then(m => ({ default: m.SecurityPage })));
 const SessionsPage = lazy(() => import("@/pages/settings/SessionsPage").then(m => ({ default: m.SessionsPage })));
@@ -54,6 +54,7 @@ const SavedPage = lazy(() => import("@/pages/saved/SavedPage").then(m => ({ defa
 const WorkloadPage = lazy(() => import("@/pages/workload/WorkloadPage").then(m => ({ default: m.WorkloadPage })));
 const GoalsPage = lazy(() => import("@/pages/goals/GoalsPage").then(m => ({ default: m.GoalsPage })));
 const WhiteboardPage = lazy(() => import("@/pages/whiteboards/WhiteboardPage").then(m => ({ default: m.WhiteboardPage })));
+const AcceptInvitePage = lazy(() => import("@/pages/organizations/AcceptInvitePage").then(m => ({ default: m.AcceptInvitePage })));
 
 export default function App() {
   return (
@@ -79,6 +80,7 @@ export default function App() {
 
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
+              <Route path="/invite/accept/:token" element={<AcceptInvitePage />} />
               
               {/* PLATFORM APP (Control Plane) */}
               <Route path="/platform" element={<PlatformRoute />}>

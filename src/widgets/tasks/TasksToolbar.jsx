@@ -16,7 +16,7 @@ import { BulkCreateTaskModal } from './BulkCreateTaskModal'
 import { Heading, Text } from '@/shared/ui/Typography'
 
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
-import { usePermissions } from '@/shared/hooks/usePermissions'
+import { usePermissions } from '@/features/auth/hooks/usePermissions'
 
 const views = [
   { id: 'all', label: 'All' },
