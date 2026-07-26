@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { useTaskList, useCompletePersonalTask, useSubmitTask, useCreateTask } from '@/features/tasks/hooks/useTasks';
+import { useTaskList, useCompletePersonalTask, useSubmitTask, useCreateTask } from '@/features/task/hooks/useTasks';
 import { Navigate, Link, useNavigate } from 'react-router-dom';
 import { EmptyDashboardState } from '@/widgets/workspace/EmptyDashboardState';
 import { selectWorkloadMatrix } from '@/features/analytics/lib/selectors';
@@ -67,6 +67,8 @@ export function DashboardPage() {
   const completePersonalTask = useCompletePersonalTask();
   const submitTask = useSubmitTask();
 
+  const widgets = useDashboardWidgets(workspaceMode);
+
   const handleCreateOrg = (data) => {
     createOrgMutation.mutate(data, {
       onSuccess: () => setIsCreateOpen(false),
@@ -98,7 +100,7 @@ export function DashboardPage() {
 
   // Redirect to Crews dashboard if in CREWS mode
   if (workspaceMode === 'CREWS') {
-    return <Navigate to="/app/crews" replace />;
+    return <Navigate to="/crews/dashboard" replace />;
   }
 
   const modeBadgeText = workspaceMode === 'ORG' && activeOrganization
@@ -111,8 +113,6 @@ export function DashboardPage() {
     data: workspaceMode === 'ORG' ? selectWorkloadMatrix(tasks) : undefined,
     onTaskClick: setSelectedTask
   };
-
-  const widgets = useDashboardWidgets(workspaceMode);
 
   return (
     <motion.div 

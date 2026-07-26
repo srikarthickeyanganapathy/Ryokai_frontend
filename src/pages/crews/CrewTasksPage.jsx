@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { Heading } from '@/shared/ui/Typography'
-import { useTaskList, useCompleteCrewTask, useDeleteTask } from '@/features/tasks/hooks/useTasks'
+import { useTaskList, useCompleteCrewTask, useDeleteTask } from '@/features/task/hooks/useTasks'
 import { TasksTable } from '@/widgets/tasks/TasksTable'
 import { TaskPanel } from '@/widgets/tasks/TaskPanel'
 import { toast } from 'sonner'

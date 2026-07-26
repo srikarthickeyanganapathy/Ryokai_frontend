@@ -19,13 +19,7 @@ export function TeamsPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { activeOrganization, workspaceMode } = useWorkspace()
-  
-  // Guard for missing org context
-  if (!activeOrganization || workspaceMode === 'PERSONAL') {
-    return <Navigate to="/app" replace />
-  }
-
-  const orgId = activeOrganization.id
+  const orgId = activeOrganization?.id
   const { data: teams = [], isLoading: teamsLoading } = useOrgTeams(orgId)
   const { data: members = [] } = useOrgMembers(orgId)
   
@@ -33,6 +27,11 @@ export function TeamsPage() {
   const [selectedTeam, setSelectedTeam] = useState(null)
   
   const { canManage, canCreateTeam, canManageTeam } = usePermissions()
+
+  // Guard for missing org context
+  if (!activeOrganization || workspaceMode === 'PERSONAL') {
+    return <Navigate to="/app" replace />
+  }
 
   return (
     <div className="flex flex-col min-h-full">

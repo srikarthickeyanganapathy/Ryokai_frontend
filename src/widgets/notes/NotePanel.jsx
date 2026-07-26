@@ -34,31 +34,26 @@ export function NotePanel({ note, isOpen, onClose }) {
   })
   const [isResizing, setIsResizing] = useState(false)
 
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    color: 'default',
-    isPinned: false,
-  })
+  const [formData, setFormData] = useState(() => ({
+    title: note?.title || '',
+    content: note?.content || '',
+    color: note?.color || 'default',
+    isPinned: !!note?.isPinned,
+  }))
+  const [prevNote, setPrevNote] = useState(note)
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen)
 
-  useEffect(() => {
-    if (note) {
-      setFormData({
-        title: note.title || '',
-        content: note.content || '',
-        color: note.color || 'default',
-        isPinned: !!note.isPinned,
-      })
-    } else {
-      setFormData({
-        title: '',
-        content: '',
-        color: 'default',
-        isPinned: false,
-      })
-    }
+  if (note !== prevNote || isOpen !== prevIsOpen) {
+    setPrevNote(note)
+    setPrevIsOpen(isOpen)
+    setFormData({
+      title: note?.title || '',
+      content: note?.content || '',
+      color: note?.color || 'default',
+      isPinned: !!note?.isPinned,
+    })
     setActiveTab('write')
-  }, [note, isOpen])
+  }
 
   const startResizing = useCallback((e) => {
     e.preventDefault()

@@ -4,14 +4,14 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { useTaskList, useUpdateTask, useDeleteTask, useSubmitTask, useApproveTask, useReassignTask, useCompletePersonalTask, useCompleteCrewTask, useRecallTask, useRejectTask } from '@/features/tasks/hooks/useTasks'
+import { useTaskList, useUpdateTask, useDeleteTask, useSubmitTask, useApproveTask, useReassignTask, useCompletePersonalTask, useCompleteCrewTask, useRecallTask, useRejectTask } from '@/features/task/hooks/useTasks'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { TaskForm } from '@/widgets/tasks/TaskForm'
 import { TasksToolbar } from '@/widgets/tasks/TasksToolbar'
 import { TasksTable } from '@/widgets/tasks/TasksTable'
 import { KanbanBoard } from '@/widgets/tasks/KanbanBoard'
 import { TaskPanel } from '@/widgets/tasks/TaskPanel'
-import NebulaView from '@/features/tasks/components/NebulaView'
+import NebulaView from '@/features/task/components/NebulaView'
 import { toast } from 'sonner'
 import { Icons } from '@/shared/ui/Icons'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
@@ -125,7 +125,7 @@ export function TasksPage() {
     })
 
     return result
-  }, [rawTasks, workspaceMode, activeOrganization, activeView, globalFilter, priorityFilter, sortBy, user])
+  }, [rawTasks, workspaceMode, activeOrganization, activeView, globalFilter, priorityFilter, sortBy, user, projectFilter, teamFilter])
 
   // Open task from URL if specified (e.g. from Saved items)
   useEffect(() => {

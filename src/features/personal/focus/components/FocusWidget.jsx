@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { isToday, parseISO } from 'date-fns'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
-import { useTaskList } from '@/features/tasks/hooks/useTasks'
+import { useTaskList } from '@/features/task/hooks/useTasks'
 import { Play, ArrowRight } from 'lucide-react'
 
 export function FocusWidget() {

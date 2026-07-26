@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useOrganizations } from '@/features/organization/organizations/hooks/useOrganizations';
 
@@ -18,42 +18,43 @@ export const WorkspaceProvider = ({ children }) => {
   });
   
   // Default to empty array if undefined/unauthenticated
-  const organizations = rawOrganizations || [];
+  const organizations = useMemo(() => rawOrganizations || [], [rawOrganizations]);
 
   useEffect(() => {
     // If the user logs out, clean up local state
     if (!user) {
-      setWorkspaceMode('PERSONAL');
-      setActiveOrganization(null);
+      queueMicrotask(() => {
+        setWorkspaceMode('PERSONAL');
+        setActiveOrganization(null);
+      });
       return;
     }
 
     if (organizations.length > 0) {
       // Auto-select on first load if we don't have an active org
       if (!activeOrganization) {
-        // Optional: you could auto-switch to ORG mode here if desired:
-        // setWorkspaceMode('ORG');
-        setActiveOrganization(organizations[0]);
+        queueMicrotask(() => {
+          setActiveOrganization(organizations[0]);
+        });
       } else {
-        // SAFETY CHECK: Ensure the currently active organization still exists in the user's fetched list
-        // This handles cases where the user leaves the org, or the org is deleted.
         const stillExists = organizations.find(org => org.id === activeOrganization.id);
-        
         if (!stillExists) {
-          // The org is gone! Downgrade them to personal space gracefully.
-          setWorkspaceMode('PERSONAL');
-          setActiveOrganization(null);
+          queueMicrotask(() => {
+            setWorkspaceMode('PERSONAL');
+            setActiveOrganization(null);
+          });
         } else {
-          // The org still exists. Update the state just in case its name/details were updated.
-          setActiveOrganization(stillExists);
+          queueMicrotask(() => {
+            setActiveOrganization(stillExists);
+          });
         }
       }
     } else {
-      // The user has 0 organizations. 
-      // If they had one selected previously, clear it.
       if (activeOrganization) {
-        setWorkspaceMode('PERSONAL');
-        setActiveOrganization(null);
+        queueMicrotask(() => {
+          setWorkspaceMode('PERSONAL');
+          setActiveOrganization(null);
+        });
       }
     }
   }, [organizations, activeOrganization, user]);
@@ -61,7 +62,9 @@ export const WorkspaceProvider = ({ children }) => {
   // If the user switches to ORG but has no org, fallback to PERSONAL
   useEffect(() => {
     if (workspaceMode === 'ORG' && organizations.length === 0) {
-      setWorkspaceMode('PERSONAL');
+      queueMicrotask(() => {
+        setWorkspaceMode('PERSONAL');
+      });
     }
   }, [workspaceMode, organizations]);
 

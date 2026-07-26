@@ -18,7 +18,7 @@ import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { TaskForm } from '@/widgets/tasks/TaskForm';
-import { useCreateTask } from '@/features/tasks/hooks/useTasks';
+import { useCreateTask } from '@/features/task/hooks/useTasks';
 import { Button } from '@/shared/ui/Button';
 
 export function MiniCalendarWidget({ tasks = [] }) {

@@ -9,6 +9,7 @@ import { usePermissions } from '@/features/auth/hooks/usePermissions'
 import { ProjectCard } from '@/features/crew/projects/components/ProjectCard'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { ProjectForm } from '@/features/crew/projects/components/ProjectForm'
+import { useOrgTeams } from '@/features/organization/organizations/hooks/useOrganizations'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { cn } from '@/shared/lib/cn'
 
@@ -125,6 +126,7 @@ export function ProjectsPage() {
             onSubmit={handleCreateProject}
             isLoading={createProjectMutation.isPending}
             workspaceMode={workspaceMode}
+            useOrgTeamsHook={useOrgTeams}
           />
         </ModalContent>
       </Modal>

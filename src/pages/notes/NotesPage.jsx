@@ -52,11 +52,13 @@ export function NotesPage() {
     if (openNoteId && notes && notes.length > 0) {
       const targetNote = notes.find(n => String(n.id) === String(openNoteId))
       if (targetNote && (!activeNote || activeNote.id !== targetNote.id)) {
-        setActiveNote(targetNote)
-        setIsPanelOpen(true)
+        queueMicrotask(() => {
+          setActiveNote(targetNote)
+          setIsPanelOpen(true)
+        })
       }
     }
-  }, [openNoteId, notes])
+  }, [openNoteId, notes, activeNote])
 
   const togglePin = (note) => {
     updateNote.mutate({ id: note.id, payload: { ...note, isPinned: !note.isPinned } })

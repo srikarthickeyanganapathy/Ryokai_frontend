@@ -7,7 +7,7 @@ import { Icons } from '@/shared/ui/Icons';
 import { Input } from '@/shared/ui/Input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar';
 import { Modal, ModalContent } from '@/shared/ui/Modal';
-import { useTaskList, useCompleteCrewTask, useClaimTask } from '@/features/tasks/hooks/useTasks';
+import { useTaskList, useCompleteCrewTask, useClaimTask } from '@/features/task/hooks/useTasks';
 import { useProjects } from '@/features/crew/projects/hooks/useProjects';
 import {
   useCrew,
@@ -327,6 +327,7 @@ function TasksTab({ crewId, tasks }) {
 /* ==================== DISCORD-STYLE CHANNELS TAB ==================== */
 function ChannelsTab({ crewId, channels, isCreator }) {
   const [selectedChannel, setSelectedChannel] = useState(null);
+  const activeChannel = selectedChannel || (channels.length > 0 ? channels[0] : null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [channelName, setChannelName] = useState('');
   const [channelType, setChannelType] = useState('TEXT');
@@ -335,13 +336,6 @@ function ChannelsTab({ crewId, channels, isCreator }) {
 
   const createChannelMutation = useCreateCrewChannel(crewId);
   const deleteChannelMutation = useDeleteCrewChannel(crewId);
-
-  // Auto-select first channel on load
-  useEffect(() => {
-    if (!selectedChannel && channels.length > 0) {
-      setSelectedChannel(channels[0]);
-    }
-  }, [channels, selectedChannel]);
 
   const textChannels = useMemo(() => channels.filter(c => c.type !== 'VOICE'), [channels]);
   const voiceChannels = useMemo(() => channels.filter(c => c.type === 'VOICE'), [channels]);
@@ -368,7 +362,7 @@ function ChannelsTab({ crewId, channels, isCreator }) {
     if (await confirm({ title: 'Delete this channel and all its messages?', danger: true })) {
       deleteChannelMutation.mutate(id, {
         onSuccess: () => {
-          if (selectedChannel?.id === id) setSelectedChannel(channels.find(c => c.id !== id) || null);
+          if (activeChannel?.id === id) setSelectedChannel(channels.find(c => c.id !== id) || null);
         }
       });
     }
@@ -442,7 +436,7 @@ function ChannelsTab({ crewId, channels, isCreator }) {
             </div>
             <div className="space-y-0.5">
               {textChannels.map((chan) => {
-                const isActive = selectedChannel?.id === chan.id;
+                const isActive = activeChannel?.id === chan.id;
                 return (
                   <div
                     key={chan.id}
@@ -488,7 +482,7 @@ function ChannelsTab({ crewId, channels, isCreator }) {
               </div>
               <div className="space-y-0.5">
                 {voiceChannels.map((chan) => {
-                  const isActive = selectedChannel?.id === chan.id;
+                  const isActive = activeChannel?.id === chan.id;
                   return (
                     <div
                       key={chan.id}
@@ -516,8 +510,8 @@ function ChannelsTab({ crewId, channels, isCreator }) {
 
       {/* 2. DISCORD CENTER CHAT CANVAS (6 Cols) */}
       <div className="lg:col-span-6 flex flex-col bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-2xl overflow-hidden shadow-sm">
-        {selectedChannel ? (
-          <ChannelChatBox crewId={crewId} channel={selectedChannel} />
+        {activeChannel ? (
+          <ChannelChatBox crewId={crewId} channel={activeChannel} />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
             <Icons.message className="w-12 h-12 text-[var(--accent)] mb-3 opacity-60" />

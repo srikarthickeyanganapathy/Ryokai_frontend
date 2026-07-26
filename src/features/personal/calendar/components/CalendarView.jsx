@@ -8,15 +8,14 @@ import { format, addMonths, subMonths, addWeeks, subWeeks, startOfToday, startOf
 import { Button } from '@/shared/ui/Button'
 import { Text, Heading } from '@/shared/ui/Typography'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
-import { TaskForm } from '@/widgets/tasks/TaskForm'
 import { EventForm } from './EventForm'
-import { useCreateTask } from '@/features/tasks/hooks/useTasks'
+import { useCreateTask } from '@/features/task/hooks/useTasks'
 import { useCreateEvent } from '../hooks/useCalendar'
 import { cn } from '@/shared/lib/cn'
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 
-export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEventClick, onVisibleRangeChange }) {
+export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEventClick, onVisibleRangeChange, TaskFormComponent }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const mode = searchParams.get('mode') || 'month'
   
@@ -202,19 +201,21 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
           </div>
 
           {createType === 'task' ? (
-            <TaskForm 
-              onSubmit={handleCreate} 
-              isLoading={createTaskMutation.isPending} 
-              defaultValues={{
-                title: '',
-                description: '',
-                assigneeUsername: '',
-                priority: 'MEDIUM',
-                dueDate: quickAddDate ? format(quickAddDate, `yyyy-MM-dd'T'${format(new Date(), 'HH:mm')}`) : '',
-                tags: '',
-                teamId: '',
-              }}
-            />
+            TaskFormComponent ? (
+              <TaskFormComponent 
+                onSubmit={handleCreate} 
+                isLoading={createTaskMutation.isPending} 
+                defaultValues={{
+                  title: '',
+                  description: '',
+                  assigneeUsername: '',
+                  priority: 'MEDIUM',
+                  dueDate: quickAddDate ? format(quickAddDate, `yyyy-MM-dd'T'${format(new Date(), 'HH:mm')}`) : '',
+                  tags: '',
+                  teamId: '',
+                }}
+              />
+            ) : null
           ) : (
             <EventForm 
               onSubmit={handleCreate} 

@@ -40,10 +40,6 @@ function ExplorerWindowInstance({
   onOpenAnalysis
 }) {
   const explorerDef = EXPLORER_REGISTRY[win.type]
-  if (!explorerDef) return null
-
-  const { Component } = explorerDef
-  const meta = explorerDef
 
   // Per-window GraphWorkspace (independent navigator, shared graph data)
   const { context, navigator, analysis } = useGraphWorkspace({
@@ -51,6 +47,11 @@ function ExplorerWindowInstance({
     allTasks,
     initialTaskId: win.taskId
   })
+
+  if (!explorerDef) return null
+
+  const { Component } = explorerDef
+  const meta = explorerDef
 
   // Sync camera on navigation
   const handleCenterOnGraph = () => {

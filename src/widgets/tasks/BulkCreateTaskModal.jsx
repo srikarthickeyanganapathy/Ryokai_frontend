@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
-import { useBulkAssign } from '../../features/tasks/hooks/useTasks';
+import { useBulkAssign } from '../../features/task/hooks/useTasks';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';

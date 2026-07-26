@@ -1,3 +1,8 @@
+/**
+ * NOTE: Per full-stack audit, TaskDependencyController and task history backend contracts
+ * are unverified / unopened. This explorer component is currently kept as a general visualization
+ * in src/features/task/components/explorers/ rather than pre-committed to a dedicated slice.
+ */
 import React, { useMemo } from 'react'
 import ExplorerNavBar from './ExplorerNavBar'
 import ActivityTimeline from './ActivityTimeline'

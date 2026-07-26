@@ -88,7 +88,7 @@ export function MarkdownPreviewer({ content, className }) {
         elements.push(
           <div key={index} className="flex items-center gap-2 my-1 text-xs text-[var(--text-secondary)]">
             <input type="checkbox" disabled className="rounded border-[var(--color-border-subtle)] text-[var(--accent)]" />
-            <span>{formatInline(line.replace(/^[-\*]\s+\[ \]\s+/, ''))}</span>
+            <span>{formatInline(line.replace(/^[-*]\s+\[ \]\s+/, ''))}</span>
           </div>
         )
         return
@@ -97,7 +97,7 @@ export function MarkdownPreviewer({ content, className }) {
         elements.push(
           <div key={index} className="flex items-center gap-2 my-1 text-xs text-[var(--text-muted)] line-through">
             <input type="checkbox" checked disabled className="rounded border-[var(--color-border-subtle)] text-[var(--accent)]" />
-            <span>{formatInline(line.replace(/^[-\*]\s+\[x\]\s+/, ''))}</span>
+            <span>{formatInline(line.replace(/^[-*]\s+\[x\]\s+/, ''))}</span>
           </div>
         )
         return
@@ -107,7 +107,7 @@ export function MarkdownPreviewer({ content, className }) {
       if (line.startsWith('- ') || line.startsWith('* ')) {
         elements.push(
           <li key={index} className="ml-4 list-disc text-xs text-[var(--text-secondary)] my-0.5 leading-relaxed">
-            {formatInline(line.replace(/^[-\*]\s+/, ''))}
+            {formatInline(line.replace(/^[-*]\s+/, ''))}
           </li>
         )
         return

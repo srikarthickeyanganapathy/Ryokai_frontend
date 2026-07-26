@@ -5,11 +5,12 @@ import { Input } from '@/shared/ui/Input'
 import { Button } from '@/shared/ui/Button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
 import { Checkbox } from '@/shared/ui/Checkbox/Checkbox'
-import { useOrgTeams } from '@/features/organization/organizations/hooks/useOrganizations'
 import { useCrews, useCrewMembers } from '@/features/crew/crews/hooks/useCrews'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 
-export function ProjectForm({ onSubmit, defaultValues, isLoading, workspaceMode }) {
+const defaultUseOrgTeams = () => ({ data: [], isLoading: false })
+
+export function ProjectForm({ onSubmit, defaultValues, isLoading, workspaceMode, useOrgTeamsHook = defaultUseOrgTeams }) {
   const isPersonal = workspaceMode === 'PERSONAL'
   const isCrewMode = workspaceMode === 'CREWS'
   const isOrgMode = workspaceMode === 'ORG'
@@ -31,7 +32,7 @@ export function ProjectForm({ onSubmit, defaultValues, isLoading, workspaceMode 
 
   // Watch organizationId to dynamically fetch its teams
   const orgId = form.watch('organizationId')
-  const { data: teams = [] } = useOrgTeams(orgId ? parseInt(orgId, 10) : null)
+  const { data: teams = [] } = useOrgTeamsHook(orgId ? parseInt(orgId, 10) : null)
 
   // Watch crewId to dynamically fetch its members for collaboration
   const watchCrewId = form.watch('crewId')

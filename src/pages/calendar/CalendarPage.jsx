@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, format } from 'date-fns'
-import { useTaskList } from '@/features/tasks/hooks/useTasks'
+import { useTaskList } from '@/features/task/hooks/useTasks'
 import { useCalendarEvents } from '@/features/personal/calendar/hooks/useCalendar'
 import { CalendarView } from '@/features/personal/calendar/components/CalendarView'
 import { TaskPanel } from '@/widgets/tasks/TaskPanel'
+import { TaskForm } from '@/widgets/tasks/TaskForm'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Badge } from '@/shared/ui/Badge'
@@ -52,6 +53,7 @@ export function CalendarPage() {
           onVisibleRangeChange={setVisibleRange}
           onTaskClick={setSelectedTask}
           onEventClick={setSelectedEvent}
+          TaskFormComponent={TaskForm}
         />
       </div>
       

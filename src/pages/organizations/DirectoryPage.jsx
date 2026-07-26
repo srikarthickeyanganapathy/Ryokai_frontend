@@ -23,8 +23,7 @@ export function DirectoryPage() {
   const { data: roles = [], isLoading: rolesLoading } = useOrgRoles(orgId)
   
   const [searchParams, setSearchParams] = useSearchParams()
-  const defaultTab = searchParams.get('tab') || 'members'
-  const [activeTab, setActiveTab] = useState(defaultTab)
+  const rawTab = searchParams.get('tab') || 'members'
 
   const [searchQuery, setSearchQuery] = useState('')
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
@@ -34,16 +33,16 @@ export function DirectoryPage() {
   const updateRoleMutation = useUpdateMemberRole(orgId)
   const removeMemberMutation = useRemoveMember(orgId)
 
+  const activeTab = (rawTab === 'admin' && !canManageRoles) ? 'members' : rawTab
+
   // Fallback if someone deep links to ?tab=admin without permissions
   useEffect(() => {
-    if (activeTab === 'admin' && !canManageRoles) {
-      setActiveTab('members')
+    if (rawTab === 'admin' && !canManageRoles) {
       setSearchParams({ tab: 'members' }, { replace: true })
     }
-  }, [activeTab, canManageRoles, setSearchParams])
+  }, [rawTab, canManageRoles, setSearchParams])
 
   const handleTabChange = (tabId) => {
-    setActiveTab(tabId)
     setSearchParams({ tab: tabId })
   }
 

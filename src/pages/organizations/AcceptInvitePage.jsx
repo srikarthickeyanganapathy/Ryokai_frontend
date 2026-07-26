@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAcceptInviteByToken } from '@/features/organization/organizations/hooks/useOrganizations'
 import { Spinner } from '@/shared/ui/Spinner'
@@ -11,11 +11,11 @@ export function AcceptInvitePage() {
   const { token } = useParams()
   const navigate = useNavigate()
   const acceptMutation = useAcceptInviteByToken()
-  const [attempted, setAttempted] = useState(false)
+  const attemptedRef = useRef(false)
 
   useEffect(() => {
-    if (token && !attempted && !acceptMutation.isPending) {
-      setAttempted(true)
+    if (token && !attemptedRef.current && !acceptMutation.isPending) {
+      attemptedRef.current = true
       acceptMutation.mutate(token, {
         onSuccess: () => {
           setTimeout(() => {
@@ -24,7 +24,7 @@ export function AcceptInvitePage() {
         }
       })
     }
-  }, [token, attempted, acceptMutation, navigate])
+  }, [token, acceptMutation, navigate])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)] p-4">

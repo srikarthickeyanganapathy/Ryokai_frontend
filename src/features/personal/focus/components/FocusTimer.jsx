@@ -37,6 +37,26 @@ export function FocusTimer({ task, onTaskComplete }) {
     setTimeLeft(target.minutes * 60)
   }
 
+  // Play gentle Web Audio API chime
+  const playChime = useCallback(() => {
+    if (!soundEnabled) return
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime) // D5
+      gain.gain.setValueAtTime(0.1, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5)
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start()
+      osc.stop(ctx.currentTime + 1.5)
+    } catch (e) {
+      // Audio context fallback
+    }
+  }, [soundEnabled])
+
   // Handle countdown interval
   useEffect(() => {
     if (isRunning) {
@@ -66,27 +86,7 @@ export function FocusTimer({ task, onTaskComplete }) {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
     }
-  }, [isRunning, mode])
-
-  // Play gentle Web Audio API chime
-  const playChime = () => {
-    if (!soundEnabled) return
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)()
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.type = 'sine'
-      osc.frequency.setValueAtTime(587.33, ctx.currentTime) // D5
-      gain.gain.setValueAtTime(0.1, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5)
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.start()
-      osc.stop(ctx.currentTime + 1.5)
-    } catch (e) {
-      // Audio context fallback
-    }
-  }
+  }, [isRunning, mode, playChime])
 
   const toggleStartPause = () => {
     if (!isRunning && mode === 'focus' && task?.id) {

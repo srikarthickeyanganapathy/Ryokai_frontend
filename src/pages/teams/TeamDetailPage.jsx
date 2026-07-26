@@ -7,8 +7,8 @@ import { Skeleton } from '@/shared/ui/Skeleton'
 import { Icons } from '@/shared/ui/Icons'
 import { SaveToggle } from '@/features/personal/saved/components/SaveToggle'
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
-import { useTeam, useTeamMessages, useSendTeamMessage, useDeleteTeamMessage } from '@/features/organization/organizations/hooks/useOrganizations'
-import { useTaskList, useReassignTask } from '@/features/tasks/hooks/useTasks'
+import { useTeam, useTeamMessages, useSendTeamMessage, useDeleteTeamMessage, useOrgTeams } from '@/features/organization/organizations/hooks/useOrganizations'
+import { useTaskList, useReassignTask } from '@/features/task/hooks/useTasks'
 import { useProjects, useCreateProject } from '@/features/crew/projects/hooks/useProjects'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { ProjectForm } from '@/features/crew/projects/components/ProjectForm'
@@ -466,6 +466,7 @@ export function TeamDetailPage() {
             onSubmit={handleCreateProjectSubmit}
             isLoading={createProjectMutation.isPending}
             workspaceMode="ORG"
+            useOrgTeamsHook={useOrgTeams}
           />
         </ModalContent>
       </Modal>

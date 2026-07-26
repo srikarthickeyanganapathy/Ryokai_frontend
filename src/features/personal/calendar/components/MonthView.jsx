@@ -9,7 +9,7 @@ import {
 import { 
   DndContext, closestCenter, MouseSensor, TouchSensor, useSensor, useSensors 
 } from '@dnd-kit/core'
-import { useUpdateTask } from '@/features/tasks/hooks/useTasks'
+import { useUpdateTask } from '@/features/task/hooks/useTasks'
 import { useUpdateEvent } from '../hooks/useCalendar'
 import { useDroppable } from '@dnd-kit/core'
 import { useDraggable } from '@dnd-kit/core'

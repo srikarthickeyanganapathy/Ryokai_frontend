@@ -84,7 +84,7 @@ export function RealtimeProvider({ children }) {
       },
       onStompError: (frame) => {
         const msg = frame.headers?.['message'] || 'STOMP session closed'
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.warn('[RealtimeProvider] STOMP notice:', msg)
         }
       },

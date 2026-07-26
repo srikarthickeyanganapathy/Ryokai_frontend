@@ -13,13 +13,13 @@ import { cn } from '@/shared/lib/cn'
 import { normalizePriority } from '@/shared/lib/priority'
 import { ChecklistForm } from './ChecklistForm'
 import { TaskComments, TaskDependencies, TaskEvidence } from './TaskPanelExtras'
-import ActivityTimeline from '@/features/tasks/components/explorers/ActivityTimeline'
+import ActivityTimeline from '@/features/task/components/explorers/ActivityTimeline'
 import { 
   useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, 
   useUpdateTask, useArchiveTask, useDeleteTask, useReassignTask,
   useSubmitTask, useApproveTask, useRejectTask, useRecallTask, useClaimTask,
   useCompletePersonalTask, useCompleteCrewTask, useReorderChecklistItems
-} from '@/features/tasks/hooks/useTasks'
+} from '@/features/task/hooks/useTasks'
 import { useCrewMembers } from '@/features/crew/crews/hooks/useCrews'
 import { useUsersList } from '@/features/auth/hooks/useUser'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'

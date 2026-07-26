@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTaskHistory } from '@/features/tasks/hooks/useTasks';
+import { useTaskHistory } from '@/features/task/hooks/useTasks';
 import ActivityTimelineItem from './ActivityTimelineItem';
 import { Loader2 } from 'lucide-react';
 

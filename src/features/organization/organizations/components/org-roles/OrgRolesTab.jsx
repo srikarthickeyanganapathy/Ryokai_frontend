@@ -37,7 +37,9 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
     if (selectedRole) {
       const updated = roles.find(r => r.id === selectedRole.id);
       if (updated) {
-        setSelectedRole(updated);
+        queueMicrotask(() => {
+          setSelectedRole(updated);
+        });
       }
     }
   }, [roles, selectedRole]);
@@ -45,11 +47,15 @@ export function OrgRolesTab({ orgId, roles, rolesLoading }) {
   // Sync local permission array when active selected role changes
   useEffect(() => {
     if (selectedRole) {
-      setLocalPermissions(selectedRole.permissions ? selectedRole.permissions.map(p => p.name) : []);
-      setLocalPriority(selectedRole.priority ?? 100);
+      queueMicrotask(() => {
+        setLocalPermissions(selectedRole.permissions ? selectedRole.permissions.map(p => p.name) : []);
+        setLocalPriority(selectedRole.priority ?? 100);
+      });
     } else {
-      setLocalPermissions([]);
-      setLocalPriority(100);
+      queueMicrotask(() => {
+        setLocalPermissions([]);
+        setLocalPriority(100);
+      });
     }
   }, [selectedRole]);
 

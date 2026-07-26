@@ -12,7 +12,7 @@ import { projectsApi } from '@/features/crew/projects/api'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { Textarea } from '@/shared/ui/Textarea'
 import { MultiSelect } from '@/shared/ui/MultiSelect'
-import { useTaskSearch } from '@/features/tasks/hooks/useTasks'
+import { useTaskSearch } from '@/features/task/hooks/useTasks'
 import { crewApi } from '@/features/crew/crews/api/crew.api'
 import { queryKeys } from '@/shared/api/queryKeys'
 
@@ -77,7 +77,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
   const watchedTeamId = form.watch('teamId')
   useEffect(() => {
     form.setValue('assigneeUsername', '')
-  }, [watchedTeamId])
+  }, [watchedTeamId, form])
 
   const handleSubmit = (data) => {
     const payload = {
@@ -164,7 +164,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
               rules={{ required: 'Assignee username is required' }}
               render={({ field }) => {
                 // FE Bug #1 Fix: Filter assignees by the currently selected team
-                const currentTeamId = form.watch('teamId');
+                const currentTeamId = watchedTeamId;
                 const selectedTeam = currentTeamId
                   ? teams.find(t => t.id.toString() === currentTeamId)
                   : null;
@@ -319,7 +319,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
                 render={({ field }) => {
                   // Only show projects that belong to the selected team (if a team is selected)
                   // If no team is selected, we might want to hide project or show global projects.
-                  const currentTeamId = form.watch('teamId');
+                  const currentTeamId = watchedTeamId;
                   const filteredProjects = currentTeamId
                     ? projects.filter(p => p.team?.id?.toString() === currentTeamId)
                     : projects.filter(p => !p.team);

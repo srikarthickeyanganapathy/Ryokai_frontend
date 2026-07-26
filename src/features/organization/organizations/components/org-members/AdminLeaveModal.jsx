@@ -24,8 +24,10 @@ export function AdminLeaveModal({ isOpen, onClose, orgId, members = [] }) {
   // Reset local state on modal open
   useEffect(() => {
     if (isOpen) {
-      setMode(isAlone ? 'dissolve' : 'transfer')
-      setSuccessorUserId('')
+      queueMicrotask(() => {
+        setMode(isAlone ? 'dissolve' : 'transfer')
+        setSuccessorUserId('')
+      })
     }
   }, [isOpen, isAlone])
 

@@ -7,7 +7,7 @@ import { KanbanTaskCard } from './KanbanTaskCard'
 import { Icons } from '@/shared/ui/Icons'
 import { Heading } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
-import { useCreateTask } from '@/features/tasks/hooks/useTasks'
+import { useCreateTask } from '@/features/task/hooks/useTasks'
 import { cn } from '@/shared/lib/cn'
 
 export function KanbanColumn({ column, tasks, onTaskClick }) {

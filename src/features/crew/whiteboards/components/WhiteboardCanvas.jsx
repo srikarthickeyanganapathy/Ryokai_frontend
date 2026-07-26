@@ -64,6 +64,23 @@ export function WhiteboardCanvas({ crewId, boardId, initialSnapshot }) {
     return () => window.removeEventListener('resize', resizeCanvas)
   }, [initialSnapshot])
 
+  const drawRemoteStroke = (event) => {
+    const ctx = ctxRef.current
+    if (!event.points || event.points.length < 2) return
+    ctx.strokeStyle = event.color
+    ctx.lineWidth = event.strokeWidth
+    ctx.beginPath()
+    ctx.moveTo(event.points[0][0], event.points[0][1])
+    event.points.slice(1).forEach(([x, y]) => ctx.lineTo(x, y))
+    ctx.stroke()
+  }
+
+  const clearCanvas = () => {
+    const ctx = ctxRef.current
+    if (!ctx || !canvasRef.current) return
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+  }
+
   // Subscribe to remote draw events
   useEffect(() => {
     if (!connected || !subscribeToTopic) return
@@ -91,23 +108,6 @@ export function WhiteboardCanvas({ crewId, boardId, initialSnapshot }) {
     }, SNAPSHOT_INTERVAL_MS)
     return () => clearInterval(interval)
   }, [crewId, boardId])
-
-  const drawRemoteStroke = (event) => {
-    const ctx = ctxRef.current
-    if (!event.points || event.points.length < 2) return
-    ctx.strokeStyle = event.color
-    ctx.lineWidth = event.strokeWidth
-    ctx.beginPath()
-    ctx.moveTo(event.points[0][0], event.points[0][1])
-    event.points.slice(1).forEach(([x, y]) => ctx.lineTo(x, y))
-    ctx.stroke()
-  }
-
-  const clearCanvas = () => {
-    const ctx = ctxRef.current
-    if (!ctx || !canvasRef.current) return
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-  }
 
   const getPos = (e) => {
     const rect = canvasRef.current.getBoundingClientRect()

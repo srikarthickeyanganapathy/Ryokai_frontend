@@ -7,7 +7,7 @@ import { cn } from '@/shared/lib/cn'
 import { useMarkRead, useDeleteNotification } from '@/features/notifications/hooks/useNotifications'
 import { useAcceptInvite, useDeclineInvite } from '@/features/organization/organizations/hooks/useOrganizations'
 import { TaskPanel } from '@/widgets/tasks/TaskPanel'
-import { useTaskList } from '@/features/tasks/hooks/useTasks'
+import { useTaskList } from '@/features/task/hooks/useTasks'
 
 export function NotificationPanel({ notification, isOpen, onClose }) {
   const markRead = useMarkRead()
@@ -57,7 +57,7 @@ export function NotificationPanel({ notification, isOpen, onClose }) {
     if (notification && notification.isRead === false) {
       markRead.mutate(notification.id)
     }
-  }, [notification])
+  }, [notification, markRead])
 
   if (!isOpen || !notification) return null
 
