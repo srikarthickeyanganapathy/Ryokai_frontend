@@ -217,7 +217,7 @@ function CreateRoleModal({ isOpen, onClose }) {
             <Input
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="e.g. PROJECT_MANAGER"
+              placeholder="e.g. GLOBAL_AUDITOR"
               className="uppercase"
               required
             />
@@ -273,7 +273,7 @@ function UpdateRoleModal({ isOpen, onClose, role }) {
             <Input
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="e.g. PROJECT_MANAGER"
+              placeholder="e.g. GLOBAL_AUDITOR"
               className="uppercase"
               required
             />

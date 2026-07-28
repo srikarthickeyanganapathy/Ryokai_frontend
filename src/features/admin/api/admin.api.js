@@ -40,8 +40,9 @@ export const getRolePermissions = async (roleId) => {
 
 export const assignRolePermissions = async (roleId, permissionNames) => {
   // permissionNames: string[] e.g. ["TASK_VIEW", "TASK_EDIT", "TASK_ASSIGN"]
-  // Backend expects AssignPermissionsRequestDTO: { permissionNames: List<String> }
-  const { data } = await api.put(`/platform/roles/${roleId}/permissions`, { permissionNames });
+  // Backend expects AssignPermissionsRequestDTO: { permissions: List<PermissionScopeAssignmentDTO> }
+  const permissions = permissionNames.map(name => ({ permissionName: name, scopeCode: 'GLOBAL' }));
+  const { data } = await api.put(`/platform/roles/${roleId}/permissions`, { permissions });
   return data;
 };
 

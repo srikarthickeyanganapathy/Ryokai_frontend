@@ -300,7 +300,10 @@ export const useCreateOrgRole = (orgId) => {
 export const useUpdateOrgRolePermissions = (orgId) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ roleId, permissionNames }) => orgApi.updateOrgRolePermissions(orgId, roleId, { permissionNames }),
+    mutationFn: ({ roleId, permissionNames }) => {
+      const permissions = permissionNames.map(name => ({ permissionName: name, scopeCode: 'ORGANIZATION' }));
+      return orgApi.updateOrgRolePermissions(orgId, roleId, { permissions });
+    },
     onSuccess: () => {
       toast.success('Permissions updated');
       queryClient.invalidateQueries({ queryKey: ['organizations', orgId, 'roles'] });

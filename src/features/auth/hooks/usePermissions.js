@@ -66,6 +66,8 @@ export const usePermissions = () => {
   const canManageUsers = isSuperAdmin;
   const canManageAnnouncements = isAdminOrAbove || permissions.includes('ANNOUNCEMENT_MANAGE');
   const canManageGoals = isAdminOrAbove || permissions.includes('GOAL_MANAGE');
+  const canViewOrgWideDashboard = isAdminOrAbove || permissions.includes('DASHBOARD_ORG_WIDE_VIEW');
+  const canOverrideTask = isAdminOrAbove || permissions.includes('TASK_OVERRIDE');
   const canViewAnalytics = true;
 
   // Task-scoped permissions
@@ -133,6 +135,8 @@ export const usePermissions = () => {
     canManageUsers,
     canManageAnnouncements,
     canManageGoals,
+    canViewOrgWideDashboard,
+    canOverrideTask,
     canViewAnalytics,
     
     // Task permissions
