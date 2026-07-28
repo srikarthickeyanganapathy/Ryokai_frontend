@@ -1,7 +1,7 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
-import { PlatformSidebar } from '@/widgets/platform/PlatformSidebar'
-import { AppTopbar } from '@/widgets/workspace/AppTopbar'
+import { PlatformSidebar } from '@/platform/admin/sections/platform/PlatformSidebar'
+import { AppTopbar } from '@/platform/workspace'
 
 export function PlatformLayout() {
   return (

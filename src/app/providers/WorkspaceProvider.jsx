@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { useOrganizations } from '@/features/organization/organizations/hooks/useOrganizations';
+import { useAuth } from '@/identity';
+import { useOrganizations } from '@/organization';
 
 const WorkspaceContext = createContext();
 

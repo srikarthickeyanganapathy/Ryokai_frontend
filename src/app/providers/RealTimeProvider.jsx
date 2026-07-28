@@ -3,7 +3,7 @@ import { Client } from '@stomp/stompjs'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { queryKeys } from '@/shared/api/queryKeys'
-import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useAuth } from '@/identity'
 
 const RealtimeContext = createContext({
   connected: false,

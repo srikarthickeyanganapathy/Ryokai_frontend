@@ -1,7 +1,7 @@
 import { ThemeProvider } from './ThemeProvider'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/shared/api/queryClient'
-import { AuthProvider } from '@/features/auth/model/AuthContext'
+import { AuthProvider } from '@/identity'
 import { RealtimeProvider } from './RealTimeProvider'
 
 import { WorkspaceProvider } from './WorkspaceProvider'

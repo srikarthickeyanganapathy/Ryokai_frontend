@@ -1,0 +1,337 @@
+﻿import { Button } from '@/shared/ui/Button';
+
+import React, { useMemo, useState } from 'react'
+import { 
+  startOfMonth, endOfMonth, startOfWeek, endOfWeek, 
+  eachDayOfInterval, format, isSameMonth, isSameDay, 
+  isToday, parseISO
+} from 'date-fns'
+import { 
+  DndContext, closestCenter, MouseSensor, TouchSensor, useSensor, useSensors 
+} from '@dnd-kit/core'
+import { useUpdateTask } from '@/task'
+import { useUpdateEvent } from '../hooks/useCalendar'
+import { useDroppable } from '@dnd-kit/core'
+import { useDraggable } from '@dnd-kit/core'
+import { PRIORITY_COLORS } from '@/shared/lib/priority'
+import { cn } from '@/shared/lib/cn'
+import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
+
+// --- Drag & Drop Sub-components ---
+
+function CalendarDayCell({ day, isCurrentMonth, children, onAddClick }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: format(day, 'yyyy-MM-dd'),
+  })
+
+  return (
+    <div 
+      ref={setNodeRef}
+      className={cn(
+        "h-full min-h-0 p-1.5 sm:p-2 border-b border-r border-[var(--color-border-subtle)] bg-[var(--bg-default)] transition-colors group relative flex flex-col overflow-hidden",
+        !isCurrentMonth && "bg-[var(--bg-subtle)]/50 opacity-50",
+        isOver && "bg-[var(--bg-elevated)] ring-2 ring-inset ring-[var(--accent)]/50"
+      )}
+    >
+      <div className="flex items-center justify-between mb-1 shrink-0">
+        <span className={cn(
+          "text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full",
+          isToday(day) ? "bg-[var(--accent)] text-[var(--bg-base)]" : "text-[var(--text-secondary)]"
+        )}>
+          {format(day, 'd')}
+        </span>
+        <Button 
+          variant="ghost"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            onAddClick(day)
+          }}
+          className="opacity-0 group-hover:opacity-100 p-0.5 w-5 h-5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] rounded transition-all flex items-center justify-center"
+        >
+          <Plus className="w-3.5 h-3.5" />
+        </Button>
+      </div>
+      <div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar flex-1 min-h-0 pr-0.5">
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function CalendarTaskChip({ task, onClick }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: task.id,
+    data: task
+  })
+
+  const style = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    zIndex: isDragging ? 50 : 1,
+    opacity: isDragging ? 0.8 : 1,
+  } : undefined
+
+  // Color mapping based on priority
+
+
+  const typeColors = {
+    MILESTONE: 'bg-purple-500/10 text-purple-400 border-purple-500/20 ring-1 ring-purple-500/30'
+  }
+
+  const colorClass = task.type === 'MILESTONE' ? typeColors.MILESTONE : (PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM)
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      onClick={(e) => {
+        // Prevent drag click from firing
+        if (!isDragging) {
+          onClick(task)
+        }
+      }}
+      className={cn(
+        "px-2 py-1 text-xs rounded border truncate cursor-grab active:cursor-grabbing transition-colors",
+        colorClass,
+        task.status === 'Done' && "opacity-50 line-through"
+      )}
+    >
+      {task.type === 'MILESTONE' && 'ðŸŽ¯ '}
+      {task.title}
+    </div>
+  )
+}
+
+function CalendarEventChip({ event, onClick }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `event-${event.id}`,
+    data: { ...event, __type: 'event' },
+  })
+  const style = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    zIndex: isDragging ? 50 : 1,
+    opacity: isDragging ? 0.8 : 1,
+  } : undefined
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      onClick={(e) => { if (!isDragging) onClick(event) }}
+      className="px-2 py-1 text-xs rounded border truncate cursor-grab active:cursor-grabbing bg-[var(--info-soft,rgba(59,130,246,0.1))] text-blue-400 border-blue-500/20 flex items-center gap-1.5"
+    >
+      <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+      {event.title}
+    </div>
+  )
+}
+
+// --- Main MonthView Component ---
+
+export function MonthView({ tasks = [], events = [], currentDate, isLoading, onTaskClick, onEventClick, onAddClick }) {
+  const updateTaskMutation = useUpdateTask()
+  const updateEventMutation = useUpdateEvent()
+
+  // Optimistic date overrides map
+  const [taskDateOverrides, setTaskDateOverrides] = useState({})
+  const [eventDateOverrides, setEventDateOverrides] = useState({})
+
+  const effectiveTasks = useMemo(() => {
+    return tasks.map(t => {
+      const override = taskDateOverrides[t.id]
+      return override ? { ...t, dueDate: override } : t
+    })
+  }, [tasks, taskDateOverrides])
+
+  const effectiveEvents = useMemo(() => {
+    return events.map(e => {
+      const override = eventDateOverrides[e.id]
+      return override ? { ...e, startTime: override.startTime, endTime: override.endTime } : e
+    })
+  }, [events, eventDateOverrides])
+
+  const rollbackTaskDate = (taskId) => {
+    setTaskDateOverrides(prev => {
+      const copy = { ...prev }
+      delete copy[taskId]
+      return copy
+    })
+  }
+
+  const rollbackEventDate = (eventId) => {
+    setEventDateOverrides(prev => {
+      const copy = { ...prev }
+      delete copy[eventId]
+      return copy
+    })
+  }
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 5, // Requires 5px movement before dragging starts (allows clicking)
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      }
+    })
+  )
+
+  const days = useMemo(() => {
+    const start = startOfWeek(startOfMonth(currentDate))
+    const end = endOfWeek(endOfMonth(currentDate))
+    return eachDayOfInterval({ start, end })
+  }, [currentDate])
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event
+    if (!over) return
+
+    const newDateStr = over.id
+    const dragged = active.data.current
+
+    if (dragged?.__type === 'event') {
+      const eventId = dragged.id
+      const original = events.find(e => e.id === eventId)
+      if (!original) return
+      const durationMs = new Date(original.endTime) - new Date(original.startTime)
+      const newStart = new Date(newDateStr)
+      newStart.setHours(new Date(original.startTime).getHours(), new Date(original.startTime).getMinutes())
+      const newEnd = new Date(newStart.getTime() + durationMs)
+
+      // Optimistically update event position immediately
+      setEventDateOverrides(prev => ({
+        ...prev,
+        [eventId]: { startTime: newStart.toISOString(), endTime: newEnd.toISOString() }
+      }))
+
+      updateEventMutation.mutate(
+        {
+          id: eventId,
+          payload: { ...original, startTime: newStart.toISOString(), endTime: newEnd.toISOString() },
+        },
+        {
+          onError: (err) => {
+            toast.error(err?.response?.data?.message || 'Failed to update event date â€” reverting position')
+            rollbackEventDate(eventId)
+          }
+        }
+      )
+      return
+    }
+
+    // Task-drag path
+    const taskId = active.id
+    const task = tasks.find(t => t.id === taskId)
+    if (!task) return
+    const newDueDateIso = new Date(newDateStr).toISOString()
+
+    // Optimistically update task position immediately
+    setTaskDateOverrides(prev => ({
+      ...prev,
+      [taskId]: newDueDateIso
+    }))
+
+    updateTaskMutation.mutate(
+      { id: taskId, payload: { dueDate: newDueDateIso } },
+      {
+        onError: (err) => {
+          toast.error(err?.response?.data?.message || 'Failed to update task deadline â€” reverting position')
+          rollbackTaskDate(taskId)
+        }
+      }
+    )
+  }
+
+  // Group tasks by date
+  const tasksByDate = useMemo(() => {
+    const map = {}
+    effectiveTasks.forEach(task => {
+      if (task.dueDate) {
+        const dateKey = format(parseISO(task.dueDate), 'yyyy-MM-dd')
+        if (!map[dateKey]) map[dateKey] = []
+        map[dateKey].push(task)
+      }
+    })
+    return map
+  }, [effectiveTasks])
+
+  const eventsByDate = useMemo(() => {
+    const map = {}
+    effectiveEvents.forEach(ev => {
+      if (ev.startTime) {
+        const dateKey = format(parseISO(ev.startTime), 'yyyy-MM-dd')
+        if (!map[dateKey]) map[dateKey] = []
+        map[dateKey].push(ev)
+      }
+    })
+    return map
+  }, [effectiveEvents])
+
+  if (isLoading) {
+    return <div className="p-8 text-center text-[var(--text-muted)]">Loading calendar...</div>
+  }
+
+  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+  return (
+    <DndContext 
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="flex flex-col h-full">
+        {/* Days of week header */}
+        <div className="grid grid-cols-7 border-b border-[var(--color-border-subtle)] bg-[var(--bg-subtle)]">
+          {weekDays.map(day => (
+            <div key={day} className="py-2 text-center text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+              {day}
+            </div>
+          ))}
+        </div>
+        
+        {/* Calendar Grid */}
+        <div className="grid grid-cols-7 flex-1 auto-rows-fr">
+          {days.map((day, i) => {
+            const dateKey = format(day, 'yyyy-MM-dd')
+            const dayTasks = tasksByDate[dateKey] || []
+            const dayEvents = eventsByDate[dateKey] || []
+            const isCurrentMonth = isSameMonth(day, currentDate)
+            
+            return (
+              <CalendarDayCell 
+                key={day.toISOString()} 
+                day={day} 
+                isCurrentMonth={isCurrentMonth}
+                onAddClick={onAddClick}
+              >
+                {dayTasks.map(task => (
+                  <CalendarTaskChip 
+                    key={task.id} 
+                    task={task} 
+                    onClick={onTaskClick}
+                  />
+                ))}
+                {dayEvents.map(ev => (
+                  <CalendarEventChip 
+                    key={ev.id} 
+                    event={ev} 
+                    onClick={onEventClick}
+                  />
+                ))}
+              </CalendarDayCell>
+            )
+          })}
+        </div>
+      </div>
+    </DndContext>
+  )
+}

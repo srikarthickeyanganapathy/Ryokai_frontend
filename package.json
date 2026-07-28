@@ -66,6 +66,7 @@
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "dependency-cruiser": "^17.4.3",
     "eslint": "^9.39.1",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-boundaries": "^7.1.0",

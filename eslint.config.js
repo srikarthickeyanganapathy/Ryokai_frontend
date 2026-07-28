@@ -2,7 +2,6 @@ import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import boundaries from 'eslint-plugin-boundaries'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
@@ -14,9 +13,6 @@ export default defineConfig([
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
-    plugins: {
-      boundaries,
-    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -32,65 +28,44 @@ export default defineConfig([
           map: [['@', './src']],
           extensions: ['.js', '.jsx', '.json'],
         },
-      },
-      'boundaries/include': ['src/**'],
-      'boundaries/elements': [
-        { type: 'app', pattern: 'src/app/**' },
-        { type: 'shared', pattern: 'src/shared/**' },
-        { type: 'entity', pattern: 'src/entities/**' },
-        { type: 'feature-task', pattern: 'src/features/task/**' },
-        { type: 'feature-personal', pattern: ['src/features/personal/**', 'src/features/notes/**', 'src/features/focus/**', 'src/features/calendar/**', 'src/features/saved/**'] },
-        { type: 'feature-crew', pattern: ['src/features/crew/**', 'src/features/crews/**', 'src/features/whiteboards/**', 'src/features/projects/**'] },
-        { type: 'feature-organization', pattern: ['src/features/organization/**', 'src/features/organizations/**', 'src/features/workload/**', 'src/features/goals/**'] },
-        { type: 'feature-admin', pattern: 'src/features/admin/**' },
-        { type: 'feature-other', pattern: ['src/features/analytics/**', 'src/features/auth/**', 'src/features/command-palette/**', 'src/features/notifications/**'] },
-        { type: 'widget', pattern: 'src/widgets/**' },
-        { type: 'page-personal', pattern: ['src/pages/personal/**', 'src/pages/notes/**', 'src/pages/focus/**', 'src/pages/calendar/**', 'src/pages/saved/**'] },
-        { type: 'page-crew', pattern: ['src/pages/crew/**', 'src/pages/crews/**', 'src/pages/projects/**', 'src/pages/whiteboards/**'] },
-        { type: 'page-organization', pattern: ['src/pages/organization/**', 'src/pages/organizations/**', 'src/pages/teams/**', 'src/pages/workload/**', 'src/pages/goals/**'] },
-        { type: 'page-overview', pattern: ['src/pages/overview/**', 'src/pages/inbox/**', 'src/pages/workspace/**', 'src/pages/analytics/**'] },
-        { type: 'page-other', pattern: ['src/pages/auth/**', 'src/pages/platform/**', 'src/pages/settings/**', 'src/pages/ui/**', 'src/pages/tasks/**'] },
-      ],
+      }
     },
     rules: {
       'no-unused-vars': 'off',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      'boundaries/dependencies': [
+      'no-restricted-imports': [
         'error',
         {
-          default: 'disallow',
-          policies: [
-            // app can import anything
-            { from: { element: { type: 'app' } }, allow: [{ to: '*' }] },
-            // shared cannot import from layers above it
-            { from: { element: { type: 'shared' } }, allow: [{ element: { type: 'shared' } }] },
-            // entity can import shared and other entities (or itself)
-            { from: { element: { type: 'entity' } }, allow: [{ element: { type: 'shared' } }, { element: { type: 'entity' } }] },
-            // feature-task (shared task engine) can import app, shared, entity, feature-other
-            { from: { element: { type: 'feature-task' } }, allow: [{ element: { type: 'app' } }, { element: { type: 'shared' } }, { element: { type: 'entity' } }, { element: { type: 'feature-task' } }, { element: { type: 'feature-other' } }] },
-            // feature-personal can import shared, entity, feature-task, feature-other, and itself
-            { from: { element: { type: 'feature-personal' } }, allow: [{ element: { type: 'app' } }, { element: { type: 'shared' } }, { element: { type: 'entity' } }, { element: { type: 'feature-task' } }, { element: { type: 'feature-personal' } }, { element: { type: 'feature-other' } }] },
-            // feature-crew can import shared, entity, feature-task, feature-other, and itself
-            { from: { element: { type: 'feature-crew' } }, allow: [{ element: { type: 'app' } }, { element: { type: 'shared' } }, { element: { type: 'entity' } }, { element: { type: 'feature-task' } }, { element: { type: 'feature-crew' } }, { element: { type: 'feature-other' } }] },
-            // feature-organization can import shared, entity, feature-task, feature-other, and itself
-            { from: { element: { type: 'feature-organization' } }, allow: [{ element: { type: 'app' } }, { element: { type: 'shared' } }, { element: { type: 'entity' } }, { element: { type: 'feature-task' } }, { element: { type: 'feature-organization' } }, { element: { type: 'feature-other' } }] },
-            // feature-admin (AC-7: Super Admin cannot access organization task data or any workspace feature)
-            { from: { element: { type: 'feature-admin' } }, allow: [{ element: { type: 'app' } }, { element: { type: 'shared' } }, { element: { type: 'entity' } }, { element: { type: 'feature-admin' } }, { element: { type: 'feature-other' } }] },
-            // feature-other (auth, analytics, notifications, command-palette)
-            { from: { element: { type: 'feature-other' } }, allow: [{ element: { type: 'app' } }, { element: { type: 'shared' } }, { element: { type: 'entity' } }, { element: { type: 'feature-task' } }, { element: { type: 'feature-personal' } }, { element: { type: 'feature-crew' } }, { element: { type: 'feature-organization' } }, { element: { type: 'feature-other' } }] },
-            // widgets can import shared, entity, any feature, or other widgets
-            { from: { element: { type: 'widget' } }, allow: [{ element: { type: 'app' } }, { element: { type: 'shared' } }, { element: { type: 'entity' } }, { element: { type: 'feature-task' } }, { element: { type: 'feature-personal' } }, { element: { type: 'feature-crew' } }, { element: { type: 'feature-organization' } }, { element: { type: 'feature-admin' } }, { element: { type: 'feature-other' } }, { element: { type: 'widget' } }] },
-            // mode pages orchestrate features across workspaces (e.g. ProjectDetailPage linking personal notes, TeamDetailPage linking crew projects), but cannot import feature-admin
-            { from: { element: { type: 'page-personal' } }, allow: [{ element: { type: 'app' } }, { element: { type: 'shared' } }, { element: { type: 'entity' } }, { element: { type: 'widget' } }, { element: { type: 'feature-task' } }, { element: { type: 'feature-personal' } }, { element: { type: 'feature-crew' } }, { element: { type: 'feature-organization' } }, { element: { type: 'feature-other' } }, { element: { type: 'page-personal' } }] },
-            { from: { element: { type: 'page-crew' } }, allow: [{ element: { type: 'app' } }, { element: { type: 'shared' } }, { element: { type: 'entity' } }, { element: { type: 'widget' } }, { element: { type: 'feature-task' } }, { element: { type: 'feature-personal' } }, { element: { type: 'feature-crew' } }, { element: { type: 'feature-organization' } }, { element: { type: 'feature-other' } }, { element: { type: 'page-crew' } }] },
-            { from: { element: { type: 'page-organization' } }, allow: [{ element: { type: 'app' } }, { element: { type: 'shared' } }, { element: { type: 'entity' } }, { element: { type: 'widget' } }, { element: { type: 'feature-task' } }, { element: { type: 'feature-personal' } }, { element: { type: 'feature-crew' } }, { element: { type: 'feature-organization' } }, { element: { type: 'feature-other' } }, { element: { type: 'page-organization' } }] },
-            // page-overview (dashboard, inbox) can import app, shared, entity, widgets, and any feature (aggregates data across all modes)
-            { from: { element: { type: 'page-overview' } }, allow: [{ element: { type: 'app' } }, { element: { type: 'shared' } }, { element: { type: 'entity' } }, { element: { type: 'widget' } }, { element: { type: 'feature-task' } }, { element: { type: 'feature-personal' } }, { element: { type: 'feature-crew' } }, { element: { type: 'feature-organization' } }, { element: { type: 'feature-other' } }, { element: { type: 'page-overview' } }] },
-            // page-other can import app, shared, entity, widget, any feature
-            { from: { element: { type: 'page-other' } }, allow: [{ element: { type: 'app' } }, { element: { type: 'shared' } }, { element: { type: 'entity' } }, { element: { type: 'widget' } }, { element: { type: 'feature-task' } }, { element: { type: 'feature-personal' } }, { element: { type: 'feature-crew' } }, { element: { type: 'feature-organization' } }, { element: { type: 'feature-admin' } }, { element: { type: 'feature-other' } }, { element: { type: 'page-other' } }] },
-          ],
-        },
-      ],
+          patterns: [
+            {
+              group: [
+                '@/task/pages/**', '@/task/sections/**', '@/task/features/**', '@/task/entities/**',
+                '@/organization/pages/**', '@/organization/sections/**', '@/organization/features/**', '@/organization/entities/**',
+                '@/crew/pages/**', '@/crew/sections/**', '@/crew/features/**', '@/crew/entities/**',
+                '@/project/pages/**', '@/project/sections/**', '@/project/features/**', '@/project/entities/**',
+                '@/dashboard/pages/**', '@/dashboard/sections/**', '@/dashboard/features/**', '@/dashboard/entities/**',
+                '@/calendar/pages/**', '@/calendar/sections/**', '@/calendar/features/**', '@/calendar/entities/**',
+                '@/focus/pages/**', '@/focus/sections/**', '@/focus/features/**', '@/focus/entities/**',
+                '@/note/pages/**', '@/note/sections/**', '@/note/features/**', '@/note/entities/**',
+                '@/whiteboard/pages/**', '@/whiteboard/sections/**', '@/whiteboard/features/**', '@/whiteboard/entities/**',
+                '@/identity/pages/**', '@/identity/sections/**', '@/identity/features/**', '@/identity/entities/**',
+                '@/inbox/pages/**', '@/inbox/sections/**', '@/inbox/features/**', '@/inbox/entities/**',
+                '@/analytics/pages/**', '@/analytics/sections/**', '@/analytics/features/**', '@/analytics/entities/**',
+                '@/library/pages/**', '@/library/sections/**', '@/library/features/**', '@/library/entities/**',
+                '@/settings/pages/**', '@/settings/sections/**', '@/settings/features/**', '@/settings/entities/**',
+                '@/platform/pages/**', '@/platform/sections/**', '@/platform/features/**', '@/platform/entities/**'
+              ],
+              message: 'Deep imports from domains are forbidden. Please import from the domain public API (e.g., @/task).'
+            },
+            {
+              group: [
+                '@/pages/**', '@/features/**', '@/widgets/**', '@/entities/**'
+              ],
+              message: 'Legacy root-level folders are permanently banned by the Domain-Oriented FSD architecture. Use the proper domain.'
+            }
+          ]
+        }
+      ]
     },
   },
 ])

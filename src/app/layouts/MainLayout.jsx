@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AppSidebar } from '@/widgets/workspace/AppSidebar'
-import { AppTopbar } from '@/widgets/workspace/AppTopbar'
+import { AppSidebar, AppTopbar } from '@/platform/workspace'
 import { useShortcuts } from "@/shared/hooks/useShortcuts"
 
 export function MainLayout() {
