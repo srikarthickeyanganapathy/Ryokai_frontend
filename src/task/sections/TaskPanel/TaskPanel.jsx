@@ -270,7 +270,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
           </Button>
         )}
 
-        {(currentStatus === 'TODO' || currentStatus === 'ASSIGNED' || currentStatus === 'REJECTED') && (isAssignee || isCreator || canEditTask) && !isUnclaimed && (
+        {(currentStatus === 'TODO' || currentStatus === 'ASSIGNED' || currentStatus === 'IN_PROGRESS') && (isAssignee || isCreator || canEditTask) && !isUnclaimed && (
           <Button 
             size={size}
             className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white gap-1.5"
@@ -278,8 +278,47 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
             isLoading={submitTaskMutation.isPending}
           >
             <Send className="w-4 h-4" />
-            {currentStatus === 'REJECTED' ? 'Resubmit' : 'Submit'}
+            Submit for Review
           </Button>
+        )}
+
+        {currentStatus === 'REJECTED' && (
+          hasAssignPerm ? (
+            <Popover open={isReassignOpen} onOpenChange={setIsReassignOpen}>
+              <PopoverTrigger asChild>
+                <Button size={size} className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5">
+                  <UserPlus className="w-4 h-4" />
+                  Reassign Task
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-52 p-1">
+                <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-semibold">Reassign Task</Text>
+                <div className="space-y-0.5 max-h-48 overflow-y-auto custom-scrollbar">
+                  {assignableUsers.map(u => (
+                    <Button
+                      key={u.id}
+                      variant="ghost"
+                      onClick={() => {
+                        reassignTask.mutate({ taskId: task.id, newAssigneeId: u.id }, {
+                          onSuccess: () => setIsReassignOpen(false)
+                        })
+                      }}
+                      className="w-full flex items-center gap-2 px-2 py-1 text-xs justify-start"
+                    >
+                      <div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px] shrink-0 font-bold">
+                        {u.username.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="truncate text-[var(--text-primary)]">{u.username}</span>
+                    </Button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <Badge variant="outline" className="border-red-500/50 text-red-400 bg-red-500/10 px-2.5 py-1 text-xs">
+              Rejected (Requires Reassignment by Assignor)
+            </Badge>
+          )
         )}
         
         {currentStatus === 'SUBMITTED' && (isAssignee || isCreator || canEditTask) && (

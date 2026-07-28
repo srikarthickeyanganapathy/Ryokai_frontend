@@ -123,20 +123,20 @@ export function AppTopbar({ onMenuClick }) {
             </IconButton>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-48 bg-[var(--bg-elevated)]/95 backdrop-blur-xl border-[var(--border-subtle)] rounded-2xl p-2 shadow-xl flex flex-col">
-            <button className="flex items-center gap-2.5 rounded-xl cursor-pointer p-2 hover:bg-[var(--bg-hover)] text-sm text-left">
+            <button onClick={() => navigate('/app/tasks')} className="flex items-center gap-2.5 rounded-xl cursor-pointer p-2 hover:bg-[var(--bg-hover)] text-sm text-left">
               <Icons.listTodo className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Create Task</span>
             </button>
-            <button className="flex items-center gap-2.5 rounded-xl cursor-pointer p-2 hover:bg-[var(--bg-hover)] text-sm text-left">
+            <button onClick={() => navigate('/app/projects')} className="flex items-center gap-2.5 rounded-xl cursor-pointer p-2 hover:bg-[var(--bg-hover)] text-sm text-left">
               <Icons.folderClosed className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Create Project</span>
             </button>
-            <button className="flex items-center gap-2.5 rounded-xl cursor-pointer p-2 hover:bg-[var(--bg-hover)] text-sm text-left">
+            <button onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true, bubbles: true }))} className="flex items-center gap-2.5 rounded-xl cursor-pointer p-2 hover:bg-[var(--bg-hover)] text-sm text-left">
               <Icons.pencil className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Capture Idea</span>
             </button>
             <Separator className="my-1 bg-[var(--border-subtle)]" />
-            <button className="flex items-center gap-2.5 rounded-xl cursor-pointer p-2 hover:bg-[var(--bg-hover)] text-sm text-left">
+            <button onClick={() => navigate('/app/organizations')} className="flex items-center gap-2.5 rounded-xl cursor-pointer p-2 hover:bg-[var(--bg-hover)] text-sm text-left">
               <Icons.userPlus className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Invite User</span>
             </button>

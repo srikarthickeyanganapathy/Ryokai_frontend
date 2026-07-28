@@ -1,45 +1,105 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
+import { useTaskList } from '@/task';
+import { useDashboardStats, useDashboardActivity } from '@/analytics';
+import { useCrews } from '@/crew';
+import { useAuth } from '@/identity';
 
 export function useCrewDashboardViewModel() {
-  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const { data: crews = [], isLoading: isCrewsLoading } = useCrews();
+  const [selectedCrewId, setSelectedCrewId] = useState(null);
 
-  const sprintStatus = {
-    name: 'Sprint 14',
-    daysLeft: 4,
-    totalPoints: 42,
-    completedPoints: 28,
-    progress: 66,
-    status: 'On Track'
-  };
+  const activeCrew = useMemo(() => {
+    return selectedCrewId 
+      ? (crews.find(c => c.id === selectedCrewId) || crews[0]) 
+      : (crews[0] || null);
+  }, [crews, selectedCrewId]);
 
-  const members = [
-    { id: 1, name: 'Alice M.', role: 'Lead', status: 'Online' },
-    { id: 2, name: 'John D.', role: 'Developer', status: 'In a meeting' },
-    { id: 3, name: 'Sarah K.', role: 'Designer', status: 'Offline' }
-  ];
+  const crewId = activeCrew?.id;
 
-  const recentActivity = [
-    { id: 1, text: 'Sarah uploaded new assets for the landing page.' },
-    { id: 2, text: 'John moved "API Integration" to In Progress.' },
-    { id: 3, text: 'Alice created a new PR.' }
-  ];
+  const { data: rawStats, isLoading: isStatsLoading } = useDashboardStats({ scope: 'CREWS', crewId });
+  const { data: activityList = [], isLoading: isActivityLoading } = useDashboardActivity({ page: 0, size: 10 });
+  const { data: rawTasks = [], isLoading: isTasksLoading } = useTaskList();
 
-  const activeTasks = [
-    { id: 1, title: 'Build recommendation engine', assignee: 'John', priority: 'High' },
-    { id: 2, title: 'Design new marketing site', assignee: 'Sarah', priority: 'Medium' }
-  ];
+  // Filter tasks strictly for Crews - memoized
+  const crewTasks = useMemo(() => {
+    return rawTasks.filter(t => 
+      t.mode === 'CREW' || 
+      t.taskMode === 'CREW' || 
+      !!t.crewId
+    );
+  }, [rawTasks]);
 
-  useEffect(() => {
-    // Simulate API fetch for crew data
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
+  // Active crew tasks filtered for currently selected crew - memoized
+  const selectedCrewTasks = useMemo(() => {
+    return crewId 
+      ? crewTasks.filter(t => t.crewId === crewId)
+      : crewTasks;
+  }, [crewTasks, crewId]);
+
+  // Work done by current user across crews - memoized
+  const myCrewTasks = useMemo(() => {
+    return crewTasks.filter(t => 
+      t.assigneeId === user?.id || 
+      t.assignedTo === user?.username || 
+      (typeof t.assignee === 'object' && t.assignee?.id === user?.id)
+    );
+  }, [crewTasks, user?.id, user?.username]);
+
+  const totalTasks = rawStats?.totalTasks ?? selectedCrewTasks.length;
+  const doneCount = rawStats?.doneCount ?? selectedCrewTasks.filter(t => t.status === 'Done' || t.currentStatus === 'COMPLETED' || t.currentStatus === 'APPROVED').length;
+  
+  const progressPercent = totalTasks > 0 ? Math.round((doneCount / totalTasks) * 100) : (rawStats?.myCompletionRate ?? 0);
+
+  const sprintStatus = useMemo(() => ({
+    name: activeCrew?.name || 'All Crews Workspace',
+    daysLeft: rawStats?.overdueCount ?? 0,
+    totalPoints: totalTasks,
+    completedPoints: doneCount,
+    progress: progressPercent,
+    status: (rawStats?.revisionsCount ?? 0) > 0 ? 'Needs Attention' : 'On Track',
+    myTaskCount: myCrewTasks.length
+  }), [activeCrew?.name, rawStats?.overdueCount, totalTasks, doneCount, progressPercent, rawStats?.revisionsCount, myCrewTasks.length]);
+
+  const members = useMemo(() => {
+    return (activeCrew?.members || []).map(m => ({
+      id: m.id || m.userId,
+      name: m.username || m.name || 'Member',
+      role: m.role || 'Contributor',
+      status: 'Active'
+    }));
+  }, [activeCrew?.members]);
+
+  const recentActivity = useMemo(() => {
+    return (activityList || []).map((act, i) => ({
+      id: act.id || i,
+      text: `${act.actor?.username || act.actor || 'User'} ${act.eventType ? act.eventType.toLowerCase().replace(/_/g, ' ') : 'updated'} "${act.taskTitle || 'task'}"`
+    }));
+  }, [activityList]);
+
+  const activeTasks = useMemo(() => {
+    return selectedCrewTasks
+      .filter(t => t.status !== 'Done' && t.currentStatus !== 'APPROVED' && t.currentStatus !== 'COMPLETED')
+      .slice(0, 5)
+      .map(t => ({
+        id: t.id,
+        title: t.title,
+        assignee: typeof t.assignee === 'object' ? (t.assignee?.username || 'Unassigned') : (t.assignee || t.assignedTo || 'Unassigned'),
+        priority: t.priority || 'MEDIUM'
+      }));
+  }, [selectedCrewTasks]);
 
   return {
-    isLoading,
+    isLoading: isStatsLoading || isActivityLoading || isTasksLoading || isCrewsLoading,
+    crews,
+    activeCrew,
+    selectedCrewId,
+    setSelectedCrewId,
     sprintStatus,
     members,
     recentActivity,
-    activeTasks
+    activeTasks,
+    myCrewTasks,
+    stats: rawStats
   };
 }

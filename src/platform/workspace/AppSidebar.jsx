@@ -87,6 +87,7 @@ export function AppSidebar({ isOpen, onClose }) {
         {
           title: 'SPRINT',
           items: [
+            { icon: Icons.layoutDashboard, label: 'Dashboard', to: '/app' },
             { icon: Icons.rocket, label: 'Crews', to: '/app/crews' },
             { icon: Icons.listTodo, label: 'All Crew Tasks', to: '/app/crews/tasks' },
             { icon: Icons.folderClosed, label: 'Projects', to: '/app/projects' },
@@ -152,6 +153,7 @@ export function AppSidebar({ isOpen, onClose }) {
         setActiveOrganization(org)
       }
     }
+    navigate('/app')
   }
 
   // ════════════════════════════════════════════════

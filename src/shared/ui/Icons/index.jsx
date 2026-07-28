@@ -93,7 +93,10 @@ import {
   Slash,
   ShieldAlert,
   ToggleRight,
-  Key
+  Key,
+  UserPlus,
+  WifiOff,
+  Image
 } from 'lucide-react'
 
 const GithubIcon = ({ className, ...props }) => (
@@ -234,4 +237,7 @@ export const Icons = {
   shieldAlert: ShieldAlert,
   toggleRight: ToggleRight,
   key: Key,
+  userPlus: UserPlus,
+  wifiOff: WifiOff,
+  image: Image,
 }

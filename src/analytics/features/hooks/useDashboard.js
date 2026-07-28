@@ -4,13 +4,15 @@ import { queryKeys } from '@/shared/api/queryKeys';
 
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
-export const useDashboardStats = () => {
+export const useDashboardStats = (customParams = {}) => {
   const { workspaceMode, activeOrganization } = useWorkspace();
-  const orgId = activeOrganization?.id;
+  const scope = customParams.scope || workspaceMode;
+  const orgId = customParams.orgId !== undefined ? customParams.orgId : (scope === 'ORG' ? activeOrganization?.id : undefined);
+  const crewId = customParams.crewId;
 
   return useQuery({
-    queryKey: [...queryKeys.dashboard.stats(), workspaceMode, orgId],
-    queryFn: () => dashboardApi.getDashboardStats({ scope: workspaceMode, orgId }),
+    queryKey: [...queryKeys.dashboard.stats(), scope, orgId, crewId],
+    queryFn: () => dashboardApi.getDashboardStats({ scope, orgId, crewId }),
     staleTime: 30000,
   });
 };

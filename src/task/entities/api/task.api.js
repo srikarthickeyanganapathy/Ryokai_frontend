@@ -172,6 +172,7 @@ export const reassignTask = async (taskId, newAssigneeId) => {
   return normalizeTask(data);
 };
 
+
 // --- Attachments ---
 // FIX: backend has NO /tasks/{taskId}/attachments endpoints (no AttachmentController exists).
 // The old code called these endpoints and would get 404 on every attachment operation.

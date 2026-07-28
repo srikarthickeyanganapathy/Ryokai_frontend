@@ -300,9 +300,17 @@ export const useCreateOrgRole = (orgId) => {
 export const useUpdateOrgRolePermissions = (orgId) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ roleId, permissionNames }) => {
-      const permissions = permissionNames.map(name => ({ permissionName: name, scopeCode: 'ORGANIZATION' }));
-      return orgApi.updateOrgRolePermissions(orgId, roleId, { permissions });
+    mutationFn: ({ roleId, permissions }) => {
+      const payloadPermissions = (permissions || []).map(p => {
+        if (typeof p === 'string') {
+          return { permissionName: p, scopeCode: 'ORGANIZATION' };
+        }
+        return {
+          permissionName: p.permissionCode || p.code || p.permissionName,
+          scopeCode: p.scopeCode || p.scope || 'ORGANIZATION'
+        };
+      });
+      return orgApi.updateOrgRolePermissions(orgId, roleId, { permissions: payloadPermissions });
     },
     onSuccess: () => {
       toast.success('Permissions updated');

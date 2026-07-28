@@ -11,7 +11,13 @@ export function Capture() {
       </div>
       <Heading level={4}>Capture</Heading>
       <Text variant="muted" size="sm" className="mb-4">Quickly log ideas or tasks before they slip away.</Text>
-      <Button variant="outline" className="w-full">New Note / Task (Cmd+K)</Button>
+      <Button 
+        variant="outline" 
+        className="w-full"
+        onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true, bubbles: true }))}
+      >
+        New Note / Task (Cmd+K)
+      </Button>
     </div>
   );
 }

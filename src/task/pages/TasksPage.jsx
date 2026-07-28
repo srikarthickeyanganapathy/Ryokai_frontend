@@ -167,10 +167,12 @@ export function TasksPage() {
       } else {
         toast.error('Crew task must be in ASSIGNED status to complete')
       }
-    } else if (current === 'ASSIGNED' || current === 'REJECTED') {
+    } else if (current === 'ASSIGNED' || current === 'TODO' || current === 'IN_PROGRESS') {
       submitTaskMutation.mutate(task.id, {
         onSuccess: () => toast.success(`Task "${task.title}" submitted for review.`)
       })
+    } else if (current === 'REJECTED') {
+      toast.error('Rejected tasks must be reassigned by the assignor before they can be submitted.')
     }
   }
 
