@@ -1,4 +1,4 @@
-﻿import { Input } from '@/shared/ui/Input';
+import { Input } from '@/shared/ui/Input';
 
 import React, { useState } from 'react'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
@@ -7,7 +7,7 @@ import { KanbanTaskCard } from './KanbanTaskCard'
 import { Icons } from '@/shared/ui/Icons'
 import { Heading } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
-import { useCreateTask } from '@/task'
+import { useCreateTask } from '../../entities/hooks/useTasks'
 import { cn } from '@/shared/lib/cn'
 
 export function KanbanColumn({ column, tasks, onTaskClick }) {
@@ -90,52 +90,6 @@ export function KanbanColumn({ column, tasks, onTaskClick }) {
             ))}
           </div>
         </SortableContext>
-
-        {/* Quick Add Form inside Column */}
-        {isQuickAdding ? (
-          <form 
-            onSubmit={handleQuickAdd}
-            className="bg-[var(--bg-elevated)] border border-[var(--accent-border)] rounded-[var(--radius-lg)] p-3 shadow-[var(--accent-glow),var(--inset-highlight)] mt-2 spring-in"
-          >
-            <Input
-              autoFocus
-              type="text"
-              value={newTaskTitle}
-              onChange={(e) => setNewTaskTitle(e.target.value)}
-              onBlur={() => !newTaskTitle.trim() && setIsQuickAdding(false)}
-              placeholder="Task title..."
-              className="w-full bg-transparent border-none outline-none text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] mb-3"
-              disabled={createTaskMutation.isPending}
-            />
-            <div className="flex items-center justify-end gap-2">
-              <Button 
-                type="button" 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setIsQuickAdding(false)}
-                disabled={createTaskMutation.isPending}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                size="sm" 
-                disabled={createTaskMutation.isPending}
-              >
-                Add
-              </Button>
-            </div>
-          </form>
-        ) : (
-          <Button 
-            variant="ghost"
-            onClick={() => setIsQuickAdding(true)}
-            className="flex items-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-full p-2 text-sm font-medium transition-all duration-[var(--duration-base)] ease-[var(--ease-out)] mt-2"
-          >
-            <Icons.plus className="w-4 h-4 mr-2" />
-            Add Task
-          </Button>
-        )}
       </div>
       </>
       )}

@@ -52,7 +52,7 @@ export function AdminLeaveModal({ isOpen, onClose, orgId, members = [] }) {
     <Modal open={isOpen} onOpenChange={onClose}>
       <ModalContent className="sm:max-w-md bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)]">
         <ModalHeader>
-          <ModalTitle className="text-[var(--text-primary)]">Exit Organization</ModalTitle>
+          <ModalTitle className="text-[var(--text-primary)]">Exit organization</ModalTitle>
         </ModalHeader>
 
         <div className="space-y-5 mt-4">

@@ -20,20 +20,20 @@ const ResetPasswordPage = lazy(() => import("@/identity/pages/ResetPasswordPage"
 const VerifyEmailPage = lazy(() => import("@/identity/pages/VerifyEmailPage").then(m => ({ default: m.VerifyEmailPage })));
 const SessionExpiredPage = lazy(() => import("@/identity/pages/SessionExpiredPage").then(m => ({ default: m.SessionExpiredPage })));
 const DashboardPage = lazy(() => import("@/dashboard/pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
-const TasksPage = lazy(() => import("@/task").then(m => ({ default: m.TasksPage })));
-const ProjectsPage = lazy(() => import("@/project").then(m => ({ default: m.ProjectsPage })));
-const ProjectDetailPage = lazy(() => import("@/project").then(m => ({ default: m.ProjectDetailPage })));
-const OrganizationsPage = lazy(() => import("@/organization").then(m => ({ default: m.OrganizationsPage })));
-const OrganizationSettingsPage = lazy(() => import("@/organization").then(m => ({ default: m.OrganizationSettingsPage })));
-const DirectoryPage = lazy(() => import("@/organization").then(m => ({ default: m.DirectoryPage })));
-const AnnouncementsPage = lazy(() => import("@/organization").then(m => ({ default: m.AnnouncementsPage })));
-const CrewsPage = lazy(() => import("@/crew").then(m => ({ default: m.CrewsPage })));
-const CrewDetailPage = lazy(() => import("@/crew").then(m => ({ default: m.CrewDetailPage })));
-const CrewDiscoverPage = lazy(() => import("@/crew").then(m => ({ default: m.CrewDiscoverPage })));
-const CrewTasksPage = lazy(() => import("@/crew").then(m => ({ default: m.CrewTasksPage })));
+const TasksPage = lazy(() => import("@/task/pages/TasksPage").then(m => ({ default: m.TasksPage })));
+const ProjectsPage = lazy(() => import("@/project/pages/ProjectsPage").then(m => ({ default: m.ProjectsPage })));
+const ProjectDetailPage = lazy(() => import("@/project/pages/ProjectDetailPage").then(m => ({ default: m.ProjectDetailPage })));
+const OrganizationsPage = lazy(() => import("@/organization/pages/OrganizationsPage").then(m => ({ default: m.OrganizationsPage })));
+const OrganizationSettingsPage = lazy(() => import("@/organization/pages/OrganizationSettingsPage").then(m => ({ default: m.OrganizationSettingsPage })));
+const DirectoryPage = lazy(() => import("@/organization/pages/DirectoryPage").then(m => ({ default: m.DirectoryPage })));
+const AnnouncementsPage = lazy(() => import("@/organization/pages/AnnouncementsPage").then(m => ({ default: m.AnnouncementsPage })));
+const CrewsPage = lazy(() => import("@/crew/pages/CrewsPage").then(m => ({ default: m.CrewsPage })));
+const CrewDetailPage = lazy(() => import("@/crew/pages/CrewDetailPage").then(m => ({ default: m.CrewDetailPage })));
+const CrewDiscoverPage = lazy(() => import("@/crew/pages/CrewDiscoverPage").then(m => ({ default: m.CrewDiscoverPage })));
+const CrewTasksPage = lazy(() => import("@/crew/pages/CrewTasksPage").then(m => ({ default: m.CrewTasksPage })));
 const TeamsPage = lazy(() => import("@/organization/teams/pages/TeamsPage").then(m => ({ default: m.TeamsPage })));
 const TeamDetailPage = lazy(() => import("@/organization/teams/pages/TeamDetailPage").then(m => ({ default: m.TeamDetailPage })));
-const CrewJoinPage = lazy(() => import("@/crew").then(m => ({ default: m.CrewJoinPage })));
+const CrewJoinPage = lazy(() => import("@/crew/pages/CrewJoinPage").then(m => ({ default: m.CrewJoinPage })));
 const InboxPage = lazy(() => import("@/inbox/pages/InboxPage").then(m => ({ default: m.InboxPage })));
 const AnalyticsPage = lazy(() => import("@/analytics/pages/AnalyticsPage").then(m => ({ default: m.AnalyticsPage })));
 
@@ -54,7 +54,7 @@ const SavedPage = lazy(() => import("@/library/saved/pages/SavedPage").then(m =>
 const WorkloadPage = lazy(() => import("@/organization/workload/pages/WorkloadPage").then(m => ({ default: m.WorkloadPage })));
 const GoalsPage = lazy(() => import("@/organization/goals/pages/GoalsPage").then(m => ({ default: m.GoalsPage })));
 const WhiteboardPage = lazy(() => import("@/whiteboard/pages/WhiteboardPage").then(m => ({ default: m.WhiteboardPage })));
-const AcceptInvitePage = lazy(() => import("@/organization").then(m => ({ default: m.AcceptInvitePage })));
+const AcceptInvitePage = lazy(() => import("@/organization/pages/AcceptInvitePage").then(m => ({ default: m.AcceptInvitePage })));
 
 export default function App() {
   return (

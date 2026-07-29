@@ -27,6 +27,12 @@ import { filterTasksByWorkspace } from '@/shared/lib/workspaceTaskFilter'
 import { useProjects } from '@/project'
 import { useOrgTeams } from '@/organization'
 
+import {
+  WorkspaceShell,
+  ManagementLayout,
+  PageStateContainer,
+} from '@/shared/workspace-framework'
+
 export function TasksPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const viewMode = searchParams.get('view') || 'list'
@@ -117,7 +123,7 @@ export function TasksPage() {
       if (sortBy === 'updated') {
         return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0)
       }
-      // dueDate default Ã¢â‚¬â€ tasks without a due date sink to the bottom
+      // dueDate default — tasks without a due date sink to the bottom
       if (!a.dueDate && !b.dueDate) return 0
       if (!a.dueDate) return 1
       if (!b.dueDate) return -1
@@ -307,7 +313,7 @@ export function TasksPage() {
       title: 'Send back for rework',
       description: 'Let them know what needs to change before it can be approved.',
       requireInput: true,
-      inputPlaceholder: 'e.g. Missing acceptance criteria for edge casesÃ¢â‚¬Â¦',
+      inputPlaceholder: 'e.g. Missing acceptance criteria for edge cases…',
       confirmLabel: 'Send back',
       danger: true,
     });
@@ -340,6 +346,7 @@ export function TasksPage() {
     return rawTasks.filter(t => (t.status || '').toUpperCase() === 'SUBMITTED' || (t.status || '').toUpperCase() === 'IN REVIEW').length
   }, [rawTasks])
 
+  // Nebula view takes over the entire screen
   if (viewMode === 'nebula') {
     return (
       <div className="fixed inset-0 z-[100] bg-zinc-950">
@@ -356,123 +363,125 @@ export function TasksPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-8rem)] relative space-y-4" role="region" aria-label="Tasks">
+    <WorkspaceShell maxWidth="wide">
+      <ManagementLayout
+        header={
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
+                  EXECUTE Mode
+                </span>
+                <span className="text-[11px] text-[var(--text-muted)]">• {tasks.length} Work Items</span>
+                {reviewCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/30 text-[10px] font-mono font-medium">
+                    {reviewCount} Awaiting Review
+                  </span>
+                )}
+              </div>
+              <Heading level={1} className="tracking-tight text-[22px] font-semibold mb-0">Tasks Engine</Heading>
+            </div>
 
-      {/* Ã¢Å¡Â¡ EXECUTE MODE STICKY HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border-subtle)]">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
-              EXECUTE Mode
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)]">Ã¢â‚¬Â¢ {tasks.length} Work Items</span>
-            {reviewCount > 0 && (
-              <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/30 text-[10px] font-mono font-medium">
-                {reviewCount} Awaiting Review
-              </span>
-            )}
-          </div>
-          <Heading level={1} className="tracking-tight text-[22px] font-semibold mb-0">Tasks Engine</Heading>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="gap-1.5 text-xs text-[var(--accent)] border-[var(--accent-border)] hover:bg-[var(--accent-soft)]"
-            onClick={() => navigate('/app/focus')}
-          >
-            <Icons.play className="w-3.5 h-3.5 fill-current" />
-            Launch Focus Engine
-          </Button>
-        </div>
-      </div>
-
-      {/* Toolbar */}
-      <TasksToolbar
-        activeView={activeView}
-        onViewChange={setActiveView}
-        globalFilter={globalFilter}
-        setGlobalFilter={setGlobalFilter}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        priorityFilter={priorityFilter}
-        onPriorityFilterChange={setPriorityFilter}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        projectFilter={projectFilter}
-        onProjectFilterChange={setProjectFilter}
-        teamFilter={teamFilter}
-        onTeamFilterChange={setTeamFilter}
-        projectsList={projectsList}
-        teamsList={teamsList}
-      />
-
-      {/* Main Content Area */}
-      <div className="flex-1 min-h-0 relative">
-        {viewMode === 'list' && (
-          <TasksTable
-            tasks={tasks}
-            isLoading={isLoading}
-            rowSelection={rowSelection}
-            setRowSelection={setRowSelection}
-            onTaskClick={setSelectedTask}
-            onQuickComplete={handleQuickComplete}
-            onQuickDelete={handleQuickDelete}
-          />
-        )}
-        {viewMode === 'board' && (
-          <KanbanBoard
-            tasks={tasks}
-            isLoading={isLoading}
-            onTaskClick={setSelectedTask}
-            onTaskStatusChange={handleTaskStatusChange}
-          />
-        )}
-
-        {/* Floating Bulk Action Bar (Appears when rows are selected in List view) */}
-        <AnimatePresence>
-          {Object.keys(rowSelection).length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="absolute bottom-6 left-1/2 -translate-x-1/2 glass-panel shadow-[var(--shadow-lg),var(--inset-highlight)] rounded-[var(--radius-pill)] px-5 py-2.5 flex items-center gap-4 z-20"
-            >
-              <Text size="sm" className="text-[13px] font-medium mr-2">
-                {Object.keys(rowSelection).length} selected
-              </Text>
-              <div className="h-4 w-px bg-[var(--border-default)]" />
-              <Button variant="ghost" onClick={handleBulkComplete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
-                {workspaceMode === 'PERSONAL' ? 'Complete' : 'Approve'}
-              </Button>
-              {workspaceMode !== 'PERSONAL' && (
-                <>
-                  <Button variant="ghost" onClick={handleBulkSubmit} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
-                    Submit
-                  </Button>
-                  <Button variant="ghost" onClick={handleOpenReassignModal} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
-                    Reassign
-                  </Button>
-                  <Button variant="ghost" onClick={handleBulkReject} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
-                    Reject
-                  </Button>
-                </>
-              )}
-              <Button variant="ghost" onClick={handleBulkDelete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
-                Delete
-              </Button>
+            <div className="flex items-center gap-2">
               <Button
-                variant="ghost"
-                onClick={() => setRowSelection({})}
-                className="ml-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+                size="sm"
+                variant="outline"
+                className="gap-1.5 text-xs text-[var(--accent)] border-[var(--accent-border)] hover:bg-[var(--accent-soft)]"
+                onClick={() => navigate('/app/focus')}
               >
-                <Icons.x className="w-4 h-4" />
+                <Icons.play className="w-3.5 h-3.5 fill-current" />
+                Launch Focus Engine
               </Button>
-            </motion.div>
+            </div>
+          </div>
+        }
+        toolbar={
+          <TasksToolbar
+            activeView={activeView}
+            onViewChange={setActiveView}
+            globalFilter={globalFilter}
+            setGlobalFilter={setGlobalFilter}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            priorityFilter={priorityFilter}
+            onPriorityFilterChange={setPriorityFilter}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            projectFilter={projectFilter}
+            onProjectFilterChange={setProjectFilter}
+            teamFilter={teamFilter}
+            onTeamFilterChange={setTeamFilter}
+            projectsList={projectsList}
+            teamsList={teamsList}
+          />
+        }
+      >
+        {/* Main Content Area */}
+        <div className="flex-1 min-h-0 relative">
+          {viewMode === 'list' && (
+            <TasksTable
+              tasks={tasks}
+              isLoading={isLoading}
+              rowSelection={rowSelection}
+              setRowSelection={setRowSelection}
+              onTaskClick={setSelectedTask}
+              onQuickComplete={handleQuickComplete}
+              onQuickDelete={handleQuickDelete}
+            />
           )}
-        </AnimatePresence>
-      </div>
+          {viewMode === 'board' && (
+            <KanbanBoard
+              tasks={tasks}
+              isLoading={isLoading}
+              onTaskClick={setSelectedTask}
+              onTaskStatusChange={handleTaskStatusChange}
+            />
+          )}
+
+          {/* Floating Bulk Action Bar (Appears when rows are selected in List view) */}
+          <AnimatePresence>
+            {Object.keys(rowSelection).length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="absolute bottom-6 left-1/2 -translate-x-1/2 glass-panel shadow-[var(--shadow-lg),var(--inset-highlight)] rounded-[var(--radius-pill)] px-5 py-2.5 flex items-center gap-4 z-20"
+              >
+                <Text size="sm" className="text-[13px] font-medium mr-2">
+                  {Object.keys(rowSelection).length} selected
+                </Text>
+                <div className="h-4 w-px bg-[var(--border-default)]" />
+                <Button variant="ghost" onClick={handleBulkComplete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                  {workspaceMode === 'PERSONAL' ? 'Complete' : 'Approve'}
+                </Button>
+                {workspaceMode !== 'PERSONAL' && (
+                  <>
+                    <Button variant="ghost" onClick={handleBulkSubmit} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                      Submit
+                    </Button>
+                    <Button variant="ghost" onClick={handleOpenReassignModal} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                      Reassign
+                    </Button>
+                    <Button variant="ghost" onClick={handleBulkReject} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
+                      Reject
+                    </Button>
+                  </>
+                )}
+                <Button variant="ghost" onClick={handleBulkDelete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
+                  Delete
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setRowSelection({})}
+                  className="ml-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+                >
+                  <Icons.x className="w-4 h-4" />
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </ManagementLayout>
 
       {/* The Task Workspace (Panel) */}
       <TaskPanel
@@ -511,7 +520,6 @@ export function TasksPage() {
       </Modal>
 
       {confirmDialog}
-
-    </div>
+    </WorkspaceShell>
   )
 }

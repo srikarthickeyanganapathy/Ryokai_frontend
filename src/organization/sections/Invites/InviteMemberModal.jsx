@@ -1,4 +1,4 @@
-﻿import { Label } from '@/shared/ui/Typography/Label';
+import { Label } from '@/shared/ui/Typography/Label';
 
 import React, { useState } from 'react'
 import { Heading, Text } from '@/shared/ui/Typography'
@@ -39,7 +39,7 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
     <Modal open={isOpen} onOpenChange={onClose}>
       <ModalContent className="sm:max-w-md">
         <ModalHeader>
-          <ModalTitle>Invite Member</ModalTitle>
+          <ModalTitle>Invite member</ModalTitle>
         </ModalHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-2">

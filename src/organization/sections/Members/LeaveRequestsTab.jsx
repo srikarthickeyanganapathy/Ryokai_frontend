@@ -54,7 +54,7 @@ export function LeaveRequestsTab({ orgId }) {
     <div className="mt-6">
       {confirmDialog}
       <div className="flex items-center justify-between mb-4">
-        <Heading level={3}>Leave Requests</Heading>
+        <Heading level={3}>Leave requests</Heading>
         <Button size="sm" onClick={() => setIsRequestModalOpen(true)}>
           <Icons.plus className="w-4 h-4 mr-1.5" />
           Request Leave
@@ -125,7 +125,7 @@ function RequestLeaveModal({ isOpen, onClose, orgId }) {
     <Modal open={isOpen} onOpenChange={onClose}>
       <ModalContent className="sm:max-w-md">
         <ModalHeader>
-          <ModalTitle>Request Leave</ModalTitle>
+          <ModalTitle>Request leave</ModalTitle>
         </ModalHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div>

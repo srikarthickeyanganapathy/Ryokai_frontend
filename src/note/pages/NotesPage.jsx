@@ -7,6 +7,12 @@ import { Input } from '@/shared/ui/Input'
 import { cn } from '@/shared/lib/cn'
 import { useNotes, useDeleteNote, useUpdateNote } from '@/note'
 import { NotePanel } from '@/note'
+import { PageHeader } from '@/shared/ui/PageHeader'
+import {
+  WorkspaceShell,
+  ManagementLayout,
+  PageStateContainer,
+} from '@/shared/workspace-framework'
 
 const NOTE_COLOR_STYLES = {
   default: '',
@@ -74,47 +80,45 @@ export function NotesPage() {
   const otherNotes = useMemo(() => filteredNotes.filter(n => !n.isPinned), [filteredNotes])
 
   return (
-    <div className="max-w-6xl mx-auto py-6 px-4 space-y-6" role="region" aria-label="Notes">
-      
-      {/* 🔒 PERSONAL MODE STICKY HEADER */}
-      <div className="pb-4 border-b border-[var(--color-border-subtle)] flex items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
-              PERSONAL Mode
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)]">• Knowledge & Scratchpad Workspace</span>
+    <WorkspaceShell maxWidth="default">
+      <ManagementLayout
+        header={
+          <PageHeader
+            eyebrow="Personal"
+            meta="• Knowledge & Scratchpad Workspace"
+            title="Private Notes & Scratchpad"
+            subtitle="Capture ideas, project specs, and personal checklists in your private workspace."
+            actions={
+              <Button onClick={openNew} className="gap-2 h-9 text-xs shrink-0">
+                <Plus className="w-4 h-4" /> New Note
+              </Button>
+            }
+          />
+        }
+        toolbar={
+          <div className="relative max-w-md">
+            <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-2.5" />
+            <Input
+              type="text"
+              placeholder="Filter notes by title or content..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-9 text-xs"
+            />
           </div>
-          <Heading level={2} className="tracking-tight text-[22px] font-semibold mb-0">Private Notes & Scratchpad</Heading>
-          <Text variant="muted" className="text-[13px] mt-1">Capture ideas, project specs, and personal checklists in your private workspace.</Text>
-        </div>
-
-        <Button onClick={openNew} className="gap-2 h-9 text-xs shrink-0">
-          <Plus className="w-4 h-4" /> New Note
-        </Button>
-      </div>
-
-      {/* SEARCH BAR */}
-      <div className="relative max-w-md">
-        <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-2.5" />
-        <Input
-          type="text"
-          placeholder="Filter notes by title or content..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 h-9 text-xs"
-        />
-      </div>
-
-      {isLoading ? (
-        <Text variant="muted" className="text-xs">Loading notes…</Text>
-      ) : filteredNotes.length === 0 ? (
-        <div className="text-center p-12 rounded-2xl border border-dashed border-[var(--color-border-subtle)] bg-[var(--bg-elevated)]">
-          <StickyNote className="w-10 h-10 mx-auto text-[var(--text-muted)] mb-3 opacity-50" />
-          <Heading level={4} className="text-sm font-semibold">No notes found</Heading>
-          <Text variant="muted" className="mt-1 text-xs">Create your first private note to start capturing ideas.</Text>
-        </div>
-      ) : (
+        }
+      >
+        <PageStateContainer
+          state={isLoading ? 'loading' : filteredNotes.length === 0 ? 'empty' : 'ready'}
+          loadingConfig={{ variant: 'cards' }}
+          emptyConfig={{
+            icon: StickyNote,
+            title: 'No notes found',
+            description: 'Create your first private note to start capturing ideas.',
+            actionLabel: 'New Note',
+            onAction: openNew,
+          }}
+        >
         <div className="space-y-6">
           {/* PINNED SECTION */}
           {pinnedNotes.length > 0 && (
@@ -187,7 +191,8 @@ export function NotesPage() {
             </div>
           )}
         </div>
-      )}
+        </PageStateContainer>
+      </ManagementLayout>
 
       {/* NOTE INSPECTOR SLIDE-OVER PANEL */}
       <NotePanel
@@ -195,6 +200,6 @@ export function NotesPage() {
         isOpen={isPanelOpen}
         onClose={closePanel}
       />
-    </div>
+    </WorkspaceShell>
   )
 }

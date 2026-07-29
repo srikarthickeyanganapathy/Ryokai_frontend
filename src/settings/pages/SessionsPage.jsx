@@ -3,10 +3,15 @@ import { Card, CardContent } from '@/shared/ui/Card'
 import { Badge } from '@/shared/ui/Badge'
 import { Button } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { Skeleton } from '@/shared/ui/Skeleton'
 import { Icons } from '@/shared/ui/Icons'
 import { motion } from 'framer-motion'
 import { useSessions, useRevokeSession } from '@/identity'
+import { PageHeader } from '@/shared/ui/PageHeader'
+import {
+  WorkspaceShell,
+  ConfigurationLayout,
+  PageStateContainer,
+} from '@/shared/workspace-framework'
 
 function formatDate(isoString) {
   if (!isoString) return '—'
@@ -35,65 +40,35 @@ export function SessionsPage() {
   const { data: sessions, isLoading, isError, error } = useSessions()
   const revokeSession = useRevokeSession()
 
+  const pageState = isLoading ? 'loading' : isError ? 'error' : (!sessions || sessions.length === 0) ? 'empty' : 'ready'
+
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 max-w-4xl pb-10">
-      
-      {/* 🏷️ SESSIONS MODE HEADER */}
-      <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border-subtle)]">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
-              SESSIONS Mode
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)]">• Active Devices & Revocation</span>
-          </div>
-          <Heading level={1} className="tracking-tight text-[22px] font-bold text-[var(--text-primary)] mb-0">
-            Active Device Sessions
-          </Heading>
-          <Text variant="muted" className="text-xs mt-0.5">
-            Monitor and manage active login sessions across all your laptops, phones, and browsers.
-          </Text>
-        </div>
-      </div>
+    <WorkspaceShell maxWidth="narrow">
+      <ConfigurationLayout
+        header={
+          <PageHeader
+            eyebrow="Sessions"
+            meta="• Active Devices & Revocation"
+            title="Active Device Sessions"
+            subtitle="Monitor and manage active login sessions across all your laptops, phones, and browsers."
+          />
+        }
+      >
+        <PageStateContainer
+          state={pageState}
+          loadingConfig={{ variant: 'list' }}
+          errorConfig={{
+            title: 'Failed to load sessions',
+            description: error?.message || 'Unknown error',
+          }}
+          emptyConfig={{
+            icon: Icons.laptop,
+            title: 'No active sessions found.',
+          }}
+        >
 
-      {isLoading && (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="border-[var(--color-border-subtle)] rounded-2xl p-4">
-              <CardContent className="p-0 flex items-center justify-between">
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-48 rounded-md" />
-                  <Skeleton className="h-3 w-32 rounded-md" />
-                </div>
-                <Skeleton className="h-8 w-20 rounded-xl" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {isError && (
-        <Card className="border-rose-500/20 bg-rose-500/5 rounded-2xl">
-          <CardContent className="p-6 text-center">
-            <Text className="text-xs text-rose-500 font-semibold">
-              Failed to load sessions: {error?.message || 'Unknown error'}
-            </Text>
-          </CardContent>
-        </Card>
-      )}
-
-      {!isLoading && !isError && sessions?.length === 0 && (
-        <Card className="border-[var(--color-border-subtle)] rounded-2xl">
-          <CardContent className="p-12 text-center">
-            <Icons.laptop className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2" />
-            <Heading level={4} className="text-xs font-semibold text-[var(--text-secondary)]">No active sessions found.</Heading>
-          </CardContent>
-        </Card>
-      )}
-
-      {!isLoading && !isError && sessions?.length > 0 && (
-        <div className="space-y-3">
-          {sessions.map((session, index) => {
+      <div className="space-y-3">
+          {sessions?.map((session, index) => {
             const DeviceIcon = getDeviceIcon(session.deviceInfo)
             return (
               <motion.div
@@ -151,7 +126,8 @@ export function SessionsPage() {
             )
           })}
         </div>
-      )}
-    </motion.div>
+        </PageStateContainer>
+      </ConfigurationLayout>
+    </WorkspaceShell>
   )
 }

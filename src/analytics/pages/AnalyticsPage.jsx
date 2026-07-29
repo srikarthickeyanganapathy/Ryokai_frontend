@@ -1,25 +1,26 @@
 import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { Spinner } from '@/shared/ui/Spinner'
 import { useDashboardStats } from '@/analytics'
 import { StatCard } from '@/analytics'
 import { CompletionChart, PriorityChart } from '@/analytics'
-import { CheckCircle2, TrendingUp, PlusCircle, AlertCircle, Clock, ShieldAlert, Timer, BarChart3, LayoutDashboard } from 'lucide-react'
+import {
+  CheckCircle2, TrendingUp, PlusCircle, AlertCircle, Clock,
+  ShieldAlert, Timer, BarChart3, LayoutDashboard
+} from 'lucide-react'
+import {
+  WorkspaceShell,
+  InsightLayout,
+  InsightSection,
+  PageStateContainer,
+} from '@/shared/workspace-framework'
 
-// Animation configurations
 const containerVariants = {
   hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05
-    }
-  }
+  show: { opacity: 1, transition: { staggerChildren: 0.04 } }
 }
-
 const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
+  hidden: { opacity: 0, y: 10 },
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
 }
 
@@ -28,7 +29,6 @@ export function AnalyticsPage() {
 
   const stats = useMemo(() => {
     if (!rawStats) return null
-
     return {
       completionRate: rawStats.myCompletionRate || rawStats.completionRate || 0,
       totalTasks: rawStats.totalTasks || 0,
@@ -43,7 +43,6 @@ export function AnalyticsPage() {
         value: s.count,
         color: s.color,
       })),
-      // Mocked historical data for the chart since the backend doesn't provide it yet
       historicalData: [
         { name: 'Mon', completed: Math.round((rawStats.doneCount || 0) * 0.2) },
         { name: 'Tue', completed: Math.round((rawStats.doneCount || 0) * 0.5) },
@@ -56,147 +55,137 @@ export function AnalyticsPage() {
     }
   }, [rawStats])
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col h-[calc(100vh-100px)]">
-        <div className="mb-8">
-          <Heading level={2} className="tracking-tight text-[24px] font-semibold mb-1.5 flex items-center gap-2">
-            <LayoutDashboard className="w-5 h-5 text-[var(--accent)]" />
-            Analytics Engine
-          </Heading>
-          <Text variant="muted" className="text-[14px]">Fetching real-time metrics and progress insights.</Text>
-        </div>
-        <div className="flex items-center justify-center flex-1">
-          <div className="text-center space-y-4">
-            <Spinner size="xl" className="text-[var(--accent)]" />
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (isError) {
-    return (
-      <div className="flex flex-col h-[calc(100vh-100px)]">
-        <div className="mb-8">
-          <Heading level={2} className="tracking-tight text-[24px] font-semibold mb-1.5 flex items-center gap-2">
-            <LayoutDashboard className="w-5 h-5 text-[var(--accent)]" />
-            Analytics Engine
-          </Heading>
-          <Text variant="muted" className="text-[14px]">Measure your progress. Optimize your workflow.</Text>
-        </div>
-        <div className="flex items-center justify-center flex-1">
-          <div className="text-center bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)]/50 backdrop-blur-xl shadow-lg rounded-[var(--radius-xl)] p-12 max-w-md">
-            <div className="w-14 h-14 rounded-2xl bg-[var(--danger-soft)] flex items-center justify-center mx-auto mb-5 text-[var(--danger)]">
-              <AlertCircle className="w-7 h-7" />
-            </div>
-            <Heading level={3} className="text-[18px]">Failed to sync data</Heading>
-            <Text variant="muted" className="mt-2 text-[14px] leading-relaxed">
-              Unable to reach the analytics server. Please check your connection and try again.
-            </Text>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (!stats || stats.totalTasks === 0) {
-    return (
-      <div className="flex flex-col h-[calc(100vh-100px)]">
-        <div className="mb-8">
-          <Heading level={2} className="tracking-tight text-[24px] font-semibold mb-1.5 flex items-center gap-2">
-            <LayoutDashboard className="w-5 h-5 text-[var(--accent)]" />
-            Analytics Engine
-          </Heading>
-          <Text variant="muted" className="text-[14px]">Measure your progress. Optimize your workflow.</Text>
-        </div>
-        <div className="flex items-center justify-center flex-1">
-          <div className="text-center bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)]/50 backdrop-blur-xl shadow-lg rounded-[var(--radius-xl)] p-12 max-w-md">
-            <div className="w-14 h-14 rounded-2xl bg-[var(--bg-subtle)] flex items-center justify-center mx-auto mb-5 text-[var(--text-muted)]">
-              <BarChart3 className="w-7 h-7" />
-            </div>
-            <Heading level={3} className="text-[18px]">No metrics available</Heading>
-            <Text variant="muted" className="mt-2 text-[14px] leading-relaxed">
-              Create and complete tasks in this workspace to start generating real-time analytics.
-            </Text>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const pageState = isLoading
+    ? 'loading'
+    : isError
+    ? 'error'
+    : (!stats || stats.totalTasks === 0)
+    ? 'empty'
+    : 'ready'
 
   return (
-    <div className="flex flex-col pb-12" role="region" aria-label="Analytics">
-
-      <div className="mb-6 pb-4 border-b border-[var(--color-border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
-              ANALYTICS Mode
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)]">• Execution Velocity & Task Metrics</span>
+    <WorkspaceShell maxWidth="default">
+      <InsightLayout
+        header={
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-1.5">
+              <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
+                Analytics
+              </span>
+            </div>
+            <Heading level={1} className="tracking-tight text-xl sm:text-[22px] font-semibold mb-1 flex items-center gap-2 truncate">
+              <LayoutDashboard className="w-5 h-5 text-[var(--accent)] shrink-0" aria-hidden="true" />
+              Analytics
+            </Heading>
+            <Text variant="muted" className="text-[13px] leading-relaxed">
+              Measure execution velocity, workload completion, and team performance.
+            </Text>
           </div>
-          <Heading level={1} className="tracking-tight text-[22px] font-semibold mb-0 flex items-center gap-2">
-            <LayoutDashboard className="w-5 h-5 text-[var(--accent)]" aria-hidden="true" />
-            Analytics Engine
-          </Heading>
-          <Text variant="muted" className="text-[13px]">Measure execution velocity, workload completion, and team performance telemetry.</Text>
-        </div>
-      </div>
-
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8"
+        }
       >
-        <motion.div variants={itemVariants}>
-          <StatCard title="Completion Rate" value={`${stats.completionRate}%`} icon={CheckCircle2} />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <StatCard title="Total Workload" value={stats.totalTasks} icon={PlusCircle} />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <StatCard title="Assigned to Me" value={stats.assignedToMe} icon={Clock} />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <StatCard title="In Review" value={stats.inReviewCount} icon={TrendingUp} />
-        </motion.div>
-        
-        <motion.div variants={itemVariants}>
-          <StatCard
-            title="Overdue Tasks"
-            value={stats.overdueCount}
-            icon={AlertCircle}
-            trend={stats.overdueCount > 0 ? -1 : 0}
-            description="Needs attention"
-          />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <StatCard title="Revisions Needed" value={stats.revisionsCount} icon={ShieldAlert} />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <StatCard title="Active To-Do" value={stats.todoCount} icon={Timer} />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <StatCard title="Successfully Done" value={stats.doneCount} icon={CheckCircle2} />
-        </motion.div>
-      </motion.div>
+        <PageStateContainer
+          state={pageState}
+          loadingConfig={{ variant: 'insight' }}
+          errorConfig={{
+            title: 'Failed to sync data',
+            description: 'Unable to reach the analytics server. Please check your connection and try again.',
+          }}
+          emptyConfig={{
+            icon: BarChart3,
+            title: 'No metrics available',
+            description: 'Create and complete tasks in this workspace to start generating real-time analytics.',
+          }}
+        >
+          {/* Tier 1 — hero KPIs: the two numbers that summarize overall health */}
+          <InsightSection question="What's the overall health?">
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-1 sm:grid-cols-2 gap-5"
+            >
+              <motion.div variants={itemVariants}>
+                <StatCard size="lg" title="Completion rate" value={`${stats?.completionRate}%`} icon={CheckCircle2} />
+              </motion.div>
+              <motion.div variants={itemVariants}>
+                <StatCard size="lg" title="Total workload" value={stats?.totalTasks} icon={PlusCircle} />
+              </motion.div>
+            </motion.div>
+          </InsightSection>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3, type: 'spring', stiffness: 200, damping: 20 }}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-      >
-        <div className="lg:col-span-2">
-          <CompletionChart data={stats.historicalData} />
-        </div>
-        <div className="lg:col-span-1">
-          <PriorityChart data={stats.priorityData} />
-        </div>
-      </motion.div>
+          {/* Tier 2 — grouped secondary metrics: what needs attention vs. day-to-day status */}
+          <InsightSection question="What needs attention?">
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-1 lg:grid-cols-3 gap-5"
+            >
+              <div className="lg:col-span-1">
+                <Text size="xs" className="mb-2 font-medium text-[var(--text-muted)] uppercase tracking-wider text-[11px]">
+                  Needs attention
+                </Text>
+                <div className="grid grid-cols-2 gap-3">
+                  <motion.div variants={itemVariants}>
+                    <StatCard
+                      tone={stats?.overdueCount > 0 ? 'attention' : 'default'}
+                      title="Overdue"
+                      value={stats?.overdueCount}
+                      icon={AlertCircle}
+                      description={stats?.overdueCount > 0 ? 'Past due date' : undefined}
+                    />
+                  </motion.div>
+                  <motion.div variants={itemVariants}>
+                    <StatCard
+                      tone={stats?.revisionsCount > 0 ? 'attention' : 'default'}
+                      title="Revisions"
+                      value={stats?.revisionsCount}
+                      icon={ShieldAlert}
+                    />
+                  </motion.div>
+                </div>
+              </div>
 
-    </div>
+              <div className="lg:col-span-2">
+                <Text size="xs" className="mb-2 font-medium text-[var(--text-muted)] uppercase tracking-wider text-[11px]">
+                  Workload breakdown
+                </Text>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <motion.div variants={itemVariants}>
+                    <StatCard title="Assigned to me" value={stats?.assignedToMe} icon={Clock} />
+                  </motion.div>
+                  <motion.div variants={itemVariants}>
+                    <StatCard title="To-do" value={stats?.todoCount} icon={Timer} />
+                  </motion.div>
+                  <motion.div variants={itemVariants}>
+                    <StatCard title="In review" value={stats?.inReviewCount} icon={TrendingUp} />
+                  </motion.div>
+                  <motion.div variants={itemVariants}>
+                    <StatCard title="Done" value={stats?.doneCount} icon={CheckCircle2} />
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          </InsightSection>
+
+          {/* Tier 3 — trends and distribution, for deeper exploration */}
+          <InsightSection question="How are trends shaping up?">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2, type: 'spring', stiffness: 200, damping: 20 }}
+              className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+            >
+              <div className="lg:col-span-2">
+                <CompletionChart data={stats?.historicalData} />
+              </div>
+              <div className="lg:col-span-1">
+                <PriorityChart data={stats?.priorityData} />
+              </div>
+            </motion.div>
+          </InsightSection>
+        </PageStateContainer>
+      </InsightLayout>
+    </WorkspaceShell>
   )
 }

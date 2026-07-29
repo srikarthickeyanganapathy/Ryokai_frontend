@@ -1,9 +1,9 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { Icons } from '@/shared/ui/Icons';
-import { useAcceptCrewInvite } from '@/crew';
+import { useAcceptCrewInvite } from '../features/hooks/useCrews';
 
 export function CrewJoinPage() {
   const [searchParams] = useSearchParams();

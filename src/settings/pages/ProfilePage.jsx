@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { Card, CardContent, CardFooter } from '@/shared/ui/Card'
 import { Button } from '@/shared/ui/Button'
@@ -12,6 +11,11 @@ import { SettingsRow } from '@/shared/ui/SettingsRow'
 import { useProfile, useUpdateProfile, useUploadAvatar } from '@/identity'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar'
 import { Icons } from '@/shared/ui/Icons'
+import { PageHeader } from '@/shared/ui/PageHeader'
+import {
+  WorkspaceShell,
+  ConfigurationLayout,
+} from '@/shared/workspace-framework'
 
 export function ProfilePage() {
   const { data: user, isLoading } = useProfile()
@@ -57,25 +61,17 @@ export function ProfilePage() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 max-w-4xl pb-10">
-      
-      {/* 🏷️ STICKY MODE HEADER */}
-      <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border-subtle)]">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-bold shadow-xs">
-              PROFILE Mode
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)]">• Personal Identity & Preferences</span>
-          </div>
-          <Heading level={1} className="tracking-tight text-[22px] font-extrabold text-[var(--text-primary)] mb-0">
-            Account Profile
-          </Heading>
-          <Text variant="muted" className="text-xs mt-0.5">
-            Manage your personal credentials, workspace presentation, and alert settings.
-          </Text>
-        </div>
-      </div>
+    <WorkspaceShell maxWidth="narrow">
+      <ConfigurationLayout
+        header={
+          <PageHeader
+            eyebrow="Profile"
+            meta="• Personal Identity & Preferences"
+            title="Account Profile"
+            subtitle="Manage your personal credentials, workspace presentation, and alert settings."
+          />
+        }
+      >
 
       {/* 👤 HIGH-END HERO PROFILE BANNER CARD */}
       <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-3xl overflow-hidden shadow-sm transition-all duration-200 hover:border-[var(--accent-soft)]">
@@ -238,7 +234,7 @@ export function ProfilePage() {
           </CardContent>
         </Card>
       </div>
-
-    </motion.div>
+      </ConfigurationLayout>
+    </WorkspaceShell>
   )
 }

@@ -1,4 +1,4 @@
-﻿import React from 'react'
+import React from 'react'
 import { useForm } from 'react-hook-form'
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/shared/ui/Modal'
 import { Heading, Text } from '@/shared/ui/Typography'
@@ -30,7 +30,7 @@ export function CreateTeamModal({ isOpen, onClose, orgId }) {
     <Modal open={isOpen} onOpenChange={onClose}>
       <ModalContent className="sm:max-w-md">
         <ModalHeader>
-          <ModalTitle>Create Team</ModalTitle>
+          <ModalTitle>Create team</ModalTitle>
           <ModalDescription>Create a new team within this organization to group members.</ModalDescription>
         </ModalHeader>
 

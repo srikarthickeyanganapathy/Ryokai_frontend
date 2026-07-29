@@ -27,12 +27,16 @@ import {
   useConvertMessageToTask,
   useCreateCrewTask,
   useTransferCrewOwnership,
-} from '@/crew';
+} from '../features/hooks/useCrews';
 import { useWhiteboards, useCreateWhiteboard, useDeleteWhiteboard } from '@/whiteboard';
 import { toast } from 'sonner';
 import { Label } from '@/shared/ui/Typography/Label';
-import { cn } from '@/shared/lib/cn';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
+import {
+  WorkspaceShell,
+  ManagementLayout,
+  PageStateContainer,
+} from '@/shared/workspace-framework';
 
 export function CrewDetailPage() {
   const { crewId } = useParams();
@@ -66,16 +70,48 @@ export function CrewDetailPage() {
     }
   };
 
-  if (isCrewLoading || !crew) {
-    return (
-      <div className="flex h-full items-center justify-center p-8">
-        <Icons.spinner className="w-8 h-8 animate-spin text-[var(--accent)]" />
-      </div>
-    );
-  }
+  const pageState = isCrewLoading ? 'loading' : !crew ? 'empty' : 'ready';
 
   return (
-    <div className="flex flex-col min-h-full space-y-4">
+    <WorkspaceShell maxWidth="wide">
+      <ManagementLayout
+        header={
+          crew ? (
+            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] text-[var(--accent)] font-bold text-base flex items-center justify-center border border-[var(--accent-border)] font-mono">
+                  {crew.name.slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Heading level={2} className="text-xl font-bold tracking-tight mb-0">{crew.name}</Heading>
+                    <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[var(--bg-subtle)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
+                      {crew.visibility?.replace('_', ' ') || 'PUBLIC'}
+                    </span>
+                  </div>
+                  <Text size="xs" variant="muted" className="mt-0.5">{crew.description || 'No description provided.'}</Text>
+                </div>
+              </div>
+              <Button size="sm" variant="outline" onClick={handleLeaveCrew} className="text-[var(--danger)] hover:bg-[var(--danger-soft)] border-[var(--danger-soft)]">
+                <Icons.logOut className="w-3.5 h-3.5 mr-1.5" />
+                Leave Crew
+              </Button>
+            </div>
+          ) : null
+        }
+      >
+        <PageStateContainer
+          state={pageState}
+          loadingConfig={{ variant: 'dashboard' }}
+          emptyConfig={{
+            icon: Icons.users,
+            title: 'Crew Not Found',
+            description: 'The requested crew does not exist or you do not have permission to view it.',
+            actionLabel: 'Back to Crews',
+            onAction: () => navigate('/app/crews'),
+          }}
+        >
+          <div className="flex flex-col min-h-full space-y-4">
       
       {/* 🧭 GLITCH-FREE UNDERLINED NAVIGATION BAR */}
       <div className="relative border-b border-[var(--border-subtle)] mb-5">
@@ -150,7 +186,10 @@ export function CrewDetailPage() {
         )}
       </div>
       {confirmDialog}
-    </div>
+          </div>
+        </PageStateContainer>
+      </ManagementLayout>
+    </WorkspaceShell>
   );
 }
 

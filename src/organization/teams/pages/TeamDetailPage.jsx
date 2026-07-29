@@ -7,7 +7,7 @@ import { Skeleton } from '@/shared/ui/Skeleton'
 import { Icons } from '@/shared/ui/Icons'
 import { SaveToggle } from '@/library/saved/features/components/SaveToggle'
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
-import { useTeam, useTeamMessages, useSendTeamMessage, useDeleteTeamMessage, useOrgTeams } from '@/organization'
+import { useTeam, useTeamMessages, useSendTeamMessage, useDeleteTeamMessage, useOrgTeams } from '../../features/hooks/useOrganizations'
 import { useTaskList, useReassignTask } from '@/task'
 import { useProjects, useCreateProject } from '@/project'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
@@ -181,7 +181,7 @@ export function TeamDetailPage() {
               {team.name.charAt(0).toUpperCase()}
             </div>
             <Heading level={2} className="tracking-tight text-[22px] font-semibold mb-0">{team.name}</Heading>
-            <Badge variant="outline" className="bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)] text-[10px] font-mono uppercase">Team Portal</Badge>
+            <Badge variant="outline" className="bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)] text-[10px] font-mono uppercase">Team</Badge>
             {isReadOnly && (
               <Badge variant="outline" className="bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20 text-[10px] font-mono uppercase">Read-Only Observer</Badge>
             )}

@@ -1,5 +1,4 @@
 import React from 'react'
-import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { Card, CardContent } from '@/shared/ui/Card'
 import { Button } from '@/shared/ui/Button'
@@ -9,6 +8,11 @@ import { Form, FormField, FormItem, FormControl, FormMessage } from '@/shared/fo
 import { SettingsRow } from '@/shared/ui/SettingsRow'
 import { Switch } from '@/shared/ui/Switch'
 import { useChangePassword } from '@/identity'
+import { PageHeader } from '@/shared/ui/PageHeader'
+import {
+  WorkspaceShell,
+  ConfigurationLayout,
+} from '@/shared/workspace-framework'
 
 export function SecurityPage() {
   const changePassword = useChangePassword()
@@ -51,25 +55,17 @@ export function SecurityPage() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 max-w-4xl pb-10">
-      
-      {/* 🏷️ SECURITY MODE HEADER */}
-      <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border-subtle)]">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
-              SECURITY Mode
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)]">• Authentication & Safety</span>
-          </div>
-          <Heading level={1} className="tracking-tight text-[22px] font-bold text-[var(--text-primary)] mb-0">
-            Security Settings
-          </Heading>
-          <Text variant="muted" className="text-xs mt-0.5">
-            Update password credentials, view password strength, and configure multi-factor authentication.
-          </Text>
-        </div>
-      </div>
+    <WorkspaceShell maxWidth="narrow">
+      <ConfigurationLayout
+        header={
+          <PageHeader
+            eyebrow="Security"
+            meta="• Authentication & Safety"
+            title="Security Settings"
+            subtitle="Update password credentials, view password strength, and configure multi-factor authentication."
+          />
+        }
+      >
 
       {/* 🔑 PASSWORD FORM */}
       <Form {...form}>
@@ -175,7 +171,7 @@ export function SecurityPage() {
           </CardContent>
         </Card>
       </div>
-
-    </motion.div>
+      </ConfigurationLayout>
+    </WorkspaceShell>
   )
 }

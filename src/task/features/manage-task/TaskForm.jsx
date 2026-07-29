@@ -12,7 +12,7 @@ import { projectsApi } from '@/project'
 import { useAuth } from '@/identity'
 import { Textarea } from '@/shared/ui/Textarea'
 import { MultiSelect } from '@/shared/ui/MultiSelect'
-import { useTaskSearch } from '@/task'
+import { useTaskSearch } from '../../entities/hooks/useTasks'
 import { crewApi } from '@/crew'
 import { queryKeys } from '@/shared/api/queryKeys'
 

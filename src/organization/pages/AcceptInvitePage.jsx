@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAcceptInviteByToken } from '@/organization'
 import { Spinner } from '@/shared/ui/Spinner'
@@ -33,7 +33,7 @@ export function AcceptInvitePage() {
           <Icons.users className="w-6 h-6" />
         </div>
 
-        <Heading level={3}>Organization Invitation</Heading>
+        <Heading level={3}>Organization invitation</Heading>
 
         {acceptMutation.isPending && (
           <div className="space-y-3 py-4">
@@ -55,7 +55,7 @@ export function AcceptInvitePage() {
               {acceptMutation.error?.response?.data?.message || 'Failed to accept invitation. The link may be expired or invalid.'}
             </div>
             <Button variant="primary" onClick={() => navigate('/app/organizations')}>
-              Go to Workspace
+              Go to workspace
             </Button>
           </div>
         )}

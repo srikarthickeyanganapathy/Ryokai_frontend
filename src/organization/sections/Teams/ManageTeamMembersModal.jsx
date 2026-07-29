@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react'
+import React, { useState } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription } from '@/shared/ui/Modal'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button, IconButton } from '@/shared/ui/Button'
@@ -56,7 +56,7 @@ export function ManageTeamMembersModal({ isOpen, onClose, team, orgMembers }) {
     <Modal open={isOpen} onOpenChange={onClose}>
       <ModalContent className="sm:max-w-md max-h-[80vh] flex flex-col">
         <ModalHeader>
-          <ModalTitle>Manage Team: {team?.name}</ModalTitle>
+          <ModalTitle>Manage team: {team?.name}</ModalTitle>
           <ModalDescription>Add or remove members and observers for this team.</ModalDescription>
         </ModalHeader>
 

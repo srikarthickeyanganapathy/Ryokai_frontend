@@ -1,8 +1,13 @@
 import React from 'react';
 import { Heading, Text } from '@/shared/ui/Typography';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { useCrewDashboardViewModel } from './hooks/useCrewDashboardViewModel';
-import { Skeleton } from '@/shared/ui/Skeleton';
 import { Icons } from '@/shared/ui/Icons';
+import {
+  WorkspaceShell,
+  CommandLayout,
+  PageStateContainer,
+} from '@/shared/workspace-framework';
 
 function SprintStatus({ status }) {
   return (
@@ -113,60 +118,59 @@ function RecentActivity({ activity }) {
 export default function CrewDashboard() {
   const vm = useCrewDashboardViewModel();
 
-  if (vm.isLoading) {
-    return (
-      <div className="p-6 space-y-6">
-        <Skeleton className="h-40 w-full rounded-2xl" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Skeleton className="h-64 w-full rounded-xl" />
-          <Skeleton className="h-64 w-full rounded-xl" />
-        </div>
-      </div>
-    );
-  }
+  const pageState = vm.isLoading ? 'loading' : 'ready';
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
-        <div>
-          <Heading level={2}>Crew Dashboard</Heading>
-          <Text variant="muted">Collaborative workspace for your squad.</Text>
-        </div>
+    <WorkspaceShell maxWidth="wide">
+      <CommandLayout
+        hero={
+          <PageHeader
+            eyebrow="Crew Workspace"
+            title="Crew Dashboard"
+            subtitle="Collaborative workspace for your squad."
+            actions={
+              vm.crews.length > 1 ? (
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
+                  <Text size="xs" variant="muted" className="font-semibold uppercase tracking-wider shrink-0 mr-1">Your Crews:</Text>
+                  {vm.crews.map(c => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => vm.setSelectedCrewId(c.id)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 ${
+                        (vm.selectedCrewId === c.id || (!vm.selectedCrewId && vm.activeCrew?.id === c.id))
+                          ? 'bg-[var(--accent)] text-white font-semibold'
+                          : 'bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+                      }`}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              ) : null
+            }
+          />
+        }
+      >
+        <PageStateContainer
+          state={pageState}
+          loadingConfig={{ variant: 'dashboard' }}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-8 space-y-6">
+              <SprintStatus status={vm.sprintStatus} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <ActiveTasks tasks={vm.activeTasks} />
+                <RecentActivity activity={vm.recentActivity} />
+              </div>
+            </div>
 
-        {vm.crews.length > 1 && (
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
-            <Text size="xs" variant="muted" className="font-semibold uppercase tracking-wider shrink-0 mr-1">Your Crews:</Text>
-            {vm.crews.map(c => (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => vm.setSelectedCrewId(c.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 ${
-                  (vm.selectedCrewId === c.id || (!vm.selectedCrewId && vm.activeCrew?.id === c.id))
-                    ? 'bg-[var(--accent)] text-white font-semibold'
-                    : 'bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
-                }`}
-              >
-                {c.name}
-              </button>
-            ))}
+            <div className="lg:col-span-4 space-y-6">
+              <CrewMembers members={vm.members} />
+            </div>
           </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-8 space-y-6">
-          <SprintStatus status={vm.sprintStatus} />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <ActiveTasks tasks={vm.activeTasks} />
-            <RecentActivity activity={vm.recentActivity} />
-          </div>
-        </div>
-
-        <div className="lg:col-span-4 space-y-6">
-          <CrewMembers members={vm.members} />
-        </div>
-      </div>
-    </div>
+        </PageStateContainer>
+      </CommandLayout>
+    </WorkspaceShell>
   );
 }

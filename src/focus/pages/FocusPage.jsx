@@ -11,6 +11,11 @@ import { CheckCircle2, Play, Circle, Maximize2, Minimize2, Settings, Sparkles, F
 import { cn } from '@/shared/lib/cn'
 import { normalizeStatus, isDoneStatus, toBackendStatus } from '@/shared/lib/status'
 import { FocusTimer } from '@/focus'
+import {
+  WorkspaceShell,
+  CommandLayout,
+  PageStateContainer,
+} from '@/shared/workspace-framework'
 
 export function FocusPage() {
   const { data: tasks = [], isLoading } = useTaskList()
@@ -115,21 +120,25 @@ export function FocusPage() {
     }
   }
 
-  if (isLoading) return <div className="p-8 text-center"><Text variant="muted">Loading Zen focus sanctuary...</Text></div>
+  const pageState = isLoading ? 'loading' : 'ready';
 
-  const mainContent = (
-    <div 
-      ref={zenContainerRef}
-      className={cn(
-        "flex flex-col transition-all duration-500 ease-out select-none max-w-7xl mx-auto w-full min-w-0 overflow-hidden text-[var(--text-primary)] [&:fullscreen]:w-screen [&:fullscreen]:h-screen [&:fullscreen]:bg-[#09090b] [&:fullscreen]:p-6 [&:fullscreen]:md:p-12 [&:fullscreen]:flex [&:fullscreen]:flex-col [&:fullscreen]:justify-center [&:fullscreen]:items-center [&:fullscreen]:overflow-y-auto",
-        isFullscreen 
-          ? "fixed inset-0 z-[999999] bg-[#09090b] w-screen h-screen p-6 md:p-12 flex flex-col justify-center items-center overflow-y-auto" 
-          : "h-full min-h-0 flex-1 py-2 px-2 sm:px-4"
-      )}
-    >
-      
-      {/* ZEN AMBIENT BACKDROP GLOW */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center opacity-20">
+  return (
+    <WorkspaceShell maxWidth="wide">
+      <CommandLayout>
+        <PageStateContainer
+          state={pageState}
+          loadingConfig={{ variant: 'dashboard' }}
+        >
+          <div 
+            ref={zenContainerRef}
+            className={cn(
+              "flex flex-col transition-all duration-500 ease-out select-none max-w-7xl mx-auto w-full min-w-0 overflow-hidden text-[var(--text-primary)] [&:fullscreen]:w-screen [&:fullscreen]:h-screen [&:fullscreen]:bg-[#09090b] [&:fullscreen]:p-6 [&:fullscreen]:md:p-12 [&:fullscreen]:flex [&:fullscreen]:flex-col [&:fullscreen]:justify-center [&:fullscreen]:items-center [&:fullscreen]:overflow-y-auto",
+              isFullscreen 
+                ? "fixed inset-0 z-[999999] bg-[#09090b] w-screen h-screen p-6 md:p-12 flex flex-col justify-center items-center overflow-y-auto" 
+                : "h-full min-h-0 flex-1 py-2 px-2 sm:px-4"
+            )}
+          >
+            <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center opacity-20">
         <div className="w-[600px] h-[600px] rounded-full bg-radial from-[var(--accent)]/30 to-transparent blur-3xl" />
       </div>
 
@@ -360,14 +369,12 @@ export function FocusPage() {
                 )
               })}
             </div>
-
           </div>
-
         </div>
-
       </div>
-    </div>
-  )
-
-  return mainContent
+      </div>
+    </PageStateContainer>
+  </CommandLayout>
+</WorkspaceShell>
+);
 }

@@ -2,7 +2,16 @@ import React, { createContext, useContext, useState, useEffect, useMemo } from '
 import { useAuth } from '@/identity';
 import { useOrganizations } from '@/organization';
 
-const WorkspaceContext = createContext();
+const DEFAULT_WORKSPACE = {
+  workspaceMode: 'PERSONAL',
+  setWorkspaceMode: () => {},
+  activeOrganization: null,
+  setActiveOrganization: () => {},
+  organizations: [],
+  loadingWorkspace: false,
+};
+
+const WorkspaceContext = createContext(DEFAULT_WORKSPACE);
 
 export const WorkspaceProvider = ({ children }) => {
   const { user } = useAuth();
@@ -86,8 +95,5 @@ export const WorkspaceProvider = ({ children }) => {
 
 export const useWorkspace = () => {
   const context = useContext(WorkspaceContext);
-  if (context === undefined) {
-    throw new Error('useWorkspace must be used within a WorkspaceProvider');
-  }
-  return context;
+  return context || DEFAULT_WORKSPACE;
 };

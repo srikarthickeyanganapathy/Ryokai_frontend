@@ -1,9 +1,14 @@
-﻿import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Heading } from '@/shared/ui/Typography'
 import { useTaskList, useCompleteCrewTask, useDeleteTask } from '@/task'
 import { TasksTable } from '@/task'
 import { TaskPanel } from '@/task'
 import { toast } from 'sonner'
+import { PageHeader } from '@/shared/ui/PageHeader'
+import {
+  WorkspaceShell,
+  ManagementLayout,
+} from '@/shared/workspace-framework'
 
 export function CrewTasksPage() {
   const { data: rawTasks = [], isLoading } = useTaskList({ scope: 'crew' })
@@ -33,26 +38,35 @@ export function CrewTasksPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4 flex flex-col min-h-[calc(100vh-8rem)]">
-      <Heading level={2} className="mb-6">Crew Tasks</Heading>
-      
-      <div className="flex-1 min-h-0 relative">
-        <TasksTable 
-          tasks={tasks} 
-          isLoading={isLoading} 
-          rowSelection={rowSelection}
-          setRowSelection={setRowSelection}
-          onTaskClick={setSelectedTask}
-          onQuickComplete={handleQuickComplete}
-          onQuickDelete={handleQuickDelete}
-        />
-      </div>
+    <WorkspaceShell maxWidth="wide">
+      <ManagementLayout
+        header={
+          <PageHeader
+            eyebrow="Crews"
+            meta={`• ${tasks.length} tasks`}
+            title="Crew Tasks"
+            subtitle="Central execution table for tasks assigned across all your active crews."
+          />
+        }
+      >
+        <div className="flex-1 min-h-0 relative">
+          <TasksTable 
+            tasks={tasks} 
+            isLoading={isLoading} 
+            rowSelection={rowSelection}
+            setRowSelection={setRowSelection}
+            onTaskClick={setSelectedTask}
+            onQuickComplete={handleQuickComplete}
+            onQuickDelete={handleQuickDelete}
+          />
+        </div>
 
-      <TaskPanel
-        task={selectedTask}
-        isOpen={!!selectedTask}
-        onClose={() => setSelectedTask(null)}
-      />
-    </div>
+        <TaskPanel
+          task={selectedTask}
+          isOpen={!!selectedTask}
+          onClose={() => setSelectedTask(null)}
+        />
+      </ManagementLayout>
+    </WorkspaceShell>
   )
 }
