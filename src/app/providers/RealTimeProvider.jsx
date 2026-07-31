@@ -60,6 +60,11 @@ export function RealtimeProvider({ children }) {
           }
         })
 
+        // Workspace mode sync
+        client.subscribe('/user/queue/workspace-mode', (msg) => {
+          queryClient.setQueryData(queryKeys.workspace.mode(), msg.body)
+        })
+
         // Force disconnect (admin revoke, password change, logout from another device)
         client.subscribe('/user/queue/force-disconnect', () => {
           localStorage.removeItem('jwt_token')

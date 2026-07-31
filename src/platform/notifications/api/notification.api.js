@@ -13,6 +13,13 @@ export const getNotifications = async (params) => {
   return data;
 };
 
+export const getActiveSignals = async (params) => {
+  const { data } = await api.get('/notifications/signals', { params });
+  if (Array.isArray(data)) return data.map(normalizeNotification);
+  if (data?.content) return data.content.map(normalizeNotification);
+  return [];
+};
+
 export const getUnreadCount = async () => {
   const { data } = await api.get('/notifications/unread/count');
   return data.count;

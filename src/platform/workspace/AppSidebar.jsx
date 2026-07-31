@@ -11,13 +11,6 @@ import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { usePermissions } from '@/identity'
 import { useCrews } from '@/crew'
 import { useOrgTeams } from '@/organization'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/Select'
 import { Separator } from '@/shared/ui/Separator'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar'
@@ -34,8 +27,6 @@ export function AppSidebar({ isOpen, onClose }) {
   const location = useLocation()
   const navigate = useNavigate()
   
-  const [isCollapsed, setIsCollapsed] = useState(false)
-
   const isSettingsMode = location.pathname.startsWith('/app/settings') || location.pathname.startsWith('/app/sessions')
 
   // ════════════════════════════════════════════════
@@ -50,14 +41,12 @@ export function AppSidebar({ isOpen, onClose }) {
     if (workspaceMode === 'ORG') {
       return [
         {
-          title: 'OVERVIEW',
           items: [
-            { icon: Icons.layoutDashboard, label: 'Dashboard', to: '/app' },
+            { icon: Icons.layoutDashboard, label: 'Mission Control', to: '/app' },
             { icon: Icons.folderClosed, label: 'Projects', to: '/app/projects' },
           ]
         },
         {
-          title: 'OPERATIONS',
           items: [
             { icon: Icons.listTodo, label: 'Tasks', to: '/app/tasks' },
             { icon: Icons.users, label: 'Teams', to: '/app/teams' },
@@ -65,7 +54,6 @@ export function AppSidebar({ isOpen, onClose }) {
           ]
         },
         {
-          title: 'LEADERSHIP',
           items: [
             { icon: Icons.barChart2, label: 'Analytics', to: '/app/analytics' },
             { icon: Icons.scale, label: 'Workload', to: '/app/workload' },
@@ -73,7 +61,6 @@ export function AppSidebar({ isOpen, onClose }) {
           ]
         },
         {
-          title: 'ADMINISTRATION',
           items: [
             { icon: Icons.megaphone, label: 'Announcements', to: '/app/announcements' },
             { icon: Icons.settings, label: 'Settings', to: '/app/organizations' },
@@ -85,16 +72,14 @@ export function AppSidebar({ isOpen, onClose }) {
     if (workspaceMode === 'CREWS') {
       return [
         {
-          title: 'SPRINT',
           items: [
-            { icon: Icons.layoutDashboard, label: 'Dashboard', to: '/app' },
+            { icon: Icons.layoutDashboard, label: 'Mission Control', to: '/app' },
             { icon: Icons.rocket, label: 'Crews', to: '/app/crews' },
             { icon: Icons.listTodo, label: 'All Crew Tasks', to: '/app/crews/tasks' },
             { icon: Icons.folderClosed, label: 'Projects', to: '/app/projects' },
           ]
         },
         {
-          title: 'COLLABORATION',
           items: [
             { icon: Icons.compass, label: 'Discover & Join', to: '/app/crews/discover' },
           ]
@@ -104,9 +89,8 @@ export function AppSidebar({ isOpen, onClose }) {
     // DEFAULT: PERSONAL
     return [
       {
-        title: 'WORK',
         items: [
-          { icon: Icons.layoutDashboard, label: 'Dashboard', to: '/app' },
+          { icon: Icons.layoutDashboard, label: 'Mission Control', to: '/app' },
           { icon: Icons.inbox, label: 'Inbox', to: '/app/inbox' },
           { icon: Icons.listTodo, label: 'Tasks', to: '/app/tasks' },
           { icon: Icons.folderClosed, label: 'Projects', to: '/app/projects' },
@@ -114,14 +98,12 @@ export function AppSidebar({ isOpen, onClose }) {
         ]
       },
       {
-        title: 'PLAN',
         items: [
           { icon: Icons.calendar, label: 'Calendar', to: '/app/calendar' },
           { icon: Icons.pencil, label: 'Notes', to: '/app/notes' },
         ]
       },
       {
-        title: 'REVIEW',
         items: [
           { icon: Icons.barChart2, label: 'Analytics', to: '/app/analytics' },
           { icon: Icons.bookmark, label: 'Saved', to: '/app/saved' },
@@ -133,12 +115,6 @@ export function AppSidebar({ isOpen, onClose }) {
   // ════════════════════════════════════════════════
   // Dropdown value logic
   // ════════════════════════════════════════════════
-
-  const getDropdownValue = () => {
-    if (workspaceMode === 'ORG' && activeOrganization) return `org-${activeOrganization.id}`
-    if (workspaceMode === 'CREWS') return 'CREWS'
-    return 'PERSONAL'
-  }
 
   const handleDropdownChange = (val) => {
     if (val === 'PERSONAL') {
@@ -156,27 +132,62 @@ export function AppSidebar({ isOpen, onClose }) {
     navigate('/app')
   }
 
+  const getWorkspaceIcon = () => {
+    if (workspaceMode === 'ORG') return <Icons.building className="w-5 h-5" />
+    if (workspaceMode === 'CREWS') return <Icons.rocket className="w-5 h-5" />
+    return <Icons.user className="w-5 h-5" />
+  }
+
   // ════════════════════════════════════════════════
   // Render helpers
   // ════════════════════════════════════════════════
 
-  const renderNavSection = (items, title) => (
-    <div className="space-y-1 mb-6">
-      {title && !isCollapsed && (
-        <div className="px-4 pb-2">
-          <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--text-tertiary)]">{title}</span>
-        </div>
-      )}
-      <div className={cn("space-y-[2px]", isCollapsed ? "px-2" : "px-3")}>
-        {items.map((item) => (
+  const renderNavSection = (items, index) => (
+    <div key={index} className="space-y-[4px] mb-4 flex flex-col items-center w-full">
+      {items.map((item) => (
+        <NavLink
+          key={item.to}
+          to={item.to}
+          end={item.to === '/app'}
+          title={item.label}
+          className={({ isActive }) => cn(
+            "relative flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 group shrink-0",
+            isActive
+              ? "text-[var(--accent)]"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
+          )}
+        >
+          {({ isActive }) => (
+            <>
+              {isActive && (
+                <motion.div
+                  layoutId="sidebar-active-pill"
+                  className="absolute inset-0 rounded-full bg-[var(--accent-soft)]"
+                  transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.6 }}
+                />
+              )}
+              <item.icon className={cn("relative w-[18px] h-[18px] shrink-0", isActive ? "text-[var(--accent)]" : "text-[var(--text-tertiary)] group-hover:text-[var(--text-secondary)]")} strokeWidth={1.5} />
+            </>
+          )}
+        </NavLink>
+      ))}
+      <div className="w-6 h-[1px] bg-[var(--color-border-subtle)] mt-4 opacity-50" />
+    </div>
+  )
+
+  const renderCrewsList = () => {
+    if (workspaceMode !== 'CREWS') return null
+    if (crews.length === 0) return null
+
+    return (
+      <div className="flex flex-col items-center space-y-2 mb-4 w-full">
+        {crews.map((crew) => (
           <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/app'}
-            title={isCollapsed ? item.label : undefined}
+            key={crew.id}
+            to={`/app/crews/${crew.id}`}
+            title={crew.name}
             className={({ isActive }) => cn(
-              "relative flex items-center h-[34px] rounded-full text-[13px] font-medium transition-colors duration-150 group",
-              isCollapsed ? "justify-center w-10 mx-auto" : "px-3 gap-3 w-full",
+              "relative flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 group shrink-0",
               isActive
                 ? "text-[var(--accent)]"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
@@ -191,225 +202,194 @@ export function AppSidebar({ isOpen, onClose }) {
                     transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.6 }}
                   />
                 )}
-                <item.icon className={cn("relative w-[16px] h-[16px] shrink-0", isActive ? "text-[var(--accent)]" : "text-[var(--text-tertiary)] group-hover:text-[var(--text-secondary)]")} strokeWidth={1.5} />
-                {!isCollapsed && <span className="relative truncate">{item.label}</span>}
+                <div className="relative w-6 h-6 rounded-md bg-[var(--accent)] text-white flex items-center justify-center text-[11px] font-bold shrink-0">
+                  {crew.name?.charAt(0).toUpperCase()}
+                </div>
               </>
             )}
           </NavLink>
         ))}
-      </div>
-    </div>
-  )
-
-  const renderCrewsList = () => {
-    if (workspaceMode !== 'CREWS' || isCollapsed) return null
-    if (crews.length === 0) return (
-      <div className="px-4 py-6 text-center">
-        <Text size="sm" variant="muted">No crews yet.</Text>
-        <Text size="xs" variant="muted" className="mt-1">Discover and join crews above!</Text>
-      </div>
-    )
-
-    return (
-      <div className="mb-6">
-        <div className="px-4 pb-2">
-          <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--text-tertiary)]">My Crews</span>
-        </div>
-        <div className="space-y-[2px] px-3">
-          {crews.map((crew) => (
-            <NavLink
-              key={crew.id}
-              to={`/app/crews/${crew.id}`}
-              className={({ isActive }) => cn(
-                "relative flex items-center h-[34px] rounded-full text-[13px] font-medium transition-colors duration-150 group px-3 gap-3 w-full",
-                isActive
-                  ? "text-[var(--accent)]"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
-              )}
-            >
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <motion.div
-                      layoutId="sidebar-active-pill"
-                      className="absolute inset-0 rounded-full bg-[var(--accent-soft)]"
-                      transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.6 }}
-                    />
-                  )}
-                  <div className="relative w-[18px] h-[18px] rounded-md bg-[var(--accent)] text-white flex items-center justify-center text-[9px] font-bold shrink-0">
-                    {crew.name?.charAt(0).toUpperCase()}
-                  </div>
-                  <span className="relative truncate">{crew.name}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
-        </div>
+        <div className="w-6 h-[1px] bg-[var(--color-border-subtle)] mt-2 opacity-50" />
       </div>
     )
   }
 
   const renderTeamsList = () => {
-    if (workspaceMode !== 'ORG' || isCollapsed || !activeOrganization) return null
+    if (workspaceMode !== 'ORG' || !activeOrganization) return null
     if (teams.length === 0) return null
 
     return (
-      <div className="mb-6">
-        <div className="px-4 pb-2 flex items-center justify-between">
-          <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--text-tertiary)]">Org Teams</span>
-          <span className="text-[10px] font-mono text-[var(--text-muted)]">{teams.length}</span>
-        </div>
-        <div className="space-y-[2px] px-3">
-          {teams.map((t) => (
-            <NavLink
-              key={t.id}
-              to={`/app/organizations/${activeOrganization.id}/teams/${t.id}`}
-              className={({ isActive }) => cn(
-                "relative flex items-center h-[34px] rounded-full text-[13px] font-medium transition-colors duration-150 group px-3 gap-3 w-full",
-                isActive
-                  ? "text-[var(--accent)]"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
-              )}
-            >
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <motion.div
-                      layoutId="sidebar-active-pill"
-                      className="absolute inset-0 rounded-full bg-[var(--accent-soft)]"
-                      transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.6 }}
-                    />
-                  )}
-                  <div className="relative w-[18px] h-[18px] rounded-md bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] flex items-center justify-center text-[9px] font-bold shrink-0">
-                    {t.name?.charAt(0).toUpperCase()}
-                  </div>
-                  <span className="relative truncate">{t.name}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
-        </div>
+      <div className="flex flex-col items-center space-y-2 mb-4 w-full">
+        {teams.map((t) => (
+          <NavLink
+            key={t.id}
+            to={`/app/organizations/${activeOrganization.id}/teams/${t.id}`}
+            title={t.name}
+            className={({ isActive }) => cn(
+              "relative flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 group shrink-0",
+              isActive
+                ? "text-[var(--accent)]"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
+            )}
+          >
+            {({ isActive }) => (
+              <>
+                {isActive && (
+                  <motion.div
+                    layoutId="sidebar-active-pill"
+                    className="absolute inset-0 rounded-full bg-[var(--accent-soft)]"
+                    transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.6 }}
+                  />
+                )}
+                <div className="relative w-6 h-6 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] flex items-center justify-center text-[11px] font-bold shrink-0">
+                  {t.name?.charAt(0).toUpperCase()}
+                </div>
+              </>
+            )}
+          </NavLink>
+        ))}
+        <div className="w-6 h-[1px] bg-[var(--color-border-subtle)] mt-2 opacity-50" />
       </div>
     )
   }
 
   const sidebarContent = (
-    <div className={cn(
-      "flex flex-col h-full bg-[var(--bg-subtle)]/40 backdrop-blur-xl relative z-20 transition-all duration-300",
-      isCollapsed ? "w-[68px]" : "w-[240px]"
-    )}>
+    <div className="flex flex-col h-full bg-[var(--bg-subtle)]/40 backdrop-blur-xl relative z-20 w-[68px] items-center py-4 border-r border-[var(--color-border-subtle)] shadow-sm">
       
       {/* Brand & User Profile Header */}
-      <div className={cn("flex items-center shrink-0 mt-2", isCollapsed ? "justify-center py-3" : "h-14 justify-between px-3")}>
-        {!isCollapsed && (
-          <Popover>
-            <PopoverTrigger asChild>
-              <div className="flex items-center gap-2.5 min-w-0 cursor-pointer hover:bg-[var(--bg-hover)] p-1.5 rounded-full transition-all duration-200 flex-1">
-                <Avatar size="sm" className="bg-[var(--accent)] text-white shrink-0 shadow-sm">
-                  <AvatarImage src={user?.avatarUrl} />
-                  <AvatarFallback className="bg-[var(--accent)] text-white text-[11px] font-bold">
-                    {user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col min-w-0 text-left overflow-hidden">
-                  <Text className="text-[13px] font-bold truncate text-[var(--text-primary)] leading-tight">
-                    {user?.name || user?.username}
-                  </Text>
-                </div>
-              </div>
-            </PopoverTrigger>
-            <PopoverContent 
-              align="start" 
-              className="w-56 bg-[var(--bg-elevated)]/95 backdrop-blur-xl border border-[var(--color-border-subtle)] p-2 rounded-2xl shadow-xl flex flex-col gap-1 z-[9999]"
-            >
-              <Link
-                to="/app/settings/profile"
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
-              >
-                <Icons.user className="w-4 h-4 text-[var(--text-muted)]" />
-                <span>Profile</span>
-              </Link>
-              <Link
-                to="/app/settings/security"
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
-              >
-                <Icons.settings className="w-4 h-4 text-[var(--text-muted)]" />
-                <span>Settings</span>
-              </Link>
-              <Separator className="my-1 bg-[var(--color-border-subtle)]" />
-              <Button
-                variant="ghost"
-                onClick={() => logout()}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[var(--danger)] hover:bg-[var(--danger-soft)]/20 transition-colors w-full text-left font-semibold"
-              >
-                <Icons.logout className="w-4 h-4" />
-                <span>Log out</span>
-              </Button>
-            </PopoverContent>
-          </Popover>
-        )}
-
-        <button 
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className={cn(
-            "text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-all duration-200 p-2 rounded-xl hover:bg-[var(--bg-hover)] hidden lg:flex shrink-0 items-center justify-center border border-transparent hover:border-[var(--color-border-subtle)]"
-          )}
-          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      <Popover>
+        <PopoverTrigger asChild>
+          <button className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--bg-hover)] transition-all duration-200 mb-4 shrink-0 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]">
+            <Avatar size="sm" className="bg-[var(--accent)] text-white shadow-sm w-8 h-8">
+              <AvatarImage src={user?.avatarUrl} />
+              <AvatarFallback className="bg-[var(--accent)] text-white text-[11px] font-bold">
+                {user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+          </button>
+        </PopoverTrigger>
+        <PopoverContent 
+          side="right"
+          align="start" 
+          sideOffset={10}
+          className="w-56 bg-[var(--bg-elevated)]/95 backdrop-blur-xl border border-[var(--color-border-subtle)] p-2 rounded-2xl shadow-xl flex flex-col gap-1 z-[9999]"
         >
-          {isCollapsed ? (
-            <Icons.sidebarOpen className="w-4 h-4 text-[var(--accent)]" />
-          ) : (
-            <Icons.sidebarClose className="w-4 h-4" />
-          )}
-        </button>
-      </div>
-
-      {/* ═══ Workspace Switcher (Top position) ═══ */}
-      {!isSettingsMode && !isCollapsed && (
-        <div className="px-4 py-2">
-          <Select
-            value={getDropdownValue()}
-            onValueChange={handleDropdownChange}
+          <div className="px-3 py-2">
+            <Text className="text-[13px] font-bold truncate text-[var(--text-primary)] leading-tight">
+              {user?.name || user?.username}
+            </Text>
+            <Text className="text-[11px] text-[var(--text-muted)] truncate">
+              {user?.email}
+            </Text>
+          </div>
+          <Separator className="my-1 bg-[var(--color-border-subtle)]" />
+          <Link
+            to="/app/settings/profile"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
           >
-            <SelectTrigger className="w-full bg-[var(--bg-elevated)]/50 backdrop-blur-md border border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--bg-hover)] h-10 text-[12px] font-semibold rounded-full px-4 transition-all duration-300 shadow-sm">
-              <SelectValue placeholder="Select Workspace" />
-            </SelectTrigger>
-            <SelectContent className="rounded-2xl border-[var(--border-subtle)] bg-[var(--bg-elevated)]/95 backdrop-blur-xl shadow-lg">
-              <SelectItem value="PERSONAL" className="rounded-xl">
-                <div className="flex items-center gap-2">
-                  <Icons.user className="w-4 h-4" />
-                  <span>Personal Space</span>
-                </div>
-              </SelectItem>
-              {organizations.map(org => (
-                <SelectItem key={org.id} value={`org-${org.id}`} className="rounded-xl">
-                  <div className="flex items-center gap-2">
-                    <Icons.building className="w-4 h-4" />
-                    <span>{org.name}</span>
-                  </div>
-                </SelectItem>
-              ))}
-              <SelectItem value="CREWS" className="rounded-xl">
-                <div className="flex items-center gap-2">
-                  <Icons.rocket className="w-4 h-4" />
-                  <span>Crews</span>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            <Icons.user className="w-4 h-4 text-[var(--text-muted)]" />
+            <span>Profile</span>
+          </Link>
+          <Link
+            to="/app/settings/security"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+          >
+            <Icons.settings className="w-4 h-4 text-[var(--text-muted)]" />
+            <span>Settings</span>
+          </Link>
+          <Separator className="my-1 bg-[var(--color-border-subtle)]" />
+          <Button
+            variant="ghost"
+            onClick={() => logout()}
+            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[var(--danger)] hover:bg-[var(--danger-soft)]/20 transition-colors w-full text-left font-semibold"
+          >
+            <Icons.logout className="w-4 h-4" />
+            <span>Log out</span>
+          </Button>
+        </PopoverContent>
+      </Popover>
+
+      {/* ═══ Workspace / Lens Switcher (Iconic) ═══ */}
+      {!isSettingsMode && (
+        <Popover>
+          <PopoverTrigger asChild>
+            <button 
+              title="Switch Lens"
+              className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] transition-all duration-300 shadow-sm mb-4 shrink-0 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+            >
+              {getWorkspaceIcon()}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent 
+            side="right"
+            align="start"
+            sideOffset={14}
+            className="w-56 p-2 rounded-2xl border-[var(--border-subtle)] bg-[var(--bg-elevated)]/95 backdrop-blur-xl shadow-xl flex flex-col gap-1 z-[9999]"
+          >
+            <div className="px-3 pt-1 pb-2">
+              <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--text-tertiary)]">Operating Lens</span>
+            </div>
+            <button 
+              onClick={() => handleDropdownChange('PERSONAL')}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-colors text-left",
+                workspaceMode === 'PERSONAL' ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
+              )}
+            >
+              <Icons.user className="w-4 h-4" />
+              <span>Personal Space</span>
+            </button>
+            
+            {organizations.length > 0 && <Separator className="my-1 bg-[var(--color-border-subtle)]" />}
+            
+            {organizations.map(org => (
+              <button 
+                key={org.id}
+                onClick={() => handleDropdownChange(`org-${org.id}`)}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-colors text-left",
+                  workspaceMode === 'ORG' && activeOrganization?.id === org.id ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
+                )}
+              >
+                <Icons.building className="w-4 h-4" />
+                <span className="truncate">{org.name}</span>
+              </button>
+            ))}
+            
+            <Separator className="my-1 bg-[var(--color-border-subtle)]" />
+            
+            <button 
+              onClick={() => handleDropdownChange('CREWS')}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-colors text-left",
+                workspaceMode === 'CREWS' ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
+              )}
+            >
+              <Icons.rocket className="w-4 h-4" />
+              <span>Crews</span>
+            </button>
+          </PopoverContent>
+        </Popover>
       )}
 
+      {/* Global Search / Command Trigger */}
+      <button 
+        title="Command Palette (Cmd+K)"
+        className="flex items-center justify-center w-10 h-10 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all duration-200 mb-4 shrink-0 focus:outline-none"
+        onClick={() => {
+          // Dispatch custom event for CommandPalette to listen to
+          document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))
+        }}
+      >
+        <Icons.search className="w-[18px] h-[18px]" strokeWidth={1.5} />
+      </button>
+
       {/* Main Navigation */}
-      <div className="flex-1 py-4 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 w-full overflow-y-auto custom-scrollbar flex flex-col items-center pt-2">
 
         {!isSettingsMode && (
           <>
-            {getSidebarSections().map(section => (
-              <React.Fragment key={section.title}>
-                {renderNavSection(section.items, section.title)}
-              </React.Fragment>
-            ))}
+            {getSidebarSections().map((section, idx) => renderNavSection(section.items, idx))}
             {renderTeamsList()}
             {renderCrewsList()}
           </>
@@ -417,20 +397,16 @@ export function AppSidebar({ isOpen, onClose }) {
 
         {isSettingsMode && (
           <>
-            <div className={cn("pb-3 flex items-center", isCollapsed ? "justify-center px-2" : "px-3")}>
+            <div className="pb-4 w-full flex justify-center">
               <button 
                 onClick={() => navigate('/app')}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 border border-[var(--color-border-subtle)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent-soft)] hover:bg-[var(--bg-hover)] shadow-sm",
-                  isCollapsed ? "w-9 h-9 justify-center p-0" : "w-full"
-                )}
+                className="flex items-center justify-center w-10 h-10 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all duration-200 border border-[var(--color-border-subtle)] bg-[var(--bg-elevated)] shadow-sm"
                 title="Back to Workspace"
               >
-                <Icons.chevronLeft className="w-4 h-4 text-[var(--accent)] shrink-0" />
-                {!isCollapsed && <span>Back to Workspace</span>}
+                <Icons.chevronLeft className="w-5 h-5 text-[var(--accent)]" />
               </button>
             </div>
-            {renderNavSection(settingsNavItems, 'Account Settings')}
+            {renderNavSection(settingsNavItems, 'settings')}
           </>
         )}
       </div>
@@ -440,7 +416,7 @@ export function AppSidebar({ isOpen, onClose }) {
 
   return (
     <>
-      {/* Desktop Persistent Sidebar */}
+      {/* Desktop Persistent Sidebar (Rigid Dock) */}
       <div className="hidden lg:block h-full shrink-0">
         {sidebarContent}
       </div>
@@ -471,3 +447,4 @@ export function AppSidebar({ isOpen, onClose }) {
     </>
   )
 }
+

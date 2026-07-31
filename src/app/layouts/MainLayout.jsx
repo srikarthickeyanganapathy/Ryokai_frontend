@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AppSidebar, AppTopbar } from '@/platform/workspace'
+import { AppSidebar, AppTopbar, GlobalCommandPalette } from '@/platform/workspace'
 import { useShortcuts } from "@/shared/hooks/useShortcuts"
 import {
   DrawerProvider,
@@ -12,12 +12,15 @@ import {
   TeamDrawer,
 } from '@/shared/workspace-framework'
 
+import { SignalDrawer } from '@/dashboard/features/SignalDrawer'
+
 /** Registry of contextual drawers keyed by drawer ID. */
 const DRAWER_REGISTRY = {
   member: MemberProfileDrawer,
   task: TaskDrawer,
   project: ProjectDrawer,
   team: TeamDrawer,
+  signal: SignalDrawer,
 }
 
 export function MainLayout() {
@@ -65,6 +68,9 @@ export function MainLayout() {
           </DrawerProvider>
         </div>
       </div>
+      
+      {/* Global Command Palette */}
+      <GlobalCommandPalette />
     </div>
   )
 }

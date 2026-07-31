@@ -89,4 +89,7 @@ export const queryKeys = {
     active: ['focus', 'active'],
     history: (params) => ['focus', 'history', params],
   },
+  workspace: {
+    mode: () => ['workspace', 'mode'],
+  },
 };

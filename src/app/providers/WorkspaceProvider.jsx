@@ -1,13 +1,26 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useAuth } from '@/identity';
 import { useOrganizations } from '@/organization';
+import { useCrews } from '@/crew';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/shared/api/queryKeys';
+import { getWorkspaceMode, updateWorkspaceMode } from '@/platform/workspace/api/workspace.api';
 
 const DEFAULT_WORKSPACE = {
+  // Workspace Mode (Lens): Where you're working (PERSONAL, ORG, CREWS)
   workspaceMode: 'PERSONAL',
   setWorkspaceMode: () => {},
+  
+  // Operating Mode: How you're working (NORMAL, FOCUS, MEETING, etc.)
+  operatingMode: 'NORMAL',
+  setOperatingMode: () => {},
+  
   activeOrganization: null,
   setActiveOrganization: () => {},
+  activeCrew: null,
+  setActiveCrew: () => {},
   organizations: [],
+  crews: [],
   loadingWorkspace: false,
 };
 
@@ -15,19 +28,61 @@ const WorkspaceContext = createContext(DEFAULT_WORKSPACE);
 
 export const WorkspaceProvider = ({ children }) => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   
-  // 'PERSONAL', 'ORG', or 'CREWS'
+  // Workspace Mode (Lens)
   const [workspaceMode, setWorkspaceMode] = useState('PERSONAL');
   const [activeOrganization, setActiveOrganization] = useState(null);
+  const [activeCrew, setActiveCrew] = useState(null);
+  const prevWorkspaceMode = useRef(workspaceMode);
 
   // TanStack Query handles caching, auto-fetching, and background updates!
-  // We only enable the query if the user is authenticated.
   const { data: rawOrganizations, isLoading: loadingWorkspace } = useOrganizations({
     enabled: !!user
   });
   
-  // Default to empty array if undefined/unauthenticated
   const organizations = useMemo(() => rawOrganizations || [], [rawOrganizations]);
+
+  // Fetch user's crews
+  const { data: rawCrews } = useCrews();
+  const crews = useMemo(() => rawCrews || [], [rawCrews]);
+
+  // Operating Mode
+  const { data: operatingMode = 'NORMAL' } = useQuery({
+    queryKey: queryKeys.workspace.mode(),
+    queryFn: getWorkspaceMode,
+    enabled: !!user,
+  });
+
+  const modeMutation = useMutation({
+    mutationFn: updateWorkspaceMode,
+    onMutate: async (newMode) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.workspace.mode() });
+      const previousMode = queryClient.getQueryData(queryKeys.workspace.mode());
+      queryClient.setQueryData(queryKeys.workspace.mode(), newMode);
+      return { previousMode };
+    },
+    onError: (err, newMode, context) => {
+      queryClient.setQueryData(queryKeys.workspace.mode(), context.previousMode);
+    }
+  });
+
+  const setOperatingMode = useCallback((mode) => {
+    modeMutation.mutate(mode);
+  }, [modeMutation]);
+
+  // ═══ Cache isolation: invalidate workspace-scoped queries on lens switch ═══
+  useEffect(() => {
+    if (prevWorkspaceMode.current !== workspaceMode) {
+      // Invalidate workspace-scoped data so stale data doesn't leak
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['notifications', 'signals'] });
+      prevWorkspaceMode.current = workspaceMode;
+    }
+  }, [workspaceMode, queryClient]);
 
   useEffect(() => {
     // If the user logs out, clean up local state
@@ -35,6 +90,7 @@ export const WorkspaceProvider = ({ children }) => {
       queueMicrotask(() => {
         setWorkspaceMode('PERSONAL');
         setActiveOrganization(null);
+        setActiveCrew(null);
       });
       return;
     }
@@ -68,6 +124,28 @@ export const WorkspaceProvider = ({ children }) => {
     }
   }, [organizations, activeOrganization, user]);
 
+  // ═══ Auto-select first crew when switching to CREWS mode ═══
+  useEffect(() => {
+    if (workspaceMode === 'CREWS' && crews.length > 0 && !activeCrew) {
+      queueMicrotask(() => {
+        setActiveCrew(crews[0]);
+      });
+    }
+    // Validate activeCrew still exists
+    if (workspaceMode === 'CREWS' && activeCrew) {
+      const stillExists = crews.find(c => c.id === activeCrew.id);
+      if (!stillExists && crews.length > 0) {
+        queueMicrotask(() => setActiveCrew(crews[0]));
+      } else if (!stillExists) {
+        queueMicrotask(() => setActiveCrew(null));
+      }
+    }
+    // Clear activeCrew when leaving CREWS mode
+    if (workspaceMode !== 'CREWS' && activeCrew) {
+      queueMicrotask(() => setActiveCrew(null));
+    }
+  }, [workspaceMode, crews, activeCrew]);
+
   // If the user switches to ORG but has no org, fallback to PERSONAL
   useEffect(() => {
     if (workspaceMode === 'ORG' && organizations.length === 0) {
@@ -77,12 +155,26 @@ export const WorkspaceProvider = ({ children }) => {
     }
   }, [workspaceMode, organizations]);
 
+  // If the user switches to CREWS but has no crews, fallback to PERSONAL
+  useEffect(() => {
+    if (workspaceMode === 'CREWS' && crews.length === 0) {
+      queueMicrotask(() => {
+        setWorkspaceMode('PERSONAL');
+      });
+    }
+  }, [workspaceMode, crews]);
+
   const value = {
     workspaceMode,
     setWorkspaceMode,
+    operatingMode,
+    setOperatingMode,
     activeOrganization,
     setActiveOrganization,
+    activeCrew,
+    setActiveCrew,
     organizations,
+    crews,
     loadingWorkspace
   };
 

@@ -136,17 +136,17 @@ export const deleteOrgRole = async (orgId, roleId) => {
 
 // --- Teams ---
 export const getTeam = async (teamId) => {
-  const { data } = await api.get(`/organizations/teams/${teamId}`);
+  const { data } = await api.get(`/organizations/${teamId}/teams`);
   return data;
 };
 
 export const updateTeam = async (teamId, payload) => {
-  const { data } = await api.put(`/organizations/teams/${teamId}`, payload);
+  const { data } = await api.put(`/organizations/${teamId}/teams`, payload);
   return data;
 };
 
 export const deleteTeam = async (teamId) => {
-  await api.delete(`/organizations/teams/${teamId}`);
+  await api.delete(`/organizations/${teamId}/teams`);
 };
 
 export const adminLeave = async (orgId, payload) => {

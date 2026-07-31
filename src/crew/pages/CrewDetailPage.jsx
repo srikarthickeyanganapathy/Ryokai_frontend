@@ -37,6 +37,7 @@ import {
   ManagementLayout,
   PageStateContainer,
 } from '@/shared/workspace-framework';
+import { cn } from '@/shared/lib/cn';
 
 export function CrewDetailPage() {
   const { crewId } = useParams();
@@ -93,7 +94,7 @@ export function CrewDetailPage() {
                 </div>
               </div>
               <Button size="sm" variant="outline" onClick={handleLeaveCrew} className="text-[var(--danger)] hover:bg-[var(--danger-soft)] border-[var(--danger-soft)]">
-                <Icons.logOut className="w-3.5 h-3.5 mr-1.5" />
+                <Icons.logout className="w-3.5 h-3.5 mr-1.5" />
                 Leave Crew
               </Button>
             </div>
