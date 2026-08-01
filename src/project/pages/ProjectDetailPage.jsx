@@ -43,7 +43,7 @@ export function ProjectDetailPage() {
   const navigate = useNavigate()
   const { workspaceMode } = useWorkspace()
   const { canManageProject, canAssignTask } = usePermissions()
-  
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)

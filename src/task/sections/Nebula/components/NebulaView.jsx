@@ -78,19 +78,6 @@ const transformTasksToWorkGraph = (tasks = []) => {
   return { nodes, links };
 };
 
-const DEMO_TASKS = [
-  { id: 101, title: 'Authentication Service Refactor', priority: 'URGENT', status: 'IN_PROGRESS', assignedTo: 'alex_dev', projectId: 1, description: 'Refactor OAuth2 token generation and JWT verification module.', blockedBy: [], tags: ['auth', 'security', 'core'] },
-  { id: 102, title: 'Session Refresh Middleware', priority: 'HIGH', status: 'OPEN', assignedTo: 'alex_dev', projectId: 1, description: 'Implement silent token refresh handling on 401 response.', blockedBy: [{ id: 101 }], tags: ['auth', 'middleware'] },
-  { id: 103, title: 'Dashboard Analytics Pipeline', priority: 'HIGH', status: 'IN_PROGRESS', assignedTo: 'sarah_m', projectId: 2, description: 'Aggregate real-time metrics for organization dashboard.', blockedBy: [{ id: 101 }], tags: ['analytics', 'data'] },
-  { id: 104, title: 'Task Dependency Graph Engine', priority: 'URGENT', status: 'IN_PROGRESS', assignedTo: 'alex_dev', projectId: 1, description: '3D spatial visualization engine for work relationships.', blockedBy: [{ id: 102 }], tags: ['graph', 'threejs', 'nebula'] },
-  { id: 105, title: 'Insight Engine Anomaly Detection', priority: 'MEDIUM', status: 'OPEN', assignedTo: 'alex_dev', projectId: 1, description: 'Automatic bottleneck and risk score detection.', blockedBy: [{ id: 104 }], tags: ['ai', 'nebula'] },
-  { id: 106, title: 'Flow Queue Visualizer', priority: 'MEDIUM', status: 'OPEN', assignedTo: 'sarah_m', projectId: 2, description: 'Work movement and velocity indicators.', blockedBy: [{ id: 104 }], tags: ['ui', 'flow'] },
-  { id: 107, title: 'User Permission Audit', priority: 'LOW', status: 'COMPLETED', assignedTo: 'john_admin', projectId: 3, description: 'Verify RBAC roles across all endpoints.', blockedBy: [], tags: ['security', 'audit'] },
-  { id: 108, title: 'Database Migration v2.4', priority: 'URGENT', status: 'COMPLETED', assignedTo: 'alex_dev', projectId: 1, description: 'PostgreSQL schema update for multi-tenancy.', blockedBy: [], tags: ['db', 'infra'] },
-  { id: 109, title: 'WebRTC Signal Relay', priority: 'HIGH', status: 'IN_REVIEW', assignedTo: 'alex_dev', projectId: 3, description: 'P2P data channel synchronization for live collaboration.', blockedBy: [{ id: 108 }], tags: ['network', 'webrtc'] },
-  { id: 110, title: 'Execution Readiness Audit', priority: 'MEDIUM', status: 'OPEN', assignedTo: 'john_admin', projectId: 2, description: 'Validate pre-flight checklist prior to release.', blockedBy: [{ id: 103 }, { id: 104 }], tags: ['qa', 'release'] }
-];
-
 export default function NebulaView({ tasks = [], onTaskSelect }) {
   const { workspaceMode, activeOrganization } = useWorkspace();
   const { user } = useAuth();
@@ -117,10 +104,9 @@ export default function NebulaView({ tasks = [], onTaskSelect }) {
   const containerRef = useRef(null);
   const graphControlsRef = useRef(null);
 
-  // 1. Workspace Task Filtering (falls back to DEMO_TASKS if empty)
+  // 1. Workspace Task Filtering
   const workspaceTasks = useMemo(() => {
-    const filtered = filterTasksByWorkspace(tasks, workspaceMode, activeOrganization);
-    return filtered.length > 0 ? filtered : DEMO_TASKS;
+    return filterTasksByWorkspace(tasks, workspaceMode, activeOrganization);
   }, [tasks, workspaceMode, activeOrganization]);
 
   const assigneesList = useMemo(() => {
@@ -321,6 +307,17 @@ export default function NebulaView({ tasks = [], onTaskSelect }) {
       if (onTaskSelect) onTaskSelect(null);
     }
   };
+
+  if (filteredTasks.length === 0 && !searchQuery && activePreset === 'all') {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-[var(--bg-base)] select-none">
+        <h3 className="text-xl font-semibold text-[var(--text-muted)] mb-2">Nebula Empty</h3>
+        <p className="text-[var(--text-tertiary)] max-w-md text-center">
+          There are no tasks in this workspace to visualize. Switch to Kanban or List view to create tasks.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div

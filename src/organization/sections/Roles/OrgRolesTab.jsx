@@ -198,6 +198,7 @@ export function OrgRolesTab({ orgId, roles = [], rolesLoading }) {
         }}
         onCancel={() => studio.setConfirmPerm(null)}
       />
+      {studio.confirmDialog}
     </>
   );
 }

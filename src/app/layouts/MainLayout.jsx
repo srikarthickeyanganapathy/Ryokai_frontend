@@ -49,7 +49,7 @@ export function MainLayout() {
           {/* Dynamic Page Content */}
           <DrawerProvider>
             <main className="flex-1 overflow-y-auto overflow-x-hidden relative custom-scrollbar">
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="popLayout">
                 <motion.div
                   key={location.pathname}
                   initial={{ opacity: 0, y: 10, scale: 0.99 }}

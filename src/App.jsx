@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "@/app/providers/AppProvider";
+import { ErrorBoundary } from "@/app/providers/ErrorBoundary";
 
 import { AuthLayout } from "@/app/layouts/AuthLayout";
 import { ProtectedRoute, PlatformRoute, TenantRoute } from "@/app/router/ProtectedRoute";
@@ -58,10 +59,10 @@ const AcceptInvitePage = lazy(() => import("@/organization/pages/AcceptInvitePag
 
 export default function App() {
   return (
-    <Router>
-      <SessionExpiredListener />
+    <ErrorBoundary>
       <AppProvider>
-        <Suspense fallback={<RouteLoader />}>
+        <Router>
+          <Suspense fallback={<RouteLoader />}>
           <Routes>
             {/* Core Resolver */}
             <Route path="/" element={<RouteResolver />} />
@@ -152,7 +153,9 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
-      </AppProvider>
-    </Router>
+        <SessionExpiredListener />
+      </Router>
+    </AppProvider>
+    </ErrorBoundary>
   );
 }

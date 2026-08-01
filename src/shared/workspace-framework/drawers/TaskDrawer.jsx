@@ -27,8 +27,8 @@ const PRIORITY_COLORS = {
 
 const STATUS_COLORS = {
   TODO: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)]',
-  ASSIGNED: 'bg-blue-500/10 text-blue-500',
-  IN_PROGRESS: 'bg-amber-500/10 text-amber-500',
+  IN_PROGRESS: 'bg-blue-500/10 text-blue-500',
+  ASSIGNED: 'bg-amber-500/10 text-amber-500',
   SUBMITTED: 'bg-purple-500/10 text-purple-500',
   APPROVED: 'bg-[var(--success-soft)] text-[var(--success)]',
   COMPLETED: 'bg-[var(--success-soft)] text-[var(--success)]',

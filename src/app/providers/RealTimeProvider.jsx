@@ -136,7 +136,11 @@ export function RealtimeProvider({ children }) {
 
   // Subscribe to a specific task's updates (for live-editing in TaskPanel)
   const subscribeToTask = useCallback((taskId, onUpdate) => {
-    return subscribeToTopic(taskId ? `/topic/tasks/${taskId}` : null, onUpdate)
+    return subscribeToTopic(taskId ? `/topic/tasks/${taskId}` : null, (dto) => {
+      import('@/task/entities/model/normalizer').then(({ normalizeTask }) => {
+        onUpdate(normalizeTask(dto));
+      });
+    })
   }, [subscribeToTopic])
 
   // Generic publish method

@@ -18,7 +18,7 @@ import { OrganizationForm } from '../sections/Settings/OrganizationForm'
 export function OrganizationsPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
 
-  const { data: organizations = [], isLoading, isError, error } = useOrganizations()
+  const { data: organizations = [], isLoading, isError, error, refetch } = useOrganizations()
   const createOrgMutation = useCreateOrganization()
 
   const handleCreateOrg = (data) => {
@@ -57,7 +57,7 @@ export function OrganizationsPage() {
           <Text variant="muted" className="mt-2 mb-6">
             {error?.message || 'An unexpected error occurred. Please try again.'}
           </Text>
-          <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+          <Button variant="outline" onClick={refetch}>Retry</Button>
         </div>
       )}
 

@@ -27,7 +27,7 @@ export function CrewsPage() {
   const [memberCap, setMemberCap] = useState(10);
   const [visibility, setVisibility] = useState('PUBLIC_LINK');
 
-  const { data: crews = [], isLoading, isError, error } = useCrews();
+  const { data: crews = [], isLoading, isError, error, refetch } = useCrews();
   const createCrewMutation = useCreateCrew();
 
   const handleCreateCrew = (e) => {
@@ -97,7 +97,7 @@ export function CrewsPage() {
           errorConfig={{
             title: 'Failed to load crews',
             description: error?.message || 'An unexpected error occurred.',
-            onRetry: () => window.location.reload(),
+            onRetry: refetch,
           }}
           emptyConfig={{
             icon: Icons.users,

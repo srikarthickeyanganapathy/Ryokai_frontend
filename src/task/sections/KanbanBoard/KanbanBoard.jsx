@@ -99,7 +99,7 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
     // FIX (SM-C01): crew tasks follow the no-review pipeline (ASSIGNED/TODO <-> COMPLETED).
     if (task.crewId || task.crew) {
       if (targetColumn === 'Done') {
-        if (currentStatus === 'ASSIGNED' || currentStatus === 'TODO') {
+        if (currentStatus === 'IN_PROGRESS' || currentStatus === 'TODO') {
           completeCrewTaskMutation.mutate(task.id, { onError })
         } else {
           toast.error('Crew task must be in To Do to complete')
@@ -145,9 +145,17 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
     }
 
     if (targetStatus === 'SUBMITTED') {
-      const isAllowedSubmit = ['ASSIGNED', 'TODO', 'TO_DO', 'IN_PROGRESS'].includes(currentStatus);
+      const isAllowedSubmit = ['IN_PROGRESS', 'TODO', 'TO_DO'].includes(currentStatus);
       if (!isAllowedSubmit) {
          toast.error('Tasks can only be submitted for review from To Do or In Progress');
+         rollbackTask(task.id);
+         return;
+      }
+      const assigneeUsername = typeof task.assignee === 'object' ? task.assignee?.username : (task.assignee || task.assignedTo);
+      const isAssignee = assigneeUsername === user?.username || assigneeUsername === user?.id || (typeof task.assignee === 'object' && task.assignee?.id === user?.id);
+      
+      if (!isAssignee && !isSuperAdmin) {
+         toast.error('Only the assignee can submit a task for review');
          rollbackTask(task.id);
          return;
       }
@@ -200,7 +208,7 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
         return; // User cancelled
       }
       rejectMutation.mutate({ id: task.id, reason: reason || 'Moved to Needs Work on Kanban' }, { onError });
-    } else if (targetStatus === 'ASSIGNED' || targetStatus === 'IN_PROGRESS' || targetColumn === 'Assigned' || targetColumn === 'In Progress') {
+    } else if (targetStatus === 'IN_PROGRESS' || targetColumn === 'Assigned' || targetColumn === 'In Progress') {
       if (currentStatus === 'SUBMITTED') {
         recallTaskMutation.mutate(task.id, { onError });
       } else {

@@ -9,12 +9,14 @@ import { Heading } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { useCreateTask } from '../../entities/hooks/useTasks'
 import { cn } from '@/shared/lib/cn'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
 export function KanbanColumn({ column, tasks, onTaskClick }) {
   const [isQuickAdding, setIsQuickAdding] = useState(false)
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [collapsed, setCollapsed] = useState(false)
   const createTaskMutation = useCreateTask()
+  const { activeOrganization } = useWorkspace()
 
   const { setNodeRef } = useDroppable({
     id: column.id,
@@ -33,7 +35,10 @@ export function KanbanColumn({ column, tasks, onTaskClick }) {
       return
     }
     
-    createTaskMutation.mutate({ title: newTaskTitle }, {
+    createTaskMutation.mutate({ 
+      title: newTaskTitle,
+      orgId: activeOrganization?.id || null 
+    }, {
       onSuccess: () => {
         setNewTaskTitle('')
         setIsQuickAdding(false)

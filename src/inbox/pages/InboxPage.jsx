@@ -19,7 +19,7 @@ import {
 } from '@/shared/workspace-framework'
 
 const typeIcons = {
-  TASK_ASSIGNED: Icons.tasks,
+  TASK_IN_PROGRESS: Icons.tasks,
   TASK_COMPLETED: Icons.check,
   TASK_COMMENT: Icons.tasks,
   TASK_UPDATED: Icons.settings,

@@ -14,12 +14,17 @@ export function CalendarWidget() {
   const { data: events = [], isLoading } = useQuery({
     queryKey: queryKeys.calendarEvents.range(today, nextWeek),
     queryFn: async () => {
-      const startDateTime = `${today}T00:00:00`;
-      const endDateTime = `${nextWeek}T23:59:59`;
-      const res = await api.get('/calendar-events', { 
-        params: { start: startDateTime, end: endDateTime } 
-      });
-      return Array.isArray(res.data) ? res.data : res.data?.content || [];
+      try {
+        const startDateTime = `${today}T00:00:00`;
+        const endDateTime = `${nextWeek}T23:59:59`;
+        const res = await api.get('/calendar-events', { 
+          params: { start: startDateTime, end: endDateTime } 
+        });
+        return Array.isArray(res.data) ? res.data : res.data?.content || [];
+      } catch (err) {
+        // Fallback for when backend calendar API is not yet implemented
+        return [];
+      }
     }
   });
 

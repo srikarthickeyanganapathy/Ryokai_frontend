@@ -37,7 +37,7 @@ export function TasksPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const viewMode = searchParams.get('view') || 'list'
   const { user } = useAuth()
-  const { canReview } = usePermissions()
+  const { canReview, canEditTask, canDeleteTask, canAssignTask, canReviewTask } = usePermissions()
   const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
   const setViewMode = (mode) => {
@@ -166,14 +166,14 @@ export function TasksPage() {
     if (task.isPersonal) {
       completePersonalTaskMutation.mutate(task.id)
     } else if (task.crewId || task.crew) {
-      if (current === 'ASSIGNED') {
+      if (current === 'IN_PROGRESS') {
         completeCrewTaskMutation.mutate(task.id)
       } else if (current === 'COMPLETED') {
         toast.info('Task is already completed')
       } else {
         toast.error('Crew task must be in ASSIGNED status to complete')
       }
-    } else if (current === 'ASSIGNED' || current === 'TODO' || current === 'IN_PROGRESS') {
+    } else if (current === 'IN_PROGRESS' || current === 'TODO') {
       submitTaskMutation.mutate(task.id, {
         onSuccess: () => toast.success(`Task "${task.title}" submitted for review.`)
       })
@@ -198,12 +198,12 @@ export function TasksPage() {
       if (task.isPersonal) {
         completePersonalTaskMutation.mutate(task.id)
       } else if (task.crewId || task.crew) {
-        if (current === 'ASSIGNED') {
+        if (current === 'IN_PROGRESS') {
           completeCrewTaskMutation.mutate(task.id)
         } else {
           skipped++
         }
-      } else if (current === 'ASSIGNED' || current === 'REJECTED') {
+      } else if (current === 'IN_PROGRESS' || current === 'REJECTED') {
         submitTaskMutation.mutate(task.id)
       } else if (current === 'SUBMITTED') {
         if (!canReview || task.assignedTo === user?.username) {
@@ -259,7 +259,7 @@ export function TasksPage() {
 
     selectedTasks.forEach(task => {
       const current = task.currentStatus?.toUpperCase()
-      if (!task.isPersonal && !task.crewId && !task.crew && (current === 'ASSIGNED' || current === 'REJECTED')) {
+      if (!task.isPersonal && !task.crewId && !task.crew && (current === 'IN_PROGRESS' || current === 'REJECTED')) {
         submitTaskMutation.mutate(task.id)
       } else {
         skipped++
@@ -451,25 +451,35 @@ export function TasksPage() {
                   {Object.keys(rowSelection).length} selected
                 </Text>
                 <div className="h-4 w-px bg-[var(--border-default)]" />
-                <Button variant="ghost" onClick={handleBulkComplete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
-                  {workspaceMode === 'PERSONAL' ? 'Complete' : 'Approve'}
-                </Button>
+                {(workspaceMode === 'PERSONAL' || canReviewTask) && (
+                  <Button variant="ghost" onClick={handleBulkComplete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                    {workspaceMode === 'PERSONAL' ? 'Complete' : 'Approve'}
+                  </Button>
+                )}
                 {workspaceMode !== 'PERSONAL' && (
                   <>
-                    <Button variant="ghost" onClick={handleBulkSubmit} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
-                      Submit
-                    </Button>
-                    <Button variant="ghost" onClick={handleOpenReassignModal} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
-                      Reassign
-                    </Button>
-                    <Button variant="ghost" onClick={handleBulkReject} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
-                      Reject
-                    </Button>
+                    {(workspaceMode === 'PERSONAL' || canEditTask) && (
+                      <Button variant="ghost" onClick={handleBulkSubmit} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                        Submit
+                      </Button>
+                    )}
+                    {(workspaceMode === 'PERSONAL' || canAssignTask) && (
+                      <Button variant="ghost" onClick={handleOpenReassignModal} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                        Reassign
+                      </Button>
+                    )}
+                    {(workspaceMode === 'PERSONAL' || canReviewTask) && (
+                      <Button variant="ghost" onClick={handleBulkReject} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
+                        Reject
+                      </Button>
+                    )}
                   </>
                 )}
-                <Button variant="ghost" onClick={handleBulkDelete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
-                  Delete
-                </Button>
+                {(workspaceMode === 'PERSONAL' || canDeleteTask) && (
+                  <Button variant="ghost" onClick={handleBulkDelete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
+                    Delete
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   onClick={() => setRowSelection({})}

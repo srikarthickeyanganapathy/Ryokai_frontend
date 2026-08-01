@@ -7,6 +7,7 @@ import {
   useDeleteOrgRole,
   usePermissionCatalog,
 } from '@/organization';
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
 
 export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
   // ── Role Selection & Filtering ──
@@ -45,6 +46,8 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
   const updatePermissionsMutation = useUpdateOrgRolePermissions(orgId);
   const updateRoleMutation = useUpdateOrgRole(orgId);
   const deleteRoleMutation = useDeleteOrgRole(orgId);
+
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
 
   // ── Auto-select first role ──
   useEffect(() => {
@@ -307,6 +310,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
       updatePermissionsMutation.mutate({
         roleId: selectedRole.id,
         permissions: payloadPermissions,
+        resourceAssignments: [],
       });
     }
     if (priorityChanged) {
@@ -335,6 +339,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
                 updatePermissionsMutation.mutate({
                   roleId: newRole.id,
                   permissions: payloadPermissions,
+                  resourceAssignments: [],
                 });
               }
             }
@@ -345,13 +350,16 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     );
   };
 
-  const handleDeleteRole = () => {
+  const handleDeleteRole = async () => {
     if (!selectedRole || isAdminRole) return;
-    if (
-      window.confirm(
-        `Delete role "${selectedRole.name}"? This cannot be undone.`
-      )
-    ) {
+    const isConfirmed = await confirm({
+      title: 'Delete role?',
+      description: `Delete role "${selectedRole.name}"? This cannot be undone.`,
+      danger: true,
+      confirmLabel: 'Delete'
+    });
+    
+    if (isConfirmed) {
       deleteRoleMutation.mutate(selectedRole.id, {
         onSuccess: () => {
           setSelectedRole(roles.find((r) => r.id !== selectedRole.id) || null);
@@ -377,6 +385,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
             updatePermissionsMutation.mutate({
               roleId: newRole.id,
               permissions: payloadPermissions,
+              resourceAssignments: [],
             });
             setSelectedRole(newRole);
           }
@@ -438,5 +447,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     // Top Tabs
     activeTab,
     setActiveTab,
+    // Dialog component to render
+    confirmDialog,
   };
 }

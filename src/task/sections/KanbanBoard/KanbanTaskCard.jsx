@@ -8,7 +8,21 @@ import { cn } from '@/shared/lib/cn'
 import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
 import { hoverScale } from '@/shared/lib/motion'
 
+import { useAuth, usePermissions } from '@/identity'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
+
 export function KanbanTaskCard({ task, onClick }) {
+  const { user } = useAuth()
+  const { canEditTask, isSuperAdmin } = usePermissions()
+  const { workspaceMode } = useWorkspace()
+
+  const assigneeUsername = typeof task.assignee === 'object' ? task.assignee?.username : (task.assignee || task.assignedTo);
+  const creatorUsername = typeof task.creator === 'object' ? task.creator?.username : task.creator;
+  const isAssignee = assigneeUsername === user?.username || assigneeUsername === user?.id || (typeof task.assignee === 'object' && task.assignee?.id === user?.id);
+  const isCreator = creatorUsername === user?.username || (typeof task.creator === 'object' && task.creator?.id === user?.id) || task.createdBy === user?.id;
+
+  const isAuthorized = workspaceMode === 'PERSONAL' || isSuperAdmin || canEditTask || isAssignee || isCreator;
+
   const {
     attributes,
     listeners,
@@ -16,7 +30,7 @@ export function KanbanTaskCard({ task, onClick }) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: task.id, data: { type: 'Task', task } })
+  } = useSortable({ id: task.id, data: { type: 'Task', task }, disabled: !isAuthorized })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -42,7 +56,10 @@ export function KanbanTaskCard({ task, onClick }) {
       {...attributes}
       {...listeners}
       onClick={() => onClick && onClick(task)}
-      className="group bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[var(--radius-md)] shadow-[var(--inset-highlight-soft)] p-3 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-md),var(--inset-highlight)] cursor-grab active:cursor-grabbing active:scale-[0.98] mb-2.5 touch-none"
+      className={cn(
+        "group bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[var(--radius-md)] shadow-[var(--inset-highlight-soft)] p-3 hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-md),var(--inset-highlight)] mb-2.5 touch-none",
+        isAuthorized ? "cursor-grab active:cursor-grabbing active:scale-[0.98]" : "cursor-default"
+      )}
     >
       <div className="flex items-start justify-between mb-2">
         <h4 className="text-[13px] font-medium leading-snug line-clamp-2">

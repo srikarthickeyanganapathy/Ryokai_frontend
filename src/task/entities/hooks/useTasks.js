@@ -48,7 +48,7 @@ export const useAssignTask = () => {
 export const useCreateTask = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { workspaceMode } = useWorkspace();
+  const { workspaceMode, activeCrew } = useWorkspace();
   return useMutation({
     mutationFn: async (payload) => {
       // Ensure required fields: assigneeUsername defaults to current user, priority defaults to MEDIUM
@@ -65,9 +65,7 @@ export const useCreateTask = () => {
         taskPayload.isPersonal = true;
         return await taskApi.createPersonalTask(taskPayload);
       } else if (workspaceMode === 'CREWS') {
-        // Find the active crew ID from somewhere, or it should be passed in payload
-        const crewId = payload.crewId || (payload.projectId ? null : null); 
-        // Wait, how do we know crewId? It is passed from TaskForm? 
+        const crewId = payload.crewId || activeCrew?.id || null; 
         taskPayload.crewId = crewId;
         return await taskApi.createCrewTask(taskPayload);
       } else {
@@ -175,7 +173,7 @@ export const useCompletePersonalTask = () => {
   });
 };
 
-// FIX (SM-C01): new hook for completing CREW tasks (ASSIGNED -> COMPLETED).
+// FIX (SM-C01): new hook for completing CREW tasks (IN_PROGRESS -> COMPLETED).
 // Crew tasks follow the no-review pipeline per the spec state machine.
 export const useCompleteCrewTask = () => {
   const queryClient = useQueryClient();
@@ -287,8 +285,8 @@ export const useAddComment = (taskId) => {
   const queryClient = useQueryClient();
   const { user: currentUser } = useAuth();
   return useMutation({
-    mutationFn: (text) => taskApi.addComment(taskId, text),
-    onMutate: async (text) => {
+    mutationFn: ({ text, parentId }) => taskApi.addComment(taskId, text, parentId),
+    onMutate: async ({ text, parentId }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.tasks.comments(taskId) });
       const previousComments = queryClient.getQueryData(queryKeys.tasks.comments(taskId));
       queryClient.setQueryData(queryKeys.tasks.comments(taskId), (old) => {
@@ -299,6 +297,7 @@ export const useAddComment = (taskId) => {
             id: Date.now(), 
             username: currentUser?.username || 'me',
             text: text, 
+            parentId: parentId || null,
             createdAt: new Date().toISOString() 
           }]
         };

@@ -11,7 +11,7 @@
 // Backend enum -> Frontend display
 const BACKEND_TO_FRONTEND = {
   TODO:        'To Do',        // personal task, not yet started
-  ASSIGNED:    'To Do',        // task is sitting with the assignee
+  IN_PROGRESS: 'To Do',        // task is sitting with the assignee
   SUBMITTED:   'In Review',    // assignee submitted for review
   APPROVED:    'Done',         // reviewer approved
   REJECTED:    'Needs Work',   // reviewer rejected, assignee must redo
@@ -20,7 +20,7 @@ const BACKEND_TO_FRONTEND = {
 
 // Frontend display -> Backend enum
 const FRONTEND_TO_BACKEND = {
-  'To Do':       'ASSIGNED',
+  'To Do':       'IN_PROGRESS',
   'In Review':   'SUBMITTED',
   'Done':        'APPROVED',
   'Needs Work':  'REJECTED',
@@ -44,7 +44,7 @@ export const normalizeStatus = (status) => {
 
 /** Convert frontend status to backend enum value */
 export const toBackendStatus = (status) => {
-  if (!status) return 'ASSIGNED';
+  if (!status) return 'IN_PROGRESS';
   const upper = String(status).toUpperCase().replace(/\s+/g, '_');
   if (BACKEND_TO_FRONTEND[upper]) return upper;
   if (FRONTEND_TO_BACKEND[status]) return FRONTEND_TO_BACKEND[status];
@@ -60,12 +60,12 @@ export const isDoneStatus = (status) => {
 /** Check if a status represents an "active/in progress" state */
 export const isActiveStatus = (status) => {
   const upper = String(status || '').toUpperCase();
-  return upper === 'TODO' || upper === 'ASSIGNED' || upper === 'SUBMITTED' || upper === 'REJECTED' || upper === 'TO DO' || upper === 'IN REVIEW' || upper === 'NEEDS WORK';
+  return upper === 'TODO' || upper === 'IN_PROGRESS' || upper === 'SUBMITTED' || upper === 'REJECTED' || upper === 'TO DO' || upper === 'IN REVIEW' || upper === 'NEEDS WORK';
 };
 
 /** Kanban column IDs mapped to backend status enums */
 export const KANBAN_COLUMNS = [
-  { id: 'To Do',       title: 'Assigned',       backendStatus: ['TODO', 'ASSIGNED'] },
+  { id: 'To Do',       title: 'In Progress',    backendStatus: ['TODO', 'IN_PROGRESS'] },
   { id: 'In Review',   title: 'In Review',   backendStatus: ['SUBMITTED'] },
   { id: 'Needs Work',  title: 'Needs Work',  backendStatus: ['REJECTED'] },
   { id: 'Done',        title: 'Done',        backendStatus: ['APPROVED', 'COMPLETED'] },

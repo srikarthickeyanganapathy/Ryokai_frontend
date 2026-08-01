@@ -3,10 +3,11 @@ import { crewApi } from '../api/crew.api';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { toast } from 'sonner';
 
-export const useCrews = () => {
+export const useCrews = (options = {}) => {
   return useQuery({
     queryKey: queryKeys.crews.all,
     queryFn: () => crewApi.getCrews(),
+    ...options,
   });
 };
 

@@ -11,15 +11,16 @@ import { cn } from '@/shared/lib/cn'
  * @param {number} [rows=5] — Number of skeleton rows (for table variant)
  * @param {number} [columns=4] — Number of skeleton columns (for table variant)
  */
+const Bone = ({ className: boneClass }) => (
+  <div className={cn('animate-pulse rounded-[var(--radius-md)] bg-[var(--bg-subtle)]/70 border border-[var(--border-subtle)]/30', boneClass)} />
+)
+
 export function FrameworkLoadingState({
   variant = 'default',
   rows = 5,
   columns = 4,
   className,
 }) {
-  const Bone = ({ className: boneClass }) => (
-    <div className={cn('animate-pulse rounded-[var(--radius-md)] bg-[var(--bg-subtle)]/70 border border-[var(--border-subtle)]/30', boneClass)} />
-  )
 
   if (variant === 'cards') {
     return (

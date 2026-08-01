@@ -85,6 +85,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
       teamId: data.teamId ? parseInt(data.teamId, 10) : null,
       projectId: data.projectId ? parseInt(data.projectId, 10) : null,
       crewId: data.crewId ? parseInt(data.crewId, 10) : null,
+      orgId: activeOrganization?.id || null,
       tags: data.tags || '',
       dueDate: data.dueDate || null,
       dependsOnIds: data.dependsOnIds || [],

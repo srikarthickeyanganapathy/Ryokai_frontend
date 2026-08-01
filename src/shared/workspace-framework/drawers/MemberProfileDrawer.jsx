@@ -55,7 +55,7 @@ export function MemberProfileDrawer({ data, onClose }) {
           </Text>
           <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
             <Mail className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
-            <span className="truncate">{email || `${username}@ryokai.app`}</span>
+            <span className="truncate">{email || member?.email || member?.user?.email || 'No email'}</span>
           </div>
         </div>
 

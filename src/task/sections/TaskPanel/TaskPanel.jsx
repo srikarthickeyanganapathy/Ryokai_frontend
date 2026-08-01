@@ -20,6 +20,8 @@ import {
   useSubmitTask, useApproveTask, useRejectTask, useRecallTask, useClaimTask,
   useCompletePersonalTask, useCompleteCrewTask
 } from '../../entities/hooks/useTasks'
+import { useComments, useAddComment, useTaskHistory, useAddDependency, useRemoveDependency, useTaskList, useEvidence, useAddEvidence, useDeleteEvidence, useUploadAttachment } from '../../entities/hooks/useTasks'
+import { normalizeTask } from '../../entities/api/task.api'
 import { useCrewMembers } from '@/crew'
 import { useUsersList } from '@/identity'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
@@ -174,7 +176,8 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   useEffect(() => {
     if (isOpen && task?.id) {
       return subscribeToTask(task.id, (updatedTask) => {
-        queryClient.setQueryData([...queryKeys.tasks.detail(task.id)], updatedTask)
+        const normalized = normalizeTask(updatedTask)
+        queryClient.setQueryData([...queryKeys.tasks.detail(task.id)], normalized)
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.lists() })
       })
     }
@@ -239,7 +242,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
               Claim Task
             </Button>
           )}
-          {!isUnclaimed && (currentStatus === 'ASSIGNED' || currentStatus === 'TODO') && (
+          {!isUnclaimed && (currentStatus === 'IN_PROGRESS' || currentStatus === 'TODO') && (
             <Button 
               size={size}
               className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
@@ -270,7 +273,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
           </Button>
         )}
 
-        {(currentStatus === 'TODO' || currentStatus === 'ASSIGNED' || currentStatus === 'IN_PROGRESS') && (isAssignee || isCreator || canEditTask) && !isUnclaimed && (
+        {(currentStatus === 'TODO' || currentStatus === 'IN_PROGRESS' || currentStatus === 'IN_PROGRESS') && (isAssignee || isCreator || canEditTask) && !isUnclaimed && (
           <Button 
             size={size}
             className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white gap-1.5"
@@ -334,7 +337,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
           </Button>
         )}
 
-        {currentStatus === 'SUBMITTED' && (canReview || isCreator) && (
+        {currentStatus === 'SUBMITTED' && (canReview || isCreator) && !isAssignee && (
           <>
             <Button 
               size={size}
@@ -348,9 +351,15 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
             <Button 
               size={size}
               className="bg-[var(--danger)] hover:bg-[var(--danger-hover)] text-white gap-1.5"
-              onClick={() => {
-                const reason = window.prompt("Rejection reason:");
-                if (reason && reason.trim() !== '') {
+              onClick={async () => {
+                const reason = await confirm({
+                  title: 'Reject task',
+                  description: 'Provide a reason for rejection.',
+                  requireInput: true,
+                  inputPlaceholder: 'Rejection reason:',
+                  danger: true
+                });
+                if (reason && typeof reason === 'string' && reason.trim() !== '') {
                   rejectTaskMutation.mutate({ id: task.id, reason });
                 }
               }}

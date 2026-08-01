@@ -44,7 +44,9 @@ export const WorkspaceProvider = ({ children }) => {
   const organizations = useMemo(() => rawOrganizations || [], [rawOrganizations]);
 
   // Fetch user's crews
-  const { data: rawCrews } = useCrews();
+  const { data: rawCrews } = useCrews({
+    enabled: !!user
+  });
   const crews = useMemo(() => rawCrews || [], [rawCrews]);
 
   // Operating Mode
@@ -83,6 +85,23 @@ export const WorkspaceProvider = ({ children }) => {
       prevWorkspaceMode.current = workspaceMode;
     }
   }, [workspaceMode, queryClient]);
+
+  const prevOrgId = useRef(activeOrganization?.id);
+  const prevCrewId = useRef(activeCrew?.id);
+
+  // ═══ Cache isolation: invalidate workspace-scoped queries on org/crew switch ═══
+  useEffect(() => {
+    if (activeOrganization?.id !== prevOrgId.current || activeCrew?.id !== prevCrewId.current) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+      queryClient.invalidateQueries({ queryKey: ['notifications', 'signals'] });
+      
+      prevOrgId.current = activeOrganization?.id;
+      prevCrewId.current = activeCrew?.id;
+    }
+  }, [activeOrganization?.id, activeCrew?.id, queryClient]);
 
   useEffect(() => {
     // If the user logs out, clean up local state

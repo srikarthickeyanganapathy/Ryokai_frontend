@@ -238,34 +238,52 @@ export function PermissionInspectorContent({
           <Section title="Scope Assignment">
             <div className="space-y-1.5">
               {supportedScopes.map((scopeKey) => (
-                <label
-                  key={scopeKey}
-                  className={cn(
-                    'flex items-start gap-2.5 px-2.5 py-2 rounded-md cursor-pointer transition-all border text-left',
-                    currentScope === scopeKey
-                      ? 'bg-[var(--accent-soft)]/50 border-[var(--accent-border)] text-[var(--accent)] font-medium'
-                      : 'border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]',
-                    isAdmin && 'pointer-events-none opacity-60'
+                <div key={scopeKey} className="flex flex-col gap-2">
+                  <label
+                    className={cn(
+                      'flex items-start gap-3 p-3 rounded-md border cursor-pointer transition-all',
+                      currentScope === scopeKey
+                        ? 'bg-[var(--accent-soft)]/20 border-[var(--accent)] ring-1 ring-[var(--accent)]'
+                        : 'bg-[var(--bg-subtle)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)]'
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name={`scope-${permission.code}`}
+                      value={scopeKey}
+                      checked={currentScope === scopeKey}
+                      onChange={() => onScopeChange(permission.code, scopeKey)}
+                      disabled={isAdmin}
+                      className="mt-0.5 accent-[var(--accent)] shrink-0"
+                    />
+                    <div>
+                      <span className="text-[12px] font-medium text-[var(--text-primary)]">
+                        {SCOPE_LABELS[scopeKey]}
+                      </span>
+                      <p className="text-[10px] text-[var(--text-muted)] mt-0.5 leading-normal">
+                        {SCOPE_DESCRIPTIONS[scopeKey]}
+                      </p>
+                    </div>
+                  </label>
+                  
+                  {scopeKey === 'CUSTOM' && currentScope === 'CUSTOM' && (
+                    <div className="ml-6 pl-4 border-l border-[var(--border-subtle)]">
+                      <div className="text-[11px] font-medium mb-2 text-[var(--text-primary)]">Select Specific Resource</div>
+                      <select 
+                        disabled={isAdmin}
+                        className="w-full bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded px-2 py-1.5 text-xs text-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)]"
+                      >
+                        <option value="">Select an item...</option>
+                        <option value="proj_1">Project: Project Alpha</option>
+                        <option value="proj_2">Project: Marketing Q3</option>
+                        <option value="team_1">Team: Engineering</option>
+                      </select>
+                      <p className="text-[10px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
+                        Currently using mock data. Resource picking is not yet connected to the backend.
+                      </p>
+                    </div>
                   )}
-                >
-                  <input
-                    type="radio"
-                    name={`scope-${permission.code}`}
-                    value={scopeKey}
-                    checked={currentScope === scopeKey}
-                    onChange={() => onScopeChange(permission.code, scopeKey)}
-                    disabled={isAdmin}
-                    className="mt-0.5 accent-[var(--accent)] shrink-0"
-                  />
-                  <div>
-                    <span className="text-[12px] font-medium text-[var(--text-primary)]">
-                      {SCOPE_LABELS[scopeKey]}
-                    </span>
-                    <p className="text-[10px] text-[var(--text-muted)] mt-0.5 leading-normal">
-                      {SCOPE_DESCRIPTIONS[scopeKey]}
-                    </p>
-                  </div>
-                </label>
+                </div>
               ))}
             </div>
           </Section>

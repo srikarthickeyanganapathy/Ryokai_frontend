@@ -118,6 +118,9 @@ export const createInviteLink = async (orgId, roleId) => {
   const { data } = await api.post(`/organizations/${orgId}/invites/link`, { roleId });
   return data;
 };
+export const revokeInvite = async (orgId, inviteId) => {
+  await api.delete(`/organizations/${orgId}/invites/${inviteId}`);
+};
 
 export const acceptInviteByToken = async (token) => {
   const { data } = await api.post(`/invites/token/${token}/accept`);
@@ -136,17 +139,17 @@ export const deleteOrgRole = async (orgId, roleId) => {
 
 // --- Teams ---
 export const getTeam = async (teamId) => {
-  const { data } = await api.get(`/organizations/${teamId}/teams`);
+  const { data } = await api.get(`/organizations/teams/${teamId}`);
   return data;
 };
 
 export const updateTeam = async (teamId, payload) => {
-  const { data } = await api.put(`/organizations/${teamId}/teams`, payload);
+  const { data } = await api.put(`/organizations/teams/${teamId}`, payload);
   return data;
 };
 
 export const deleteTeam = async (teamId) => {
-  await api.delete(`/organizations/${teamId}/teams`);
+  await api.delete(`/organizations/teams/${teamId}`);
 };
 
 export const adminLeave = async (orgId, payload) => {

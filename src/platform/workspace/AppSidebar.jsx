@@ -27,6 +27,18 @@ export function AppSidebar({ isOpen, onClose }) {
   const location = useLocation()
   const navigate = useNavigate()
   
+  const [isExpanded, setIsExpanded] = useState(() => {
+    return localStorage.getItem('ryokai_sidebar_expanded') !== 'false'
+  })
+
+  const toggleSidebar = () => {
+    setIsExpanded(prev => {
+      const next = !prev
+      localStorage.setItem('ryokai_sidebar_expanded', String(next))
+      return next
+    })
+  }
+
   const isSettingsMode = location.pathname.startsWith('/app/settings') || location.pathname.startsWith('/app/sessions')
 
   // ════════════════════════════════════════════════
@@ -64,7 +76,7 @@ export function AppSidebar({ isOpen, onClose }) {
           items: [
             { icon: Icons.megaphone, label: 'Announcements', to: '/app/announcements' },
             { icon: Icons.settings, label: 'Settings', to: '/app/organizations' },
-            ...(isSuperAdmin ? [{ icon: Icons.shield, label: 'Admin', to: '/app/admin' }] : []),
+            ...(isSuperAdmin ? [{ icon: Icons.shield, label: 'Admin', to: '/platform' }] : []),
           ]
         }
       ]
@@ -143,15 +155,16 @@ export function AppSidebar({ isOpen, onClose }) {
   // ════════════════════════════════════════════════
 
   const renderNavSection = (items, index) => (
-    <div key={index} className="space-y-[4px] mb-4 flex flex-col items-center w-full">
+    <div key={index} className={cn("mb-4 flex flex-col w-full", isExpanded ? "px-3 space-y-1" : "items-center space-y-[4px]")}>
       {items.map((item) => (
         <NavLink
           key={item.to}
           to={item.to}
           end={item.to === '/app'}
-          title={item.label}
+          title={!isExpanded ? item.label : undefined}
           className={({ isActive }) => cn(
-            "relative flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 group shrink-0",
+            "relative flex items-center transition-colors duration-200 group shrink-0",
+            isExpanded ? "w-full h-9 rounded-lg px-3 justify-start" : "justify-center w-10 h-10 rounded-full",
             isActive
               ? "text-[var(--accent)]"
               : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
@@ -162,16 +175,21 @@ export function AppSidebar({ isOpen, onClose }) {
               {isActive && (
                 <motion.div
                   layoutId="sidebar-active-pill"
-                  className="absolute inset-0 rounded-full bg-[var(--accent-soft)]"
+                  className={cn("absolute inset-0 bg-[var(--accent-soft)]", isExpanded ? "rounded-lg" : "rounded-full")}
                   transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.6 }}
                 />
               )}
               <item.icon className={cn("relative w-[18px] h-[18px] shrink-0", isActive ? "text-[var(--accent)]" : "text-[var(--text-tertiary)] group-hover:text-[var(--text-secondary)]")} strokeWidth={1.5} />
+              {isExpanded && (
+                <span className={cn("relative ml-3 text-sm font-medium", isActive ? "text-[var(--accent)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]")}>
+                  {item.label}
+                </span>
+              )}
             </>
           )}
         </NavLink>
       ))}
-      <div className="w-6 h-[1px] bg-[var(--color-border-subtle)] mt-4 opacity-50" />
+      <div className={cn("h-[1px] bg-[var(--color-border-subtle)] mt-4 opacity-50", isExpanded ? "mx-3" : "w-6 mx-auto")} />
     </div>
   )
 
@@ -180,14 +198,16 @@ export function AppSidebar({ isOpen, onClose }) {
     if (crews.length === 0) return null
 
     return (
-      <div className="flex flex-col items-center space-y-2 mb-4 w-full">
+      <div className={cn("flex flex-col mb-4 w-full", isExpanded ? "px-3 space-y-1" : "items-center space-y-2")}>
+        {isExpanded && <div className="px-3 pb-2 text-[11px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Your Crews</div>}
         {crews.map((crew) => (
           <NavLink
             key={crew.id}
             to={`/app/crews/${crew.id}`}
-            title={crew.name}
+            title={!isExpanded ? crew.name : undefined}
             className={({ isActive }) => cn(
-              "relative flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 group shrink-0",
+              "relative flex items-center transition-colors duration-200 group shrink-0",
+              isExpanded ? "w-full h-9 rounded-lg px-3 justify-start" : "justify-center w-10 h-10 rounded-full",
               isActive
                 ? "text-[var(--accent)]"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
@@ -198,18 +218,23 @@ export function AppSidebar({ isOpen, onClose }) {
                 {isActive && (
                   <motion.div
                     layoutId="sidebar-active-pill"
-                    className="absolute inset-0 rounded-full bg-[var(--accent-soft)]"
+                    className={cn("absolute inset-0 bg-[var(--accent-soft)]", isExpanded ? "rounded-lg" : "rounded-full")}
                     transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.6 }}
                   />
                 )}
                 <div className="relative w-6 h-6 rounded-md bg-[var(--accent)] text-white flex items-center justify-center text-[11px] font-bold shrink-0">
                   {crew.name?.charAt(0).toUpperCase()}
                 </div>
+                {isExpanded && (
+                  <span className={cn("relative ml-3 text-sm font-medium truncate", isActive ? "text-[var(--accent)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]")}>
+                    {crew.name}
+                  </span>
+                )}
               </>
             )}
           </NavLink>
         ))}
-        <div className="w-6 h-[1px] bg-[var(--color-border-subtle)] mt-2 opacity-50" />
+        <div className={cn("h-[1px] bg-[var(--color-border-subtle)] mt-2 opacity-50", isExpanded ? "mx-3" : "w-6 mx-auto")} />
       </div>
     )
   }
@@ -219,14 +244,16 @@ export function AppSidebar({ isOpen, onClose }) {
     if (teams.length === 0) return null
 
     return (
-      <div className="flex flex-col items-center space-y-2 mb-4 w-full">
+      <div className={cn("flex flex-col mb-4 w-full", isExpanded ? "px-3 space-y-1" : "items-center space-y-2")}>
+        {isExpanded && <div className="px-3 pb-2 text-[11px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Your Teams</div>}
         {teams.map((t) => (
           <NavLink
             key={t.id}
             to={`/app/organizations/${activeOrganization.id}/teams/${t.id}`}
-            title={t.name}
+            title={!isExpanded ? t.name : undefined}
             className={({ isActive }) => cn(
-              "relative flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 group shrink-0",
+              "relative flex items-center transition-colors duration-200 group shrink-0",
+              isExpanded ? "w-full h-9 rounded-lg px-3 justify-start" : "justify-center w-10 h-10 rounded-full",
               isActive
                 ? "text-[var(--accent)]"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
@@ -237,18 +264,23 @@ export function AppSidebar({ isOpen, onClose }) {
                 {isActive && (
                   <motion.div
                     layoutId="sidebar-active-pill"
-                    className="absolute inset-0 rounded-full bg-[var(--accent-soft)]"
+                    className={cn("absolute inset-0 bg-[var(--accent-soft)]", isExpanded ? "rounded-lg" : "rounded-full")}
                     transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.6 }}
                   />
                 )}
                 <div className="relative w-6 h-6 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] flex items-center justify-center text-[11px] font-bold shrink-0">
                   {t.name?.charAt(0).toUpperCase()}
                 </div>
+                {isExpanded && (
+                  <span className={cn("relative ml-3 text-sm font-medium truncate", isActive ? "text-[var(--accent)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]")}>
+                    {t.name}
+                  </span>
+                )}
               </>
             )}
           </NavLink>
         ))}
-        <div className="w-6 h-[1px] bg-[var(--color-border-subtle)] mt-2 opacity-50" />
+        <div className={cn("h-[1px] bg-[var(--color-border-subtle)] mt-2 opacity-50", isExpanded ? "mx-3" : "w-6 mx-auto")} />
       </div>
     )
   }
@@ -308,16 +340,24 @@ export function AppSidebar({ isOpen, onClose }) {
           </Button>
         </PopoverContent>
       </Popover>
-
       {/* ═══ Workspace / Lens Switcher (Iconic) ═══ */}
       {!isSettingsMode && (
+        <div className={cn("flex mb-4", isExpanded ? "px-4" : "justify-center")}>
         <Popover>
           <PopoverTrigger asChild>
             <button 
-              title="Switch Lens"
-              className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] transition-all duration-300 shadow-sm mb-4 shrink-0 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              title={!isExpanded ? "Switch Lens" : undefined}
+              className={cn("flex items-center rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] transition-all duration-300 shadow-sm shrink-0 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]", isExpanded ? "w-full px-3 py-2 justify-start gap-3" : "justify-center w-10 h-10")}
             >
-              {getWorkspaceIcon()}
+              <div className="shrink-0">{getWorkspaceIcon()}</div>
+              {isExpanded && (
+                <div className="flex flex-col text-left overflow-hidden">
+                  <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                    {workspaceMode === 'ORG' ? activeOrganization?.name : (workspaceMode === 'CREWS' ? 'Crews' : 'Personal Space')}
+                  </span>
+                  <span className="text-[10px] text-[var(--text-tertiary)] truncate uppercase tracking-wider">Switch Lens</span>
+                </div>
+              )}
             </button>
           </PopoverTrigger>
           <PopoverContent 
@@ -370,19 +410,23 @@ export function AppSidebar({ isOpen, onClose }) {
             </button>
           </PopoverContent>
         </Popover>
+        </div>
       )}
 
       {/* Global Search / Command Trigger */}
+      <div className={cn("flex mb-4", isExpanded ? "px-4" : "justify-center")}>
       <button 
-        title="Command Palette (Cmd+K)"
-        className="flex items-center justify-center w-10 h-10 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all duration-200 mb-4 shrink-0 focus:outline-none"
+        title={!isExpanded ? "Command Palette (Cmd+K)" : undefined}
+        className={cn("flex items-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all duration-200 shrink-0 focus:outline-none", isExpanded ? "w-full h-9 rounded-lg px-3 justify-start gap-3" : "justify-center w-10 h-10 rounded-full")}
         onClick={() => {
           // Dispatch custom event for CommandPalette to listen to
           document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))
         }}
       >
-        <Icons.search className="w-[18px] h-[18px]" strokeWidth={1.5} />
+        <Icons.search className="w-[18px] h-[18px] shrink-0" strokeWidth={1.5} />
+        {isExpanded && <span className="text-sm font-medium">Search</span>}
       </button>
+      </div>
 
       {/* Main Navigation */}
       <div className="flex-1 w-full overflow-y-auto custom-scrollbar flex flex-col items-center pt-2">
@@ -411,6 +455,15 @@ export function AppSidebar({ isOpen, onClose }) {
         )}
       </div>
 
+      {/* Bottom Toggle */}
+      <div className={cn("mt-auto pt-4 flex", isExpanded ? "justify-end px-4" : "justify-center")}>
+        <button
+          onClick={toggleSidebar}
+          className="flex items-center justify-center w-8 h-8 rounded-full text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all duration-200 focus:outline-none"
+        >
+          {isExpanded ? <Icons.chevronLeft className="w-5 h-5" /> : <Icons.chevronRight className="w-5 h-5" />}
+        </button>
+      </div>
     </div>
   )
 

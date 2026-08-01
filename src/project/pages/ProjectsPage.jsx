@@ -29,7 +29,7 @@ export function ProjectsPage() {
   const { canCreateProject } = usePermissions()
   const canCreate = workspaceMode === 'PERSONAL' || canCreateProject
 
-  const { data: allProjects = [], isLoading, isError, error } = useProjects({ search: globalFilter })
+  const { data: allProjects = [], isLoading, isError, error, refetch } = useProjects({ search: globalFilter })
   const createProjectMutation = useCreateProject()
 
   const projects = useMemo(() => {
@@ -125,7 +125,7 @@ export function ProjectsPage() {
           errorConfig={{
             title: 'Failed to load projects',
             description: error?.message || 'An unexpected error occurred. Please try again.',
-            onRetry: () => window.location.reload(),
+            onRetry: refetch,
           }}
           emptyConfig={{
             icon: Icons.projects,

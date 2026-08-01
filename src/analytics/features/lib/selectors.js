@@ -28,7 +28,7 @@ const isInProgress = (s) => isActiveStatus(s)
 /** Check if a status represents todo */
 const isTodo = (s) => {
   const u = String(s || '').toUpperCase()
-  return u === 'TODO' || u === 'ASSIGNED'
+  return u === 'TODO' || u === 'IN_PROGRESS'
 }
 
 export const selectCompletionRate = (tasks = []) => {

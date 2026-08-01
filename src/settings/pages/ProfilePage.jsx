@@ -112,7 +112,7 @@ export function ProfilePage() {
 
             <p className="text-xs text-[var(--text-muted)] flex items-center justify-center sm:justify-start gap-1.5">
               <Icons.mail className="w-3.5 h-3.5 text-[var(--text-tertiary)]" />
-              <span>{user?.email || 'srikar.kkn123@gmail.com'}</span>
+              <span>{user?.email || 'No email provided'}</span>
             </p>
           </div>
 

@@ -31,7 +31,7 @@ const SIGNAL_CONFIG = {
     label: 'Submitted for Review',
     badgeVariant: 'warning',
   },
-  TASK_ASSIGNED: {
+  TASK_IN_PROGRESS: {
     icon: User,
     iconColor: 'text-blue-500',
     bgColor: 'bg-blue-500/10',

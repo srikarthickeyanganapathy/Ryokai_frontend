@@ -115,6 +115,19 @@ export const useDeclineInvite = () => {
     },
   });
 };
+export const useRevokeInvite = (orgId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (inviteId) => orgApi.revokeInvite(orgId, inviteId),
+    onSuccess: () => {
+      toast.success('Invite revoked');
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to revoke invite');
+    },
+  });
+};
 
 export const useRemoveMember = (orgId) => {
   const queryClient = useQueryClient();

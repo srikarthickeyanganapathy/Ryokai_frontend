@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/Select';
-import { usePermissions } from '@/identity';
+import { usePermissions, useAuth } from '@/identity';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
 import { InviteMemberModal } from '../sections/Invites/InviteMemberModal';
 import { LeaveRequestsTab } from '../sections/Members/LeaveRequestsTab';
@@ -39,6 +39,7 @@ import { SearchPlugin } from '@/shared/workspace-framework/toolbar/plugins/Searc
 export function DirectoryPage() {
   const { activeOrganization } = useWorkspace();
   const orgId = activeOrganization?.id;
+  const { user } = useAuth();
   const { data: members = [], isLoading } = useOrgMembers(orgId);
   const { data: roles = [], isLoading: rolesLoading } = useOrgRoles(orgId);
 
@@ -231,6 +232,10 @@ export function DirectoryPage() {
                   const currentRole = roles.find(
                     (r) => r.name === member.orgRole
                   );
+                  const isSelf = member.userId === user?.id;
+                  const adminCount = members.filter(m => m.rolePriority === 0).length;
+                  const isLastAdmin = adminCount <= 1 && member.rolePriority === 0;
+
                   return (
                     <motion.div
                       key={member.userId}
@@ -271,7 +276,7 @@ export function DirectoryPage() {
                           <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] truncate">
                             <Mail className="h-3.5 w-3.5 flex-shrink-0" />
                             <span className="truncate">
-                              {member.username}@ryokai.app
+                              {member.email || "No email provided"}
                             </span>
                           </div>
 
@@ -292,7 +297,7 @@ export function DirectoryPage() {
                                         roleId: val,
                                       })
                                     }
-                                    disabled={updateRoleMutation.isPending}
+                                    disabled={updateRoleMutation.isPending || isSelf || isLastAdmin}
                                   >
                                     <SelectTrigger className="w-[110px] h-7 text-[11px]">
                                       <SelectValue
@@ -314,7 +319,7 @@ export function DirectoryPage() {
                                   </Select>
                                 )}
 
-                                {canRemoveMembers && (
+                                {canRemoveMembers && !isSelf && (
                                   <IconButton
                                     variant="danger"
                                     size="sm"

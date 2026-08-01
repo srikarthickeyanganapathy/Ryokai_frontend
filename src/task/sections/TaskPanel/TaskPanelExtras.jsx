@@ -35,6 +35,7 @@ export function TaskComments({ taskId, hasCommentPerm }) {
   const [isFocused, setIsFocused] = useState(false)
   const [likes, setLikes] = useState({})
   const [dislikes, setDislikes] = useState({})
+  const [replyingTo, setReplyingTo] = useState(null)
 
   const toggleLike = (commentId) => {
     setLikes(prev => ({ ...prev, [commentId]: !prev[commentId] }))
@@ -49,10 +50,11 @@ export function TaskComments({ taskId, hasCommentPerm }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!text.trim()) return
-    addComment.mutate(text, {
+    addComment.mutate({ text, parentId: replyingTo }, {
       onSuccess: () => {
         setText('')
         setIsFocused(false)
+        setReplyingTo(null)
       }
     })
   }
@@ -86,7 +88,7 @@ export function TaskComments({ taskId, hasCommentPerm }) {
                   type="button" 
                   variant="ghost" 
                   size="sm" 
-                  onClick={() => { setText(''); setIsFocused(false); }}
+                  onClick={() => { setText(''); setIsFocused(false); setReplyingTo(null); }}
                 >
                   Cancel
                 </Button>
@@ -147,7 +149,11 @@ export function TaskComments({ taskId, hasCommentPerm }) {
                   >
                     <Icons.thumbsDown className={cn("w-3.5 h-3.5", isDisliked && "fill-current")} />
                   </button>
-                  <button type="button" className="font-medium hover:text-[var(--text-primary)] transition-colors">
+                  <button 
+                    type="button"
+                    onClick={() => { setReplyingTo(c.id); setIsFocused(true); }}
+                    className={cn("font-medium hover:text-[var(--text-primary)] transition-colors", replyingTo === c.id && "text-[var(--accent)]")}
+                  >
                     Reply
                   </button>
                 </div>
@@ -438,11 +444,11 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
                     rel="noreferrer" 
                     className="font-medium text-sm text-[var(--text-primary)] hover:text-[var(--accent)] line-clamp-1 flex items-center gap-1 group/link"
                   >
-                    <span className="truncate">{item.description || item.url}</span>
+                    <span className="truncate">{item.title || item.url}</span>
                     <Icons.externalLink className="w-3.5 h-3.5 opacity-0 group-hover/link:opacity-100 transition-opacity shrink-0" />
                   </a>
 
-                  {item.description && item.url !== item.description && (
+                  {item.title && item.url !== item.title && (
                     <Text size="xs" variant="muted" className="line-clamp-1 mt-0.5">
                       {item.url}
                     </Text>

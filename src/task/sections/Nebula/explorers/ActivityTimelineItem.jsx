@@ -26,7 +26,7 @@ const getEventIcon = (type, toStatus) => {
         return <PlayCircle size={14} className="text-blue-500" />;
       }
       return <ArrowRightLeft size={14} className="text-amber-500" />;
-    case 'ASSIGNED':
+    case 'IN_PROGRESS':
       return <UserPlus size={14} className="text-purple-500" />;
     case 'REJECTED':
       return <XCircle size={14} className="text-rose-500" />;
@@ -63,7 +63,7 @@ export default function ActivityTimelineItem({ event }) {
             Changed status from <span className="font-medium text-[var(--text-primary)]">{event.fromStatus || 'None'}</span> to <span className="font-medium text-[var(--text-primary)]">{event.toStatus}</span>
           </span>
         );
-      case 'ASSIGNED':
+      case 'IN_PROGRESS':
         return <span>Assigned task</span>;
       case 'REJECTED':
         return <span>Rejected task</span>;

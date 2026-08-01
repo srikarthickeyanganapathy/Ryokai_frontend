@@ -13,7 +13,7 @@ const normalizeChecklistItem = (item) => ({
 // FIX: backend TaskResponseDTO field is `assignee` (String username), not `assignedTo`.
 //      The old code mapped t.assignedTo which was always undefined — assignee was lost.
 //      Backend also returns `archived` (not `isArchived`), `isPersonal` (via @JsonProperty).
-const normalizeTask = (t) => ({
+export const normalizeTask = (t) => ({
   ...t,
   // Backend field is `assignee` (username string). Keep it as-is and also alias to assignedTo
   // for any component that still reads the old shape.
@@ -71,7 +71,7 @@ export const completePersonalTask = async (id) => {
   return normalizeTask(data);
 };
 
-// FIX (SM-C01): new endpoint for completing CREW tasks (ASSIGNED -> COMPLETED).
+// FIX (SM-C01): new endpoint for completing CREW tasks (IN_PROGRESS -> COMPLETED).
 // Crew tasks follow the no-review pipeline per the spec state machine.
 export const completeCrewTask = async (id) => {
   const { data } = await api.post(`/tasks/${id}/complete-crew`);
@@ -186,16 +186,24 @@ export const getAttachments = async (taskId) => {
 
 export const uploadAttachment = async (taskId, file) => {
   if (!file) throw new Error('No file provided for upload');
-  const reader = new FileReader();
-  const dataUrl = await new Promise((resolve, reject) => {
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+  
+  // 1. Upload the file to get the imageKey
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const uploadRes = await api.post(`/tasks/${taskId}/evidence/upload`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
   });
+  
+  const imageKey = uploadRes.data.imageKey;
+
+  // 2. Submit the evidence record with the imageKey
   return addEvidence(taskId, {
     type: 'SCREENSHOT',
-    url: dataUrl,
-    description: file.name || 'Attachment Evidence',
+    imageKey: imageKey,
+    title: file.name || 'Attachment Evidence',
   });
 };
 
@@ -214,7 +222,7 @@ export const getEvidence = async (taskId) => {
 };
 
 export const addEvidence = async (taskId, payload) => {
-  // payload: { type, url, description }
+  // payload: { type, url, title }
   // EvidenceType: LINK | GITHUB | SCREENSHOT | RECORDING | SNIPPET | NOTE
   const { data } = await api.post(`/tasks/${taskId}/evidence`, payload);
   return data;

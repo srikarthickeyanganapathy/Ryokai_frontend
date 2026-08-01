@@ -32,7 +32,7 @@ export function TeamDetailPage() {
   const [messageInput, setMessageInput] = useState('')
   const [assigningTaskId, setAssigningTaskId] = useState(null)
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false)
-  
+
   const messagesEndRef = useRef(null)
 
   // Fetch Team details
@@ -342,8 +342,8 @@ export function TeamDetailPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {teamProjects.map(proj => (
-                  <div 
-                    key={proj.id} 
+                  <div
+                    key={proj.id}
                     onClick={() => navigate(`/app/projects/${proj.id}`)}
                     className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-5 hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] transition-[border-color,box-shadow] cursor-pointer"
                   >
@@ -385,7 +385,7 @@ export function TeamDetailPage() {
                         <Badge className={cn("text-xs mr-2", PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM)}>
                           {normalizePriority(task.priority)}
                         </Badge>
-                        
+
                         {canAssignTask && !isReadOnly && (
                           <Popover open={assigningTaskId === task.id} onOpenChange={open => setAssigningTaskId(open ? task.id : null)}>
                             <PopoverTrigger asChild>
@@ -455,7 +455,7 @@ export function TeamDetailPage() {
       <Modal open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
         <ModalContent className="sm:max-w-xl">
           <Heading level={3} className="mb-4">Create Team Project</Heading>
-          <ProjectForm 
+          <ProjectForm
             defaultValues={{
               name: '',
               description: '',
