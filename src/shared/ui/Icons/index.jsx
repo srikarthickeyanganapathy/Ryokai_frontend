@@ -96,7 +96,9 @@ import {
   Key,
   UserPlus,
   WifiOff,
-  Image
+  Image,
+  DoorOpen,
+  FolderPlus
 } from 'lucide-react'
 
 const GithubIcon = ({ className, ...props }) => (
@@ -240,4 +242,7 @@ export const Icons = {
   userPlus: UserPlus,
   wifiOff: WifiOff,
   image: Image,
+  alertCircle: AlertCircle,
+  doorOpen: DoorOpen,
+  folderPlus: FolderPlus,
 }

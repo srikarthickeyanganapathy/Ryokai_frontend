@@ -9,7 +9,7 @@ import { useAdminLeave } from '@/organization'
 import { useAuth } from '@/identity'
 import { useNavigate } from 'react-router-dom'
 
-export function AdminLeaveModal({ isOpen, onClose, orgId, members = [] }) {
+export function AdminLeaveModal({ isOpen, onClose, orgId, members = [], initialMode = null }) {
   const { user } = useAuth()
   const navigate = useNavigate()
   const adminLeaveMutation = useAdminLeave(orgId)
@@ -18,18 +18,18 @@ export function AdminLeaveModal({ isOpen, onClose, orgId, members = [] }) {
   const otherMembers = members.filter(m => m.userId !== user?.id)
   const isAlone = otherMembers.length === 0
 
-  const [mode, setMode] = useState(isAlone ? 'dissolve' : 'transfer') // 'transfer' or 'dissolve'
+  const [mode, setMode] = useState(initialMode || (isAlone ? 'dissolve' : 'transfer')) // 'transfer' or 'dissolve'
   const [successorUserId, setSuccessorUserId] = useState('')
 
   // Reset local state on modal open
   useEffect(() => {
     if (isOpen) {
       queueMicrotask(() => {
-        setMode(isAlone ? 'dissolve' : 'transfer')
+        setMode(initialMode || (isAlone ? 'dissolve' : 'transfer'))
         setSuccessorUserId('')
       })
     }
-  }, [isOpen, isAlone])
+  }, [isOpen, isAlone, initialMode])
 
   const handleConfirm = () => {
     const isDissolving = mode === 'dissolve'

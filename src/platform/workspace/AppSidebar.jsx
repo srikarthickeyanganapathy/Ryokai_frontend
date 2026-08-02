@@ -15,18 +15,19 @@ import { Separator } from '@/shared/ui/Separator'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar'
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
+import { CommandMenu } from '@/platform/command-palette'
 
 export function AppSidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth()
   const { workspaceMode, setWorkspaceMode, activeOrganization, setActiveOrganization, organizations } = useWorkspace()
-  const { isSuperAdmin, canViewAnalytics } = usePermissions()
+  const { isSuperAdmin, canViewAnalytics, canManageRoles } = usePermissions()
   const { data: crewsData } = useCrews()
   const crews = crewsData || []
   const { data: teamsData = [] } = useOrgTeams(activeOrganization?.id)
   const teams = teamsData || []
   const location = useLocation()
   const navigate = useNavigate()
-  
+
   const [isExpanded, setIsExpanded] = useState(() => {
     return localStorage.getItem('ryokai_sidebar_expanded') !== 'false'
   })
@@ -63,20 +64,21 @@ export function AppSidebar({ isOpen, onClose }) {
             { icon: Icons.listTodo, label: 'Tasks', to: '/app/tasks' },
             { icon: Icons.users, label: 'Teams', to: '/app/teams' },
             { icon: Icons.network, label: 'Directory', to: '/app/directory' },
+            { icon: Icons.clock, label: 'Leave Requests', to: '/app/leave-requests' },
           ]
         },
         {
           items: [
-            { icon: Icons.barChart2, label: 'Analytics', to: '/app/analytics' },
-            { icon: Icons.scale, label: 'Workload', to: '/app/workload' },
+            { icon: Icons.scale, label: 'Workload & Analytics', to: '/app/workload' },
             { icon: Icons.target, label: 'Goals & OKRs', to: '/app/goals' },
           ]
         },
         {
           items: [
+            ...(canManageRoles ? [{ icon: Icons.shield, label: 'Roles & Permissions', to: '/app/roles-permissions' }] : []),
             { icon: Icons.megaphone, label: 'Announcements', to: '/app/announcements' },
             { icon: Icons.settings, label: 'Settings', to: '/app/organizations' },
-            ...(isSuperAdmin ? [{ icon: Icons.shield, label: 'Admin', to: '/platform' }] : []),
+            ...(isSuperAdmin ? [{ icon: Icons.shieldAlert, label: 'Admin', to: '/platform' }] : []),
           ]
         }
       ]
@@ -286,35 +288,55 @@ export function AppSidebar({ isOpen, onClose }) {
   }
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-[var(--bg-subtle)]/40 backdrop-blur-xl relative z-20 w-[68px] items-center py-4 border-r border-[var(--color-border-subtle)] shadow-sm">
-      
+    <div className={cn(
+      "flex flex-col h-full bg-[var(--bg-subtle)]/40 backdrop-blur-xl relative z-20 py-4 border-r border-[var(--color-border-subtle)] shadow-sm transition-[width] duration-300 ease-in-out",
+      isExpanded ? "w-[260px]" : "w-[68px] items-center"
+    )}>
+
       {/* Brand & User Profile Header */}
       <Popover>
         <PopoverTrigger asChild>
-          <button className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-[var(--bg-hover)] transition-all duration-200 mb-4 shrink-0 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]">
-            <Avatar size="sm" className="bg-[var(--accent)] text-white shadow-sm w-8 h-8">
+          <button className={cn(
+            "flex items-center hover:bg-[var(--bg-hover)] transition-all duration-200 mb-4 shrink-0 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]",
+            isExpanded ? "mx-4 px-2 py-1.5 rounded-xl justify-start gap-3 w-[calc(100%-32px)]" : "justify-center w-10 h-10 rounded-full"
+          )}>
+            <Avatar size="sm" className="bg-[var(--accent)] text-white shadow-sm w-8 h-8 shrink-0">
               <AvatarImage src={user?.avatarUrl} />
               <AvatarFallback className="bg-[var(--accent)] text-white text-[11px] font-bold">
                 {user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
+            {isExpanded && (
+              <div className="flex flex-col text-left overflow-hidden">
+                <span className="text-[13px] font-bold truncate text-[var(--text-primary)] leading-tight">
+                  {user?.name || user?.username}
+                </span>
+                <span className="text-[11px] text-[var(--text-muted)] truncate">
+                  {user?.email}
+                </span>
+              </div>
+            )}
           </button>
         </PopoverTrigger>
-        <PopoverContent 
+        <PopoverContent
           side="right"
-          align="start" 
+          align="start"
           sideOffset={10}
           className="w-56 bg-[var(--bg-elevated)]/95 backdrop-blur-xl border border-[var(--color-border-subtle)] p-2 rounded-2xl shadow-xl flex flex-col gap-1 z-[9999]"
         >
-          <div className="px-3 py-2">
-            <Text className="text-[13px] font-bold truncate text-[var(--text-primary)] leading-tight">
-              {user?.name || user?.username}
-            </Text>
-            <Text className="text-[11px] text-[var(--text-muted)] truncate">
-              {user?.email}
-            </Text>
-          </div>
-          <Separator className="my-1 bg-[var(--color-border-subtle)]" />
+          {!isExpanded && (
+            <>
+              <div className="px-3 py-2">
+                <Text className="text-[13px] font-bold truncate text-[var(--text-primary)] leading-tight">
+                  {user?.name || user?.username}
+                </Text>
+                <Text className="text-[11px] text-[var(--text-muted)] truncate">
+                  {user?.email}
+                </Text>
+              </div>
+              <Separator className="my-1 bg-[var(--color-border-subtle)]" />
+            </>
+          )}
           <Link
             to="/app/settings/profile"
             className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
@@ -342,90 +364,90 @@ export function AppSidebar({ isOpen, onClose }) {
       </Popover>
       {/* ═══ Workspace / Lens Switcher (Iconic) ═══ */}
       {!isSettingsMode && (
-        <div className={cn("flex mb-4", isExpanded ? "px-4" : "justify-center")}>
-        <Popover>
-          <PopoverTrigger asChild>
-            <button 
-              title={!isExpanded ? "Switch Lens" : undefined}
-              className={cn("flex items-center rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] transition-all duration-300 shadow-sm shrink-0 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]", isExpanded ? "w-full px-3 py-2 justify-start gap-3" : "justify-center w-10 h-10")}
+        <div className={cn("flex mb-4 w-full", isExpanded ? "px-4" : "justify-center")}>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                title={!isExpanded ? "Switch Lens" : undefined}
+                className={cn("flex items-center rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] transition-all duration-300 shadow-sm shrink-0 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]", isExpanded ? "w-full px-3 py-2 justify-start gap-3" : "justify-center w-10 h-10")}
+              >
+                <div className="shrink-0">{getWorkspaceIcon()}</div>
+                {isExpanded && (
+                  <div className="flex flex-col text-left overflow-hidden">
+                    <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                      {workspaceMode === 'ORG' ? activeOrganization?.name : (workspaceMode === 'CREWS' ? 'Crews' : 'Personal Space')}
+                    </span>
+                    <span className="text-[10px] text-[var(--text-tertiary)] truncate uppercase tracking-wider">Switch Lens</span>
+                  </div>
+                )}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              side="right"
+              align="start"
+              sideOffset={14}
+              className="w-56 p-2 rounded-2xl border-[var(--border-subtle)] bg-[var(--bg-elevated)]/95 backdrop-blur-xl shadow-xl flex flex-col gap-1 z-[9999]"
             >
-              <div className="shrink-0">{getWorkspaceIcon()}</div>
-              {isExpanded && (
-                <div className="flex flex-col text-left overflow-hidden">
-                  <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
-                    {workspaceMode === 'ORG' ? activeOrganization?.name : (workspaceMode === 'CREWS' ? 'Crews' : 'Personal Space')}
-                  </span>
-                  <span className="text-[10px] text-[var(--text-tertiary)] truncate uppercase tracking-wider">Switch Lens</span>
-                </div>
-              )}
-            </button>
-          </PopoverTrigger>
-          <PopoverContent 
-            side="right"
-            align="start"
-            sideOffset={14}
-            className="w-56 p-2 rounded-2xl border-[var(--border-subtle)] bg-[var(--bg-elevated)]/95 backdrop-blur-xl shadow-xl flex flex-col gap-1 z-[9999]"
-          >
-            <div className="px-3 pt-1 pb-2">
-              <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--text-tertiary)]">Operating Lens</span>
-            </div>
-            <button 
-              onClick={() => handleDropdownChange('PERSONAL')}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-colors text-left",
-                workspaceMode === 'PERSONAL' ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
-              )}
-            >
-              <Icons.user className="w-4 h-4" />
-              <span>Personal Space</span>
-            </button>
-            
-            {organizations.length > 0 && <Separator className="my-1 bg-[var(--color-border-subtle)]" />}
-            
-            {organizations.map(org => (
-              <button 
-                key={org.id}
-                onClick={() => handleDropdownChange(`org-${org.id}`)}
+              <div className="px-3 pt-1 pb-2">
+                <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--text-tertiary)]">Operating Lens</span>
+              </div>
+              <button
+                onClick={() => handleDropdownChange('PERSONAL')}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-colors text-left",
-                  workspaceMode === 'ORG' && activeOrganization?.id === org.id ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
+                  workspaceMode === 'PERSONAL' ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
                 )}
               >
-                <Icons.building className="w-4 h-4" />
-                <span className="truncate">{org.name}</span>
+                <Icons.user className="w-4 h-4" />
+                <span>Personal Space</span>
               </button>
-            ))}
-            
-            <Separator className="my-1 bg-[var(--color-border-subtle)]" />
-            
-            <button 
-              onClick={() => handleDropdownChange('CREWS')}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-colors text-left",
-                workspaceMode === 'CREWS' ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
-              )}
-            >
-              <Icons.rocket className="w-4 h-4" />
-              <span>Crews</span>
-            </button>
-          </PopoverContent>
-        </Popover>
+
+              {organizations.length > 0 && <Separator className="my-1 bg-[var(--color-border-subtle)]" />}
+
+              {organizations.map(org => (
+                <button
+                  key={org.id}
+                  onClick={() => handleDropdownChange(`org-${org.id}`)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-colors text-left",
+                    workspaceMode === 'ORG' && activeOrganization?.id === org.id ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
+                  )}
+                >
+                  <Icons.building className="w-4 h-4" />
+                  <span className="truncate">{org.name}</span>
+                </button>
+              ))}
+
+              <Separator className="my-1 bg-[var(--color-border-subtle)]" />
+
+              <button
+                onClick={() => handleDropdownChange('CREWS')}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-colors text-left",
+                  workspaceMode === 'CREWS' ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
+                )}
+              >
+                <Icons.rocket className="w-4 h-4" />
+                <span>Crews</span>
+              </button>
+            </PopoverContent>
+          </Popover>
         </div>
       )}
 
       {/* Global Search / Command Trigger */}
-      <div className={cn("flex mb-4", isExpanded ? "px-4" : "justify-center")}>
-      <button 
-        title={!isExpanded ? "Command Palette (Cmd+K)" : undefined}
-        className={cn("flex items-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all duration-200 shrink-0 focus:outline-none", isExpanded ? "w-full h-9 rounded-lg px-3 justify-start gap-3" : "justify-center w-10 h-10 rounded-full")}
-        onClick={() => {
-          // Dispatch custom event for CommandPalette to listen to
-          document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))
-        }}
-      >
-        <Icons.search className="w-[18px] h-[18px] shrink-0" strokeWidth={1.5} />
-        {isExpanded && <span className="text-sm font-medium">Search</span>}
-      </button>
+      <div className={cn("flex mb-4 w-full", isExpanded ? "px-4" : "justify-center")}>
+        <button
+          title={!isExpanded ? "Command Palette (Cmd+K)" : undefined}
+          className={cn("flex items-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all duration-200 shrink-0 focus:outline-none", isExpanded ? "w-full h-9 rounded-lg px-3 justify-start gap-3" : "justify-center w-10 h-10 rounded-full")}
+          onClick={() => {
+            // Dispatch custom event for CommandPalette to listen to
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))
+          }}
+        >
+          <Icons.search className="w-[18px] h-[18px] shrink-0" strokeWidth={1.5} />
+          {isExpanded && <span className="text-sm font-medium">Search</span>}
+        </button>
       </div>
 
       {/* Main Navigation */}
@@ -442,7 +464,7 @@ export function AppSidebar({ isOpen, onClose }) {
         {isSettingsMode && (
           <>
             <div className="pb-4 w-full flex justify-center">
-              <button 
+              <button
                 onClick={() => navigate('/app')}
                 className="flex items-center justify-center w-10 h-10 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all duration-200 border border-[var(--color-border-subtle)] bg-[var(--bg-elevated)] shadow-sm"
                 title="Back to Workspace"
@@ -478,14 +500,14 @@ export function AppSidebar({ isOpen, onClose }) {
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onClose}
               className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
             />
-            <motion.div 
+            <motion.div
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}

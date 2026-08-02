@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { CommandMenu } from '@/platform/command-palette'
 import { Icons } from '@/shared/ui/Icons'
 import { IconButton, Button } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
@@ -20,6 +19,7 @@ import {
 import { useAcceptInvite, useDeclineInvite } from '@/organization'
 import { cn } from '@/shared/lib/cn'
 import { Play } from 'lucide-react'
+import { CommandMenu } from '../command-palette'
 
 function FocusTimerIndicator() {
   // Mocked state: hidden by default
@@ -91,22 +91,11 @@ export function AppTopbar({ onMenuClick }) {
       </div>
 
       <div className="flex-1 flex justify-center px-4 max-w-2xl">
-        <div className="hidden sm:block w-full max-w-md">
-          <CommandMenu />
-        </div>
+        <CommandMenu />
       </div>
 
       <div className="flex items-center justify-end gap-1 sm:gap-3 flex-1 sm:min-w-[200px]">
-        <div className="sm:hidden">
-          <IconButton 
-            variant="ghost"
-            onClick={() => {
-              document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true, bubbles: true }))
-            }}
-          >
-            <Icons.search className="w-5 h-5" />
-          </IconButton>
-        </div>
+
 
         <SyncStatusIndicator />
         <FocusTimerIndicator />

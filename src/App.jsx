@@ -25,8 +25,10 @@ const TasksPage = lazy(() => import("@/task/pages/TasksPage").then(m => ({ defau
 const ProjectsPage = lazy(() => import("@/project/pages/ProjectsPage").then(m => ({ default: m.ProjectsPage })));
 const ProjectDetailPage = lazy(() => import("@/project/pages/ProjectDetailPage").then(m => ({ default: m.ProjectDetailPage })));
 const OrganizationsPage = lazy(() => import("@/organization/pages/OrganizationsPage").then(m => ({ default: m.OrganizationsPage })));
-const OrganizationSettingsPage = lazy(() => import("@/organization/pages/OrganizationSettingsPage").then(m => ({ default: m.OrganizationSettingsPage })));
+const OrganizationAdministrationPage = lazy(() => import("@/organization/pages/OrganizationAdministrationPage").then(m => ({ default: m.OrganizationAdministrationPage })));
 const DirectoryPage = lazy(() => import("@/organization/pages/DirectoryPage").then(m => ({ default: m.DirectoryPage })));
+const LeaveRequestsPage = lazy(() => import("@/organization/pages/LeaveRequestsPage").then(m => ({ default: m.LeaveRequestsPage })));
+const RolesPermissionsPage = lazy(() => import("@/organization/pages/RolesPermissionsPage").then(m => ({ default: m.RolesPermissionsPage })));
 const AnnouncementsPage = lazy(() => import("@/organization/pages/AnnouncementsPage").then(m => ({ default: m.AnnouncementsPage })));
 const CrewsPage = lazy(() => import("@/crew/pages/CrewsPage").then(m => ({ default: m.CrewsPage })));
 const CrewDetailPage = lazy(() => import("@/crew/pages/CrewDetailPage").then(m => ({ default: m.CrewDetailPage })));
@@ -108,7 +110,7 @@ export default function App() {
                   <Route path="projects" element={<ProjectsPage />} />
                   <Route path="projects/:projectId" element={<ProjectDetailPage />} />
                   <Route path="organizations" element={<OrganizationsPage />} />
-                  <Route path="organizations/:orgId" element={<OrganizationSettingsPage />} />
+                  <Route path="organizations/:orgId" element={<OrganizationAdministrationPage />} />
                   <Route path="teams" element={<TeamsPage />} />
                   <Route path="organizations/:orgId/teams/:teamId" element={<TeamDetailPage />} />
                   <Route path="crews" element={<CrewsPage />} />
@@ -136,6 +138,8 @@ export default function App() {
                   {/* Organization workspace */}
                   <Route path="goals" element={<GoalsPage />} />
                   <Route path="directory" element={<DirectoryPage />} />
+                  <Route path="leave-requests" element={<LeaveRequestsPage />} />
+                  <Route path="roles-permissions" element={<RolesPermissionsPage />} />
                   <Route path="announcements" element={<AnnouncementsPage />} />
                   <Route path="workload" element={<WorkloadPage />} />
                   

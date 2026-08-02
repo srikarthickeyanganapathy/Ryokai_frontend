@@ -12,14 +12,17 @@ import {
   Sliders,
 } from 'lucide-react';
 import { getRiskConfig, SCOPE_LABELS, SCOPE_DESCRIPTIONS } from './constants';
+import { ResourcePicker } from './ResourcePicker';
 
 export function PermissionInspectorContent({
   role,
   permission,
   isEnabled,
   currentScope,
+  currentAssignments = [],
   isAdmin,
   onScopeChange,
+  onResourceAssignmentChange,
   onToggle,
   permissionMap,
   localScopedPerms,
@@ -265,22 +268,31 @@ export function PermissionInspectorContent({
                       </p>
                     </div>
                   </label>
-                  
-                  {scopeKey === 'CUSTOM' && currentScope === 'CUSTOM' && (
-                    <div className="ml-6 pl-4 border-l border-[var(--border-subtle)]">
-                      <div className="text-[11px] font-medium mb-2 text-[var(--text-primary)]">Select Specific Resource</div>
-                      <select 
-                        disabled={isAdmin}
-                        className="w-full bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded px-2 py-1.5 text-xs text-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)]"
-                      >
-                        <option value="">Select an item...</option>
-                        <option value="proj_1">Project: Project Alpha</option>
-                        <option value="proj_2">Project: Marketing Q3</option>
-                        <option value="team_1">Team: Engineering</option>
-                      </select>
-                      <p className="text-[10px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
-                        Currently using mock data. Resource picking is not yet connected to the backend.
-                      </p>
+                  {['PROJECT', 'TEAM', 'CREW'].includes(scopeKey) && currentScope === scopeKey && permission.requiresResourceAssignment && (
+                    <div className="ml-6 pl-4 border-l border-[var(--border-subtle)] mt-2">
+                      <div className="p-4 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-md">
+                        <p className="text-[12px] font-medium text-[var(--text-primary)] mb-3">
+                          Select Specific {SCOPE_LABELS[scopeKey]}
+                        </p>
+                        <ResourcePicker 
+                          resourceType={scopeKey}
+                          selectedAssignments={currentAssignments}
+                          onChange={(assignments) => onResourceAssignmentChange(permission.code, assignments)}
+                          disabled={isAdmin}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {['PROJECT', 'TEAM', 'CREW'].includes(scopeKey) && currentScope === scopeKey && !permission.requiresResourceAssignment && (
+                    <div className="ml-6 pl-4 border-l border-[var(--border-subtle)] mt-2">
+                      <div className="p-3 bg-[var(--warning-soft)]/30 border border-[var(--warning-border)]/30 rounded-md">
+                        <p className="text-[11px] font-medium text-[var(--warning)] mb-1">
+                          No resource assignment needed
+                        </p>
+                        <p className="text-[10px] text-[var(--text-muted)] leading-relaxed">
+                          This permission uses {SCOPE_LABELS[scopeKey]} scope but does not require specific resource assignments.
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>

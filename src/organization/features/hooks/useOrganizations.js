@@ -40,14 +40,38 @@ export const useUpdateOrganization = (orgId) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload) => orgApi.updateOrganization(orgId, payload),
+    onMutate: async (newOrgData) => {
+      // Cancel any outgoing refetches so they don't overwrite optimistic update
+      await queryClient.cancelQueries({ queryKey: queryKeys.organizations.detail(orgId) });
+      
+      // Snapshot previous value
+      const previousOrg = queryClient.getQueryData(queryKeys.organizations.detail(orgId));
+      
+      // Optimistically update
+      if (previousOrg) {
+        queryClient.setQueryData(queryKeys.organizations.detail(orgId), {
+          ...previousOrg,
+          ...newOrgData,
+        });
+      }
+      
+      // Return a context with previous value
+      return { previousOrg };
+    },
     onSuccess: () => {
-      toast.success('Organization updated');
-      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(orgId) });
+      // toast.success('Organization updated'); // Optionally hide toast for purely inline updates
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
     },
-    onError: (error) => {
+    onError: (error, newOrgData, context) => {
+      // Rollback on error
+      if (context?.previousOrg) {
+        queryClient.setQueryData(queryKeys.organizations.detail(orgId), context.previousOrg);
+      }
       toast.error(error.response?.data?.message || 'Failed to update organization');
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.detail(orgId) });
     },
   });
 };

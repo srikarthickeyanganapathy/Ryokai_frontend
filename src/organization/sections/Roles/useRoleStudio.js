@@ -66,7 +66,10 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     if (selectedRole) {
       const initialMap = {};
       selectedRole.permissions?.forEach((p) => {
-        initialMap[p.code] = p.scope || 'ORGANIZATION';
+        initialMap[p.permissionCode || p.code] = {
+          scopeCode: p.scopeCode || p.scope || 'ORGANIZATION',
+          resourceAssignments: p.resourceAssignments || []
+        };
       });
       setLocalScopedPerms(initialMap);
       setLocalPriority(selectedRole.priority ?? 100);
@@ -89,7 +92,10 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
   const originalMap = useMemo(() => {
     const map = {};
     selectedRole?.permissions?.forEach((p) => {
-      map[p.code] = p.scope || 'ORGANIZATION';
+      map[p.permissionCode || p.code] = {
+        scopeCode: p.scopeCode || p.scope || 'ORGANIZATION',
+        resourceAssignments: p.resourceAssignments || []
+      };
     });
     return map;
   }, [selectedRole]);
@@ -105,9 +111,18 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
   );
   const scopeChangedPerms = useMemo(
     () =>
-      Object.keys(localScopedPerms).filter(
-        (c) => originalMap[c] && originalMap[c] !== localScopedPerms[c]
-      ),
+      Object.keys(localScopedPerms).filter((c) => {
+        const orig = originalMap[c];
+        const local = localScopedPerms[c];
+        if (!orig || !local) return false;
+        
+        // Deep compare scope and assignments
+        if (orig.scopeCode !== local.scopeCode) return true;
+        
+        const origArr = [...(orig.resourceAssignments || [])].sort((a,b) => (a.resourceId - b.resourceId));
+        const localArr = [...(local.resourceAssignments || [])].sort((a,b) => (a.resourceId - b.resourceId));
+        return JSON.stringify(origArr) !== JSON.stringify(localArr);
+      }),
     [localScopedPerms, originalMap]
   );
   const priorityChanged =
@@ -217,7 +232,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
         const defaultScope = supported.includes('OWN')
           ? 'OWN'
           : perm.recommendedScope || supported[0];
-        next[code] = defaultScope;
+        next[code] = { scopeCode: defaultScope, resourceAssignments: [] };
 
         // Auto-enable dependent permissions
         perm.requires?.forEach((reqCode) => {
@@ -228,7 +243,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
             const reqDefault = reqSupported.includes('OWN')
               ? 'OWN'
               : reqPerm?.recommendedScope || reqSupported[0];
-            next[reqCode] = reqDefault;
+            next[reqCode] = { scopeCode: reqDefault, resourceAssignments: [] };
             toast.info(`${reqPerm?.name || reqCode} auto-enabled`, {
               description: `Required by ${perm.name || code}.`,
             });
@@ -241,7 +256,18 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
 
   const handleScopeChange = (code, newScope) => {
     if (isAdminRole) return;
-    setLocalScopedPerms((prev) => ({ ...prev, [code]: newScope }));
+    setLocalScopedPerms((prev) => ({ 
+      ...prev, 
+      [code]: { ...prev[code], scopeCode: newScope, resourceAssignments: [] } 
+    }));
+  };
+
+  const handleResourceAssignmentChange = (code, assignments) => {
+    if (isAdminRole) return;
+    setLocalScopedPerms((prev) => ({
+      ...prev,
+      [code]: { ...prev[code], resourceAssignments: assignments }
+    }));
   };
 
   const handleEnableAll = () => {
@@ -254,9 +280,10 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
             p.supportedScopes?.length > 0
               ? p.supportedScopes
               : ['ORGANIZATION'];
-          next[p.code] = supported.includes('OWN')
+          const sc = supported.includes('OWN')
             ? 'OWN'
             : p.recommendedScope || supported[0];
+          next[p.code] = { scopeCode: sc, resourceAssignments: [] };
         }
       });
       return next;
@@ -302,15 +329,15 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
       scopeChangedPerms.length > 0
     ) {
       const payloadPermissions = Object.entries(localScopedPerms).map(
-        ([code, scopeCode]) => ({
-          permissionCode: code,
-          scopeCode,
+        ([code, config]) => ({
+          permissionName: code,
+          scopeCode: config.scopeCode,
+          resourceAssignments: config.resourceAssignments || []
         })
       );
       updatePermissionsMutation.mutate({
         roleId: selectedRole.id,
         permissions: payloadPermissions,
-        resourceAssignments: [],
       });
     }
     if (priorityChanged) {
@@ -333,13 +360,13 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
               const sourceRole = roles.find((r) => r.id === templateRoleId);
               if (sourceRole?.permissions?.length > 0) {
                 const payloadPermissions = sourceRole.permissions.map((p) => ({
-                  permissionCode: p.code,
-                  scopeCode: p.scope || 'ORGANIZATION',
+                  permissionName: p.permissionCode || p.code,
+                  scopeCode: p.scopeCode || p.scope || 'ORGANIZATION',
+                  resourceAssignments: p.resourceAssignments || []
                 }));
                 updatePermissionsMutation.mutate({
                   roleId: newRole.id,
-                  permissions: payloadPermissions,
-                  resourceAssignments: [],
+                  permissions: payloadPermissions
                 });
               }
             }
@@ -377,15 +404,15 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
         onSuccess: (newRole) => {
           if (newRole && Object.keys(localScopedPerms).length > 0) {
             const payloadPermissions = Object.entries(localScopedPerms).map(
-              ([code, scopeCode]) => ({
-                permissionCode: code,
-                scopeCode,
+              ([code, config]) => ({
+                permissionName: code,
+                scopeCode: config.scopeCode,
+                resourceAssignments: config.resourceAssignments || []
               })
             );
             updatePermissionsMutation.mutate({
               roleId: newRole.id,
-              permissions: payloadPermissions,
-              resourceAssignments: [],
+              permissions: payloadPermissions
             });
             setSelectedRole(newRole);
           }
@@ -418,6 +445,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     togglePermission,
     commitToggle,
     handleScopeChange,
+    handleResourceAssignmentChange,
     handleEnableAll,
     handleDisableAll,
     handleResetModule,

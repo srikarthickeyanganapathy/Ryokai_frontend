@@ -1,8 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { toast } from 'sonner';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import {
   useOrgMembers,
@@ -11,7 +9,7 @@ import {
   useOrgRoles,
 } from '../features/hooks/useOrganizations';
 import { Heading, Text } from '@/shared/ui/Typography';
-import { Search, Mail, Shield, User as UserIcon, Users } from 'lucide-react';
+import { Mail, Shield, User as UserIcon } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { Badge } from '@/shared/ui/Badge';
 import { Button, IconButton } from '@/shared/ui/Button';
@@ -26,8 +24,6 @@ import {
 import { usePermissions, useAuth } from '@/identity';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
 import { InviteMemberModal } from '../sections/Invites/InviteMemberModal';
-import { LeaveRequestsTab } from '../sections/Members/LeaveRequestsTab';
-import { OrgRolesTab } from '../sections/Roles/OrgRolesTab';
 import {
   WorkspaceShell,
   ManagementLayout,
@@ -40,33 +36,17 @@ export function DirectoryPage() {
   const { activeOrganization } = useWorkspace();
   const orgId = activeOrganization?.id;
   const { user } = useAuth();
+  
   const { data: members = [], isLoading } = useOrgMembers(orgId);
-  const { data: roles = [], isLoading: rolesLoading } = useOrgRoles(orgId);
-
-  const [searchParams, setSearchParams] = useSearchParams();
-  const rawTab = searchParams.get('tab') || 'members';
+  const { data: roles = [] } = useOrgRoles(orgId);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const { confirm, dialog: confirmDialog } = useConfirmDialog();
 
-  const { canManageRoles, canInviteMembers, canRemoveMembers } =
-    usePermissions();
+  const { canManageRoles, canInviteMembers, canRemoveMembers } = usePermissions();
   const updateRoleMutation = useUpdateMemberRole(orgId);
   const removeMemberMutation = useRemoveMember(orgId);
-
-  const activeTab =
-    rawTab === 'admin' && !canManageRoles ? 'members' : rawTab;
-
-  useEffect(() => {
-    if (rawTab === 'admin' && !canManageRoles) {
-      setSearchParams({ tab: 'members' }, { replace: true });
-    }
-  }, [rawTab, canManageRoles, setSearchParams]);
-
-  const handleTabChange = (tabId) => {
-    setSearchParams({ tab: tabId });
-  };
 
   const filteredMembers = useMemo(() => {
     const q = searchQuery.toLowerCase();
@@ -79,69 +59,6 @@ export function DirectoryPage() {
 
   if (!activeOrganization) return null;
 
-  const tabs = [
-    { id: 'members', label: 'Members' },
-    { id: 'leaves', label: 'Leave Requests' },
-  ];
-  if (canManageRoles) {
-    tabs.push({ id: 'admin', label: 'Admin Settings' });
-  }
-
-  const isAdminTab = activeTab === 'admin';
-
-  // ── Admin Tab → Compact layout for Role Studio ──
-  if (isAdminTab) {
-    return (
-      <WorkspaceShell maxWidth="wide">
-        <ManagementLayout
-          header={
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
-                  Directory / Admin Settings
-                </span>
-                <span className="w-px h-3 bg-[var(--border-subtle)]" />
-                <h1 className="text-sm font-semibold text-[var(--text-primary)]">
-                  Organization Roles & Access Control
-                </h1>
-              </div>
-              <div className="flex items-center gap-4">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTabChange(tab.id)}
-                    className={cn(
-                      'text-xs font-medium transition-colors py-1 relative',
-                      activeTab === tab.id
-                        ? 'text-[var(--text-primary)]'
-                        : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-                    )}
-                  >
-                    {tab.label}
-                    {activeTab === tab.id && (
-                      <motion.div
-                        layoutId="directory-tab-inline"
-                        className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-[var(--accent)]"
-                      />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          }
-        >
-          <OrgRolesTab
-            orgId={orgId}
-            roles={roles}
-            rolesLoading={rolesLoading}
-          />
-        </ManagementLayout>
-        {confirmDialog}
-      </WorkspaceShell>
-    );
-  }
-
-  // ── Standard Directory View ──
   const pageState = isLoading ? 'loading' : 'ready';
 
   return (
@@ -149,12 +66,12 @@ export function DirectoryPage() {
       <ManagementLayout
         header={
           <PageHeader
-            eyebrow="Directory"
+            eyebrow="People"
             meta={`${members.length} member${members.length !== 1 ? 's' : ''}`}
             title="Organization Directory"
-            subtitle={`Roster, permissions, leave requests, and role administration for ${activeOrganization.name}.`}
+            subtitle={`Member roster for ${activeOrganization.name}.`}
             actions={
-              activeTab === 'members' && canInviteMembers ? (
+              canInviteMembers ? (
                 <Button
                   variant="primary"
                   onClick={() => setInviteModalOpen(true)}
@@ -167,66 +84,49 @@ export function DirectoryPage() {
             }
           />
         }
-        tabs={
-          <div className="flex items-center gap-5 sm:gap-6 overflow-x-auto no-scrollbar">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className={cn(
-                  'relative pb-3 text-sm font-medium transition-colors whitespace-nowrap shrink-0',
-                  activeTab === tab.id
-                    ? 'text-[var(--text-primary)]'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                )}
-              >
-                {tab.label}
-                {activeTab === tab.id && (
-                  <motion.div
-                    layoutId="directory-tab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[var(--accent)] shadow-[0_0_6px_var(--accent)]"
-                  />
-                )}
-              </button>
-            ))}
-          </div>
-        }
         toolbar={
-          activeTab === 'members' ? (
-            <ModularToolbar
-              left={
-                <SearchPlugin
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder="Search members..."
-                />
-              }
-            />
-          ) : null
+          <ModularToolbar
+            left={
+              <SearchPlugin
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search members..."
+              />
+            }
+          />
         }
       >
-        {/* Members Tab */}
-        {activeTab === 'members' && (
-          <PageStateContainer
-            state={pageState}
-            loadingConfig={{ variant: 'cards' }}
-            emptyConfig={{
-              icon: UserIcon,
-              title: 'No members found',
-              description: 'Try adjusting your search criteria',
-            }}
-          >
-            {filteredMembers.length === 0 ? (
-              <div className="text-center py-16 sm:py-20 bg-[var(--bg-subtle)] border border-dashed border-[var(--border-subtle)] rounded-2xl">
-                <UserIcon className="h-10 w-10 text-[var(--text-muted)] mx-auto mb-4" />
-                <Heading level={4} className="text-[var(--text-secondary)] mb-2">
-                  No members found
-                </Heading>
-                <Text variant="muted" className="text-sm">
-                  Try adjusting your search criteria
-                </Text>
+        <PageStateContainer
+          state={pageState}
+          loadingConfig={{ variant: 'cards' }}
+          emptyConfig={{
+            icon: UserIcon,
+            title: 'No members found',
+            description: 'Try adjusting your search criteria',
+          }}
+        >
+          {filteredMembers.length === 0 ? (
+            <div className="text-center py-16 sm:py-20 bg-[var(--bg-subtle)] border border-dashed border-[var(--border-subtle)] rounded-2xl">
+              <UserIcon className="h-10 w-10 text-[var(--text-muted)] mx-auto mb-4" />
+              <Heading level={4} className="text-[var(--text-secondary)] mb-2">
+                No members found
+              </Heading>
+              <Text variant="muted" className="text-sm">
+                Try adjusting your search criteria
+              </Text>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="p-3 bg-[var(--info-soft)]/40 border border-[var(--info-border)]/40 rounded-lg flex items-start gap-3">
+                <Icons.info className="w-4 h-4 text-[var(--info)] shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-[12px] font-medium text-[var(--info)]">Pending Invites & Suspensions</p>
+                  <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                    Listing pending invites and suspended users requires the next backend release. Currently showing only active members.
+                  </p>
+                </div>
               </div>
-            ) : (
+              
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filteredMembers.map((member, index) => {
                   const currentRole = roles.find(
@@ -235,6 +135,7 @@ export function DirectoryPage() {
                   const isSelf = member.userId === user?.id;
                   const adminCount = members.filter(m => m.rolePriority === 0).length;
                   const isLastAdmin = adminCount <= 1 && member.rolePriority === 0;
+                  const isSuspended = member.status === 'SUSPENDED';
 
                   return (
                     <motion.div
@@ -245,19 +146,28 @@ export function DirectoryPage() {
                       className="group relative bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--accent-border)] rounded-xl p-4 sm:p-5 transition-colors duration-200 shadow-sm"
                     >
                       <div className="flex items-start gap-3.5">
-                        <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-[var(--accent-soft)] border border-[var(--accent-border)] flex items-center justify-center flex-shrink-0">
-                          <span className="text-base sm:text-lg font-medium text-[var(--accent)]">
+                        <div className={cn(
+                          "h-11 w-11 sm:h-12 sm:w-12 rounded-full border flex items-center justify-center flex-shrink-0 relative",
+                          member.rolePriority === 0 ? "bg-[var(--danger-soft)] border-[var(--danger-border)] text-[var(--danger)]" :
+                          member.rolePriority === 1 ? "bg-[var(--warning-soft)] border-[var(--warning-border)] text-[var(--warning)]" :
+                          "bg-[var(--accent-soft)] border-[var(--accent-border)] text-[var(--accent)]"
+                        )}>
+                          <span className="text-base sm:text-lg font-medium">
                             {member.username?.charAt(0).toUpperCase() || '?'}
                           </span>
+                          {isSuspended && (
+                            <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[var(--danger)] border-2 border-[var(--bg-elevated)] rounded-full" title="Suspended"></div>
+                          )}
                         </div>
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 mb-1">
                             <Heading
                               level={4}
-                              className="truncate text-[15px] font-medium text-[var(--text-primary)]"
+                              className={cn("truncate text-[15px] font-medium", isSuspended ? "text-[var(--text-muted)] line-through" : "text-[var(--text-primary)]")}
                             >
                               {member.username}
+                              {isSelf && <span className="ml-2 text-[10px] font-normal text-[var(--text-muted)]">(You)</span>}
                             </Heading>
                             <Badge
                               variant={
@@ -267,7 +177,7 @@ export function DirectoryPage() {
                                   ? 'warning'
                                   : 'outline'
                               }
-                              className="shrink-0"
+                              className="shrink-0 text-[10px] uppercase tracking-wider"
                             >
                               {member.orgRole}
                             </Badge>
@@ -351,12 +261,9 @@ export function DirectoryPage() {
                   );
                 })}
               </div>
-            )}
-          </PageStateContainer>
-        )}
-
-        {/* Leave Requests Tab */}
-        {activeTab === 'leaves' && <LeaveRequestsTab orgId={orgId} />}
+            </div>
+          )}
+        </PageStateContainer>
       </ManagementLayout>
 
       <InviteMemberModal

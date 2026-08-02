@@ -80,67 +80,15 @@ export function TeamsPage() {
             onAction: canCreateTeam ? () => setCreateTeamModalOpen(true) : undefined,
           }}
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {teams.map((team, i) => {
-              const isMemberOfTeam = team.members?.some(m => m.username === user?.username)
-              const canEnterTeam = canManage || isMemberOfTeam
-              return (
-                <div 
-                  key={team.id || i} 
-                  onClick={() => {
-                    if (canEnterTeam) {
-                      navigate(`/app/organizations/${orgId}/teams/${team.id}`)
-                    } else {
-                      toast.warning("You are not a member of this team. Contact a manager to join.")
-                    }
-                  }}
-                  className={cn(
-                    "bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-5 flex flex-col transition-[border-color,box-shadow] duration-[var(--duration-base)]",
-                    canEnterTeam ? "hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] cursor-pointer" : "opacity-80"
-                  )}
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <Heading level={4} className="text-base">{team.name}</Heading>
-                      <Badge variant="outline" className="text-xs">{team.memberCount ?? team.members?.length ?? 0} members</Badge>
-                    </div>
-                    {team.description && (
-                      <Text variant="muted" size="sm" className="line-clamp-2 mt-2">{team.description}</Text>
-                    )}
-                  </div>
-                  <div className="mt-4 pt-4 border-t border-[var(--color-border-subtle)] flex gap-2">
-                    {canEnterTeam && (
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className="flex-1"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          navigate(`/app/organizations/${orgId}/teams/${team.id}`)
-                        }}
-                      >
-                        Enter Portal
-                      </Button>
-                    )}
-                    {canManageTeam && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={canEnterTeam ? "flex-1" : "w-full"}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setSelectedTeam(team)
-                        }}
-                      >
-                        <Icons.settings className="w-4 h-4 mr-1.5" />
-                        Manage
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+          <TeamsGrid
+            teams={teams}
+            user={user}
+            orgId={orgId}
+            canManage={canManage}
+            canManageTeam={canManageTeam}
+            navigate={navigate}
+            setSelectedTeam={setSelectedTeam}
+          />
         </PageStateContainer>
       </ManagementLayout>
 
@@ -157,5 +105,125 @@ export function TeamsPage() {
         orgMembers={members}
       />
     </WorkspaceShell>
+  )
+}
+
+function TeamsGrid({ teams, user, orgId, canManage, canManageTeam, navigate, setSelectedTeam }) {
+  const myTeams = teams.filter(team => team.members?.some(m => m.username === user?.username));
+  const otherTeams = teams.filter(team => !team.members?.some(m => m.username === user?.username));
+
+  return (
+    <div className="space-y-8">
+      {myTeams.length > 0 && (
+        <section>
+          <Heading level={5} className="text-sm font-semibold mb-3 uppercase tracking-wider text-[var(--text-muted)]">Your Teams</Heading>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {myTeams.map(team => (
+              <TeamCard 
+                key={team.id} 
+                team={team} 
+                isMember={true}
+                orgId={orgId}
+                canManage={canManage}
+                canManageTeam={canManageTeam}
+                navigate={navigate}
+                setSelectedTeam={setSelectedTeam}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {otherTeams.length > 0 && (
+        <section>
+          <Heading level={5} className="text-sm font-semibold mb-3 uppercase tracking-wider text-[var(--text-muted)]">
+            {myTeams.length > 0 ? "All Teams" : "Directory"}
+          </Heading>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {otherTeams.map(team => (
+              <TeamCard 
+                key={team.id} 
+                team={team} 
+                isMember={false}
+                orgId={orgId}
+                canManage={canManage}
+                canManageTeam={canManageTeam}
+                navigate={navigate}
+                setSelectedTeam={setSelectedTeam}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function TeamCard({ team, isMember, orgId, canManage, canManageTeam, navigate, setSelectedTeam }) {
+  const canEnterTeam = canManage || isMember;
+  
+  // Future-proofing observer count mapping (assuming backend capability mapping)
+  const observersCount = team.observers?.length || team.observerCount || 0;
+  
+  return (
+    <div 
+      onClick={() => {
+        if (canEnterTeam) {
+          navigate(`/app/organizations/${orgId}/teams/${team.id}`)
+        } else {
+          toast.warning("You are not a member of this team. Contact a manager to join.")
+        }
+      }}
+      className={cn(
+        "bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-5 flex flex-col transition-[border-color,box-shadow] duration-[var(--duration-base)]",
+        canEnterTeam ? "hover:border-[var(--accent-border)] hover:shadow-[var(--accent-glow)] cursor-pointer" : "opacity-80 cursor-default"
+      )}
+    >
+      <div className="flex-1">
+        <div className="flex items-start justify-between mb-2">
+          <Heading level={4} className="text-base truncate pr-2" title={team.name}>{team.name}</Heading>
+          <div className="flex flex-col gap-1 items-end shrink-0">
+            <Badge variant="outline" className="text-[10px]">{team.memberCount ?? team.members?.length ?? 0} Members</Badge>
+            {observersCount > 0 && (
+              <Badge variant="outline" className="text-[10px] bg-[var(--info-soft)] text-[var(--info)] border-transparent">
+                {observersCount} Observers
+              </Badge>
+            )}
+          </div>
+        </div>
+        {team.description && (
+          <Text variant="muted" size="sm" className="line-clamp-2 mt-2">{team.description}</Text>
+        )}
+      </div>
+      <div className="mt-4 pt-4 border-t border-[var(--color-border-subtle)] flex gap-2">
+        {canEnterTeam && (
+          <Button
+            variant="default"
+            size="sm"
+            className="flex-1"
+            onClick={(e) => {
+              e.stopPropagation()
+              navigate(`/app/organizations/${orgId}/teams/${team.id}`)
+            }}
+          >
+            Enter Portal
+          </Button>
+        )}
+        {canManageTeam && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className={canEnterTeam ? "flex-1" : "w-full"}
+            onClick={(e) => {
+              e.stopPropagation()
+              setSelectedTeam(team)
+            }}
+          >
+            <Icons.settings className="w-4 h-4 mr-1.5" />
+            Manage
+          </Button>
+        )}
+      </div>
+    </div>
   )
 }

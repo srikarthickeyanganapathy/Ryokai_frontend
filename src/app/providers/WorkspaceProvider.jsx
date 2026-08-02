@@ -165,7 +165,9 @@ export const WorkspaceProvider = ({ children }) => {
     }
   }, [workspaceMode, crews, activeCrew]);
 
-  // If the user switches to ORG but has no org, fallback to PERSONAL
+  // Allow users to switch to ORG or CREWS mode even if they have no orgs or crews yet
+  // so they can access the 'Discover & Join' or 'Create' pages.
+  /*
   useEffect(() => {
     if (workspaceMode === 'ORG' && organizations.length === 0) {
       queueMicrotask(() => {
@@ -174,7 +176,6 @@ export const WorkspaceProvider = ({ children }) => {
     }
   }, [workspaceMode, organizations]);
 
-  // If the user switches to CREWS but has no crews, fallback to PERSONAL
   useEffect(() => {
     if (workspaceMode === 'CREWS' && crews.length === 0) {
       queueMicrotask(() => {
@@ -182,6 +183,7 @@ export const WorkspaceProvider = ({ children }) => {
       });
     }
   }, [workspaceMode, crews]);
+  */
 
   const value = {
     workspaceMode,

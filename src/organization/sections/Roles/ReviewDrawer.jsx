@@ -56,11 +56,14 @@ export function ReviewDrawer({
           {/* Added permissions */}
           {addedPerms.map((code) => {
             const p = permissionMap.get(code);
-            const scope = localScopedPerms[code];
+            const config = localScopedPerms[code];
+            const scope = config.scopeCode;
+            const resCount = config.resourceAssignments?.length || 0;
             return (
               <GitDiffRow key={code} badge="+" color="#30A46C" title={p?.name || code}>
                 <Badge variant="outline" className="text-[9px] uppercase font-sans">
                   {SCOPE_LABELS[scope] || scope}
+                  {resCount > 0 ? ` + ${resCount} res` : ''}
                 </Badge>
               </GitDiffRow>
             );
@@ -69,16 +72,29 @@ export function ReviewDrawer({
           {/* Scope changes */}
           {scopeChangedPerms.map((code) => {
             const p = permissionMap.get(code);
-            const oldScope = originalMap[code];
-            const newScope = localScopedPerms[code];
+            const oldConfig = originalMap[code];
+            const newConfig = localScopedPerms[code];
+            const oldScope = oldConfig.scopeCode;
+            const newScope = newConfig.scopeCode;
+            const oldResCount = oldConfig.resourceAssignments?.length || 0;
+            const newResCount = newConfig.resourceAssignments?.length || 0;
             return (
               <GitDiffRow key={code} badge="~" color="#F5A623" title={p?.name || code}>
-                <div className="flex items-center gap-1 text-[11px] font-sans text-[var(--text-muted)]">
-                  <span>{SCOPE_LABELS[oldScope]}</span>
-                  <ArrowRight className="w-2.5 h-2.5" />
-                  <span className="font-semibold text-[var(--text-primary)]">
-                    {SCOPE_LABELS[newScope]}
-                  </span>
+                <div className="flex flex-col gap-1 text-[11px] font-sans text-[var(--text-muted)]">
+                  <div className="flex items-center gap-1">
+                    <span>{SCOPE_LABELS[oldScope]}</span>
+                    <ArrowRight className="w-2.5 h-2.5" />
+                    <span className="font-semibold text-[var(--text-primary)]">
+                      {SCOPE_LABELS[newScope]}
+                    </span>
+                  </div>
+                  {(oldResCount !== newResCount || newResCount > 0) && (
+                    <div className="flex items-center gap-1 opacity-80">
+                      <span>{oldResCount} res</span>
+                      <ArrowRight className="w-2.5 h-2.5" />
+                      <span className="font-semibold">{newResCount} res</span>
+                    </div>
+                  )}
                 </div>
               </GitDiffRow>
             );

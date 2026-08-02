@@ -1,3 +1,3 @@
 export { AppSidebar } from './AppSidebar';
 export { AppTopbar } from './AppTopbar';
-export { GlobalCommandPalette } from './GlobalCommandPalette';
+export { GlobalCommandPalette } from '../command-palette/GlobalCommandPalette';

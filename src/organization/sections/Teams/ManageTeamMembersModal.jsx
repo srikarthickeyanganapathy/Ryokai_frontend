@@ -21,9 +21,10 @@ export function ManageTeamMembersModal({ isOpen, onClose, team, orgMembers }) {
   const removeObserver = useRemoveTeamObserver()
   
   // Available members to add (org members not already in the team)
+  const [memberSearch, setMemberSearch] = useState('')
   const availableMembers = orgMembers?.filter(
     (orgMem) => !team?.members?.some((teamMem) => teamMem.id === orgMem.userId)
-  )
+  ).filter((mem) => mem.username?.toLowerCase().includes(memberSearch.toLowerCase()) || mem.email?.toLowerCase().includes(memberSearch.toLowerCase()))
 
   const handleAddMember = (userId) => {
     if (!team?.id) return
@@ -46,11 +47,12 @@ export function ManageTeamMembersModal({ isOpen, onClose, team, orgMembers }) {
   }
 
   // Available observers to add (org members not in the team and not already observers)
+  const [observerSearch, setObserverSearch] = useState('')
   const availableObservers = orgMembers?.filter(
     (orgMem) => 
       !team?.members?.some((teamMem) => teamMem.id === orgMem.userId) &&
       !observers?.some((obsMem) => obsMem.id === orgMem.userId)
-  )
+  ).filter((mem) => mem.username?.toLowerCase().includes(observerSearch.toLowerCase()) || mem.email?.toLowerCase().includes(observerSearch.toLowerCase()))
 
   return (
     <Modal open={isOpen} onOpenChange={onClose}>
@@ -123,9 +125,23 @@ export function ManageTeamMembersModal({ isOpen, onClose, team, orgMembers }) {
 
               {/* Add Members */}
               <section>
-                <Text className="mb-3 text-[11px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">Add from Organization</Text>
+                <div className="flex items-center justify-between mb-3">
+                  <Text className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">Add from Organization</Text>
+                </div>
+                <div className="mb-3 relative">
+                  <Icons.search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+                  <input
+                    type="text"
+                    placeholder="Search available members..."
+                    value={memberSearch}
+                    onChange={(e) => setMemberSearch(e.target.value)}
+                    className="w-full pl-8 pr-3 py-1.5 text-xs bg-[var(--bg-base)] border border-[var(--color-border-subtle)] rounded-md focus:outline-none focus:border-[var(--accent)]"
+                  />
+                </div>
                 {availableMembers?.length === 0 ? (
-                  <Text variant="muted" className="text-sm italic">All organization members are already in this team.</Text>
+                  <Text variant="muted" className="text-sm italic">
+                    {memberSearch ? 'No members match your search.' : 'All organization members are already in this team.'}
+                  </Text>
                 ) : (
                   <div className="space-y-2">
                     {availableMembers?.map((member) => (
@@ -190,9 +206,23 @@ export function ManageTeamMembersModal({ isOpen, onClose, team, orgMembers }) {
 
               {/* Add Observers */}
               <section>
-                <Text className="mb-3 text-[11px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">Add Observer from Organization</Text>
+                <div className="flex items-center justify-between mb-3">
+                  <Text className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">Add Observer from Organization</Text>
+                </div>
+                <div className="mb-3 relative">
+                  <Icons.search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+                  <input
+                    type="text"
+                    placeholder="Search available members..."
+                    value={observerSearch}
+                    onChange={(e) => setObserverSearch(e.target.value)}
+                    className="w-full pl-8 pr-3 py-1.5 text-xs bg-[var(--bg-base)] border border-[var(--color-border-subtle)] rounded-md focus:outline-none focus:border-[var(--accent)]"
+                  />
+                </div>
                 {availableObservers?.length === 0 ? (
-                  <Text variant="muted" className="text-sm italic">All available members are already in the team or are observers.</Text>
+                  <Text variant="muted" className="text-sm italic">
+                    {observerSearch ? 'No members match your search.' : 'All available members are already in the team or are observers.'}
+                  </Text>
                 ) : (
                   <div className="space-y-2">
                     {availableObservers?.map((member) => (

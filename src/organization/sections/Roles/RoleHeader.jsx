@@ -46,6 +46,11 @@ export function RoleHeader({
               System Built-in
             </Badge>
           )}
+          {isDirty && !isAdmin && (
+            <Badge variant="outline" className="text-[10px] uppercase font-bold shrink-0 text-[#E5484D] border-[#E5484D] bg-transparent">
+              ● Unsaved
+            </Badge>
+          )}
         </div>
 
         <div className="flex items-center gap-2 text-xs flex-wrap">

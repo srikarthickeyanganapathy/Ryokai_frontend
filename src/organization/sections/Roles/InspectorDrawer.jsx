@@ -9,8 +9,10 @@ export function InspectorDrawer({
   onOpenChange,
   isEnabled,
   currentScope,
+  currentAssignments,
   isAdmin,
   onScopeChange,
+  onResourceAssignmentChange,
   onToggle,
   permissionMap,
   localScopedPerms,
@@ -24,8 +26,10 @@ export function InspectorDrawer({
           permission={permission}
           isEnabled={isEnabled}
           currentScope={currentScope}
+          currentAssignments={currentAssignments}
           isAdmin={isAdmin}
           onScopeChange={onScopeChange}
+          onResourceAssignmentChange={onResourceAssignmentChange}
           onToggle={onToggle}
           permissionMap={permissionMap}
           localScopedPerms={localScopedPerms}

@@ -1,5 +1,5 @@
 export { OrganizationsPage } from './pages/OrganizationsPage';
-export { OrganizationSettingsPage } from './pages/OrganizationSettingsPage';
+export { OrganizationAdministrationPage } from './pages/OrganizationAdministrationPage';
 export { DirectoryPage } from './pages/DirectoryPage';
 export { AnnouncementsPage } from './pages/AnnouncementsPage';
 export { AcceptInvitePage } from './pages/AcceptInvitePage';
@@ -13,7 +13,5 @@ export * from './features/api/organization.api';
 export { OrganizationForm } from './sections/Settings/OrganizationForm';
 export { AdminLeaveModal } from './sections/Members/AdminLeaveModal';
 export { InviteMemberModal } from './sections/Invites/InviteMemberModal';
-export { LeaveRequestsTab } from './sections/Members/LeaveRequestsTab';
-export { OrgRolesTab } from './sections/Roles/OrgRolesTab';
 export { CreateTeamModal } from './sections/Teams/CreateTeamModal';
 export { ManageTeamMembersModal } from './sections/Teams/ManageTeamMembersModal';
