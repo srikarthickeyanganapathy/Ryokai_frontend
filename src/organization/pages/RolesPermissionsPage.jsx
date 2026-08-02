@@ -40,28 +40,23 @@ export function RolesPermissionsPage() {
         }
       >
         {!canManageRoles ? (
-          <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl h-[600px]">
-            <div className="w-12 h-12 rounded-full bg-[var(--danger-soft)]/20 flex items-center justify-center mb-4">
-              <Icons.shieldAlert className="w-6 h-6 text-[var(--danger)]" />
-            </div>
-            <Heading as="h3" size="lg" className="mb-2">Access Denied</Heading>
-            <Text variant="muted" className="max-w-md">
-              You do not have permission to view or manage roles and permissions for this organization. 
-              Please contact an administrator if you believe this is a mistake.
-            </Text>
-          </div>
+          <EmptyState
+            icon={<Icons.shieldAlert className="w-5 h-5 text-[var(--danger)]" />}
+            iconBg="bg-[var(--danger-soft)]"
+            title="Access Denied"
+            description="You do not have permission to view or manage roles and permissions for this organization. Please contact an administrator if you believe this is a mistake."
+          />
         ) : studio.rolesLoading ? (
-          <div className="flex gap-0 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden h-[600px]">
+          <div className="flex rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden h-[600px]">
             <Skeleton className="w-[200px] h-full shrink-0" />
             <Skeleton className="flex-1 h-full" />
           </div>
         ) : (
           <>
-            {/* ── Main Studio Layout (Eliminating box-in-box nested borders) ── */}
             <div className="flex flex-col lg:flex-row rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden min-h-[560px] max-h-[calc(100vh-160px)] shadow-xs">
-      
-              {/* ── 1. Role Sidebar ── */}
-              <aside className="w-full lg:w-[200px] shrink-0 border-b lg:border-b-0 lg:border-r border-[var(--border-subtle)] bg-[var(--bg-card)]">
+
+              {/* Role Sidebar */}
+              <aside className="w-full lg:w-[200px] shrink-0 border-b lg:border-b-0 lg:border-r border-[var(--border-subtle)]">
                 <RoleSidebar
                   roles={studio.roles}
                   selectedRole={studio.selectedRole}
@@ -71,12 +66,10 @@ export function RolesPermissionsPage() {
                   onSearchChange={studio.setRoleSearchQuery}
                 />
               </aside>
-      
-              {/* ── 2. Main Role Studio Content ── */}
+
+              {/* Main Role Studio Content */}
               {studio.selectedRole ? (
                 <div className="flex-1 flex flex-col min-w-0 min-h-0">
-      
-                  {/* Role Header */}
                   <RoleHeader
                     role={studio.selectedRole}
                     isAdmin={studio.isAdminRole}
@@ -92,21 +85,17 @@ export function RolesPermissionsPage() {
                     permissionMap={studio.PERMISSION_MAP}
                     localScopedPerms={studio.localScopedPerms}
                   />
-      
-                  {/* Split View: Permissions + Desktop Inline Inspector Panel */}
+
                   <div className="flex-1 flex flex-col lg:flex-row min-h-0 min-w-0">
-      
                     {/* Central Permission Column */}
                     <div className="flex-1 flex flex-col min-h-0 min-w-0 border-r-0 lg:border-r border-[var(--border-subtle)]">
-                      {/* Module Navigation Tabs */}
                       <ModuleTabs
                         modules={studio.filteredModules}
                         activeModule={studio.activeModuleCode}
                         onModuleChange={studio.setActiveModuleCode}
                         localScopedPerms={studio.localScopedPerms}
                       />
-      
-                      {/* Permission Browser */}
+
                       {studio.activeModuleData ? (
                         <PermissionBrowser
                           groupedPermissions={studio.groupedPermissions}
@@ -123,32 +112,32 @@ export function RolesPermissionsPage() {
                           onReset={studio.handleResetModule}
                         />
                       ) : (
-                        <div className="flex-1 flex items-center justify-center text-xs text-[var(--text-muted)]">
+                        <div className="flex-1 flex items-center justify-center text-[12px] text-[var(--text-muted)]">
                           {studio.permSearchQuery
                             ? 'No permissions match search.'
                             : 'Select a module to browse permissions.'}
                         </div>
                       )}
                     </div>
-      
-                    {/* ── Inline Desktop Inspector Panel (lg+) ── */}
-                    <aside className="hidden lg:block w-[300px] shrink-0 border-l border-[var(--border-subtle)] bg-[var(--bg-card)]">
+
+                    {/* Inline Desktop Inspector Panel */}
+                    <aside className="hidden lg:block w-[300px] shrink-0 border-l border-[var(--border-subtle)]">
                       <PermissionInspectorContent
                         role={studio.selectedRole}
                         permission={studio.activePermission}
                         isEnabled={
                           studio.activePermission
-                            ? Boolean(studio.localScopedPerms[studio.activePermission.code])
+                            ? Boolean(studio.localScopedPerms?.[studio.activePermission.code])
                             : false
                         }
                         currentScope={
                           studio.activePermission
-                            ? studio.localScopedPerms[studio.activePermission.code]?.scopeCode
+                            ? studio.localScopedPerms?.[studio.activePermission.code]?.scopeCode
                             : null
                         }
                         currentAssignments={
                           studio.activePermission
-                            ? studio.localScopedPerms[studio.activePermission.code]?.resourceAssignments || []
+                            ? studio.localScopedPerms?.[studio.activePermission.code]?.resourceAssignments || []
                             : []
                         }
                         isAdmin={studio.isAdminRole}
@@ -163,13 +152,13 @@ export function RolesPermissionsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="flex-1 flex items-center justify-center text-xs text-[var(--text-muted)]">
+                <div className="flex-1 flex items-center justify-center text-[12px] text-[var(--text-muted)]">
                   Select a role to configure permissions.
                 </div>
               )}
             </div>
-      
-            {/* ── Mobile / Tablet Inspector Drawer (< lg) ── */}
+
+            {/* Mobile / Tablet Inspector Drawer */}
             <div className="block lg:hidden">
               <InspectorDrawer
                 role={studio.selectedRole}
@@ -180,17 +169,17 @@ export function RolesPermissionsPage() {
                 }}
                 isEnabled={
                   studio.activePermission
-                    ? Boolean(studio.localScopedPerms[studio.activePermission.code])
+                    ? Boolean(studio.localScopedPerms?.[studio.activePermission.code])
                     : false
                 }
                 currentScope={
                   studio.activePermission
-                    ? studio.localScopedPerms[studio.activePermission.code]?.scopeCode
+                    ? studio.localScopedPerms?.[studio.activePermission.code]?.scopeCode
                     : null
                 }
                 currentAssignments={
                   studio.activePermission
-                    ? studio.localScopedPerms[studio.activePermission.code]?.resourceAssignments || []
+                    ? studio.localScopedPerms?.[studio.activePermission.code]?.resourceAssignments || []
                     : []
                 }
                 isAdmin={studio.isAdminRole}
@@ -202,8 +191,7 @@ export function RolesPermissionsPage() {
                 supervisionNames={studio.supervisionRank.can}
               />
             </div>
-      
-            {/* ── Review Drawer ── */}
+
             <ReviewDrawer
               open={studio.showReview}
               onOpenChange={studio.setShowReview}
@@ -220,8 +208,7 @@ export function RolesPermissionsPage() {
               onSave={studio.handleSaveChanges}
               onDiscard={studio.handleDiscardChanges}
             />
-      
-            {/* ── Create Role Drawer ── */}
+
             <CreateRoleDrawer
               roles={studio.roles}
               open={studio.showCreateRole}
@@ -229,8 +216,7 @@ export function RolesPermissionsPage() {
               onCreate={studio.handleCreateRole}
               isLoading={false}
             />
-      
-            {/* ── Critical Permission Dialog ── */}
+
             <CriticalPermissionDialog
               perm={studio.confirmPerm}
               roleName={studio.selectedRole?.name}
@@ -246,5 +232,17 @@ export function RolesPermissionsPage() {
         )}
       </ManagementLayout>
     </WorkspaceShell>
+  );
+}
+
+function EmptyState({ icon, iconBg, title, description }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl h-[600px]">
+      <div className={`w-11 h-11 rounded-full ${iconBg} flex items-center justify-center mb-4`}>
+        {icon}
+      </div>
+      <Heading as="h3" size="lg" className="mb-2 text-[15px]">{title}</Heading>
+      <Text variant="muted" className="max-w-md text-[13px]">{description}</Text>
+    </div>
   );
 }

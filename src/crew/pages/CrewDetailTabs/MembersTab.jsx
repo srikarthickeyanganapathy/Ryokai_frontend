@@ -1,18 +1,17 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heading, Text } from '@/shared/ui/Typography';
+import { Heading, Text, Label } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { Icons } from '@/shared/ui/Icons';
+import { IconButton } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar';
 import { cn } from '@/shared/lib/cn';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router-dom';
-
-
-
-import { useCreateCrewTask } from '@/crew/features/hooks/useCrews'; import { useCompleteCrewTask } from '@/task';
-import { useClaimTask } from '@/task/entities/hooks/useTasks';
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { Modal, ModalContent } from '@/shared/ui/Modal';
+import { useInviteCrewMember, useCreateCrewInviteLink, useRemoveCrewMember, useTransferCrewOwnership } from '@/crew/features/hooks/useCrews';
 
 /* ==================== DIRECTORY-STYLE MEMBERS TAB ==================== */
 export function MembersTab({ crewId, members, memberCap, isCreator }) {

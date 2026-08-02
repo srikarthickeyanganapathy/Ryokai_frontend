@@ -4,8 +4,8 @@ import { GROUP_LABELS } from './constants';
 
 export function PermissionGroup({
   groupKey,
-  permissions,
-  localScopedPerms,
+  permissions = [],
+  localScopedPerms = {},
   isAdmin,
   onToggle,
   onSelect,
@@ -13,26 +13,25 @@ export function PermissionGroup({
 }) {
   if (!permissions || permissions.length === 0) return null;
 
+  const enabledCount = permissions.filter((p) => Boolean(localScopedPerms?.[p.code])).length;
+
   return (
-    <div className="mb-2">
-      {/* Sticky group header */}
-      <div className="sticky top-0 z-10 bg-[var(--bg-card)]/90 backdrop-blur-xs py-1.5 px-3 border-b border-[var(--border-subtle)] flex items-center justify-between mb-1">
+    <div className="mb-3">
+      <div className="sticky top-0 z-10 bg-[var(--bg-card)] py-1.5 px-2.5 flex items-center justify-between">
         <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
           {GROUP_LABELS[groupKey] || groupKey}
         </span>
         <span className="text-[10px] text-[var(--text-muted)] font-mono">
-          {permissions.filter((p) => Boolean(localScopedPerms[p.code])).length}/
-          {permissions.length}
+          {enabledCount}/{permissions.length}
         </span>
       </div>
 
-      {/* Permission rows */}
       <div className="space-y-0.5">
         {permissions.map((perm) => (
           <PermissionRow
             key={perm.code}
             perm={perm}
-            isEnabled={Boolean(localScopedPerms[perm.code])}
+            isEnabled={Boolean(localScopedPerms?.[perm.code])}
             isActive={activePermission?.code === perm.code}
             isAdmin={isAdmin}
             onToggle={onToggle}

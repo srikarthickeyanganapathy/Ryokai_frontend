@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heading, Text } from '@/shared/ui/Typography';
+import { Heading, Text, Label } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { Icons } from '@/shared/ui/Icons';
 import { Input } from '@/shared/ui/Input';
@@ -8,10 +8,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar';
 import { cn } from '@/shared/lib/cn';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router-dom';
-
-
-
-import { useCreateCrewTask } from '@/crew/features/hooks/useCrews'; import { useCompleteCrewTask } from '@/task';
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { Modal, ModalContent } from '@/shared/ui/Modal';
+import { useCreateCrewTask, useCrewMembers, useCreateCrewChannel, useDeleteCrewChannel, useChannelMessages, useConvertMessageToTask, useDeleteChannelMessage, useSendChannelMessage, useUpdateChannelMessage } from '@/crew/features/hooks/useCrews'; import { useCompleteCrewTask } from '@/task';
 import { useClaimTask } from '@/task/entities/hooks/useTasks';
 
 /* ==================== DISCORD-STYLE CHANNELS TAB ==================== */
@@ -60,10 +59,10 @@ export function ChannelsTab({ crewId, channels, isCreator }) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-210px)] min-h-[500px]">
-      
+
       {/* 1. DISCORD LEFT CHANNEL SIDEBAR (3 Cols) */}
       <div className="lg:col-span-3 flex flex-col bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-2xl p-3 overflow-hidden shadow-sm">
-        
+
         {/* Sidebar Header */}
         <div className="flex items-center justify-between px-2 pb-3 mb-2 border-b border-[var(--color-border-subtle)] shrink-0">
           <div className="flex items-center gap-2">
@@ -71,10 +70,10 @@ export function ChannelsTab({ crewId, channels, isCreator }) {
             <span className="font-bold text-xs uppercase tracking-wider text-[var(--text-primary)] font-mono">Channels</span>
           </div>
           {isCreator && (
-            <Button 
-              size="xs" 
-              variant="outline" 
-              className="p-1 h-6 w-6 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]" 
+            <Button
+              size="xs"
+              variant="outline"
+              className="p-1 h-6 w-6 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               onClick={() => setIsCreateOpen(true)}
               title="Create Channel"
             >

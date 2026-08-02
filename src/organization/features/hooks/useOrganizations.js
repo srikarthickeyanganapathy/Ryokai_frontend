@@ -344,7 +344,8 @@ export const useUpdateOrgRolePermissions = (orgId) => {
         }
         return {
           permissionName: p.permissionCode || p.code || p.permissionName,
-          scopeCode: p.scopeCode || p.scope || 'ORGANIZATION'
+          scopeCode: p.scopeCode || p.scope || 'ORGANIZATION',
+          resourceAssignments: p.resourceAssignments || []
         };
       });
       return orgApi.updateOrgRolePermissions(orgId, roleId, { permissions: payloadPermissions });

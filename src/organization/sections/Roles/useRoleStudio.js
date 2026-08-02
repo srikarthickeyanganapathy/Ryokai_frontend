@@ -10,26 +10,21 @@ import {
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
 
 export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
-  // ── Role Selection & Filtering ──
   const [selectedRole, setSelectedRole] = useState(null);
   const [roleSearchQuery, setRoleSearchQuery] = useState('');
 
-  // ── Permission Editing State ──
   const [localScopedPerms, setLocalScopedPerms] = useState({});
   const [localPriority, setLocalPriority] = useState(100);
 
-  // ── Navigation State ──
-  const [activeTab, setActiveTab] = useState('permissions'); // 'general' | 'permissions'
+  const [activeTab, setActiveTab] = useState('permissions');
   const [activeModuleCode, setActiveModuleCode] = useState(null);
   const [permSearchQuery, setPermSearchQuery] = useState('');
 
-  // ── Inspector & Dialog States ──
   const [activePermission, setActivePermission] = useState(null);
   const [showReview, setShowReview] = useState(false);
   const [showCreateRole, setShowCreateRole] = useState(false);
   const [confirmPerm, setConfirmPerm] = useState(null);
 
-  // ── Catalog & Mapping ──
   const { data: catalogResponse, isLoading: catalogLoading } = usePermissionCatalog();
   const permissionModules = catalogResponse?.modules || [];
 
@@ -41,7 +36,6 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     return map;
   }, [permissionModules]);
 
-  // ── Mutations ──
   const createRoleMutation = useCreateOrgRole(orgId);
   const updatePermissionsMutation = useUpdateOrgRolePermissions(orgId);
   const updateRoleMutation = useUpdateOrgRole(orgId);
@@ -49,7 +43,6 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
 
   const { confirm, dialog: confirmDialog } = useConfirmDialog();
 
-  // ── Auto-select first role ──
   useEffect(() => {
     if (roles.length > 0 && !selectedRole) {
       setSelectedRole(roles[0]);
@@ -61,7 +54,6 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     }
   }, [roles]);
 
-  // ── Sync local state on role change ──
   useEffect(() => {
     if (selectedRole) {
       const initialMap = {};
@@ -81,14 +73,12 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     }
   }, [selectedRole?.id]);
 
-  // ── Auto-select first module ──
   useEffect(() => {
     if (permissionModules.length > 0 && !activeModuleCode) {
       setActiveModuleCode(permissionModules[0].moduleCode);
     }
   }, [permissionModules]);
 
-  // ── Original map for diff ──
   const originalMap = useMemo(() => {
     const map = {};
     selectedRole?.permissions?.forEach((p) => {
@@ -100,7 +90,6 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     return map;
   }, [selectedRole]);
 
-  // ── Diff calculations ──
   const addedPerms = useMemo(
     () => Object.keys(localScopedPerms).filter((c) => !originalMap[c]),
     [localScopedPerms, originalMap]
@@ -115,18 +104,16 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
         const orig = originalMap[c];
         const local = localScopedPerms[c];
         if (!orig || !local) return false;
-        
-        // Deep compare scope and assignments
+
         if (orig.scopeCode !== local.scopeCode) return true;
-        
-        const origArr = [...(orig.resourceAssignments || [])].sort((a,b) => (a.resourceId - b.resourceId));
-        const localArr = [...(local.resourceAssignments || [])].sort((a,b) => (a.resourceId - b.resourceId));
+
+        const origArr = [...(orig.resourceAssignments || [])].sort((a, b) => (a.resourceId - b.resourceId));
+        const localArr = [...(local.resourceAssignments || [])].sort((a, b) => (a.resourceId - b.resourceId));
         return JSON.stringify(origArr) !== JSON.stringify(localArr);
       }),
     [localScopedPerms, originalMap]
   );
-  const priorityChanged =
-    (selectedRole?.priority ?? 100) !== Number(localPriority);
+  const priorityChanged = (selectedRole?.priority ?? 100) !== Number(localPriority);
 
   const isDirty =
     addedPerms.length > 0 ||
@@ -142,7 +129,6 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
 
   const isAdminRole = selectedRole?.name === 'ADMIN';
 
-  // ── Supervision Rank ──
   const supervisionRank = useMemo(() => {
     if (!roles || !selectedRole) return { can: [], cannot: [] };
     const currentRank = Number(localPriority);
@@ -156,7 +142,6 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     return { can, cannot };
   }, [roles, selectedRole, localPriority]);
 
-  // ── Filtered modules & grouped permissions ──
   const filteredModules = useMemo(() => {
     if (!permSearchQuery.trim()) return permissionModules;
     const q = permSearchQuery.toLowerCase();
@@ -188,7 +173,6 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     return groups;
   }, [activeModuleData]);
 
-  // Switch module if query filters out active module
   useEffect(() => {
     if (
       permSearchQuery.trim() &&
@@ -199,7 +183,6 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     }
   }, [filteredModules, activeModuleCode, permSearchQuery]);
 
-  // ── Actions ──
   const handleSelectRole = (role) => {
     setSelectedRole(role);
     setActiveTab('permissions');
@@ -234,7 +217,6 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
           : perm.recommendedScope || supported[0];
         next[code] = { scopeCode: defaultScope, resourceAssignments: [] };
 
-        // Auto-enable dependent permissions
         perm.requires?.forEach((reqCode) => {
           if (!next[reqCode]) {
             const reqPerm = PERMISSION_MAP.get(reqCode);
@@ -256,9 +238,9 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
 
   const handleScopeChange = (code, newScope) => {
     if (isAdminRole) return;
-    setLocalScopedPerms((prev) => ({ 
-      ...prev, 
-      [code]: { ...prev[code], scopeCode: newScope, resourceAssignments: [] } 
+    setLocalScopedPerms((prev) => ({
+      ...prev,
+      [code]: { ...prev[code], scopeCode: newScope, resourceAssignments: [] }
     }));
   };
 
@@ -385,7 +367,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
       danger: true,
       confirmLabel: 'Delete'
     });
-    
+
     if (isConfirmed) {
       deleteRoleMutation.mutate(selectedRole.id, {
         onSuccess: () => {
@@ -422,14 +404,12 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
   };
 
   return {
-    // Selection & Data
     selectedRole,
     roles,
     rolesLoading,
     roleSearchQuery,
     setRoleSearchQuery,
     handleSelectRole,
-    // Permissions & Modules
     filteredModules,
     activeModuleCode,
     setActiveModuleCode,
@@ -439,7 +419,6 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     PERMISSION_MAP,
     permSearchQuery,
     setPermSearchQuery,
-    // Inspector & Actions
     activePermission,
     setActivePermission,
     togglePermission,
@@ -449,7 +428,6 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     handleEnableAll,
     handleDisableAll,
     handleResetModule,
-    // Diff & Save/Discard
     addedPerms,
     removedPerms,
     scopeChangedPerms,
@@ -462,7 +440,6 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     supervisionRank,
     handleDiscardChanges,
     handleSaveChanges,
-    // Drawers / Dialogs
     showReview,
     setShowReview,
     showCreateRole,
@@ -472,10 +449,8 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     handleCreateRole,
     handleDeleteRole,
     handleCloneRole,
-    // Top Tabs
     activeTab,
     setActiveTab,
-    // Dialog component to render
     confirmDialog,
   };
 }

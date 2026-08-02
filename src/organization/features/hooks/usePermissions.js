@@ -5,7 +5,7 @@ export const usePermissionCatalog = (options = {}) => {
   return useQuery({
     queryKey: ['permissions', 'catalog'],
     queryFn: () => permissionApi.getPermissionCatalog(),
-    staleTime: 1000 * 60 * 60, // 1 hour caching
+    staleTime: 0, // Disable long caching during active development
     ...options,
   });
 };

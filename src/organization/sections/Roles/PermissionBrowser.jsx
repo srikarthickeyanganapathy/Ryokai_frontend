@@ -25,8 +25,6 @@ export function PermissionBrowser({
         onEnableAll={onEnableAll}
         onDisableAll={onDisableAll}
         onReset={onReset}
-        localScopedPerms={localScopedPerms}
-        permissionMap={permissionMap}
       />
 
       <PermissionGroups

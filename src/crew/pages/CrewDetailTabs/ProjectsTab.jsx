@@ -11,7 +11,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 
 
-import { useCreateCrewTask } from '@/crew/features/hooks/useCrews'; import { useCompleteCrewTask } from '@/task';
+import { useCreateCrewTask, useShareProjectWithCrew, useUnshareProjectFromCrew } from '@/crew/features/hooks/useCrews'; import { useCompleteCrewTask } from '@/task';
 import { useClaimTask } from '@/task/entities/hooks/useTasks';
 
 /* ==================== PROJECTS TAB ==================== */
