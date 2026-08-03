@@ -13,12 +13,12 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center p-8 text-center min-h-[300px] bg-[var(--bg-subtle)]/30 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] border-dashed',
+        'flex flex-col items-center justify-center p-8 text-center min-h-[300px] bg-[var(--bg-subtle)]/30 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] border-dashed animate-in fade-in slide-in-from-bottom-4 duration-500',
         className
       )}
     >
       {Icon && (
-        <div className="w-16 h-16 rounded-full bg-[var(--bg-elevated)] border border-[var(--border-default)] shadow-[var(--shadow-sm)] flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-full bg-[var(--bg-elevated)] border border-[var(--border-default)] shadow-[var(--shadow-sm)] flex items-center justify-center mb-4 animate-in zoom-in spin-in-12 duration-500">
           <Icon className="w-8 h-8 text-[var(--text-secondary)]" strokeWidth={1.5} />
         </div>
       )}

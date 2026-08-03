@@ -38,7 +38,7 @@ export const Button = forwardRef(({
       className={cn(
         'inline-flex items-center justify-center font-medium select-none',
         'transition-[background-color,border-color,color,filter,box-shadow,transform] duration-[var(--duration-base)] ease-[var(--ease-out)]',
-        'focus-ring cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed disabled:pointer-events-none',
+        'focus-ring cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed',
         'active:scale-[0.97] active:duration-[var(--duration-fast)]',
         buttonVariants[variant],
         buttonSizes[size],

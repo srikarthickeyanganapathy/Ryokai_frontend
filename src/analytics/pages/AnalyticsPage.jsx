@@ -13,6 +13,7 @@ import {
   InsightLayout,
   InsightSection,
   PageStateContainer,
+  useWorkspace,
 } from '@/shared/workspace-framework'
 
 const containerVariants = {
@@ -25,7 +26,8 @@ const itemVariants = {
 }
 
 export function AnalyticsPage() {
-  const { data: rawStats, isLoading, isError } = useDashboardStats()
+  const { activeCrew } = useWorkspace()
+  const { data: rawStats, isLoading, isError } = useDashboardStats({ crewId: activeCrew?.id })
 
   const stats = useMemo(() => {
     if (!rawStats) return null

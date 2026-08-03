@@ -67,6 +67,7 @@ export const queryKeys = {
     all: ['projects'],
     list: (f) => ['projects', 'list', { filters: f }],
     detail: (id) => ['projects', 'detail', id],
+    activities: (id) => ['projects', 'detail', id, 'activities'],
   },
   organizations: {
     all: ['organizations'],

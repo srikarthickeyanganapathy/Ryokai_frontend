@@ -14,6 +14,7 @@
 
 // ── Shell ─────────────────────────────────────────────────
 export { WorkspaceShell } from './shell/WorkspaceShell'
+export { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
 // ── Layout Archetypes ─────────────────────────────────────
 export { CommandLayout } from './layouts/CommandLayout'

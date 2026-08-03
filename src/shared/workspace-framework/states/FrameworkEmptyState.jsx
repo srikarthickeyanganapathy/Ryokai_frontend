@@ -29,7 +29,7 @@ export function FrameworkEmptyState({
       className={cn(
         'flex flex-col items-center justify-center p-10 text-center min-h-[320px]',
         'bg-[var(--bg-subtle)]/20 rounded-[var(--radius-lg)]',
-        'border border-[var(--border-subtle)] border-dashed',
+        'border border-[var(--border-subtle)] border-dashed animate-in fade-in slide-in-from-bottom-4 duration-500',
         className
       )}
     >
@@ -37,7 +37,7 @@ export function FrameworkEmptyState({
       {illustration ? (
         <div className="mb-5">{illustration}</div>
       ) : Icon ? (
-        <div className="w-16 h-16 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-default)] shadow-[var(--shadow-sm)] flex items-center justify-center mb-5">
+        <div className="w-16 h-16 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-default)] shadow-[var(--shadow-sm)] flex items-center justify-center mb-5 animate-in zoom-in spin-in-6 duration-500 delay-100 fill-mode-backwards">
           <Icon className="w-8 h-8 text-[var(--text-tertiary)]" strokeWidth={1.5} />
         </div>
       ) : null}

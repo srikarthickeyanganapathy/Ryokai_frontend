@@ -39,13 +39,18 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// --- Date Array Transform ---
-const transformDateArrays = (obj) => {
+// --- Date Transform ---
+const transformDates = (obj) => {
   if (obj === null || obj === undefined || typeof obj !== 'object') return obj;
 
   for (const key of Object.keys(obj)) {
     const val = obj[key];
-    if (Array.isArray(val)) {
+    if (typeof val === 'string') {
+      // If it's a LocalDateTime string like '2024-01-01T12:00:00' (no Z or offset at the end)
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?$/.test(val)) {
+        obj[key] = val + 'Z';
+      }
+    } else if (Array.isArray(val)) {
       if (val.length >= 3 && val.length <= 7 && 
           typeof val[0] === 'number' && val[0] > 2000 && val[0] < 2100 &&
           typeof val[1] === 'number' && val[1] >= 1 && val[1] <= 12 &&
@@ -58,11 +63,11 @@ const transformDateArrays = (obj) => {
       } else {
         // Only recursively transform if it's an array of objects to prevent accidental primitive corruption
         if (val.length > 0 && typeof val[0] === 'object') {
-          transformDateArrays(val);
+          transformDates(val);
         }
       }
     } else if (typeof val === 'object') {
-      transformDateArrays(val);
+      transformDates(val);
     }
   }
   return obj;
@@ -72,7 +77,7 @@ const transformDateArrays = (obj) => {
 api.interceptors.response.use(
   (response) => {
     if (response.data) {
-      transformDateArrays(response.data);
+      transformDates(response.data);
     }
     return response;
   },

@@ -19,6 +19,8 @@ export const Toaster = ({ ...props }) => {
             'group-[.toast]:bg-[var(--accent)] group-[.toast]:text-white',
           cancelButton:
             'group-[.toast]:bg-[var(--bg-subtle)] group-[.toast]:text-[var(--text-secondary)]',
+          success: 'group-[.toaster]:bg-[var(--success-soft)] group-[.toaster]:text-[var(--success)] group-[.toaster]:border-[var(--success)]/20',
+          error: 'group-[.toaster]:bg-[var(--danger-soft)] group-[.toaster]:text-[var(--danger)] group-[.toaster]:border-[var(--danger)]/20',
         },
       }}
       {...props}

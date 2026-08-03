@@ -186,10 +186,10 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   // Sync contentEditable refs when task changes or panel opens
   useEffect(() => {
     if (isOpen && task) {
-      if (titleRef.current && titleRef.current.textContent !== task.title) {
+      if (titleRef.current && document.activeElement !== titleRef.current && titleRef.current.textContent !== task.title) {
         titleRef.current.textContent = task.title || ''
       }
-      if (descRef.current && descRef.current.textContent !== (task.description || '')) {
+      if (descRef.current && document.activeElement !== descRef.current && descRef.current.textContent !== (task.description || '')) {
         descRef.current.textContent = task.description || ''
       }
     }
@@ -260,7 +260,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
     // Default Org Workflow
     return (
       <div className="flex items-center gap-2">
-        {isUnclaimed && currentStatus !== 'COMPLETED' && currentStatus !== 'APPROVED' && currentStatus !== 'DONE' && (
+        {isCrewTask && isUnclaimed && currentStatus !== 'COMPLETED' && currentStatus !== 'APPROVED' && currentStatus !== 'DONE' && (
           <Button 
             size={size}
             variant="outline"
@@ -678,7 +678,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                       value={task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : ''}
                       onChange={(e) => {
                         const val = e.target.value
-                        const newDate = val ? `${val}T23:59:59` : null
+                        const newDate = val || null
                         updateTask.mutate({ id: task.id, payload: { dueDate: newDate } }, {
                           onSuccess: () => toast.success('Due date updated')
                         })

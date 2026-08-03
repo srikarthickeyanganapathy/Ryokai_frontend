@@ -119,7 +119,7 @@ export const createInviteLink = async (orgId, roleId) => {
   return data;
 };
 export const revokeInvite = async (orgId, inviteId) => {
-  await api.delete(`/organizations/${orgId}/invites/${inviteId}`);
+  await api.delete(`/invites/${inviteId}`);
 };
 
 export const acceptInviteByToken = async (token) => {

@@ -44,7 +44,7 @@ export function ManagementLayout({
 
       {/* ── Tabs Slot ─────────────────────────────────── */}
       {tabs && (
-        <div className="border-b border-[var(--border-subtle)]">
+        <div className="border-b border-[var(--border-subtle)] overflow-hidden">
           {tabs}
         </div>
       )}

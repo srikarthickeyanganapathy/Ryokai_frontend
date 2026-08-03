@@ -3,9 +3,11 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/shared/api/api';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
+import { usePermissions } from '@/identity/features/authentication/hooks/usePermissions';
 
 export function OrganizationGoals() {
   const { activeOrganization } = useWorkspace();
+  const { canViewGoals } = usePermissions();
 
   const { data: goals, isLoading } = useQuery({
     queryKey: ['org_goals', activeOrganization?.id],
@@ -14,7 +16,7 @@ export function OrganizationGoals() {
       const res = await api.get(`/organizations/${activeOrganization.id}/goals`);
       return res.data;
     },
-    enabled: !!activeOrganization
+    enabled: !!activeOrganization && canViewGoals
   });
 
   if (isLoading) {

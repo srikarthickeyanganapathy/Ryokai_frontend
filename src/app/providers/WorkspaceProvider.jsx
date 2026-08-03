@@ -127,7 +127,7 @@ export const WorkspaceProvider = ({ children }) => {
             setWorkspaceMode('PERSONAL');
             setActiveOrganization(null);
           });
-        } else {
+        } else if (stillExists.id !== activeOrganization.id) {
           queueMicrotask(() => {
             setActiveOrganization(stillExists);
           });
@@ -185,7 +185,7 @@ export const WorkspaceProvider = ({ children }) => {
   }, [workspaceMode, crews]);
   */
 
-  const value = {
+  const value = useMemo(() => ({
     workspaceMode,
     setWorkspaceMode,
     operatingMode,
@@ -197,7 +197,19 @@ export const WorkspaceProvider = ({ children }) => {
     organizations,
     crews,
     loadingWorkspace
-  };
+  }), [
+    workspaceMode,
+    setWorkspaceMode,
+    operatingMode,
+    setOperatingMode,
+    activeOrganization,
+    setActiveOrganization,
+    activeCrew,
+    setActiveCrew,
+    organizations,
+    crews,
+    loadingWorkspace
+  ]);
 
   return (
     <WorkspaceContext.Provider value={value}>

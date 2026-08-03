@@ -9,6 +9,7 @@
     --bg-subtle: #F7F8F9; /* Very subtle off-white for panels */
     --bg-sidebar: #F9FAFB; /* Gemini/Linear style sidebar background */
     --bg-elevated: #FFFFFF; /* Cards, inputs */
+    --bg-card: var(--bg-elevated);
     --bg-overlay: rgba(0, 0, 0, 0.4);
     --bg-hover: #F3F4F6;
     --bg-hover-strong: #E5E7EB;
@@ -132,6 +133,7 @@
     --bg-subtle: #131417;
     --bg-sidebar: #09090B;
     --bg-elevated: #18191C;
+    --bg-card: var(--bg-elevated);
     --bg-overlay: rgba(0, 0, 0, 0.8);
     --bg-hover: #27272A;
     --bg-hover-strong: #3F3F46;

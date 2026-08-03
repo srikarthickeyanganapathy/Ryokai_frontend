@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react'
+import React, { createContext, useContext, useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { Client } from '@stomp/stompjs'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -29,9 +29,9 @@ export function RealtimeProvider({ children }) {
     const token = localStorage.getItem('jwt_token')
     if (!token || clientRef.current?.active) return
 
-    // Derive WS URL from the API base: http://localhost:8080/api → http://localhost:8080/ws
+    // Derive WS URL from the API base: http://localhost:8080/api → ws://localhost:8080/ws
     const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1'
-    const wsUrl = apiBase.replace(/\/api(\/v1)?\/?$/, '') + '/ws'
+    const wsUrl = apiBase.replace(/\/api(\/v1)?\/?$/, '').replace(/^http/i, 'ws') + '/ws'
 
     const client = new Client({
       brokerURL: wsUrl,
@@ -39,6 +39,10 @@ export function RealtimeProvider({ children }) {
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
       reconnectDelay: 5000,
+      beforeConnect: () => {
+        const freshToken = localStorage.getItem('jwt_token')
+        if (freshToken) client.connectHeaders = { Authorization: 'Bearer ' + freshToken }
+      },
       onConnect: () => {
         setConnected(true)
 
@@ -73,6 +77,28 @@ export function RealtimeProvider({ children }) {
           window.location.href = '/login'
         })
 
+        // Handle subscription errors
+        client.subscribe('/user/queue/errors', (msg) => {
+          const errorMsg = msg.body
+          if (import.meta.env.DEV) {
+            console.warn('[RealtimeProvider] WS Error:', errorMsg)
+          }
+          if (errorMsg.startsWith('Subscription denied: ')) {
+            const topic = errorMsg.replace('Subscription denied: ', '')
+            for (const [id, req] of pendingSubscriptions.current.entries()) {
+              if (req.topic === topic) {
+                pendingSubscriptions.current.delete(id)
+                const activeSub = activeSubscriptions.current.get(id)
+                if (activeSub) {
+                  // activeSub might just be a mock or invalid, but we clean it up anyway
+                  try { activeSub.unsubscribe() } catch { /* ignore */ }
+                  activeSubscriptions.current.delete(id)
+                }
+              }
+            }
+          }
+        })
+
         // Apply any dynamic subscriptions that were queued before we connected
         for (const [id, req] of pendingSubscriptions.current.entries()) {
           if (!activeSubscriptions.current.has(id)) {
@@ -85,6 +111,11 @@ export function RealtimeProvider({ children }) {
       },
       onDisconnect: () => {
         setConnected(false)
+        activeSubscriptions.current.forEach((sub) => {
+          try {
+            sub.unsubscribe()
+          } catch { /* ignore */ }
+        })
         activeSubscriptions.current.clear() // Force recreation on next connect
       },
       onStompError: (frame) => {
@@ -95,8 +126,8 @@ export function RealtimeProvider({ children }) {
       },
     })
 
-    client.activate()
     clientRef.current = client
+    client.activate()
   }, [queryClient])
 
   useEffect(() => {
@@ -150,8 +181,13 @@ export function RealtimeProvider({ children }) {
     }
   }, [])
 
+  const value = useMemo(
+    () => ({ connected, subscribeToTask, subscribeToTopic, publish }),
+    [connected, subscribeToTask, subscribeToTopic, publish]
+  )
+
   return (
-    <RealtimeContext.Provider value={{ connected, subscribeToTask, subscribeToTopic, publish }}>
+    <RealtimeContext.Provider value={value}>
       {children}
     </RealtimeContext.Provider>
   )

@@ -105,7 +105,9 @@ export const rejectTask = async (id, reason) => {
 };
 
 export const getComments = async (id, params) => {
-  const { data } = await api.get(`/tasks/${id}/comments`, { params });
+  const formattedParams = { ...params };
+  if (formattedParams.page && formattedParams.page > 0) formattedParams.page = formattedParams.page - 1;
+  const { data } = await api.get(`/tasks/${id}/comments`, { params: formattedParams });
   return data;
 };
 
@@ -135,7 +137,9 @@ export const reorderChecklistItems = async (taskId, itemIds) => {
 };
 
 export const getTaskHistory = async (id, params) => {
-  const { data } = await api.get(`/tasks/${id}/history`, { params });
+  const formattedParams = { ...params };
+  if (formattedParams.page && formattedParams.page > 0) formattedParams.page = formattedParams.page - 1;
+  const { data } = await api.get(`/tasks/${id}/history`, { params: formattedParams });
   return mapPage(data, mapActivityEvent);
 };
 
@@ -147,7 +151,7 @@ export const addDependency = async (taskId, dependsOnId) => {
 };
 
 export const updateTask = async (taskId, payload) => {
-  const { data } = await api.put(`/tasks/${taskId}`, payload);
+  const { data } = await api.put(`/tasks/${taskId}`, { ...payload, tags: toBackendTags(payload.tags) });
   return normalizeTask(data);
 };
 

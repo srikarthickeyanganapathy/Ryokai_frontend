@@ -19,12 +19,11 @@ export function OrganizationIdentity({ org }) {
   const [activeField, setActiveField] = useState(null);
 
   useEffect(() => {
-    // Only update local state if not currently mutating to prevent cursor jumps
     if (org && !updateOrgMutation.isPending) {
       setName(org.name || '');
       setDescription(org.description || '');
     }
-  }, [org, updateOrgMutation.isPending]);
+  }, [org?.name, org?.description]);
 
   const handleNameBlur = () => {
     if (name.trim() && name !== org?.name) {

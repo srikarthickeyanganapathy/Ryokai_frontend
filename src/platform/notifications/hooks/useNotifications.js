@@ -6,10 +6,11 @@ import { toast } from 'sonner';
 // Named useNotificationQueries to avoid collision with
 // NotificationProvider.jsx's useNotifications (STOMP context hook)
 
-export const useNotificationList = (params = { page: 0, size: 20 }) => {
+export const useNotificationList = (params = { page: 1, size: 20 }) => {
+  const apiParams = { ...params, page: params.page ? Math.max(0, params.page - 1) : 0 };
   return useQuery({
     queryKey: queryKeys.notifications.list(params),
-    queryFn: () => notificationApi.getNotifications(params),
+    queryFn: () => notificationApi.getNotifications(apiParams),
     select: (data) => data?.content || data || [],
   });
 };

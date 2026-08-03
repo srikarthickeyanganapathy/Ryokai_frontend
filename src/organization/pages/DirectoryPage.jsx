@@ -204,7 +204,7 @@ export function DirectoryPage() {
                                     onValueChange={(val) =>
                                       updateRoleMutation.mutate({
                                         userId: member.userId,
-                                        roleId: val,
+                                        roleId: parseInt(val, 10),
                                       })
                                     }
                                     disabled={updateRoleMutation.isPending || isSelf || isLastAdmin}
@@ -229,7 +229,7 @@ export function DirectoryPage() {
                                   </Select>
                                 )}
 
-                                {canRemoveMembers && !isSelf && (
+                                {canRemoveMembers && !isSelf && !isLastAdmin && (
                                   <IconButton
                                     variant="danger"
                                     size="sm"

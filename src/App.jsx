@@ -13,58 +13,63 @@ import { PlatformLayout } from "@/app/layouts/PlatformLayout";
 import { RouteLoader } from "@/shared/ui/RouteLoader";
 
 // Route-level code splitting
-const UIDesignSystem = lazy(() => import("@/shared/styleguide"));
-const LoginPage = lazy(() => import("@/identity/pages/LoginPage").then(m => ({ default: m.LoginPage })));
-const RegisterPage = lazy(() => import("@/identity/pages/RegisterPage").then(m => ({ default: m.RegisterPage })));
-const ForgotPasswordPage = lazy(() => import("@/identity/pages/ForgotPasswordPage").then(m => ({ default: m.ForgotPasswordPage })));
-const ResetPasswordPage = lazy(() => import("@/identity/pages/ResetPasswordPage").then(m => ({ default: m.ResetPasswordPage })));
-const VerifyEmailPage = lazy(() => import("@/identity/pages/VerifyEmailPage").then(m => ({ default: m.VerifyEmailPage })));
-const SessionExpiredPage = lazy(() => import("@/identity/pages/SessionExpiredPage").then(m => ({ default: m.SessionExpiredPage })));
-const DashboardPage = lazy(() => import("@/dashboard/pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
-const TasksPage = lazy(() => import("@/task/pages/TasksPage").then(m => ({ default: m.TasksPage })));
-const ProjectsPage = lazy(() => import("@/project/pages/ProjectsPage").then(m => ({ default: m.ProjectsPage })));
-const ProjectDetailPage = lazy(() => import("@/project/pages/ProjectDetailPage").then(m => ({ default: m.ProjectDetailPage })));
-const OrganizationsPage = lazy(() => import("@/organization/pages/OrganizationsPage").then(m => ({ default: m.OrganizationsPage })));
-const OrganizationAdministrationPage = lazy(() => import("@/organization/pages/OrganizationAdministrationPage").then(m => ({ default: m.OrganizationAdministrationPage })));
-const DirectoryPage = lazy(() => import("@/organization/pages/DirectoryPage").then(m => ({ default: m.DirectoryPage })));
-const LeaveRequestsPage = lazy(() => import("@/organization/pages/LeaveRequestsPage").then(m => ({ default: m.LeaveRequestsPage })));
-const RolesPermissionsPage = lazy(() => import("@/organization/pages/RolesPermissionsPage").then(m => ({ default: m.RolesPermissionsPage })));
-const AnnouncementsPage = lazy(() => import("@/organization/pages/AnnouncementsPage").then(m => ({ default: m.AnnouncementsPage })));
-const CrewsPage = lazy(() => import("@/crew/pages/CrewsPage").then(m => ({ default: m.CrewsPage })));
-const CrewDetailPage = lazy(() => import("@/crew/pages/CrewDetailPage").then(m => ({ default: m.CrewDetailPage })));
-const CrewDiscoverPage = lazy(() => import("@/crew/pages/CrewDiscoverPage").then(m => ({ default: m.CrewDiscoverPage })));
-const CrewTasksPage = lazy(() => import("@/crew/pages/CrewTasksPage").then(m => ({ default: m.CrewTasksPage })));
-const TeamsPage = lazy(() => import("@/organization/teams/pages/TeamsPage").then(m => ({ default: m.TeamsPage })));
-const TeamDetailPage = lazy(() => import("@/organization/teams/pages/TeamDetailPage").then(m => ({ default: m.TeamDetailPage })));
-const CrewJoinPage = lazy(() => import("@/crew/pages/CrewJoinPage").then(m => ({ default: m.CrewJoinPage })));
-const InboxPage = lazy(() => import("@/inbox/pages/InboxPage").then(m => ({ default: m.InboxPage })));
-const AnalyticsPage = lazy(() => import("@/analytics/pages/AnalyticsPage").then(m => ({ default: m.AnalyticsPage })));
+const Loadable = (Component) => (props) => (
+  <Suspense fallback={<RouteLoader />}>
+    <Component {...props} />
+  </Suspense>
+);
+
+const UIDesignSystem = Loadable(lazy(() => import("@/shared/styleguide")));
+const LoginPage = Loadable(lazy(() => import("@/identity/pages/LoginPage").then(m => ({ default: m.LoginPage }))));
+const RegisterPage = Loadable(lazy(() => import("@/identity/pages/RegisterPage").then(m => ({ default: m.RegisterPage }))));
+const ForgotPasswordPage = Loadable(lazy(() => import("@/identity/pages/ForgotPasswordPage").then(m => ({ default: m.ForgotPasswordPage }))));
+const ResetPasswordPage = Loadable(lazy(() => import("@/identity/pages/ResetPasswordPage").then(m => ({ default: m.ResetPasswordPage }))));
+const VerifyEmailPage = Loadable(lazy(() => import("@/identity/pages/VerifyEmailPage").then(m => ({ default: m.VerifyEmailPage }))));
+const SessionExpiredPage = Loadable(lazy(() => import("@/identity/pages/SessionExpiredPage").then(m => ({ default: m.SessionExpiredPage }))));
+const DashboardPage = Loadable(lazy(() => import("@/dashboard/pages/DashboardPage").then(m => ({ default: m.DashboardPage }))));
+const TasksPage = Loadable(lazy(() => import("@/task/pages/TasksPage").then(m => ({ default: m.TasksPage }))));
+const ProjectsPage = Loadable(lazy(() => import("@/project/pages/ProjectsPage").then(m => ({ default: m.ProjectsPage }))));
+const ProjectDetailPage = Loadable(lazy(() => import("@/project/pages/ProjectDetailPage").then(m => ({ default: m.ProjectDetailPage }))));
+const OrganizationsPage = Loadable(lazy(() => import("@/organization/pages/OrganizationsPage").then(m => ({ default: m.OrganizationsPage }))));
+const OrganizationAdministrationPage = Loadable(lazy(() => import("@/organization/pages/OrganizationAdministrationPage").then(m => ({ default: m.OrganizationAdministrationPage }))));
+const DirectoryPage = Loadable(lazy(() => import("@/organization/pages/DirectoryPage").then(m => ({ default: m.DirectoryPage }))));
+const LeaveRequestsPage = Loadable(lazy(() => import("@/organization/pages/LeaveRequestsPage").then(m => ({ default: m.LeaveRequestsPage }))));
+const RolesPermissionsPage = Loadable(lazy(() => import("@/organization/pages/RolesPermissionsPage").then(m => ({ default: m.RolesPermissionsPage }))));
+const AnnouncementsPage = Loadable(lazy(() => import("@/organization/pages/AnnouncementsPage").then(m => ({ default: m.AnnouncementsPage }))));
+const CrewsPage = Loadable(lazy(() => import("@/crew/pages/CrewsPage").then(m => ({ default: m.CrewsPage }))));
+const CrewDetailPage = Loadable(lazy(() => import("@/crew/pages/CrewDetailPage").then(m => ({ default: m.CrewDetailPage }))));
+const CrewDiscoverPage = Loadable(lazy(() => import("@/crew/pages/CrewDiscoverPage").then(m => ({ default: m.CrewDiscoverPage }))));
+const CrewTasksPage = Loadable(lazy(() => import("@/crew/pages/CrewTasksPage").then(m => ({ default: m.CrewTasksPage }))));
+const TeamsPage = Loadable(lazy(() => import("@/organization/teams/pages/TeamsPage").then(m => ({ default: m.TeamsPage }))));
+const TeamDetailPage = Loadable(lazy(() => import("@/organization/teams/pages/TeamDetailPage").then(m => ({ default: m.TeamDetailPage }))));
+const CrewJoinPage = Loadable(lazy(() => import("@/crew/pages/CrewJoinPage").then(m => ({ default: m.CrewJoinPage }))));
+const InboxPage = Loadable(lazy(() => import("@/inbox/pages/InboxPage").then(m => ({ default: m.InboxPage }))));
+const AnalyticsPage = Loadable(lazy(() => import("@/analytics/pages/AnalyticsPage").then(m => ({ default: m.AnalyticsPage }))));
 
 // Platform Pages
-const PlatformDashboardPage = lazy(() => import("@/platform/admin/pages/PlatformDashboardPage").then(m => ({ default: m.PlatformDashboardPage })));
-const PlatformOrganizationsPage = lazy(() => import("@/platform/admin/pages/PlatformOrganizationsPage").then(m => ({ default: m.PlatformOrganizationsPage })));
-const PlatformUsersPage = lazy(() => import("@/platform/admin/pages/PlatformUsersPage").then(m => ({ default: m.PlatformUsersPage })));
-const PlatformMonitoringPage = lazy(() => import("@/platform/admin/pages/PlatformMonitoringPage").then(m => ({ default: m.PlatformMonitoringPage })));
-const PlatformAuditPage = lazy(() => import("@/platform/admin/pages/PlatformAuditPage").then(m => ({ default: m.PlatformAuditPage })));
-const PlatformSettingsPage = lazy(() => import("@/platform/admin/pages/PlatformSettingsPage").then(m => ({ default: m.PlatformSettingsPage })));
-const FocusPage = lazy(() => import("@/focus/pages/FocusPage").then(m => ({ default: m.FocusPage })));
-const ProfilePage = lazy(() => import("@/settings/pages/ProfilePage").then(m => ({ default: m.ProfilePage })));
-const SecurityPage = lazy(() => import("@/settings/pages/SecurityPage").then(m => ({ default: m.SecurityPage })));
-const SessionsPage = lazy(() => import("@/settings/pages/SessionsPage").then(m => ({ default: m.SessionsPage })));
-const CalendarPage = lazy(() => import("@/calendar/pages/CalendarPage").then(m => ({ default: m.CalendarPage })));
-const NotesPage = lazy(() => import("@/note/pages/NotesPage").then(m => ({ default: m.NotesPage })));
-const SavedPage = lazy(() => import("@/library/saved/pages/SavedPage").then(m => ({ default: m.SavedPage })));
-const WorkloadPage = lazy(() => import("@/organization/workload/pages/WorkloadPage").then(m => ({ default: m.WorkloadPage })));
-const GoalsPage = lazy(() => import("@/organization/goals/pages/GoalsPage").then(m => ({ default: m.GoalsPage })));
-const WhiteboardPage = lazy(() => import("@/whiteboard/pages/WhiteboardPage").then(m => ({ default: m.WhiteboardPage })));
-const AcceptInvitePage = lazy(() => import("@/organization/pages/AcceptInvitePage").then(m => ({ default: m.AcceptInvitePage })));
+const PlatformDashboardPage = Loadable(lazy(() => import("@/platform/admin/pages/PlatformDashboardPage").then(m => ({ default: m.PlatformDashboardPage }))));
+const PlatformOrganizationsPage = Loadable(lazy(() => import("@/platform/admin/pages/PlatformOrganizationsPage").then(m => ({ default: m.PlatformOrganizationsPage }))));
+const PlatformUsersPage = Loadable(lazy(() => import("@/platform/admin/pages/PlatformUsersPage").then(m => ({ default: m.PlatformUsersPage }))));
+const PlatformMonitoringPage = Loadable(lazy(() => import("@/platform/admin/pages/PlatformMonitoringPage").then(m => ({ default: m.PlatformMonitoringPage }))));
+const PlatformAuditPage = Loadable(lazy(() => import("@/platform/admin/pages/PlatformAuditPage").then(m => ({ default: m.PlatformAuditPage }))));
+const PlatformSettingsPage = Loadable(lazy(() => import("@/platform/admin/pages/PlatformSettingsPage").then(m => ({ default: m.PlatformSettingsPage }))));
+const FocusPage = Loadable(lazy(() => import("@/focus/pages/FocusPage").then(m => ({ default: m.FocusPage }))));
+const ProfilePage = Loadable(lazy(() => import("@/settings/pages/ProfilePage").then(m => ({ default: m.ProfilePage }))));
+const SecurityPage = Loadable(lazy(() => import("@/settings/pages/SecurityPage").then(m => ({ default: m.SecurityPage }))));
+const SessionsPage = Loadable(lazy(() => import("@/settings/pages/SessionsPage").then(m => ({ default: m.SessionsPage }))));
+const CalendarPage = Loadable(lazy(() => import("@/calendar/pages/CalendarPage").then(m => ({ default: m.CalendarPage }))));
+const NotesPage = Loadable(lazy(() => import("@/note/pages/NotesPage").then(m => ({ default: m.NotesPage }))));
+const SavedPage = Loadable(lazy(() => import("@/library/saved/pages/SavedPage").then(m => ({ default: m.SavedPage }))));
+const WorkloadPage = Loadable(lazy(() => import("@/organization/workload/pages/WorkloadPage").then(m => ({ default: m.WorkloadPage }))));
+const GoalsPage = Loadable(lazy(() => import("@/organization/goals/pages/GoalsPage").then(m => ({ default: m.GoalsPage }))));
+const WhiteboardPage = Loadable(lazy(() => import("@/whiteboard/pages/WhiteboardPage").then(m => ({ default: m.WhiteboardPage }))));
+const AcceptInvitePage = Loadable(lazy(() => import("@/organization/pages/AcceptInvitePage").then(m => ({ default: m.AcceptInvitePage }))));
 
 export default function App() {
   return (
     <ErrorBoundary>
       <AppProvider>
         <Router>
-          <Suspense fallback={<RouteLoader />}>
           <Routes>
             {/* Core Resolver */}
             <Route path="/" element={<RouteResolver />} />
@@ -156,7 +161,6 @@ export default function App() {
             {/* Fallback routing */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </Suspense>
         <SessionExpiredListener />
       </Router>
     </AppProvider>

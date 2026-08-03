@@ -13,5 +13,5 @@ export * from './features/api/organization.api';
 export { OrganizationForm } from './sections/Settings/OrganizationForm';
 export { AdminLeaveModal } from './sections/Members/AdminLeaveModal';
 export { InviteMemberModal } from './sections/Invites/InviteMemberModal';
-export { CreateTeamModal } from './sections/Teams/CreateTeamModal';
-export { ManageTeamMembersModal } from './sections/Teams/ManageTeamMembersModal';
+export { CreateTeamModal } from './teams/modals/CreateTeamModal';
+export { ManageTeamMembersModal } from './teams/modals/ManageTeamMembersModal';

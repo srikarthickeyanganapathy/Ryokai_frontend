@@ -81,3 +81,11 @@ export function useUnshareProjectFromCrew() {
     },
   })
 }
+
+export function useProjectActivities(projectId) {
+  return useQuery({
+    queryKey: queryKeys.projects.activities(projectId),
+    queryFn: () => projectsApi.getProjectActivities(projectId),
+    enabled: !!projectId,
+  })
+}

@@ -40,7 +40,7 @@ export const usePermissionStore = create((set, get) => ({
   hasPermission: (permissionName) => {
     const { permissions, isLoaded } = get();
     if (!isLoaded) return false;
-    return permissions.some(p => p.name === permissionName);
+    return permissions.some(p => (typeof p === 'string' ? p : p.name) === permissionName);
   },
 
   /**

@@ -5,6 +5,8 @@ import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { usePermissionStore } from '../store/permissionStore';
 import { useEffect } from 'react';
 
+const EMPTY_PERMISSIONS = [];
+
 /**
  * Custom hook providing comprehensive permission checks.
  * Combines role/membership derivation with synchronous permission store lookups.
@@ -20,7 +22,7 @@ export const usePermissions = () => {
 
   // SUPER_ADMIN is the only global role
   const normalizedRoles = useMemo(
-    () => (user?.roles || []).map(r => (typeof r === 'string' ? r.replace(/^ROLE_/, '') : '')),
+    () => (user?.roles || []).map(r => (typeof r === 'string' ? r.replace(/^ROLE_/, '') : '')).filter(Boolean),
     [user?.roles]
   );
   const isSuperAdmin = normalizedRoles.includes('SUPER_ADMIN');
@@ -44,7 +46,7 @@ export const usePermissions = () => {
   }, [membersList, user]);
 
   const rawOrgRole = myMembership?.orgRole || null;
-  const permissions = myMembership?.permissions || [];
+  const permissions = myMembership?.permissions || EMPTY_PERMISSIONS;
 
   // Normalize orgRole
   const orgRole = typeof rawOrgRole === 'string'
@@ -67,7 +69,15 @@ export const usePermissions = () => {
   const canManageRoles = isAdminOrAbove || permissions.includes('ROLE_UPDATE');
   const canManageUsers = isSuperAdmin;
   const canManageAnnouncements = isAdminOrAbove || permissions.includes('ANNOUNCEMENT_UPDATE');
+  const canViewAnnouncements = isAdminOrAbove || permissions.includes('ANNOUNCEMENT_VIEW');
+  const canCreateAnnouncements = isAdminOrAbove || permissions.includes('ANNOUNCEMENT_CREATE');
+  const canDeleteAnnouncements = isAdminOrAbove || permissions.includes('ANNOUNCEMENT_DELETE');
   const canManageGoals = isAdminOrAbove || permissions.includes('GOAL_UPDATE');
+  const canViewGoals = isAdminOrAbove || permissions.includes('GOAL_VIEW');
+  const canCreateGoals = isAdminOrAbove || permissions.includes('GOAL_CREATE');
+  const canDeleteGoals = isAdminOrAbove || permissions.includes('GOAL_DELETE');
+  const canManageOrganization = isAdminOrAbove || permissions.includes('ORG_PROFILE_UPDATE');
+  const canViewOrganization = isAdminOrAbove || permissions.includes('ORG_VIEW');
   const canViewOrgWideDashboard = isAdminOrAbove || permissions.includes('DASHBOARD_VIEW');
   const canOverrideTask = isAdminOrAbove || permissions.includes('TASK_OVERRIDE');
   const canViewAnalytics = isAdminOrAbove || permissions.includes('DASHBOARD_VIEW');
@@ -146,7 +156,15 @@ export const usePermissions = () => {
     canManageRoles,
     canManageUsers,
     canManageAnnouncements,
+    canViewAnnouncements,
+    canCreateAnnouncements,
+    canDeleteAnnouncements,
     canManageGoals,
+    canViewGoals,
+    canCreateGoals,
+    canDeleteGoals,
+    canManageOrganization,
+    canViewOrganization,
     canViewOrgWideDashboard,
     canOverrideTask,
     canViewAnalytics,

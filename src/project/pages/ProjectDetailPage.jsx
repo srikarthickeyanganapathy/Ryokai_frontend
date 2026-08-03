@@ -181,12 +181,10 @@ export function ProjectDetailPage() {
         </div>
         {canManageProject && (
           <div className="flex items-center gap-2">
-            {workspaceMode === 'PERSONAL' && !isSharedToCrew && (
-              <Button variant="outline" size="sm" onClick={() => setIsShareModalOpen(true)}>
-                <Icons.users className="w-3.5 h-3.5 mr-1" />
-                Share
-              </Button>
-            )}
+            <Button variant="outline" size="sm" onClick={() => setIsShareModalOpen(true)}>
+              <Icons.users className="w-3.5 h-3.5 mr-1" />
+              {isSharedToCrew ? 'Crew Access' : 'Share'}
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>Edit</Button>
             <Button variant="outline" size="sm" className="text-[var(--danger)] hover:text-[var(--danger)] hover:border-[var(--danger)] hover:bg-[var(--danger-soft)]" onClick={() => setIsDeleteModalOpen(true)}>Delete</Button>
           </div>
@@ -359,7 +357,7 @@ export function ProjectDetailPage() {
                           size="xs"
                           variant="outline"
                           className="text-red-500 hover:text-red-600 hover:bg-red-500/10 border-red-500/20"
-                          onClick={() => unshareMutation.mutate({ projectId: Number(projectId), crewId: sharedCrewId })}
+                          onClick={() => unshareMutation.mutate({ projectId: Number(projectId), crewId: Number(sharedCrewId) })}
                           isLoading={unshareMutation.isPending}
                         >
                           Unshare
@@ -403,20 +401,23 @@ export function ProjectDetailPage() {
 
       {/* Edit Project Modal */}
       <Modal open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <ModalContent className="sm:max-w-xl">
-          <Heading level={3} className="mb-4">Edit Project</Heading>
+        <ModalContent className="sm:max-w-md !bg-[var(--bg-card)] !backdrop-blur-none border border-[var(--border-subtle)] shadow-xl rounded-xl p-6">
+          <Heading level={3} className="mb-5 text-[15px] font-semibold tracking-tight">Edit Project</Heading>
           <ProjectForm
             defaultValues={{
               name: project.name,
               description: project.description || '',
               organizationId: project.organizationId || '',
               teamId: project.teamId ? project.teamId.toString() : 'none',
+              crewId: project.crewId ? project.crewId.toString() : (project.sharedCrewIds && project.sharedCrewIds.length > 0 ? project.sharedCrewIds[0].toString() : ''),
+              collaboratorIds: Array.isArray(project.collaboratorIds) ? project.collaboratorIds : (Array.isArray(project.collaborators) ? project.collaborators.map(c => c.userId || c.id) : []),
               dueDate: project.dueDate ? project.dueDate.slice(0, 16) : '',
             }}
             onSubmit={handleEditProject}
             isLoading={updateProjectMutation.isPending}
-            workspaceMode={workspaceMode}
+            workspaceMode={workspaceMode === 'PERSONAL' && isSharedToCrew ? 'CREWS' : workspaceMode} // Switch to CREWS mode if editing a shared personal project
             useOrgTeamsHook={useOrgTeams}
+            hideContextFields={workspaceMode === 'ORG'} 
           />
         </ModalContent>
       </Modal>

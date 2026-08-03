@@ -27,7 +27,7 @@ export function ProjectsPage() {
 
   const { workspaceMode, activeOrganization } = useWorkspace()
   const { canCreateProject } = usePermissions()
-  const canCreate = workspaceMode === 'PERSONAL' || canCreateProject
+  const canCreate = workspaceMode === 'PERSONAL' || workspaceMode === 'CREWS' || canCreateProject
 
   const { data: allProjects = [], isLoading, isError, error, refetch } = useProjects({ search: globalFilter })
   const createProjectMutation = useCreateProject()

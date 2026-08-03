@@ -17,19 +17,21 @@ export const useDashboardStats = (customParams = {}) => {
   });
 };
 
-export const useDashboardActivity = (params = { page: 0, size: 10 }) => {
+export const useDashboardActivity = (params = { page: 1, size: 10 }) => {
+  const apiParams = { ...params, page: params.page ? Math.max(0, params.page - 1) : 0 };
   return useQuery({
     queryKey: queryKeys.dashboard.activity(params),
-    queryFn: () => dashboardApi.getDashboardActivity(params),
+    queryFn: () => dashboardApi.getDashboardActivity(apiParams),
     select: (data) => data?.content || data || [],
     staleTime: 15000,
   });
 };
 
-export const useTaskActivity = (taskId, params = { page: 0, size: 10 }) => {
+export const useTaskActivity = (taskId, params = { page: 1, size: 10 }) => {
+  const apiParams = { ...params, page: params.page ? Math.max(0, params.page - 1) : 0 };
   return useQuery({
     queryKey: [...queryKeys.dashboard.all, 'activity', 'task', taskId, { params }],
-    queryFn: () => dashboardApi.getTaskActivity(taskId, params),
+    queryFn: () => dashboardApi.getTaskActivity(taskId, apiParams),
     select: (data) => data?.content || data || [],
     enabled: !!taskId,
     staleTime: 15000,

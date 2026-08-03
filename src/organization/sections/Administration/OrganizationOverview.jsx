@@ -5,7 +5,7 @@ import { Icons } from '@/shared/ui/Icons';
 import { OrganizationIdentity } from './OrganizationIdentity';
 import { usePermissions } from '@/identity';
 import { InviteMemberModal } from '../Invites/InviteMemberModal';
-import { CreateTeamModal } from '../Teams/CreateTeamModal';
+import { CreateTeamModal } from '../../teams/modals/CreateTeamModal';
 import { Link, useNavigate } from 'react-router-dom';
 
 export function OrganizationOverview({ org, counts }) {
@@ -47,12 +47,12 @@ export function OrganizationOverview({ org, counts }) {
       border: 'var(--warning-border)'
     }))
   ];
-  
+
   // We can add invites here later when the backend supports pending invites listing
 
   return (
     <div className="space-y-10">
-      
+
       {/* ── Organization Health ───────────────────────── */}
       <section>
         <div className="flex items-center justify-between mb-3">
@@ -61,7 +61,7 @@ export function OrganizationOverview({ org, counts }) {
             {attentionItems.length} items
           </div>
         </div>
-        
+
         {attentionItems.length === 0 && counts.pendingInvites === 0 ? (
           <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] border-dashed rounded-[var(--radius-md)] p-6 flex flex-col items-center justify-center text-center">
             <Icons.checkCircle className="w-8 h-8 text-[var(--success)] mb-2" />
@@ -71,20 +71,20 @@ export function OrganizationOverview({ org, counts }) {
         ) : (
           <div className="flex flex-col gap-2">
             {counts.pendingInvites > 0 && (
-               <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[var(--radius-md)] p-3 hover:bg-[var(--bg-hover)] transition-colors cursor-pointer" onClick={() => navigate(`/app/organizations/${org.id}/invites`)}>
-                  <div className="w-8 h-8 rounded-[var(--radius-sm)] flex items-center justify-center shrink-0" style={{ backgroundColor: 'var(--warning-soft)', border: '1px solid var(--warning-border)' }}>
-                    <Icons.mail className="w-4 h-4" style={{ color: 'var(--warning)' }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <Text size="xs" className="font-medium truncate">{counts.pendingInvites} Pending Invites</Text>
-                    <Text size="xs" variant="muted" className="truncate text-[10px]">Users invited to the organization have not yet accepted.</Text>
-                  </div>
-                  <Button variant="ghost" size="sm" className="text-xs h-7 px-2 shrink-0">
-                    Manage <Icons.chevronRight className="w-3 h-3 ml-1" />
-                  </Button>
-               </div>
+              <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[var(--radius-md)] p-3 hover:bg-[var(--bg-hover)] transition-colors cursor-pointer" onClick={() => navigate(`/app/organizations/${org.id}/invites`)}>
+                <div className="w-8 h-8 rounded-[var(--radius-sm)] flex items-center justify-center shrink-0" style={{ backgroundColor: 'var(--warning-soft)', border: '1px solid var(--warning-border)' }}>
+                  <Icons.mail className="w-4 h-4" style={{ color: 'var(--warning)' }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <Text size="xs" className="font-medium truncate">{counts.pendingInvites} Pending Invites</Text>
+                  <Text size="xs" variant="muted" className="truncate text-[10px]">Users invited to the organization have not yet accepted.</Text>
+                </div>
+                <Button variant="ghost" size="sm" className="text-xs h-7 px-2 shrink-0">
+                  Manage <Icons.chevronRight className="w-3 h-3 ml-1" />
+                </Button>
+              </div>
             )}
-            
+
             {attentionItems.slice(0, 6).map((item, idx) => {
               const Icon = item.icon;
               return (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import {
   useCreateOrgRole,
@@ -8,6 +8,38 @@ import {
   usePermissionCatalog,
 } from '@/organization';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
+
+const PIN_STORAGE_KEY = 'ryokai.roles.pinned';
+const RECENT_STORAGE_KEY = 'ryokai.roles.recent';
+const INSPECTOR_STORAGE_KEY = 'ryokai.roles.inspectorOpen';
+const RECENT_LIMIT = 4;
+
+function readLocalSet(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch (e) {
+    return new Set();
+  }
+}
+
+function readLocalList(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function readLocalBool(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw === null ? fallback : raw === 'true';
+  } catch (e) {
+    return fallback;
+  }
+}
 
 export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
   const [selectedRole, setSelectedRole] = useState(null);
@@ -19,11 +51,45 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
   const [activeTab, setActiveTab] = useState('permissions');
   const [activeModuleCode, setActiveModuleCode] = useState(null);
   const [permSearchQuery, setPermSearchQuery] = useState('');
+  const [riskFilter, setRiskFilter] = useState('ALL'); // 'ALL' | 'ELEVATED'
+  const [collapsedGroups, setCollapsedGroups] = useState({});
 
   const [activePermission, setActivePermission] = useState(null);
   const [showReview, setShowReview] = useState(false);
   const [showCreateRole, setShowCreateRole] = useState(false);
   const [confirmPerm, setConfirmPerm] = useState(null);
+
+  // ── Inspector visibility — reclaim horizontal space for the permission list ──
+  const [inspectorOpen, setInspectorOpen] = useState(() => readLocalBool(INSPECTOR_STORAGE_KEY, true));
+  const toggleInspector = useCallback(() => {
+    setInspectorOpen((prev) => {
+      const next = !prev;
+      try { localStorage.setItem(INSPECTOR_STORAGE_KEY, String(next)); } catch (e) {}
+      return next;
+    });
+  }, []);
+
+  // ── Pinned / Recent roles (client-side convenience state) ──
+  const [pinnedRoleIds, setPinnedRoleIds] = useState(() => readLocalSet(PIN_STORAGE_KEY));
+  const [recentRoleIds, setRecentRoleIds] = useState(() => readLocalList(RECENT_STORAGE_KEY));
+
+  const togglePinRole = useCallback((roleId) => {
+    setPinnedRoleIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(roleId)) next.delete(roleId);
+      else next.add(roleId);
+      try { localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify([...next])); } catch (e) {}
+      return next;
+    });
+  }, []);
+
+  const pushRecentRole = useCallback((roleId) => {
+    setRecentRoleIds((prev) => {
+      const next = [roleId, ...prev.filter((id) => id !== roleId)].slice(0, RECENT_LIMIT);
+      try { localStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(next)); } catch (e) {}
+      return next;
+    });
+  }, []);
 
   const { data: catalogResponse, isLoading: catalogLoading } = usePermissionCatalog();
   const permissionModules = catalogResponse?.modules || [];
@@ -67,6 +133,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
       setLocalPriority(selectedRole.priority ?? 100);
       setActivePermission(null);
       setPermSearchQuery('');
+      setRiskFilter('ALL');
     } else {
       setLocalScopedPerms({});
       setLocalPriority(100);
@@ -127,6 +194,18 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     scopeChangedPerms.length +
     (priorityChanged ? 1 : 0);
 
+  const changeRisk = useMemo(() => {
+    const touched = [...addedPerms, ...removedPerms, ...scopeChangedPerms];
+    let critical = 0, high = 0;
+    touched.forEach((code) => {
+      const p = PERMISSION_MAP.get(code);
+      if (!p) return;
+      if (p.riskLevel === 'CRITICAL') critical++;
+      else if (p.riskLevel === 'HIGH') high++;
+    });
+    return { critical, high, total: critical + high };
+  }, [addedPerms, removedPerms, scopeChangedPerms, PERMISSION_MAP]);
+
   const isAdminRole = selectedRole?.name === 'ADMIN';
 
   const supervisionRank = useMemo(() => {
@@ -143,20 +222,33 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
   }, [roles, selectedRole, localPriority]);
 
   const filteredModules = useMemo(() => {
-    if (!permSearchQuery.trim()) return permissionModules;
-    const q = permSearchQuery.toLowerCase();
-    return permissionModules
-      .map((m) => ({
-        ...m,
-        permissions: m.permissions.filter(
-          (p) =>
-            p.name?.toLowerCase().includes(q) ||
-            p.code?.toLowerCase().includes(q) ||
-            p.description?.toLowerCase().includes(q)
-        ),
-      }))
-      .filter((m) => m.permissions.length > 0);
-  }, [permissionModules, permSearchQuery]);
+    let mods = permissionModules;
+    if (permSearchQuery.trim()) {
+      const q = permSearchQuery.toLowerCase();
+      mods = mods
+        .map((m) => ({
+          ...m,
+          permissions: m.permissions.filter(
+            (p) =>
+              p.name?.toLowerCase().includes(q) ||
+              p.code?.toLowerCase().includes(q) ||
+              p.description?.toLowerCase().includes(q)
+          ),
+        }))
+        .filter((m) => m.permissions.length > 0);
+    }
+    if (riskFilter === 'ELEVATED') {
+      mods = mods
+        .map((m) => ({
+          ...m,
+          permissions: m.permissions.filter(
+            (p) => p.riskLevel === 'CRITICAL' || p.riskLevel === 'HIGH'
+          ),
+        }))
+        .filter((m) => m.permissions.length > 0);
+    }
+    return mods;
+  }, [permissionModules, permSearchQuery, riskFilter]);
 
   const activeModuleData = filteredModules.find(
     (m) => m.moduleCode === activeModuleCode
@@ -175,17 +267,22 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
 
   useEffect(() => {
     if (
-      permSearchQuery.trim() &&
+      (permSearchQuery.trim() || riskFilter !== 'ALL') &&
       filteredModules.length > 0 &&
       !filteredModules.find((m) => m.moduleCode === activeModuleCode)
     ) {
       setActiveModuleCode(filteredModules[0].moduleCode);
     }
-  }, [filteredModules, activeModuleCode, permSearchQuery]);
+  }, [filteredModules, activeModuleCode, permSearchQuery, riskFilter]);
+
+  const toggleGroupCollapsed = useCallback((groupKey) => {
+    setCollapsedGroups((prev) => ({ ...prev, [groupKey]: !prev[groupKey] }));
+  }, []);
 
   const handleSelectRole = (role) => {
     setSelectedRole(role);
     setActiveTab('permissions');
+    pushRecentRole(role.id);
   };
 
   const togglePermission = (perm) => {
@@ -410,6 +507,11 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     roleSearchQuery,
     setRoleSearchQuery,
     handleSelectRole,
+    pinnedRoleIds,
+    togglePinRole,
+    recentRoleIds,
+    inspectorOpen,
+    toggleInspector,
     filteredModules,
     activeModuleCode,
     setActiveModuleCode,
@@ -419,6 +521,10 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     PERMISSION_MAP,
     permSearchQuery,
     setPermSearchQuery,
+    riskFilter,
+    setRiskFilter,
+    collapsedGroups,
+    toggleGroupCollapsed,
     activePermission,
     setActivePermission,
     togglePermission,
@@ -432,12 +538,14 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     removedPerms,
     scopeChangedPerms,
     priorityChanged,
+    changeRisk,
     localPriority,
     setLocalPriority,
     isDirty,
     changeCount,
     isAdminRole,
     supervisionRank,
+    originalMap,
     handleDiscardChanges,
     handleSaveChanges,
     showReview,

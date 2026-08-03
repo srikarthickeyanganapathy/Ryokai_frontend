@@ -10,20 +10,24 @@ import { Label } from '@/shared/ui/Typography/Label';
 import { Icons } from '@/shared/ui/Icons';
 import { toast } from 'sonner';
 
+const EMPTY_ROLES = [];
+
 export function InviteMemberModal({ isOpen, onClose, orgId }) {
   const [activeTab, setActiveTab] = useState('direct'); // 'direct' or 'link'
   const [username, setUsername] = useState('');
   const [roleId, setRoleId] = useState('');
   const [generatedLink, setGeneratedLink] = useState('');
   
-  const { data: roles = [], isLoading: rolesLoading } = useOrgRoles(orgId);
+  const { data: rawRoles, isLoading: rolesLoading } = useOrgRoles(orgId);
+  const roles = rawRoles ?? EMPTY_ROLES;
+
   const inviteMutation = useInviteMember(orgId);
   const linkMutation = useCreateInviteLink(orgId);
   
   const { myMembership, isSuperAdmin } = usePermissions();
 
   const assignableRoles = useMemo(() => {
-    if (!roles) return [];
+    if (!roles || roles.length === 0) return EMPTY_ROLES;
     const myPriority = myMembership?.rolePriority ?? 999;
     
     return roles.filter(r => {
@@ -33,16 +37,15 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
     });
   }, [roles, myMembership?.rolePriority, isSuperAdmin]);
 
-  // Set default role when roles load
+  // Set default role when roles load or change
   useEffect(() => {
-    if (assignableRoles.length > 0 && !roleId) {
-      const employeeRole = assignableRoles.find(r => r.name === 'EMPLOYEE') || assignableRoles[0];
-      setRoleId(employeeRole.id.toString());
-    } else if (assignableRoles.length > 0 && roleId) {
-      // If currently selected role is no longer assignable, reset it
-      if (!assignableRoles.find(r => r.id.toString() === roleId)) {
+    if (assignableRoles.length > 0) {
+      const isValidRole = assignableRoles.some(r => r.id.toString() === roleId);
+      if (!roleId || !isValidRole) {
         const employeeRole = assignableRoles.find(r => r.name === 'EMPLOYEE') || assignableRoles[0];
-        setRoleId(employeeRole.id.toString());
+        if (employeeRole) {
+          setRoleId(employeeRole.id.toString());
+        }
       }
     }
   }, [assignableRoles, roleId]);
@@ -79,8 +82,8 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
       if (!open) {
         setGeneratedLink('');
         setUsername('');
+        onClose();
       }
-      onClose(open);
     }}>
       <ModalContent className="sm:max-w-md">
         <ModalHeader>
