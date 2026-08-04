@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "@/app/providers/AppProvider";
 import { ErrorBoundary } from "@/app/providers/ErrorBoundary";
+import { InspectorProvider } from "@/context/InspectorContext";
 
 import { AuthLayout } from "@/app/layouts/AuthLayout";
 import { ProtectedRoute, PlatformRoute, TenantRoute } from "@/app/router/ProtectedRoute";
@@ -68,8 +69,9 @@ const AcceptInvitePage = Loadable(lazy(() => import("@/organization/pages/Accept
 export default function App() {
   return (
     <ErrorBoundary>
-      <AppProvider>
-        <Router>
+      <InspectorProvider>
+        <AppProvider>
+          <Router>
           <Routes>
             {/* Core Resolver */}
             <Route path="/" element={<RouteResolver />} />
@@ -162,8 +164,9 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         <SessionExpiredListener />
-      </Router>
-    </AppProvider>
+        </Router>
+      </AppProvider>
+      </InspectorProvider>
     </ErrorBoundary>
   );
 }

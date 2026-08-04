@@ -60,9 +60,10 @@ export function CrewTasksPage() {
       return status === 'DONE' || status === 'COMPLETED' || status === 'APPROVED';
     }).length;
     
-    const inProgress = tasks.filter(t => {
+    const claimed = tasks.filter(t => {
       const status = (t.currentStatus || t.status || '').toUpperCase();
-      return status.includes('PROGRESS') || status.includes('REVIEW');
+      const isDone = status === 'DONE' || status === 'COMPLETED' || status === 'APPROVED';
+      return !isDone && (t.assignee || t.assigneeId || status.includes('CLAIM') || status.includes('PROGRESS'));
     }).length;
 
     const overdue = tasks.filter(t => {
@@ -73,7 +74,7 @@ export function CrewTasksPage() {
 
     const completionRate = total > 0 ? Math.round((done / total) * 100) : 0;
     
-    return { total, done, inProgress, overdue, completionRate };
+    return { total, done, claimed, inProgress: claimed, overdue, completionRate };
   }, [tasks]);
 
   const selectedCount = Object.keys(rowSelection).length;
@@ -143,8 +144,8 @@ export function CrewTasksPage() {
                 <Activity className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-[18px] font-bold text-[var(--text-primary)] leading-none tabular-nums">{analytics.inProgress}</div>
-                <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mt-1">In Progress</div>
+                <div className="text-[18px] font-bold text-[var(--text-primary)] leading-none tabular-nums">{analytics.claimed}</div>
+                <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mt-1">Claimed</div>
               </div>
             </div>
 

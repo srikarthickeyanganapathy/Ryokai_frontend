@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AppSidebar, AppTopbar, GlobalCommandPalette } from '@/platform/workspace'
+import { WorkspaceInspector } from '@/components/inspector/WorkspaceInspector'
 import { useShortcuts } from "@/shared/hooks/useShortcuts"
 import {
   DrawerProvider,
@@ -69,8 +70,9 @@ export function MainLayout() {
         </div>
       </div>
       
-      {/* Global Command Palette */}
+      {/* Global Command Palette & Inspector */}
       <GlobalCommandPalette />
+      <WorkspaceInspector />
     </div>
   )
 }

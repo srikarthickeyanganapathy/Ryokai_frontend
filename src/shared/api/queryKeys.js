@@ -75,6 +75,7 @@ export const queryKeys = {
     members: (id) => ['organizations', id, 'members'],
     teams: (id) => ['organizations', id, 'teams'],
     leaveRequests: (id) => ['organizations', id, 'leave-requests'],
+    exitRequests: (id) => ['organizations', id, 'exit-requests'],
     invites: () => [...queryKeys.organizations.all, 'invites'],
   },
   announcements: {

@@ -74,28 +74,72 @@ export const createTeam = async (orgId, payload) => {
   return data;
 };
 
-export const requestLeave = async (orgId, reason) => {
-  const { data } = await api.post(`/organizations/${orgId}/leave`, { reason });
+// --- Leave Requests (Workforce Time Off) ---
+export const requestLeave = async (orgId, reasonOrPayload) => {
+  const payload = typeof reasonOrPayload === 'string' ? { reason: reasonOrPayload, leaveType: 'VACATION' } : reasonOrPayload;
+  const { data } = await api.post(`/organizations/${orgId}/leave-requests`, payload);
   return data;
 };
 
 export const approveLeave = async (orgId, requestId) => {
-  const { data } = await api.post(`/organizations/${orgId}/leave/${requestId}/approve`);
+  const { data } = await api.post(`/organizations/${orgId}/leave-requests/${requestId}/approve`);
   return data;
 };
 
 export const rejectLeave = async (orgId, requestId, comment) => {
-  const { data } = await api.post(`/organizations/${orgId}/leave/${requestId}/reject`, { comment });
+  const { data } = await api.post(`/organizations/${orgId}/leave-requests/${requestId}/reject`, { comment });
+  return data;
+};
+
+export const cancelLeave = async (orgId, requestId) => {
+  const { data } = await api.post(`/organizations/${orgId}/leave-requests/${requestId}/cancel`);
   return data;
 };
 
 export const getLeaveRequests = async (orgId) => {
-  const { data } = await api.get(`/organizations/${orgId}/leave`);
+  const { data } = await api.get(`/organizations/${orgId}/leave-requests`);
   return data;
 };
 
 export const getLeaveRequestStatus = async (orgId) => {
-  const { data } = await api.get(`/organizations/${orgId}/leave/status`);
+  const { data } = await api.get(`/organizations/${orgId}/leave-requests/status`);
+  return data;
+};
+
+// --- Exit Requests (Membership Lifecycle) ---
+export const getExitBlockers = async (orgId) => {
+  const { data } = await api.get(`/organizations/${orgId}/exit-requests/blockers`);
+  return data;
+};
+
+export const requestExit = async (orgId, payload = {}) => {
+  const body = typeof payload === 'string' ? { reason: payload } : payload;
+  const { data } = await api.post(`/organizations/${orgId}/exit-requests`, body);
+  return data;
+};
+
+export const approveExit = async (orgId, requestId, offboarding = false) => {
+  const { data } = await api.post(`/organizations/${orgId}/exit-requests/${requestId}/approve?offboarding=${offboarding}`);
+  return data;
+};
+
+export const rejectExit = async (orgId, requestId, comment) => {
+  const { data } = await api.post(`/organizations/${orgId}/exit-requests/${requestId}/reject`, { comment });
+  return data;
+};
+
+export const cancelExit = async (orgId, requestId) => {
+  const { data } = await api.post(`/organizations/${orgId}/exit-requests/${requestId}/cancel`);
+  return data;
+};
+
+export const getExitRequests = async (orgId) => {
+  const { data } = await api.get(`/organizations/${orgId}/exit-requests`);
+  return data;
+};
+
+export const getExitRequestStatus = async (orgId) => {
+  const { data } = await api.get(`/organizations/${orgId}/exit-requests/status`);
   return data;
 };
 

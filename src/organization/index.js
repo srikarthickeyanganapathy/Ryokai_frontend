@@ -15,3 +15,6 @@ export { AdminLeaveModal } from './sections/Members/AdminLeaveModal';
 export { InviteMemberModal } from './sections/Invites/InviteMemberModal';
 export { CreateTeamModal } from './teams/modals/CreateTeamModal';
 export { ManageTeamMembersModal } from './teams/modals/ManageTeamMembersModal';
+export * from './features/requests/RequestsProvider';
+export { RequestCard } from './features/requests/RequestCard';
+export { RequestDetailDrawer } from './features/requests/RequestDetailDrawer';

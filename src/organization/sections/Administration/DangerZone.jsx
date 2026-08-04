@@ -1,63 +1,88 @@
 import React, { useState } from 'react';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
-import { Icons } from '@/shared/ui/Icons';
 import { AdminLeaveModal } from '../Members/AdminLeaveModal';
+import { MemberExitModal } from '../Members/MemberExitModal';
 
 export function DangerZone({ orgId, members, isOrgAdmin }) {
   const [adminModalState, setAdminModalState] = useState({ isOpen: false, mode: 'transfer' });
-
-  if (!isOrgAdmin) return null;
+  const [isExitModalOpen, setIsExitModalOpen] = useState(false);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-3xl">
       <div>
-        <Heading level={4} className="text-[var(--danger)] text-base font-semibold mb-1">Danger Zone</Heading>
-        <Text size="sm" variant="muted" className="leading-relaxed">
-          Irreversible and critical administrative actions. Use with extreme caution.
+        <Heading level={4} className="text-base font-semibold text-[var(--text-primary)] mb-1">
+          Danger Zone
+        </Heading>
+        <Text size="sm" variant="muted">
+          Manage critical membership changes and irreversible organizational actions.
         </Text>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Transfer Ownership */}
-        <div className="border border-[var(--border-subtle)] bg-[var(--bg-elevated)] rounded-[var(--radius-lg)] p-5 flex flex-col justify-between gap-4 transition-colors hover:border-[var(--warning-border)]">
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <Text className="font-semibold text-[var(--text-primary)]">Transfer Ownership</Text>
-              <div className="px-2 py-0.5 rounded text-[10px] font-mono bg-[var(--warning-soft)] text-[var(--warning)] border border-[var(--warning-border)]">HIGH RISK</div>
+      <div className="space-y-4">
+        {isOrgAdmin ? (
+          <>
+            {/* Transfer Ownership Card for Admin */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl p-5 transition-colors duration-200 hover:border-[var(--border-default)]">
+              <div className="space-y-1 max-w-lg">
+                <Text className="font-medium text-[var(--text-primary)] text-sm">
+                  Transfer Ownership
+                </Text>
+                <Text size="xs" variant="muted" className="leading-relaxed">
+                  Transfer full administrative control of this organization to another active member. You will remain as a standard member.
+                </Text>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setAdminModalState({ isOpen: true, mode: 'transfer' })}
+                className="shrink-0 font-medium"
+              >
+                Transfer Ownership
+              </Button>
             </div>
-            <Text size="sm" variant="muted">
-              Hand over ADMIN role to another member. You will be demoted to DIRECTOR.
-            </Text>
-            <div className="mt-3 p-2 bg-[var(--bg-subtle)] rounded text-xs text-[var(--text-muted)] border border-[var(--border-subtle)]">
-              <span className="font-semibold">Impact:</span> Role change + task reassignment. <span className="font-semibold ml-2">Recovery:</span> Another transfer.
-            </div>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => setAdminModalState({ isOpen: true, mode: 'transfer' })} className="shrink-0 self-start">
-            <Icons.userCheck className="w-4 h-4 mr-2" />
-            Transfer Ownership
-          </Button>
-        </div>
 
-        {/* Delete Organization */}
-        <div className="bg-[var(--danger-soft)] border border-[var(--danger-border)] rounded-[var(--radius-lg)] p-5 flex flex-col justify-between gap-4">
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <Text className="font-semibold text-[var(--danger)]">Delete Organization</Text>
-              <div className="px-2 py-0.5 rounded text-[10px] font-mono bg-red-950 text-red-400 border border-red-900">CRITICAL RISK</div>
+            {/* Dissolve Organization Card for Admin */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl p-5 transition-colors duration-200 hover:border-red-500/40">
+              <div className="space-y-1 max-w-lg">
+                <Text className="font-medium text-[var(--text-primary)] text-sm">
+                  Dissolve Organization
+                </Text>
+                <Text size="xs" variant="muted" className="leading-relaxed">
+                  Permanently delete this organization, along with all associated teams, projects, workflows, and task records. This action cannot be undone.
+                </Text>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setAdminModalState({ isOpen: true, mode: 'dissolve' })}
+                className="shrink-0 font-medium text-red-500 hover:text-red-600 hover:border-red-500/50 hover:bg-red-500/5"
+              >
+                Dissolve Organization
+              </Button>
             </div>
-            <Text size="sm" className="text-[var(--danger)]/80">
-              Permanently dissolve the organization. All data, teams, projects, and tasks will be destroyed. This cannot be undone.
-            </Text>
-            <div className="mt-3 p-2 bg-red-950/20 rounded text-xs text-[var(--danger)]/90 border border-red-900/30">
-              <span className="font-semibold">Impact:</span> Full data deletion. <span className="font-semibold ml-2">Recovery:</span> None.
+          </>
+        ) : (
+          /* Exit Organization Card for Non-Admin Members */
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl p-5 transition-colors duration-200 hover:border-red-500/40">
+            <div className="space-y-1 max-w-lg">
+              <Text className="font-medium text-[var(--text-primary)] text-sm">
+                Exit Organization
+              </Text>
+              <Text size="xs" variant="muted" className="leading-relaxed">
+                Submit a formal request to relinquish your membership and depart from this organization. Once approved, new tasks cannot be assigned to you.
+              </Text>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsExitModalOpen(true)}
+              className="shrink-0 font-medium text-red-500 hover:text-red-600 hover:border-red-500/50 hover:bg-red-500/5"
+            >
+              Request Exit
+            </Button>
           </div>
-          <Button variant="danger" size="sm" onClick={() => setAdminModalState({ isOpen: true, mode: 'dissolve' })} className="shrink-0 self-start">
-            <Icons.trash2 className="w-4 h-4 mr-2" />
-            Dissolve Organization
-          </Button>
-        </div>
+        )}
       </div>
 
       <AdminLeaveModal
@@ -66,6 +91,12 @@ export function DangerZone({ orgId, members, isOrgAdmin }) {
         onClose={() => setAdminModalState({ isOpen: false, mode: 'transfer' })}
         orgId={orgId}
         members={members}
+      />
+
+      <MemberExitModal
+        isOpen={isExitModalOpen}
+        onClose={() => setIsExitModalOpen(false)}
+        orgId={orgId}
       />
     </div>
   );

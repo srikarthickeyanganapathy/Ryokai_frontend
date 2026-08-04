@@ -34,7 +34,7 @@ function CrewTaskColumn({ title, tasks, tone, onClaim, onComplete, onTaskClick }
   }[tone];
 
   return (
-    <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl flex flex-col overflow-hidden min-w-[280px] w-full max-w-[340px] shadow-sm">
+    <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl flex flex-col overflow-hidden min-w-[280px] w-full shadow-sm">
       <div className="px-4 py-2.5 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--bg-base)]/50 backdrop-blur-sm sticky top-0 z-10">
         <span className="flex items-center gap-2 text-[12px] font-semibold text-[var(--text-primary)] uppercase tracking-wider">
           <span className={cn('w-2 h-2 rounded-full', toneStyles.dot)} />
@@ -96,24 +96,24 @@ function CrewTaskColumn({ title, tasks, tone, onClaim, onComplete, onTaskClick }
                         </span>
                       )}
 
-                      {task.assignee ? (
+                      {task.assignee || task.assigneeId ? (
                         <div className="flex items-center gap-1.5">
                           <div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white text-[8px] font-bold flex items-center justify-center">
-                            {task.assignee.username?.charAt(0).toUpperCase() || 'U'}
+                            {task.assignee?.username?.charAt(0).toUpperCase() || 'M'}
                           </div>
-                          <span className="truncate max-w-[60px]">@{task.assignee.username}</span>
+                          <span className="truncate max-w-[60px]">{task.assignee?.username ? `@${task.assignee.username}` : 'Claimed'}</span>
                         </div>
                       ) : (
-                        !task.assignee && task.status !== 'Done' && (
+                        task.status !== 'Done' && (
                           <span className="flex items-center gap-1 text-[var(--warning)]">
-                            <User className="w-3 h-3" /> Unassigned
+                            <User className="w-3 h-3" /> Unclaimed
                           </span>
                         )
                       )}
                     </div>
 
                     <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                      {!task.assignee && task.status !== 'Done' && (
+                      {!task.assignee && !task.assigneeId && task.status !== 'Done' && (
                         <Button
                           size="sm"
                           variant="outline"
@@ -170,14 +170,19 @@ export function TasksTab({ crewId, tasks }) {
   const taskBoard = useMemo(() => {
     const filtered = activeFilter === 'ALL' ? tasks : tasks.filter(t => normalizePriority(t.priority) === activeFilter);
 
-    const unassigned = [], inProgress = [], review = [], completed = [];
+    const unclaimed = [], claimed = [], completed = [];
     filtered.forEach(t => {
-      if (t.status === 'Done') completed.push(t);
-      else if (!t.assignee) unassigned.push(t);
-      else if ((t.status || '').toLowerCase().includes('review')) review.push(t);
-      else inProgress.push(t);
+      const status = (t.status || t.currentStatus || '').toUpperCase();
+      const isDone = t.status === 'Done' || status === 'DONE' || status === 'COMPLETED' || status === 'APPROVED';
+      if (isDone) {
+        completed.push(t);
+      } else if (!t.assignee && !t.assigneeId) {
+        unclaimed.push(t);
+      } else {
+        claimed.push(t);
+      }
     });
-    return { unassigned, inProgress, review, completed };
+    return { unclaimed, claimed, completed };
   }, [tasks, activeFilter]);
 
   const stats = useMemo(() => ({
@@ -270,10 +275,9 @@ export function TasksTab({ crewId, tasks }) {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 pb-20">
-          <CrewTaskColumn title="Unassigned" tasks={taskBoard.unassigned} tone="warning" onClaim={claimTaskMutation.mutate} onComplete={completeTaskMutation.mutate} onTaskClick={setSelectedTask} />
-          <CrewTaskColumn title="In Progress" tasks={taskBoard.inProgress} tone="info" onClaim={claimTaskMutation.mutate} onComplete={completeTaskMutation.mutate} onTaskClick={setSelectedTask} />
-          <CrewTaskColumn title="Review" tasks={taskBoard.review} tone="accent" onClaim={claimTaskMutation.mutate} onComplete={completeTaskMutation.mutate} onTaskClick={setSelectedTask} />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-20">
+          <CrewTaskColumn title="Unclaimed" tasks={taskBoard.unclaimed} tone="warning" onClaim={claimTaskMutation.mutate} onComplete={completeTaskMutation.mutate} onTaskClick={setSelectedTask} />
+          <CrewTaskColumn title="Claimed" tasks={taskBoard.claimed} tone="info" onClaim={claimTaskMutation.mutate} onComplete={completeTaskMutation.mutate} onTaskClick={setSelectedTask} />
           <CrewTaskColumn title="Completed" tasks={taskBoard.completed} tone="muted" onClaim={claimTaskMutation.mutate} onComplete={completeTaskMutation.mutate} onTaskClick={setSelectedTask} />
         </div>
       )}
@@ -352,7 +356,7 @@ export function TasksTab({ crewId, tasks }) {
               <Button type="button" variant="outline" size="sm" className="h-8 px-4 text-[12px] font-medium" onClick={() => setIsCreateOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" size="default" className="h-10 px-5 text-[13px] font-medium shadow-sm" isLoading={createTaskMutation.isPending}>
+              <Button type="submit" variant="primary" size="sm" className="h-8 px-4 text-[12px] font-semibold shadow-sm" isLoading={createTaskMutation.isPending}>
                 Create Task
               </Button>
             </div>

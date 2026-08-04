@@ -91,7 +91,7 @@ export function OrganizationAdministrationPage() {
             <OrganizationAdministrationHub orgId={orgId} counts={counts} />
           )}
 
-          {activeTab === 'danger' && isOrgAdmin && (
+          {activeTab === 'danger' && (
             <DangerZone orgId={orgId} members={members} isOrgAdmin={isOrgAdmin} />
           )}
         </ConfigurationLayout>

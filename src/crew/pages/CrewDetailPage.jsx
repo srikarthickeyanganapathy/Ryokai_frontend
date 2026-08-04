@@ -12,7 +12,7 @@ import { CrewTabs } from '../components/CrewTabs';
 import { Icons } from '@/shared/ui/Icons';
 import { useTaskList } from '@/task';
 import { useProjects } from '@/project';
-import { useCrew, useCrewMembers, useCrewChannels, useCrewProjects, useLeaveCrew } from '../features/hooks/useCrews';
+import { useCrew, useCrewMembers, useCrewChannels, useCrewProjects, useLeaveCrew, useDeleteCrew } from '../features/hooks/useCrews';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
 import { WorkspaceShell, ManagementLayout, PageStateContainer } from '@/shared/workspace-framework';
 import { useAuth } from '@/identity';
@@ -38,17 +38,76 @@ export function CrewDetailPage() {
     return myMembership?.role === 'CREATOR' || myMembership?.role === 'OWNER';
   }, [crew, members, user]);
 
+  const deleteCrewMutation = useDeleteCrew();
   const leaveCrewMutation = useLeaveCrew();
+
   const handleLeaveCrew = async () => {
-    if (isCreator && members.length > 1) {
-      toast.error('You cannot leave a crew you created while other members remain.');
-      return;
+    if (isCreator) {
+      if (members.length > 1) {
+        const wantsTransfer = await confirm({
+          title: 'Owner Action Required',
+          description: `As the owner of ${crew?.name || 'this crew'}, you cannot leave while other members remain. Would you like to transfer ownership to another member?`,
+          confirmLabel: 'Transfer Ownership',
+          cancelLabel: 'Delete Crew Instead',
+          danger: false,
+        });
+
+        if (wantsTransfer) {
+          setActiveTab('members');
+          toast.info('Please select a member and click Transfer Ownership before leaving.');
+          return;
+        }
+
+        const confirmDelete = await confirm({
+          title: 'Delete Crew Permanently?',
+          description: `This will permanently delete ${crew?.name || 'this crew'} and remove all channels, tasks, and member access. This action cannot be undone.`,
+          confirmLabel: 'Delete Crew',
+          cancelLabel: 'Cancel',
+          danger: true,
+        });
+
+        if (confirmDelete) {
+          deleteCrewMutation.mutate(crewId, {
+            onSuccess: () => {
+              toast.success(`${crew?.name || 'Crew'} deleted successfully.`);
+              navigate('/app/crews');
+            },
+            onError: (err) => {
+              toast.error(err?.response?.data?.message || 'Failed to delete crew.');
+            }
+          });
+        }
+        return;
+      } else {
+        const confirmDelete = await confirm({
+          title: 'Delete Crew & Leave?',
+          description: `As the sole member of ${crew?.name || 'this crew'}, leaving will permanently delete it. Do you want to delete this crew?`,
+          confirmLabel: 'Delete Crew',
+          cancelLabel: 'Cancel',
+          danger: true,
+        });
+
+        if (confirmDelete) {
+          deleteCrewMutation.mutate(crewId, {
+            onSuccess: () => {
+              toast.success(`${crew?.name || 'Crew'} deleted.`);
+              navigate('/app/crews');
+            },
+            onError: (err) => {
+              toast.error(err?.response?.data?.message || 'Failed to delete crew.');
+            }
+          });
+        }
+        return;
+      }
     }
+
     const confirmed = await confirm({
       title: 'Leave Crew?',
-      message: `Are you sure you want to exit ${crew?.name}?`,
-      confirmText: 'Leave',
-      variant: 'danger'
+      description: `Are you sure you want to exit ${crew?.name || 'this crew'}?`,
+      confirmLabel: 'Leave Crew',
+      cancelLabel: 'Cancel',
+      danger: true,
     });
     if (!confirmed) return;
 
@@ -148,7 +207,7 @@ export function CrewDetailPage() {
                   {activeTab === 'channels' && <ChannelsTab crewId={crewId} channels={channels} isCreator={isCreator} />}
                   {activeTab === 'projects' && <ProjectsTab crewId={crewId} sharedProjects={sharedProjects} allProjects={allProjects} />}
                   {activeTab === 'whiteboards' && <WhiteboardsTab crewId={crewId} isCreator={isCreator} />}
-                  {activeTab === 'members' && <MembersTab crewId={crewId} members={members} memberCap={crew.memberCap} isCreator={isCreator} />}
+                  {activeTab === 'members' && <MembersTab crewId={crewId} members={members} memberCap={crew?.memberCap} isCreator={isCreator} />}
                 </motion.div>
               </AnimatePresence>
             </div>

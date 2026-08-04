@@ -258,6 +258,107 @@ export const useLeaveRequestStatus = (orgId) => {
   });
 };
 
+export const useCancelLeave = (orgId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (requestId) => orgApi.cancelLeave(orgId, requestId),
+    onSuccess: () => {
+      toast.success('Leave request cancelled');
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.leaveRequests(orgId) });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to cancel leave request');
+    },
+  });
+};
+
+// --- Exit Requests (Membership Lifecycle) ---
+export const useExitBlockers = (orgId) => {
+  return useQuery({
+    queryKey: [...queryKeys.organizations.exitRequests(orgId), 'blockers'],
+    queryFn: () => orgApi.getExitBlockers(orgId),
+    enabled: !!orgId,
+  });
+};
+
+export const useRequestExit = (orgId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload) => orgApi.requestExit(orgId, payload),
+    onSuccess: () => {
+      toast.success('Exit request submitted. Waiting for review.');
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.exitRequests(orgId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.members(orgId) });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to submit exit request');
+    },
+  });
+};
+
+export const useApproveExit = (orgId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ requestId, offboarding = false }) => orgApi.approveExit(orgId, requestId, offboarding),
+    onSuccess: (_, { offboarding }) => {
+      toast.success(offboarding ? 'Member moved to offboarding state' : 'Exit request approved & membership terminated');
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.exitRequests(orgId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.members(orgId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to process exit approval');
+    },
+  });
+};
+
+export const useRejectExit = (orgId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ requestId, comment }) => orgApi.rejectExit(orgId, requestId, comment),
+    onSuccess: () => {
+      toast.success('Exit request rejected');
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.exitRequests(orgId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.members(orgId) });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to reject exit request');
+    },
+  });
+};
+
+export const useCancelExit = (orgId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (requestId) => orgApi.cancelExit(orgId, requestId),
+    onSuccess: () => {
+      toast.success('Exit request cancelled');
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.exitRequests(orgId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations.members(orgId) });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to cancel exit request');
+    },
+  });
+};
+
+export const useExitRequests = (orgId) => {
+  return useQuery({
+    queryKey: queryKeys.organizations.exitRequests(orgId),
+    queryFn: () => orgApi.getExitRequests(orgId),
+    enabled: !!orgId,
+  });
+};
+
+export const useExitRequestStatus = (orgId) => {
+  return useQuery({
+    queryKey: [...queryKeys.organizations.exitRequests(orgId), 'status'],
+    queryFn: () => orgApi.getExitRequestStatus(orgId),
+    enabled: !!orgId,
+  });
+};
+
 // --- C1 Fix: Member Role Update ---
 
 export const useUpdateMemberRole = (orgId) => {

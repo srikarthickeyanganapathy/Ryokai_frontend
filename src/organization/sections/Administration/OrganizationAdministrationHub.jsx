@@ -51,8 +51,8 @@ export function OrganizationAdministrationHub({ orgId, counts }) {
       color: 'var(--danger)'
     },
     {
-      title: 'Leave Requests',
-      description: 'Review pending member exits',
+      title: 'Requests Inbox',
+      description: 'Review workforce leave & member exits',
       icon: Icons.doorOpen,
       count: counts.pendingLeave,
       countLabel: 'Requests',

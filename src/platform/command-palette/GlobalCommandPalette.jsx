@@ -16,7 +16,7 @@ import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 export function GlobalCommandPalette() {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
-  const { setWorkspaceMode } = useWorkspace()
+  const { setWorkspaceMode, organizations = [], setActiveOrganization } = useWorkspace()
 
   useEffect(() => {
     const down = (e) => {
@@ -36,7 +36,7 @@ export function GlobalCommandPalette() {
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Type a command or search..." />
+      <CommandInput placeholder="Type a command or search workspace..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         
@@ -53,24 +53,60 @@ export function GlobalCommandPalette() {
             <Icons.folderClosed className="mr-2 h-4 w-4" />
             <span>Projects</span>
           </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/app/members'))}>
+            <Icons.users className="mr-2 h-4 w-4" />
+            <span>Members & Directory</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/app/teams'))}>
+            <Icons.users className="mr-2 h-4 w-4" />
+            <span>Teams</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/app/goals'))}>
+            <Icons.target className="mr-2 h-4 w-4" />
+            <span>Goals</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/app/leave-requests'))}>
+            <Icons.calendar className="mr-2 h-4 w-4" />
+            <span>Leave Requests & Exits</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/app/announcements'))}>
+            <Icons.megaphone className="mr-2 h-4 w-4" />
+            <span>Announcements</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/app/roles'))}>
+            <Icons.shield className="mr-2 h-4 w-4" />
+            <span>Roles & Permissions</span>
+          </CommandItem>
         </CommandGroup>
         
         <CommandSeparator />
         
-        <CommandGroup heading="Lens (Workspace)">
+        <CommandGroup heading="Lens (Workspace Mode)">
           <CommandItem onSelect={() => runCommand(() => {
             setWorkspaceMode('PERSONAL')
             navigate('/app')
           })}>
             <Icons.user className="mr-2 h-4 w-4" />
-            <span>Switch to Personal</span>
+            <span>Switch to Personal Space</span>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => {
             setWorkspaceMode('CREWS')
             navigate('/app')
           })}>
             <Icons.rocket className="mr-2 h-4 w-4" />
-            <span>Switch to Crews</span>
+            <span>Switch to Crews Space</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => {
+            if (organizations && organizations.length > 0) {
+              setWorkspaceMode('ORG')
+              setActiveOrganization(organizations[0])
+              navigate('/app')
+            } else {
+              navigate('/app/organizations')
+            }
+          })}>
+            <Icons.building className="mr-2 h-4 w-4 text-[var(--accent)]" />
+            <span>Switch to Organization Workspace</span>
           </CommandItem>
         </CommandGroup>
         
@@ -84,7 +120,7 @@ export function GlobalCommandPalette() {
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate('/app/settings/security'))}>
             <Icons.shield className="mr-2 h-4 w-4" />
-            <span>Security</span>
+            <span>Security Settings</span>
           </CommandItem>
         </CommandGroup>
       </CommandList>

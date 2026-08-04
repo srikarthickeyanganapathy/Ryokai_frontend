@@ -135,6 +135,9 @@ export function AppSidebar({ isOpen, onClose }) {
       setWorkspaceMode('PERSONAL')
     } else if (val === 'CREWS') {
       setWorkspaceMode('CREWS')
+    } else if (val === 'CREATE_ORG') {
+      navigate('/app/organizations')
+      return
     } else if (val.startsWith('org-')) {
       const orgId = val.replace('org-', '')
       const org = organizations.find(o => o.id.toString() === orgId)
@@ -375,7 +378,7 @@ export function AppSidebar({ isOpen, onClose }) {
                 {isExpanded && (
                   <div className="flex flex-col text-left overflow-hidden">
                     <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
-                      {workspaceMode === 'ORG' ? activeOrganization?.name : (workspaceMode === 'CREWS' ? 'Crews' : 'Personal Space')}
+                      {workspaceMode === 'ORG' ? (activeOrganization?.name || 'Organization Workspace') : (workspaceMode === 'CREWS' ? 'Crews' : 'Personal Space')}
                     </span>
                     <span className="text-[10px] text-[var(--text-tertiary)] truncate uppercase tracking-wider">Switch Lens</span>
                   </div>
@@ -402,21 +405,31 @@ export function AppSidebar({ isOpen, onClose }) {
                 <span>Personal Space</span>
               </button>
 
-              {organizations.length > 0 && <Separator className="my-1 bg-[var(--color-border-subtle)]" />}
+              <Separator className="my-1 bg-[var(--color-border-subtle)]" />
 
-              {organizations.map(org => (
+              {organizations.length > 0 ? (
+                organizations.map(org => (
+                  <button
+                    key={org.id}
+                    onClick={() => handleDropdownChange(`org-${org.id}`)}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-colors text-left",
+                      workspaceMode === 'ORG' && activeOrganization?.id === org.id ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
+                    )}
+                  >
+                    <Icons.building className="w-4 h-4 text-[var(--accent)]" />
+                    <span className="truncate">{org.name}</span>
+                  </button>
+                ))
+              ) : (
                 <button
-                  key={org.id}
-                  onClick={() => handleDropdownChange(`org-${org.id}`)}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-colors text-left",
-                    workspaceMode === 'ORG' && activeOrganization?.id === org.id ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
-                  )}
+                  onClick={() => handleDropdownChange('CREATE_ORG')}
+                  className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors text-left"
                 >
-                  <Icons.building className="w-4 h-4" />
-                  <span className="truncate">{org.name}</span>
+                  <Icons.building className="w-4 h-4 text-emerald-500" />
+                  <span>Organization Workspace</span>
                 </button>
-              ))}
+              )}
 
               <Separator className="my-1 bg-[var(--color-border-subtle)]" />
 
