@@ -79,7 +79,7 @@ export function CompletionChart({ data }) {
 }
 
 export function PriorityChart({ data }) {
-  const defaultColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042']
+  const defaultColors = ['var(--accent)', 'var(--success)', 'var(--warning)', 'var(--danger)']
   
   return (
     <Card className="h-full bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)]/50 backdrop-blur-xl shadow-sm">

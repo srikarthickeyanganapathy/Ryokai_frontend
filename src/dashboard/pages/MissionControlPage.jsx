@@ -114,7 +114,7 @@ export function MissionControlPage() {
             </div>
 
             {/* Context Rail Column */}
-            <div className="w-80 flex-shrink-0">
+            <div className="w-full lg:w-80 flex-shrink-0">
               {renderWidgets('context')}
             </div>
           </div>

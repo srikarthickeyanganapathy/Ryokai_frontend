@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import { PageHeader } from '@/shared/ui/PageHeader'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { DataTable } from '@/shared/ui/data-table/DataTable'
 import { useUsersList } from '@/identity'
@@ -88,12 +89,10 @@ export function PlatformUsersPage() {
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-1">Platform Users</Heading>
-          <Text variant="muted" className="text-[13px]">Manage global identities and assign platform-level roles.</Text>
-        </div>
-        {activeTab === 'users' && (
+      <PageHeader
+        title="Platform Users"
+        subtitle="Manage global identities and assign platform-level roles."
+        actions={activeTab === 'users' ? (
           <div className="w-[300px] relative">
             <Icons.search className="absolute left-2.5 top-2.5 h-4 w-4 text-[var(--text-muted)]" />
             <Input 
@@ -103,8 +102,9 @@ export function PlatformUsersPage() {
               className="pl-9 h-9"
             />
           </div>
-        )}
-      </div>
+        ) : null}
+        className="mb-6"
+      />
 
       <div className="flex items-center gap-6 border-b border-[var(--color-border-subtle)] mb-6">
         {tabs.map(tab => (
@@ -135,8 +135,8 @@ export function PlatformUsersPage() {
           <DataTable 
             columns={columns}
             data={filteredUsers}
-            loading={usersLoading || rolesLoading}
-            emptyMessage="No users found."
+            isLoading={usersLoading || rolesLoading}
+            emptyStateTitle="No users found."
           />
         )}
         

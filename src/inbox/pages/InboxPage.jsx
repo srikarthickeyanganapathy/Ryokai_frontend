@@ -75,6 +75,7 @@ export function InboxPage() {
                 <Button
                   variant="outline"
                   onClick={() => markAllRead.mutate()}
+                  isLoading={markAllRead.isPending}
                   disabled={markAllRead.isPending}
                   className="h-9 text-[13px]"
                 >
@@ -189,6 +190,7 @@ export function InboxPage() {
                               <Button 
                                 size="sm" 
                                 variant="primary" 
+                                isLoading={acceptInviteMutation.isPending}
                                 disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -201,6 +203,7 @@ export function InboxPage() {
                               <Button 
                                 size="sm" 
                                 variant="outline" 
+                                isLoading={declineInviteMutation.isPending}
                                 disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending}
                                 onClick={(e) => {
                                   e.stopPropagation();

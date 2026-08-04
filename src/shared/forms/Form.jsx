@@ -1,4 +1,5 @@
 import React, { createContext, useContext, forwardRef } from 'react'
+import { Slot } from '@radix-ui/react-slot'
 import { FormProvider, Controller, useFormContext } from 'react-hook-form'
 import { cn } from '@/shared/lib/cn'
 import { Label } from '@/shared/ui/Typography'
@@ -69,7 +70,7 @@ const FormControl = forwardRef(({ ...props }, ref) => {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
 
   return (
-    <div
+    <Slot
       ref={ref}
       id={formItemId}
       aria-describedby={!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`}

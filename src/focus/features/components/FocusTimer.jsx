@@ -8,8 +8,8 @@ import { useActiveFocus, useStartFocus, useStopFocus } from '../hooks/useFocus'
 
 const POMODORO_MODES = [
   { id: 'focus', label: '25m Focus', minutes: 25, accent: 'var(--accent)' },
-  { id: 'shortBreak', label: '5m Break', minutes: 5, accent: '#10B981' },
-  { id: 'longBreak', label: '15m Reset', minutes: 15, accent: '#8B5CF6' },
+  { id: 'shortBreak', label: '5m Break', minutes: 5, accent: 'var(--success)' },
+  { id: 'longBreak', label: '15m Reset', minutes: 15, accent: 'var(--accent)' },
 ]
 
 export function FocusTimer({ task, onTaskComplete }) {
@@ -227,6 +227,8 @@ export function FocusTimer({ task, onTaskComplete }) {
         <Button
           size="lg"
           onClick={toggleStartPause}
+          disabled={startMutation.isPending || stopMutation.isPending}
+          isLoading={startMutation.isPending || stopMutation.isPending}
           className={cn(
             "rounded-full h-10 sm:h-11 px-6 sm:px-8 text-xs sm:text-sm font-semibold tracking-wide gap-2 shadow-lg transition-all duration-300 hover:scale-105",
             isRunning ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[var(--accent)] text-white hover:opacity-90"

@@ -35,14 +35,14 @@ import { useCrews, useCreateCrew } from '../features/hooks/useCrews';
 
 // Preset Brand Color Palette Swatches for Mission Command Cards
 const PRESET_COLORS = [
-  { id: 'indigo', label: 'Indigo', hex: '#6366f1', hue: 239, sat: 84, light: 67 },
-  { id: 'cyan', label: 'Cyan', hex: '#06b6d4', hue: 189, sat: 94, light: 43 },
-  { id: 'emerald', label: 'Emerald', hex: '#10b981', hue: 160, sat: 84, light: 39 },
-  { id: 'amber', label: 'Amber', hex: '#f59e0b', hue: 38, sat: 92, light: 50 },
-  { id: 'rose', label: 'Rose', hex: '#f43f5e', hue: 349, sat: 89, light: 60 },
-  { id: 'violet', label: 'Violet', hex: '#8b5cf6', hue: 263, sat: 90, light: 66 },
-  { id: 'azure', label: 'Azure', hex: '#3b82f6', hue: 217, sat: 91, light: 60 },
-  { id: 'teal', label: 'Teal', hex: '#14b8a6', hue: 173, sat: 80, light: 40 },
+  { id: 'indigo', label: 'Indigo', hex: 'var(--accent)', hue: 239, sat: 84, light: 67 },
+  { id: 'cyan', label: 'Cyan', hex: 'var(--accent)', hue: 189, sat: 94, light: 43 },
+  { id: 'emerald', label: 'Emerald', hex: 'var(--success)', hue: 160, sat: 84, light: 39 },
+  { id: 'amber', label: 'Amber', hex: 'var(--warning)', hue: 38, sat: 92, light: 50 },
+  { id: 'rose', label: 'Rose', hex: 'var(--danger)', hue: 349, sat: 89, light: 60 },
+  { id: 'violet', label: 'Violet', hex: 'var(--accent)', hue: 263, sat: 90, light: 66 },
+  { id: 'azure', label: 'Azure', hex: 'var(--accent)', hue: 217, sat: 91, light: 60 },
+  { id: 'teal', label: 'Teal', hex: 'var(--success)', hue: 173, sat: 80, light: 40 },
 ];
 
 function hashHue(str = '') {

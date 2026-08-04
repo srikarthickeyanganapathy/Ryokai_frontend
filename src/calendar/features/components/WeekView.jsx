@@ -1,4 +1,5 @@
 import { Button } from '@/shared/ui/Button';
+import { Skeleton } from '@/shared/ui/Skeleton';
 import React, { useMemo } from 'react'
 import { startOfWeek, endOfWeek, eachDayOfInterval, format, isToday, parseISO } from 'date-fns'
 import { PRIORITY_COLORS } from '@/shared/lib/priority'
@@ -24,7 +25,18 @@ export function WeekView({ tasks = [], events = [], currentDate, isLoading, onTa
     return map
   }, [events])
 
-  if (isLoading) return <div className="p-8 text-center text-[var(--text-muted)] text-[13px]">Loading week...</div>
+  if (isLoading) {
+    return (
+      <div className="flex h-full min-h-[600px] gap-2 p-4">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <div key={i} className="flex-1 flex flex-col gap-2">
+            <Skeleton className="h-12 w-full rounded-md" />
+            <Skeleton className="flex-1 min-h-[500px] w-full rounded-md" />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   const typeColors = { MILESTONE: 'bg-purple-500/10 text-purple-500 border-purple-500/20' }
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Skeleton } from '@/shared/ui/Skeleton';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/shared/api/api';
@@ -18,7 +19,21 @@ export function RecentlyActive() {
   });
 
   if (isLoading) {
-    return <Card><CardContent className="p-6 text-sm text-ui-text-muted">Loading members...</CardContent></Card>;
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-5 w-32" />
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex justify-between items-center">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    );
   }
 
   // Sort by lastLoginAt descending

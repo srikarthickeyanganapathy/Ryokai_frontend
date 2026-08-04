@@ -1,4 +1,5 @@
 import React from 'react';
+import { Skeleton } from '@/shared/ui/Skeleton';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/shared/api/api';
@@ -18,7 +19,21 @@ export function WorkloadBrief() {
   });
 
   if (isLoading) {
-    return <Card><CardContent className="p-6">Loading workload...</CardContent></Card>;
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-5 w-32" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex justify-between items-center">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

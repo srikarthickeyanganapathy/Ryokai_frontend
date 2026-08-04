@@ -823,7 +823,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
               <Text size="xs" variant="muted">Created {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : 'Ã¢â‚¬â€'}</Text>
               <div className="flex items-center gap-2">
                 {renderStateMachineActions("sm")}
-                <Button size="sm" disabled={!isDirty} onClick={() => {
+                <Button size="sm" disabled={!isDirty || updateTask.isPending} isLoading={updateTask.isPending} onClick={() => {
                   updateTask.mutate({ id: task.id, payload: localEdits }, {
                     onSuccess: () => setIsDirty(false)
                   })

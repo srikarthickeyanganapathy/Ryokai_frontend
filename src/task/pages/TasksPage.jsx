@@ -161,6 +161,8 @@ export function TasksPage() {
   const rejectTaskMutation = useRejectTask()
   const [reassignTaskData, setReassignTaskData] = useState(null)
 
+  const isBulkPending = completePersonalTaskMutation.isPending || completeCrewTaskMutation.isPending || submitTaskMutation.isPending || approveTaskMutation.isPending || reassignTaskMutation.isPending || rejectTaskMutation.isPending || deleteTaskMutation.isPending
+
   const handleQuickComplete = (task) => {
     const current = task.currentStatus?.toUpperCase()
     if (task.isPersonal) {
@@ -452,31 +454,31 @@ export function TasksPage() {
                 </Text>
                 <div className="h-4 w-px bg-[var(--border-default)]" />
                 {(workspaceMode === 'PERSONAL' || canReviewTask) && (
-                  <Button variant="ghost" onClick={handleBulkComplete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                  <Button variant="ghost" onClick={handleBulkComplete} disabled={isBulkPending} isLoading={completePersonalTaskMutation.isPending || completeCrewTaskMutation.isPending || approveTaskMutation.isPending} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
                     {workspaceMode === 'PERSONAL' ? 'Complete' : 'Approve'}
                   </Button>
                 )}
                 {workspaceMode !== 'PERSONAL' && (
                   <>
                     {(workspaceMode === 'PERSONAL' || canEditTask) && (
-                      <Button variant="ghost" onClick={handleBulkSubmit} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                      <Button variant="ghost" onClick={handleBulkSubmit} disabled={isBulkPending} isLoading={submitTaskMutation.isPending} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
                         Submit
                       </Button>
                     )}
                     {(workspaceMode === 'PERSONAL' || canAssignTask) && (
-                      <Button variant="ghost" onClick={handleOpenReassignModal} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+                      <Button variant="ghost" onClick={handleOpenReassignModal} disabled={isBulkPending} isLoading={reassignTaskMutation.isPending} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
                         Reassign
                       </Button>
                     )}
                     {(workspaceMode === 'PERSONAL' || canReviewTask) && (
-                      <Button variant="ghost" onClick={handleBulkReject} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
+                      <Button variant="ghost" onClick={handleBulkReject} disabled={isBulkPending} isLoading={rejectTaskMutation.isPending} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
                         Reject
                       </Button>
                     )}
                   </>
                 )}
                 {(workspaceMode === 'PERSONAL' || canDeleteTask) && (
-                  <Button variant="ghost" onClick={handleBulkDelete} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
+                  <Button variant="ghost" onClick={handleBulkDelete} disabled={isBulkPending} isLoading={deleteTaskMutation.isPending} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
                     Delete
                   </Button>
                 )}

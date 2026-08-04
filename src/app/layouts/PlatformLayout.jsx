@@ -15,7 +15,7 @@ export function PlatformLayout() {
           <AppTopbar onMenuClick={() => {}} />
           
           <main className="flex-1 overflow-y-auto overflow-x-hidden relative custom-scrollbar">
-            <div className="w-full h-full p-6 md:p-10">
+            <div className="w-full h-full">
               <Outlet />
             </div>
           </main>

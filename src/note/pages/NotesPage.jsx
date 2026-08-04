@@ -9,6 +9,7 @@ import { useNotes, useDeleteNote, useUpdateNote } from '@/note'
 import { NotePanel } from '@/note'
 import { PageHeader } from '@/shared/ui/PageHeader'
 import { WorkspaceShell, ManagementLayout, PageStateContainer } from '@/shared/workspace-framework'
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 
 const NOTE_COLOR_STYLES = {
   default: '',
@@ -23,10 +24,23 @@ export function NotesPage() {
   const { data: notes = [], isLoading } = useNotes()
   const deleteNote = useDeleteNote()
   const updateNote = useUpdateNote()
+  const { confirm, dialog } = useConfirmDialog()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [activeNote, setActiveNote] = useState(null)
   const [isPanelOpen, setIsPanelOpen] = useState(false)
+
+  const handleDeleteNote = async (e, noteId) => {
+    e.stopPropagation()
+    const confirmed = await confirm({
+      title: 'Delete Note?',
+      description: 'Are you sure you want to delete this note?',
+      danger: true,
+    })
+    if (confirmed) {
+      deleteNote.mutate(noteId)
+    }
+  }
 
   const openNew = () => { setActiveNote(null); setIsPanelOpen(true) }
   const openEdit = (note) => { setActiveNote(note); setIsPanelOpen(true) }
@@ -81,14 +95,14 @@ export function NotesPage() {
                 <div className="flex items-center gap-1.5 mb-3 text-[11px] font-bold text-[var(--accent)] uppercase tracking-wider">
                   <Pin className="w-3 h-3 fill-current" /> PINNED NOTES ({pinnedNotes.length})
                 </div>
-                <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 [&>*]:mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {pinnedNotes.map(note => (
                     <div key={note.id} onClick={() => openEdit(note)} className={cn('break-inside-avoid p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--accent-border)] cursor-pointer hover:shadow-sm transition-all group', NOTE_COLOR_STYLES[note.color])}>
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <Heading level={4} className="line-clamp-1 text-[13px] font-semibold tracking-tight">{note.title || 'Untitled'}</Heading>
                         <div className="flex items-center gap-0.5 shrink-0 opacity-80 group-hover:opacity-100">
                           <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); togglePin(note) }}><Pin className="w-3 h-3 fill-[var(--accent)] text-[var(--accent)]" /></Button>
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); deleteNote.mutate(note.id) }}><Trash2 className="w-3 h-3 text-[var(--text-muted)] hover:text-[var(--danger)]" /></Button>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={(e) => handleDeleteNote(e, note.id)}><Trash2 className="w-3 h-3 text-[var(--text-muted)] hover:text-[var(--danger)]" /></Button>
                         </div>
                       </div>
                       <Text size="xs" variant="muted" className="whitespace-pre-wrap line-clamp-6 text-[11px] leading-relaxed">{note.content}</Text>
@@ -101,14 +115,14 @@ export function NotesPage() {
             {otherNotes.length > 0 && (
               <div>
                 {pinnedNotes.length > 0 && <div className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-3">OTHER NOTES ({otherNotes.length})</div>}
-                <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 [&>*]:mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {otherNotes.map(note => (
                     <div key={note.id} onClick={() => openEdit(note)} className={cn('break-inside-avoid p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] cursor-pointer hover:shadow-sm transition-all group', NOTE_COLOR_STYLES[note.color])}>
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <Heading level={4} className="line-clamp-1 text-[13px] font-semibold tracking-tight">{note.title || 'Untitled'}</Heading>
                         <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); togglePin(note) }}><Pin className="w-3 h-3 text-[var(--text-muted)]" /></Button>
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); deleteNote.mutate(note.id) }}><Trash2 className="w-3 h-3 text-[var(--text-muted)] hover:text-[var(--danger)]" /></Button>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={(e) => handleDeleteNote(e, note.id)}><Trash2 className="w-3 h-3 text-[var(--text-muted)] hover:text-[var(--danger)]" /></Button>
                         </div>
                       </div>
                       <Text size="xs" variant="muted" className="whitespace-pre-wrap line-clamp-6 text-[11px] leading-relaxed">{note.content}</Text>
@@ -122,6 +136,7 @@ export function NotesPage() {
       </ManagementLayout>
 
       <NotePanel note={activeNote} isOpen={isPanelOpen} onClose={closePanel} />
+      {dialog}
     </WorkspaceShell>
   )
 }

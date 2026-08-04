@@ -1,4 +1,5 @@
 import React from 'react'
+import { PageHeader } from '@/shared/ui/PageHeader'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card'
 import { Icons } from '@/shared/ui/Icons'
@@ -14,10 +15,11 @@ export function PlatformDashboardPage() {
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-      <div className="mb-6">
-        <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-1">Platform Dashboard</Heading>
-        <Text variant="muted" className="text-[13px]">Overview of platform health and status.</Text>
-      </div>
+      <PageHeader 
+        title="Platform Dashboard" 
+        subtitle="Overview of platform health and status." 
+        className="mb-6" 
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Card>

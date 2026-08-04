@@ -42,8 +42,8 @@ const TEMPLATES = [
     category: 'Ideation',
     icon: Lightbulb,
     desc: 'Mind maps, sticky note clusters & freeform team ideation.',
-    accentColor: '#F59E0B',
-    bgColor: 'rgba(245, 158, 11, 0.08)'
+    accentColor: 'var(--warning)',
+    bgColor: 'var(--warning-soft)'
   },
   {
     id: 'architecture',
@@ -51,8 +51,8 @@ const TEMPLATES = [
     category: 'System Design',
     icon: GitBranch,
     desc: 'System topology, flowcharts, microservices & DB schemas.',
-    accentColor: '#4169E1',
-    bgColor: 'rgba(65, 105, 225, 0.08)'
+    accentColor: 'var(--accent)',
+    bgColor: 'var(--accent-soft)'
   },
   {
     id: 'retrospective',
@@ -60,8 +60,8 @@ const TEMPLATES = [
     category: 'Agile',
     icon: MessageSquare,
     desc: 'Sprint recap with What Went Well, To Improve & Action Items.',
-    accentColor: '#10B981',
-    bgColor: 'rgba(16, 185, 129, 0.08)'
+    accentColor: 'var(--success)',
+    bgColor: 'var(--success-soft)'
   },
   {
     id: 'user-journey',
@@ -69,8 +69,8 @@ const TEMPLATES = [
     category: 'UX Design',
     icon: Compass,
     desc: 'Map persona touchpoints, user pain points & solution paths.',
-    accentColor: '#8B5CF6',
-    bgColor: 'rgba(139, 92, 246, 0.08)'
+    accentColor: 'var(--accent)',
+    bgColor: 'var(--accent-soft)'
   },
   {
     id: 'blank',
@@ -78,8 +78,8 @@ const TEMPLATES = [
     category: 'Freeform',
     icon: LayoutGrid,
     desc: 'Clean infinite canvas for custom sketching and notes.',
-    accentColor: '#6B7280',
-    bgColor: 'rgba(107, 114, 128, 0.08)'
+    accentColor: 'var(--text-tertiary)',
+    bgColor: 'var(--bg-subtle)'
   }
 ];
 
@@ -192,7 +192,7 @@ function VisualCanvasThumbnail({ board, templateId }) {
           <circle cx="25" cy="60" r="8" fill="var(--accent)" />
           <circle cx="75" cy="38" r="8" fill="var(--success)" />
           <circle cx="125" cy="72" r="8" fill="var(--warning)" />
-          <circle cx="175" cy="40" r="8" fill="#8B5CF6" />
+          <circle cx="175" cy="40" r="8" fill="var(--accent)" />
 
           <rect x="15" y="75" width="20" height="12" rx="2" fill="var(--bg-card)" stroke="var(--border-subtle)" />
           <rect x="65" y="52" width="20" height="12" rx="2" fill="var(--bg-card)" stroke="var(--border-subtle)" />

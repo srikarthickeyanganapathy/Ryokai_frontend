@@ -49,7 +49,7 @@ export function KanbanColumn({ column, tasks, onTaskClick }) {
   return (
     <div className={cn(
       "flex flex-col bg-[var(--bg-subtle)] rounded-[var(--radius-lg)] border border-[var(--border-subtle)] transition-[width,min-width,flex,background-color] duration-[var(--duration-slow)] ease-[var(--ease-out)]",
-      collapsed ? "w-[52px] min-w-[52px] flex-none" : "flex-1 min-w-0"
+      collapsed ? "w-[52px] min-w-[52px] flex-none" : "flex-1 min-w-[280px]"
     )}>
       {/* Column Header */}
       <div className="p-4 flex items-center justify-between sticky top-0 z-10">

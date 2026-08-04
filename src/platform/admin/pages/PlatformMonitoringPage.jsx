@@ -1,5 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
+import { PageHeader } from '@/shared/ui/PageHeader'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card'
 import { Icons } from '@/shared/ui/Icons'
@@ -7,10 +8,11 @@ import { Icons } from '@/shared/ui/Icons'
 export function PlatformMonitoringPage() {
   return (
     <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-      <div className="mb-6">
-        <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-1">Platform Monitoring</Heading>
-        <Text variant="muted" className="text-[13px]">Infrastructure observability and metrics.</Text>
-      </div>
+      <PageHeader
+        title="Platform Monitoring"
+        subtitle="Infrastructure observability and metrics."
+        className="mb-6"
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Prometheus Placeholder */}

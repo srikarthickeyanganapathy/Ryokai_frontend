@@ -372,7 +372,7 @@ export function AppSidebar({ isOpen, onClose }) {
             <PopoverTrigger asChild>
               <button
                 title={!isExpanded ? "Switch Lens" : undefined}
-                className={cn("flex items-center rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] transition-all duration-300 shadow-sm shrink-0 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]", isExpanded ? "w-full px-3 py-2 justify-start gap-3" : "justify-center w-10 h-10")}
+                className={cn("flex items-center rounded-2xl bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] transition-all duration-300 shadow-sm shrink-0 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]", isExpanded ? "w-full px-3 py-2 justify-start gap-3" : "justify-center w-10 h-10")}
               >
                 <div className="shrink-0">{getWorkspaceIcon()}</div>
                 {isExpanded && (
@@ -389,7 +389,7 @@ export function AppSidebar({ isOpen, onClose }) {
               side="right"
               align="start"
               sideOffset={14}
-              className="w-56 p-2 rounded-2xl border-[var(--border-subtle)] bg-[var(--bg-elevated)]/95 backdrop-blur-xl shadow-xl flex flex-col gap-1 z-[9999]"
+              className="w-56 p-2 rounded-2xl border-[var(--color-border-subtle)] bg-[var(--bg-elevated)]/95 backdrop-blur-xl shadow-xl flex flex-col gap-1 z-[9999]"
             >
               <div className="px-3 pt-1 pb-2">
                 <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--text-tertiary)]">Operating Lens</span>

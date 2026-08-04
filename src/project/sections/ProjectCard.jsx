@@ -29,7 +29,7 @@ export function ProjectCard({ project }) {
             <div className="flex items-center gap-3 min-w-0">
               <div 
                 className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105"
-                style={{ backgroundColor: `${safeColor}1a`, color: safeColor }}
+                style={{ backgroundColor: safeColor.startsWith('var(') ? 'var(--accent-soft)' : `${safeColor}1a`, color: safeColor }}
               >
                 <Icons.projects className="w-4 h-4" />
               </div>

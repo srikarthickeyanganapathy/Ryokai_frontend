@@ -2,14 +2,14 @@ import React from 'react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { cn } from '@/shared/lib/cn'
+import { Progress } from '@/shared/ui/Progress'
+import { EmptyState } from '@/shared/ui/EmptyState'
 
-export function ProgressBar({ value, max, className, barClassName }) {
-  const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0
-  return (
-    <div className={cn('h-1.5 w-full rounded-full bg-[var(--bg-subtle)] overflow-hidden', className)}>
-      <div className={cn('h-full rounded-full bg-[var(--accent)] transition-[width] duration-500', barClassName)} style={{ width: `${pct}%` }} />
-    </div>
-  )
+export { Progress, EmptyState }
+
+export function ProgressBar({ value, max, className }) {
+  const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : (value || 0)
+  return <Progress value={pct} className={className} />
 }
 
 export function LockIcon(props) { return (<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.3" /><path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" strokeWidth="1.3" /></svg>) }
@@ -36,16 +36,7 @@ export function PermissionButton({ allowed, reason, onClick, children, variant =
   )
 }
 
-export function EmptyState({ icon: Icon, title, description, actionLabel, onAction, actionAllowed = true, actionReason }) {
-  return (
-    <div className="text-center py-16 bg-[var(--bg-card)] border border-dashed border-[var(--border-subtle)] rounded-xl flex flex-col items-center justify-center gap-2">
-      {Icon && <Icon className="w-6 h-6 text-[var(--text-muted)] mb-2" />}
-      <Heading level={4} className="text-[14px] font-semibold tracking-tight">{title}</Heading>
-      {description && <Text variant="muted" size="sm" className="max-w-xs text-[12px]">{description}</Text>}
-      {actionLabel && <div className="mt-4"><PermissionButton allowed={actionAllowed} reason={actionReason} onClick={onAction} icon={ChecklistIcon}>{actionLabel}</PermissionButton></div>}
-    </div>
-  )
-}
+
 
 export function SummaryStat({ label, value, icon: Icon, accent }) {
   return (

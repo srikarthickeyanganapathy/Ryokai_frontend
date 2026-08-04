@@ -78,7 +78,7 @@ export function AppTopbar({ onMenuClick }) {
   const unread = typeof unreadCount === 'number' ? unreadCount : 0
 
   return (
-    <header className="h-12 flex items-center justify-between px-3 md:px-4 border-b border-[var(--border-subtle)] bg-[var(--bg-base)]/70 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-10 shadow-[var(--inset-highlight-soft)]">
+    <header className="h-12 flex items-center justify-between px-3 md:px-4 border-b border-[var(--color-border-subtle)] bg-[var(--bg-base)]/70 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-10 shadow-[var(--inset-highlight-soft)]">
 
       <div className="flex items-center gap-4 flex-1 sm:min-w-[200px]">
         <IconButton
@@ -111,7 +111,7 @@ export function AppTopbar({ onMenuClick }) {
               <Icons.plus className="w-5 h-5" />
             </IconButton>
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-48 bg-[var(--bg-elevated)]/95 backdrop-blur-xl border-[var(--border-subtle)] rounded-2xl p-2 shadow-xl flex flex-col">
+          <PopoverContent align="end" className="w-48 bg-[var(--bg-elevated)]/95 backdrop-blur-xl border-[var(--color-border-subtle)] rounded-2xl p-2 shadow-xl flex flex-col">
             <button onClick={() => navigate('/app/tasks')} className="flex items-center gap-2.5 rounded-xl cursor-pointer p-2 hover:bg-[var(--bg-hover)] text-sm text-left">
               <Icons.listTodo className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Create Task</span>
@@ -124,7 +124,7 @@ export function AppTopbar({ onMenuClick }) {
               <Icons.pencil className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Capture Idea</span>
             </button>
-            <Separator className="my-1 bg-[var(--border-subtle)]" />
+            <Separator className="my-1 bg-[var(--color-border-subtle)]" />
             <button onClick={() => navigate('/app/organizations')} className="flex items-center gap-2.5 rounded-xl cursor-pointer p-2 hover:bg-[var(--bg-hover)] text-sm text-left">
               <Icons.userPlus className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Invite User</span>
@@ -161,7 +161,7 @@ export function AppTopbar({ onMenuClick }) {
           </PopoverTrigger>
           <PopoverContent align="end" className="w-80 p-0 max-h-[420px] flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between px-3 py-2.5 border-b border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between px-3 py-2.5 border-b border-[var(--color-border-subtle)]">
               <Heading level={4} className="text-[13px]">Notifications</Heading>
               {unread > 0 && (
                 <button
@@ -203,7 +203,7 @@ export function AppTopbar({ onMenuClick }) {
                   <div
                     key={n.id}
                     className={cn(
-                      'flex items-start gap-3 px-3 py-2.5 border-b border-[var(--border-subtle)] last:border-b-0 transition-colors duration-[var(--duration-base)] ease-[var(--ease-out)] cursor-pointer group',
+                      'flex items-start gap-3 px-3 py-2.5 border-b border-[var(--color-border-subtle)] last:border-b-0 transition-colors duration-[var(--duration-base)] ease-[var(--ease-out)] cursor-pointer group',
                       !isRead && 'bg-[var(--accent-soft)]',
                       'hover:bg-[var(--bg-hover)]'
                     )}

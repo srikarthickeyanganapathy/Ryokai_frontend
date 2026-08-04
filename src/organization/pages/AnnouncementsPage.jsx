@@ -29,10 +29,13 @@ export function AnnouncementsPage() {
   const { canManageAnnouncements } = usePermissions();
   
   const orgId = activeOrganization?.id;
-  const { data: announcementsPage, isLoading } = useAnnouncements(orgId, { page: 0, size: 20 });
+  const [page, setPage] = useState(0);
+  const { data: announcementsPage, isLoading } = useAnnouncements(orgId, { page, size: 20 });
   const deleteMutation = useDeleteAnnouncement(orgId);
   
   const announcements = announcementsPage?.content || [];
+  const totalPages = announcementsPage?.totalPages || 0;
+  const isLastPage = announcementsPage?.last ?? (totalPages ? page >= totalPages - 1 : announcements.length < 20);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -121,6 +124,28 @@ export function AnnouncementsPage() {
                 </motion.div>
               ))}
             </AnimatePresence>
+
+            <div className="flex items-center justify-between pt-4 border-t border-[var(--border-subtle)]">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((prev) => Math.max(0, prev - 1))}
+                disabled={page === 0}
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-[var(--text-muted)] font-medium">
+                Page {page + 1}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((prev) => prev + 1)}
+                disabled={isLastPage}
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </PageStateContainer>
       </ManagementLayout>

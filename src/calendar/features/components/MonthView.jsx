@@ -1,4 +1,5 @@
 import { Button } from '@/shared/ui/Button';
+import { Skeleton } from '@/shared/ui/Skeleton';
 import React, { useMemo, useState } from 'react'
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth, isToday, parseISO } from 'date-fns'
 import { DndContext, closestCenter, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
@@ -113,7 +114,22 @@ export function MonthView({ tasks = [], events = [], currentDate, isLoading, onT
     return map
   }, [effectiveEvents])
 
-  if (isLoading) return <div className="p-8 text-center text-[var(--text-muted)] text-[13px]">Loading calendar...</div>
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-full space-y-2 p-4">
+        <div className="grid grid-cols-7 gap-2">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <Skeleton key={i} className="h-4 w-full" />
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-2 flex-1 auto-rows-fr min-h-[400px]">
+          {Array.from({ length: 35 }).map((_, i) => (
+            <Skeleton key={i} className="h-full min-h-[80px] w-full rounded-md" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 

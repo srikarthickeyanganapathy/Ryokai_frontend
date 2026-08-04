@@ -1,5 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
+import { PageHeader } from '@/shared/ui/PageHeader'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Card, CardContent } from '@/shared/ui/Card'
 import { Icons } from '@/shared/ui/Icons'
@@ -7,10 +8,11 @@ import { Icons } from '@/shared/ui/Icons'
 export function PlatformAuditPage() {
   return (
     <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-      <div className="mb-6">
-        <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-1">Global Audit Logs</Heading>
-        <Text variant="muted" className="text-[13px]">Platform-wide security and compliance auditing.</Text>
-      </div>
+      <PageHeader
+        title="Global Audit Logs"
+        subtitle="Platform-wide security and compliance auditing."
+        className="mb-6"
+      />
 
       <Card className="border-dashed bg-[var(--bg-elevated)] border-[var(--color-border-subtle)] flex-1 min-h-[300px] flex items-center justify-center opacity-70">
         <CardContent className="flex flex-col items-center justify-center text-center p-12">

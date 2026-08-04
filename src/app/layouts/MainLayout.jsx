@@ -57,7 +57,7 @@ export function MainLayout() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.99 }}
                   transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-full h-full p-6 md:p-10"
+                  className="w-full h-full"
                 >
                   <Outlet />
                 </motion.div>

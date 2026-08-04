@@ -48,7 +48,7 @@ export function EventForm({ onSubmit, onCancel, isLoading, defaultValues }) {
 
       <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-subtle)]">
         {onCancel && <Button type="button" variant="outline" size="sm" className="h-8 text-[12px]" onClick={onCancel}>Cancel</Button>}
-        <Button type="submit" size="sm" className="h-8 text-[12px]" disabled={isLoading}>{isLoading ? 'Creating…' : 'Create Event'}</Button>
+        <Button type="submit" size="sm" className="h-8 text-[12px]" disabled={isLoading} isLoading={isLoading}>{isLoading ? 'Creating…' : 'Create Event'}</Button>
       </div>
     </form>
   )

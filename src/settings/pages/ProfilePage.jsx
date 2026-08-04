@@ -12,6 +12,8 @@ import { useProfile, useUpdateProfile, useUploadAvatar } from '@/identity'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar'
 import { Icons } from '@/shared/ui/Icons'
 import { PageHeader } from '@/shared/ui/PageHeader'
+import { Spinner } from '@/shared/ui/Spinner'
+import { cn } from '@/shared/lib/cn'
 import {
   WorkspaceShell,
   ConfigurationLayout,
@@ -82,13 +84,17 @@ export function ProfilePage() {
 
         {/* Profile Content */}
         <div className="px-6 pb-6 pt-0 relative flex flex-col sm:flex-row items-center sm:items-end gap-5 -mt-10">
-          <div className="relative group shrink-0 cursor-pointer" onClick={handleAvatarClick}>
+          <div className={cn("relative group shrink-0", uploadAvatar.isPending ? "pointer-events-none opacity-80" : "cursor-pointer")} onClick={handleAvatarClick}>
             <Avatar size="xl" className="w-20 h-20 bg-[var(--accent)] text-white font-bold text-2xl shadow-xl ring-4 ring-[var(--bg-elevated)] group-hover:opacity-80 transition-opacity">
               <AvatarImage src={user?.avatarUrl} />
               <AvatarFallback>{(user?.name || user?.username || 'U').charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
-            <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <Icons.image className="w-6 h-6 text-white" />
+            <div className={cn("absolute inset-0 bg-black/50 rounded-full flex items-center justify-center transition-opacity", uploadAvatar.isPending ? "opacity-100" : "opacity-0 group-hover:opacity-100")}>
+              {uploadAvatar.isPending ? (
+                <Spinner size="sm" className="text-white" />
+              ) : (
+                <Icons.image className="w-6 h-6 text-white" />
+              )}
             </div>
             <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-[var(--bg-elevated)] shadow-sm" title="Online" />
             <input 
@@ -206,7 +212,7 @@ export function ProfilePage() {
                   type="submit" 
                   size="sm"
                   isLoading={updateProfile.isPending} 
-                  disabled={isLoading}
+                  disabled={isLoading || updateProfile.isPending}
                   className="rounded-xl px-5 font-bold shadow-sm"
                 >
                   Save Profile Changes

@@ -1,5 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
+import { PageHeader } from '@/shared/ui/PageHeader'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card'
 import { Icons } from '@/shared/ui/Icons'
@@ -7,10 +8,11 @@ import { Icons } from '@/shared/ui/Icons'
 export function PlatformSettingsPage() {
   return (
     <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-      <div className="mb-6">
-        <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-1">Platform Settings</Heading>
-        <Text variant="muted" className="text-[13px]">Global configuration and environment details.</Text>
-      </div>
+      <PageHeader
+        title="Platform Settings"
+        subtitle="Global configuration and environment details."
+        className="mb-6"
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         

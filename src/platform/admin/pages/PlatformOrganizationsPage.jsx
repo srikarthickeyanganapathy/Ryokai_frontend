@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
+import { PageHeader } from '@/shared/ui/PageHeader'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { DataTable } from '@/shared/ui/data-table/DataTable'
 import { useAdminOrganizations, useSuspendOrganization, useActivateOrganization } from '@/platform/admin/features/hooks/useAdmin'
@@ -7,11 +8,13 @@ import { Button } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
 import { Input } from '@/shared/ui/Input'
 import { Badge } from '@/shared/ui/Badge'
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 
 export function PlatformOrganizationsPage() {
   const { data: orgs, isLoading } = useAdminOrganizations()
   const suspendOrg = useSuspendOrganization()
   const activateOrg = useActivateOrganization()
+  const { confirm, dialog } = useConfirmDialog()
   const [searchTerm, setSearchTerm] = useState('')
 
   const filteredOrgs = useMemo(() => {
@@ -69,7 +72,14 @@ export function PlatformOrganizationsPage() {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => suspendOrg.mutate(org.id)}
+            onClick={async () => {
+              const confirmed = await confirm({
+                title: 'Suspend Organization?',
+                description: 'Are you sure you want to suspend this organization?',
+                danger: true,
+              })
+              if (confirmed) suspendOrg.mutate(org.id)
+            }}
             disabled={suspendOrg.isPending}
             className="h-7 text-xs text-red-500 hover:bg-red-500/10 hover:text-red-600"
           >
@@ -79,25 +89,26 @@ export function PlatformOrganizationsPage() {
         )
       }
     }
-  ], [activateOrg, suspendOrg])
+  ], [activateOrg, suspendOrg, confirm])
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <Heading level={2} className="tracking-tight text-[20px] font-semibold mb-1">Organizations</Heading>
-          <Text variant="muted" className="text-[13px]">Oversight and governance of all platform tenants.</Text>
-        </div>
-        <div className="w-[300px] relative">
-          <Icons.search className="absolute left-2.5 top-2.5 h-4 w-4 text-[var(--text-muted)]" />
-          <Input 
-            placeholder="Search organizations..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 h-9"
-          />
-        </div>
-      </div>
+      <PageHeader
+        title="Organizations"
+        subtitle="Oversight and governance of all platform tenants."
+        actions={
+          <div className="w-[300px] relative">
+            <Icons.search className="absolute left-2.5 top-2.5 h-4 w-4 text-[var(--text-muted)]" />
+            <Input 
+              placeholder="Search organizations..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 h-9"
+            />
+          </div>
+        }
+        className="mb-6"
+      />
 
       <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl overflow-hidden shadow-sm">
         <DataTable
@@ -107,6 +118,7 @@ export function PlatformOrganizationsPage() {
           emptyMessage="No organizations found."
         />
       </div>
+      {dialog}
     </div>
   )
 }
