@@ -1,56 +1,126 @@
-import React from 'react'
+import React, { useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { Badge } from '@/shared/ui/Badge'
+import { Button } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
-import { PermissionButton, ProgressBar } from '../components/Shared'
-
-function formatRelative(dateStr) {
-  if (!dateStr) return null
-  const d = new Date(dateStr)
-  if (Number.isNaN(d.getTime())) return null
-  const days = Math.floor((Date.now() - d.getTime()) / (1000 * 60 * 60 * 24))
-  if (days <= 0) return 'Today'
-  if (days === 1) return 'Yesterday'
-  if (days < 7) return `${days} days ago`
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-}
+import { PermissionButton } from '../components/Shared'
+import { ImmersiveEmptyState } from '@/shared/ui/Immersive'
+import { Users } from 'lucide-react'
 
 export function MembersTab({ team, workload, teamTasks, hasProjectIdOnTasks, hasTaskTimestamps, canManage, onManageMembers }) {
+  const members = team?.members || [];
+  
+  // Calculate max workload to normalize progress bars
+  const maxWorkload = useMemo(() => {
+    const values = Object.values(workload);
+    return values.length > 0 ? Math.max(...values, 1) : 1;
+  }, [workload]);
+
+  if (members.length === 0) {
+    return (
+      <div className="py-16">
+        <ImmersiveEmptyState
+          icon={Users}
+          title="No members in this team yet"
+          description="Invite members from your organization to start collaborating on tasks and projects."
+          action={canManage ? <Button onClick={onManageMembers}>Manage Members</Button> : null}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 sm:p-6 space-y-5 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between">
-        <Heading level={3} className="text-[14px] font-semibold tracking-tight">Roster</Heading>
-        <PermissionButton allowed={canManage} reason="You don't have permission to manage team members." onClick={onManageMembers} icon={Icons.users}>Manage Members</PermissionButton>
+    <div className="px-6 py-8 max-w-[1200px] mx-auto">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <Heading level={3} className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
+            Team Roster
+          </Heading>
+          <Text size="sm" variant="muted" className="mt-1">
+            {members.length} member{members.length === 1 ? '' : 's'} currently assigned to this team.
+          </Text>
+        </div>
+        <PermissionButton 
+          allowed={canManage} 
+          reason="You don't have permission to manage team members." 
+          onClick={onManageMembers} 
+          icon={Icons.users}
+          variant="outline"
+          className="bg-[var(--bg-card)] hover:bg-[var(--bg-subtle)] border-[var(--border-subtle)] text-sm font-medium h-9 px-4"
+        >
+          Manage Roster
+        </PermissionButton>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {team.members?.map(m => {
-          const taskCount = workload[m.username] || 0
-          const relativeMax = Math.max(...Object.values(workload), 1)
-          const tone = taskCount > 4 ? 'High' : taskCount > 2 ? 'Medium' : 'Low'
-          const toneClasses = taskCount > 4 ? 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20' : taskCount > 2 ? 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20' : 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]'
-          const memberProjectCount = hasProjectIdOnTasks ? new Set(teamTasks.filter(t => t.assignedTo === m.username && t.projectId != null).map(t => t.projectId)).size : null
-          const lastTask = hasTaskTimestamps ? [...teamTasks].filter(t => t.assignedTo === m.username).sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0))[0] : null
-          const lastAssignment = lastTask ? formatRelative(lastTask.updatedAt || lastTask.createdAt) : null
+
+      <motion.div 
+        initial="hidden" 
+        animate="visible" 
+        variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } }}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+      >
+        {members.map(m => {
+          const taskCount = workload[m.username] || 0;
+          const workloadPct = Math.min(100, Math.round((taskCount / maxWorkload) * 100));
+          
+          // Determine tone based on task count
+          const tone = taskCount > 5 ? 'danger' : taskCount > 3 ? 'warning' : 'accent';
+          const barColor = tone === 'danger' ? 'bg-red-500' : tone === 'warning' ? 'bg-amber-500' : 'bg-[var(--accent)]';
+          const textColor = tone === 'danger' ? 'text-red-500' : tone === 'warning' ? 'text-amber-500' : 'text-[var(--text-muted)]';
+
+          // Generate soft avatar background
+          const hash = m.username?.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0) || 0;
+          const hue1 = Math.abs(hash) % 360;
+          const hue2 = (hue1 + 40) % 360;
+
           return (
-            <div key={m.id} className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[12px] font-bold shrink-0 shadow-sm">{m.username.charAt(0).toUpperCase()}</div>
-                  <div className="min-w-0"><span className="font-semibold block text-[var(--text-primary)] truncate text-[13px]">{m.username}</span><span className="text-[11px] text-[var(--text-muted)]">{m.orgRole || 'Member'}</span></div>
+            <motion.div
+              key={m.id}
+              variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } } }}
+              className="group relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-5 hover:border-[var(--accent-border)] hover:shadow-sm transition-all duration-300 flex flex-col"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                {/* Soft Gradient Avatar */}
+                <div 
+                  className="w-12 h-12 rounded-full flex items-center justify-center font-semibold text-white shadow-sm ring-1 ring-black/5 shrink-0"
+                  style={{ background: `linear-gradient(135deg, hsl(${hue1} 70% 60%), hsl(${hue2} 70% 45%))` }}
+                >
+                  {m.username?.charAt(0).toUpperCase() || '?'}
                 </div>
-                <Badge variant="outline" className={cn('text-[9px] font-semibold shrink-0', toneClasses)}>{tone}</Badge>
+                
+                <div className="min-w-0 flex-1">
+                  <Heading level={4} className="text-[15px] font-semibold text-[var(--text-primary)] truncate">
+                    {m.username}
+                  </Heading>
+                  <Text size="xs" variant="muted" className="capitalize">
+                    {m.orgRole?.toLowerCase() || 'team member'}
+                  </Text>
+                </div>
               </div>
-              <ProgressBar value={taskCount} max={relativeMax} className="h-1.5 mb-3" barClassName={taskCount > 4 ? 'bg-[var(--danger)]' : taskCount > 2 ? 'bg-[var(--warning)]' : 'bg-[var(--accent)]'} />
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-[var(--text-muted)]">
-                <span>{taskCount} Active Task{taskCount === 1 ? '' : 's'}</span>
-                {memberProjectCount != null && memberProjectCount > 0 && <span>{memberProjectCount} Project{memberProjectCount === 1 ? '' : 's'}</span>}
-                {lastAssignment && <span>Last Assignment: {lastAssignment}</span>}
+
+              {/* Workload Visualization */}
+              <div className="mt-auto pt-4 border-t border-[var(--border-subtle)]/50">
+                <div className="flex items-center justify-between mb-1.5">
+                  <Text size="xs" variant="muted" className="font-medium uppercase tracking-wider">
+                    Active Workload
+                  </Text>
+                  <Text size="xs" className={cn("font-semibold tabular-nums", textColor)}>
+                    {taskCount} {taskCount === 1 ? 'Task' : 'Tasks'}
+                  </Text>
+                </div>
+                <div className="h-1.5 w-full bg-[var(--bg-subtle)] rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${workloadPct}%` }}
+                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                    className={cn("h-full rounded-full", barColor)} 
+                  />
+                </div>
               </div>
-            </div>
-          )
+            </motion.div>
+          );
         })}
-      </div>
+      </motion.div>
     </div>
-  )
+  );
 }

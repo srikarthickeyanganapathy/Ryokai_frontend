@@ -1,11 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as goalsApi from '../api/goals.api'
 import { queryKeys } from '@/shared/api/queryKeys'
+import { normalizeGoal } from '../../entities/model/normalizer'
 import { toast } from 'sonner'
 
 export const useGoals = (orgId) => useQuery({
   queryKey: queryKeys.goals.list(orgId),
-  queryFn: () => goalsApi.getGoals(orgId),
+  queryFn: () => goalsApi.getGoals(orgId).then(data => (Array.isArray(data) ? data.map(normalizeGoal) : [])),
   enabled: !!orgId,
 })
 

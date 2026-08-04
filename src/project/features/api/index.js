@@ -47,6 +47,6 @@ export const projectsApi = {
 
   getProjectActivities: async (id, params = {}) => {
     const { data } = await api.get(`/projects/${id}/activities`, { params });
-    return data;
+    return Array.isArray(data) ? data : data?.content || [];
   },
 };

@@ -204,6 +204,7 @@ export function TeamDetailPage() {
 
         {activeTab === 'chat' && (
           <DiscussionTab
+            teamId={teamId}
             messages={messages}
             messagesLoading={messagesLoading}
             user={user}

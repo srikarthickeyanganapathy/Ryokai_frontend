@@ -1,63 +1,198 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Text } from '@/shared/ui/Typography'
-import { Badge } from '@/shared/ui/Badge'
 import { cn } from '@/shared/lib/cn'
-import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
+import { normalizePriority } from '@/shared/lib/priority'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
-import { EmptyState, ChecklistIcon, LockIcon } from '../components/Shared'
+import { ImmersiveEmptyState } from '@/shared/ui/Immersive'
+import { CheckCheckIcon, Calendar, MoreHorizontal } from 'lucide-react'
 
-function TaskColumn({ title, tasks, tone, team, canAssignTask, isReadOnly, assigningTaskId, setAssigningTaskId, handleAssignTask }) {
-  const toneDot = { warning: 'bg-[var(--warning)]', info: 'bg-[var(--info)]', accent: 'bg-[var(--accent)]', muted: 'bg-[var(--text-muted)]' }[tone]
-  return (
-    <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl flex flex-col overflow-hidden min-w-[250px]">
-      <div className="px-4 py-3 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--bg-subtle)]/30">
-        <span className="flex items-center gap-2 text-[12px] font-semibold text-[var(--text-primary)]"><span className={cn('w-1.5 h-1.5 rounded-full', toneDot)} />{title}</span>
-        <span className="text-[10px] text-[var(--text-muted)] tabular-nums bg-[var(--bg-subtle)] px-1.5 py-0.5 rounded-full font-medium">{tasks.length}</span>
+const COLUMN_CONFIG = {
+  unassigned: { title: 'To Do', tone: 'bg-[var(--text-muted)]', statusTarget: 'TODO' },
+  inProgress: { title: 'In Progress', tone: 'bg-blue-400', statusTarget: 'IN_PROGRESS' },
+  review: { title: 'In Review', tone: 'bg-purple-400', statusTarget: 'REVIEW' },
+  completed: { title: 'Done', tone: 'bg-emerald-400', statusTarget: 'DONE' }
+};
+
+// Simple priority colors for the subtle dot
+const PRIORITY_COLORS = {
+  URGENT: 'bg-red-500',
+  HIGH: 'bg-orange-500',
+  MEDIUM: 'bg-yellow-500',
+  LOW: 'bg-blue-500'
+};
+
+export function TasksTab({ teamTasks, taskBoard, team, canAssignTask, isReadOnly, assigningTaskId, setAssigningTaskId, handleAssignTask, onUpdateTaskStatus }) {
+  const [draggedTask, setDraggedTask] = useState(null);
+  const [dragOverCol, setDragOverCol] = useState(null);
+
+  const handleDragStart = (e, task) => {
+    if (isReadOnly) return;
+    setDraggedTask(task);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDrop = (e, columnId) => {
+    e.preventDefault();
+    if (draggedTask && onUpdateTaskStatus) {
+      const targetStatus = COLUMN_CONFIG[columnId].statusTarget;
+      if (draggedTask.status !== targetStatus && !(columnId === 'completed' && draggedTask.status === 'Done')) {
+        onUpdateTaskStatus(draggedTask.id, targetStatus);
+      }
+    }
+    setDraggedTask(null);
+    setDragOverCol(null);
+  };
+
+  if (teamTasks.length === 0) {
+    return (
+      <div className="py-16">
+        <ImmersiveEmptyState
+          icon={CheckCheckIcon}
+          title="No tasks yet"
+          description="Tasks assigned to this team will appear here. Drag and drop cards to update their status."
+        />
       </div>
-      <div className="p-2.5 space-y-2 max-h-[60vh] overflow-y-auto">
-        {tasks.length === 0 ? <div className="text-center py-8"><Text size="xs" variant="muted" className="italic text-[11px]">No tasks</Text></div> : (
-          tasks.map(task => (
-            <div key={task.id} className="p-3 rounded-lg bg-[var(--bg-subtle)]/50 border border-[var(--border-subtle)] hover:border-[var(--accent-border)] transition-colors">
-              <Text size="sm" className={cn('font-medium block truncate mb-2 text-[12px]', task.status === 'Done' && 'line-through text-[var(--text-secondary)]')}>{task.title}</Text>
-              <div className="flex items-center justify-between gap-1.5">
-                <Badge className={cn('text-[9px]', PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM)}>{normalizePriority(task.priority)}</Badge>
-                {task.status !== 'Done' && (
-                  <Popover open={assigningTaskId === task.id} onOpenChange={open => setAssigningTaskId(open ? task.id : null)}>
-                    <PopoverTrigger asChild>
-                      <button disabled={!canAssignTask || isReadOnly} className={cn('text-[10px] font-medium px-2 py-0.5 rounded-full border transition-colors flex items-center gap-1', (!canAssignTask || isReadOnly) ? 'text-[var(--text-muted)] border-[var(--border-subtle)] opacity-60 cursor-not-allowed' : 'text-[var(--accent)] border-[var(--accent-border)] hover:bg-[var(--accent-soft)]')}>
-                        {(!canAssignTask || isReadOnly) && <LockIcon className="w-2 h-2" />}{task.assignedTo || 'Assign'}
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent align="end" className="w-48 p-1.5">
-                      <Text size="xs" variant="muted" className="px-2 py-1 uppercase font-bold tracking-wide text-[10px]">Assign Member</Text>
-                      <div className="space-y-0.5 max-h-40 overflow-y-auto">
-                        {team.members?.map(m => <button key={m.id} onClick={() => handleAssignTask(task.id, m.id, m.username)} className="w-full flex items-center gap-2 px-2 py-1.5 text-[12px] rounded hover:bg-[var(--bg-hover)] transition-colors text-left"><div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[8px] shrink-0">{m.username.charAt(0).toUpperCase()}</div><span className="truncate">{m.username}</span></button>)}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+    );
+  }
+
+  return (
+    <div className="px-6 py-8 max-w-[1400px] mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        {Object.keys(COLUMN_CONFIG).map((colKey) => {
+          const config = COLUMN_CONFIG[colKey];
+          const tasks = taskBoard[colKey] || [];
+          const isDragOver = dragOverCol === colKey;
+
+          return (
+            <div 
+              key={colKey}
+              onDragOver={(e) => { e.preventDefault(); setDragOverCol(colKey); }}
+              onDrop={(e) => handleDrop(e, colKey)}
+              onDragLeave={() => setDragOverCol(null)}
+              className={cn(
+                "flex flex-col gap-3 p-3 rounded-2xl transition-colors min-h-[200px]",
+                isDragOver && !isReadOnly ? "bg-[var(--accent-soft)]/30" : "bg-[var(--bg-subtle)]/30"
+              )}
+            >
+              {/* Clean Column Header */}
+              <div className="flex items-center justify-between px-2 pb-2 border-b border-[var(--border-subtle)]">
+                <div className="flex items-center gap-2">
+                  <span className={cn("w-1.5 h-1.5 rounded-full", config.tone)} />
+                  <Text className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                    {config.title}
+                  </Text>
+                </div>
+                <Text className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-card)] px-1.5 py-0.5 rounded-full border border-[var(--border-subtle)]">{tasks.length}</Text>
+              </div>
+
+              {/* Task Cards */}
+              <div className="space-y-3 flex-1">
+                <AnimatePresence>
+                  {tasks.map(task => (
+                    <KanbanCard 
+                      key={task.id} 
+                      task={task} 
+                      team={team}
+                      canAssignTask={canAssignTask}
+                      isReadOnly={isReadOnly}
+                      assigningTaskId={assigningTaskId}
+                      setAssigningTaskId={setAssigningTaskId}
+                      handleAssignTask={handleAssignTask}
+                      onDragStart={(e) => handleDragStart(e, task)}
+                      isDragging={draggedTask?.id === task.id}
+                    />
+                  ))}
+                </AnimatePresence>
+                
+                {tasks.length === 0 && (
+                  <div className="flex items-center justify-center h-20 border border-dashed border-[var(--border-subtle)] rounded-xl">
+                    <Text size="xs" variant="muted" className="italic opacity-50">Drop here</Text>
+                  </div>
                 )}
               </div>
             </div>
-          ))
-        )}
+          );
+        })}
       </div>
     </div>
-  )
+  );
 }
 
-export function TasksTab({ teamTasks, taskBoard, team, canAssignTask, isReadOnly, assigningTaskId, setAssigningTaskId, handleAssignTask }) {
+function KanbanCard({ task, team, canAssignTask, isReadOnly, assigningTaskId, setAssigningTaskId, handleAssignTask, onDragStart, isDragging }) {
+  const priority = normalizePriority(task.priority);
+  const priorityColor = PRIORITY_COLORS[priority?.toUpperCase()] || 'bg-gray-400';
+  const isDone = task.status === 'Done' || task.status === 'COMPLETED';
+  
+  const formattedDueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : null;
+  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && !isDone;
+
   return (
-    <div className="p-4 sm:p-6 space-y-5 max-w-[1400px] mx-auto">
-      {teamTasks.length === 0 ? (
-        <EmptyState icon={ChecklistIcon} title="No Tasks Yet" description="Tasks assigned to this team will show up here." />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <TaskColumn title="Unassigned" tasks={taskBoard.unassigned} tone="warning" team={team} canAssignTask={canAssignTask} isReadOnly={isReadOnly} assigningTaskId={assigningTaskId} setAssigningTaskId={setAssigningTaskId} handleAssignTask={handleAssignTask} />
-          <TaskColumn title="In Progress" tasks={taskBoard.inProgress} tone="info" team={team} canAssignTask={canAssignTask} isReadOnly={isReadOnly} assigningTaskId={assigningTaskId} setAssigningTaskId={setAssigningTaskId} handleAssignTask={handleAssignTask} />
-          <TaskColumn title="Review" tasks={taskBoard.review} tone="accent" team={team} canAssignTask={canAssignTask} isReadOnly={isReadOnly} assigningTaskId={assigningTaskId} setAssigningTaskId={setAssigningTaskId} handleAssignTask={handleAssignTask} />
-          <TaskColumn title="Completed" tasks={taskBoard.completed} tone="muted" team={team} canAssignTask={canAssignTask} isReadOnly={isReadOnly} assigningTaskId={assigningTaskId} setAssigningTaskId={setAssigningTaskId} handleAssignTask={handleAssignTask} />
-        </div>
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: isDragging ? 0.5 : 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      draggable={!isReadOnly}
+      onDragStart={onDragStart}
+      className={cn(
+        "group relative p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--accent-border)] hover:shadow-md transition-all cursor-grab active:cursor-grabbing",
+        isDone && "opacity-60"
       )}
-    </div>
-  )
+    >
+      {/* Priority Dot */}
+      <div className={cn("absolute top-4 right-4 w-2 h-2 rounded-full", priorityColor)} title={`${priority} priority`} />
+
+      <Text className={cn("block text-sm font-medium text-[var(--text-primary)] mb-3 pr-6", isDone && "line-through text-[var(--text-muted)]")}>
+        {task.title}
+      </Text>
+
+      <div className="flex items-center justify-between">
+        {/* Date */}
+        {formattedDueDate && (
+          <span className={cn("text-[11px] font-medium flex items-center gap-1.5", isOverdue ? "text-red-500" : "text-[var(--text-muted)]")}>
+            <Calendar className="w-3 h-3" />
+            {formattedDueDate}
+          </span>
+        )}
+
+        {/* Assignee */}
+        {task.assignedTo ? (
+          <div className="flex items-center gap-1.5 ml-auto">
+            <div className="w-6 h-6 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-[10px] font-bold shrink-0 border border-[var(--accent-border)]">
+              {task.assignedTo.charAt(0).toUpperCase()}
+            </div>
+          </div>
+        ) : (
+          <Popover open={assigningTaskId === task.id} onOpenChange={open => setAssigningTaskId(open ? task.id : null)}>
+            <PopoverTrigger asChild>
+              <button 
+                disabled={!canAssignTask || isReadOnly} 
+                className="ml-auto text-[11px] font-medium text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors flex items-center gap-1"
+              >
+                <MoreHorizontal className="w-3.5 h-3.5" /> Assign
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-48 p-1.5">
+              <div className="space-y-0.5 max-h-40 overflow-y-auto">
+                {team.members?.map(m => (
+                  <button 
+                    key={m.id} 
+                    onClick={() => handleAssignTask(task.id, m.id, m.username)} 
+                    className="w-full flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-[var(--bg-subtle)] transition-colors text-left"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-[9px] font-bold shrink-0">
+                      {m.username.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="truncate text-[var(--text-primary)]">{m.username}</span>
+                  </button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+      </div>
+    </motion.div>
+  );
 }

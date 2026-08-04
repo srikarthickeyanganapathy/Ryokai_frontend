@@ -1,85 +1,83 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { Icons } from '@/shared/ui/Icons'
-import { Badge } from '@/shared/ui/Badge'
+import { ImmersivePanel, ImmersiveBadge } from '@/shared/ui/Immersive'
+import { calculateHealthScore, getHealthStatus, formatRelativeDate } from '../features/utils/projectUtils'
 import { cn } from '@/shared/lib/cn'
 
 export function ProjectCard({ project }) {
-  const { id, name, description, progress, tasksTotal, tasksCompleted, dueDate, status, createdBy, color } = project
-  const tasksLeft = tasksTotal - tasksCompleted
-  const safeColor = color || 'var(--accent)'
+  const { id, name, description, progress = 0, tasksTotal = 0, tasksCompleted = 0, dueDate, status } = project
+  const tasksLeft = (tasksTotal || 0) - (tasksCompleted || 0)
+  
+  const healthScore = calculateHealthScore(project)
+  const health = getHealthStatus(healthScore)
+  const formattedDueDate = formatRelativeDate(dueDate)
+  const isOverdue = formattedDueDate.includes('Overdue')
+
+  // SVG Progress Ring Math
+  const radius = 16
+  const circumference = 2 * Math.PI * radius
+  const strokeDashoffset = circumference - ((progress || 0) / 100) * circumference
 
   return (
-    <Link to={`/app/projects/${id}`} className="block h-full">
-      <motion.div 
-        whileHover={{ y: -2 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-        className="group relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-5 transition-all duration-200 hover:border-[var(--accent-border)] hover:shadow-sm h-full flex flex-col justify-between overflow-hidden"
-      >
-        <div 
-          className="absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none"
-          style={{ backgroundColor: safeColor }}
-          aria-hidden="true"
-        />
-
-        <div className="space-y-3 relative z-10">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-3 min-w-0">
-              <div 
-                className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105"
-                style={{ backgroundColor: safeColor.startsWith('var(') ? 'var(--accent-soft)' : `${safeColor}1a`, color: safeColor }}
-              >
-                <Icons.projects className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <Heading level={4} className="text-[14px] font-semibold tracking-tight group-hover:text-[var(--accent)] transition-colors truncate">
-                  {name}
-                </Heading>
-                <Text size="xs" variant="muted" className="text-[11px] line-clamp-1 mt-0.5">{description || 'No description provided.'}</Text>
-              </div>
-            </div>
-            <Badge 
-              variant="outline"
-              className={cn(
-                "shrink-0 font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full border font-semibold",
-                status === 'ACTIVE' && "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]",
-                status === 'COMPLETED' && "bg-[var(--success-soft)] text-[var(--success)] border-[var(--success-border)]",
-                status === 'ARCHIVED' && "bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--border-subtle)]"
-              )}
-            >
-              {status || 'ACTIVE'}
-            </Badge>
+    <Link to={`/app/projects/${id}`} className="block h-full group">
+      <ImmersivePanel interactive className="h-full flex flex-col p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className={cn(
+              "px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold border",
+              health.tone === 'success' && 'bg-green-500/10 text-green-500 border-green-500/20',
+              health.tone === 'accent' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+              health.tone === 'warning' && 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
+              health.tone === 'danger' && 'bg-red-500/10 text-red-500 border-red-500/20'
+            )}>
+              {health.label} {healthScore}
+            </span>
           </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-1.5 text-[11px] font-mono">
-              <span className="font-semibold text-[var(--text-primary)]">{progress || 0}% <span className="text-[var(--text-muted)] font-normal">done</span></span>
-              <span className="text-[var(--text-muted)]">{tasksLeft > 0 ? `${tasksLeft} left` : 'All done'}</span>
-            </div>
-            <div className="h-1.5 w-full bg-[var(--bg-subtle)] rounded-full overflow-hidden border border-[var(--border-subtle)]">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: `${progress || 0}%` }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="h-full rounded-full"
-                style={{ backgroundColor: safeColor }}
-              />
-            </div>
-          </div>
+          <ImmersiveBadge tone={status === 'COMPLETED' ? 'success' : 'neutral'}>{status || 'ACTIVE'}</ImmersiveBadge>
         </div>
 
-        <div className="flex items-center justify-between pt-4 mt-4 border-t border-[var(--border-subtle)] text-[10px] text-[var(--text-muted)] font-mono relative z-10">
-          <span className="truncate max-w-[120px]">
-            By {createdBy || 'System'}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Icons.alert className="w-3 h-3 text-[var(--accent)] shrink-0" />
-            {dueDate ? `Due ${new Date(dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}` : 'No deadline'}
-          </span>
+        <Heading level={4} className="text-[15px] font-semibold tracking-tight text-[var(--text-primary)] mb-1 group-hover:text-[var(--accent)] transition-colors truncate">
+          {name}
+        </Heading>
+        <Text size="sm" variant="muted" className="text-[12px] leading-relaxed mb-4 line-clamp-2 min-h-[32px]">
+          {description || 'No description provided.'}
+        </Text>
+
+        <div className="mt-auto flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]/50">
+          <div className="flex items-center gap-3">
+            {/* Progress Ring */}
+            <div className="relative w-10 h-10 flex items-center justify-center">
+              <svg className="w-10 h-10 transform -rotate-90 absolute inset-0" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r={radius} fill="none" stroke="var(--bg-subtle)" strokeWidth="3" />
+                <circle 
+                  cx="18" cy="18" r={radius} 
+                  fill="none" 
+                  stroke="var(--accent)" 
+                  strokeWidth="3" 
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <span className="text-[10px] font-bold text-[var(--text-primary)]">{progress || 0}%</span>
+            </div>
+            <div className="text-[11px] text-[var(--text-muted)] font-medium">
+              <div>{tasksCompleted || 0}/{tasksTotal || 0} Tasks</div>
+              <div className="text-[var(--text-tertiary)]">{tasksLeft > 0 ? `${tasksLeft} left` : 'All done'}</div>
+            </div>
+          </div>
+          
+          {dueDate && (
+            <span className={cn(
+              "text-[11px] font-medium px-2 py-1 rounded-md",
+              isOverdue ? "bg-red-500/10 text-red-500" : "bg-[var(--bg-subtle)] text-[var(--text-secondary)]"
+            )}>
+              {formattedDueDate}
+            </span>
+          )}
         </div>
-      </motion.div>
+      </ImmersivePanel>
     </Link>
   )
 }

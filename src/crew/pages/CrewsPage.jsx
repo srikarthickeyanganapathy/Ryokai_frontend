@@ -71,7 +71,7 @@ function TeamAvatar({ name, colorMeta, size = 'md' }) {
   return (
     <div
       className={cn(
-        'rounded-xl flex items-center justify-center font-bold text-white shrink-0 shadow-md transition-transform duration-300 group-hover:scale-105',
+        'rounded-full flex items-center justify-center font-bold text-white shrink-0 shadow-md transition-transform duration-300 group-hover:scale-105',
         sizes[size]
       )}
       style={{
