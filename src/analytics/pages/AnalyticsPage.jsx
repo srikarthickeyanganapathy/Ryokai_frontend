@@ -8,7 +8,7 @@ import { CompletionChart, PriorityChart } from '@/analytics'
 import {
   CheckCircle2, TrendingUp, PlusCircle, AlertCircle, Clock,
   ShieldAlert, Timer, BarChart3, LayoutDashboard
-} from 'lucide-react'
+} from '@/shared/ui/Icons'
 import {
   WorkspaceShell,
   InsightLayout,

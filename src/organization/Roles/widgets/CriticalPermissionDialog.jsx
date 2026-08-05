@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Heading } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from '@/shared/ui/Icons';
 
 export function CriticalPermissionDialog({ perm, roleName, open, onConfirm, onCancel }) {
   if (!open || !perm) return null;

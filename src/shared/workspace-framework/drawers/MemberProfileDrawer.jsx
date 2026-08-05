@@ -3,7 +3,7 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { Badge } from '@/shared/ui/Badge'
 import { Button } from '@/shared/ui/Button'
 import { cn } from '@/shared/lib/cn'
-import { Mail, Shield, Calendar, ExternalLink } from 'lucide-react'
+import { Mail, Shield, Calendar, ExternalLink } from '@/shared/ui/Icons'
 
 /**
  * MemberProfileDrawer

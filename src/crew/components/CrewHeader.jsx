@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, Pencil, Radio, Shield, AlertTriangle } from 'lucide-react'
+import { LogOut, Pencil, Radio, Shield, AlertTriangle } from '@/shared/ui/Icons'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'

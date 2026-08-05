@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover';
-import { MoreHorizontal, Copy, Trash2, CheckCircle2, ShieldAlert, PanelRight, PanelRightClose, Shield } from 'lucide-react';
+import { MoreHorizontal, Copy, Trash2, CheckCircle2, ShieldAlert, PanelRight, PanelRightClose, Shield } from '@/shared/ui/Icons';
 
 export function RoleHeader({ role, isAdmin, permissionCount, isDirty, changeCount, supervisionNames, onDiscard, onSave, onReview, onClone, onDelete, permissionMap, localScopedPerms, inspectorOpen = true, onToggleInspector }) {
   const stats = useMemo(() => {

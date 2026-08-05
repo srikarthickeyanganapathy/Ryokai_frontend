@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card';
 import { OrganizationGoals } from './OrganizationGoals';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { Users, ArrowRight, Building2, FolderOpen } from 'lucide-react';
+import { Users, ArrowRight, Building2, FolderOpen } from '@/shared/ui/Icons';
 import { useNavigate } from 'react-router-dom';
 
 export function OrgContextRail({ context }) {

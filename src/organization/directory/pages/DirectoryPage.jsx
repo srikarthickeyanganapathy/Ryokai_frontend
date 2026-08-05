@@ -22,7 +22,7 @@ import {
   FolderKanban,
   Layers,
   Sparkles,
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 import { Badge } from '@/shared/ui/Badge';
 import { Button, IconButton } from '@/shared/ui/Button';

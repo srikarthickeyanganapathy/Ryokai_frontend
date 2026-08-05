@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import ExplorerNavBar from './ExplorerNavBar'
-import { Zap, AlertTriangle, TrendingDown, Users } from 'lucide-react'
+import { Zap, AlertTriangle, TrendingDown, Users } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 
 const PRIORITY_BADGE = {

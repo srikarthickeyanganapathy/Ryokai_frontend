@@ -5,7 +5,7 @@ import { cn } from '@/shared/lib/cn'
 import { normalizePriority } from '@/shared/lib/priority'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { ImmersiveEmptyState } from '@/shared/ui/Immersive'
-import { CheckCheckIcon, Calendar, MoreHorizontal } from 'lucide-react'
+import { CheckCheckIcon, Calendar, MoreHorizontal } from '@/shared/ui/Icons'
 
 const COLUMN_CONFIG = {
   unassigned: { title: 'To Do', tone: 'bg-[var(--text-muted)]', statusTarget: 'TODO' },

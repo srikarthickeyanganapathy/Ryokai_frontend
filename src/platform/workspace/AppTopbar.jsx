@@ -18,7 +18,7 @@ import {
 } from '@/platform/notifications'
 import { useAcceptInvite, useDeclineInvite } from '@/organization'
 import { cn } from '@/shared/lib/cn'
-import { Play } from 'lucide-react'
+import { Play } from '@/shared/ui/Icons'
 import { CommandMenu } from '../command-palette'
 
 function FocusTimerIndicator() {

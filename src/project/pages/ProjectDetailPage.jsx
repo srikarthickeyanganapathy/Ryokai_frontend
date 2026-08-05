@@ -29,7 +29,7 @@ import { normalizeStatus, PROJECT_STATUS_COLORS } from '@/shared/lib/status';
 import { usePermissions } from '@/identity';
 import { calculateHealthScore, getHealthStatus, formatRelativeDate, getTaskAnalytics, getTeamContributions } from '../features/utils/projectUtils';
 import { WorkspaceShell, CommandLayout } from '@/shared/workspace-framework';
-import { Users, CalendarClock, Activity as ActivityIcon, CheckCircle2, ListTodo, Clock, Share2, Edit3, Trash2, Plus, Sparkles } from 'lucide-react';
+import { Users, CalendarClock, Activity as ActivityIcon, CheckCircle2, ListTodo, Clock, Share2, Edit3, Trash2, Plus, Sparkles } from '@/shared/ui/Icons';
 
 const defaultStatusColor = 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]';
 

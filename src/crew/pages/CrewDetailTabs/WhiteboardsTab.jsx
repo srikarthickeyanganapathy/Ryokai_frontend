@@ -31,7 +31,7 @@ import {
   ArrowRight,
   Zap,
   Check
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 
 // Template Definitions with Visual Configurations

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Check, ChevronsUpDown } from 'lucide-react'
+import { Check, ChevronsUpDown } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 import { Button } from '@/shared/ui/Button'
 import {

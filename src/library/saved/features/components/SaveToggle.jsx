@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bookmark } from 'lucide-react';
+import { Bookmark } from '@/shared/ui/Icons';
 import { useSaveState } from '../hooks/useSaved';
 import { Button } from '@/shared/ui/Button';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/shared/ui/Tooltip';

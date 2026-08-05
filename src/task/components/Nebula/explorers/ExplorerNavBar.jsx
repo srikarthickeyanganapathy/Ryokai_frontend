@@ -1,5 +1,5 @@
 import React from 'react'
-import { ChevronLeft, ChevronRight, Pin, PinOff, MapPin } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Pin, PinOff, MapPin } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 
 /**

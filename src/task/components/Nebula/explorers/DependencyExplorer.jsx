@@ -5,7 +5,7 @@
  */
 import React, { useMemo } from 'react'
 import ExplorerNavBar from './ExplorerNavBar'
-import { AlertTriangle, ArrowDown, ArrowUp, Route, ShieldAlert } from 'lucide-react'
+import { AlertTriangle, ArrowDown, ArrowUp, Route, ShieldAlert } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 
 const STATUS_COLORS = {

@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Bell, Trash2, X, Check, ExternalLink, Mail, UserCheck, UserX, ShieldAlert } from 'lucide-react'
+import { Bell, Trash2, X, Check, ExternalLink, Mail, UserCheck, UserX, ShieldAlert } from '@/shared/ui/Icons'
 import { Button, IconButton } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { cn } from '@/shared/lib/cn'

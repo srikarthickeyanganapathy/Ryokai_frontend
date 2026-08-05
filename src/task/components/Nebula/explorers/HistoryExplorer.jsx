@@ -6,7 +6,7 @@
 import React, { useMemo } from 'react'
 import ExplorerNavBar from './ExplorerNavBar'
 import ActivityTimeline from './ActivityTimeline'
-import { Clock, ArrowRightLeft, User, CalendarDays } from 'lucide-react'
+import { Clock, ArrowRightLeft, User, CalendarDays } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 
 const STATUS_COLORS = {

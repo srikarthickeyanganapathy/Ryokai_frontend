@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/shared/ui/Card';
 import { Badge } from '@/shared/ui/Badge';
-import { AlertCircle, FileText, CheckSquare, MessageSquare } from 'lucide-react';
+import { AlertCircle, FileText, CheckSquare, MessageSquare } from '@/shared/ui/Icons';
 import { useDrawerManager } from '@/shared/workspace-framework';
 
 export function SignalStrip({ interrupts }) {

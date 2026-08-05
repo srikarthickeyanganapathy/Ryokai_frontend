@@ -7,7 +7,7 @@ import { useMarkRead } from '@/platform/notifications/hooks/useNotifications';
 import { 
   AlertTriangle, CheckSquare, MessageSquare, Megaphone, 
   ExternalLink, Clock, Bell, ArrowRight, User 
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 
 const SIGNAL_CONFIG = {
   TASK_BLOCKED: {

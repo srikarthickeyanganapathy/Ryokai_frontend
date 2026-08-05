@@ -18,7 +18,7 @@ import {
   ModalDescription,
   ModalFooter,
 } from '@/shared/ui/Modal';
-import { Filter, Download, Shield, X, AlertTriangle, Users, CheckSquare } from 'lucide-react';
+import { Filter, Download, Shield, X, AlertTriangle, Users, CheckSquare } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 import { toast } from 'sonner';
 

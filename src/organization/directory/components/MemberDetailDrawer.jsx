@@ -12,7 +12,7 @@ import { Button } from '@/shared/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select';
 import { Icons } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
-import { Mail, Shield, Users, CheckSquare, Trash2, ShieldAlert } from 'lucide-react';
+import { Mail, Shield, Users, CheckSquare, Trash2, ShieldAlert } from '@/shared/ui/Icons';
 
 export function MemberDetailDrawer({ 
   isOpen, 

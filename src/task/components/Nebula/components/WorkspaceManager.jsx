@@ -11,7 +11,7 @@ import ExecutionExplorer from '../explorers/ExecutionExplorer'
 import FlowExplorer from '../explorers/FlowExplorer'
 import TaskWorkspace from '../explorers/TaskWorkspace'
 
-import { Network, Zap, Globe, Target, Clock, Waves, Eye } from 'lucide-react'
+import { Network, Zap, Globe, Target, Clock, Waves, Eye } from '@/shared/ui/Icons'
 
 // Explorer Registry — Analysis Modes
 const EXPLORER_REGISTRY = {

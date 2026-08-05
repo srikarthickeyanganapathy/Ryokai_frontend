@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTaskHistory } from '../../../entities/hooks/useTasks';
 import ActivityTimelineItem from './ActivityTimelineItem';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/shared/ui/Icons';
 
 export default function ActivityTimeline({ taskId }) {
   const [page, setPage] = useState(0);

@@ -23,7 +23,7 @@ import {
   Info,
   ShieldCheck,
   FileText,
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 import { format } from 'date-fns';
 
 export function RequestDetailDrawer({ request, isOpen, onClose }) {

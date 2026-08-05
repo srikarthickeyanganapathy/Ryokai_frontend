@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { UploadCloud } from 'lucide-react'
+import { UploadCloud } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 import { Heading, Text } from '@/shared/ui/Typography'
 

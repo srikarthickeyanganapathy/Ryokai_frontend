@@ -6,7 +6,7 @@ import { Text } from '@/shared/ui/Typography';
 import { Label } from '@/shared/ui/Typography/Label';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { useExitBlockers, useRequestExit } from '@/organization/features/hooks/useOrganizations';
-import { CheckCircle2, AlertCircle, ClipboardList, Folder, Users, ShieldAlert, ChevronRight } from 'lucide-react';
+import { CheckCircle2, AlertCircle, ClipboardList, Folder, Users, ShieldAlert, ChevronRight } from '@/shared/ui/Icons';
 
 export function MemberExitModal({ isOpen, onClose, orgId }) {
   const [reason, setReason] = useState('');

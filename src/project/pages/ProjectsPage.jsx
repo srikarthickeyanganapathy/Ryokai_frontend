@@ -16,7 +16,7 @@ import { useOrgTeams } from '@/organization';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { WorkspaceShell, ManagementLayout, PageStateContainer, ModularToolbar } from '@/shared/workspace-framework';
 import { SearchPlugin } from '@/shared/workspace-framework/toolbar/plugins/SearchPlugin';
-import { FolderPlus, AlertTriangle, CalendarClock, Activity, Folder, TrendingUp } from 'lucide-react';
+import { FolderPlus, AlertTriangle, CalendarClock, Activity, Folder, TrendingUp } from '@/shared/ui/Icons';
 import { getPortfolioMetrics, calculateHealthScore, formatRelativeDate } from '../features/utils/projectUtils';
 
 const PROJECT_TABS = [

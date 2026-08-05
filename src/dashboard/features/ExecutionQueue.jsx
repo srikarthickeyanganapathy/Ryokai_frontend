@@ -2,7 +2,7 @@ import React from 'react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { useDrawerManager } from '@/shared/workspace-framework';
-import { CheckCircle2, Clock, MoreHorizontal, Calendar } from 'lucide-react';
+import { CheckCircle2, Clock, MoreHorizontal, Calendar } from '@/shared/ui/Icons';
 
 export function ExecutionQueue({ queueOrdering }) {
   const { open } = useDrawerManager();

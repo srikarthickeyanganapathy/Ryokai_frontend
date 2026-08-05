@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card';
-import { CheckCircle2, Clock, ArrowRight, Target, Rocket, Building2 } from 'lucide-react';
+import { CheckCircle2, Clock, ArrowRight, Target, Rocket, Building2 } from '@/shared/ui/Icons';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
 import { useDrawerManager } from '@/shared/workspace-framework';

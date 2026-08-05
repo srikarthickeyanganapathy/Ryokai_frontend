@@ -5,7 +5,7 @@
  */
 import React, { useMemo } from 'react'
 import ExplorerNavBar from './ExplorerNavBar'
-import { Waves, AlertTriangle, Clock, TrendingUp, Pause } from 'lucide-react'
+import { Waves, AlertTriangle, Clock, TrendingUp, Pause } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 
 const STATUS_ORDER = ['OPEN', 'TODO', 'IN_PROGRESS', 'IN_REVIEW', 'SUBMITTED', 'BLOCKED', 'COMPLETED', 'DONE']

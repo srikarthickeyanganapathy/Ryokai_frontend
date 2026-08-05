@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/Select';
-import { Mail, Shield, Users, FolderKanban } from 'lucide-react';
+import { Mail, Shield, Users, FolderKanban } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 
 function hashHue(str = '') {

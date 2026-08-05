@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
-import { FileText, Activity, Users, Sparkles } from 'lucide-react';
+import { FileText, Activity, Users, Sparkles } from '@/shared/ui/Icons';
 import { useDrawerManager } from '@/shared/workspace-framework';
 
 export function ContextRail({ suggestedActions, workspaceMode }) {

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import ExplorerNavBar from './ExplorerNavBar'
-import { Target, ShieldCheck, ShieldAlert, CheckCircle, AlertCircle, User, Calendar, Paperclip } from 'lucide-react'
+import { Target, ShieldCheck, ShieldAlert, CheckCircle, AlertCircle, User, Calendar, Paperclip } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 
 function ReadinessBar({ score }) {

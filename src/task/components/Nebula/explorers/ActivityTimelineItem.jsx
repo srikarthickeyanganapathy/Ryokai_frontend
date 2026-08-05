@@ -11,7 +11,7 @@ import {
   MessageSquare,
   AlertCircle,
   ArrowRightLeft
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 
 const getEventIcon = (type, toStatus) => {
   switch (type) {

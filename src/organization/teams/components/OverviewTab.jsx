@@ -9,7 +9,7 @@ import {
   ListTodo, Plus, MessageSquare, Folder, Users, TrendingUp, 
   Activity, AlertCircle, ArrowRight, Sparkles, Clock, CheckCircle2, 
   Zap, Target, ChevronRight, Pencil
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 
 // Helper to format relative timestamps
 function formatTimeAgo(dateString) {

@@ -5,7 +5,7 @@ import { RequestDetailDrawer } from './RequestDetailDrawer';
 import { Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog';
-import { Calendar, Clock, LogOut, AlertCircle, CheckCircle2, XCircle, ShieldAlert, Sparkles, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, LogOut, AlertCircle, CheckCircle2, XCircle, ShieldAlert, Sparkles, ChevronRight } from '@/shared/ui/Icons';
 import { formatRelative } from 'date-fns';
 
 export function RequestCard({ request, index = 0 }) {

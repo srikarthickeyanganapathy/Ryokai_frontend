@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Badge } from '@/shared/ui/Badge';
 import { cn } from '@/shared/lib/cn';
-import { ChevronDown, Users } from 'lucide-react';
+import { ChevronDown, Users } from '@/shared/ui/Icons';
 
 const PRIORITY_LABELS = {
   0: 'Administrators',

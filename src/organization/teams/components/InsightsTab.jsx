@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { cn } from '@/shared/lib/cn'
 import { normalizePriority } from '@/shared/lib/priority'
-import { FolderIcon, CheckCircle2, AlertCircle, Users } from 'lucide-react'
+import { FolderIcon, CheckCircle2, AlertCircle, Users } from '@/shared/ui/Icons'
 
 // Minimalist SVG Donut Chart for Task Status
 function StatusDonut({ completed, total }) {

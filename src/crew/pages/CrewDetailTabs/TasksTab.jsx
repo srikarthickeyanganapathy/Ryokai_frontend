@@ -23,7 +23,7 @@ import {
   ArrowRight,
   Sparkles,
   CheckCheck
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 
 function CrewTaskColumn({ title, tasks, tone, onClaim, onComplete, onTaskClick }) {
   const toneStyles = {

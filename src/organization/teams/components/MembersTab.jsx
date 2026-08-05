@@ -6,7 +6,7 @@ import { Icons } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 import { PermissionButton } from '../components/Shared'
 import { ImmersiveEmptyState } from '@/shared/ui/Immersive'
-import { Users } from 'lucide-react'
+import { Users } from '@/shared/ui/Icons'
 
 export function MembersTab({ team, workload, teamTasks, hasProjectIdOnTasks, hasTaskTimestamps, canManage, onManageMembers }) {
   const members = team?.members || [];

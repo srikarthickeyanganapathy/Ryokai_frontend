@@ -1,4 +1,4 @@
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown } from '@/shared/ui/Icons';
 import { FilterTabs } from '@/shared/ui/FilterTabs';
 import {
   Select,

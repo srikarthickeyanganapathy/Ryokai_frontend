@@ -41,7 +41,7 @@ import {
   Check,
   Loader2,
   Crown,
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 
 // Radial Progress Ring Component

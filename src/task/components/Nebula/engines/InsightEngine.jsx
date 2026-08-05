@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { AlertTriangle, Clock, ShieldAlert, Users, Zap, ChevronRight, Waves } from 'lucide-react'
+import { AlertTriangle, Clock, ShieldAlert, Users, Zap, ChevronRight, Waves } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 
 const SEVERITY_STYLES = {

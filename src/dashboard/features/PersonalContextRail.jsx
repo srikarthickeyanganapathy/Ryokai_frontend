@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card';
 import { CalendarWidget } from './CalendarWidget';
 import { InboxWidget } from './InboxWidget';
-import { FolderOpen, ListTodo, ArrowRight } from 'lucide-react';
+import { FolderOpen, ListTodo, ArrowRight } from '@/shared/ui/Icons';
 import { useNavigate } from 'react-router-dom';
 
 export function PersonalContextRail({ context }) {

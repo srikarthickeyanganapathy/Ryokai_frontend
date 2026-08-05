@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card';
 import { RecentlyActive } from './RecentlyActive';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { FolderOpen, ArrowRight, Hash, ListTodo } from 'lucide-react';
+import { FolderOpen, ArrowRight, Hash, ListTodo } from '@/shared/ui/Icons';
 import { useNavigate } from 'react-router-dom';
 
 export function CrewContextRail({ context }) {

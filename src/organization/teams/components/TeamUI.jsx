@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/shared/lib/cn';
-import { Users } from 'lucide-react';
+import { Users } from '@/shared/ui/Icons';
 export function hashHue(str = '') {
   let hash = 0;
   for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);

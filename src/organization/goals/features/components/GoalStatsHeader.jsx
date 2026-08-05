@@ -1,4 +1,4 @@
-import { Target, TrendingUp, AlertTriangle, Clock, Activity } from 'lucide-react';
+import { Target, TrendingUp, AlertTriangle, Clock, Activity } from '@/shared/ui/Icons';
 import { ImmersiveStatCard, MetricGrid } from '@/shared/ui/Immersive';
 
 export function GoalStatsHeader({ stats }) {

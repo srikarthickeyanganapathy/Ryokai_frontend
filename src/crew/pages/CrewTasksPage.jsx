@@ -21,7 +21,7 @@ import {
   X,
   Layers,
   Clock
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 
 export function CrewTasksPage() {

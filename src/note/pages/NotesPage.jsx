@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Pin, Plus, Trash2, Search, StickyNote } from 'lucide-react'
+import { Pin, Plus, Trash2, Search, StickyNote } from '@/shared/ui/Icons'
 import { Button } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Input } from '@/shared/ui/Input'

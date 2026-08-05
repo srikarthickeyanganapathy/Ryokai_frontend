@@ -8,7 +8,7 @@ import {
   TrendingUp,
   TrendingDown,
   Wand2,
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 import { Text, Heading } from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/cn';
 import { AnimatedNumber, CapacityRing } from './ProgressVisuals';

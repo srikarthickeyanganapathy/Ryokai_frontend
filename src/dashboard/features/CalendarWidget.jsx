@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/shared/api/api';
 import { queryKeys } from '@/shared/api/queryKeys';
-import { Calendar, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight } from '@/shared/ui/Icons';
 import { useNavigate } from 'react-router-dom';
 
 export function CalendarWidget() {

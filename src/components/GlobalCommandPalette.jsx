@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, UserPlus, FileText, Send, User, Target } from 'lucide-react';
+import { Search, UserPlus, FileText, Send, User, Target } from '@/shared/ui/Icons';
 import { useInspector } from '@/context/InspectorContext';
 
 export function GlobalCommandPalette() {

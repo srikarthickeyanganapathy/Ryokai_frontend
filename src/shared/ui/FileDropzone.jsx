@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { cn } from '@/shared/lib/cn';
-import { UploadCloud } from 'lucide-react';
+import { UploadCloud } from '@/shared/ui/Icons';
 import { validateFile, MAX_SCREENSHOT_SIZE } from '@/shared/lib/fileValidation';
 import { Text } from '@/shared/ui/Typography';
 

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Checkbox } from '@/shared/ui/Checkbox';
 import { cn } from '@/shared/lib/cn';
-import { Check, AlertCircle, Info, BarChart3, ShieldAlert, Sliders, GitBranch, Radar } from 'lucide-react';
+import { Check, AlertCircle, Info, BarChart3, ShieldAlert, Sliders, GitBranch, Radar } from '@/shared/ui/Icons';
 import { getRiskConfig, SCOPE_LABELS, SCOPE_DESCRIPTIONS } from '../entities/constants';
 import { ResourcePicker } from '../components/ResourcePicker';
 

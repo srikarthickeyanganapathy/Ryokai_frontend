@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import api from '@/shared/api/api';
-import { Search, Loader2, Check, X } from 'lucide-react';
+import { Search, Loader2, Check, X } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 import { Badge } from '@/shared/ui/Badge';
 

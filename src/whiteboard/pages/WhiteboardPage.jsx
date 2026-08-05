@@ -2,7 +2,7 @@ import { Button } from '@/shared/ui/Button';
 
 import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from '@/shared/ui/Icons'
 import { WhiteboardCanvas } from '@/whiteboard'
 import { useWhiteboards } from '@/whiteboard'
 import { Text } from '@/shared/ui/Typography'

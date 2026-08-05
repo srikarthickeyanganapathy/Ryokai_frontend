@@ -41,7 +41,7 @@ import {
   Filter,
   X,
   Target
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 
 const categories = ['All Missions', 'Engineering', 'Design', 'Product', 'Marketing', 'Operations', 'Growth', 'Research'];

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/Select';
-import { Monitor, Focus, Users, CheckSquare, Search } from 'lucide-react';
+import { Monitor, Focus, Users, CheckSquare, Search } from '@/shared/ui/Icons';
 
 export function ModeSelector() {
   const { operatingMode, setOperatingMode } = useWorkspace();

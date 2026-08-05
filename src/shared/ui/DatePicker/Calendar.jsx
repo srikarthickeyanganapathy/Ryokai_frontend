@@ -1,5 +1,5 @@
 import React from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from '@/shared/ui/Icons'
 import { DayPicker } from 'react-day-picker'
 import { cn } from '@/shared/lib/cn'
 import { buttonVariants } from '@/shared/ui/Button/Button'

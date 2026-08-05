@@ -4,7 +4,7 @@ import React, { useMemo } from 'react'
 import { startOfWeek, endOfWeek, eachDayOfInterval, format, isToday, parseISO } from 'date-fns'
 import { PRIORITY_COLORS } from '@/shared/lib/priority'
 import { cn } from '@/shared/lib/cn'
-import { Plus } from 'lucide-react'
+import { Plus } from '@/shared/ui/Icons'
 
 export function WeekView({ tasks = [], events = [], currentDate, isLoading, onTaskClick, onEventClick, onAddClick }) {
   const days = useMemo(() => {

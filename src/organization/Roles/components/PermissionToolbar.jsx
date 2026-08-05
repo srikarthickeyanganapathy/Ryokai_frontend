@@ -1,7 +1,7 @@
 import React from 'react';
 import { Input } from '@/shared/ui/Input';
 import { Button } from '@/shared/ui/Button';
-import { Search, MoreHorizontal, RotateCcw, ShieldAlert } from 'lucide-react';
+import { Search, MoreHorizontal, RotateCcw, ShieldAlert } from '@/shared/ui/Icons';
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover';
 import { cn } from '@/shared/lib/cn';
 

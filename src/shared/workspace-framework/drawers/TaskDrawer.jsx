@@ -3,7 +3,7 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { Badge } from '@/shared/ui/Badge'
 import { Button } from '@/shared/ui/Button'
 import { cn } from '@/shared/lib/cn'
-import { Calendar, Flag, User, Clock, ExternalLink, CheckCircle2 } from 'lucide-react'
+import { Calendar, Flag, User, Clock, ExternalLink, CheckCircle2 } from '@/shared/ui/Icons'
 
 /**
  * TaskDrawer

@@ -1,4 +1,4 @@
-import { CheckSquare, Briefcase, Settings, Users, Layers, ShieldAlert, BarChart2, RefreshCw, Award, Info, Folder } from 'lucide-react';
+import { CheckSquare, Briefcase, Settings, Users, Layers, ShieldAlert, BarChart2, RefreshCw, Award, Info, Folder } from '@/shared/ui/Icons';
 
 export const MODULE_META = {
   TASK: { icon: CheckSquare }, PROJECT: { icon: Briefcase }, ORGANIZATION: { icon: Settings }, MEMBER: { icon: Users }, TEAM: { icon: Layers }, ROLE: { icon: ShieldAlert }, DASHBOARD: { icon: BarChart2 }, ACTIVITY: { icon: RefreshCw }, GOAL: { icon: Award }, ANNOUNCEMENT: { icon: Info }, DEFAULT: { icon: Folder },

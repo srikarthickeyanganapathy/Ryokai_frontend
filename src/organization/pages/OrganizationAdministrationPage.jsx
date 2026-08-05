@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import { Building2, Home, Settings, ShieldAlert, Key } from 'lucide-react';
+import { Building2, Home, Settings, ShieldAlert, Key } from '@/shared/ui/Icons';
 import { useOrganization, useOrgMembers, useOrgTeams, useLeaveRequests } from '../features/hooks/useOrganizations';
 import { usePermissions } from '@/identity';
 import { PageHeader } from '@/shared/ui/PageHeader';

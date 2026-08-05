@@ -7,7 +7,7 @@ import { Skeleton } from '@/shared/ui/Skeleton';
 import { usePermissions } from '@/identity';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Icons } from '@/shared/ui/Icons';
-import { ShieldCheck, ShieldAlert, KeyRound, Users2 } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, KeyRound, Users2 } from '@/shared/ui/Icons';
 
 import { useRoleStudio } from '../hooks/useRoleStudio';
 import { RoleSidebar } from '../components/RoleSidebar';

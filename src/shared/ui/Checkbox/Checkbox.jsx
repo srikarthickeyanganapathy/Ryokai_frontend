@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react'
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
-import { Check, Minus } from 'lucide-react'
+import { Check, Minus } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 
 export const Checkbox = forwardRef(({ className, indeterminate, ...props }, ref) => (

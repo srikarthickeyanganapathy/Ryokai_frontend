@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card';
-import { CheckCircle, Clock, Calendar, Zap } from 'lucide-react';
+import { CheckCircle, Clock, Calendar, Zap } from '@/shared/ui/Icons';
 
 export function DailyBriefWidget({ context }) {
   if (!context?.dailyBrief) return null;

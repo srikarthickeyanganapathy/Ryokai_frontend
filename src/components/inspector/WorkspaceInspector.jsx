@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInspector } from '@/context/InspectorContext';
-import { X } from 'lucide-react'; // assuming lucide-react is used, common in such templates
+import { X } from '@/shared/ui/Icons'; // assuming lucide-react is used, common in such templates
 
 export function WorkspaceInspector() {
   const { isOpen, selectedEntity, activeTab, closeInspector, setTab } = useInspector();

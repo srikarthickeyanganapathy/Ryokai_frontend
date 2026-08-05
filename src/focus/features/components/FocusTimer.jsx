@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Text, Heading } from '@/shared/ui/Typography'
 import { Button, IconButton } from '@/shared/ui/Button'
-import { Play, Pause, RotateCcw, SkipForward, Sparkles, Flame, CheckCircle, Volume2, VolumeX } from 'lucide-react'
+import { Play, Pause, RotateCcw, SkipForward, Sparkles, Flame, CheckCircle, Volume2, VolumeX } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 import { useActiveFocus, useStartFocus, useStopFocus } from '../hooks/useFocus'
 

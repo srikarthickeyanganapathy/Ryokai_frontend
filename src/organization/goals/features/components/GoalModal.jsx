@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from '@/shared/ui/Icons';
 import { Button } from '@/shared/ui/Button';
 import { Modal, ModalContent, ModalHeader, ModalTitle } from '@/shared/ui/Modal';
 import { Input } from '@/shared/ui/Input';

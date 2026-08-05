@@ -5,7 +5,7 @@
  */
 import React, { useMemo } from 'react'
 import ExplorerNavBar from './ExplorerNavBar'
-import { FolderOpen, User, Network, Tag } from 'lucide-react'
+import { FolderOpen, User, Network, Tag } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 
 const STATUS_DOT = {

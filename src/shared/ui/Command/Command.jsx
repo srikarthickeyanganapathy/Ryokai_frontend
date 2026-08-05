@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react'
 import { Command as CommandPrimitive } from 'cmdk'
-import { Search } from 'lucide-react'
+import { Search } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 

@@ -8,7 +8,7 @@ import { useUpdateEvent } from '../hooks/useCalendar'
 import { useDroppable, useDraggable } from '@dnd-kit/core'
 import { PRIORITY_COLORS } from '@/shared/lib/priority'
 import { cn } from '@/shared/lib/cn'
-import { Plus } from 'lucide-react'
+import { Plus } from '@/shared/ui/Icons'
 import { toast } from 'sonner'
 
 function CalendarDayCell({ day, isCurrentMonth, children, onAddClick }) {

@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { cn } from '@/shared/lib/cn'
-import { X } from 'lucide-react'
+import { X } from '@/shared/ui/Icons'
 
 export const Modal = DialogPrimitive.Root
 

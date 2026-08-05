@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/shared/lib/cn';
 import { Input } from '@/shared/ui/Input';
 import { Button } from '@/shared/ui/Button';
-import { Lock, Plus, Search, Shield, Pin, Clock, ShieldAlert } from 'lucide-react';
+import { Lock, Plus, Search, Shield, Pin, Clock, ShieldAlert } from '@/shared/ui/Icons';
 
 const MIN_WIDTH = 180;
 const MAX_WIDTH = 320;

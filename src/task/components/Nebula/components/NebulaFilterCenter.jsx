@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Filter, AlertTriangle, ShieldAlert, User, Clock, CheckCircle2, ChevronDown, ChevronUp, Layers, X } from 'lucide-react'
+import { Search, Filter, AlertTriangle, ShieldAlert, User, Clock, CheckCircle2, ChevronDown, ChevronUp, Layers, X } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 
 const PRESET_QUERIES = [

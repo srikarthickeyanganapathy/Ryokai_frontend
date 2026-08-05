@@ -50,7 +50,7 @@ import {
   CornerDownRight,
   ChevronRight,
   SmilePlus
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 
 const QUICK_EMOJIS = ['👍', '❤️', '🔥', '🚀', '💡', '✅'];
 

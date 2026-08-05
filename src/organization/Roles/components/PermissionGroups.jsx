@@ -1,7 +1,7 @@
 import React from 'react';
 import { PermissionGroup } from './PermissionGroup';
 import { GROUP_ORDER } from '../entities/constants';
-import { Inbox } from 'lucide-react';
+import { Inbox } from '@/shared/ui/Icons';
 
 export function PermissionGroups({ groupedPermissions, localScopedPerms, isAdmin, onToggle, onSelect, activePermission, collapsedGroups = {}, onToggleGroupCollapsed }) {
   const hasPermissions = Object.values(groupedPermissions).some((g) => g && g.length > 0);

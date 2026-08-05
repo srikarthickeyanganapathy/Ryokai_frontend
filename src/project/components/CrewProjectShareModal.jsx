@@ -12,7 +12,7 @@ import { useAuth } from '@/identity'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { projectsApi } from '../features/api'
 import { toast } from 'sonner'
-import { Shield, Users, UserCheck } from 'lucide-react'
+import { Shield, Users, UserCheck } from '@/shared/ui/Icons'
 
 export function CrewProjectShareModal({ isOpen, onClose, project }) {
   const { user } = useAuth()

@@ -5,7 +5,7 @@ import { Button } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
 import { ImmersiveEmptyState } from '@/shared/ui/Immersive'
 import { cn } from '@/shared/lib/cn'
-import { MessageSquare, Send } from 'lucide-react'
+import { MessageSquare, Send } from '@/shared/ui/Icons'
 
 // Helper to format date separators cleanly
 function formatDaySeparator(dateStr) {

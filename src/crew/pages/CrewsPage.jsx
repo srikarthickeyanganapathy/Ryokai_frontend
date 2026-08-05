@@ -32,7 +32,7 @@ import {
   ArrowRight,
   Check,
   Globe
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 import { useCrews, useCreateCrew } from '../features/hooks/useCrews';
 

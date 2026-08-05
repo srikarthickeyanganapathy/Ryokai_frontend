@@ -2,7 +2,7 @@ import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
-import { Clock } from 'lucide-react'
+import { Clock } from '@/shared/ui/Icons'
 
 export function SessionExpiredPage() {
   const location = useLocation();

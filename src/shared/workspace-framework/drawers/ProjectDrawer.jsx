@@ -4,7 +4,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { Button } from '@/shared/ui/Button'
 import { Progress } from '@/shared/ui/Progress'
 import { cn } from '@/shared/lib/cn'
-import { Calendar, Users, FolderKanban, ExternalLink, Clock } from 'lucide-react'
+import { Calendar, Users, FolderKanban, ExternalLink, Clock } from '@/shared/ui/Icons'
 
 /**
  * ProjectDrawer

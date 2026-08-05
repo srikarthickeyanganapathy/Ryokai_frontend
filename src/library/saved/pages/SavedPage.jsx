@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bookmark, X } from 'lucide-react'
+import { Bookmark, X } from '@/shared/ui/Icons'
 import { Button } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { useSavedItems, useToggleSave } from '@/library/saved/features/hooks/useSaved'

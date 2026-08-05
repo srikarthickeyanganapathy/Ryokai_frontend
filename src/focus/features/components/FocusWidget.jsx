@@ -4,7 +4,7 @@ import { isToday, parseISO } from 'date-fns'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { useTaskList } from '@/task'
-import { Play, ArrowRight } from 'lucide-react'
+import { Play, ArrowRight } from '@/shared/ui/Icons'
 
 export function FocusWidget() {
   const { data: tasks = [] } = useTaskList()

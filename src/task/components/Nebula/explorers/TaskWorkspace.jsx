@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import ExplorerNavBar from './ExplorerNavBar'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Badge } from '@/shared/ui/Badge'
-import { ArrowDown, ArrowUp, Calendar, Flag, User, CheckCircle, Paperclip, MessageSquare, Zap, Route, Target } from 'lucide-react'
+import { ArrowDown, ArrowUp, Calendar, Flag, User, CheckCircle, Paperclip, MessageSquare, Zap, Route, Target } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 
 const PRIORITY_STYLE = {

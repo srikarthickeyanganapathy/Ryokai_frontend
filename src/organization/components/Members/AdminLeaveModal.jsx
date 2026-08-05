@@ -7,7 +7,7 @@ import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/sha
 import { useAdminLeave } from '@/organization';
 import { useAuth } from '@/identity';
 import { useNavigate } from 'react-router-dom';
-import { UserCheck, Trash2, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { UserCheck, Trash2, AlertTriangle, ShieldAlert } from '@/shared/ui/Icons';
 
 export function AdminLeaveModal({ isOpen, onClose, orgId, members = [], initialMode = null }) {
   const { user } = useAuth();

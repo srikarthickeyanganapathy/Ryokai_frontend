@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { ForgotPasswordForm } from '@/identity'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from '@/shared/ui/Icons'
 
 export function ForgotPasswordPage() {
   return (

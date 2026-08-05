@@ -29,7 +29,7 @@ import {
   Layers,
   ArrowUpRight,
   UserCheck
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 
 // Helper function to format relative timestamps
 function formatTimeAgo(dateString) {

@@ -23,7 +23,7 @@ import {
   WifiOff,
   Radio,
   Rocket
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 
 // Ambient Particle Canvas / Background

@@ -4,7 +4,7 @@ import { Input } from '@/shared/ui/Input';
 import { Button } from '@/shared/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select';
 import { cn } from '@/shared/lib/cn';
-import { ShieldPlus, Copy } from 'lucide-react';
+import { ShieldPlus, Copy } from '@/shared/ui/Icons';
 
 export function CreateRoleDrawer({ roles = [], open, onOpenChange, onCreate, isLoading }) {
   const [name, setName] = useState('');

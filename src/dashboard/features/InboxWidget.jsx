@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card';
 import { useNotificationList } from '@/platform/notifications/hooks/useNotifications';
-import { Inbox, ArrowRight } from 'lucide-react';
+import { Inbox, ArrowRight } from '@/shared/ui/Icons';
 import { useNavigate } from 'react-router-dom';
 import { useDrawerManager } from '@/shared/workspace-framework';
 

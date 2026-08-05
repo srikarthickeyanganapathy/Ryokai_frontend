@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 import { PermissionRow } from './PermissionRow';
 import { GROUP_LABELS, getGroupConfig } from '../entities/constants';

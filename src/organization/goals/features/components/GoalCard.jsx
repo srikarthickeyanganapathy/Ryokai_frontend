@@ -12,7 +12,7 @@ import {
   Target,
   Edit2,
   Trash2,
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 import { Text } from '@/shared/ui/Typography';
 import { Input } from '@/shared/ui/Input';
 import { Button } from '@/shared/ui/Button';

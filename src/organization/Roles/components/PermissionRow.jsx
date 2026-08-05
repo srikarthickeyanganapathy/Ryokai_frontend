@@ -1,7 +1,7 @@
 import React from 'react';
 import { Checkbox } from '@/shared/ui/Checkbox';
 import { cn } from '@/shared/lib/cn';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight } from '@/shared/ui/Icons';
 import { getRiskConfig } from '../entities/constants';
 
 export function PermissionRow({ perm, isEnabled, isActive, isAdmin, onToggle, onSelect }) {

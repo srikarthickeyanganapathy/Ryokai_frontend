@@ -53,7 +53,7 @@ import {
   ChevronRight,
   Shield,
   Layers,
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 
 // --- Presence Configurations ---
 const PRESENCE_CONFIG = {

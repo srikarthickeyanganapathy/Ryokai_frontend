@@ -5,7 +5,7 @@ import { Icons } from '@/shared/ui/Icons'
 import { ProjectCard } from '@/project/components/ProjectCard'
 import { PermissionButton } from '../components/Shared'
 import { ImmersiveEmptyState } from '@/shared/ui/Immersive'
-import { FolderPlus } from 'lucide-react'
+import { FolderPlus } from '@/shared/ui/Icons'
 
 export function ProjectsTab({ teamProjects, canCreateProject, isReadOnly, onCreateProject }) {
   return (

@@ -9,7 +9,7 @@ import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/sha
 import { Textarea } from '@/shared/ui/Textarea';
 import { Label } from '@/shared/ui/Typography/Label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/Select';
-import { Plus, Inbox, Calendar, Clock, Sparkles, AlertCircle } from 'lucide-react';
+import { Plus, Inbox, Calendar, Clock, Sparkles, AlertCircle } from '@/shared/ui/Icons';
 import {
   WorkspaceShell,
   ManagementLayout,

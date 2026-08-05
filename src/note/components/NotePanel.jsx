@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Pin, Trash2, X, Check, Save, StickyNote, Bold, Italic, Heading as HeadingIcon, Code, Quote, List, CheckSquare, Link as LinkIcon, Eye, Edit3 } from 'lucide-react'
+import { Pin, Trash2, X, Check, Save, StickyNote, Bold, Italic, Heading as HeadingIcon, Code, Quote, List, CheckSquare, Link as LinkIcon, Eye, Edit3 } from '@/shared/ui/Icons'
 import { Button, IconButton } from '@/shared/ui/Button'
 import { Heading, Text, Label } from '@/shared/ui/Typography'
 import { cn } from '@/shared/lib/cn'

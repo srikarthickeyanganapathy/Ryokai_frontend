@@ -3,7 +3,7 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { Badge } from '@/shared/ui/Badge'
 import { Button } from '@/shared/ui/Button'
 import { cn } from '@/shared/lib/cn'
-import { Users, ExternalLink, Calendar, Shield, FolderKanban } from 'lucide-react'
+import { Users, ExternalLink, Calendar, Shield, FolderKanban } from '@/shared/ui/Icons'
 
 /**
  * TeamDrawer

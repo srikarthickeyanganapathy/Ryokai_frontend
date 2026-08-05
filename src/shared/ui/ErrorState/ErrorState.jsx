@@ -1,7 +1,7 @@
 import React from 'react'
 import { cn } from '@/shared/lib/cn'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle } from '@/shared/ui/Icons'
 
 export function ErrorState({ 
   title = 'Something went wrong', 

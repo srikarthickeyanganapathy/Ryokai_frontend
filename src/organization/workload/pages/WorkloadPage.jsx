@@ -9,7 +9,7 @@ import {
   TrendingDown,
   Minus,
   Filter,
-} from 'lucide-react';
+} from '@/shared/ui/Icons';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { Button } from '@/shared/ui/Button';

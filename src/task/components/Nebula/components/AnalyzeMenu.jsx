@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { Network, Zap, Globe, Target, Clock, Waves } from 'lucide-react'
+import { Network, Zap, Globe, Target, Clock, Waves } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 
 const ANALYSIS_MODES = [

@@ -1,5 +1,5 @@
 import React from 'react'
-import { ZoomIn, ZoomOut, Maximize2, RotateCcw, ChevronRight, LogOut, Compass, Eye, Search } from 'lucide-react'
+import { ZoomIn, ZoomOut, Maximize2, RotateCcw, ChevronRight, LogOut, Compass, Eye, Search } from '@/shared/ui/Icons'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/shared/lib/cn'
 
