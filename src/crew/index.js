@@ -1,8 +1,3 @@
-export { CrewsPage } from './pages/CrewsPage';
-export { CrewDetailPage } from './pages/CrewDetailPage';
-export { CrewDiscoverPage } from './pages/CrewDiscoverPage';
-export { CrewJoinPage } from './pages/CrewJoinPage';
-export { CrewTasksPage } from './pages/CrewTasksPage';
 export * from './entities/model/types';
 export * from './entities/model/normalizer';
 export * from './entities/model/queryKeys';

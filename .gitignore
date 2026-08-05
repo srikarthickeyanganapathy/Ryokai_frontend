@@ -25,3 +25,4 @@ dist-ssr
 
 .env
 .env.example
+frontend_audit_report.md

@@ -20,6 +20,7 @@ import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/shared/ui/Modal'
 import { Button } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'
+import { Skeleton } from '@/shared/ui/Skeleton'
 
 export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange }) {
   const [activeTask, setActiveTask] = useState(null)
@@ -292,12 +293,12 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
 
   if (isLoading) {
     return (
-      <div className="flex gap-4 pb-4">
+      <div className="flex gap-4 pb-4 overflow-x-auto custom-scrollbar">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="flex flex-col bg-[var(--bg-subtle)] rounded-[var(--radius-lg)] h-full w-[85vw] max-w-[320px] sm:w-[320px] shrink-0 border border-[var(--border-subtle)] p-3 gap-2.5">
-            <div className="h-5 w-28 bg-[var(--bg-elevated)] animate-pulse rounded-[var(--radius-xs)]" />
-            <div className="h-20 bg-[var(--bg-elevated)] animate-pulse rounded-[var(--radius-md)]" />
-            <div className="h-28 bg-[var(--bg-elevated)] animate-pulse rounded-[var(--radius-md)]" />
+            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-28 w-full" />
           </div>
         ))}
       </div>
@@ -305,7 +306,7 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
   }
 
   return (
-    <div className="flex gap-4 pb-4 items-start">
+    <div className="flex gap-4 pb-4 items-start overflow-x-auto custom-scrollbar">
       {confirmDialog}
       <DndContext
         sensors={sensors}

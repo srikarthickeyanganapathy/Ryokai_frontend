@@ -20,23 +20,27 @@ import { useAcceptInvite, useDeclineInvite } from '@/organization'
 import { cn } from '@/shared/lib/cn'
 import { Play } from '@/shared/ui/Icons'
 import { CommandMenu } from '../command-palette'
+import { LensStatusIndicator } from '@/shared/ui/LensStatusIndicator'
+
+import { useRealtime } from '@/app/providers/RealTimeProvider'
+import { useActiveFocus } from './useActiveFocus'
 
 function FocusTimerIndicator() {
-  // Mocked state: hidden by default
-  const isActive = false;
-  if (!isActive) return null;
+  const { data: focusData, isLoading } = useActiveFocus();
+  
+  if (isLoading || !focusData?.isActive) return null;
 
   return (
     <div className="flex items-center gap-2 bg-[var(--accent-soft)] text-[var(--accent)] px-3 py-1.5 rounded-full text-xs font-semibold mr-2 border border-[var(--accent-border)]">
       <Play className="w-3.5 h-3.5" />
-      <span>24:59</span>
+      <span>{focusData.timeRemaining || '24:59'}</span>
     </div>
   );
 }
 
 function SyncStatusIndicator() {
-  // Mocked state: 'synced', 'syncing', 'offline', 'conflict'
-  const syncState = 'synced'; 
+  const { connected } = useRealtime();
+  const syncState = connected ? 'synced' : 'offline'; 
   
   if (syncState === 'synced') return null;
 
@@ -90,12 +94,13 @@ export function AppTopbar({ onMenuClick }) {
         </IconButton>
       </div>
 
-      <div className="flex-1 flex justify-center px-4 max-w-2xl">
+      <div className="flex-1 flex justify-center px-4 max-w-2xl min-w-0">
         <CommandMenu />
       </div>
 
       <div className="flex items-center justify-end gap-1 sm:gap-3 flex-1 sm:min-w-[200px]">
 
+        <LensStatusIndicator />
 
         <SyncStatusIndicator />
         <FocusTimerIndicator />
@@ -152,7 +157,7 @@ export function AppTopbar({ onMenuClick }) {
               >
                 <Icons.bell className="w-5 h-5" />
                 {unread > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] flex items-center justify-center rounded-full bg-[var(--accent)] text-white text-[9px] font-semibold leading-none px-1 border-2 border-[var(--bg-base)] shadow-[0_0_8px_var(--accent)]">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[16px] flex items-center justify-center rounded-full bg-[var(--accent)] text-white text-[9px] font-semibold leading-none px-1 border-2 border-[var(--bg-base)] shadow-[0_0_8px_var(--accent)]">
                     {unread > 99 ? '99+' : unread}
                   </span>
                 )}

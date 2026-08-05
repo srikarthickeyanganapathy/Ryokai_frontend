@@ -330,4 +330,5 @@ export const Icons = {
   alertCircle: AlertCircle,
   folderPlus: FolderPlus,
   CheckCheck,
+  pin: Pin,
 }

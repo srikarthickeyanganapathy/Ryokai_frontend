@@ -7,7 +7,7 @@ export function DailyBriefWidget({ context }) {
   const { dailyBrief } = context;
 
   return (
-    <Card className="w-full bg-gradient-to-br from-background to-muted/30 border-muted/50 mb-6">
+    <Card className="w-full bg-gradient-to-br from-[var(--bg-base)] to-[var(--bg-subtle)] border-[var(--border-subtle)] mb-6">
       <CardHeader className="pb-2">
         <CardTitle className="text-xl font-bold flex items-center gap-2">
           {dailyBrief.greeting}

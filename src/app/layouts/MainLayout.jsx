@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AppSidebar, AppTopbar, GlobalCommandPalette } from '@/platform/workspace'
 import { WorkspaceInspector } from '@/components/inspector/WorkspaceInspector'
 import { useShortcuts } from "@/shared/hooks/useShortcuts"
+import { CosmicBackground } from '@/shared/ui/CosmicBackground'
 import {
   DrawerProvider,
   DrawerOutlet,
@@ -32,7 +33,10 @@ export function MainLayout() {
   useShortcuts()
 
   return (
-    <div className="flex h-screen w-full bg-[var(--bg-subtle)] text-[var(--text-primary)] overflow-hidden font-sans">
+    <div className="flex h-screen w-full bg-[var(--bg-subtle)] text-[var(--text-primary)] overflow-hidden font-sans relative">
+      
+      {/* Cosmic ambient particles — Ryokai signature atmosphere */}
+      <CosmicBackground variant="full" opacity={0.25} />
       
       {/* Sidebar - Desktop is persistent, Mobile is drawer */}
       <AppSidebar 

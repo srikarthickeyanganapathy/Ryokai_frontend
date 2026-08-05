@@ -23,7 +23,7 @@ export function ModeSelector() {
 
   return (
     <Select value={operatingMode} onValueChange={handleModeChange}>
-      <SelectTrigger className="w-[180px] h-9 bg-elevated border-subtle hover:border-strong focus:ring-accent transition-all shadow-sm text-primary">
+      <SelectTrigger className="w-[180px] h-9 bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:border-[var(--border-strong)] focus:ring-[var(--accent)] transition-all shadow-sm text-[var(--text-primary)]">
         <div className="flex items-center text-sm font-medium">
           {getIcon(operatingMode)}
           <SelectValue placeholder="Operating Mode" />

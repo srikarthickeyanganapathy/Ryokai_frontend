@@ -20,7 +20,7 @@ export function AnnouncementDrawer({ announcement, isOpen, onClose, onPin, onDel
   
   const priority = announcement.priority || 'MEDIUM';
   const config = PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.MEDIUM;
-  const AudienceIcon = announcement.audience === 'HR Team' || announcement.audience === 'Engineering' ? Icons.Users : Icons.Globe;
+  const AudienceIcon = announcement.audience === 'HR Team' || announcement.audience === 'Engineering' ? Icons.users : Icons.globe;
   const isExpired = announcement.expiresAt && new Date(announcement.expiresAt) < new Date();
 
   return (
@@ -29,14 +29,14 @@ export function AnnouncementDrawer({ announcement, isOpen, onClose, onPin, onDel
         <DrawerHeader className="border-b border-[var(--border-subtle)] pb-4 text-left">
           <div className="flex items-center gap-2 mb-3">
             <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-semibold flex items-center gap-1", config.bg, config.text)}>
-              <Icons.ShieldAlert className="w-3 h-3" /> {config.label}
+              <Icons.shieldAlert className="w-3 h-3" /> {config.label}
             </span>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--bg-subtle)] text-[var(--text-secondary)] flex items-center gap-1 capitalize">
               <AudienceIcon className="w-3 h-3" /> {announcement.audience || 'Organization'}
             </span>
             {announcement.isPinned && (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--accent-soft)] text-[var(--accent)] flex items-center gap-1">
-                <Icons.Pin className="w-3 h-3" /> Pinned
+                <Icons.pin className="w-3 h-3" /> Pinned
               </span>
             )}
           </div>
@@ -48,7 +48,7 @@ export function AnnouncementDrawer({ announcement, isOpen, onClose, onPin, onDel
             <Text size="xs" className="font-medium">{announcement.author?.username || 'Admin'}</Text>
             <span className="text-[var(--text-muted)]">•</span>
             <Text size="xs" variant="muted" className="flex items-center gap-1">
-              <Icons.Clock className="w-3 h-3" />
+              <Icons.clock className="w-3 h-3" />
               {format(new Date(announcement.createdAt), 'MMM d, yyyy')}
             </Text>
           </DrawerDescription>
@@ -59,7 +59,7 @@ export function AnnouncementDrawer({ announcement, isOpen, onClose, onPin, onDel
           
           {announcement.expiresAt && (
             <div className={cn("mt-6 p-3 rounded-lg border flex items-center gap-2 text-xs", isExpired ? "bg-red-500/10 border-red-500/20 text-red-500" : "bg-[var(--bg-subtle)] border-[var(--border-subtle)] text-[var(--text-secondary)]")}>
-              <Icons.Clock className="w-3.5 h-3.5" />
+              <Icons.clock className="w-3.5 h-3.5" />
               {isExpired ? `Expired ${formatRelative(new Date(announcement.expiresAt), new Date())}` : `Expires ${formatRelative(new Date(announcement.expiresAt), new Date())}`}
             </div>
           )}
@@ -69,14 +69,14 @@ export function AnnouncementDrawer({ announcement, isOpen, onClose, onPin, onDel
             <Text className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">Attachments</Text>
             <div className="border border-dashed border-[var(--border-subtle)] rounded-lg p-3 flex items-center gap-3 bg-[var(--bg-subtle)]/30">
               <div className="w-9 h-9 rounded bg-red-500/10 text-red-500 flex items-center justify-center">
-                <Icons.Paperclip className="w-4 h-4" />
+                <Icons.paperclip className="w-4 h-4" />
               </div>
               <div className="flex-1">
                 <Text className="text-xs font-medium text-[var(--text-primary)]">Agenda.pdf</Text>
                 <Text size="xs" variant="muted">2.4 MB</Text>
               </div>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Icons.Download className="w-4 h-4 text-[var(--text-secondary)]" />
+                <Icons.download className="w-4 h-4 text-[var(--text-secondary)]" />
               </Button>
             </div>
           </div>
@@ -85,10 +85,10 @@ export function AnnouncementDrawer({ announcement, isOpen, onClose, onPin, onDel
         {canManage && (
           <div className="pt-4 mt-auto border-t border-[var(--border-subtle)] flex items-center justify-between gap-3">
             <Button variant="outline" className="w-full gap-2" onClick={onPin}>
-              <Icons.Pin className="w-4 h-4" /> {announcement.isPinned ? "Unpin" : "Pin"}
+              <Icons.pin className="w-4 h-4" /> {announcement.isPinned ? "Unpin" : "Pin"}
             </Button>
             <Button variant="danger" className="w-full gap-2" onClick={onDelete}>
-              <Icons.Trash2 className="w-4 h-4" /> Delete
+              <Icons.trash2 className="w-4 h-4" /> Delete
             </Button>
           </div>
         )}

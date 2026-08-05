@@ -65,6 +65,18 @@ export const WIDGET_REGISTRY = [
 
   // --- CONTEXT WIDGETS ---
   {
+    id: 'ai_copilot',
+    component: 'AICopilotPanel',
+    placement: 'context',
+    order: 0,
+    workspaceModes: ['PERSONAL', 'CREWS', 'ORG'],
+    requiredPermissions: [],
+    requiredCapabilities: [],
+    lazy: false,
+    visible: true,
+    featureFlag: null
+  },
+  {
     id: 'personal_context_rail',
     component: 'PersonalContextRail',
     placement: 'context',

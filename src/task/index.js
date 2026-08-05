@@ -1,4 +1,3 @@
-export { TasksPage } from './pages/TasksPage';
 export { TaskPanel } from './components/TaskPanel/TaskPanel';
 export { TaskForm } from './features/manage-task/TaskForm';
 export { TasksTable } from './components/TableView/TasksTable';

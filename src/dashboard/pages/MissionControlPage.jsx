@@ -16,6 +16,7 @@ import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { useAuth } from '@/identity';
 
 import { DailyBriefWidget } from '../features/DailyBriefWidget';
+import { AICopilotPanel } from '../features/AICopilotPanel';
 
 const WIDGET_COMPONENTS = {
   SignalStrip,
@@ -25,7 +26,8 @@ const WIDGET_COMPONENTS = {
   PersonalContextRail,
   CrewContextRail,
   OrgContextRail,
-  DailyBriefWidget
+  DailyBriefWidget,
+  AICopilotPanel
 };
 
 function getGreeting() {

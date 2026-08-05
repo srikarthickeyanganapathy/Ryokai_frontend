@@ -11,6 +11,7 @@ import { Text, Heading } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { Icons } from '@/shared/ui/Icons'
+import { Skeleton } from '@/shared/ui/Skeleton'
 
 export function DataTable({
   columns,
@@ -73,7 +74,7 @@ export function DataTable({
                   <tr key={index} className="border-b border-[var(--color-border-subtle)]">
                     {columns.map((_, cellIndex) => (
                       <td key={cellIndex} className="p-3 align-middle">
-                        <div className="h-4 w-full bg-[var(--bg-subtle)] rounded-[var(--radius-sm)] animate-pulse" />
+                        <Skeleton className="h-4 w-full" />
                       </td>
                     ))}
                   </tr>

@@ -23,8 +23,8 @@ export function SignalStrip({ interrupts }) {
   return (
     <div className="flex flex-col space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold tracking-wider text-tertiary uppercase">Signals</h3>
-        <Badge variant="secondary" className="text-xs bg-danger/10 text-danger border-danger/20">
+        <h3 className="text-sm font-semibold tracking-wider text-[var(--text-tertiary)] uppercase">Signals</h3>
+        <Badge variant="danger" className="text-xs">
           {interrupts.length} Action{interrupts.length !== 1 ? 's' : ''} Required
         </Badge>
       </div>
@@ -34,7 +34,7 @@ export function SignalStrip({ interrupts }) {
           <Card 
             key={signal.id} 
             variant="interactive"
-            className="border-l-4 !border-l-[var(--warning)]"
+            className="!border-l-4 !border-l-[var(--warning)]"
             onClick={() => {
               if (signal.taskId) {
                 open('task', { taskId: signal.taskId });
@@ -44,14 +44,14 @@ export function SignalStrip({ interrupts }) {
             }}
           >
             <CardContent className="p-4 flex gap-3 items-start">
-              <div className="mt-0.5 bg-subtle p-2 rounded-md">
+              <div className="mt-0.5 bg-[var(--bg-subtle)] p-2 rounded-md">
                 {getIcon(signal.type)}
               </div>
               <div>
-                <h4 className="text-sm font-medium text-primary line-clamp-1">
+                <h4 className="text-sm font-medium text-[var(--text-primary)] line-clamp-1">
                   {signal.title}
                 </h4>
-                <p className="text-xs text-secondary mt-1 line-clamp-2">
+                <p className="text-xs text-[var(--text-secondary)] mt-1 line-clamp-2">
                   {signal.message}
                 </p>
               </div>

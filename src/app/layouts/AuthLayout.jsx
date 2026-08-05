@@ -1,8 +1,8 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { Icons } from '@/shared/ui/Icons'
 import { RyokaiLogo } from '@/shared/ui/Logo/RyokaiLogo'
+import { CosmicBackground } from '@/shared/ui/CosmicBackground'
 
 export function AuthLayout() {
   return (
@@ -10,6 +10,8 @@ export function AuthLayout() {
 
       {/* LEFT SIDE — Brand */}
       <div className="hidden lg:flex lg:w-[42%] relative bg-[var(--bg-subtle)] border-r border-[var(--border-subtle)] flex-col justify-between p-10 overflow-hidden mesh-bg shadow-[var(--inset-highlight-soft)]">
+        {/* Cosmic starfield particles in brand panel */}
+        <CosmicBackground variant="hero" opacity={0.3} />
         {/* Quiet dot-grid texture */}
         <div
           className="absolute inset-0 z-0 opacity-[0.35]"

@@ -18,7 +18,7 @@ export function AnnouncementCard({ announcement, onRead, onOpen, onPin, onDelete
   const config = PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.MEDIUM;
   
   // Use shared Icons instead of direct lucide imports
-  const AudienceIcon = announcement.audience === 'HR Team' || announcement.audience === 'Engineering' ? Icons.Users : Icons.Globe;
+  const AudienceIcon = announcement.audience === 'HR Team' || announcement.audience === 'Engineering' ? Icons.users : Icons.globe;
   const isExpired = announcement.expiresAt && new Date(announcement.expiresAt) < new Date();
 
   return (
@@ -42,12 +42,12 @@ export function AnnouncementCard({ announcement, onRead, onOpen, onPin, onDelete
         )}
         {canManage && (
           <button onClick={(e) => { e.stopPropagation(); onPin(); }} className={cn("p-1.5 hover:bg-[var(--bg-hover)] rounded", isPinned ? "text-[var(--accent)]" : "text-[var(--text-secondary)] hover:text-[var(--accent)]")} title="Pin">
-            <Icons.Pin className="w-3.5 h-3.5" />
+            <Icons.pin className="w-3.5 h-3.5" />
           </button>
         )}
         {canManage && (
           <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="p-1.5 hover:bg-[var(--bg-hover)] rounded text-[var(--text-secondary)] hover:text-red-500" title="Delete">
-            <Icons.Trash2 className="w-3.5 h-3.5" />
+            <Icons.trash2 className="w-3.5 h-3.5" />
           </button>
         )}
       </div>
@@ -55,14 +55,14 @@ export function AnnouncementCard({ announcement, onRead, onOpen, onPin, onDelete
       {/* Header Badges */}
       <div className="flex items-center gap-2">
         <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-semibold flex items-center gap-1", config.bg, config.text)}>
-          <Icons.ShieldAlert className="w-3 h-3" /> {config.label}
+          <Icons.shieldAlert className="w-3 h-3" /> {config.label}
         </span>
         <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--bg-subtle)] text-[var(--text-secondary)] flex items-center gap-1 capitalize">
           <AudienceIcon className="w-3 h-3" /> {announcement.audience || 'Organization'}
         </span>
         {isPinned && (
           <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--accent-soft)] text-[var(--accent)] flex items-center gap-1">
-            <Icons.Pin className="w-3 h-3" /> Pinned
+            <Icons.pin className="w-3 h-3" /> Pinned
           </span>
         )}
       </div>
@@ -84,7 +84,7 @@ export function AnnouncementCard({ announcement, onRead, onOpen, onPin, onDelete
           <Text size="xs" className="font-medium text-[var(--text-secondary)]">{announcement.author?.username || 'Admin'}</Text>
         </div>
         <div className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] font-mono">
-          <Icons.Clock className="w-3 h-3" />
+          <Icons.clock className="w-3 h-3" />
           {formatRelative(new Date(announcement.createdAt), new Date())}
         </div>
       </div>

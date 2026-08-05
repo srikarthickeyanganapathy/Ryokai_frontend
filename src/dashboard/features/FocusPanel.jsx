@@ -9,7 +9,7 @@ import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 const FOCUS_CONFIG = {
   PERSONAL: {
     badge: 'Current Focus',
-    badgeClass: 'text-accent border-accent/20 bg-accent/5',
+    badgeClass: 'text-[var(--accent)] border-[var(--accent)]/20 bg-[var(--accent)]/5',
     icon: Target,
     emptyTitle: "You're caught up.",
     emptyDesc: 'No high-priority tasks need your attention right now.',
@@ -46,13 +46,13 @@ export function FocusPanel({ focusTask, resumeContext }) {
   if (!focusTask) {
     return (
       <Card className="relative overflow-hidden group h-full">
-        <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="absolute inset-0 bg-[var(--accent)]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         <CardContent className="pt-6 pb-8 flex flex-col items-center justify-center text-center space-y-4 h-full">
-          <div className="h-16 w-16 rounded-full bg-subtle flex items-center justify-center text-tertiary mb-2">
+          <div className="h-16 w-16 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center text-[var(--text-tertiary)] mb-2">
             <EmptyIcon size={32} />
           </div>
-          <h2 className="text-2xl font-semibold text-primary">{config.emptyTitle}</h2>
-          <p className="text-secondary max-w-sm">
+          <h2 className="text-2xl font-semibold text-[var(--text-primary)]">{config.emptyTitle}</h2>
+          <p className="text-[var(--text-secondary)] max-w-sm">
             {config.emptyDesc}
           </p>
         </CardContent>
@@ -66,7 +66,7 @@ export function FocusPanel({ focusTask, resumeContext }) {
       className="relative overflow-hidden group h-full"
       onClick={() => open('task', { taskId: focusTask.id })}
     >
-      <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <div className="absolute inset-0 bg-[var(--accent)]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between relative z-10">
           <div className="space-y-3 flex-1">
@@ -75,7 +75,7 @@ export function FocusPanel({ focusTask, resumeContext }) {
                 {config.badge}
               </Badge>
               {resumeContext && (
-                <span className="text-xs text-secondary font-medium flex items-center gap-1">
+                <span className="text-xs text-[var(--text-secondary)] font-medium flex items-center gap-1">
                   <Clock size={12} /> Resuming
                 </span>
               )}
@@ -91,24 +91,24 @@ export function FocusPanel({ focusTask, resumeContext }) {
               )}
             </div>
             
-            <h2 className="text-2xl font-semibold text-primary line-clamp-2">
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] line-clamp-2">
               {focusTask.title}
             </h2>
             
-            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-secondary">
+            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-[var(--text-secondary)]">
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-warning"></span>
+                <span className="w-2 h-2 rounded-full bg-[var(--warning)]"></span>
                 <span>{focusTask.status || 'In Progress'}</span>
               </div>
               {focusTask.project && (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-tertiary">•</span>
+                  <span className="text-[var(--text-tertiary)]">•</span>
                   <span>{focusTask.project.name}</span>
                 </div>
               )}
               {focusTask.assigneeName && workspaceMode !== 'PERSONAL' && (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-tertiary">•</span>
+                  <span className="text-[var(--text-tertiary)]">•</span>
                   <span>{focusTask.assigneeName}</span>
                 </div>
               )}
@@ -116,7 +116,7 @@ export function FocusPanel({ focusTask, resumeContext }) {
           </div>
           
           <div className="flex-shrink-0">
-            <Button size="lg" className="bg-accent hover:bg-accent-hover text-white rounded-full px-6 shadow-sm group-hover:shadow-accent/25 transition-all">
+            <Button size="lg" className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-full px-6 shadow-sm group-hover:shadow-[0_0_20px_var(--accent)] transition-all">
               {config.action}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

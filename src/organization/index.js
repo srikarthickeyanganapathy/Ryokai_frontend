@@ -1,8 +1,3 @@
-export { OrganizationsPage } from './pages/OrganizationsPage';
-export { OrganizationAdministrationPage } from './pages/OrganizationAdministrationPage';
-export { DirectoryPage } from './directory/pages/DirectoryPage';
-export { AnnouncementsPage } from './announcements/pages/AnnouncementsPage';
-export { AcceptInvitePage } from './pages/AcceptInvitePage';
 export * from './entities/model/types';
 export * from './entities/model/normalizer';
 export * from './entities/model/queryKeys';

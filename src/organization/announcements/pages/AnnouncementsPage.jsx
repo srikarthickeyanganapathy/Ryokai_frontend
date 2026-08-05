@@ -101,7 +101,7 @@ export function AnnouncementsPage() {
             actions={
               canManageAnnouncements ? (
                 <Button size="sm" className="gap-2" onClick={() => setIsCreateOpen(true)}>
-                  <Icons.Plus className="w-4 h-4" />
+                  <Icons.plus className="w-4 h-4" />
                   New Broadcast
                 </Button>
               ) : null
@@ -128,7 +128,7 @@ export function AnnouncementsPage() {
           state={pageState}
           loadingConfig={{ variant: 'cards' }}
           emptyConfig={{
-            icon: Icons.Megaphone,
+            icon: Icons.megaphone,
             title: 'No announcements yet',
             description: 'When an admin posts an update, it will appear here.',
             actionLabel: canManageAnnouncements ? 'Create first announcement' : undefined,
@@ -137,7 +137,7 @@ export function AnnouncementsPage() {
         >
           {filteredAnnouncements.length === 0 && !isLoading && announcements.length > 0 && (
             <ImmersiveEmptyState
-              icon={Icons.Inbox}
+              icon={Icons.inbox}
               title="No matching announcements"
               description="Try adjusting your filters or search terms."
             />

@@ -11,7 +11,7 @@ export function ContextRail({ suggestedActions, workspaceMode }) {
     <div className="w-full lg:w-80 flex-shrink-0 space-y-6">
       
       {/* AI Summary / Briefing */}
-      <Card className="bg-accent text-white border-0 shadow-lg overflow-hidden relative">
+      <Card className="bg-[var(--accent)] text-white border-0 shadow-lg overflow-hidden relative">
         <div className="absolute top-0 right-0 p-4 opacity-10">
           <Sparkles size={64} />
         </div>
@@ -33,11 +33,11 @@ export function ContextRail({ suggestedActions, workspaceMode }) {
 
       {/* Suggested Actions or Quick Links */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold tracking-wider text-tertiary uppercase">Context Tools</h3>
+        <h3 className="text-sm font-semibold tracking-wider text-[var(--text-tertiary)] uppercase">Context Tools</h3>
         <div className="grid grid-cols-2 gap-2">
           <Button 
             variant="outline" 
-            className="h-20 flex flex-col items-center justify-center gap-2 text-secondary hover:text-primary bg-elevated border-subtle hover:border-default hover:bg-hover"
+            className="h-20 flex flex-col items-center justify-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--bg-hover)]"
             onClick={() => open('notes')}
           >
             <FileText size={20} />
@@ -45,7 +45,7 @@ export function ContextRail({ suggestedActions, workspaceMode }) {
           </Button>
           <Button 
             variant="outline" 
-            className="h-20 flex flex-col items-center justify-center gap-2 text-secondary hover:text-primary bg-elevated border-subtle hover:border-default hover:bg-hover"
+            className="h-20 flex flex-col items-center justify-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--bg-hover)]"
             onClick={() => open('activity')}
           >
             <Activity size={20} />
@@ -54,7 +54,7 @@ export function ContextRail({ suggestedActions, workspaceMode }) {
           {workspaceMode !== 'PERSONAL' && (
             <Button 
               variant="outline" 
-              className="h-20 flex flex-col items-center justify-center gap-2 text-secondary hover:text-primary bg-elevated border-subtle hover:border-default hover:bg-hover col-span-2"
+              className="h-20 flex flex-col items-center justify-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:border-[var(--border-default)] hover:bg-[var(--bg-hover)] col-span-2"
               onClick={() => open('team')}
             >
               <Users size={20} />
