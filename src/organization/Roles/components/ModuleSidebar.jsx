@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/shared/lib/cn';
-import { getModuleIcon } from './constants';
+import { getModuleIcon } from '../entities/constants';
 
 export function ModuleSidebar({ modules = [], activeModule, onModuleChange, localScopedPerms = {} }) {
   return (

@@ -7,11 +7,12 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { useTaskList, useUpdateTask, useDeleteTask, useSubmitTask, useApproveTask, useReassignTask, useCompletePersonalTask, useCompleteCrewTask, useRecallTask, useRejectTask } from '../entities/hooks/useTasks'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { TaskForm } from '../features/manage-task/TaskForm'
-import { TasksToolbar } from '../sections/TaskToolbar/TasksToolbar'
-import { TasksTable } from '../sections/TableView/TasksTable'
-import { KanbanBoard } from '../sections/KanbanBoard/KanbanBoard'
-import { TaskPanel } from '../sections/TaskPanel/TaskPanel'
-import NebulaView from '../sections/Nebula/components/NebulaView'
+import { TasksToolbar } from '../components/TaskToolbar/TasksToolbar'
+import { TasksTable } from '../components/TableView/TasksTable'
+import { KanbanBoard } from '../components/KanbanBoard/KanbanBoard'
+import { TaskPanel } from '../components/TaskPanel/TaskPanel'
+import NebulaView from '../components/Nebula/components/NebulaView'
+import { PageHeader } from '@/shared/ui/PageHeader'
 import { toast } from 'sonner'
 import { Icons } from '@/shared/ui/Icons'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
@@ -368,23 +369,10 @@ export function TasksPage() {
     <WorkspaceShell maxWidth="wide">
       <ManagementLayout
         header={
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
-                  EXECUTE Mode
-                </span>
-                <span className="text-[11px] text-[var(--text-muted)]">• {tasks.length} Work Items</span>
-                {reviewCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/30 text-[10px] font-mono font-medium">
-                    {reviewCount} Awaiting Review
-                  </span>
-                )}
-              </div>
-              <Heading level={1} className="tracking-tight text-[22px] font-semibold mb-0">Tasks Engine</Heading>
-            </div>
-
-            <div className="flex items-center gap-2">
+          <PageHeader
+            eyebrow={`EXECUTE Mode · ${tasks.length} Work Items${reviewCount > 0 ? ` · ${reviewCount} Awaiting Review` : ''}`}
+            title="Tasks Engine"
+            actions={
               <Button
                 size="sm"
                 variant="outline"
@@ -394,8 +382,8 @@ export function TasksPage() {
                 <Icons.play className="w-3.5 h-3.5 fill-current" />
                 Launch Focus Engine
               </Button>
-            </div>
-          </div>
+            }
+          />
         }
         toolbar={
           <TasksToolbar

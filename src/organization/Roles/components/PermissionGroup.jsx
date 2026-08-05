@@ -2,7 +2,7 @@ import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { PermissionRow } from './PermissionRow';
-import { GROUP_LABELS, getGroupConfig } from './constants';
+import { GROUP_LABELS, getGroupConfig } from '../entities/constants';
 
 export function PermissionGroup({ groupKey, permissions = [], localScopedPerms = {}, isAdmin, onToggle, onSelect, activePermission, collapsed = false, onToggleCollapsed }) {
   if (!permissions || permissions.length === 0) return null;

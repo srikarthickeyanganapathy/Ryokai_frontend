@@ -13,9 +13,9 @@ import { useProjects } from '@/project';
 import { useTaskList } from '@/task';
 import { useGoals } from '@/organization/goals/features/hooks/useGoals';
 
-import { OrganizationOverview } from '../sections/Administration/OrganizationOverview';
-import { OrganizationAdministrationHub } from '../sections/Administration/OrganizationAdministrationHub';
-import { DangerZone } from '../sections/Administration/DangerZone';
+import { OrganizationOverview } from '../components/Administration/OrganizationOverview';
+import { OrganizationAdministrationHub } from '../components/Administration/OrganizationAdministrationHub';
+import { DangerZone } from '../components/Administration/DangerZone';
 
 export function OrganizationAdministrationPage() {
   const { orgId } = useParams();

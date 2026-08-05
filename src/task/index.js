@@ -1,10 +1,10 @@
 export { TasksPage } from './pages/TasksPage';
-export { TaskPanel } from './sections/TaskPanel/TaskPanel';
+export { TaskPanel } from './components/TaskPanel/TaskPanel';
 export { TaskForm } from './features/manage-task/TaskForm';
-export { TasksTable } from './sections/TableView/TasksTable';
-export { TasksToolbar } from './sections/TaskToolbar/TasksToolbar';
-export { KanbanBoard } from './sections/KanbanBoard/KanbanBoard';
-export { default as NebulaView } from './sections/Nebula/components/NebulaView';
+export { TasksTable } from './components/TableView/TasksTable';
+export { TasksToolbar } from './components/TaskToolbar/TasksToolbar';
+export { KanbanBoard } from './components/KanbanBoard/KanbanBoard';
+export { default as NebulaView } from './components/Nebula/components/NebulaView';
 export { BulkCreateTaskModal } from './features/manage-task/BulkCreateTaskModal';
 export * from './entities/hooks/useTasks';
 export * from './entities/model/types';

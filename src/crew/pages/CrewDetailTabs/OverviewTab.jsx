@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
+import { SectionPanel } from '@/shared/ui/SectionPanel';
 import { Icons } from '@/shared/ui/Icons';
 import { ProgressBar } from '../../components/CrewShared';
 import {
@@ -478,21 +479,17 @@ export function OverviewTab({
         {/* --------------------------------------------------------------- */}
         {/* CARD 1: ACTIVE WORK CARDS (Requirement 2, lg:col-span-8)         */}
         {/* --------------------------------------------------------------- */}
-        <div className="lg:col-span-8 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-5">
-          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center font-bold text-xs">
-                <Zap className="w-4 h-4" />
-              </div>
-              <div>
-                <Heading level={4} className="text-[15px] font-bold tracking-tight">Active Work</Heading>
-                <Text size="xs" variant="muted">Assigned tasks currently in progress or review</Text>
-              </div>
-            </div>
+        <SectionPanel
+          className="lg:col-span-8 flex flex-col justify-between"
+          icon={Zap}
+          title="Active Work"
+          subtitle="Assigned tasks currently in progress or review"
+          actions={
             <Badge variant="primary" size="sm" className="tabular-nums font-semibold">
               {activeTasks.length} Active
             </Badge>
-          </div>
+          }
+        >
 
           {/* Active Work Task List */}
           {activeTasks.length === 0 ? (
@@ -565,7 +562,7 @@ export function OverviewTab({
             </div>
           )}
 
-          <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between">
+          <div className="pt-2 mt-5 border-t border-[var(--border-subtle)] flex items-center justify-between">
             <span className="text-[11px] text-[var(--text-muted)]">
               Showing top active tasks out of {totalTasks} total
             </span>
@@ -576,21 +573,21 @@ export function OverviewTab({
               View Task Board <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
+        </SectionPanel>
 
         {/* --------------------------------------------------------------- */}
         {/* CARD 2: VELOCITY SPARKLINE & HEALTH GAUGE (Req 4, lg:col-span-4)   */}
         {/* --------------------------------------------------------------- */}
-        <div className="lg:col-span-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-5">
-          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
-            <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-[var(--accent)]" />
-              <Heading level={4} className="text-[15px] font-bold tracking-tight">Crew Velocity & Health</Heading>
-            </div>
+        <SectionPanel
+          className="lg:col-span-4 flex flex-col justify-between"
+          icon={Activity}
+          title="Crew Velocity & Health"
+          actions={
             <Badge variant="success" size="xs" className="gap-1 font-mono">
               <TrendingUp className="w-3 h-3" /> {completionRate}% Complete
             </Badge>
-          </div>
+          }
+        >
 
           <div className="grid grid-cols-2 gap-4 items-center py-1">
             {/* Health Gauge Meter */}
@@ -624,28 +621,28 @@ export function OverviewTab({
           </div>
 
           {/* Velocity Sparkline SVG Chart */}
-          <div className="pt-2">
+          <div className="pt-2 mt-5">
             <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)] mb-1">
               <span>Velocity Trend</span>
               <span className="font-mono text-[var(--accent)] font-semibold">Done: {doneTasksCount}</span>
             </div>
             <VelocitySparkline data={[0, Math.round(totalTasks * 0.2), Math.round(totalTasks * 0.4), Math.round(totalTasks * 0.6), doneTasksCount]} />
           </div>
-        </div>
+        </SectionPanel>
 
         {/* --------------------------------------------------------------- */}
         {/* CARD 3: ACTIVITY TIMELINE FEED (Requirement 3, lg:col-span-8)    */}
         {/* --------------------------------------------------------------- */}
-        <div className="lg:col-span-8 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm space-y-5">
-          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[var(--accent)]" />
-              <Heading level={4} className="text-[15px] font-bold tracking-tight">Activity Timeline</Heading>
-            </div>
+        <SectionPanel
+          className="lg:col-span-8"
+          icon={Clock}
+          title="Activity Timeline"
+          actions={
             <Badge variant="outline" size="sm" className="text-[10px] text-[var(--text-muted)]">
               Realtime Stream
             </Badge>
-          </div>
+          }
+        >
 
           {activityFeed.length === 0 ? (
             /* STATE 5: Partial Timeline Empty State */
@@ -686,7 +683,7 @@ export function OverviewTab({
               })}
             </div>
           )}
-        </div>
+        </SectionPanel>
 
         {/* --------------------------------------------------------------- */}
         {/* CARD 4: QUICK CONTINUE & SQUAD RAIL (Requirement 4, lg:col-span-4) */}
@@ -694,8 +691,7 @@ export function OverviewTab({
         <div className="lg:col-span-4 space-y-6">
           
           {/* Quick Jump Rail */}
-          <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm space-y-4">
-            <Heading level={4} className="text-[14px] font-bold tracking-tight">Quick Action Shortcuts</Heading>
+          <SectionPanel title="Quick Action Shortcuts">
             <div className="grid grid-cols-2 gap-2.5">
               <Button
                 variant="outline"
@@ -730,19 +726,20 @@ export function OverviewTab({
                 <Pencil className="w-3.5 h-3.5 text-[var(--danger)]" /> Canvas
               </Button>
             </div>
-          </div>
+          </SectionPanel>
 
           {/* Squad Roster Snippet */}
-          <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <Heading level={4} className="text-[14px] font-bold tracking-tight">Squad Roster</Heading>
+          <SectionPanel
+            title="Squad Roster"
+            actions={
               <button
                 onClick={() => setActiveTab('members')}
                 className="text-[11px] font-semibold text-[var(--accent)] hover:underline"
               >
                 View All ({members.length}) →
               </button>
-            </div>
+            }
+          >
 
             {members.length === 0 ? (
               <Text size="xs" variant="muted" className="italic">No squad members assigned.</Text>
@@ -777,7 +774,7 @@ export function OverviewTab({
                 })}
               </div>
             )}
-          </div>
+          </SectionPanel>
 
         </div>
 

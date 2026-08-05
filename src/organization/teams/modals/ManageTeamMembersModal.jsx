@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription } from '@/shared/ui/Modal'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button, IconButton } from '@/shared/ui/Button'
+import { FilterTabs } from '@/shared/ui/FilterTabs'
 import { Icons } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 import { useAddTeamMember, useRemoveTeamMember, useTeamObservers, useAddTeamObserver, useRemoveTeamObserver } from '@/organization'
@@ -62,14 +63,19 @@ export function ManageTeamMembersModal({ isOpen, onClose, team, orgMembers }) {
             </div>
           </ModalHeader>
         </div>
-
-        <div className="flex gap-1 p-1 bg-[var(--bg-subtle)] mx-6 mt-4 rounded-lg shrink-0 w-fit">
-          <button type="button" onClick={() => setActiveTab('members')} className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12.5px] font-medium transition-colors', activeTab === 'members' ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]')}>
-            <Icons.users className="w-3.5 h-3.5" /> Members <span className={cn('tabular-nums text-xs', activeTab === 'members' ? 'opacity-90' : 'opacity-60')}>{team?.members?.length || 0}</span>
-          </button>
-          <button type="button" onClick={() => setActiveTab('observers')} className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12.5px] font-medium transition-colors', activeTab === 'observers' ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]')}>
-            <Icons.search className="w-3.5 h-3.5" /> Observers <span className={cn('tabular-nums text-xs', activeTab === 'observers' ? 'opacity-90' : 'opacity-60')}>{observers?.length || 0}</span>
-          </button>
+        <div className="mx-6 mt-4">
+          <FilterTabs
+            filters={[
+              { value: 'members', label: 'Members' },
+              { value: 'observers', label: 'Observers' },
+            ]}
+            value={activeTab}
+            onChange={setActiveTab}
+            counts={{
+              members: team?.members?.length || 0,
+              observers: observers?.length || 0,
+            }}
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto space-y-6 min-h-0 px-6 pt-4 pb-6 custom-scrollbar">

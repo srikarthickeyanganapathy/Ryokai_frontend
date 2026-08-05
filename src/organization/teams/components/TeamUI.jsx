@@ -144,18 +144,7 @@ export function RadialProgressRing({ progress = 0, size = 48, strokeWidth = 4, h
     </div>
   );
 }
-export function StatPill({ icon: Icon, label, value, highlight }) {
-  return (
-    <div className={cn(
-      "flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-200 shadow-2xs",
-      highlight ? "border-[var(--accent-border)] bg-[var(--accent-soft)]/25 text-[var(--accent)]" : "border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]"
-    )}>
-      {Icon && <Icon className={cn("w-3.5 h-3.5 shrink-0", highlight ? "text-[var(--accent)]" : "text-[var(--text-muted)]")} aria-hidden="true" />}
-      <span className="text-[13px] font-bold tabular-nums">{value}</span>
-      <span className="text-[11px] text-[var(--text-muted)] font-medium capitalize">{label}</span>
-    </div>
-  );
-}
+
 export function MetricChip({ icon: Icon, label, value, colorClass, borderClass, bgClass }) {
   return (
     <div className={cn(

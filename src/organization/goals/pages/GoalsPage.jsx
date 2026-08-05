@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Plus, Target, Building2 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
-import { Heading, Text } from '@/shared/ui/Typography';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { usePermissions } from '@/identity';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import {
@@ -27,6 +27,7 @@ import {
   filterGoalsByStatus,
   sortGoals,
 } from '@/organization/goals/features/utils/goalCalculations';
+import { Text } from '@/shared/ui/Typography';
 
 export function GoalsPage() {
   const { workspaceMode } = useWorkspace();
@@ -137,36 +138,19 @@ export function GoalsPage() {
     <WorkspaceShell maxWidth="narrow">
       <ManagementLayout
         header={
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
-                  Goals
-                </span>
-              </div>
-              <Heading
-                level={1}
-                className="tracking-tight text-xl sm:text-[22px] font-semibold mb-1 flex items-center gap-2 truncate"
-              >
-                <Target
-                  className="w-5 h-5 text-[var(--accent)] shrink-0"
-                  aria-hidden="true"
-                />
-                Strategic goals & OKRs
-              </Heading>
-              <Text variant="muted" className="text-[13px] leading-relaxed">
-                Track key organizational objectives, target metrics, and progress
-                outcomes across departments.
-              </Text>
-            </div>
-            {canManageGoals && (
-              <div className="flex items-center gap-2 shrink-0">
+          <PageHeader
+            eyebrow="Goals"
+            icon={Target}
+            title="Strategic goals & OKRs"
+            subtitle="Track key organizational objectives, target metrics, and progress outcomes across departments."
+            actions={
+              canManageGoals && (
                 <Button onClick={openNew} className="gap-2 h-9 text-xs">
                   <Plus className="w-4 h-4" /> New goal
                 </Button>
-              </div>
-            )}
-          </div>
+              )
+            }
+          />
         }
       >
         <PageStateContainer

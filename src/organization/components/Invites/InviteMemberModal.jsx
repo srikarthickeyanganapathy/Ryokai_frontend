@@ -3,6 +3,7 @@ import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select';
+import { FilterTabs } from '@/shared/ui/FilterTabs';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/shared/ui/Modal';
 import { useInviteMember, useOrgRoles, useCreateInviteLink } from '@/organization';
 import { usePermissions } from '@/identity';
@@ -90,27 +91,19 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
           <ModalTitle>Invite member</ModalTitle>
         </ModalHeader>
 
-        <div className="flex bg-[var(--bg-muted)] p-1 rounded-lg mt-4">
-          <button
-            onClick={() => setActiveTab('direct')}
-            className={`flex-1 text-sm font-medium py-1.5 rounded-md transition-colors ${
-              activeTab === 'direct'
-                ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-            }`}
-          >
-            Direct Invite
-          </button>
-          <button
-            onClick={() => { setActiveTab('link'); setGeneratedLink(''); }}
-            className={`flex-1 text-sm font-medium py-1.5 rounded-md transition-colors ${
-              activeTab === 'link'
-                ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-            }`}
-          >
-            Shareable Link
-          </button>
+        <div className="mt-4">
+          <FilterTabs
+            filters={[
+              { value: 'direct', label: 'Direct Invite' },
+              { value: 'link', label: 'Shareable Link' },
+            ]}
+            value={activeTab}
+            onChange={(val) => {
+              setActiveTab(val);
+              if (val === 'link') setGeneratedLink('');
+            }}
+            className="w-full [&>button]:flex-1"
+          />
         </div>
 
         <div className="space-y-4 mt-6">

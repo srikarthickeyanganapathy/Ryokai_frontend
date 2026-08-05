@@ -17,7 +17,7 @@ import { Text } from '@/shared/ui/Typography';
 import { Input } from '@/shared/ui/Input';
 import { Button } from '@/shared/ui/Button';
 import { cn } from '@/shared/lib/cn';
-import { AnimatedNumber, ProgressBar } from './ProgressVisuals';
+import { AnimatedNumber, ProgressBar } from '@/shared/ui/Progress';
 import {
   getKRSummary,
   getKRStatus,

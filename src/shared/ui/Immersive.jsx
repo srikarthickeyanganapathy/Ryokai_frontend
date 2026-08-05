@@ -89,9 +89,17 @@ export function ImmersiveBadge({ children, tone = 'neutral', className }) {
 }
 
 /**
- * ImmersiveMetric: A clean, typography-focused metric display without heavy boxes.
+ * ImmersiveMetric: A clean, typography-focused metric display.
+ * Enhanced with subtitle and icon background support.
+ *
+ * @param {string} label - Uppercase muted label text
+ * @param {string|number} value - Primary metric value
+ * @param {React.ComponentType} [icon] - Lucide icon component
+ * @param {'default'|'accent'|'success'|'warning'|'danger'} [tone] - Color tone
+ * @param {string} [subtitle] - Secondary context line (e.g. "3 Active · 2 Completed")
+ * @param {string} [className] - Additional wrapper classes
  */
-export function ImmersiveMetric({ label, value, icon: Icon, tone = 'default' }) {
+export function ImmersiveMetric({ label, value, icon: Icon, tone = 'default', subtitle, className }) {
   const tones = {
     default: 'text-[var(--text-primary)]',
     accent: 'text-[var(--accent)]',
@@ -100,18 +108,73 @@ export function ImmersiveMetric({ label, value, icon: Icon, tone = 'default' }) 
     danger: 'text-red-500',
   };
 
+  const iconBgTones = {
+    default: 'bg-[var(--bg-subtle)] text-[var(--text-muted)]',
+    accent: 'bg-[var(--accent-soft)] text-[var(--accent)]',
+    success: 'bg-emerald-500/10 text-emerald-500',
+    warning: 'bg-amber-500/10 text-amber-500',
+    danger: 'bg-red-500/10 text-red-500',
+  };
+
   return (
-    <div className="flex flex-col gap-1 py-2">
+    <div className={cn('flex flex-col gap-1 py-2', className)}>
       <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
         {Icon && <Icon className="w-3 h-3" />}
         <span className="text-[10px] font-medium uppercase tracking-wider">{label}</span>
       </div>
-      <span className={cn('text-2xl font-bold tracking-tight tabular-nums', tones[tone])}>
-        {value}
-      </span>
+      <div className="flex items-end gap-2.5">
+        {Icon && (
+          <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0', iconBgTones[tone])}>
+            <Icon className="w-4 h-4" />
+          </div>
+        )}
+        <span className={cn('text-2xl font-bold tracking-tight tabular-nums', tones[tone])}>
+          {value}
+        </span>
+      </div>
+      {subtitle && (
+        <span className="text-[11px] text-[var(--text-muted)] mt-0.5">{subtitle}</span>
+      )}
     </div>
   );
 }
+
+/**
+ * ImmersiveStatCard: ImmersiveMetric wrapped in a glass-panel card.
+ * Drop-in replacement for hand-rolled stat cards across all modules.
+ */
+export function ImmersiveStatCard({ label, value, icon, tone = 'default', subtitle, className }) {
+  return (
+    <div
+      className={cn(
+        'glass-panel rounded-[var(--radius-lg)] border border-[var(--color-border-subtle)] p-3 transition-colors hover:border-[var(--accent-border)]',
+        className
+      )}
+    >
+      <ImmersiveMetric label={label} value={value} icon={icon} tone={tone} subtitle={subtitle} />
+    </div>
+  );
+}
+
+/**
+ * MetricGrid: Consistent responsive grid wrapper for stat cards.
+ * @param {number} [columns=4] - Number of columns at lg breakpoint
+ */
+export function MetricGrid({ children, columns = 4, className }) {
+  const colClasses = {
+    2: 'grid-cols-2',
+    3: 'sm:grid-cols-3',
+    4: 'sm:grid-cols-2 lg:grid-cols-4',
+    5: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5',
+  };
+
+  return (
+    <div className={cn('grid grid-cols-1 gap-2', colClasses[columns] || colClasses[4], className)}>
+      {children}
+    </div>
+  );
+}
+
 
 /**
  * ImmersiveEmptyState: A beautiful, welcoming empty state with subtle animation.

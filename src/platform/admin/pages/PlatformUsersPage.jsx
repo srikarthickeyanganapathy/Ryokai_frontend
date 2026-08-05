@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback } from 'react'
-import { motion } from 'framer-motion'
 import { PageHeader } from '@/shared/ui/PageHeader'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { DataTable } from '@/shared/ui/data-table/DataTable'
@@ -8,8 +7,9 @@ import { useRoles, useAssignUserRoles } from '@/platform/admin/features/hooks/us
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
 import { Input } from '@/shared/ui/Input'
 import { Icons } from '@/shared/ui/Icons'
-import { RolesTab } from '@/platform/admin/sections/RolesTab'
+import { RolesTab } from '@/platform/admin/components/RolesTab'
 import { cn } from '@/shared/lib/cn'
+import { DetailTabs } from '@/shared/ui/DetailTabs'
 
 export function PlatformUsersPage() {
   const { data: users, isLoading: usersLoading } = useUsersList()
@@ -106,29 +106,13 @@ export function PlatformUsersPage() {
         className="mb-6"
       />
 
-      <div className="flex items-center gap-6 border-b border-[var(--color-border-subtle)] mb-6">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              "relative pb-3 text-sm font-medium transition-colors duration-[var(--duration-base)] whitespace-nowrap",
-              activeTab === tab.id 
-                ? "text-[var(--text-primary)]" 
-                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-            )}
-          >
-            {tab.label}
-            {activeTab === tab.id && (
-              <motion.div
-                layoutId="admin-active-tab"
-                className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-[var(--accent)] shadow-[0_0_6px_var(--accent)]"
-                transition={{ type: 'spring', stiffness: 500, damping: 38 }}
-              />
-            )}
-          </button>
-        ))}
-      </div>
+      <DetailTabs
+        tabs={tabs}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        sticky={false}
+        className="mb-6 bg-transparent border-0 border-b"
+      />
 
       <div className="flex-1 min-h-0 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] shadow-sm overflow-hidden p-4 transition-colors duration-[var(--duration-base)]">
         {activeTab === 'users' && (

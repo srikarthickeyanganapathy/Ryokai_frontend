@@ -1,6 +1,6 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
-import { PlatformSidebar } from '@/platform/admin/sections/platform/PlatformSidebar'
+import { PlatformSidebar } from '@/platform/admin/components/platform/PlatformSidebar'
 import { AppTopbar } from '@/platform/workspace'
 
 export function PlatformLayout() {

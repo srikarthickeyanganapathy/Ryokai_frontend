@@ -10,6 +10,9 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { toast } from 'sonner';
 import { WorkspaceShell, ManagementLayout, PageStateContainer } from '@/shared/workspace-framework';
+import { PageHeader } from '@/shared/ui/PageHeader';
+import { FilterTabs } from '@/shared/ui/FilterTabs';
+import { StatPill } from '@/shared/ui/StatPill';
 import {
   Compass,
   Users,
@@ -174,30 +177,6 @@ function RadialProgressRing({ progress = 0, size = 46, strokeWidth = 4, hue = 23
     </div>
   );
 }
-
-function StatPill({ icon: Icon, label, value, highlight }) {
-  return (
-    <div className={cn(
-      "flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border transition-colors",
-      highlight ? "border-[var(--accent-border)] bg-[var(--accent-soft)]/20" : "border-[var(--border-subtle)]"
-    )}>
-      {Icon && <Icon className={cn("w-3.5 h-3.5", highlight ? "text-[var(--accent)]" : "text-[var(--text-muted)]")} aria-hidden="true" />}
-      <span className="text-[13px] font-bold text-[var(--text-primary)] tabular-nums">{value}</span>
-      <span className="text-[11px] text-[var(--text-muted)] font-medium">{label}</span>
-    </div>
-  );
-}
-
-function CardMetricPill({ icon: Icon, label, value }) {
-  return (
-    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-subtle)]/70 border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)]">
-      {Icon && <Icon className="w-3 h-3 text-[var(--text-muted)]" aria-hidden="true" />}
-      <span className="font-semibold text-[var(--text-primary)] tabular-nums">{value}</span>
-      <span className="text-[10px] text-[var(--text-muted)]">{label}</span>
-    </div>
-  );
-}
-
 export function CrewsPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -279,30 +258,22 @@ export function CrewsPage() {
       <ManagementLayout
         header={
           <div className="space-y-5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                  <span className="px-2 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" /> Mission Control
-                  </span>
+            <PageHeader
+              eyebrow="Mission Control"
+              icon={Users}
+              title="Crews Workspace"
+              subtitle="Cross-functional squad hubs equipped with real-time text channels, interactive STOMP canvas whiteboards, shared project boards, and task conversion workflows."
+              actions={
+                <div className="flex items-center gap-2.5 shrink-0">
+                  <Button variant="outline" size="sm" onClick={() => navigate('/app/crews/discover')} className="h-9 text-[12px] gap-1.5 shadow-sm hover:border-[var(--accent)]">
+                    <Compass className="w-3.5 h-3.5 text-[var(--accent)]" /> Discover Crews
+                  </Button>
+                  <Button variant="primary" size="sm" onClick={() => setIsCreateOpen(true)} className="shadow-sm h-9 text-[12px] gap-1.5">
+                    <Plus className="w-4 h-4" /> Create Crew
+                  </Button>
                 </div>
-                <Heading level={1} className="tracking-tight text-[20px] font-bold mb-1 flex items-center gap-2.5 truncate text-[var(--text-primary)]">
-                  <Users className="w-5 h-5 text-[var(--accent)] shrink-0" aria-hidden="true" />
-                  Crews Workspace
-                </Heading>
-                <Text variant="muted" className="text-[13px] leading-relaxed max-w-2xl">
-                  Cross-functional squad hubs equipped with real-time text channels, interactive STOMP canvas whiteboards, shared project boards, and task conversion workflows.
-                </Text>
-              </div>
-              <div className="flex items-center gap-2.5 shrink-0">
-                <Button variant="outline" size="sm" onClick={() => navigate('/app/crews/discover')} className="h-9 text-[12px] gap-1.5 shadow-sm hover:border-[var(--accent)]">
-                  <Compass className="w-3.5 h-3.5 text-[var(--accent)]" /> Discover Crews
-                </Button>
-                <Button variant="primary" size="sm" onClick={() => setIsCreateOpen(true)} className="shadow-sm h-9 text-[12px] gap-1.5">
-                  <Plus className="w-4 h-4" /> Create Crew
-                </Button>
-              </div>
-            </div>
+              }
+            />
 
             {crews.length > 0 && (
               <>
@@ -313,32 +284,16 @@ export function CrewsPage() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-                  <div className="flex items-center gap-1 bg-[var(--bg-subtle)] p-1 rounded-xl border border-[var(--border-subtle)] w-full sm:w-auto overflow-x-auto no-scrollbar">
-                    {[
-                      { id: 'ALL', label: 'All Squads', count: crews.length },
-                      { id: 'OWNED', label: 'Owned', count: ownedCount },
-                      { id: 'JOINED', label: 'Joined', count: joinedCount },
-                    ].map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={cn(
-                          "px-3.5 py-1.5 text-[12px] font-medium rounded-lg transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer",
-                          activeTab === tab.id
-                            ? "bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm font-semibold border border-[var(--border-subtle)]"
-                            : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                        )}
-                      >
-                        <span>{tab.label}</span>
-                        <span className={cn(
-                          "text-[10px] font-mono px-1.5 py-0.5 rounded-full font-bold",
-                          activeTab === tab.id ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "bg-[var(--bg-hover)] text-[var(--text-muted)]"
-                        )}>
-                          {tab.count}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+                  <FilterTabs
+                    filters={[
+                      { value: 'ALL', label: 'All Squads' },
+                      { value: 'OWNED', label: 'Owned' },
+                      { value: 'JOINED', label: 'Joined' },
+                    ]}
+                    value={activeTab}
+                    onChange={setActiveTab}
+                    counts={{ ALL: crews.length, OWNED: ownedCount, JOINED: joinedCount }}
+                  />
 
                   <div className="relative flex-1 max-w-sm">
                     <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" aria-hidden="true" />
@@ -809,9 +764,9 @@ function CrewCard({ crew, navigate }) {
 
       {/* Metric Pills Row */}
       <div className="flex flex-wrap items-center gap-2 mb-4 relative z-10">
-        <CardMetricPill icon={Users} label="members" value={`${memberCount}/${crew.memberCap || '∞'}`} />
-        <CardMetricPill icon={Folder} label="projects" value={crew.projectCount ?? 0} />
-        <CardMetricPill icon={MessageSquare} label="channels" value={crew.channelCount ?? 1} />
+        <StatPill icon={Users} label="members" value={`${memberCount}/${crew.memberCap || '∞'}`} className="bg-[var(--bg-subtle)]/70 py-1 px-2.5 gap-1.5 [&_span:first-of-type]:text-[11px] [&_span:last-of-type]:text-[10px]" />
+        <StatPill icon={Folder} label="projects" value={crew.projectCount ?? 0} className="bg-[var(--bg-subtle)]/70 py-1 px-2.5 gap-1.5 [&_span:first-of-type]:text-[11px] [&_span:last-of-type]:text-[10px]" />
+        <StatPill icon={MessageSquare} label="channels" value={crew.channelCount ?? 1} className="bg-[var(--bg-subtle)]/70 py-1 px-2.5 gap-1.5 [&_span:first-of-type]:text-[11px] [&_span:last-of-type]:text-[10px]" />
       </div>
 
       {/* Bottom Action Footer */}

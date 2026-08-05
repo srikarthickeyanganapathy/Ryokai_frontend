@@ -8,7 +8,7 @@ import {
   useRemoveMember,
   useOrgRoles,
   useOrgTeams,
-} from '../features/hooks/useOrganizations';
+} from '../../features/hooks/useOrganizations';
 import { useTaskList } from '@/task/entities/hooks/useTasks';
 import { Heading, Text } from '@/shared/ui/Typography';
 import {
@@ -35,9 +35,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/Select';
+import { FilterTabs } from '@/shared/ui/FilterTabs';
+import { SegmentedToggle } from '@/shared/ui/SegmentedToggle';
 import { usePermissions, useAuth } from '@/identity';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
-import { InviteMemberModal } from '../sections/Invites/InviteMemberModal';
+import { InviteMemberModal } from '../../components/Invites/InviteMemberModal';
 import {
   WorkspaceShell,
   ManagementLayout,
@@ -48,10 +50,10 @@ import { SearchPlugin } from '@/shared/workspace-framework/toolbar/plugins/Searc
 import { toast } from 'sonner';
 
 // Child components for Phase 1 enhancements
-import { MemberDetailDrawer } from './components/MemberDetailDrawer';
-import { DirectoryOrgChart } from './components/DirectoryOrgChart';
-import { DirectoryTableView } from './components/DirectoryTableView';
-import { DirectoryFilterBar, DirectoryBulkActionsBar } from './components/DirectoryFilterAndBulkBar';
+import { MemberDetailDrawer } from '../components/MemberDetailDrawer';
+import { DirectoryOrgChart } from '../components/DirectoryOrgChart';
+import { DirectoryTableView } from '../components/DirectoryTableView';
+import { DirectoryFilterBar, DirectoryBulkActionsBar } from '../components/DirectoryFilterAndBulkBar';
 
 function hashHue(str = '') {
   let hash = 0;
@@ -255,44 +257,15 @@ export function DirectoryPage() {
                   )}
 
                   {/* Segmented View Toggle Strip: Grid / Table / Org Chart */}
-                  <div className="inline-flex items-center bg-[var(--bg-subtle)] p-1 rounded-xl border border-[var(--border-subtle)] shadow-2xs">
-                    <button
-                      type="button"
-                      onClick={() => setViewMode('grid')}
-                      className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150",
-                        viewMode === 'grid' ? "bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-xs" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                      )}
-                      title="Grid Cards View"
-                    >
-                      <LayoutGrid className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Cards</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setViewMode('table')}
-                      className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150",
-                        viewMode === 'table' ? "bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-xs" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                      )}
-                      title="Compact Table View"
-                    >
-                      <TableIcon className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Table</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setViewMode('orgchart')}
-                      className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150",
-                        viewMode === 'orgchart' ? "bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-xs" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                      )}
-                      title="Hierarchy Org Chart View"
-                    >
-                      <Network className="w-3.5 h-3.5 text-[var(--accent)]" />
-                      <span className="hidden sm:inline">Org Chart</span>
-                    </button>
-                  </div>
+                  <SegmentedToggle
+                    options={[
+                      { value: 'grid', label: 'Cards', icon: LayoutGrid },
+                      { value: 'table', label: 'Table', icon: TableIcon },
+                      { value: 'orgchart', label: 'Org Chart', icon: Network },
+                    ]}
+                    value={viewMode}
+                    onChange={setViewMode}
+                  />
                 </div>
               }
             />

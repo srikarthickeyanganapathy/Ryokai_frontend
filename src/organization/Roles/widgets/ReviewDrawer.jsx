@@ -3,7 +3,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } f
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
 import { ArrowRight, ShieldAlert, CheckCircle2, GitCommitHorizontal } from 'lucide-react';
-import { SCOPE_LABELS } from './constants';
+import { SCOPE_LABELS } from '../entities/constants';
 
 export function ReviewDrawer({ open, onOpenChange, roleName, addedPerms, removedPerms, scopeChangedPerms, priorityChanged, originalPriority, newPriority, changeRisk = { critical: 0, high: 0, total: 0 }, permissionMap, localScopedPerms = {}, originalMap = {}, onSave, onDiscard }) {
   const totalChanges = addedPerms.length + removedPerms.length + scopeChangedPerms.length + (priorityChanged ? 1 : 0);

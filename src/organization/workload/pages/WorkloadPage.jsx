@@ -11,8 +11,10 @@ import {
   Filter,
 } from 'lucide-react';
 import { Heading, Text } from '@/shared/ui/Typography';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
+import { FilterTabs } from '@/shared/ui/FilterTabs';
 import { cn } from '@/shared/lib/cn';
 import { usePermissions } from '@/identity';
 import { useWorkload } from '@/organization/workload/features/hooks/useWorkload';
@@ -319,66 +321,57 @@ export function WorkloadPage() {
     <WorkspaceShell maxWidth="default">
       <CommandLayout
         hero={
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-[var(--border-subtle)]">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="px-2 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
-                  Resource Capacity
-                </span>
-              </div>
-              <Heading
-                level={1}
-                className="tracking-tight text-[18px] font-semibold flex items-center gap-2.5"
-              >
-                <Gauge className="w-5 h-5 text-[var(--accent)] shrink-0" /> Team
-                Capacity & Utilization
-              </Heading>
-              <Text variant="muted" className="text-[13px] mt-0.5">
-                Monitor team load balance and task allocation bottlenecks.
-              </Text>
-            </div>
-            <div className="flex items-center gap-2">
-              {showThresholdInput ? (
-                <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border-subtle)] p-1 rounded-lg">
-                  <Input
-                    type="number"
-                    value={tempThreshold}
-                    onChange={(e) => setTempThreshold(Number(e.target.value))}
-                    className="w-16 h-7 text-sm border-none focus-visible:ring-0"
-                    min={1}
-                    max={20}
-                  />
+          <div className="pb-4 border-b border-[var(--border-subtle)]">
+            <PageHeader
+              eyebrow="Resource Capacity"
+              icon={Gauge}
+              title="Team Capacity & Utilization"
+              subtitle="Monitor team load balance and task allocation bottlenecks."
+              actions={
+                <div className="flex items-center gap-2">
+                  {showThresholdInput ? (
+                    <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border-subtle)] p-1 rounded-lg">
+                      <Input
+                        type="number"
+                        value={tempThreshold}
+                        onChange={(e) => setTempThreshold(Number(e.target.value))}
+                        className="w-16 h-7 text-sm border-none focus-visible:ring-0"
+                        min={1}
+                        max={20}
+                      />
+                      <Button
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={handleSaveThreshold}
+                      >
+                        Set
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowThresholdInput(true)}
+                      className="gap-1.5 text-[12px] h-8"
+                    >
+                      <Settings2 className="w-3.5 h-3.5" /> Capacity: {threshold}
+                    </Button>
+                  )}
                   <Button
+                    variant="outline"
                     size="sm"
-                    className="h-7 text-xs"
-                    onClick={handleSaveThreshold}
+                    onClick={() => refetch()}
+                    className="gap-1.5 text-[12px] h-8"
+                    disabled={isLoading}
                   >
-                    Set
+                    <RefreshCw
+                      className={cn('w-3.5 h-3.5', isLoading && 'animate-spin')}
+                    />{' '}
+                    Refresh
                   </Button>
                 </div>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowThresholdInput(true)}
-                  className="gap-1.5 text-[12px] h-8"
-                >
-                  <Settings2 className="w-3.5 h-3.5" /> Capacity: {threshold}
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => refetch()}
-                className="gap-1.5 text-[12px] h-8"
-                disabled={isLoading}
-              >
-                <RefreshCw
-                  className={cn('w-3.5 h-3.5', isLoading && 'animate-spin')}
-                />{' '}
-                Refresh
-              </Button>
-            </div>
+              }
+            />
           </div>
         }
       >
@@ -428,22 +421,11 @@ export function WorkloadPage() {
             {/* Quick Filters */}
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-[var(--text-muted)]" />
-              <div className="flex items-center gap-1 p-0.5 bg-[var(--bg-subtle)] rounded-lg border border-[var(--color-border-subtle)]">
-                {FILTERS.map((f) => (
-                  <button
-                    key={f.value}
-                    onClick={() => setFilter(f.value)}
-                    className={cn(
-                      'px-3 py-1 text-xs rounded-md transition-colors',
-                      filter === f.value
-                        ? 'bg-[var(--bg-base)] text-[var(--text-primary)] shadow-sm font-medium'
-                        : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]',
-                    )}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
+              <FilterTabs
+                filters={FILTERS}
+                value={filter}
+                onChange={setFilter}
+              />
             </div>
 
             {/* Utilization Cards Grid */}

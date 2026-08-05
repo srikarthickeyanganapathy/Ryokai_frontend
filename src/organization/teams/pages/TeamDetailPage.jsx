@@ -18,12 +18,12 @@ import { ManageTeamMembersModal } from '../modals/ManageTeamMembersModal'
 
 import { TeamHeader } from '../components/TeamHeader'
 import { TeamTabs } from '../components/TeamTabs'
-import { OverviewTab } from '../sections/OverviewTab'
-import { ProjectsTab } from '../sections/ProjectsTab'
-import { TasksTab } from '../sections/TasksTab'
-import { MembersTab } from '../sections/MembersTab'
-import { DiscussionTab } from '../sections/DiscussionTab'
-import { InsightsTab } from '../sections/InsightsTab'
+import { OverviewTab } from '../components/OverviewTab'
+import { ProjectsTab } from '../components/ProjectsTab'
+import { TasksTab } from '../components/TasksTab'
+import { MembersTab } from '../components/MembersTab'
+import { DiscussionTab } from '../components/DiscussionTab'
+import { InsightsTab } from '../components/InsightsTab'
 
 const INACTIVE_STATUSES = new Set(['completed', 'done', 'archived', 'cancelled', 'closed'])
 const isActiveStatus = (status) => !INACTIVE_STATUSES.has((status || '').toLowerCase())

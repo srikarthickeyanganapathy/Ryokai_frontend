@@ -2,7 +2,7 @@ import React from 'react';
 import { Checkbox } from '@/shared/ui/Checkbox';
 import { cn } from '@/shared/lib/cn';
 import { ChevronRight } from 'lucide-react';
-import { getRiskConfig } from './constants';
+import { getRiskConfig } from '../entities/constants';
 
 export function PermissionRow({ perm, isEnabled, isActive, isAdmin, onToggle, onSelect }) {
   const risk = getRiskConfig(perm.riskLevel);

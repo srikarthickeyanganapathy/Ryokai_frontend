@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
+import { PageHeader } from '@/shared/ui/PageHeader'
 import { useDashboardStats } from '@/analytics'
 import { StatCard } from '@/analytics'
 import { CompletionChart, PriorityChart } from '@/analytics'
@@ -69,20 +70,12 @@ export function AnalyticsPage() {
     <WorkspaceShell maxWidth="default">
       <InsightLayout
         header={
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2 mb-1.5">
-              <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
-                Analytics
-              </span>
-            </div>
-            <Heading level={1} className="tracking-tight text-xl sm:text-[22px] font-semibold mb-1 flex items-center gap-2 truncate">
-              <LayoutDashboard className="w-5 h-5 text-[var(--accent)] shrink-0" aria-hidden="true" />
-              Analytics
-            </Heading>
-            <Text variant="muted" className="text-[13px] leading-relaxed">
-              Measure execution velocity, workload completion, and team performance.
-            </Text>
-          </div>
+          <PageHeader
+            eyebrow="Analytics"
+            icon={LayoutDashboard}
+            title="Analytics"
+            subtitle="Measure execution velocity, workload completion, and team performance."
+          />
         }
       >
         <PageStateContainer

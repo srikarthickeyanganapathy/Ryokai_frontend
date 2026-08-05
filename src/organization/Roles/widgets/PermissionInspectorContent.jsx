@@ -2,8 +2,8 @@ import React, { useMemo } from 'react';
 import { Checkbox } from '@/shared/ui/Checkbox';
 import { cn } from '@/shared/lib/cn';
 import { Check, AlertCircle, Info, BarChart3, ShieldAlert, Sliders, GitBranch, Radar } from 'lucide-react';
-import { getRiskConfig, SCOPE_LABELS, SCOPE_DESCRIPTIONS } from './constants';
-import { ResourcePicker } from './ResourcePicker';
+import { getRiskConfig, SCOPE_LABELS, SCOPE_DESCRIPTIONS } from '../entities/constants';
+import { ResourcePicker } from '../components/ResourcePicker';
 
 export function PermissionInspectorContent({ role, permission, isEnabled, currentScope, currentAssignments = [], isAdmin, onScopeChange, onResourceAssignmentChange, onToggle, permissionMap, localScopedPerms = {}, supervisionNames = [], onClose }) {
   const requires = permission?.requires || [];

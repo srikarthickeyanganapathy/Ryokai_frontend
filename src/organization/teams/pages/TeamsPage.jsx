@@ -4,6 +4,8 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'
 import { Icons } from '@/shared/ui/Icons'
+import { PageHeader } from '@/shared/ui/PageHeader'
+import { StatPill } from '@/shared/ui/StatPill'
 import { useOrgTeams, useOrgMembers } from '../../features/hooks/useOrganizations'
 import { CreateTeamModal } from '../modals/CreateTeamModal'
 import { ManageTeamMembersModal } from '../modals/ManageTeamMembersModal'
@@ -76,17 +78,6 @@ function MemberAvatarStack({ members = [], max = 4 }) {
     </div>
   )
 }
-
-function StatPill({ icon: Icon, label, value }) {
-  return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[var(--bg-card)] border border-[var(--border-subtle)]">
-      <Icon className="w-3.5 h-3.5 text-[var(--accent)]" aria-hidden="true" />
-      <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">{value}</span>
-      <span className="text-[11px] text-[var(--text-muted)]">{label}</span>
-    </div>
-  )
-}
-
 export function TeamsPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -120,31 +111,20 @@ export function TeamsPage() {
       <ManagementLayout
         header={
           <div className="space-y-5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                  <span className="px-2 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
-                    Teams
-                  </span>
-                  <span className="text-[11px] text-[var(--text-muted)]">{activeOrganization.name}</span>
-                </div>
-                <Heading level={1} className="tracking-tight text-[18px] font-semibold mb-1 flex items-center gap-2 truncate">
-                  <Icons.users className="w-4 h-4 text-[var(--accent)] shrink-0" aria-hidden="true" />
-                  Teams workspace
-                </Heading>
-                <Text variant="muted" className="text-[13px] leading-relaxed">
-                  Manage your organization's divisions and collaborative units.
-                </Text>
-              </div>
-              {canCreateTeam && (
-                <div className="flex items-center gap-2 shrink-0">
+            <PageHeader
+              eyebrow={`Teams · ${activeOrganization.name}`}
+              icon={Icons.users}
+              title="Teams workspace"
+              subtitle="Manage your organization's divisions and collaborative units."
+              actions={
+                canCreateTeam && (
                   <Button variant="primary" size="sm" onClick={() => setCreateTeamModalOpen(true)} className="shadow-sm h-8 text-[12px]">
                     <Icons.plus className="w-3.5 h-3.5 mr-1" />
                     Create Team
                   </Button>
-                </div>
-              )}
-            </div>
+                )
+              }
+            />
 
             {teams.length > 0 && (
               <>

@@ -7,6 +7,7 @@ import { Input } from '@/shared/ui/Input'
 import { Button, IconButton } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
+import { SegmentedToggle } from '@/shared/ui/SegmentedToggle'
 import { useCreateTaskWithDependencies } from '../../entities/hooks/useTasks'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
@@ -211,28 +212,17 @@ export function TasksToolbar({
         <div className="flex items-center gap-2 shrink-0">
           
           {/* Segmented Buttons for List/Board/Calendar */}
-          <div className="hidden sm:flex items-center bg-[var(--bg-subtle)] rounded-full p-0.5 border border-[var(--border-subtle)] mr-1">
-            {['list', 'board', 'nebula'].map((mode) => (
-              <Button
-                key={mode}
-                variant="ghost"
-                onClick={() => setViewMode(mode)}
-                className={cn(
-                  "relative px-3 py-1 text-[12px] font-medium rounded-full transition-colors duration-[var(--duration-base)] capitalize hover:bg-transparent",
-                  viewMode === mode ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                )}
-                aria-label={`View as ${mode}`}
-              >
-                {viewMode === mode && (
-                  <motion.div
-                    layoutId="view-mode-pill"
-                    className="absolute inset-0 bg-[var(--bg-elevated)] shadow-[var(--shadow-xs),var(--inset-highlight-soft)] rounded-full"
-                    transition={{ type: 'spring', stiffness: 500, damping: 38 }}
-                  />
-                )}
-                <span className="relative">{mode}</span>
-              </Button>
-            ))}
+          <div className="hidden sm:block mr-1">
+            <SegmentedToggle
+              options={[
+                { value: 'list', label: 'List' },
+                { value: 'board', label: 'Board' },
+                { value: 'nebula', label: 'Nebula' },
+              ]}
+              value={viewMode}
+              onChange={setViewMode}
+              className="rounded-full bg-[var(--bg-subtle)]"
+            />
           </div>
 
           {!isPersonalMode && canCreate && (

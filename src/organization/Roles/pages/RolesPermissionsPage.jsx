@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { WorkspaceShell, ManagementLayout } from '@/shared/workspace-framework';
-import { useOrgRoles } from '../features/hooks/useOrganizations';
+import { useOrgRoles } from '../../features/hooks/useOrganizations';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { usePermissions } from '@/identity';
@@ -9,16 +9,16 @@ import { Heading, Text } from '@/shared/ui/Typography';
 import { Icons } from '@/shared/ui/Icons';
 import { ShieldCheck, ShieldAlert, KeyRound, Users2 } from 'lucide-react';
 
-import { useRoleStudio } from '../sections/Roles/useRoleStudio';
-import { RoleSidebar } from '../sections/Roles/RoleSidebar';
-import { RoleHeader } from '../sections/Roles/RoleHeader';
-import { ModuleSidebar } from '../sections/Roles/ModuleSidebar';
-import { PermissionBrowser } from '../sections/Roles/PermissionBrowser';
-import { PermissionInspectorContent } from '../sections/Roles/PermissionInspectorContent';
-import { InspectorDrawer } from '../sections/Roles/InspectorDrawer';
-import { ReviewDrawer } from '../sections/Roles/ReviewDrawer';
-import { CreateRoleDrawer } from '../sections/Roles/CreateRoleDrawer';
-import { CriticalPermissionDialog } from '../sections/Roles/CriticalPermissionDialog';
+import { useRoleStudio } from '../hooks/useRoleStudio';
+import { RoleSidebar } from '../components/RoleSidebar';
+import { RoleHeader } from '../components/RoleHeader';
+import { ModuleSidebar } from '../components/ModuleSidebar';
+import { PermissionBrowser } from '../components/PermissionBrowser';
+import { PermissionInspectorContent } from '../widgets/PermissionInspectorContent';
+import { InspectorDrawer } from '../widgets/InspectorDrawer';
+import { ReviewDrawer } from '../widgets/ReviewDrawer';
+import { CreateRoleDrawer } from '../widgets/CreateRoleDrawer';
+import { CriticalPermissionDialog } from '../widgets/CriticalPermissionDialog';
 
 export function RolesPermissionsPage() {
   const { activeOrganization } = useWorkspace();

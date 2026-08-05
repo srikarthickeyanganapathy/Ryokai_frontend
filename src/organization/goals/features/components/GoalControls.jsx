@@ -1,5 +1,5 @@
 import { ArrowUpDown } from 'lucide-react';
-import { cn } from '@/shared/lib/cn';
+import { FilterTabs } from '@/shared/ui/FilterTabs';
 import {
   Select,
   SelectTrigger,
@@ -28,34 +28,7 @@ export function GoalControls({ filter, setFilter, sortBy, setSortBy, counts }) {
   return (
     <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
       {/* Filter tabs */}
-      <div className="flex items-center gap-0.5 p-0.5 bg-[var(--bg-subtle)] rounded-lg border border-[var(--color-border-subtle)]">
-        {FILTERS.map((f) => (
-          <button
-            key={f.value}
-            onClick={() => setFilter(f.value)}
-            className={cn(
-              'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center gap-1.5',
-              filter === f.value
-                ? 'bg-[var(--bg-base)] text-[var(--text-base)] shadow-sm'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-base)]',
-            )}
-          >
-            {f.label}
-            {counts && counts[f.value] !== undefined && (
-              <span
-                className={cn(
-                  'text-[10px] font-mono px-1.5 rounded-full',
-                  filter === f.value
-                    ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
-                    : 'bg-[var(--color-border-subtle)] text-[var(--text-muted)]',
-                )}
-              >
-                {counts[f.value]}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
+      <FilterTabs filters={FILTERS} value={filter} onChange={setFilter} counts={counts} />
 
       {/* Sort dropdown via Premium Select */}
       <div className="flex items-center gap-2">

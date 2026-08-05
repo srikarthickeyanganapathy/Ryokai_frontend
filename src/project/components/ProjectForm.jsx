@@ -1,4 +1,4 @@
-// File: src/project/sections/ProjectForm.jsx
+// File: src/project/components/ProjectForm.jsx
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/shared/forms'

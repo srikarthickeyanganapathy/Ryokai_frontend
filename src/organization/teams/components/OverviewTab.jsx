@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
-import { Badge } from '@/shared/ui/Badge';
+import { Badge } from '@/shared/ui/Badge'
+import { SectionPanel } from '@/shared/ui/SectionPanel';
 import { Icons } from '@/shared/ui/Icons';
 import { 
   ListTodo, Plus, MessageSquare, Folder, Users, TrendingUp, 
@@ -218,19 +219,13 @@ export function OverviewTab({ team, insights, teamTasks, teamProjects, observerC
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
 
         {/* CARD 1: ACTIVE WORK (lg:col-span-8) */}
-        <div className="lg:col-span-8 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-5">
-          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center font-bold text-xs">
-                <Zap className="w-4 h-4" />
-              </div>
-              <div>
-                <Heading level={4} className="text-[15px] font-bold tracking-tight">Active Work</Heading>
-                <Text size="xs" variant="muted">Tasks currently in progress or review</Text>
-              </div>
-            </div>
-            <Badge variant="primary" size="sm" className="tabular-nums font-semibold">{activeTasks.length} Active</Badge>
-          </div>
+        <SectionPanel
+          className="lg:col-span-8 flex flex-col justify-between"
+          icon={Zap}
+          title="Active Work"
+          subtitle="Tasks currently in progress or review"
+          actions={<Badge variant="primary" size="sm" className="tabular-nums font-semibold">{activeTasks.length} Active</Badge>}
+        >
 
           {activeTasks.length === 0 ? (
             <div className="py-8 px-4 text-center bg-[var(--bg-subtle)]/40 rounded-xl border border-dashed border-[var(--border-subtle)] space-y-3">
@@ -276,26 +271,21 @@ export function OverviewTab({ team, insights, teamTasks, teamProjects, observerC
               })}
             </div>
           )}
-          
-          <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between">
+          <div className="pt-2 mt-5 border-t border-[var(--border-subtle)] flex items-center justify-between">
             <span className="text-[11px] text-[var(--text-muted)]">Showing top active tasks out of {totalTasks} total</span>
             <button onClick={() => setActiveTab('tasks')} className="text-[12px] font-semibold text-[var(--accent)] hover:underline flex items-center gap-1">
               View Task Board <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
+        </SectionPanel>
 
         {/* CARD 2: VELOCITY & HEALTH (lg:col-span-4) */}
-        <div className="lg:col-span-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-5">
-          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
-            <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-[var(--accent)]" />
-              <Heading level={4} className="text-[15px] font-bold tracking-tight">Team Velocity</Heading>
-            </div>
-            <Badge variant="success" size="xs" className="gap-1 font-mono">
-              <TrendingUp className="w-3 h-3" /> {insights.completionRate}%
-            </Badge>
-          </div>
+        <SectionPanel
+          className="lg:col-span-4 flex flex-col justify-between"
+          icon={Activity}
+          title="Team Velocity"
+          actions={<Badge variant="success" size="xs" className="gap-1 font-mono"><TrendingUp className="w-3 h-3" /> {insights.completionRate}%</Badge>}
+        >
 
           <div className="grid grid-cols-2 gap-4 items-center py-1">
             <div className="flex flex-col items-center border-r border-[var(--border-subtle)] pr-2">
@@ -318,24 +308,22 @@ export function OverviewTab({ team, insights, teamTasks, teamProjects, observerC
             </div>
           </div>
 
-          <div className="pt-2">
+          <div className="pt-2 mt-5">
             <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)] mb-1">
               <span>Completion Trend</span>
               <span className="font-mono text-[var(--accent)] font-semibold">Done: {doneTasksCount}</span>
             </div>
             <VelocitySparkline data={[0, Math.round(totalTasks * 0.2), Math.round(totalTasks * 0.4), Math.round(totalTasks * 0.6), doneTasksCount]} />
           </div>
-        </div>
+        </SectionPanel>
 
         {/* CARD 3: ACTIVITY TIMELINE (lg:col-span-8) */}
-        <div className="lg:col-span-8 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm space-y-5">
-          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[var(--accent)]" />
-              <Heading level={4} className="text-[15px] font-bold tracking-tight">Activity Timeline</Heading>
-            </div>
-            <Badge variant="outline" size="sm" className="text-[10px] text-[var(--text-muted)]">Realtime Stream</Badge>
-          </div>
+        <SectionPanel
+          className="lg:col-span-8"
+          icon={Clock}
+          title="Activity Timeline"
+          actions={<Badge variant="outline" size="sm" className="text-[10px] text-[var(--text-muted)]">Realtime Stream</Badge>}
+        >
 
           {activityFeed.length === 0 ? (
             <div className="py-8 text-center bg-[var(--bg-subtle)]/30 rounded-xl border border-dashed border-[var(--border-subtle)]">
@@ -369,13 +357,12 @@ export function OverviewTab({ team, insights, teamTasks, teamProjects, observerC
               ))}
             </div>
           )}
-        </div>
+        </SectionPanel>
 
         {/* CARD 4: QUICK ACTIONS & ROSTER (lg:col-span-4) */}
         <div className="lg:col-span-4 space-y-6">
           
-          <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm space-y-4">
-            <Heading level={4} className="text-[14px] font-bold tracking-tight">Quick Action Shortcuts</Heading>
+          <SectionPanel title="Quick Action Shortcuts">
             <div className="grid grid-cols-2 gap-2.5">
               <Button variant="outline" size="sm" className="gap-2 justify-start h-9 text-[12px] w-full" onClick={() => setActiveTab('tasks')}>
                 <ListTodo className="w-3.5 h-3.5 text-[var(--accent)]" /> Task Board
@@ -390,15 +377,16 @@ export function OverviewTab({ team, insights, teamTasks, teamProjects, observerC
                 <Activity className="w-3.5 h-3.5 text-[var(--danger)]" /> Analytics
               </Button>
             </div>
-          </div>
+          </SectionPanel>
 
-          <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <Heading level={4} className="text-[14px] font-bold tracking-tight">Team Roster</Heading>
+          <SectionPanel
+            title="Team Roster"
+            actions={
               <button onClick={() => setActiveTab('members')} className="text-[11px] font-semibold text-[var(--accent)] hover:underline">
                 View All ({team.members?.length || 0}) →
               </button>
-            </div>
+            }
+          >
             {team.members?.length === 0 ? (
               <Text size="xs" variant="muted" className="italic">No team members assigned.</Text>
             ) : (
@@ -421,7 +409,7 @@ export function OverviewTab({ team, insights, teamTasks, teamProjects, observerC
                 ))}
               </div>
             )}
-          </div>
+          </SectionPanel>
 
         </div>
 

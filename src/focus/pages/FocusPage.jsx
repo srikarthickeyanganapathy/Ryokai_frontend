@@ -9,6 +9,7 @@ import { Switch } from '@/shared/ui/Switch'
 import { useTaskList, useUpdateTask, useCompletePersonalTask, useCompleteCrewTask, useSubmitTask, useClaimTask } from '@/task'
 import { CheckCircle2, Play, Circle, Maximize2, Minimize2, Settings, Sparkles, Flame, Moon, Check, Calendar, Clock, ArrowRight } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
+import { PageHeader } from '@/shared/ui/PageHeader'
 import { normalizeStatus, isDoneStatus, toBackendStatus } from '@/shared/lib/status'
 import { FocusTimer } from '@/focus'
 import {
@@ -178,16 +179,10 @@ export function FocusPage() {
         {/* ⚡ EXECUTE MODE STICKY HEADER (Hidden in Fullscreen for 1st Image Match) */}
         {!isFullscreen && (
           <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border-subtle)] shrink-0">
-            <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[9px] uppercase tracking-wider font-semibold flex items-center gap-1">
-                  <Moon className="w-3 h-3" />
-                  EXECUTE Mode
-                </span>
-                <span className="text-[11px] text-[var(--text-muted)] truncate">• Distraction-Free Zen Sanctuary</span>
-              </div>
-              <Heading level={2} className="tracking-tight text-lg sm:text-xl font-semibold mb-0">Zen Focus Stage</Heading>
-            </div>
+            <PageHeader
+              eyebrow="EXECUTE Mode · Distraction-Free Zen Sanctuary"
+              title="Zen Focus Stage"
+            />
             <div className="flex items-center gap-2 text-[var(--text-muted)]">
               <Popover>
                 <PopoverTrigger asChild>
