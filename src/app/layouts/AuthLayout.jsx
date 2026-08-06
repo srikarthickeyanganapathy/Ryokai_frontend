@@ -41,7 +41,7 @@ export function AuthLayout() {
       </div>
 
       {/* RIGHT SIDE — Forms */}
-      <div className="flex flex-1 flex-col items-center justify-center p-8 sm:p-12 lg:p-24 relative overflow-y-auto">
+      <div className="flex flex-1 flex-col items-center justify-center p-8 sm:p-12 lg:p-24 relative overflow-y-auto bg-[var(--bg-base)]">
 
         {/* Mobile brand mark */}
         <div className="absolute top-8 left-8 flex lg:hidden items-center gap-2">

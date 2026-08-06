@@ -95,9 +95,7 @@ export default function App() {
                 {/* PLATFORM APP (Control Plane) */}
                 <Route path="/platform" element={<PlatformRoute />}>
                   <Route element={<PlatformLayout />}>
-                    {/* Redirect /platform to /platform/dashboard */}
                     <Route index element={<Navigate to="/platform/dashboard" replace />} />
-
                     <Route path="dashboard" element={<PlatformDashboardPage />} />
                     <Route path="organizations" element={<PlatformOrganizationsPage />} />
                     <Route path="users" element={<PlatformUsersPage />} />
@@ -111,7 +109,6 @@ export default function App() {
                 {/* TENANT APP (Data Plane) */}
                 <Route path="/app" element={<TenantRoute />}>
                   <Route element={<MainLayout />}>
-                    {/* Note: WorkspaceResolver handles organization selection within MainLayout context */}
                     <Route index element={<DashboardPage />} />
                     <Route path="tasks" element={<TasksPage />} />
                     <Route path="projects" element={<ProjectsPage />} />
@@ -128,39 +125,25 @@ export default function App() {
                     <Route path="analytics" element={<AnalyticsPage />} />
                     <Route path="focus" element={<FocusPage />} />
                     <Route path="inbox" element={<InboxPage />} />
-
-                    {/* Settings Routes */}
                     <Route path="settings/profile" element={<ProfilePage />} />
                     <Route path="settings/security" element={<SecurityPage />} />
                     <Route path="settings/sessions" element={<SessionsPage />} />
-
-                    {/* Keep legacy route for fallback if needed */}
                     <Route path="sessions" element={<Navigate to="/app/settings/sessions" replace />} />
-
-                    {/* Personal workspace */}
                     <Route path="notes" element={<NotesPage />} />
                     <Route path="calendar" element={<CalendarPage />} />
                     <Route path="saved" element={<SavedPage />} />
-
-                    {/* Organization workspace */}
                     <Route path="goals" element={<GoalsPage />} />
                     <Route path="directory" element={<DirectoryPage />} />
                     <Route path="leave-requests" element={<LeaveRequestsPage />} />
                     <Route path="roles-permissions" element={<RolesPermissionsPage />} />
                     <Route path="announcements" element={<AnnouncementsPage />} />
                     <Route path="workload" element={<WorkloadPage />} />
-
-                    {/* Crews workspace */}
                     <Route path="crews/tasks" element={<CrewTasksPage />} />
                   </Route>
                 </Route>
-
               </Route>
 
-              {/* Design System Showcase */}
               <Route path="/ui" element={<UIDesignSystem />} />
-
-              {/* Fallback routing */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <SessionExpiredListener />

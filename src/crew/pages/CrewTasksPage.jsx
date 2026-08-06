@@ -2,15 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
+import { PageShell, PageHero, PageStats, PageContent } from '@/shared/ui/PageShell';
+import { InteractiveCard } from '@/shared/ui/InteractiveCard';
 import { useTaskList, useCompleteCrewTask, useDeleteTask } from '@/task';
 import { TasksTable } from '@/task';
 import { TaskPanel } from '@/task';
 import { toast } from 'sonner';
-import { PageHeader } from '@/shared/ui/PageHeader';
-import {
-  WorkspaceShell,
-  ManagementLayout,
-} from '@/shared/workspace-framework';
 import { 
   ListTodo, 
   CheckCircle2, 
@@ -95,101 +92,96 @@ export function CrewTasksPage() {
     setRowSelection({});
   };
 
+  const StatWidget = ({ icon: Icon, label, value, iconBg, iconColor, alertBorder }) => (
+    <InteractiveCard padding={false} className="overflow-hidden">
+      <div className={cn(
+        "p-4 flex items-center gap-3",
+        alertBorder && "border-l-2 border-[var(--danger)]"
+      )}>
+        <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center border shrink-0", iconBg, iconColor)}>
+          <Icon className="w-4 h-4" />
+        </div>
+        <div>
+          <div className="text-[18px] font-bold text-[var(--text-primary)] leading-none tabular-nums">{value}</div>
+          <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mt-1">{label}</div>
+        </div>
+      </div>
+    </InteractiveCard>
+  );
+
   return (
-    <WorkspaceShell maxWidth="default">
-      <ManagementLayout
-        header={
-          <div className="space-y-4 pb-4 border-b border-[var(--border-subtle)]">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase tracking-wider font-semibold">
-                Operations
-              </span>
-              <span className="text-[12px] text-[var(--text-muted)] font-medium flex items-center gap-1.5">
-                <Layers className="w-3 h-3 text-[var(--accent)]" /> All Crews Overview
-              </span>
-            </div>
-            <Heading level={1} className="tracking-tight text-[18px] font-semibold mb-1 text-[var(--text-primary)]">
-              Crew Tasks Center
-            </Heading>
-            <Text variant="muted" className="text-[13px] leading-relaxed">
-              Central execution table for tasks assigned across all your active crews.
-            </Text>
-          </div>
-        }
-      >
+    <PageShell maxWidth="default">
+      <PageHero
+        eyebrow="Operations"
+        meta="All Crews Overview"
+        title="Crew Tasks Center"
+        subtitle="Central execution table for tasks assigned across all your active crews."
+      />
+
+      <PageStats>
+        <StatWidget
+          icon={ListTodo}
+          label="Total Tasks"
+          value={analytics.total}
+          iconBg="bg-[var(--bg-subtle)]"
+          iconColor="text-[var(--text-muted)] border-[var(--border-subtle)]"
+        />
+        <StatWidget
+          icon={CheckCircle2}
+          label="Completed"
+          value={analytics.done}
+          iconBg="bg-[var(--success-soft)]"
+          iconColor="text-[var(--success)] border-[var(--success)]/20"
+        />
+        <StatWidget
+          icon={Activity}
+          label="Claimed"
+          value={analytics.claimed}
+          iconBg="bg-[var(--info-soft)]"
+          iconColor="text-[var(--info)] border-[var(--info)]/20"
+        />
+        <StatWidget
+          icon={AlertTriangle}
+          label="Overdue"
+          value={analytics.overdue}
+          iconBg={analytics.overdue > 0 ? "bg-[var(--danger-soft)]" : "bg-[var(--bg-subtle)]"}
+          iconColor={analytics.overdue > 0 ? "text-[var(--danger)] border-[var(--danger)]/20" : "text-[var(--text-muted)] border-[var(--border-subtle)]"}
+          alertBorder={analytics.overdue > 0}
+        />
+      </PageStats>
+
+      <PageContent>
         <div className="flex flex-col min-h-full relative">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 pb-2">
-            <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[var(--bg-subtle)] flex items-center justify-center text-[var(--text-muted)] border border-[var(--border-subtle)]">
-                <ListTodo className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="text-[18px] font-bold text-[var(--text-primary)] leading-none tabular-nums">{analytics.total}</div>
-                <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mt-1">Total Tasks</div>
-              </div>
-            </div>
-            
-            <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[var(--success-soft)] flex items-center justify-center text-[var(--success)] border border-[var(--success)]/20">
-                <CheckCircle2 className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="text-[18px] font-bold text-[var(--text-primary)] leading-none tabular-nums">{analytics.done}</div>
-                <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mt-1">Completed</div>
-              </div>
-            </div>
-
-            <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[var(--info-soft)] flex items-center justify-center text-[var(--info)] border border-[var(--info)]/20">
-                <Activity className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="text-[18px] font-bold text-[var(--text-primary)] leading-none tabular-nums">{analytics.claimed}</div>
-                <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mt-1">Claimed</div>
-              </div>
-            </div>
-
-            <div className={cn(
-              "bg-[var(--bg-card)] border rounded-xl p-4 flex items-center gap-3",
-              analytics.overdue > 0 ? "border-[var(--danger)]/30" : "border-[var(--border-subtle)]"
-            )}>
-              <div className={cn(
-                "w-9 h-9 rounded-lg flex items-center justify-center border",
-                analytics.overdue > 0 ? "bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20" : "bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--border-subtle)]"
-              )}>
-                <AlertTriangle className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="text-[18px] font-bold text-[var(--text-primary)] leading-none tabular-nums">{analytics.overdue}</div>
-                <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mt-1">Overdue</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-5 mb-6 mt-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center border border-[var(--accent-border)]">
-                  <Layers className="w-3.5 h-3.5" />
+          {/* Completion Progress Card */}
+          <InteractiveCard padding={false} className="mb-6 overflow-hidden">
+            <div className="p-5 pb-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center border border-[var(--accent-border)]">
+                    <Layers className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <Heading level={4} className="text-[14px] font-semibold tracking-tight text-[var(--text-primary)]">Mission Completion</Heading>
+                    <Text variant="muted" className="text-[11px]">Overall squad execution status</Text>
+                  </div>
                 </div>
-                <div>
-                  <Heading level={4} className="text-[14px] font-semibold tracking-tight text-[var(--text-primary)]">Mission Completion</Heading>
-                  <Text variant="muted" className="text-[11px]">Overall squad execution status</Text>
+                <div className="text-right">
+                  <span className="text-[18px] font-bold text-[var(--text-primary)] tabular-nums">{analytics.completionRate}%</span>
                 </div>
               </div>
-              <div className="text-right">
-                <span className="text-[18px] font-bold text-[var(--text-primary)] tabular-nums">{analytics.completionRate}%</span>
+              <div className="relative w-full h-1.5 bg-[var(--bg-subtle)] rounded-full overflow-hidden border border-[var(--border-subtle)]">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${analytics.completionRate}%` }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  className="h-full bg-[var(--accent)] rounded-full"
+                />
               </div>
             </div>
-            <div className="relative w-full h-1.5 bg-[var(--bg-subtle)] rounded-full overflow-hidden border border-[var(--border-subtle)]">
-              <div 
-                style={{ width: `${analytics.completionRate}%` }}
-                className="h-full bg-[var(--accent)] rounded-full transition-[width] duration-500"
-              />
-            </div>
-          </div>
+          </InteractiveCard>
 
-          <div className="flex-1 min-h-0 relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden shadow-sm">
+          {/* Tasks Table Card */}
+          <InteractiveCard padding={false} className="flex-1 min-h-0 overflow-hidden">
             <div className="flex-1 min-h-0 relative">
               <TasksTable 
                 tasks={tasks} 
@@ -201,8 +193,9 @@ export function CrewTasksPage() {
                 onQuickDelete={handleQuickDelete}
               />
             </div>
-          </div>
+          </InteractiveCard>
 
+          {/* Floating Bulk Actions Bar */}
           <AnimatePresence>
             {selectedCount > 0 && (
               <motion.div
@@ -253,7 +246,7 @@ export function CrewTasksPage() {
             onClose={() => setSelectedTask(null)}
           />
         </div>
-      </ManagementLayout>
-    </WorkspaceShell>
+      </PageContent>
+    </PageShell>
   );
 }

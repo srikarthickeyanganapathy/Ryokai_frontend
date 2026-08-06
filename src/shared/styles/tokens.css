@@ -184,6 +184,34 @@
     --mesh-1: rgba(232, 138, 166, 0.05);
     --mesh-2: rgba(111, 214, 217, 0.05);
     --mesh-3: rgba(0, 0, 0, 0.9);
+
+    /* ═══════════════════════════════════════════════
+     * Product-Semantic Tokens
+     * UI speaks Ryokai's language, not generic colors.
+     * ═══════════════════════════════════════════════ */
+    --task-completed: var(--success);
+    --task-completed-soft: var(--success-soft);
+    --task-completed-bg: rgba(34, 197, 94, 0.08);
+    --goal-achieved: var(--success);
+    --goal-achieved-soft: var(--success-soft);
+    --goal-achieved-glow: rgba(34, 197, 94, 0.15);
+    --announcement-pinned: var(--accent);
+    --announcement-pinned-soft: var(--accent-soft);
+    --project-at-risk: var(--warning);
+    --project-at-risk-soft: var(--warning-soft);
+    --project-at-risk-bg: rgba(234, 179, 8, 0.08);
+    --review-pending: var(--warning);
+    --review-pending-soft: var(--warning-soft);
+    --task-blocked: var(--danger);
+    --task-blocked-soft: var(--danger-soft);
+    --member-online: #22c55e;
+    --member-online-glow: rgba(34, 197, 94, 0.12);
+    --member-away: #eab308;
+    --member-offline: var(--text-tertiary);
+    --crew-active: #a855f7;
+    --crew-active-soft: rgba(168, 85, 247, 0.12);
+    --ai-insight: #8b5cf6;
+    --ai-insight-soft: rgba(139, 92, 246, 0.1);
   }
 
   body {

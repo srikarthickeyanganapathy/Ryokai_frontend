@@ -11,12 +11,11 @@ import { Label } from '@/shared/ui/Typography/Label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/Select';
 import { Plus, Inbox, Calendar, Clock, Sparkles, AlertCircle } from '@/shared/ui/Icons';
 import {
-  WorkspaceShell,
-  ManagementLayout,
-  PageStateContainer,
   ModularToolbar,
 } from '@/shared/workspace-framework';
 import { SearchPlugin } from '@/shared/workspace-framework/toolbar/plugins/SearchPlugin';
+import { PageShell, PageHero, PageContent, PageToolbar } from '@/shared/ui/PageShell';
+import { PageState } from '@/shared/ui/PageState';
 
 export function LeaveRequestsPage() {
   const { activeOrganization } = useWorkspace();
@@ -25,11 +24,11 @@ export function LeaveRequestsPage() {
   if (!orgId) return null;
 
   return (
-    <WorkspaceShell maxWidth="default">
+    <PageShell maxWidth="default">
       <RequestsProvider orgId={orgId}>
         <RequestsInboxContent />
       </RequestsProvider>
-    </WorkspaceShell>
+    </PageShell>
   );
 }
 
@@ -63,22 +62,20 @@ function RequestsInboxContent() {
   const pageState = isLoading ? 'loading' : filteredRequests.length === 0 ? 'empty' : 'ready';
 
   return (
-    <ManagementLayout
-      header={
-        <PageHeader
-          eyebrow="Workforce & Membership"
-          meta={`${allRequestsCount} request${allRequestsCount !== 1 ? 's' : ''} recorded`}
-          title="Requests Inbox"
-          subtitle="Review employee time-off availability schedules and organization membership exit workflows."
-          actions={
-            <Button variant="primary" onClick={() => setIsRequestModalOpen(true)} className="shrink-0 font-medium">
-              <Plus className="w-4 h-4 mr-1.5" />
-              Request Time Off
-            </Button>
-          }
-        />
-      }
-      toolbar={
+    <>
+      <PageHero
+        eyebrow="Workforce & Membership"
+        meta={`${allRequestsCount} request${allRequestsCount !== 1 ? 's' : ''} recorded`}
+        title="Requests Inbox"
+        subtitle="Review employee time-off availability schedules and organization membership exit workflows."
+        actions={
+          <Button variant="primary" onClick={() => setIsRequestModalOpen(true)} className="shrink-0 font-medium">
+            <Plus className="w-4 h-4 mr-1.5" />
+            Request Time Off
+          </Button>
+        }
+      />
+      <PageToolbar>
         <ModularToolbar
           left={
             <SearchPlugin
@@ -120,33 +117,36 @@ function RequestsInboxContent() {
             </div>
           }
         />
-      }
-    >
-      <PageStateContainer
-        state={pageState}
-        loadingConfig={{ variant: 'cards' }}
-        emptyConfig={{
-          icon: Inbox,
-          title: 'No requests found',
-          description: searchQuery.trim()
-            ? 'No requests match your search criteria. Try clarifying your query.'
-            : 'You are caught up! There are currently no active requests in this queue.',
-        }}
-      >
-        <div className="space-y-4">
-          <AnimatePresence mode="popLayout">
-            {filteredRequests.map((req, idx) => (
-              <RequestCard key={`${req.requestType}-${req.id}`} request={req} index={idx} />
-            ))}
-          </AnimatePresence>
-        </div>
-      </PageStateContainer>
+      </PageToolbar>
+      <PageContent>
+        <PageState
+          state={pageState}
+          stateProps={{
+            loading: { variant: 'cards' },
+            empty: {
+              icon: Inbox,
+              title: 'No requests found',
+              description: searchQuery.trim()
+                ? 'No requests match your search criteria. Try clarifying your query.'
+                : 'You are caught up! There are currently no active requests in this queue.',
+            },
+          }}
+        >
+          <div className="space-y-4">
+            <AnimatePresence mode="popLayout">
+              {filteredRequests.map((req, idx) => (
+                <RequestCard key={`${req.requestType}-${req.id}`} request={req} index={idx} />
+              ))}
+            </AnimatePresence>
+          </div>
+        </PageState>
 
-      <RequestLeaveModal
-        isOpen={isRequestModalOpen}
-        onClose={() => setIsRequestModalOpen(false)}
-      />
-    </ManagementLayout>
+        <RequestLeaveModal
+          isOpen={isRequestModalOpen}
+          onClose={() => setIsRequestModalOpen(false)}
+        />
+      </PageContent>
+    </>
   );
 }
 

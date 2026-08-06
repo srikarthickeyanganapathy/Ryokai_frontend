@@ -1,38 +1,65 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card';
-import { CheckCircle, Clock, Calendar, Zap } from '@/shared/ui/Icons';
+import { PremiumCard, PremiumCardHeader, PremiumCardTitle, PremiumCardContent } from '@/shared/ui/PremiumCard';
+import { CheckCircle, Clock, Calendar, Zap, Sparkles } from '@/shared/ui/Icons';
+import { motion } from 'framer-motion';
 
 export function DailyBriefWidget({ context }) {
   if (!context?.dailyBrief) return null;
   const { dailyBrief } = context;
 
+  const stats = [
+    { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-500/10', label: 'Focus Tasks', value: dailyBrief.focusTasksCount },
+    { icon: Clock, color: 'text-amber-500', bg: 'bg-amber-500/10', label: 'Reminders', value: dailyBrief.remindersCount },
+    { icon: Calendar, color: 'text-blue-500', bg: 'bg-blue-500/10', label: 'Meetings', value: dailyBrief.meetingsCount },
+  ];
+
   return (
-    <Card className="w-full bg-gradient-to-br from-[var(--bg-base)] to-[var(--bg-subtle)] border-[var(--border-subtle)] mb-6">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-bold flex items-center gap-2">
+    <PremiumCard className="w-full overflow-hidden border-0 bg-gradient-to-br from-[var(--bg-base)] via-[var(--bg-elevated)] to-[var(--accent-soft)]/20 mb-6">
+      <div className="absolute top-0 right-0 p-4 opacity-10">
+        <Sparkles size={48} />
+      </div>
+      <PremiumCardHeader className="pb-2 relative z-10">
+        <PremiumCardTitle className="text-xl font-bold flex items-center gap-2">
           {dailyBrief.greeting}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+        </PremiumCardTitle>
+      </PremiumCardHeader>
+      <PremiumCardContent className="relative z-10">
         <div className="flex gap-6 mt-4">
-          <div className="flex items-center gap-2 text-sm">
-            <CheckCircle className="w-4 h-4 text-green-500" />
-            <span>{dailyBrief.focusTasksCount} Focus Tasks</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Clock className="w-4 h-4 text-amber-500" />
-            <span>{dailyBrief.remindersCount} Reminders</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Calendar className="w-4 h-4 text-blue-500" />
-            <span>{dailyBrief.meetingsCount} Meetings</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Zap className="w-4 h-4 text-purple-500" />
-            <span>{dailyBrief.streakMessage}</span>
-          </div>
+          {stats.map((stat, idx) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.08 }}
+              className="flex items-center gap-2"
+            >
+              <div className={`p-1.5 rounded-lg ${stat.bg}`}>
+                <stat.icon className={`w-4 h-4 ${stat.color}`} />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-[var(--text-primary)] tabular-nums">{stat.value}</p>
+                <p className="text-[10px] text-[var(--text-tertiary)]">{stat.label}</p>
+              </div>
+            </motion.div>
+          ))}
+          {dailyBrief.streakMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.24 }}
+              className="flex items-center gap-2 ml-auto"
+            >
+              <div className="p-1.5 rounded-lg bg-purple-500/10">
+                <Zap className="w-4 h-4 text-purple-500" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-purple-500">{dailyBrief.streakMessage}</p>
+                <p className="text-[10px] text-[var(--text-tertiary)]">Streak</p>
+              </div>
+            </motion.div>
+          )}
         </div>
-      </CardContent>
-    </Card>
+      </PremiumCardContent>
+    </PremiumCard>
   );
 }

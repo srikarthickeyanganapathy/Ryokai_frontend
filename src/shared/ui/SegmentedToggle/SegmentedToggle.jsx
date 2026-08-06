@@ -1,10 +1,12 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { cn } from '@/shared/lib/cn';
 
 /**
  * SegmentedToggle
  * ─────────────────────────────────────────────────────────
  * Shared component for switching view modes (e.g. Grid vs Table).
+ * Features a sliding background indicator between options.
  *
  * @param {Array<{value: string, label: string, icon?: React.ElementType}>} options - Toggle options
  * @param {string} value - Currently active option value
@@ -15,30 +17,38 @@ export function SegmentedToggle({ options, value, onChange, className }) {
   return (
     <div
       className={cn(
-        'inline-flex items-center bg-[var(--bg-subtle)] p-1 rounded-xl border border-[var(--border-subtle)] shadow-2xs',
+        'relative inline-flex items-center bg-[var(--bg-subtle)] p-1 rounded-xl border border-[var(--border-subtle)] shadow-2xs',
         className
       )}
     >
       {options.map((opt) => {
         const IconEl = opt.icon;
         const isActive = value === opt.value;
-        
+
         return (
-          <button
+          <motion.button
             key={opt.value}
             type="button"
             onClick={() => onChange(opt.value)}
+            whileTap={{ scale: 0.96 }}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150',
+              'relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold z-10',
               isActive
-                ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-xs'
+                ? 'text-[var(--text-primary)]'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
             )}
             title={opt.label}
           >
-            {IconEl && <IconEl className="w-3.5 h-3.5" aria-hidden="true" />}
-            <span className="hidden sm:inline">{opt.label}</span>
-          </button>
+            {isActive && (
+              <motion.div
+                layoutId="segmented-toggle-bg"
+                className="absolute inset-0 bg-[var(--bg-elevated)] rounded-lg shadow-xs"
+                transition={{ type: 'spring', stiffness: 450, damping: 28 }}
+              />
+            )}
+            {IconEl && <IconEl className="w-3.5 h-3.5 relative z-10" aria-hidden="true" />}
+            <span className="hidden sm:inline relative z-10">{opt.label}</span>
+          </motion.button>
         );
       })}
     </div>

@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/shared/forms'
 import { Input } from '@/shared/ui/Input'
@@ -103,7 +104,13 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <motion.form
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="space-y-4"
+        >
           <FormField
             control={form.control}
             name="title"
@@ -354,7 +361,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
           <Button type="submit" isLoading={isLoading} className="w-full">
             {isLoading ? 'Saving...' : 'Save Task'}
           </Button>
-        </form>
+        </motion.form>
       </Form>
     </>
   )

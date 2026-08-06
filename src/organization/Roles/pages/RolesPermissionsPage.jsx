@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { WorkspaceShell, ManagementLayout } from '@/shared/workspace-framework';
+import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
 import { useOrgRoles } from '../../features/hooks/useOrganizations';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { Skeleton } from '@/shared/ui/Skeleton';
@@ -46,15 +46,15 @@ export function RolesPermissionsPage() {
   if (!orgId) return null;
 
   return (
-    <WorkspaceShell maxWidth="wide">
-      <ManagementLayout
-        header={
-          <div className="flex flex-col gap-4">
-            <PageHeader eyebrow="Security · Access Control" title="Roles & Permissions" subtitle="Configure the permission surface for every role in this organization." />
-            {canManageRoles && !studio.rolesLoading && <PostureStrip posture={posture} />}
-          </div>
-        }
+    <PageShell maxWidth="wide">
+      <PageHero
+        eyebrow="Security · Access Control"
+        title="Roles & Permissions"
+        subtitle="Configure the permission surface for every role in this organization."
       >
+        {canManageRoles && !studio.rolesLoading && <PostureStrip posture={posture} />}
+      </PageHero>
+      <PageContent>
         {!canManageRoles ? (
           <EmptyState icon={<Icons.shieldAlert className="w-4 h-4 text-[var(--danger)]" />} iconBg="bg-[var(--danger-soft)]" title="Access Denied" description="You do not have permission to view or manage roles and permissions. Please contact an administrator if you believe this is a mistake." />
         ) : studio.rolesLoading ? (
@@ -106,8 +106,8 @@ export function RolesPermissionsPage() {
             {studio.confirmDialog}
           </>
         )}
-      </ManagementLayout>
-    </WorkspaceShell>
+      </PageContent>
+    </PageShell>
   );
 }
 

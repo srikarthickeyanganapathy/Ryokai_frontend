@@ -243,6 +243,7 @@ export const Icons = {
   google: GoogleIcon,
   check: Check,
   menu: Menu,
+  layout: Layout,
   layoutDashboard: LayoutDashboard,
   checkCircle: CheckCircle2,
   listTodo: ListTodo,

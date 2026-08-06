@@ -1,8 +1,19 @@
 import React from 'react';
-import { Card, CardContent } from '@/shared/ui/Card';
+import { PremiumCard, PremiumCardHeader, PremiumCardTitle, PremiumCardContent } from '@/shared/ui/PremiumCard';
 import { Badge } from '@/shared/ui/Badge';
-import { AlertCircle, FileText, CheckSquare, MessageSquare } from '@/shared/ui/Icons';
+import { AlertCircle, FileText, CheckSquare, MessageSquare, Bell, ArrowRight } from '@/shared/ui/Icons';
 import { useDrawerManager } from '@/shared/workspace-framework';
+import { motion } from 'framer-motion';
+
+const SIGNAL_ICON_MAP = {
+  APPROVAL_REQUIRED: { icon: CheckSquare, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+  MENTION: { icon: MessageSquare, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  BLOCKED: { icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-500/10' },
+  TASK_DUE_SOON: { icon: Bell, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+  TASK_OVERDUE: { icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-500/10' },
+  TASK_COMMENTED: { icon: MessageSquare, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  ANNOUNCEMENT: { icon: FileText, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+};
 
 export function SignalStrip({ interrupts }) {
   const { open } = useDrawerManager();
@@ -11,54 +22,70 @@ export function SignalStrip({ interrupts }) {
     return null;
   }
 
-  const getIcon = (type) => {
-    switch (type) {
-      case 'APPROVAL_REQUIRED': return <CheckSquare className="h-4 w-4 text-amber-500" />;
-      case 'MENTION': return <MessageSquare className="h-4 w-4 text-blue-500" />;
-      case 'BLOCKED': return <AlertCircle className="h-4 w-4 text-red-500" />;
-      default: return <AlertCircle className="h-4 w-4 text-slate-500" />;
-    }
-  };
-
   return (
-    <div className="flex flex-col space-y-3">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex flex-col space-y-3"
+    >
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold tracking-wider text-[var(--text-tertiary)] uppercase">Signals</h3>
-        <Badge variant="danger" className="text-xs">
-          {interrupts.length} Action{interrupts.length !== 1 ? 's' : ''} Required
-        </Badge>
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 300 }}
+        >
+          <Badge variant="danger" className="text-xs animate-pulse">
+            {interrupts.length} Action{interrupts.length !== 1 ? 's' : ''} Required
+          </Badge>
+        </motion.div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {interrupts.map((signal) => (
-          <Card 
-            key={signal.id} 
-            variant="interactive"
-            className="!border-l-4 !border-l-[var(--warning)]"
-            onClick={() => {
-              if (signal.taskId) {
-                open('task', { taskId: signal.taskId });
-              } else {
-                open('signal', { signalId: signal.id, signal: signal });
-              }
-            }}
-          >
-            <CardContent className="p-4 flex gap-3 items-start">
-              <div className="mt-0.5 bg-[var(--bg-subtle)] p-2 rounded-md">
-                {getIcon(signal.type)}
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-[var(--text-primary)] line-clamp-1">
-                  {signal.title}
-                </h4>
-                <p className="text-xs text-[var(--text-secondary)] mt-1 line-clamp-2">
-                  {signal.message}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        {interrupts.map((signal, idx) => {
+          const sigConfig = SIGNAL_ICON_MAP[signal.type] || { icon: AlertCircle, color: 'text-slate-500', bg: 'bg-slate-500/10' };
+          const SignalIcon = sigConfig.icon;
+          return (
+            <motion.div
+              key={signal.id}
+              initial={{ opacity: 0, y: 12, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: idx * 0.06, duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+              whileHover={{ y: -2, scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <PremiumCard 
+                variant="interactive"
+                className="!border-l-4 !border-l-[var(--warning)] cursor-pointer"
+                onClick={() => {
+                  if (signal.taskId) {
+                    open('task', { taskId: signal.taskId });
+                  } else {
+                    open('signal', { signalId: signal.id, signal: signal });
+                  }
+                }}
+              >
+                <PremiumCardContent className="p-4 flex gap-3 items-start">
+                  <div className={`mt-0.5 ${sigConfig.bg} p-2 rounded-lg`}>
+                    <SignalIcon className={`h-4 w-4 ${sigConfig.color}`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-sm font-medium text-[var(--text-primary)] line-clamp-1">
+                      {signal.title}
+                    </h4>
+                    <p className="text-xs text-[var(--text-secondary)] mt-1 line-clamp-2">
+                      {signal.message}
+                    </p>
+                    <div className="flex items-center gap-1 mt-2 text-[10px] font-medium text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity">
+                      View details <ArrowRight size={10} />
+                    </div>
+                  </div>
+                </PremiumCardContent>
+              </PremiumCard>
+            </motion.div>
+          );
+        })}
       </div>
-    </div>
+    </motion.div>
   );
 }

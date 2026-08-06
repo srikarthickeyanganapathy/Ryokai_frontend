@@ -11,7 +11,6 @@ import {
   Filter,
 } from '@/shared/ui/Icons';
 import { Heading, Text } from '@/shared/ui/Typography';
-import { PageHeader } from '@/shared/ui/PageHeader';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { FilterTabs } from '@/shared/ui/FilterTabs';
@@ -20,11 +19,9 @@ import { usePermissions } from '@/identity';
 import { useWorkload } from '@/organization/workload/features/hooks/useWorkload';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import {
-  WorkspaceShell,
-  CommandLayout,
-  PageStateContainer,
-  FrameworkEmptyState,
-} from '@/shared/workspace-framework';
+  PageShell, PageHero, PageContent, PageToolbar,
+} from '@/shared/ui/PageShell';
+import { PageState } from '@/shared/ui/PageState';
 import { DataTable } from '@/shared/ui/data-table/DataTable';
 import { toast } from 'sonner';
 import {
@@ -297,15 +294,21 @@ export function WorkloadPage() {
   const toggleCard = (id) =>
     setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
 
+  /* ── No active org: empty fallback ── */
   if (!orgId) {
     return (
-      <WorkspaceShell maxWidth="default">
-        <FrameworkEmptyState
-          icon={Building2}
-          title="Select an organization to view workload"
-          description="Resource capacity and team member utilization tracking requires an active organization workspace."
-        />
-      </WorkspaceShell>
+      <PageShell maxWidth="default">
+        <PageContent>
+          <PageState
+            state="empty"
+            stateProps={{
+              icon: Building2,
+              title: 'Select an organization to view workload',
+              description: 'Resource capacity and team member utilization tracking requires an active organization workspace.',
+            }}
+          />
+        </PageContent>
+      </PageShell>
     );
   }
 
@@ -318,84 +321,70 @@ export function WorkloadPage() {
         : 'ready';
 
   return (
-    <WorkspaceShell maxWidth="default">
-      <CommandLayout
-        hero={
-          <div className="pb-4 border-b border-[var(--border-subtle)]">
-            <PageHeader
-              eyebrow="Resource Capacity"
-              icon={Gauge}
-              title="Team Capacity & Utilization"
-              subtitle="Monitor team load balance and task allocation bottlenecks."
-              actions={
-                <div className="flex items-center gap-2">
-                  {showThresholdInput ? (
-                    <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border-subtle)] p-1 rounded-lg">
-                      <Input
-                        type="number"
-                        value={tempThreshold}
-                        onChange={(e) => setTempThreshold(Number(e.target.value))}
-                        className="w-16 h-7 text-sm border-none focus-visible:ring-0"
-                        min={1}
-                        max={20}
-                      />
-                      <Button
-                        size="sm"
-                        className="h-7 text-xs"
-                        onClick={handleSaveThreshold}
-                      >
-                        Set
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowThresholdInput(true)}
-                      className="gap-1.5 text-[12px] h-8"
-                    >
-                      <Settings2 className="w-3.5 h-3.5" /> Capacity: {threshold}
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => refetch()}
-                    className="gap-1.5 text-[12px] h-8"
-                    disabled={isLoading}
-                  >
-                    <RefreshCw
-                      className={cn('w-3.5 h-3.5', isLoading && 'animate-spin')}
-                    />{' '}
-                    Refresh
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-        }
+    <PageShell maxWidth="default">
+      <PageHero
+        eyebrow="Resource Capacity"
+        title="Team Capacity & Utilization"
+        subtitle="Monitor team load balance and task allocation bottlenecks."
+        icon={Gauge}
       >
-        <PageStateContainer
+        <div className="flex items-center gap-2">
+          {showThresholdInput ? (
+            <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border-subtle)] p-1 rounded-lg">
+              <Input
+                type="number"
+                value={tempThreshold}
+                onChange={(e) => setTempThreshold(Number(e.target.value))}
+                className="w-16 h-7 text-sm border-none focus-visible:ring-0"
+                min={1}
+                max={20}
+              />
+              <Button
+                size="sm"
+                className="h-7 text-xs"
+                onClick={handleSaveThreshold}
+              >
+                Set
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowThresholdInput(true)}
+              className="gap-1.5 text-[12px] h-8"
+            >
+              <Settings2 className="w-3.5 h-3.5" /> Capacity: {threshold}
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            className="gap-1.5 text-[12px] h-8"
+            disabled={isLoading}
+          >
+            <RefreshCw
+              className={cn('w-3.5 h-3.5', isLoading && 'animate-spin')}
+            />{' '}
+            Refresh
+          </Button>
+        </div>
+      </PageHero>
+
+      <PageContent>
+        <PageState
           state={pageState}
-          loadingConfig={{ variant: 'dashboard', rows: 5 }}
-          emptyConfig={{
-            icon: Gauge,
-            title: 'No Workload Matrix Available',
-            description:
-              'There are currently no active workload assignments or team member metrics for this organization.',
-            actionLabel: 'Refresh Workload',
+          stateProps={{
+            loadingVariant: 'dashboard',
             onAction: () => refetch(),
-          }}
-          errorConfig={{
-            title: 'Failed to load Workload Data',
-            description:
-              error?.response?.data?.message ||
-              error?.message ||
-              'Server encountered an issue retrieving workload metrics.',
+            actionLabel: 'Refresh Workload',
+            title: 'No Workload Matrix Available',
+            description: 'There are currently no active workload assignments or team member metrics for this organization.',
             onRetry: () => refetch(),
           }}
         >
-          <div className="flex flex-col gap-6 mt-6">
+          <div className="flex flex-col gap-6">
             <OrgSnapshotBanner stats={stats} />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -453,8 +442,11 @@ export function WorkloadPage() {
                   const risk = getRiskLevel(activeCount, threshold);
 
                   return (
-                    <div
+                    <motion.div
                       key={userId}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25, ease: 'easeOut' }}
                       className={cn(
                         'rounded-xl bg-[var(--bg-card)] border p-4 transition-all',
                         isOver
@@ -568,7 +560,7 @@ export function WorkloadPage() {
                           : 'View Trend Analysis'}
                       </Button>
                       {expandedCards[userId] && (
-                        <div className="mt-3 pt-3 border-t border-[var(--color-border-subtle)] flex flex-col items-center gap-2">
+                        <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex flex-col items-center gap-2">
                           <Sparkline
                             data={trendData}
                             color={
@@ -580,7 +572,7 @@ export function WorkloadPage() {
                           </Text>
                         </div>
                       )}
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
@@ -717,8 +709,8 @@ export function WorkloadPage() {
               />
             </div>
           </div>
-        </PageStateContainer>
-      </CommandLayout>
-    </WorkspaceShell>
+        </PageState>
+      </PageContent>
+    </PageShell>
   );
 }

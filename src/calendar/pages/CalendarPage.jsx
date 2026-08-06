@@ -8,8 +8,8 @@ import { TaskForm } from '@/task'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Badge } from '@/shared/ui/Badge'
-import { PageHeader } from '@/shared/ui/PageHeader'
-import { WorkspaceShell, ManagementLayout } from '@/shared/workspace-framework'
+import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
+import { PageState } from '@/shared/ui/PageState'
 
 export function CalendarPage() {
   const [visibleRange, setVisibleRange] = useState(() => {
@@ -23,15 +23,21 @@ export function CalendarPage() {
   const [selectedTask, setSelectedTask] = useState(null)
   const [selectedEvent, setSelectedEvent] = useState(null)
 
+  const isLoading = tasksLoading || eventsLoading
+
   return (
-    <WorkspaceShell maxWidth="wide">
-      <ManagementLayout
-        header={<PageHeader eyebrow="Orient" meta="• Schedule Matrix & Event Telemetry" title="Calendar & Task Deadlines" subtitle="View upcoming deadlines, scheduled milestones, and project events." />}
-      >
+    <PageShell maxWidth="wide">
+      <PageHero
+        title="Calendar & Task Deadlines"
+        subtitle="View upcoming deadlines, scheduled milestones, and project events."
+        eyebrow="Schedule Matrix & Event Telemetry"
+      />
+
+      <PageContent>
         <div className="flex-1 min-h-0 pt-2">
           <CalendarView tasks={tasks} events={events} isLoading={tasksLoading || eventsLoading} onVisibleRangeChange={setVisibleRange} onTaskClick={setSelectedTask} onEventClick={setSelectedEvent} TaskFormComponent={TaskForm} />
         </div>
-        
+
         <TaskPanel task={selectedTask} isOpen={!!selectedTask} onClose={() => setSelectedTask(null)} />
 
         <Modal open={!!selectedEvent} onOpenChange={(open) => !open && setSelectedEvent(null)}>
@@ -56,7 +62,7 @@ export function CalendarPage() {
             )}
           </ModalContent>
         </Modal>
-      </ManagementLayout>
-    </WorkspaceShell>
+      </PageContent>
+    </PageShell>
   )
 }

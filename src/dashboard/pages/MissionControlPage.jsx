@@ -7,8 +7,8 @@ import { PersonalContextRail } from '../features/PersonalContextRail';
 import { CrewContextRail } from '../features/CrewContextRail';
 import { OrgContextRail } from '../features/OrgContextRail';
 import { useMissionControlViewModel } from './hooks/useMissionControlViewModel';
-import { WorkspaceShell, CommandLayout, PageStateContainer } from '@/shared/workspace-framework';
-import { PageHeader } from '@/shared/ui/PageHeader';
+import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
+import { PageState } from '@/shared/ui/PageState';
 import { ModeSelector } from '../features/ModeSelector';
 import { WIDGET_REGISTRY } from '../config/WidgetRegistry';
 import { usePermissions } from '@/identity/features/authentication/hooks/usePermissions';
@@ -62,7 +62,6 @@ export function MissionControlPage() {
       });
   };
 
-  // Workspace-aware header content
   const getHeaderConfig = () => {
     switch (vm.workspaceMode) {
       case 'CREWS':
@@ -93,20 +92,18 @@ export function MissionControlPage() {
   const headerConfig = getHeaderConfig();
 
   return (
-    <WorkspaceShell maxWidth="wide">
-      <CommandLayout
-        hero={
-          <PageHeader
-            eyebrow={headerConfig.eyebrow}
-            title={headerConfig.title}
-            subtitle={headerConfig.subtitle}
-            actions={<ModeSelector />}
-          />
-        }
-      >
-        <PageStateContainer
+    <PageShell maxWidth="wide">
+      <PageHero
+        eyebrow={headerConfig.eyebrow}
+        title={headerConfig.title}
+        subtitle={headerConfig.subtitle}
+        actions={<ModeSelector />}
+      />
+
+      <PageContent>
+        <PageState
           state={vm.pageState}
-          loadingConfig={{ variant: "dashboard" }}
+          stateProps={{ loadingVariant: 'dashboard' }}
         >
           <div className="flex flex-col lg:flex-row gap-6 w-full h-full">
             {/* Primary Execution Column */}
@@ -120,8 +117,8 @@ export function MissionControlPage() {
               {renderWidgets('context')}
             </div>
           </div>
-        </PageStateContainer>
-      </CommandLayout>
-    </WorkspaceShell>
+        </PageState>
+      </PageContent>
+    </PageShell>
   );
 }

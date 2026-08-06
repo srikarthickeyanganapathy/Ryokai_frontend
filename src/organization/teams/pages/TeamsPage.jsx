@@ -15,10 +15,11 @@ import { useAuth } from '@/identity'
 import { toast } from 'sonner'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import {
-  WorkspaceShell,
-  ManagementLayout,
-  PageStateContainer,
-} from '@/shared/workspace-framework'
+  PageShell,
+  PageHero,
+  PageContent,
+} from '@/shared/ui/PageShell'
+import { PageState } from '@/shared/ui/PageState'
 
 function hashHue(str = '') {
   let hash = 0
@@ -107,61 +108,49 @@ export function TeamsPage() {
 
 
   return (
-    <WorkspaceShell maxWidth="default">
-      <ManagementLayout
-        header={
-          <div className="space-y-5">
-            <PageHeader
-              eyebrow={`Teams · ${activeOrganization.name}`}
-              icon={Icons.users}
-              title="Teams workspace"
-              subtitle="Manage your organization's divisions and collaborative units."
-              actions={
-                canCreateTeam && (
-                  <Button variant="primary" size="sm" onClick={() => setCreateTeamModalOpen(true)} className="shadow-sm h-8 text-[12px]">
-                    <Icons.plus className="w-3.5 h-3.5 mr-1" />
-                    Create Team
-                  </Button>
-                )
-              }
-            />
-
-            {teams.length > 0 && (
-              <>
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatPill icon={Icons.users} label="teams" value={teams.length} />
-                  <StatPill icon={Icons.users} label="members" value={members.length} />
-                  {orgObserverTotal > 0 && <StatPill icon={Icons.search} label="observers" value={orgObserverTotal} />}
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="relative flex-1 max-w-sm">
-                    <Icons.search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" aria-hidden="true" />
-                    <input
-                      type="text"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Search teams..."
-                      aria-label="Search teams"
-                      className="w-full pl-9 pr-3 py-2 text-[13px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent)] transition-colors text-[var(--text-primary)]"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        }
+    <PageShell maxWidth="default">
+      <PageHero
+        eyebrow={`Teams · ${activeOrganization?.name || ''}`}
+        title="Teams workspace"
+        subtitle="Manage your organization's divisions and collaborative units."
       >
-        <PageStateContainer
+        {canCreateTeam && (
+          <Button variant="primary" size="sm" onClick={() => setCreateTeamModalOpen(true)} className="shadow-sm h-8 text-[12px]">
+            <Icons.plus className="w-3.5 h-3.5 mr-1" />
+            Create Team
+          </Button>
+        )}
+      </PageHero>
+
+      {teams.length > 0 && (
+        <>
+          <div className="flex flex-wrap items-center gap-2">
+            <StatPill icon={Icons.users} label="teams" value={teams.length} />
+            <StatPill icon={Icons.users} label="members" value={members.length} />
+            {orgObserverTotal > 0 && <StatPill icon={Icons.search} label="observers" value={orgObserverTotal} />}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1 max-w-sm">
+              <Icons.search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" aria-hidden="true" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search teams..."
+                aria-label="Search teams"
+                className="w-full pl-9 pr-3 py-2 text-[13px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent)] transition-colors text-[var(--text-primary)]"
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      <PageContent>
+        <PageState
           state={pageState}
-          loadingConfig={{ variant: 'cards' }}
-          emptyConfig={{
-            icon: Icons.users,
-            title: 'No teams created yet',
-            description: 'Create a team to organize members, own projects, and coordinate work.',
-            actionLabel: canCreateTeam ? 'Create Team' : undefined,
-            onAction: canCreateTeam ? () => setCreateTeamModalOpen(true) : undefined,
-          }}
+          moduleId="teams"
+          stateProps={{ loadingVariant: 'cards', onAction: canCreateTeam ? () => setCreateTeamModalOpen(true) : undefined }}
         >
           {filteredTeams.length === 0 ? (
             <div className="text-center py-16 border border-dashed border-[var(--border-subtle)] rounded-xl bg-[var(--bg-card)]">
@@ -179,12 +168,12 @@ export function TeamsPage() {
               setSelectedTeam={setSelectedTeam}
             />
           )}
-        </PageStateContainer>
-      </ManagementLayout>
+        </PageState>
+      </PageContent>
 
       <CreateTeamModal isOpen={createTeamModalOpen} onClose={() => setCreateTeamModalOpen(false)} orgId={orgId} />
       <ManageTeamMembersModal isOpen={!!selectedTeam} onClose={() => setSelectedTeam(null)} team={teams.find((t) => t.id === selectedTeam?.id) || selectedTeam} orgMembers={members} />
-    </WorkspaceShell>
+    </PageShell>
   )
 }
 

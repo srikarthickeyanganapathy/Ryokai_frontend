@@ -14,7 +14,8 @@ import { useTaskList } from '@/task';
 import { useProjects } from '@/project';
 import { useCrew, useCrewMembers, useCrewChannels, useCrewProjects, useLeaveCrew, useDeleteCrew } from '../features/hooks/useCrews';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
-import { WorkspaceShell, ManagementLayout, PageStateContainer } from '@/shared/workspace-framework';
+import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
+import { PageState } from '@/shared/ui/PageState';
 import { useAuth } from '@/identity';
 import { toast } from 'sonner';
 
@@ -147,74 +148,87 @@ export function CrewDetailPage() {
   const pageState = isCrewLoading ? 'loading' : !crew ? 'empty' : 'ready';
 
   return (
-    <WorkspaceShell maxWidth="wide">
-      <ManagementLayout
-        header={
-          crew ? (
-            <div className="pb-4">
-              <CrewHeader
-                crew={crew}
-                members={members}
-                sharedProjects={sharedProjects}
-                crewTasks={crewTasks}
-                channels={channels}
-                completionRate={completionRate}
-                isCreator={isCreator}
-                onLeave={handleLeaveCrew}
-                onOpenChat={() => setActiveTab('channels')}
-                onOpenTasks={() => setActiveTab('tasks')}
-                onNewBoard={() => setActiveTab('whiteboards')}
-              />
-            </div>
-          ) : null
-        }
-        tabs={
-          <CrewTabs
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            tabCounts={tabCounts}
-          />
-        }
+    <PageShell maxWidth="wide">
+      <PageHero
+        eyebrow={crew?.name || 'Crew'}
+        title={crew?.name || 'Crew Details'}
+        subtitle={crew?.description}
       >
-        <PageStateContainer
-          state={pageState}
-          loadingConfig={{ variant: 'dashboard' }}
-          emptyConfig={{ icon: Icons.users, title: 'Crew Not Found', description: 'The requested crew does not exist or you do not have permission to view it.', actionLabel: 'Back to Crews', onAction: () => navigate('/app/crews') }}
-        >
-          <div className="flex flex-col min-h-full pt-4">
-            <div className="flex-1 min-h-0">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.15, ease: 'easeOut' }}
-                >
-                  {activeTab === 'overview' && (
-                    <OverviewTab
-                      crew={crew}
-                      members={members}
-                      sharedProjects={sharedProjects}
-                      crewTasks={crewTasks}
-                      channels={channels}
-                      completionRate={completionRate}
-                      setActiveTab={setActiveTab}
-                      isCreator={isCreator}
-                    />
-                  )}
-                  {activeTab === 'tasks' && <TasksTab crewId={crewId} tasks={crewTasks} />}
-                  {activeTab === 'channels' && <ChannelsTab crewId={crewId} channels={channels} isCreator={isCreator} />}
-                  {activeTab === 'projects' && <ProjectsTab crewId={crewId} sharedProjects={sharedProjects} allProjects={allProjects} />}
-                  {activeTab === 'whiteboards' && <WhiteboardsTab crewId={crewId} isCreator={isCreator} />}
-                  {activeTab === 'members' && <MembersTab crewId={crewId} members={members} memberCap={crew?.memberCap} isCreator={isCreator} />}
-                </motion.div>
-              </AnimatePresence>
-            </div>
+        {crew && (
+          <div className="pb-2">
+            <CrewHeader
+              crew={crew}
+              members={members}
+              sharedProjects={sharedProjects}
+              crewTasks={crewTasks}
+              channels={channels}
+              completionRate={completionRate}
+              isCreator={isCreator}
+              onLeave={handleLeaveCrew}
+              onOpenChat={() => setActiveTab('channels')}
+              onOpenTasks={() => setActiveTab('tasks')}
+              onNewBoard={() => setActiveTab('whiteboards')}
+            />
           </div>
-        </PageStateContainer>
-        {confirmDialog}
-      </ManagementLayout>
-    </WorkspaceShell>
+        )}
+      </PageHero>
+
+      <PageState
+        state={pageState}
+        stateProps={{
+          loadingVariant: 'dashboard',
+          icon: Icons.users,
+          title: 'Crew Not Found',
+          description: 'The requested crew does not exist or you do not have permission to view it.',
+        }}
+      >
+        {crew && (
+          <>
+            {/* Tabs — inline between hero and content */}
+            <CrewTabs
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              tabCounts={tabCounts}
+            />
+
+            <PageContent>
+              <div className="flex flex-col min-h-full pt-4">
+                <div className="flex-1 min-h-0">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeTab}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.15, ease: 'easeOut' }}
+                    >
+                      {activeTab === 'overview' && (
+                        <OverviewTab
+                          crew={crew}
+                          members={members}
+                          sharedProjects={sharedProjects}
+                          crewTasks={crewTasks}
+                          channels={channels}
+                          completionRate={completionRate}
+                          setActiveTab={setActiveTab}
+                          isCreator={isCreator}
+                        />
+                      )}
+                      {activeTab === 'tasks' && <TasksTab crewId={crewId} tasks={crewTasks} />}
+                      {activeTab === 'channels' && <ChannelsTab crewId={crewId} channels={channels} isCreator={isCreator} />}
+                      {activeTab === 'projects' && <ProjectsTab crewId={crewId} sharedProjects={sharedProjects} allProjects={allProjects} />}
+                      {activeTab === 'whiteboards' && <WhiteboardsTab crewId={crewId} isCreator={isCreator} />}
+                      {activeTab === 'members' && <MembersTab crewId={crewId} members={members} memberCap={crew?.memberCap} isCreator={isCreator} />}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </div>
+            </PageContent>
+          </>
+        )}
+      </PageState>
+
+      {confirmDialog}
+    </PageShell>
   );
 }

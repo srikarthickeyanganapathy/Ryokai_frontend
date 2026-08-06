@@ -1,525 +1,124 @@
-import { Button } from '@/shared/ui/Button';
-
 import React, { useState, useMemo, useEffect } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { Heading, Text } from '@/shared/ui/Typography'
-import { useTaskList, useUpdateTask, useDeleteTask, useSubmitTask, useApproveTask, useReassignTask, useCompletePersonalTask, useCompleteCrewTask, useRecallTask, useRejectTask } from '../entities/hooks/useTasks'
+import { useSearchParams } from 'react-router-dom'
+import { useTaskList, useUpdateTask, useDeleteTask, useSubmitTask, useApproveTask, useReassignTask, useCompletePersonalTask, useCompleteCrewTask, useRejectTask, useComments } from '../entities/hooks/useTasks'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { TaskForm } from '../features/manage-task/TaskForm'
-import { TasksToolbar } from '../components/TaskToolbar/TasksToolbar'
 import { TasksTable } from '../components/TableView/TasksTable'
 import { KanbanBoard } from '../components/KanbanBoard/KanbanBoard'
-import { TaskPanel } from '../components/TaskPanel/TaskPanel'
+import { TaskDetailView } from '../components/TaskDetailView'
+import { TaskIDE } from '../components/TaskIDE'
+import { TaskComments, TaskEvidence } from '../components/TaskPanel/TaskPanelExtras'
+import ActivityTimeline from '../components/Nebula/explorers/ActivityTimeline'
 import NebulaView from '../components/Nebula/components/NebulaView'
-import { PageHeader } from '@/shared/ui/PageHeader'
 import { toast } from 'sonner'
-import { Icons } from '@/shared/ui/Icons'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
-import { normalizeStatus, toBackendStatus } from '@/shared/lib/status'
 import { PRIORITY_OPTIONS } from '@/shared/lib/priority'
-import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
-import { useAuth } from '@/identity'
+import { useAuth, useUsersList, usePermissions } from '@/identity'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
-import { useUsersList } from '@/identity'
-import { usePermissions } from '@/identity'
-
 import { filterTasksByWorkspace } from '@/shared/lib/workspaceTaskFilter'
-import { useProjects } from '@/project'
-import { useOrgTeams } from '@/organization'
-
-import {
-  WorkspaceShell,
-  ManagementLayout,
-  PageStateContainer,
-} from '@/shared/workspace-framework'
+import { Text } from '@/shared/ui/Typography'
 
 export function TasksPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const viewMode = searchParams.get('view') || 'list'
   const { user } = useAuth()
-  const { canReview, canEditTask, canDeleteTask, canAssignTask, canReviewTask } = usePermissions()
+  const { canReviewTask } = usePermissions()
   const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
-  const setViewMode = (mode) => {
-    setSearchParams(params => {
-      params.set('view', mode)
-      return params
-    }, { replace: true })
-  }
+  const setViewMode = (mode) => setSearchParams(p => { p.set('view', mode); return p }, { replace: true })
 
-  const [activeView, setActiveView] = useState('all')
-  const [globalFilter, setGlobalFilter] = useState('')
-  const [priorityFilter, setPriorityFilter] = useState([])
-  const [projectFilter, setProjectFilter] = useState('ALL')
-  const [teamFilter, setTeamFilter] = useState('ALL')
-  const [sortBy, setSortBy] = useState('dueDate')
-  const [rowSelection, setRowSelection] = useState({})
-
-  // Task Panel State
   const [selectedTask, setSelectedTask] = useState(null)
-
   const { workspaceMode, activeOrganization } = useWorkspace()
+  const { data: rawTasks = [], isLoading, refetch } = useTaskList()
+  const { data: allUsers } = useUsersList()
 
-  // Data Fetching
-  const { data: rawTasks = [], isLoading } = useTaskList()
-  const { data: allProjects = [] } = useProjects()
-  const { data: orgTeams = [] } = useOrgTeams(activeOrganization?.id)
-
-  const projectsList = useMemo(() => {
-    return (allProjects || []).map(p => ({ id: p.id, name: p.name }))
-  }, [allProjects])
-
-  const teamsList = useMemo(() => {
-    return (orgTeams || []).map(t => ({ id: t.id, name: t.name }))
-  }, [orgTeams])
-
+  // ─── Filter ───
   const tasks = useMemo(() => {
     if (!rawTasks) return []
-    let result = filterTasksByWorkspace(rawTasks, workspaceMode, activeOrganization)
+    return filterTasksByWorkspace(rawTasks, workspaceMode, activeOrganization)
+  }, [rawTasks, workspaceMode, activeOrganization])
 
-    if (globalFilter) {
-      const lowerSearch = globalFilter.toLowerCase()
-      result = result.filter(t => t.title?.toLowerCase().includes(lowerSearch) || t.description?.toLowerCase().includes(lowerSearch))
-    }
-
-    if (projectFilter !== 'ALL') {
-      result = result.filter(t => String(t.projectId) === String(projectFilter) || String(t.projectName) === String(projectFilter))
-    }
-
-    if (teamFilter !== 'ALL') {
-      result = result.filter(t => String(t.teamId) === String(teamFilter) || String(t.teamName) === String(teamFilter) || String(t.team?.id) === String(teamFilter))
-    }
-
-    if (activeView === 'archived') {
-      result = result.filter(t => t.archived)
-    } else {
-      result = result.filter(t => !t.archived)
-
-      if (activeView === 'assigned') {
-        result = result.filter(t => t.assignedTo === user?.username)
-      } else if (activeView === 'completed') {
-        result = result.filter(t => t.status === 'Done')
-      } else if (activeView === 'today') {
-        const today = new Date().toDateString()
-        result = result.filter(t => t.dueDate && new Date(t.dueDate).toDateString() === today)
-      } else if (activeView === 'upcoming') {
-        const today = new Date()
-        result = result.filter(t => t.dueDate && new Date(t.dueDate) > today)
-      }
-    }
-
-    if (priorityFilter.length > 0) {
-      result = result.filter(t => priorityFilter.includes(String(t.priority).toUpperCase()))
-    }
-
-    const priorityRank = Object.fromEntries(PRIORITY_OPTIONS.map((o, i) => [o.value, i]))
-    result = [...result].sort((a, b) => {
-      if (sortBy === 'priority') {
-        return (priorityRank[String(a.priority).toUpperCase()] ?? 99) - (priorityRank[String(b.priority).toUpperCase()] ?? 99)
-      }
-      if (sortBy === 'title') {
-        return (a.title || '').localeCompare(b.title || '')
-      }
-      if (sortBy === 'updated') {
-        return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0)
-      }
-      // dueDate default — tasks without a due date sink to the bottom
-      if (!a.dueDate && !b.dueDate) return 0
-      if (!a.dueDate) return 1
-      if (!b.dueDate) return -1
-      return new Date(a.dueDate) - new Date(b.dueDate)
-    })
-
-    return result
-  }, [rawTasks, workspaceMode, activeOrganization, activeView, globalFilter, priorityFilter, sortBy, user, projectFilter, teamFilter])
-
-  // Open task from URL if specified (e.g. from Saved items)
+  // URL sync
   useEffect(() => {
-    const openTaskId = searchParams.get('openTaskId')
-    if (openTaskId && tasks && tasks.length > 0) {
-      const targetTask = tasks.find(t => String(t.id) === String(openTaskId))
-      if (targetTask && (!selectedTask || selectedTask.id !== targetTask.id)) {
-        setSelectedTask(targetTask)
-      }
+    const id = searchParams.get('openTaskId')
+    if (id && tasks.length > 0) {
+      const t = tasks.find(t => String(t.id) === String(id))
+      if (t && (!selectedTask || selectedTask.id !== t.id)) setSelectedTask(t)
     }
   }, [searchParams, tasks, selectedTask])
 
-  const { data: allUsers } = useUsersList()
+  // ─── Mutations ───
+  const updateTask = useUpdateTask()
+  const deleteTask = useDeleteTask()
+  const submitTask = useSubmitTask()
+  const approveTask = useApproveTask()
+  const reassignTask = useReassignTask()
+  const completePersonal = useCompletePersonalTask()
+  const completeCrew = useCompleteCrewTask()
+  const rejectTask = useRejectTask()
+  const [reassignData, setReassignData] = useState(null)
 
-  // Mutations
-  const updateTaskMutation = useUpdateTask()
-  const deleteTaskMutation = useDeleteTask()
-  const submitTaskMutation = useSubmitTask()
-  const approveTaskMutation = useApproveTask()
-  const reassignTaskMutation = useReassignTask()
-
-  const completePersonalTaskMutation = useCompletePersonalTask()
-  // FIX (SM-C01): crew tasks follow ASSIGNED -> COMPLETED (no review pipeline).
-  const completeCrewTaskMutation = useCompleteCrewTask()
-  // FIX (SM-M03): assignee can recall a SUBMITTED task back to ASSIGNED.
-  const recallTaskMutation = useRecallTask()
-  const rejectTaskMutation = useRejectTask()
-  const [reassignTaskData, setReassignTaskData] = useState(null)
-
-  const isBulkPending = completePersonalTaskMutation.isPending || completeCrewTaskMutation.isPending || submitTaskMutation.isPending || approveTaskMutation.isPending || reassignTaskMutation.isPending || rejectTaskMutation.isPending || deleteTaskMutation.isPending
-
+  const handleTaskSelect = (task) => { setSelectedTask(task); setSearchParams(p => { p.set('openTaskId', task.id); return p }, { replace: true }) }
+  const handleTaskClose = () => { setSelectedTask(null); setSearchParams(p => { p.delete('openTaskId'); return p }, { replace: true }) }
+  const handleTaskStatusChange = (task, s) => toast.success(`→ ${s}`)
   const handleQuickComplete = (task) => {
-    const current = task.currentStatus?.toUpperCase()
-    if (task.isPersonal) {
-      completePersonalTaskMutation.mutate(task.id)
-    } else if (task.crewId || task.crew) {
-      if (current === 'IN_PROGRESS') {
-        completeCrewTaskMutation.mutate(task.id)
-      } else if (current === 'COMPLETED') {
-        toast.info('Task is already completed')
-      } else {
-        toast.error('Crew task must be in ASSIGNED status to complete')
-      }
-    } else if (current === 'IN_PROGRESS' || current === 'TODO') {
-      submitTaskMutation.mutate(task.id, {
-        onSuccess: () => toast.success(`Task "${task.title}" submitted for review.`)
-      })
-    } else if (current === 'REJECTED') {
-      toast.error('Rejected tasks must be reassigned by the assignor before they can be submitted.')
-    }
+    const st = task.currentStatus?.toUpperCase()
+    if (task.isPersonal) completePersonal.mutate(task.id)
+    else if (task.crewId || task.crew) { if (st === 'IN_PROGRESS') completeCrew.mutate(task.id) }
+    else if (st === 'IN_PROGRESS' || st === 'TODO') submitTask.mutate(task.id, { onSuccess: () => toast.success(`"${task.title}" submitted`) })
   }
 
-  const handleTaskStatusChange = (task, newStatus) => {
-    // Now handled by KanbanBoard's internal workflow mutation logic
-    toast.success(`Task moved to ${newStatus}`)
+  const handleReassignSubmit = (p) => {
+    if (!reassignData) return
+    const u = allUsers?.find(x => x.username === p.assigneeUsername)
+    if (u) reassignTask.mutate({ taskId: reassignData.id, newAssigneeId: u.id }, { onSuccess: () => { setReassignData(null); toast.success('Reassigned') } })
   }
 
-  const [isBulkAssignOpen, setIsBulkAssignOpen] = useState(false)
-  const handleBulkComplete = () => {
-    const selectedIndices = Object.keys(rowSelection).map(Number)
-    const selectedTasks = selectedIndices.map(idx => tasks[idx]).filter(Boolean)
-    let skipped = 0;
-
-    selectedTasks.forEach(task => {
-      const current = task.currentStatus?.toUpperCase()
-      if (task.isPersonal) {
-        completePersonalTaskMutation.mutate(task.id)
-      } else if (task.crewId || task.crew) {
-        if (current === 'IN_PROGRESS') {
-          completeCrewTaskMutation.mutate(task.id)
-        } else {
-          skipped++
-        }
-      } else if (current === 'IN_PROGRESS' || current === 'REJECTED') {
-        submitTaskMutation.mutate(task.id)
-      } else if (current === 'SUBMITTED') {
-        if (!canReview || task.assignedTo === user?.username) {
-          skipped++
-          return
-        }
-        approveTaskMutation.mutate(task.id)
-      }
-    })
-
-    if (skipped > 0) {
-      toast.error(`${skipped} task(s) skipped due to review permissions or status`);
-    } else {
-      toast.success(`Processing ${selectedTasks.length} task(s)...`)
-    }
-    setRowSelection({})
+  // ─── Dock renderer ───
+  const renderDock = (task, tabId) => {
+    if (tabId === 'comments') return <div className="p-3"><TaskComments taskId={task.id} hasCommentPerm={workspaceMode === 'PERSONAL' || canReviewTask} /></div>
+    if (tabId === 'evidence') return <div className="p-4"><TaskEvidence taskId={task.id} hasEditPerm={task.assignedTo === user?.username} /></div>
+    if (tabId === 'activity') return <div className="p-4"><ActivityTimeline taskId={task.id} /></div>
+    return null
   }
 
-  const handleQuickDelete = (taskId) => {
-    deleteTaskMutation.mutate(taskId)
-  }
-
-  const handleBulkApprove = () => {
-    const selectedIndices = Object.keys(rowSelection).map(Number)
-    const selectedTasks = selectedIndices.map(idx => tasks[idx]).filter(Boolean)
-    let skipped = 0
-
-    selectedTasks.forEach(task => {
-      if (task.isPersonal || task.crewId || task.crew) {
-        skipped++
-      } else {
-        if (!canReview || task.assignedTo === user?.username) {
-          skipped++
-          return
-        }
-        approveTaskMutation.mutate(task.id)
-      }
-    })
-  }
-
-  const handleBulkDelete = () => {
-    const selectedIndices = Object.keys(rowSelection).map(Number)
-    const actualTaskIds = selectedIndices.map(idx => tasks[idx]?.id).filter(Boolean)
-    actualTaskIds.forEach(id => deleteTaskMutation.mutate(id))
-    toast.success(`Deleted ${actualTaskIds.length} task(s)`)
-    setRowSelection({})
-  }
-
-  const handleBulkSubmit = () => {
-    const selectedIndices = Object.keys(rowSelection).map(Number)
-    const selectedTasks = selectedIndices.map(idx => tasks[idx]).filter(Boolean)
-    let skipped = 0
-
-    selectedTasks.forEach(task => {
-      const current = task.currentStatus?.toUpperCase()
-      if (!task.isPersonal && !task.crewId && !task.crew && (current === 'IN_PROGRESS' || current === 'REJECTED')) {
-        submitTaskMutation.mutate(task.id)
-      } else {
-        skipped++
-      }
-    })
-
-    if (skipped > 0) {
-      toast.error(`${skipped} task(s) could not be submitted (must be org tasks in ASSIGNED/REJECTED status)`)
-    } else {
-      toast.success(`Submitting ${selectedTasks.length} task(s) for review...`)
-    }
-    setRowSelection({})
-  }
-
-  const handleBulkAssign = (targetUser) => {
-    if (!targetUser) return
-    const selectedIds = Object.keys(rowSelection).map(Number)
-
-    const actualTaskIds = selectedIds.map(idx => tasks[idx]?.id).filter(Boolean)
-
-    actualTaskIds.forEach(id => {
-      reassignTaskMutation.mutate({ taskId: id, newAssigneeId: targetUser.id })
-    })
-    toast.success(`Reassigned ${actualTaskIds.length} task(s) to ${targetUser.username}`)
-    setIsBulkAssignOpen(false)
-    setRowSelection({})
-  }
-
-  const handleOpenReassignModal = () => {
-    const selectedIndices = Object.keys(rowSelection).map(Number)
-    const selectedTasks = selectedIndices.map(idx => tasks[idx]).filter(Boolean)
-    if (selectedTasks.length === 0) return
-    setReassignTaskData(selectedTasks[0])
-  }
-
-  const handleReassignSubmit = (payload) => {
-    if (!reassignTaskData) return
-    const targetUser = allUsers?.find(u => u.username === payload.assigneeUsername)
-    if (targetUser) {
-      reassignTaskMutation.mutate({ taskId: reassignTaskData.id, newAssigneeId: targetUser.id }, {
-        onSuccess: () => {
-          setReassignTaskData(null)
-          setRowSelection({})
-        }
-      })
-    }
-  }
-
-  const handleBulkReject = async () => {
-    const reason = await confirm({
-      title: 'Send back for rework',
-      description: 'Let them know what needs to change before it can be approved.',
-      requireInput: true,
-      inputPlaceholder: 'e.g. Missing acceptance criteria for edge cases…',
-      confirmLabel: 'Send back',
-      danger: true,
-    });
-    if (reason === false) return; // User cancelled
-
-    const selectedIndices = Object.keys(rowSelection).map(Number)
-    const selectedTasks = selectedIndices.map(idx => tasks[idx]).filter(Boolean)
-    let skipped = 0
-
-    selectedTasks.forEach(task => {
-      const current = task.currentStatus?.toUpperCase()
-      if (current === 'SUBMITTED') {
-        rejectTaskMutation.mutate({ id: task.id, reason: reason || 'Rework requested' })
-      } else {
-        skipped++
-      }
-    })
-
-    if (skipped > 0) {
-      toast.error(`${skipped} task(s) skipped (only SUBMITTED tasks can be rejected)`)
-    } else {
-      toast.success(`Rejecting ${selectedTasks.length} task(s)...`)
-    }
-    setRowSelection({})
-  }
-
-  const navigate = useNavigate()
-  const reviewCount = useMemo(() => {
-    if (!rawTasks) return 0
-    return rawTasks.filter(t => (t.status || '').toUpperCase() === 'SUBMITTED' || (t.status || '').toUpperCase() === 'IN REVIEW').length
-  }, [rawTasks])
-
-  // Nebula view takes over the entire screen
+  // ─── Nebula full screen ───
   if (viewMode === 'nebula') {
-    return (
-      <div className="fixed inset-0 z-[100] bg-zinc-950">
-        <NebulaView
-          tasks={rawTasks}
-          onTaskSelect={(task) => {
-            if (!task) {
-              setViewMode('list')
-            }
-          }}
-        />
-      </div>
-    )
+    return <div className="fixed inset-0 z-[100] bg-zinc-950"><NebulaView tasks={rawTasks} onTaskSelect={(t) => { if (!t) setViewMode('list') }} /></div>
   }
 
   return (
-    <WorkspaceShell maxWidth="wide">
-      <ManagementLayout
-        header={
-          <PageHeader
-            eyebrow={`EXECUTE Mode · ${tasks.length} Work Items${reviewCount > 0 ? ` · ${reviewCount} Awaiting Review` : ''}`}
-            title="Tasks Engine"
-            actions={
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-1.5 text-xs text-[var(--accent)] border-[var(--accent-border)] hover:bg-[var(--accent-soft)]"
-                onClick={() => navigate('/app/focus')}
-              >
-                <Icons.play className="w-3.5 h-3.5 fill-current" />
-                Launch Focus Engine
-              </Button>
-            }
-          />
-        }
-        toolbar={
-          <TasksToolbar
-            activeView={activeView}
-            onViewChange={setActiveView}
-            globalFilter={globalFilter}
-            setGlobalFilter={setGlobalFilter}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            priorityFilter={priorityFilter}
-            onPriorityFilterChange={setPriorityFilter}
-            sortBy={sortBy}
-            onSortChange={setSortBy}
-            projectFilter={projectFilter}
-            onProjectFilterChange={setProjectFilter}
-            teamFilter={teamFilter}
-            onTeamFilterChange={setTeamFilter}
-            projectsList={projectsList}
-            teamsList={teamsList}
-          />
-        }
-      >
-        {/* Main Content Area */}
-        <div className="flex-1 min-h-0 relative">
-          {viewMode === 'list' && (
-            <TasksTable
-              tasks={tasks}
-              isLoading={isLoading}
-              rowSelection={rowSelection}
-              setRowSelection={setRowSelection}
-              onTaskClick={setSelectedTask}
-              onQuickComplete={handleQuickComplete}
-              onQuickDelete={handleQuickDelete}
-            />
-          )}
-          {viewMode === 'board' && (
-            <KanbanBoard
-              tasks={tasks}
-              isLoading={isLoading}
-              onTaskClick={setSelectedTask}
-              onTaskStatusChange={handleTaskStatusChange}
-            />
-          )}
-
-          {/* Floating Bulk Action Bar (Appears when rows are selected in List view) */}
-          <AnimatePresence>
-            {Object.keys(rowSelection).length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                className="absolute bottom-6 left-1/2 -translate-x-1/2 glass-panel shadow-[var(--shadow-lg),var(--inset-highlight)] rounded-[var(--radius-pill)] px-5 py-2.5 flex items-center gap-4 z-20"
-              >
-                <Text size="sm" className="text-[13px] font-medium mr-2">
-                  {Object.keys(rowSelection).length} selected
-                </Text>
-                <div className="h-4 w-px bg-[var(--border-default)]" />
-                {(workspaceMode === 'PERSONAL' || canReviewTask) && (
-                  <Button variant="ghost" onClick={handleBulkComplete} disabled={isBulkPending} isLoading={completePersonalTaskMutation.isPending || completeCrewTaskMutation.isPending || approveTaskMutation.isPending} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
-                    {workspaceMode === 'PERSONAL' ? 'Complete' : 'Approve'}
-                  </Button>
-                )}
-                {workspaceMode !== 'PERSONAL' && (
-                  <>
-                    {(workspaceMode === 'PERSONAL' || canEditTask) && (
-                      <Button variant="ghost" onClick={handleBulkSubmit} disabled={isBulkPending} isLoading={submitTaskMutation.isPending} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
-                        Submit
-                      </Button>
-                    )}
-                    {(workspaceMode === 'PERSONAL' || canAssignTask) && (
-                      <Button variant="ghost" onClick={handleOpenReassignModal} disabled={isBulkPending} isLoading={reassignTaskMutation.isPending} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
-                        Reassign
-                      </Button>
-                    )}
-                    {(workspaceMode === 'PERSONAL' || canReviewTask) && (
-                      <Button variant="ghost" onClick={handleBulkReject} disabled={isBulkPending} isLoading={rejectTaskMutation.isPending} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
-                        Reject
-                      </Button>
-                    )}
-                  </>
-                )}
-                {(workspaceMode === 'PERSONAL' || canDeleteTask) && (
-                  <Button variant="ghost" onClick={handleBulkDelete} disabled={isBulkPending} isLoading={deleteTaskMutation.isPending} className="text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors">
-                    Delete
-                  </Button>
-                )}
-                <Button
-                  variant="ghost"
-                  onClick={() => setRowSelection({})}
-                  className="ml-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-                >
-                  <Icons.x className="w-4 h-4" />
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </ManagementLayout>
-
-      {/* The Task Workspace (Panel) */}
-      <TaskPanel
-        task={selectedTask}
-        isOpen={!!selectedTask}
-        onClose={() => {
-          setSelectedTask(null)
-          if (searchParams.has('openTaskId')) {
-            setSearchParams(params => {
-              params.delete('openTaskId')
-              return params
-            }, { replace: true })
-          }
-        }}
+    <>
+      {confirmDialog}
+      <TaskIDE
+        tasks={tasks}
+        selectedTask={selectedTask}
+        onTaskSelect={handleTaskSelect}
+        onTaskClose={handleTaskClose}
+        user={user}
+        workspaceMode={workspaceMode}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        renderEditor={(task) => <TaskDetailView task={task} />}
+        renderBoard={() => <KanbanBoard tasks={tasks} isLoading={isLoading} onTaskClick={handleTaskSelect} onTaskStatusChange={handleTaskStatusChange} />}
+        renderDock={renderDock}
+        storageKey="tasks-ide"
       />
 
-      <Modal open={!!reassignTaskData} onOpenChange={(open) => !open && setReassignTaskData(null)}>
+      {/* Reassign modal */}
+      <Modal open={!!reassignData} onOpenChange={(o) => !o && setReassignData(null)}>
         <ModalContent className="sm:max-w-xl bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] p-6">
-          <Heading level={3} className="mb-4 text-[var(--text-primary)]">Reassign Task</Heading>
-          {reassignTaskData && (
-            <TaskForm
-              defaultValues={{
-                title: reassignTaskData.title,
-                description: reassignTaskData.description,
-                priority: reassignTaskData.priority,
-                dueDate: reassignTaskData.dueDate ? new Date(reassignTaskData.dueDate).toISOString().slice(0, 16) : '',
-                assigneeUsername: reassignTaskData.assignedTo || '',
-                tags: reassignTaskData.tags || '',
-                teamId: reassignTaskData.teamId ? reassignTaskData.teamId.toString() : ''
-              }}
-              onSubmit={handleReassignSubmit}
-              isLoading={updateTaskMutation.isPending}
-            />
+          <Text size="sm" className="font-semibold mb-4">Reassign Task</Text>
+          {reassignData && (
+            <TaskForm defaultValues={{
+              title: reassignData.title, description: reassignData.description,
+              priority: reassignData.priority, dueDate: reassignData.dueDate ? new Date(reassignData.dueDate).toISOString().slice(0, 16) : '',
+              assigneeUsername: reassignData.assignedTo || '', tags: reassignData.tags || '',
+              teamId: reassignData.teamId ? reassignData.teamId.toString() : ''
+            }} onSubmit={handleReassignSubmit} isLoading={updateTask.isPending} />
           )}
         </ModalContent>
       </Modal>
-
-      {confirmDialog}
-    </WorkspaceShell>
+    </>
   )
 }

@@ -10,12 +10,8 @@ import {
   useUpdateGoal,
   useDeleteGoal,
 } from '@/organization/goals/features/hooks/useGoals';
-import {
-  WorkspaceShell,
-  ManagementLayout,
-  PageStateContainer,
-  FrameworkEmptyState,
-} from '@/shared/workspace-framework';
+import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
+import { PageState } from '@/shared/ui/PageState';
 import {
   GoalCard,
   GoalStatsHeader,
@@ -122,48 +118,39 @@ export function GoalsPage() {
   // Guard: requires ORG workspace
   if (workspaceMode !== 'ORG' || !orgId) {
     return (
-      <WorkspaceShell maxWidth="narrow">
-        <FrameworkEmptyState
-          icon={Building2}
-          title="Enterprise goals & OKRs require organization mode"
-          description="Strategic Goals & Key Results are managed at the Organization level. Please switch your workspace mode to an active Organization in the sidebar to view OKRs."
-        />
-      </WorkspaceShell>
+      <PageShell maxWidth="narrow">
+        <PageState state="unauthorized" moduleId="goals" stateProps={{
+          title: 'Enterprise goals & OKRs require organization mode',
+          description: 'Strategic Goals & Key Results are managed at the Organization level. Switch to an active Organization.',
+          icon: Building2,
+          tone: 'neutral',
+        }} />
+      </PageShell>
     );
   }
 
   const pageState = isLoading ? 'loading' : goals.length === 0 ? 'empty' : 'ready';
 
   return (
-    <WorkspaceShell maxWidth="narrow">
-      <ManagementLayout
-        header={
-          <PageHeader
-            eyebrow="Goals"
-            icon={Target}
-            title="Strategic goals & OKRs"
-            subtitle="Track key organizational objectives, target metrics, and progress outcomes across departments."
-            actions={
-              canManageGoals && (
-                <Button onClick={openNew} className="gap-2 h-9 text-xs">
-                  <Plus className="w-4 h-4" /> New goal
-                </Button>
-              )
-            }
-          />
-        }
+    <PageShell maxWidth="narrow">
+      <PageHero
+        title="Strategic goals & OKRs"
+        subtitle="Track key organizational objectives, target metrics, and progress outcomes across departments."
+        eyebrow="Goals"
+        icon={Target}
       >
-        <PageStateContainer
+        {canManageGoals && (
+          <Button onClick={openNew} className="gap-2 h-9 text-xs">
+            <Plus className="w-4 h-4" /> New goal
+          </Button>
+        )}
+      </PageHero>
+
+      <PageContent>
+        <PageState
           state={pageState}
-          loadingConfig={{ variant: 'cards' }}
-          emptyConfig={{
-            icon: Target,
-            title: 'No strategic goals yet',
-            description:
-              'Goals help your organization align teams around measurable outcomes. Create your first goal to start tracking OKRs.',
-            actionLabel: canManageGoals ? 'Create first goal' : undefined,
-            onAction: canManageGoals ? openNew : undefined,
-          }}
+          moduleId="goals"
+          stateProps={{ loadingVariant: 'cards', onAction: canManageGoals ? openNew : undefined }}
         >
           {goals.length > 0 && (
             <>
@@ -208,8 +195,8 @@ export function GoalsPage() {
               </Text>
             </div>
           )}
-        </PageStateContainer>
-      </ManagementLayout>
+        </PageState>
+      </PageContent>
 
       <GoalModal
         open={!!editing}
@@ -218,6 +205,6 @@ export function GoalsPage() {
         onSave={handleSave}
         isPending={createGoal.isPending || updateGoal.isPending}
       />
-    </WorkspaceShell>
+    </PageShell>
   );
 }

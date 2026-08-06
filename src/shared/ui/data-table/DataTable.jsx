@@ -6,6 +6,7 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import { motion } from 'framer-motion'
 import { cn } from '@/shared/lib/cn'
 import { Text, Heading } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
@@ -80,11 +81,17 @@ export function DataTable({
                   </tr>
                 ))
               ) : table.getRowModel().rows?.length ? (
-                // Data Rows
-                table.getRowModel().rows.map((row) => (
-                  <tr
+                // Data Rows with staggered entrance
+                table.getRowModel().rows.map((row, rowIndex) => (
+                  <motion.tr
                     key={row.id}
-                    onClick={() => onRowClick && onRowClick(row.original)}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: Math.min(rowIndex * 0.025, 0.3),
+                      duration: 0.2,
+                      ease: 'easeOut',
+                    }}
                     className={cn(
                       "border-b border-[var(--color-border-subtle)] transition-colors hover:bg-[var(--bg-subtle)] group",
                       onRowClick && "cursor-pointer",
@@ -92,11 +99,25 @@ export function DataTable({
                     )}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="p-3 align-middle">
+                      <td
+                        key={cell.id}
+                        className="p-3 align-middle"
+                        onClick={(e) => {
+                          // Only fire row click on non-interactive cells
+                          const isInteractive = cell.column.id === 'title' ||
+                            e.target.closest('button') ||
+                            e.target.closest('input') ||
+                            e.target.closest('a') ||
+                            e.target.closest('[role="checkbox"]');
+                          if (!isInteractive && onRowClick) {
+                            onRowClick(row.original)
+                          }
+                        }}
+                      >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
                     ))}
-                  </tr>
+                  </motion.tr>
                 ))
               ) : (
                 // Empty State
@@ -107,7 +128,7 @@ export function DataTable({
                       title={emptyStateTitle}
                       description={emptyStateDescription}
                       actionLabel={emptyStateAction ? "Add New" : undefined}
-                      onAction={undefined} // If emptyStateAction is a component, we just render it below.
+                      onAction={undefined}
                     />
                     {emptyStateAction && (
                       <div className="flex justify-center mt-[-1rem] pb-4">
@@ -121,7 +142,7 @@ export function DataTable({
           </table>
         </div>
 
-        {/* Pagination Placeholder */}
+        {/* Pagination */}
         {data.length > 0 && (
            <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--color-border-subtle)] bg-[var(--bg-elevated)]">
              <Text size="sm" variant="muted">

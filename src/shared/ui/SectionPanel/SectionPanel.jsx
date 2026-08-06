@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { cn } from '@/shared/lib/cn';
 import { Heading, Text } from '@/shared/ui/Typography';
 
@@ -6,7 +7,7 @@ import { Heading, Text } from '@/shared/ui/Typography';
  * SectionPanel
  * ─────────────────────────────────────────────────────────
  * Standardized section card with an optional icon, title, subtitle, and actions.
- * Unifies various hand-rolled content cards across pages.
+ * Wrapped in a fade-up motion container for premium entrance feel.
  *
  * @param {React.ElementType} [icon] - Lucide icon for the header
  * @param {string} title - Section title
@@ -14,6 +15,7 @@ import { Heading, Text } from '@/shared/ui/Typography';
  * @param {React.ReactNode} [actions] - Action buttons placed on the right of the header
  * @param {React.ReactNode} children - Panel content
  * @param {boolean} [noPadding=false] - If true, removes padding from content area
+ * @param {number} [staggerIndex=0] - Animation stagger index (0 = no delay)
  * @param {string} [className] - Additional container classes
  */
 export function SectionPanel({
@@ -23,10 +25,18 @@ export function SectionPanel({
   actions,
   children,
   noPadding = false,
+  staggerIndex = 0,
   className,
 }) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        delay: staggerIndex * 0.06,
+        duration: 0.3,
+        ease: [0.25, 0.1, 0.25, 1],
+      }}
       className={cn(
         'relative bg-[var(--bg-card)] border border-[var(--color-border-subtle)] rounded-xl overflow-hidden shadow-sm flex flex-col',
         className
@@ -60,6 +70,6 @@ export function SectionPanel({
       <div className={cn('flex-1', !noPadding && 'p-4 sm:p-5')}>
         {children}
       </div>
-    </div>
+    </motion.div>
   );
 }

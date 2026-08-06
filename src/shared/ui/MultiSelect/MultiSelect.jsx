@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ChevronsUpDown, X } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui/Button';
@@ -26,7 +27,7 @@ export function MultiSelect({
   emptyText = "No options found.",
   loading = false,
   className,
-  disabledValues = [], // Values that cannot be selected
+  disabledValues = [],
 }) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -47,7 +48,6 @@ export function MultiSelect({
 
   const toggleOption = (optionValue) => {
     if (disabledValues.includes(optionValue)) return;
-    
     if (value.includes(optionValue)) {
       onChange(value.filter((v) => v !== optionValue));
     } else {
@@ -61,8 +61,6 @@ export function MultiSelect({
     onChange(value.filter((v) => v !== optionValue));
   };
 
-  const selectedOptions = options.filter(opt => value.includes(opt.value));
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -74,21 +72,31 @@ export function MultiSelect({
         >
           <div className="flex flex-wrap gap-1 items-center overflow-hidden">
             {value.length > 0 ? (
-              value.map((v) => {
-                const opt = options.find(o => o.value === v);
-                const label = opt ? opt.label : v;
-                return (
-                  <Badge key={v} variant="secondary" className="flex items-center gap-1 bg-[var(--bg-subtle)] mr-1">
-                    {label}
-                    <div 
-                      className="cursor-pointer hover:bg-[var(--bg-hover)] rounded-full p-0.5 transition-colors"
-                      onPointerDown={(e) => removeOption(e, v)}
+              <AnimatePresence mode="popLayout">
+                {value.map((v) => {
+                  const opt = options.find(o => o.value === v);
+                  const label = opt ? opt.label : v;
+                  return (
+                    <motion.div
+                      key={v}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.15 }}
                     >
-                      <X className="w-3 h-3" />
-                    </div>
-                  </Badge>
-                );
-              })
+                      <Badge variant="secondary" className="flex items-center gap-1 bg-[var(--bg-subtle)] mr-1">
+                        {label}
+                        <div 
+                          className="cursor-pointer hover:bg-[var(--bg-hover)] rounded-full p-0.5 transition-colors"
+                          onPointerDown={(e) => removeOption(e, v)}
+                        >
+                          <X className="w-3 h-3" />
+                        </div>
+                      </Badge>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
             ) : (
               <span className="text-[var(--text-tertiary)] px-1">{placeholder}</span>
             )}
@@ -97,41 +105,56 @@ export function MultiSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0" align="start">
-        <Command className="bg-transparent" shouldFilter={!onSearch}>
-          <CommandInput 
-            placeholder="Search..." 
-            value={inputValue} 
-            onValueChange={setInputValue} 
-          />
-          <CommandList>
-            <CommandEmpty>{loading ? "Searching..." : emptyText}</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => {
-                const isSelected = value.includes(option.value);
-                const isDisabled = disabledValues.includes(option.value);
-                return (
-                  <CommandItem
-                    key={option.value}
-                    value={option.value}
-                    disabled={isDisabled}
-                    onSelect={() => {
-                      toggleOption(option.value);
-                    }}
-                    className={cn(isDisabled && "opacity-50 cursor-not-allowed")}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4 transition-opacity duration-[var(--duration-fast)]",
-                        isSelected ? "opacity-100 text-[var(--accent)]" : "opacity-0"
-                      )}
-                    />
-                    {option.label}
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-          </CommandList>
-        </Command>
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: -4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: -4 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 26 }}
+            >
+              <Command className="bg-transparent rounded-[var(--radius-md)] overflow-hidden" shouldFilter={!onSearch}>
+                <CommandInput 
+                  placeholder="Search..." 
+                  value={inputValue} 
+                  onValueChange={setInputValue} 
+                />
+                <CommandList>
+                  <CommandEmpty>{loading ? "Searching..." : emptyText}</CommandEmpty>
+                  <CommandGroup>
+                    {options.map((option, idx) => {
+                      const isSelected = value.includes(option.value);
+                      const isDisabled = disabledValues.includes(option.value);
+                      return (
+                        <motion.div
+                          key={option.value}
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.02, duration: 0.15 }}
+                        >
+                          <CommandItem
+                            value={option.value}
+                            disabled={isDisabled}
+                            onSelect={() => toggleOption(option.value)}
+                            className={cn(isDisabled && "opacity-50 cursor-not-allowed")}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4 transition-opacity duration-[var(--duration-fast)]",
+                                isSelected ? "opacity-100 text-[var(--accent)]" : "opacity-0"
+                              )}
+                            />
+                            {option.label}
+                          </CommandItem>
+                        </motion.div>
+                      );
+                    })}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </PopoverContent>
     </Popover>
   );

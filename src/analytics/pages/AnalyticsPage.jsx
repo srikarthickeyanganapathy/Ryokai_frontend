@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { PageHeader } from '@/shared/ui/PageHeader'
 import { useDashboardStats } from '@/analytics'
 import { StatCard } from '@/analytics'
 import { CompletionChart, PriorityChart } from '@/analytics'
@@ -9,13 +8,9 @@ import {
   CheckCircle2, TrendingUp, PlusCircle, AlertCircle, Clock,
   ShieldAlert, Timer, BarChart3, LayoutDashboard
 } from '@/shared/ui/Icons'
-import {
-  WorkspaceShell,
-  InsightLayout,
-  InsightSection,
-  PageStateContainer,
-  useWorkspace,
-} from '@/shared/workspace-framework'
+import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
+import { PageState } from '@/shared/ui/PageState'
+import { InsightSection, useWorkspace } from '@/shared/workspace-framework'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -46,7 +41,7 @@ export function AnalyticsPage() {
         value: s.count,
         color: s.color,
       })),
-      historicalData: [
+      historicalData: rawStats.historicalData || [
         { name: 'Mon', completed: Math.round((rawStats.doneCount || 0) * 0.2) },
         { name: 'Tue', completed: Math.round((rawStats.doneCount || 0) * 0.5) },
         { name: 'Wed', completed: Math.round((rawStats.doneCount || 0) * 0.4) },
@@ -67,31 +62,24 @@ export function AnalyticsPage() {
     : 'ready'
 
   return (
-    <WorkspaceShell maxWidth="default">
-      <InsightLayout
-        header={
-          <PageHeader
-            eyebrow="Analytics"
-            icon={LayoutDashboard}
-            title="Analytics"
-            subtitle="Measure execution velocity, workload completion, and team performance."
-          />
-        }
-      >
-        <PageStateContainer
+    <PageShell maxWidth="default">
+      <PageHero
+        eyebrow="Analytics"
+        title="Analytics"
+        subtitle="Measure execution velocity, workload completion, and team performance."
+      />
+
+      <PageContent>
+        <PageState
           state={pageState}
-          loadingConfig={{ variant: 'insight' }}
-          errorConfig={{
+          stateProps={{
+            loadingVariant: 'insight',
             title: 'Failed to sync data',
             description: 'Unable to reach the analytics server. Please check your connection and try again.',
-          }}
-          emptyConfig={{
             icon: BarChart3,
-            title: 'No metrics available',
-            description: 'Create and complete tasks in this workspace to start generating real-time analytics.',
           }}
         >
-          {/* Tier 1 — hero KPIs: the two numbers that summarize overall health */}
+          {/* Tier 1 — hero KPIs */}
           <InsightSection question="What's the overall health?">
             <motion.div
               variants={containerVariants}
@@ -108,7 +96,7 @@ export function AnalyticsPage() {
             </motion.div>
           </InsightSection>
 
-          {/* Tier 2 — grouped secondary metrics: what needs attention vs. day-to-day status */}
+          {/* Tier 2 — grouped secondary metrics */}
           <InsightSection question="What needs attention?">
             <motion.div
               variants={containerVariants}
@@ -163,7 +151,7 @@ export function AnalyticsPage() {
             </motion.div>
           </InsightSection>
 
-          {/* Tier 3 — trends and distribution, for deeper exploration */}
+          {/* Tier 3 — trends and distribution */}
           <InsightSection question="How are trends shaping up?">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -179,8 +167,8 @@ export function AnalyticsPage() {
               </div>
             </motion.div>
           </InsightSection>
-        </PageStateContainer>
-      </InsightLayout>
-    </WorkspaceShell>
+        </PageState>
+      </PageContent>
+    </PageShell>
   )
 }

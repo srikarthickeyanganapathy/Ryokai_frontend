@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
@@ -12,11 +13,8 @@ import {
 } from '@/platform/notifications'
 import { useAcceptInvite, useDeclineInvite } from '@/organization'
 import { NotificationPanel } from '@/platform/notifications'
-import { PageHeader } from '@/shared/ui/PageHeader'
-import {
-  WorkspaceShell,
-  ManagementLayout,
-} from '@/shared/workspace-framework'
+import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
+import { PageState } from '@/shared/ui/PageState'
 
 const typeIcons = {
   TASK_IN_PROGRESS: Icons.tasks,
@@ -30,7 +28,7 @@ const typeIcons = {
 }
 
 export function InboxPage() {
-  const [filterTab, setFilterTab] = useState('ALL') // ALL | UNREAD | MENTIONS | INVITES
+  const [filterTab, setFilterTab] = useState('ALL')
   const [activeNotification, setActiveNotification] = useState(null)
   const [isPanelOpen, setIsPanelOpen] = useState(false)
 
@@ -56,217 +54,158 @@ export function InboxPage() {
   const openNotification = (n) => {
     setActiveNotification(n)
     setIsPanelOpen(true)
-    if (n.isRead === false) {
-      markRead.mutate(n.id)
-    }
+    if (n.isRead === false) markRead.mutate(n.id)
   }
 
   return (
-    <WorkspaceShell maxWidth="narrow">
-      <ManagementLayout
-        header={
-          <PageHeader
-            eyebrow="Orient"
-            meta="• Action Stream & Telemetry"
-            title="Action Inbox & Telemetry"
-            subtitle={unreadCount > 0 ? `You have ${unreadCount} unread action${unreadCount === 1 ? '' : 's'} requiring attention.` : "You're completely caught up."}
-            actions={
-              unreadCount > 0 ? (
-                <Button
-                  variant="outline"
-                  onClick={() => markAllRead.mutate()}
-                  isLoading={markAllRead.isPending}
-                  disabled={markAllRead.isPending}
-                  className="h-9 text-[13px]"
-                >
-                  <Icons.checkCircle className="w-4 h-4 mr-2" />
-                  Mark all read
-                </Button>
-              ) : null
-            }
-          />
-        }
-        toolbar={
-          <div className="flex items-center gap-2">
-            {[
-              { id: 'ALL', label: 'All Activity', count: notifications.length },
-              { id: 'UNREAD', label: 'Unread', count: unreadCount },
-              { id: 'MENTIONS', label: 'Mentions', count: mentionsCount },
-              { id: 'INVITES', label: 'Invitations', count: invitesCount },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setFilterTab(tab.id)}
-                className={cn(
-                  'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5',
-                  filterTab === tab.id
-                    ? 'bg-[var(--accent-soft)] text-[var(--accent)] font-semibold'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]'
-                )}
-              >
-                {tab.label}
-                {tab.count > 0 && (
-                  <span className={cn('px-1.5 py-0.2 rounded-full font-mono text-[10px]', filterTab === tab.id ? 'bg-[var(--accent)] text-white' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)]')}>
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        }
+    <PageShell maxWidth="narrow">
+      <PageHero
+        title="Action Inbox"
+        subtitle={unreadCount > 0 ? `You have ${unreadCount} unread items requiring attention.` : "You're completely caught up."}
+        eyebrow="Inbox"
       >
-        {/* LIST CONTAINER */}
-        <div className="flex-1 bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] shadow-sm overflow-hidden flex flex-col min-h-0">
-          {notifLoading && (
-            <div className="p-6 space-y-6">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex gap-4">
-                  <Skeleton className="w-10 h-10 rounded-full shrink-0" />
-                  <div className="flex-1 space-y-2 mt-1">
-                    <Skeleton className="h-4 w-1/3" />
-                    <Skeleton className="h-3 w-2/3" />
-                  </div>
+        {unreadCount > 0 && (
+          <Button variant="outline" size="sm" onClick={() => markAllRead.mutate()} isLoading={markAllRead.isPending} className="h-9 text-[13px] gap-2">
+            <Icons.checkCircle className="w-4 h-4" />
+            Mark all read
+          </Button>
+        )}
+      </PageHero>
+
+      <div className="flex items-center gap-2 pb-4">
+        {[
+          { id: 'ALL', label: 'All Activity', count: notifications.length },
+          { id: 'UNREAD', label: 'Unread', count: unreadCount },
+          { id: 'MENTIONS', label: 'Mentions', count: mentionsCount },
+          { id: 'INVITES', label: 'Invitations', count: invitesCount },
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setFilterTab(tab.id)}
+            className={cn(
+              'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5',
+              filterTab === tab.id
+                ? 'bg-[var(--accent-soft)] text-[var(--accent)] font-semibold'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]'
+            )}
+          >
+            {tab.label}
+            {tab.count > 0 && (
+              <span className={cn('px-1.5 py-0.2 rounded-full font-mono text-[10px]', filterTab === tab.id ? 'bg-[var(--accent)] text-white' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)]')}>
+                {tab.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      <PageContent>
+        <PageState state={notifLoading ? 'loading' : 'ready'} stateProps={{ loadingVariant: 'table' }}>
+          <div className="flex-1 bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] shadow-sm overflow-hidden flex flex-col min-h-0">
+            {filteredNotifications.length === 0 ? (
+              <div className="py-24 flex flex-col items-center justify-center text-center">
+                <div className="w-12 h-12 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center mb-4">
+                  <Icons.inbox className="w-6 h-6 text-[var(--text-tertiary)]" />
                 </div>
-              ))}
-            </div>
-          )}
-
-          {!notifLoading && filteredNotifications.length === 0 && (
-            <div className="py-24 flex flex-col items-center justify-center text-center">
-              <div className="w-12 h-12 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center mb-4">
-                <Icons.inbox className="w-6 h-6 text-[var(--text-tertiary)]" />
+                <Heading level={4} className="text-base font-semibold">Zero pending actions</Heading>
+                <Text variant="muted" className="mt-1 text-xs">No notifications match your current filter.</Text>
               </div>
-              <Heading level={4} className="text-base font-semibold">Zero pending actions</Heading>
-              <Text variant="muted" className="mt-1 text-xs">No notifications match your current filter.</Text>
-            </div>
-          )}
-
-          {!notifLoading && filteredNotifications.length > 0 && (
-            <div className="divide-y divide-[var(--border-subtle)] overflow-y-auto custom-scrollbar">
-              {filteredNotifications.map((n) => {
-                const IconComponent = typeIcons[n.type] || Icons.alert
-                const isRead = n.isRead !== false
-                const isSelected = activeNotification?.id === n.id && isPanelOpen
-                
-                return (
-                  <div
-                    key={n.id}
-                    className={cn(
-                      'flex items-start gap-4 p-5 transition-colors duration-[var(--duration-fast)] ease-out cursor-pointer group',
-                      isSelected
-                        ? 'bg-[var(--accent-soft)] border-l-4 border-l-[var(--accent)]'
-                        : !isRead
-                        ? 'bg-[var(--accent-soft)]/40 hover:bg-[var(--bg-subtle)]'
-                        : 'bg-[var(--bg-base)] hover:bg-[var(--bg-subtle)]'
-                    )}
-                    onClick={() => openNotification(n)}
-                  >
-                    <div className={cn(
-                      'w-10 h-10 rounded-full flex items-center justify-center shrink-0 border',
-                      !isRead 
-                        ? 'bg-[var(--bg-base)] border-transparent text-[var(--accent)] shadow-sm' 
-                        : 'bg-[var(--bg-subtle)] border-transparent text-[var(--text-secondary)]'
-                    )}>
-                      <IconComponent className="w-5 h-5" />
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <Text className={cn("text-[14px] font-medium leading-snug", !isRead ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>
-                            {n.title}
-                          </Text>
-                          {n.message && (
-                            <Text variant="muted" className="text-[13px] mt-1.5 leading-relaxed line-clamp-2">
-                              {n.message}
+            ) : (
+              <div className="divide-y divide-[var(--border-subtle)] overflow-y-auto custom-scrollbar">
+                {filteredNotifications.map((n, idx) => {
+                  const IconComponent = typeIcons[n.type] || Icons.alert
+                  const isRead = n.isRead !== false
+                  const isSelected = activeNotification?.id === n.id && isPanelOpen
+                  
+                  return (
+                    <motion.div
+                      key={n.id}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.025, duration: 0.2 }}
+                      whileHover={{ x: 4 }}
+                      className={cn(
+                        'flex items-start gap-4 p-5 transition-colors duration-[var(--duration-fast)] ease-out cursor-pointer group',
+                        isSelected
+                          ? 'bg-[var(--accent-soft)] border-l-4 border-l-[var(--accent)]'
+                          : !isRead
+                          ? 'bg-[var(--accent-soft)]/40 hover:bg-[var(--bg-subtle)]'
+                          : 'bg-[var(--bg-base)] hover:bg-[var(--bg-subtle)]'
+                      )}
+                      onClick={() => openNotification(n)}
+                    >
+                      <div className={cn(
+                        'w-10 h-10 rounded-full flex items-center justify-center shrink-0 border',
+                        !isRead ? 'bg-[var(--bg-base)] border-transparent text-[var(--accent)] shadow-sm' : 'bg-[var(--bg-subtle)] border-transparent text-[var(--text-secondary)]'
+                      )}>
+                        <IconComponent className="w-5 h-5" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <Text className={cn("text-[14px] font-medium leading-snug", !isRead ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>
+                              {n.title}
                             </Text>
-                          )}
-                          <Text variant="muted" className="text-[12px] mt-2.5 font-medium flex items-center gap-1.5">
-                            {n.relativeTime || 'Just now'}
-                          </Text>
+                            {n.message && (
+                              <Text variant="muted" className="text-[13px] mt-1.5 leading-relaxed line-clamp-2">
+                                {n.message}
+                              </Text>
+                            )}
+                            <Text variant="muted" className="text-[12px] mt-2.5 font-medium flex items-center gap-1.5">
+                              {n.relativeTime || 'Just now'}
+                            </Text>
 
-                          {n.type === 'ORG_INVITE_RECEIVED' && n.deduplicationKey && (
-                            <div className="flex items-center gap-2.5 mt-4">
-                              <Button 
-                                size="sm" 
-                                variant="primary" 
-                                isLoading={acceptInviteMutation.isPending}
-                                disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending}
-                                onClick={(e) => {
+                            {n.type === 'ORG_INVITE_RECEIVED' && n.deduplicationKey && (
+                              <div className="flex items-center gap-2.5 mt-4">
+                                <Button size="sm" variant="primary" isLoading={acceptInviteMutation.isPending} disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending} onClick={(e) => {
                                   e.stopPropagation();
                                   const inviteId = n.deduplicationKey.replace('org-invite:', '');
                                   if (inviteId) acceptInviteMutation.mutate(inviteId);
-                                }}
-                              >
-                                Accept Invitation
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="outline" 
-                                isLoading={declineInviteMutation.isPending}
-                                disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending}
-                                onClick={(e) => {
+                                }}>Accept Invitation</Button>
+                                <Button size="sm" variant="outline" isLoading={declineInviteMutation.isPending} disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending} onClick={(e) => {
                                   e.stopPropagation();
                                   const inviteId = n.deduplicationKey.replace('org-invite:', '');
                                   if (inviteId) declineInviteMutation.mutate(inviteId);
-                                }}
-                              >
-                                Decline
-                              </Button>
-                            </div>
-                          )}
-                        </div>
+                                }}>Decline</Button>
+                              </div>
+                            )}
+                          </div>
 
-                        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                          {!isRead && (
-                            <IconButton
-                              variant="ghost"
-                              size="sm"
-                              title="Mark as read"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                markRead.mutate(n.id)
-                              }}
-                            >
-                              <Icons.check className="w-4 h-4 text-[var(--text-secondary)]" />
+                          <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                            {!isRead && (
+                              <IconButton variant="ghost" size="sm" title="Mark as read" onClick={(e) => { e.stopPropagation(); markRead.mutate(n.id); }}>
+                                <Icons.check className="w-4 h-4 text-[var(--text-secondary)]" />
+                              </IconButton>
+                            )}
+                            <IconButton variant="ghost" size="sm" title="Delete" onClick={(e) => { e.stopPropagation(); deleteNotification.mutate(n.id); }} className="text-[var(--text-secondary)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]">
+                              <Icons.trash2 className="w-4 h-4" />
                             </IconButton>
-                          )}
-                          <IconButton
-                            variant="ghost"
-                            size="sm"
-                            title="Delete"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              deleteNotification.mutate(n.id)
-                            }}
-                            className="text-[var(--text-secondary)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]"
-                          >
-                            <Icons.trash2 className="w-4 h-4" />
-                          </IconButton>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    
-                    {!isRead && (
-                      <div className="w-2 h-2 rounded-full bg-[var(--accent)] shrink-0 mt-4 shadow-[0_0_8px_var(--accent)]" />
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
+                      
+                      {!isRead && (
+                        <div className="w-2 h-2 rounded-full bg-[var(--accent)] shrink-0 mt-4 shadow-[0_0_8px_var(--accent)]" />
+                      )}
+                    </motion.div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </PageState>
+      </PageContent>
 
-        {/* OUTLOOK-STYLE RIGHT ACTION PANEL */}
-        <NotificationPanel
-          notification={activeNotification}
-          isOpen={isPanelOpen}
-          onClose={() => {
-            setIsPanelOpen(false)
-            setActiveNotification(null)
-          }}
-        />
-      </ManagementLayout>
-    </WorkspaceShell>
+      <NotificationPanel
+        notification={activeNotification}
+        isOpen={isPanelOpen}
+        onClose={() => { setIsPanelOpen(false); setActiveNotification(null); }}
+        onMarkRead={(id) => markRead.mutate(id)}
+        onDelete={(id) => { deleteNotification.mutate(id); setIsPanelOpen(false); }}
+        onAcceptInvite={(id) => acceptInviteMutation.mutate(id.replace('org-invite:', ''))}
+        onDeclineInvite={(id) => declineInviteMutation.mutate(id.replace('org-invite:', ''))}
+      />
+    </PageShell>
   )
 }

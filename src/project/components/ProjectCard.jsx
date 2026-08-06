@@ -1,13 +1,15 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { ImmersivePanel, ImmersiveBadge } from '@/shared/ui/Immersive'
+import { Badge } from '@/shared/ui/Badge'
+import { InteractiveCard } from '@/shared/ui/InteractiveCard'
 import { calculateHealthScore, getHealthStatus, formatRelativeDate } from '../features/utils/projectUtils'
 import { cn } from '@/shared/lib/cn'
 
 export function ProjectCard({ project }) {
-  const { id, name, description, progress = 0, tasksTotal = 0, tasksCompleted = 0, dueDate, status } = project
+  const { id, name, description, progress = 0, tasksTotal = 0, tasksCompleted = 0, dueDate, status, teamName, organizationName } = project
   const tasksLeft = (tasksTotal || 0) - (tasksCompleted || 0)
+  const navigate = useNavigate()
   
   const healthScore = calculateHealthScore(project)
   const health = getHealthStatus(healthScore)
@@ -19,9 +21,28 @@ export function ProjectCard({ project }) {
   const circumference = 2 * Math.PI * radius
   const strokeDashoffset = circumference - ((progress || 0) / 100) * circumference
 
+  const handleClick = useCallback((e) => {
+    e.preventDefault()
+    // Progressive disclosure: quick peek via drawer
+    const event = new CustomEvent('open-project-drawer', {
+      detail: {
+        id, name, description, status, progress,
+        taskCount: tasksTotal, completedCount: tasksCompleted,
+        dueDate, teamName, organizationName
+      }
+    })
+    window.dispatchEvent(event)
+  }, [id, name, description, status, progress, tasksTotal, tasksCompleted, dueDate, teamName, organizationName])
+
+  const handleOpenFull = useCallback((e) => {
+    e.stopPropagation()
+    e.preventDefault()
+    navigate(`/app/projects/${id}`)
+  }, [id, navigate])
+
   return (
-    <Link to={`/app/projects/${id}`} className="block h-full group">
-      <ImmersivePanel interactive className="h-full flex flex-col p-4">
+    <div className="block h-full group">
+      <InteractiveCard onClick={handleClick} className="h-full flex flex-col p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className={cn(
@@ -34,18 +55,23 @@ export function ProjectCard({ project }) {
               {health.label} {healthScore}
             </span>
           </div>
-          <ImmersiveBadge tone={status === 'COMPLETED' ? 'success' : 'neutral'}>{status || 'ACTIVE'}</ImmersiveBadge>
+          <Badge variant="outline" className={cn('text-[10px]', status === 'COMPLETED' ? 'bg-[var(--success-soft)] text-[var(--success)]' : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)]')}>{status || 'ACTIVE'}</Badge>
         </div>
 
-        <Heading level={4} className="text-[15px] font-semibold tracking-tight text-[var(--text-primary)] mb-1 group-hover:text-[var(--accent)] transition-colors truncate">
-          {name}
-        </Heading>
-        <Text size="sm" variant="muted" className="text-[12px] leading-relaxed mb-4 line-clamp-2 min-h-[32px]">
-          {description || 'No description provided.'}
-        </Text>
+        <button onClick={handleClick} className="text-left w-full">
+          <Heading level={4} className="text-[15px] font-semibold tracking-tight text-[var(--text-primary)] mb-1 group-hover:text-[var(--accent)] transition-colors truncate">
+            {name}
+          </Heading>
+        </button>
+
+        <button onClick={handleClick} className="text-left w-full">
+          <Text size="sm" variant="muted" className="text-[12px] leading-relaxed mb-4 line-clamp-2 min-h-[32px]">
+            {description || 'No description provided.'}
+          </Text>
+        </button>
 
         <div className="mt-auto flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]/50">
-          <div className="flex items-center gap-3">
+          <button onClick={handleClick} className="flex items-center gap-3 text-left">
             {/* Progress Ring */}
             <div className="relative w-10 h-10 flex items-center justify-center">
               <svg className="w-10 h-10 transform -rotate-90 absolute inset-0" viewBox="0 0 36 36">
@@ -66,18 +92,26 @@ export function ProjectCard({ project }) {
               <div>{tasksCompleted || 0}/{tasksTotal || 0} Tasks</div>
               <div className="text-[var(--text-tertiary)]">{tasksLeft > 0 ? `${tasksLeft} left` : 'All done'}</div>
             </div>
-          </div>
+          </button>
           
-          {dueDate && (
-            <span className={cn(
+          {dueDate ? (
+            <button onClick={handleClick} className={cn(
               "text-[11px] font-medium px-2 py-1 rounded-md",
               isOverdue ? "bg-red-500/10 text-red-500" : "bg-[var(--bg-subtle)] text-[var(--text-secondary)]"
             )}>
               {formattedDueDate}
-            </span>
-          )}
+            </button>
+          ) : null}
+
+          <button
+            onClick={handleOpenFull}
+            className="text-[10px] font-medium text-[var(--text-tertiary)] hover:text-[var(--accent)] transition-colors px-2 py-1 rounded-md hover:bg-[var(--bg-subtle)]"
+            title="Open full project"
+          >
+            →
+          </button>
         </div>
-      </ImmersivePanel>
-    </Link>
+      </InteractiveCard>
+    </div>
   )
 }

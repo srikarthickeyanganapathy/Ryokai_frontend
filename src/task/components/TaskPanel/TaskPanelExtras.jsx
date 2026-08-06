@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
 import { IconButton, Button } from '@/shared/ui/Button'
@@ -83,7 +84,13 @@ export function TaskComments({ taskId, hasCommentPerm }) {
               className="w-full bg-transparent border-b border-[var(--color-border-subtle)] focus:border-[var(--accent)] text-sm text-[var(--text-primary)] focus:outline-none transition-all duration-200 resize-none py-1.5 placeholder:text-[var(--text-tertiary)]"
             />
             {isFocused && (
-              <div className="flex justify-end gap-2 animate-fadeIn">
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex justify-end gap-2"
+              >
                 <Button 
                   type="button" 
                   variant="ghost" 
@@ -100,7 +107,7 @@ export function TaskComments({ taskId, hasCommentPerm }) {
                 >
                   Comment
                 </Button>
-              </div>
+              </motion.div>
             )}
           </div>
         </form>
@@ -112,12 +119,18 @@ export function TaskComments({ taskId, hasCommentPerm }) {
         {!isLoading && comments.length === 0 && (
           <Text variant="muted" size="sm" className="italic">No comments yet. Be the first to comment!</Text>
         )}
-        {comments.map(c => {
+        {comments.map((c, idx) => {
           const isLiked = !!likes[c.id]
           const isDisliked = !!dislikes[c.id]
           const initial = (c.username || 'U').charAt(0).toUpperCase()
           return (
-            <div key={c.id} className="flex gap-3.5 group">
+            <motion.div
+              key={c.id}
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.04, duration: 0.2 }}
+              className="flex gap-3.5 group"
+            >
               <Avatar size="sm" className="w-9 h-9 shrink-0 bg-[var(--accent-soft)] text-[var(--accent)] font-bold text-xs">
                 <AvatarFallback>{initial}</AvatarFallback>
               </Avatar>
@@ -158,7 +171,7 @@ export function TaskComments({ taskId, hasCommentPerm }) {
                   </button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )
         })}
       </div>

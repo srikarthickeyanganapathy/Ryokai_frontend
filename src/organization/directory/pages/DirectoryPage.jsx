@@ -41,11 +41,10 @@ import { usePermissions, useAuth } from '@/identity';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
 import { InviteMemberModal } from '../../components/Invites/InviteMemberModal';
 import {
-  WorkspaceShell,
-  ManagementLayout,
-  PageStateContainer,
   ModularToolbar,
 } from '@/shared/workspace-framework';
+import { PageShell, PageHero, PageContent, PageToolbar } from '@/shared/ui/PageShell';
+import { PageState } from '@/shared/ui/PageState';
 import { SearchPlugin } from '@/shared/workspace-framework/toolbar/plugins/SearchPlugin';
 import { toast } from 'sonner';
 
@@ -204,93 +203,92 @@ export function DirectoryPage() {
   const adminCount = members.filter(m => m.rolePriority === 0).length;
 
   return (
-    <WorkspaceShell maxWidth="default">
-      <ManagementLayout
-        header={
-          <PageHeader
-            eyebrow="People & Governance"
-            meta={`${members.length} member${members.length !== 1 ? 's' : ''} · ${teams.length} ${teams.length === 1 ? 'team' : 'teams'}`}
-            title="Organization Directory"
-            subtitle={`Interactive member roster and authority hierarchy for ${activeOrganization.name}.`}
-            actions={
-              <div className="flex items-center gap-2.5">
-                {canInviteMembers && (
-                  <Button
-                    variant="primary"
-                    onClick={() => setInviteModalOpen(true)}
-                    className="shrink-0 shadow-md bg-[var(--accent)] hover:opacity-90"
-                  >
-                    <Icons.plus className="w-4 h-4 mr-1.5" />
-                    Invite Member
-                  </Button>
-                )}
-              </div>
-            }
-          />
-        }
-        toolbar={
-          <div className="space-y-3 w-full">
-            <ModularToolbar
-              left={
-                <div className="flex items-center gap-2 flex-1 min-w-[240px]">
-                  <SearchPlugin
-                    value={searchQuery}
-                    onChange={setSearchQuery}
-                    placeholder="Search by name, role or email..."
-                    className="w-full max-w-sm"
-                  />
-                </div>
-              }
-              right={
-                <div className="flex items-center gap-2 flex-wrap">
-                  {/* Role Grouping Mode Toggle (Grid view only) */}
-                  {viewMode === 'grid' && (
-                    <Button
-                      variant={groupByRole ? 'primary' : 'outline'}
-                      size="sm"
-                      onClick={() => setGroupByRole(prev => !prev)}
-                      className={cn("h-9 px-3 text-xs flex items-center gap-1.5", groupByRole ? "bg-[var(--accent)] text-white font-semibold shadow-2xs" : "bg-[var(--bg-elevated)]")}
-                    >
-                      <Layers className="w-3.5 h-3.5" />
-                      Group by Role
-                    </Button>
-                  )}
-
-                  {/* Segmented View Toggle Strip: Grid / Table / Org Chart */}
-                  <SegmentedToggle
-                    options={[
-                      { value: 'grid', label: 'Cards', icon: LayoutGrid },
-                      { value: 'table', label: 'Table', icon: TableIcon },
-                      { value: 'orgchart', label: 'Org Chart', icon: Network },
-                    ]}
-                    value={viewMode}
-                    onChange={setViewMode}
-                  />
-                </div>
-              }
-            />
-
-            {/* Interactive Filter Bar */}
-            {viewMode !== 'orgchart' && (
-              <DirectoryFilterBar
-                roles={roles}
-                teams={teams}
-                selectedRole={selectedRoleFilter}
-                onRoleChange={setSelectedRoleFilter}
-                selectedTeam={selectedTeamFilter}
-                onTeamChange={setSelectedTeamFilter}
-                onResetFilters={() => { setSelectedRoleFilter('ALL'); setSelectedTeamFilter('ALL'); setSearchQuery(''); }}
-                totalCount={members.length}
-                filteredCount={filteredMembers.length}
-              />
+    <PageShell maxWidth="default">
+      <PageHero
+        eyebrow="People & Governance"
+        meta={`${members.length} member${members.length !== 1 ? 's' : ''} · ${teams.length} ${teams.length === 1 ? 'team' : 'teams'}`}
+        title="Organization Directory"
+        subtitle={`Interactive member roster and authority hierarchy for ${activeOrganization.name}.`}
+        actions={
+          <div className="flex items-center gap-2.5">
+            {canInviteMembers && (
+              <Button
+                variant="primary"
+                onClick={() => setInviteModalOpen(true)}
+                className="shrink-0 shadow-md bg-[var(--accent)] hover:opacity-90"
+              >
+                <Icons.plus className="w-4 h-4 mr-1.5" />
+                Invite Member
+              </Button>
             )}
           </div>
         }
-      >
-        <PageStateContainer
+      />
+
+      <PageToolbar>
+        <div className="space-y-3 w-full">
+          <ModularToolbar
+            left={
+              <div className="flex items-center gap-2 flex-1 min-w-[240px]">
+                <SearchPlugin
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Search by name, role or email..."
+                  className="w-full max-w-sm"
+                />
+              </div>
+            }
+            right={
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Role Grouping Mode Toggle (Grid view only) */}
+                {viewMode === 'grid' && (
+                  <Button
+                    variant={groupByRole ? 'primary' : 'outline'}
+                    size="sm"
+                    onClick={() => setGroupByRole(prev => !prev)}
+                    className={cn("h-9 px-3 text-xs flex items-center gap-1.5", groupByRole ? "bg-[var(--accent)] text-white font-semibold shadow-2xs" : "bg-[var(--bg-elevated)]")}
+                  >
+                    <Layers className="w-3.5 h-3.5" />
+                    Group by Role
+                  </Button>
+                )}
+
+                {/* Segmented View Toggle Strip: Grid / Table / Org Chart */}
+                <SegmentedToggle
+                  options={[
+                    { value: 'grid', label: 'Cards', icon: LayoutGrid },
+                    { value: 'table', label: 'Table', icon: TableIcon },
+                    { value: 'orgchart', label: 'Org Chart', icon: Network },
+                  ]}
+                  value={viewMode}
+                  onChange={setViewMode}
+                />
+              </div>
+            }
+          />
+
+          {/* Interactive Filter Bar */}
+          {viewMode !== 'orgchart' && (
+            <DirectoryFilterBar
+              roles={roles}
+              teams={teams}
+              selectedRole={selectedRoleFilter}
+              onRoleChange={setSelectedRoleFilter}
+              selectedTeam={selectedTeamFilter}
+              onTeamChange={setSelectedTeamFilter}
+              onResetFilters={() => { setSelectedRoleFilter('ALL'); setSelectedTeamFilter('ALL'); setSearchQuery(''); }}
+              totalCount={members.length}
+              filteredCount={filteredMembers.length}
+            />
+          )}
+        </div>
+      </PageToolbar>
+
+      <PageContent>
+        <PageState
           state={pageState}
-          loadingConfig={{ variant: 'cards' }}
-          emptyConfig={{
+          stateProps={{
+            loadingVariant: 'cards',
             icon: UserIcon,
             title: 'No organization members found',
             description: 'Try adjusting your filter parameters or inviting new teammates.',
@@ -433,8 +431,8 @@ export function DirectoryPage() {
               )}
             </div>
           )}
-        </PageStateContainer>
-      </ManagementLayout>
+        </PageState>
+      </PageContent>
 
       {/* Slide-over Detail Drawer */}
       <MemberDetailDrawer
@@ -478,7 +476,7 @@ export function DirectoryPage() {
         orgId={orgId}
       />
       {confirmDialog}
-    </WorkspaceShell>
+    </PageShell>
   );
 }
 

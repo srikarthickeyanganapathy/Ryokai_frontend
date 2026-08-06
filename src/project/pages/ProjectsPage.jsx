@@ -1,12 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { Icons } from '@/shared/ui/Icons';
-import { PageHeader } from '@/shared/ui/PageHeader';
-import { FilterTabs } from '@/shared/ui/FilterTabs';
-import { ImmersiveStatCard, MetricGrid, ImmersiveEmptyState } from '@/shared/ui/Immersive';
 import { useProjects, useCreateProject } from '../features/hooks/useProjects';
 import { usePermissions } from '@/identity';
 import { ProjectCard } from '../components/ProjectCard';
@@ -14,10 +11,14 @@ import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { ProjectForm } from '../components/ProjectForm';
 import { useOrgTeams } from '@/organization';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { WorkspaceShell, ManagementLayout, PageStateContainer, ModularToolbar } from '@/shared/workspace-framework';
+import { PageShell, PageHero, PageStats, PageToolbar, PageContent, PageEmptyState, FloatingActions } from '@/shared/ui/PageShell';
+import { FilterTabs } from '@/shared/ui/FilterTabs';
 import { SearchPlugin } from '@/shared/workspace-framework/toolbar/plugins/SearchPlugin';
-import { FolderPlus, AlertTriangle, CalendarClock, Activity, Folder, TrendingUp } from '@/shared/ui/Icons';
 import { getPortfolioMetrics, calculateHealthScore, formatRelativeDate } from '../features/utils/projectUtils';
+import {
+  FolderKanban, Plus, TrendingUp, CalendarClock,
+  AlertTriangle, Folder, Activity
+} from 'lucide-react';
 
 const PROJECT_TABS = [
   { value: 'ALL', label: 'All' },
@@ -30,6 +31,7 @@ export function ProjectsPage() {
   const [globalFilter, setGlobalFilter] = useState('');
   const [activeTab, setActiveTab] = useState('ALL');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const navigate = useNavigate();
 
   const { workspaceMode, activeOrganization } = useWorkspace();
   const { canCreateProject } = usePermissions();
@@ -40,15 +42,11 @@ export function ProjectsPage() {
 
   const projects = useMemo(() => {
     return allProjects.filter(p => {
-      let modeMatch = false;
-      if (workspaceMode === 'PERSONAL') {
-        modeMatch = !p.organizationId;
-      } else if (workspaceMode === 'CREWS') {
-        modeMatch = !!p.crewId || (Array.isArray(p.sharedCrewIds) && p.sharedCrewIds.length > 0);
-      } else if (workspaceMode === 'ORG') {
-        modeMatch = p.organizationId === activeOrganization?.id;
-      }
-      if (!modeMatch) return false;
+      if (workspaceMode === 'PERSONAL') return !p.organizationId;
+      if (workspaceMode === 'CREWS') return !!p.crewId || (Array.isArray(p.sharedCrewIds) && p.sharedCrewIds.length > 0);
+      if (workspaceMode === 'ORG') return p.organizationId === activeOrganization?.id;
+      return true;
+    }).filter(p => {
       if (activeTab === 'ACTIVE') return p.status !== 'COMPLETED' && p.status !== 'ARCHIVED';
       if (activeTab === 'COMPLETED') return p.status === 'COMPLETED';
       if (activeTab === 'ARCHIVED') return p.status === 'ARCHIVED';
@@ -66,156 +64,143 @@ export function ProjectsPage() {
       .slice(0, 4);
   }, [projects]);
 
+  const atRiskProjects = useMemo(() => {
+    return projects.filter(p => calculateHealthScore(p) < 60 && p.status !== 'COMPLETED').slice(0, 3);
+  }, [projects]);
+
   const handleCreateProject = (data) => {
     createProjectMutation.mutate(data, { onSuccess: () => setIsCreateOpen(false) });
   };
 
-  const pageState = isLoading ? 'loading' : isError ? 'error' : projects.length === 0 ? 'empty' : 'ready';
-
   return (
-    <WorkspaceShell maxWidth="default">
-      <ManagementLayout
-        header={
-          <PageHeader
-            eyebrow="Projects"
-            title="Project Directory"
-            subtitle="Manage strategic initiatives, track timelines, and supervise milestones."
-            actions={
-              canCreate && (
-                <Button size="sm" className="shrink-0 gap-1.5 shadow-sm" onClick={() => setIsCreateOpen(true)}>
-                  <Icons.plus className="w-3.5 h-3.5" />
-                  New Project
-                </Button>
-              )
-            }
-          />
-        }
-        toolbar={
-          <ModularToolbar
-            left={
-              <FilterTabs filters={PROJECT_TABS} value={activeTab} onChange={setActiveTab} />
-            }
-            right={
-              <SearchPlugin
-                value={globalFilter}
-                onChange={setGlobalFilter}
-                placeholder="Search projects..."
-                className="w-full sm:w-72"
-              />
-            }
-          />
-        }
+    <PageShell workspaceMode={workspaceMode} maxWidth="default">
+      <PageHero
+        title="Project Directory"
+        subtitle="Manage strategic initiatives, track timelines, and supervise milestones."
+        eyebrow="Projects"
+        icon={FolderKanban}
       >
-        {/* Executive Metrics Dashboard */}
-        <MetricGrid columns={4} className="mb-6">
-          <ImmersiveStatCard
-            icon={Folder}
-            label="Portfolio Size"
-            value={metrics.total}
-            subtitle={`${metrics.active} Active · ${metrics.completed} Completed`}
-          />
-          <ImmersiveStatCard
-            icon={TrendingUp}
-            label="Overall Progress"
-            value={`${metrics.total > 0 ? Math.round(metrics.overallProgress / metrics.total) : 0}%`}
-            tone="success"
-            subtitle="Average completion across portfolio"
-          />
-          <ImmersiveStatCard
-            icon={CalendarClock}
-            label="Due This Week"
-            value={metrics.endingThisWeek}
-            tone="warning"
-            subtitle="Milestones closing within 7 days"
-          />
-          <ImmersiveStatCard
-            icon={AlertTriangle}
-            label="Needs Attention"
-            value={metrics.atRisk + metrics.overdue}
-            tone="danger"
-            subtitle={`${metrics.overdue} Overdue · ${metrics.atRisk} At Risk`}
-          />
-        </MetricGrid>
+        {canCreate && (
+          <Button size="sm" className="shrink-0 gap-1.5 shadow-sm" onClick={() => setIsCreateOpen(true)}>
+            <Plus size={14} strokeWidth={1.5} />
+            New Project
+          </Button>
+        )}
+      </PageHero>
 
-        {/* Upcoming Deadlines & Risk Projects Quick View */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-2 glass-panel rounded-[var(--radius-lg)] border border-[var(--color-border-subtle)] p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <CalendarClock className="w-4 h-4 text-[var(--accent)]" />
-              <Heading level={4} className="text-sm font-semibold">Upcoming Deadlines</Heading>
-            </div>
-            <div className="space-y-2">
-              {upcomingDeadlines.length === 0 ? (
-                <Text variant="muted" size="sm" className="py-2">No upcoming deadlines scheduled.</Text>
-              ) : (
-                upcomingDeadlines.map(p => (
-                  <Link to={`/app/projects/${p.id}`} key={p.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-hover)] transition-colors border border-transparent hover:border-[var(--border-subtle)]">
-                    <span className="text-sm font-medium truncate">{p.name}</span>
-                    <span className="text-xs font-mono px-2 py-1 rounded-md bg-[var(--bg-subtle)]">{formatRelativeDate(p.dueDate)}</span>
-                  </Link>
-                ))
-              )}
-            </div>
+      <PageStats>
+        <StatTile icon={Folder} label="Portfolio" value={metrics.total} tone="default" />
+        <StatTile icon={TrendingUp} label="Progress" value={metrics.total > 0 ? `${Math.round(metrics.overallProgress / metrics.total)}%` : '0%'} tone="success" />
+        <StatTile icon={CalendarClock} label="Due This Week" value={metrics.endingThisWeek} tone="warning" />
+        <StatTile icon={AlertTriangle} label="At Risk" value={metrics.atRisk + metrics.overdue} tone={metrics.atRisk + metrics.overdue > 0 ? 'danger' : 'default'} />
+      </PageStats>
+
+      <PageToolbar>
+        <FilterTabs filters={PROJECT_TABS} value={activeTab} onChange={setActiveTab} />
+        <SearchPlugin value={globalFilter} onChange={setGlobalFilter} placeholder="Search projects..." className="w-full sm:w-72" />
+      </PageToolbar>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 glass-panel rounded-2xl border border-[var(--border-subtle)] p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <CalendarClock size={16} strokeWidth={1.5} className="text-[var(--accent)]" />
+            <Heading level={4} className="text-sm font-semibold">Upcoming Deadlines</Heading>
           </div>
-
-          <div className="glass-panel rounded-[var(--radius-lg)] border border-[var(--color-border-subtle)] p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Activity className="w-4 h-4 text-[var(--accent)]" />
-              <Heading level={4} className="text-sm font-semibold">Risk Projects</Heading>
-            </div>
-            <div className="space-y-2">
-              {projects.filter(p => calculateHealthScore(p) < 60 && p.status !== 'COMPLETED').slice(0, 3).map(p => (
-                <Link to={`/app/projects/${p.id}`} key={p.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-hover)] transition-colors border border-transparent hover:border-[var(--border-subtle)]">
-                  <div className="flex items-center gap-2 truncate">
-                    <AlertTriangle className="w-4 h-4 text-yellow-500 shrink-0" />
-                    <span className="text-sm font-medium truncate">{p.name}</span>
-                  </div>
-                  <span className="text-xs font-bold font-mono text-[var(--text-muted)]">{p.progress}%</span>
-                </Link>
-              ))}
-              {projects.filter(p => calculateHealthScore(p) < 60 && p.status !== 'COMPLETED').length === 0 && (
-                <Text variant="muted" size="sm" className="py-2">All active projects are currently healthy.</Text>
-              )}
-            </div>
+          <div className="space-y-2">
+            {upcomingDeadlines.length === 0 ? (
+              <Text variant="muted" size="sm" className="py-2">No upcoming deadlines scheduled.</Text>
+            ) : (
+              upcomingDeadlines.map(p => (
+                <button key={p.id} onClick={() => navigate(`/app/projects/${p.id}`)} className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-hover)] transition-colors text-left">
+                  <span className="text-sm font-medium truncate">{p.name}</span>
+                  <span className="text-xs font-mono px-2 py-1 rounded-md bg-[var(--bg-subtle)]">{formatRelativeDate(p.dueDate)}</span>
+                </button>
+              ))
+            )}
           </div>
         </div>
 
-        <PageStateContainer
-          state={pageState}
-          loadingConfig={{ variant: 'cards' }}
-          errorConfig={{
-            title: 'Failed to load projects',
-            description: error?.message || 'An unexpected error occurred.',
-            onRetry: refetch,
-          }}
-          emptyConfig={{
-            customComponent: (
-              <ImmersiveEmptyState
-                icon={FolderPlus}
-                title={canCreate ? "Start your first project" : "No projects found"}
-                description={canCreate ? "Create a new project to organize your tasks and collaborate with your team." : "Check back later for active projects."}
-                action={canCreate ? <Button onClick={() => setIsCreateOpen(true)}>Create Project</Button> : null}
-              />
-            )
-          }}
-        >
+        <div className="glass-panel rounded-2xl border border-[var(--border-subtle)] p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Activity size={16} strokeWidth={1.5} className="text-[var(--accent)]" />
+            <Heading level={4} className="text-sm font-semibold">Risk Projects</Heading>
+          </div>
+          <div className="space-y-2">
+            {atRiskProjects.length === 0 ? (
+              <Text variant="muted" size="sm" className="py-2">All active projects are currently healthy.</Text>
+            ) : (
+              atRiskProjects.map(p => (
+                <button key={p.id} onClick={() => navigate(`/app/projects/${p.id}`)} className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-[var(--bg-hover)] transition-colors text-left">
+                  <div className="flex items-center gap-2 truncate">
+                    <AlertTriangle size={14} className="text-yellow-500 shrink-0" />
+                    <span className="text-sm font-medium truncate">{p.name}</span>
+                  </div>
+                  <span className="text-xs font-bold font-mono text-[var(--text-muted)]">{p.progress}%</span>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      <PageContent>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="h-48 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)] animate-pulse" />
+            ))}
+          </div>
+        ) : isError ? (
+          <PageEmptyState
+            icon={AlertTriangle}
+            title="Failed to load projects"
+            description={error?.message || 'An unexpected error occurred.'}
+            action={<Button variant="outline" onClick={() => refetch()}>Retry</Button>}
+          />
+        ) : projects.length === 0 ? (
+          <PageEmptyState
+            moduleId="projects"
+            icon={FolderKanban}
+            action={canCreate ? <Button onClick={() => setIsCreateOpen(true)}>Create Project</Button> : null}
+          />
+        ) : activeTab !== 'ALL' && projects.length === 0 ? (
+          <PageEmptyState
+            icon={FolderKanban}
+            title={`No ${activeTab.toLowerCase()} projects`}
+            description="Try a different filter or create a new project."
+            action={<Button variant="outline" onClick={() => setActiveTab('ALL')}>Show All</Button>}
+          />
+        ) : (
           <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ staggerChildren: 0.05 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
           >
-            {projects.map(project => (
+            {projects.map((project, i) => (
               <motion.div
                 key={project.id}
-                variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } } }}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04, duration: 0.25 }}
               >
                 <ProjectCard project={project} />
               </motion.div>
             ))}
           </motion.div>
-        </PageStateContainer>
-      </ManagementLayout>
+        )}
+      </PageContent>
+
+      <FloatingActions show={canCreate && projects.length > 3}>
+        <Button
+          size="lg"
+          className="rounded-2xl shadow-lg shadow-[var(--accent)]/25"
+          onClick={() => setIsCreateOpen(true)}
+        >
+          <Plus size={18} strokeWidth={1.5} />
+          New Project
+        </Button>
+      </FloatingActions>
 
       <Modal open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <ModalContent className="sm:max-w-xl">
@@ -235,6 +220,33 @@ export function ProjectsPage() {
           />
         </ModalContent>
       </Modal>
-    </WorkspaceShell>
+    </PageShell>
+  );
+}
+
+function StatTile({ icon: Icon, label, value, tone = 'default' }) {
+  const toneMap = {
+    default: 'text-[var(--text-primary)]',
+    success: 'text-[var(--success)]',
+    warning: 'text-[var(--warning)]',
+    danger: 'text-[var(--danger)]',
+  };
+  const bgMap = {
+    default: 'bg-[var(--bg-subtle)]',
+    success: 'bg-[var(--success-soft)]',
+    warning: 'bg-[var(--warning-soft)]',
+    danger: 'bg-[var(--danger-soft)]',
+  };
+
+  return (
+    <motion.div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--accent-border)] transition-colors">
+      <div className={`${bgMap[tone]} w-9 h-9 rounded-lg flex items-center justify-center shrink-0`}>
+        <Icon className={`${toneMap[tone]} w-4 h-4`} strokeWidth={1.5} />
+      </div>
+      <div>
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">{label}</div>
+        <div className="text-lg font-bold tabular-nums text-[var(--text-primary)]">{value}</div>
+      </div>
+    </motion.div>
   );
 }

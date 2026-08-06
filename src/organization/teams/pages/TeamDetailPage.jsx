@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
-import { Skeleton } from '@/shared/ui/Skeleton'
 import { Icons } from '@/shared/ui/Icons'
 import { useTeam, useTeamMessages, useSendTeamMessage, useDeleteTeamMessage, useOrgTeams, useOrgMembers } from '../../features/hooks/useOrganizations'
 import { useTaskList, useReassignTask } from '@/task'
@@ -24,6 +24,9 @@ import { TasksTab } from '../components/TasksTab'
 import { MembersTab } from '../components/MembersTab'
 import { DiscussionTab } from '../components/DiscussionTab'
 import { InsightsTab } from '../components/InsightsTab'
+
+import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
+import { PageState } from '@/shared/ui/PageState'
 
 const INACTIVE_STATUSES = new Set(['completed', 'done', 'archived', 'cancelled', 'closed'])
 const isActiveStatus = (status) => !INACTIVE_STATUSES.has((status || '').toLowerCase())
@@ -126,161 +129,208 @@ export function TeamDetailPage() {
   const handleDeleteMessage = async (messageId) => { if (await confirm({ title: 'Are you sure you want to delete this message?', danger: true })) deleteMessageMutation.mutate(messageId) }
   const handleAssignTask = (taskId, memberId, memberUsername) => { reassignTaskMutation.mutate({ taskId, newAssigneeId: memberId }, { onSuccess: () => { toast.success(`Task assigned to ${memberUsername}`); setAssigningTaskId(null) } }) }
 
-  if (teamLoading || tasksLoading || projectsLoading) {
-    return (
-      <div className="space-y-4 p-4 sm:p-6 max-w-6xl mx-auto">
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-10 w-full max-w-md rounded-xl" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4"><Skeleton className="h-40 rounded-xl" /><Skeleton className="h-40 rounded-xl" /><Skeleton className="h-40 rounded-xl" /></div>
-        {confirmDialog}
-      </div>
-    )
-  }
+  const isLoading = teamLoading || tasksLoading || projectsLoading
 
-  if (teamError || !team) {
-    return (
-      <div className="text-center py-16 m-6 border border-dashed border-[var(--border-subtle)] rounded-xl">
-        <Icons.alert className="w-8 h-8 text-[var(--danger)] mx-auto mb-4" />
-        <Heading level={3} className="text-[15px] font-semibold mb-2 tracking-tight">Team Not Found</Heading>
-        <Button variant="outline" size="sm" onClick={() => navigate(`/app/organizations/${orgId}`)}>Back to Organization</Button>
-      </div>
-    )
-  }
+  /* ── Page state derivation ── */
+  const pageState = isLoading
+    ? 'loading'
+    : teamError || !team
+      ? 'error'
+      : !isAuthorized
+        ? 'unauthorized'
+        : 'ready'
 
-  if (!isAuthorized) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center m-6 border border-dashed border-[var(--border-subtle)] rounded-xl">
-        <Icons.alert className="w-8 h-8 text-[var(--danger)] mb-4 animate-pulse" />
-        <Heading level={3} className="text-[16px] font-semibold mb-2 tracking-tight">Access Denied</Heading>
-        <Text variant="muted" className="max-w-sm mb-6 text-[13px]">You are not a member of this team, and do not have organization manager permissions to view this portal.</Text>
-        <Button variant="outline" size="sm" onClick={() => navigate(`/app/organizations/${orgId}`)}>Back to Organization</Button>
-      </div>
-    )
-  }
-
-  const tabCounts = { projects: teamProjects.length, tasks: teamTasks.length, members: team.members?.length || 0, chat: messages.length }
+  const tabCounts = { projects: teamProjects.length, tasks: teamTasks.length, members: team?.members?.length || 0, chat: messages.length }
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-4rem)] relative">
-      <div className="p-4 sm:p-6 max-w-[1400px] mx-auto w-full">
-        <TeamHeader
+    <PageShell maxWidth="wide">
+      <PageHero
+        eyebrow="Team"
+        title={team?.name || 'Team Details'}
+        subtitle={team?.description || 'Collaborate on projects, manage tasks, and stay aligned.'}
+        icon={Icons.users}
+      >
+        <div className="flex items-center gap-2">
+          {canManage && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsManageMembersOpen(true)}
+              className="gap-1.5 text-[12px] h-8"
+            >
+              <Icons.users className="w-3.5 h-3.5" /> Manage Members
+            </Button>
+          )}
+          {canCreateProject && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setIsCreateProjectOpen(true)}
+              className="gap-1.5 text-[12px] h-8"
+            >
+              <Icons.plus className="w-3.5 h-3.5" /> New Project
+            </Button>
+          )}
+        </div>
+      </PageHero>
+
+      <PageContent>
+        <PageState
+          state={pageState}
+          stateProps={{
+            loadingVariant: 'cards',
+            onRetry: () => navigate(0),
+            error: {
+              title: 'Team Not Found',
+              description: 'This team may have been removed or you may not have access to it.',
+            },
+            unauthorized: {
+              title: 'Access Denied',
+              description: 'You are not a member of this team, and do not have organization manager permissions to view this portal.',
+            },
+          }}
+        >
+          {team && (
+            <div className="flex flex-col">
+              <TeamHeader
+                team={team}
+                orgId={orgId}
+                insights={insights}
+                teamProjects={teamProjects}
+                teamTasks={teamTasks}
+                isReadOnly={isReadOnly}
+                canManage={canManage}
+                canCreateProject={canCreateProject}
+                onManageMembers={() => setIsManageMembersOpen(true)}
+                onCreateProject={() => setIsCreateProjectOpen(true)}
+                onOpenChat={() => setActiveTab('chat')}
+              />
+
+              <TeamTabs
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                tabCounts={tabCounts}
+              />
+
+              <div className="flex-1 min-h-0 relative">
+                <AnimatePresence mode="wait">
+                  {activeTab === 'overview' && (
+                    <OverviewTab
+                      key="overview"
+                      team={team}
+                      insights={insights}
+                      teamTasks={teamTasks}
+                      teamProjects={teamProjects}
+                      observerCount={observerCount}
+                      hasTaskTimestamps={hasTaskTimestamps}
+                      canCreateProject={canCreateProject}
+                      canAssignTask={canAssignTask}
+                      canManage={canManage}
+                      isReadOnly={isReadOnly}
+                      onManageMembers={() => setIsManageMembersOpen(true)}
+                      onCreateProject={() => setIsCreateProjectOpen(true)}
+                      onAssignTask={() => setActiveTab('tasks')}
+                      onOpenChat={() => setActiveTab('chat')}
+                      onOpenTasks={() => setActiveTab('tasks')}
+                      setActiveTab={setActiveTab}
+                    />
+                  )}
+
+                  {activeTab === 'chat' && (
+                    <DiscussionTab
+                      key="chat"
+                      teamId={teamId}
+                      messages={messages}
+                      messagesLoading={messagesLoading}
+                      user={user}
+                      canManage={canManage}
+                      isReadOnly={isReadOnly}
+                      onSend={handleSendMessage}
+                      onDelete={handleDeleteMessage}
+                    />
+                  )}
+
+                  {activeTab === 'projects' && (
+                    <ProjectsTab
+                      key="projects"
+                      teamProjects={teamProjects}
+                      hasProjectIdOnTasks={hasProjectIdOnTasks}
+                      tasksForProject={tasksForProject}
+                      canCreateProject={canCreateProject}
+                      isReadOnly={isReadOnly}
+                      onCreateProject={() => setIsCreateProjectOpen(true)}
+                    />
+                  )}
+
+                  {activeTab === 'tasks' && (
+                    <TasksTab
+                      key="tasks"
+                      teamTasks={teamTasks}
+                      taskBoard={taskBoard}
+                      team={team}
+                      canAssignTask={canAssignTask}
+                      isReadOnly={isReadOnly}
+                      assigningTaskId={assigningTaskId}
+                      setAssigningTaskId={setAssigningTaskId}
+                      handleAssignTask={handleAssignTask}
+                    />
+                  )}
+
+                  {activeTab === 'members' && (
+                    <MembersTab
+                      key="members"
+                      team={team}
+                      workload={workload}
+                      teamTasks={teamTasks}
+                      hasProjectIdOnTasks={hasProjectIdOnTasks}
+                      hasTaskTimestamps={hasTaskTimestamps}
+                      canManage={canManage}
+                      onManageMembers={() => setIsManageMembersOpen(true)}
+                    />
+                  )}
+
+                  {activeTab === 'insights' && (
+                    <InsightsTab
+                      key="insights"
+                      teamTasks={teamTasks}
+                      teamProjects={teamProjects}
+                      insights={insights}
+                    />
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          )}
+        </PageState>
+
+        {/* ── Modals ── */}
+        <Modal open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
+          <ModalContent className="sm:max-w-xl">
+            <Heading level={3} className="mb-5 text-[15px] font-semibold tracking-tight">Create Team Project</Heading>
+            <ProjectForm
+              defaultValues={{
+                name: '',
+                description: '',
+                organizationId: orgId,
+                teamId: teamId,
+                dueDate: ''
+              }}
+              onSubmit={handleCreateProjectSubmit}
+              isLoading={createProjectMutation.isPending}
+              workspaceMode="ORG"
+              useOrgTeamsHook={useOrgTeams}
+            />
+          </ModalContent>
+        </Modal>
+
+        <ManageTeamMembersModal
+          isOpen={isManageMembersOpen}
+          onClose={() => setIsManageMembersOpen(false)}
           team={team}
-          orgId={orgId}
-          insights={insights}
-          teamProjects={teamProjects}
-          teamTasks={teamTasks}
-          isReadOnly={isReadOnly}
-          canManage={canManage}
-          canCreateProject={canCreateProject}
-          onManageMembers={() => setIsManageMembersOpen(true)}
-          onCreateProject={() => setIsCreateProjectOpen(true)}
-          onOpenChat={() => setActiveTab('chat')}
+          orgMembers={orgMembers}
         />
-      </div>
-
-      <TeamTabs activeTab={activeTab} setActiveTab={setActiveTab} tabCounts={tabCounts} />
-
-      <div className="flex-1 min-h-0 relative">
-        {activeTab === 'overview' && (
-          <OverviewTab
-            team={team}
-            insights={insights}
-            teamTasks={teamTasks}
-            teamProjects={teamProjects}
-            observerCount={observerCount}
-            hasTaskTimestamps={hasTaskTimestamps}
-            canCreateProject={canCreateProject}
-            canAssignTask={canAssignTask}
-            canManage={canManage}
-            isReadOnly={isReadOnly}
-            onManageMembers={() => setIsManageMembersOpen(true)}
-            onCreateProject={() => setIsCreateProjectOpen(true)}
-            onAssignTask={() => setActiveTab('tasks')}
-            onOpenChat={() => setActiveTab('chat')}
-            onOpenTasks={() => setActiveTab('tasks')}
-            setActiveTab={setActiveTab}
-          />
-        )}
-
-        {activeTab === 'chat' && (
-          <DiscussionTab
-            teamId={teamId}
-            messages={messages}
-            messagesLoading={messagesLoading}
-            user={user}
-            canManage={canManage}
-            isReadOnly={isReadOnly}
-            onSend={handleSendMessage}
-            onDelete={handleDeleteMessage}
-          />
-        )}
-
-        {activeTab === 'projects' && (
-          <ProjectsTab
-            teamProjects={teamProjects}
-            hasProjectIdOnTasks={hasProjectIdOnTasks}
-            tasksForProject={tasksForProject}
-            canCreateProject={canCreateProject}
-            isReadOnly={isReadOnly}
-            onCreateProject={() => setIsCreateProjectOpen(true)}
-          />
-        )}
-
-        {activeTab === 'tasks' && (
-          <TasksTab
-            teamTasks={teamTasks}
-            taskBoard={taskBoard}
-            team={team}
-            canAssignTask={canAssignTask}
-            isReadOnly={isReadOnly}
-            assigningTaskId={assigningTaskId}
-            setAssigningTaskId={setAssigningTaskId}
-            handleAssignTask={handleAssignTask}
-          />
-        )}
-
-        {activeTab === 'members' && (
-          <MembersTab
-            team={team}
-            workload={workload}
-            teamTasks={teamTasks}
-            hasProjectIdOnTasks={hasProjectIdOnTasks}
-            hasTaskTimestamps={hasTaskTimestamps}
-            canManage={canManage}
-            onManageMembers={() => setIsManageMembersOpen(true)}
-          />
-        )}
-
-        {activeTab === 'insights' && (
-          <InsightsTab
-            teamTasks={teamTasks}
-            teamProjects={teamProjects}
-            insights={insights}
-          />
-        )}
-      </div>
-
-      <Modal open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
-        <ModalContent className="sm:max-w-xl">
-          <Heading level={3} className="mb-5 text-[15px] font-semibold tracking-tight">Create Team Project</Heading>
-          <ProjectForm 
-            defaultValues={{ 
-              name: '', 
-              description: '', 
-              organizationId: orgId, 
-              teamId: teamId, 
-              dueDate: '' 
-            }} 
-            onSubmit={handleCreateProjectSubmit} 
-            isLoading={createProjectMutation.isPending} 
-            workspaceMode="ORG" 
-            useOrgTeamsHook={useOrgTeams} 
-          />
-        </ModalContent>
-      </Modal>
-
-      <ManageTeamMembersModal isOpen={isManageMembersOpen} onClose={() => setIsManageMembersOpen(false)} team={team} orgMembers={orgMembers} />
-      {confirmDialog}
-    </div>
+        {confirmDialog}
+      </PageContent>
+    </PageShell>
   )
 }

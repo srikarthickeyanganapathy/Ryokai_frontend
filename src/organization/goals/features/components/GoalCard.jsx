@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   ChevronDown,
   TrendingUp,
@@ -175,7 +176,11 @@ export function GoalCard({ goal, expanded, onToggle, canManage, onUpdateKR, onEd
   const StatusIcon = statusConfig.icon;
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      whileHover={{ y: -2, transition: { duration: 0.2 } }}
       className={cn(
         'rounded-[var(--radius-lg)] glass-panel border overflow-hidden transition-all duration-200',
         expanded
@@ -326,6 +331,6 @@ export function GoalCard({ goal, expanded, onToggle, canManage, onUpdateKR, onEd
           )}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

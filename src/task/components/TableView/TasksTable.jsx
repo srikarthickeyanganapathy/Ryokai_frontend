@@ -5,6 +5,7 @@ import { Icons } from '@/shared/ui/Icons'
 import { IconButton } from '@/shared/ui/Button'
 import { Checkbox } from '@/shared/ui/Checkbox'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
+import { InlineEditable } from '@/shared/ui/InlineEditable'
 import { cn } from '@/shared/lib/cn'
 import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
 
@@ -68,9 +69,14 @@ export function TasksTable({
             <div className="text-[var(--text-secondary)] shrink-0">
               {statusIcons[task.status] || <div className="w-4 h-4 rounded-full border-2 border-[var(--color-border-default)]" />}
             </div>
-            <span className={cn("font-medium truncate max-w-[300px] sm:max-w-[400px]", isDone && "line-through text-[var(--text-secondary)]")}>
-              {task.title}
-            </span>
+            <InlineEditable
+              value={task.title}
+              onSave={(newTitle) => {
+                if (onTaskClick) onTaskClick({ ...task, title: newTitle })
+              }}
+              truncate
+              className={cn(isDone && 'line-through !text-[var(--text-secondary)]')}
+            />
           </div>
         )
       },
