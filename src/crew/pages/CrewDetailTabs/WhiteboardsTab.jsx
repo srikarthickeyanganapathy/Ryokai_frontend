@@ -6,6 +6,7 @@ import { Input } from '@/shared/ui/Input';
 import { Link } from 'react-router-dom';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { Modal, ModalContent } from '@/shared/ui/Modal';
+import { ImmersiveEmptyState } from '@/shared/ui/Immersive';
 import { useWhiteboards, useCreateWhiteboard, useDeleteWhiteboard } from '@/whiteboard';
 import { 
   Pencil, 
@@ -98,6 +99,12 @@ function formatRelativeTime(dateString) {
   if (diffHours < 24) return `${diffHours}h ago`;
   if (diffDays < 7) return `${diffDays}d ago`;
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+// Deterministic gradient for collaborator avatars
+function getAvatarGradient(name = '?') {
+  const hash = (name || '').split('').reduce((acc, c) => c.charCodeAt(0) + ((acc << 5) - acc), 0)
+  return `linear-gradient(135deg, hsl(${Math.abs(hash) % 360} 70% 60%), hsl(${(Math.abs(hash) + 35) % 360} 70% 45%))`
 }
 
 // Custom Visual Canvas Thumbnail Renderers
@@ -221,7 +228,7 @@ function StarterTemplateCard({ template, onSelect }) {
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onSelect(template.id)}
-      className="group relative text-left bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--accent-border)] rounded-xl p-3.5 transition-all duration-200 shadow-xs hover:shadow-md flex flex-col justify-between overflow-hidden"
+      className="group relative text-left bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--accent-border)] hover:shadow-sm rounded-xl p-3.5 transition-all duration-200 shadow-xs flex flex-col justify-between overflow-hidden"
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <div 
@@ -264,7 +271,7 @@ function WhiteboardCard({ board, crewId, isCreator, onDelete, isFavorite, onTogg
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.03 }}
-        className="group relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-3.5 hover:border-[var(--accent-border)] hover:shadow-xs transition-all duration-200 flex items-center justify-between gap-4"
+        className="group relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-3.5 hover:border-[var(--accent-border)] hover:shadow-sm transition-all duration-200 flex items-center justify-between gap-4"
       >
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="w-14 h-11 rounded-lg overflow-hidden border border-[var(--border-subtle)] shrink-0 relative bg-[var(--bg-subtle)]">
@@ -304,7 +311,8 @@ function WhiteboardCard({ board, crewId, isCreator, onDelete, isFavorite, onTogg
             {recentEditors.slice(0, 3).map((editor, i) => (
               <div 
                 key={i} 
-                className="w-6 h-6 rounded-full bg-[var(--accent)] border-2 border-[var(--bg-card)] flex items-center justify-center text-[9px] font-bold text-white shadow-xs" 
+                className="w-6 h-6 rounded-full border-2 border-[var(--bg-card)] flex items-center justify-center text-[9px] font-bold text-white shadow-xs" 
+                style={{ background: getAvatarGradient(editor.username || editor.name) }}
                 title={editor.username || editor.name || `User ${i + 1}`}
               >
                 {(editor.username || editor.name || 'U').charAt(0).toUpperCase()}
@@ -355,7 +363,7 @@ function WhiteboardCard({ board, crewId, isCreator, onDelete, isFavorite, onTogg
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, type: 'spring', stiffness: 300, damping: 25 }}
-      className="group relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden hover:border-[var(--accent-border)] hover:shadow-md transition-all duration-200 flex flex-col"
+      className="group relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden hover:border-[var(--accent-border)] hover:shadow-sm transition-all duration-200 flex flex-col"
     >
       {/* Thumbnail Header */}
       <div className="relative h-32 bg-[var(--bg-subtle)] overflow-hidden border-b border-[var(--border-subtle)]">
@@ -413,7 +421,8 @@ function WhiteboardCard({ board, crewId, isCreator, onDelete, isFavorite, onTogg
                 recentEditors.slice(0, 3).map((editor, i) => (
                   <div 
                     key={i} 
-                    className="w-5 h-5 rounded-full bg-[var(--accent)] border-2 border-[var(--bg-card)] flex items-center justify-center text-[8px] font-bold text-white shadow-xs" 
+                    className="w-5 h-5 rounded-full border-2 border-[var(--bg-card)] flex items-center justify-center text-[8px] font-bold text-white shadow-xs" 
+                    style={{ background: getAvatarGradient(editor.username || editor.name) }}
                     title={editor.username || editor.name || `User ${i + 1}`}
                   >
                     {(editor.username || editor.name || 'U').charAt(0).toUpperCase()}
@@ -546,22 +555,24 @@ export function WhiteboardsTab({ crewId, isCreator }) {
     <div className="p-4 sm:p-6 space-y-6 max-w-[1400px] mx-auto text-[var(--text-primary)]">
       {/* Header Hub Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
-        <div>
-          <Heading level={3} className="text-[16px] font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] flex items-center justify-center">
-              <Pencil className="w-4 h-4" />
-            </div>
-            Visual Collaboration Hub
-          </Heading>
-          <Text className="text-[12px] text-[var(--text-secondary)] mt-1">
-            Real-time canvas for brainstorming, architecture diagrams, retrospectives, and user journeys.
-          </Text>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] flex items-center justify-center shrink-0">
+            <Pencil className="w-4 h-4" />
+          </div>
+          <div>
+            <Heading level={3} className="text-[15px] font-semibold tracking-tight text-[var(--text-primary)]">
+              Visual Collaboration Hub
+            </Heading>
+            <Text className="text-[12px] text-[var(--text-secondary)] mt-0.5">
+              Real-time canvas for brainstorming, architecture diagrams, retrospectives, and user journeys.
+            </Text>
+          </div>
         </div>
         
         <div className="flex items-center gap-2 shrink-0">
           <Button 
             size="sm" 
-            className="gap-2 h-9 text-[12px] font-semibold shadow-xs" 
+            className="gap-2 h-8 text-[12px] font-semibold shadow-xs" 
             onClick={() => handleOpenCreateModal('blank')}
           >
             <Plus className="w-4 h-4" /> New Whiteboard
@@ -573,7 +584,9 @@ export function WhiteboardsTab({ crewId, isCreator }) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[var(--accent)]" />
+            <div className="w-6 h-6 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] flex items-center justify-center">
+              <Sparkles className="w-3.5 h-3.5" />
+            </div>
             <Heading level={4} className="text-[13px] font-semibold tracking-tight text-[var(--text-primary)]">
               Template Starter Gallery
             </Heading>
@@ -597,13 +610,13 @@ export function WhiteboardsTab({ crewId, isCreator }) {
       {/* Search, Filter & Control Toolbar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1 p-1 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-lg text-[12px] font-medium overflow-x-auto">
+        <div className="flex items-center gap-1 p-1 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg text-[12px] font-medium overflow-x-auto">
           <button
             onClick={() => setActiveFilter('all')}
             className={cn(
               "px-3 py-1 rounded-md transition-all whitespace-nowrap",
               activeFilter === 'all' 
-                ? "bg-[var(--bg-card)] text-[var(--text-primary)] shadow-xs font-semibold" 
+                ? "bg-[var(--accent-soft)] text-[var(--accent)] shadow-sm font-semibold" 
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             )}
           >
@@ -615,7 +628,7 @@ export function WhiteboardsTab({ crewId, isCreator }) {
             className={cn(
               "px-3 py-1 rounded-md transition-all flex items-center gap-1.5 whitespace-nowrap",
               activeFilter === 'starred' 
-                ? "bg-[var(--bg-card)] text-[var(--text-primary)] shadow-xs font-semibold" 
+                ? "bg-[var(--accent-soft)] text-[var(--accent)] shadow-sm font-semibold" 
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             )}
           >
@@ -628,7 +641,7 @@ export function WhiteboardsTab({ crewId, isCreator }) {
             className={cn(
               "px-3 py-1 rounded-md transition-all flex items-center gap-1.5 whitespace-nowrap",
               activeFilter === 'live' 
-                ? "bg-[var(--bg-card)] text-[var(--text-primary)] shadow-xs font-semibold" 
+                ? "bg-[var(--accent-soft)] text-[var(--accent)] shadow-sm font-semibold" 
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             )}
           >
@@ -645,26 +658,26 @@ export function WhiteboardsTab({ crewId, isCreator }) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search whiteboards..."
-              className="w-full pl-9 pr-3 py-1.5 text-[12px] font-medium bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg focus:outline-none focus:border-[var(--accent)] text-[var(--text-primary)] transition-all placeholder:text-[var(--text-muted)]"
+              className="w-full pl-9 pr-3 py-1.5 text-[12px] font-medium bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-lg focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/30 text-[var(--text-primary)] transition-all placeholder:text-[var(--text-muted)]"
             />
           </div>
 
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="h-8 px-2.5 text-[12px] font-medium bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent)]"
+            className="h-8 px-2.5 text-[12px] font-medium bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/30"
           >
             <option value="recent">Recently Edited</option>
             <option value="name">Title (A-Z)</option>
             <option value="oldest">Date Created</option>
           </select>
 
-          <div className="flex items-center p-0.5 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-lg">
+          <div className="flex items-center p-0.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg">
             <button
               onClick={() => setViewMode('grid')}
               className={cn(
                 "p-1.5 rounded-md transition-colors",
-                viewMode === 'grid' ? "bg-[var(--bg-card)] text-[var(--text-primary)] shadow-xs" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                viewMode === 'grid' ? "bg-[var(--accent-soft)] text-[var(--accent)] shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               )}
               title="Grid View"
             >
@@ -674,7 +687,7 @@ export function WhiteboardsTab({ crewId, isCreator }) {
               onClick={() => setViewMode('list')}
               className={cn(
                 "p-1.5 rounded-md transition-colors",
-                viewMode === 'list' ? "bg-[var(--bg-card)] text-[var(--text-primary)] shadow-xs" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                viewMode === 'list' ? "bg-[var(--accent-soft)] text-[var(--accent)] shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               )}
               title="List View"
             >
@@ -707,7 +720,9 @@ export function WhiteboardsTab({ crewId, isCreator }) {
       ) : isError ? (
         /* State 4: Error State */
         <div className="flex flex-col items-center justify-center py-12 px-4 text-center border border-[var(--danger-border)]/40 rounded-xl bg-[var(--danger-soft)]/20">
-          <AlertTriangle className="w-8 h-8 text-[var(--danger)] mb-2.5" />
+          <div className="w-12 h-12 rounded-xl bg-[var(--danger-soft)] text-[var(--danger)] flex items-center justify-center mb-3 border border-[var(--danger-border)]/40">
+            <AlertTriangle className="w-6 h-6" />
+          </div>
           <Heading level={4} className="text-[14px] font-bold text-[var(--text-primary)] mb-1">
             Failed to Load Whiteboards
           </Heading>
@@ -720,37 +735,27 @@ export function WhiteboardsTab({ crewId, isCreator }) {
         </div>
       ) : whiteboards.length === 0 ? (
         /* State 2: Empty State (No Whiteboards in Crew) */
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center border border-dashed border-[var(--border-subtle)] rounded-xl bg-[var(--bg-card)]">
-          <div className="w-12 h-12 rounded-xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center mb-3 border border-[var(--accent-border)]">
-            <Pencil className="w-6 h-6" />
-          </div>
-          <Heading level={4} className="text-[15px] font-semibold text-[var(--text-primary)] mb-1">
-            Start Visualizing Ideas Together
-          </Heading>
-          <Text variant="muted" className="text-[12px] max-w-md mb-6 text-[var(--text-secondary)]">
-            Create your crew's first interactive whiteboard to sketch diagrams, map user flows, or conduct sprint retrospectives in real-time.
-          </Text>
-          <div className="flex items-center gap-3">
-            <Button size="sm" onClick={() => handleOpenCreateModal('blank')} className="gap-2 h-9 text-[12px] font-semibold">
+        <ImmersiveEmptyState
+          icon={Pencil}
+          title="Start Visualizing Ideas Together"
+          description="Create your crew's first interactive whiteboard to sketch diagrams, map user flows, or conduct sprint retrospectives in real-time."
+          action={(
+            <Button size="sm" onClick={() => handleOpenCreateModal('blank')} className="gap-2 h-8 text-[12px] font-semibold">
               <Plus className="w-4 h-4" /> Create Blank Canvas
             </Button>
-          </div>
-        </div>
+          )}
+        />
       ) : filteredAndSortedBoards.length === 0 ? (
         /* State 3 & 7: No Search / Filter Match State */
-        <div className="flex flex-col items-center justify-center py-14 px-4 text-center border border-dashed border-[var(--border-subtle)] rounded-xl bg-[var(--bg-card)]">
-          <Search className="w-7 h-7 text-[var(--text-tertiary)] mb-2.5" />
-          <Heading level={4} className="text-[14px] font-semibold text-[var(--text-primary)] mb-1">
-            No Whiteboards Found
-          </Heading>
-          <Text variant="muted" className="text-[12px] max-w-sm mb-4 text-[var(--text-secondary)]">
-            {searchQuery 
-              ? `No whiteboards match "${searchQuery}". Try a different keyword.` 
-              : activeFilter === 'starred' 
-                ? 'You have not favorited any whiteboards yet. Click the star icon on any board to keep it handy.' 
-                : 'No active live whiteboard sessions at the moment.'}
-          </Text>
-          {(searchQuery || activeFilter !== 'all') && (
+        <ImmersiveEmptyState
+          icon={Search}
+          title="No Whiteboards Found"
+          description={searchQuery 
+            ? `No whiteboards match "${searchQuery}". Try a different keyword.` 
+            : activeFilter === 'starred' 
+              ? 'You have not favorited any whiteboards yet. Click the star icon on any board to keep it handy.' 
+              : 'No active live whiteboard sessions at the moment.'}
+          action={(searchQuery || activeFilter !== 'all') ? (
             <Button 
               size="sm" 
               variant="outline" 
@@ -759,8 +764,8 @@ export function WhiteboardsTab({ crewId, isCreator }) {
             >
               Reset Filters
             </Button>
-          )}
-        </div>
+          ) : null}
+        />
       ) : (
         /* State 5: Default Content Grid/List View */
         <div className={cn(
@@ -814,7 +819,7 @@ export function WhiteboardsTab({ crewId, isCreator }) {
                       type="button"
                       onClick={() => setSelectedTemplate(template.id)}
                       className={cn(
-                        "flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all cursor-pointer",
+                        "flex items-center gap-2.5 p-2.5 rounded-lg border text-left transition-all cursor-pointer",
                         isSelected 
                           ? "bg-[var(--accent-soft)] border-[var(--accent-border)] text-[var(--accent)] font-semibold shadow-xs" 
                           : "bg-[var(--bg-subtle)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-default)] hover:text-[var(--text-primary)]"
@@ -856,7 +861,7 @@ export function WhiteboardsTab({ crewId, isCreator }) {
                 type="button" 
                 variant="outline" 
                 size="sm" 
-                className="h-8 px-4 text-[12px] font-medium" 
+                className="h-8 px-4 text-[12px] font-medium rounded-lg" 
                 onClick={() => setIsCreateOpen(false)}
               >
                 Cancel
@@ -864,7 +869,7 @@ export function WhiteboardsTab({ crewId, isCreator }) {
               <Button 
                 type="submit" 
                 size="sm" 
-                className="h-8 px-4 text-[12px] font-semibold gap-1.5" 
+                className="h-8 px-4 text-[12px] font-semibold gap-1.5 rounded-lg" 
                 isLoading={createBoardMutation.isPending}
               >
                 <Sparkles className="w-3.5 h-3.5" /> Create Board
@@ -879,4 +884,3 @@ export function WhiteboardsTab({ crewId, isCreator }) {
     </div>
   );
 }
-

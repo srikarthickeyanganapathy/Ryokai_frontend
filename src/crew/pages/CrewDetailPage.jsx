@@ -1,6 +1,10 @@
-import React, { useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Heading, Text } from '@/shared/ui/Typography';
+import { Button } from '@/shared/ui/Button';
+import { Badge } from '@/shared/ui/Badge';
+import { Icons } from '@/shared/ui/Icons';
 import { TasksTab } from './CrewDetailTabs/TasksTab';
 import { ChannelsTab } from './CrewDetailTabs/ChannelsTab';
 import { ProjectsTab } from './CrewDetailTabs/ProjectsTab';
@@ -9,28 +13,107 @@ import { WhiteboardsTab } from './CrewDetailTabs/WhiteboardsTab';
 import { OverviewTab } from './CrewDetailTabs/OverviewTab';
 import { CrewHeader } from '../components/CrewHeader';
 import { CrewTabs } from '../components/CrewTabs';
-import { Icons } from '@/shared/ui/Icons';
 import { useTaskList } from '@/task';
 import { useProjects } from '@/project';
 import { useCrew, useCrewMembers, useCrewChannels, useCrewProjects, useLeaveCrew, useDeleteCrew } from '../features/hooks/useCrews';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
-import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
+import { PageShell } from '@/shared/ui/PageShell';
 import { PageState } from '@/shared/ui/PageState';
 import { useAuth } from '@/identity';
+import { SaveToggle } from '@/library/saved/features/components/SaveToggle';
+import { ENTITY_TYPES } from '@/shared/constants/entityTypes';
+import { CrewStatusPill } from '../components/CrewStatusPill';
+import { cn } from '@/shared/lib/cn';
+import { SPRINGS } from '@/shared/lib/uxTokens';
 import { toast } from 'sonner';
+
+const CREW_TABS = ['overview', 'tasks', 'channels', 'projects', 'whiteboards', 'members']
+
+function hashHue(str = '') {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  return Math.abs(hash) % 360
+}
+
+/* Activity Feed Item */
+function ActivityItem({ type, user, action, target, time, hue }) {
+  const iconMap = {
+    project_shared: Icons.folderPlus,
+    task_created: Icons.plusCircle,
+    task_completed: Icons.checkCircle2,
+  }
+  const Icon = iconMap[type] || Icons.activity
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 8 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="flex items-start gap-2.5 py-2.5"
+    >
+      <span
+        className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 text-white"
+        style={{ background: `linear-gradient(135deg, hsl(${hue} 72% 52%), hsl(${(hue + 35) % 360} 68% 38%))` }}
+      >
+        <Icon className="w-3 h-3" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <Text size="xs" className="text-[var(--text-secondary)] leading-snug">
+          <span className="font-semibold text-[var(--text-primary)]">{user}</span>{' '}
+          {action}{' '}
+          {target && <span className="font-medium text-[var(--accent)]">{target}</span>}
+        </Text>
+        <Text size="xs" className="text-[var(--text-muted)]">{time}</Text>
+      </div>
+    </motion.div>
+  )
+}
+
+/* Quick Jump FAB */
+function QuickJumpFab({ visible }) {
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.5, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.5, y: 16 }}
+          transition={SPRINGS.fast}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-lg shadow-black/5 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent-border)] hover:shadow-xl transition-all duration-200"
+          title="Scroll to top"
+        >
+          <Icons.chevronUp className="w-5 h-5" />
+        </motion.button>
+      )}
+    </AnimatePresence>
+  )
+}
 
 export function CrewDetailPage() {
   const { crewId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
   const { confirm, dialog: confirmDialog } = useConfirmDialog();
+
+  const initialTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(initialTab && CREW_TABS.includes(initialTab) ? initialTab : 'overview');
+  const [isHeaderSticky, setIsHeaderSticky] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [showFab, setShowFab] = useState(false);
+  const sentinelRef = useRef(null);
 
   const { data: crew, isLoading: isCrewLoading } = useCrew(crewId);
   const { data: members = [] } = useCrewMembers(crewId);
-  
+
   const { data: rawCrewTasks = [] } = useTaskList({ crewId });
-  
+
   const isCreator = useMemo(() => {
     if (!crew) return false;
     if (crew.myRole === 'CREATOR' || crew.myRole === 'OWNER') return true;
@@ -123,10 +206,9 @@ export function CrewDetailPage() {
     });
   };
 
-  const crewTasks = useMemo(() => {
-    if (!Array.isArray(rawCrewTasks)) return [];
-    return rawCrewTasks.filter(t => (t.crewId && String(t.crewId) === String(crewId)) || (t.crew && String(t.crew.id) === String(crewId)));
-  }, [rawCrewTasks, crewId]);
+  // Backend already scopes to this crew including tasks of projects shared
+  // with / owned by the crew (project bridge), so pass through as-is.
+  const crewTasks = useMemo(() => (Array.isArray(rawCrewTasks) ? rawCrewTasks : []), [rawCrewTasks]);
 
   const { data: sharedProjects = [] } = useCrewProjects(crewId);
   const { data: allProjects = [] } = useProjects();
@@ -145,55 +227,168 @@ export function CrewDetailPage() {
     members: members.length,
   }), [crewTasks.length, channels.length, sharedProjects.length, members.length]);
 
+  // Sticky header observer
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsHeaderSticky(!entry.isIntersecting),
+      { threshold: 1.0 },
+    )
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [])
+
+  // Scroll listener for FAB visibility
+  useEffect(() => {
+    const onScroll = () => {
+      setShowFab(window.scrollY > 400)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Activity feed derived from live crew data (same pattern as team HQ)
+  const activityFeed = useMemo(() => {
+    const items = []
+    crewTasks.forEach(t => {
+      if (t.createdAt) {
+        items.push({
+          type: 'task_created',
+          user: t.creatorName || t.createdBy || 'Someone',
+          action: 'created task',
+          target: t.title || 'a task',
+          time: new Date(t.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        })
+      }
+      if (t.updatedAt && (t.status === 'Done' || t.status === 'COMPLETED')) {
+        items.push({
+          type: 'task_completed',
+          user: t.assignedTo || 'Someone',
+          action: 'completed',
+          target: t.title || 'a task',
+          time: new Date(t.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        })
+      }
+    })
+    sharedProjects.slice(-3).reverse().forEach(p => {
+      items.push({
+        type: 'project_shared',
+        user: p.creator || p.createdBy || 'Someone',
+        action: 'shared project',
+        target: p.name || 'Untitled',
+        time: p.createdAt ? new Date(p.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'recently',
+      })
+    })
+    return items.slice(0, 20)
+  }, [crewTasks, sharedProjects])
+
   const pageState = isCrewLoading ? 'loading' : !crew ? 'empty' : 'ready';
+  const hue = crew?.hue !== undefined ? crew.hue : hashHue(crew?.name || 'Crew')
 
   return (
-    <PageShell maxWidth="wide">
-      <PageHero
-        eyebrow={crew?.name || 'Crew'}
-        title={crew?.name || 'Crew Details'}
-        subtitle={crew?.description}
-      >
-        {crew && (
-          <div className="pb-2">
-            <CrewHeader
-              crew={crew}
-              members={members}
-              sharedProjects={sharedProjects}
-              crewTasks={crewTasks}
-              channels={channels}
-              completionRate={completionRate}
-              isCreator={isCreator}
-              onLeave={handleLeaveCrew}
-              onOpenChat={() => setActiveTab('channels')}
-              onOpenTasks={() => setActiveTab('tasks')}
-              onNewBoard={() => setActiveTab('whiteboards')}
-            />
-          </div>
-        )}
-      </PageHero>
-
+    <PageShell maxWidth="full" className="!px-0 !py-0">
       <PageState
         state={pageState}
         stateProps={{
-          loadingVariant: 'dashboard',
-          icon: Icons.users,
-          title: 'Crew Not Found',
-          description: 'The requested crew does not exist or you do not have permission to view it.',
+          loadingVariant: 'cards',
+          onRetry: () => navigate(0),
+          empty: {
+            icon: Icons.users,
+            title: 'Crew Not Found',
+            description: 'The requested crew does not exist or you do not have permission to view it.',
+          },
         }}
       >
         {crew && (
-          <>
-            {/* Tabs — inline between hero and content */}
-            <CrewTabs
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              tabCounts={tabCounts}
-            />
+          <div className="flex flex-col h-full">
+            {/* Sentinel for sticky detection */}
+            <div ref={sentinelRef} className="h-px" />
 
-            <PageContent>
-              <div className="flex flex-col min-h-full pt-4">
-                <div className="flex-1 min-h-0">
+            {/* Sticky Header — identity + actions only (rich stats live in Overview) */}
+            <div
+              className={cn(
+                'sticky top-0 z-30 transition-shadow duration-200',
+                isHeaderSticky
+                  ? 'bg-[var(--bg-base)] border-b border-[var(--border-subtle)] shadow-sm'
+                  : 'bg-[var(--bg-base)]',
+              )}
+            >
+              <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+                <div className={cn('flex items-center gap-3 transition-all duration-200', isHeaderSticky ? 'py-2' : 'py-3')}>
+                  {/* Back */}
+                  <button
+                    onClick={() => navigate('/app/crews')}
+                    className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors shrink-0"
+                    title="Back to crews"
+                  >
+                    <Icons.chevronLeft className="w-4 h-4" />
+                  </button>
+
+                  {/* Avatar */}
+                  <div
+                    className={cn(
+                      'rounded-lg flex items-center justify-center font-bold text-white shrink-0 border border-white/10 transition-all',
+                      isHeaderSticky ? 'w-7 h-7 text-[10px]' : 'w-8 h-8 text-xs',
+                    )}
+                    style={{ background: `linear-gradient(135deg, hsl(${hue} 72% 52%), hsl(${(hue + 35) % 360} 68% 38%))` }}
+                  >
+                    {crew.name.charAt(0).toUpperCase()}
+                  </div>
+
+                  {/* Name + badges */}
+                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                    <Heading level={3} className={cn('font-semibold truncate mb-0 transition-all', isHeaderSticky ? 'text-[13px]' : 'text-[14px]')}>
+                      {crew.name}
+                    </Heading>
+                    {crew.visibility && (
+                      <Badge variant="outline" className="hidden sm:inline-flex text-[9px] uppercase font-mono shrink-0">
+                        {String(crew.visibility).replace('_', ' ')}
+                      </Badge>
+                    )}
+                    {!isHeaderSticky && crew.description && (
+                      <Text variant="muted" size="xs" className="line-clamp-1 ml-1 hidden md:inline">{crew.description}</Text>
+                    )}
+                    {!isHeaderSticky && (
+                      <CrewStatusPill completionRate={completionRate} crewTasks={crewTasks} members={members} size="sm" />
+                    )}
+                    <SaveToggle entityType={ENTITY_TYPES?.CREW || 'crew'} entityId={crew.id} className="ml-auto sm:ml-1" />
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <Button variant="primary" size="sm" onClick={() => setActiveTab('tasks')} className="gap-1 text-[11px] h-7 shadow-sm">
+                      <Icons.plus className="w-3 h-3" /> Add Task
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setActiveTab('whiteboards')} className="gap-1 text-[11px] h-7 hidden sm:inline-flex">
+                      <Icons.pencil className="w-3 h-3" /> New Board
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleLeaveCrew} className="gap-1 text-[11px] h-7 hidden sm:inline-flex text-[var(--danger)] hover:text-[var(--danger)]">
+                      <Icons.logout className="w-3 h-3" /> Leave
+                    </Button>
+                    <Button
+                      variant="ghost" size="sm"
+                      onClick={() => setShowSidebar(!showSidebar)}
+                      className={cn('gap-1 text-[11px] h-7 px-2', showSidebar && 'text-[var(--accent)] bg-[var(--accent-soft)]')}
+                      title="Activity feed"
+                    >
+                      <Icons.activity className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8">
+              <CrewTabs activeTab={activeTab} setActiveTab={setActiveTab} tabCounts={tabCounts} sticky={false} />
+            </div>
+
+            {/* Content Area (with optional activity sidebar) */}
+            <div className="flex-1 min-h-0 max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 pb-12">
+              <div className="flex gap-0">
+                {/* Main Content */}
+                <div className="flex-1 min-w-0">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={activeTab}
@@ -203,32 +398,127 @@ export function CrewDetailPage() {
                       transition={{ duration: 0.15, ease: 'easeOut' }}
                     >
                       {activeTab === 'overview' && (
-                        <OverviewTab
-                          crew={crew}
-                          members={members}
-                          sharedProjects={sharedProjects}
-                          crewTasks={crewTasks}
-                          channels={channels}
-                          completionRate={completionRate}
-                          setActiveTab={setActiveTab}
-                          isCreator={isCreator}
-                        />
+                        <>
+                          <div className="pt-4">
+                            <CrewHeader
+                              crew={crew}
+                              members={members}
+                              sharedProjects={sharedProjects}
+                              crewTasks={crewTasks}
+                              channels={channels}
+                              completionRate={completionRate}
+                              isCreator={isCreator}
+                              onLeave={handleLeaveCrew}
+                              onOpenChat={() => setActiveTab('channels')}
+                              onOpenTasks={() => setActiveTab('tasks')}
+                              onNewBoard={() => setActiveTab('whiteboards')}
+                            />
+                          </div>
+                          <div className="pt-4">
+                            <OverviewTab
+                              crew={crew}
+                              members={members}
+                              sharedProjects={sharedProjects}
+                              crewTasks={crewTasks}
+                              channels={channels}
+                              completionRate={completionRate}
+                              setActiveTab={setActiveTab}
+                              isCreator={isCreator}
+                            />
+                          </div>
+                        </>
                       )}
-                      {activeTab === 'tasks' && <TasksTab crewId={crewId} tasks={crewTasks} />}
-                      {activeTab === 'channels' && <ChannelsTab crewId={crewId} channels={channels} isCreator={isCreator} />}
-                      {activeTab === 'projects' && <ProjectsTab crewId={crewId} sharedProjects={sharedProjects} allProjects={allProjects} />}
-                      {activeTab === 'whiteboards' && <WhiteboardsTab crewId={crewId} isCreator={isCreator} />}
-                      {activeTab === 'members' && <MembersTab crewId={crewId} members={members} memberCap={crew?.memberCap} isCreator={isCreator} />}
+                      {activeTab === 'tasks' && (
+                        <div className="pt-4">
+                          <TasksTab crewId={crewId} tasks={crewTasks} />
+                        </div>
+                      )}
+                      {activeTab === 'channels' && (
+                        <div className="pt-4">
+                          <ChannelsTab crewId={crewId} channels={channels} isCreator={isCreator} />
+                        </div>
+                      )}
+                      {activeTab === 'projects' && (
+                        <div className="pt-4">
+                          <ProjectsTab crewId={crewId} sharedProjects={sharedProjects} allProjects={allProjects} />
+                        </div>
+                      )}
+                      {activeTab === 'whiteboards' && (
+                        <div className="pt-4">
+                          <WhiteboardsTab crewId={crewId} isCreator={isCreator} />
+                        </div>
+                      )}
+                      {activeTab === 'members' && (
+                        <div className="pt-4">
+                          <MembersTab crewId={crewId} members={members} memberCap={crew?.memberCap} isCreator={isCreator} />
+                        </div>
+                      )}
                     </motion.div>
                   </AnimatePresence>
                 </div>
+
+                {/* Sidebar: Activity Feed */}
+                <AnimatePresence>
+                  {showSidebar && (
+                    <motion.aside
+                      initial={{ width: 0, opacity: 0 }}
+                      animate={{ width: 280, opacity: 1 }}
+                      exit={{ width: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden shrink-0 border-l border-[var(--border-subtle)]"
+                    >
+                      <div className="w-[280px] pl-5 pr-3 pt-3 h-full max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-thin">
+                        <div className="flex items-center justify-between mb-3 sticky top-0 bg-[var(--bg-base)] z-10 pb-2">
+                          <div className="flex items-center gap-1.5">
+                            <Icons.activity className="w-4 h-4 text-[var(--accent)]" />
+                            <Heading level={4} className="text-[12px] font-semibold tracking-tight mb-0">
+                              Activity Feed
+                            </Heading>
+                          </div>
+                          <Badge variant="outline" className="text-[9px] px-1.5 py-0">
+                            {activityFeed.length}
+                          </Badge>
+                        </div>
+
+                        {activityFeed.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center py-12 text-center">
+                            <Icons.activity className="w-8 h-8 text-[var(--text-muted)] mb-3 opacity-40" />
+                            <Text size="xs" className="text-[var(--text-muted)]">
+                              No recent activity
+                            </Text>
+                            <Text size="xs" className="text-[var(--text-muted)] mt-0.5">
+                              Actions will appear here
+                            </Text>
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-[var(--border-subtle)]">
+                            {activityFeed.map((item, i) => (
+                              <ActivityItem
+                                key={`${item.type}-${i}`}
+                                type={item.type}
+                                user={item.user}
+                                action={item.action}
+                                target={item.target}
+                                time={item.time}
+                                hue={(hue + i * 20) % 360}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </motion.aside>
+                  )}
+                </AnimatePresence>
               </div>
-            </PageContent>
-          </>
+            </div>
+          </div>
         )}
       </PageState>
 
       {confirmDialog}
+
+      {/* Quick Jump FAB */}
+      <QuickJumpFab visible={showFab} />
     </PageShell>
   );
 }

@@ -15,16 +15,15 @@ import {
   ModalFooter,
 } from '@/shared/ui/Modal';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/Select';
-import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
-import { useShareProjectWithCrew, useUnshareProjectFromCrew } from '@/crew/features/hooks/useCrews';
+import { ImmersiveEmptyState } from '@/shared/ui/Immersive';
+import { useShareProjectWithCrew, useUnshareProjectFromCrew } from '@/crew';
 import { Link } from 'react-router-dom';
 import {
   FolderKanban,
   Star,
   ArrowUpRight,
   Unlink,
-  Activity,
   AlertTriangle,
   CheckCircle2,
   Plus,
@@ -33,8 +32,6 @@ import {
   Search,
   Filter,
   RefreshCw,
-  Calendar,
-  Users,
   ShieldAlert,
   Sparkles,
   Clock,
@@ -107,7 +104,7 @@ function formatDate(dateStr) {
 function getHealthInfo(project) {
   const completion = project.completion ?? project.progress ?? 0;
   const isOverdue = project.dueDate && new Date(project.dueDate) < new Date() && completion < 100;
-  
+
   if (project.health === 'Delayed' || project.health === 'Critical' || isOverdue) {
     return {
       status: 'Delayed',
@@ -119,7 +116,7 @@ function getHealthInfo(project) {
       Icon: ShieldAlert,
     };
   }
-  
+
   if (project.health === 'At Risk' || (completion > 0 && completion < 40)) {
     return {
       status: 'At Risk',
@@ -175,7 +172,7 @@ function ProjectsTabSkeleton({ viewMode }) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
       {[1, 2, 3, 4, 5, 6].map((i) => (
         <div key={i} className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-5 space-y-4">
           <div className="flex items-center justify-between">
@@ -212,25 +209,23 @@ function SharedProjectCard({ project, index, isFavorite, onToggleFavorite, onReq
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.2, delay: index * 0.04 }}
-      className="group relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden hover:border-[var(--accent-border)] hover:shadow-md transition-all duration-200 flex flex-col"
+      className="group relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden hover:border-[var(--accent-border)] hover:shadow-sm transition-all flex flex-col"
     >
-      {/* Top Banner Accent */}
-      <div className="h-2 bg-gradient-to-r from-[var(--accent)] via-indigo-500 to-sky-400 opacity-80 group-hover:opacity-100 transition-opacity" />
+      {/* Health accent bar at top */}
+      <div className={cn('h-0.5 w-full shrink-0', healthInfo.dotColor)} />
 
-      <div className="p-5 flex-1 flex flex-col">
-        {/* Header Badges & Actions */}
+      <div className="p-4 flex-1 flex flex-col">
+        {/* Header: Category & Health Chip + Favorite Action */}
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <Badge variant="primary" size="xs" className="font-semibold uppercase tracking-wider">
+            <Badge variant="outline" size="xs" className="text-[10px] uppercase tracking-wider font-semibold">
               {category}
             </Badge>
             <span className={cn(
-              "text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 border",
-              healthInfo.indicatorBg,
-              healthInfo.indicatorText,
-              "border-current/20"
+              "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] font-medium",
+              healthInfo.indicatorText
             )}>
-              <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", healthInfo.dotColor)} />
+              <span className={cn("w-1.5 h-1.5 rounded-full", healthInfo.dotColor)} />
               {healthInfo.label}
             </span>
           </div>
@@ -240,7 +235,7 @@ function SharedProjectCard({ project, index, isFavorite, onToggleFavorite, onReq
             variant="ghost"
             size="xs"
             onClick={() => onToggleFavorite(project.id)}
-            className="text-[var(--text-muted)] hover:text-amber-500 transition-colors"
+            className="text-[var(--text-muted)] hover:text-amber-500 transition-colors shrink-0"
             title={isFavorite ? 'Remove favorite' : 'Mark favorite'}
           >
             <Star className={cn("w-4 h-4", isFavorite && "fill-amber-500 text-amber-500")} />
@@ -248,7 +243,7 @@ function SharedProjectCard({ project, index, isFavorite, onToggleFavorite, onReq
         </div>
 
         {/* Project Title & Info */}
-        <div className="mb-4">
+        <div className="mb-3">
           <Heading level={4} className="text-[15px] font-semibold tracking-tight text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors line-clamp-1">
             {project.name}
           </Heading>
@@ -260,24 +255,26 @@ function SharedProjectCard({ project, index, isFavorite, onToggleFavorite, onReq
         </div>
 
         {/* Radar & Task Metrics Box */}
-        <div className="p-3.5 bg-[var(--bg-subtle)]/60 rounded-xl border border-[var(--border-subtle)] mb-4 flex items-center justify-between gap-4">
+        <div className="p-3 bg-[var(--bg-subtle)]/60 rounded-lg border border-[var(--border-subtle)] mb-4 flex items-center justify-between gap-4">
           <div className="flex-1 space-y-2">
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="font-medium text-[var(--text-secondary)]">Task Execution</span>
-              <span className="font-mono text-[var(--text-muted)] font-semibold">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">
+                Task Execution
+              </span>
+              <span className="font-mono text-[11px] text-[var(--text-muted)] font-semibold">
                 {completedTasks}/{totalTasks}
               </span>
             </div>
             <Progress value={(completedTasks / Math.max(totalTasks, 1)) * 100} className="h-1.5" />
-            <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)] pt-0.5">
-              <span>Updated {formatDate(project.lastUpdated || project.updatedAt)}</span>
+            <div className="text-[10px] text-[var(--text-muted)]">
+              Updated {formatDate(project.lastUpdated || project.updatedAt)}
             </div>
           </div>
-          <ProgressRing progress={completion} size={46} strokeWidth={4} />
+          <ProgressRing progress={completion} size={44} strokeWidth={4} />
         </div>
 
         {/* Footer: Lead Avatar & Actions */}
-        <div className="mt-auto pt-3.5 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2">
+        <div className="mt-auto pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2">
           {/* Squad Avatars */}
           <div className="flex items-center gap-2 min-w-0">
             <div className="relative shrink-0" title={`Project Lead: ${ownerName}`}>
@@ -305,10 +302,10 @@ function SharedProjectCard({ project, index, isFavorite, onToggleFavorite, onReq
           </div>
 
           {/* Quick Links */}
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-0.5 shrink-0">
             <Link
               to={`/app/projects/${project.id}`}
-              className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-colors"
+              className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-colors"
               title="Open Project Workspace"
             >
               <ArrowUpRight className="w-4 h-4" />
@@ -342,9 +339,9 @@ function MiniGanttTimelineView({ projects, isFavorite, onToggleFavorite, onReque
   ];
 
   return (
-    <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden shadow-sm">
+    <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden">
       {/* Timeline Header */}
-      <div className="grid grid-cols-12 gap-2 p-4 bg-[var(--bg-subtle)]/70 border-b border-[var(--border-subtle)] text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+      <div className="grid grid-cols-12 gap-2 p-4 bg-[var(--bg-subtle)]/50 border-b border-[var(--border-subtle)] text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
         <div className="col-span-5 md:col-span-4">Project & Health Radar</div>
         <div className="col-span-7 md:col-span-8 grid grid-cols-4 gap-2 text-center border-l border-[var(--border-subtle)] pl-4">
           {visibleMonths.map((m, idx) => (
@@ -372,7 +369,7 @@ function MiniGanttTimelineView({ projects, isFavorite, onToggleFavorite, onReque
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.15, delay: index * 0.03 }}
-              className="grid grid-cols-12 gap-2 p-4 items-center hover:bg-[var(--bg-subtle)]/40 transition-colors"
+              className="grid grid-cols-12 gap-2 p-4 items-center hover:bg-[var(--bg-subtle)]/30 transition-colors"
             >
               {/* Project Metadata Column */}
               <div className="col-span-5 md:col-span-4 pr-2 space-y-1.5">
@@ -451,7 +448,7 @@ function MiniGanttTimelineView({ projects, isFavorite, onToggleFavorite, onReque
   );
 }
 
-// Main ProjectsTab Mission Execution Board Component
+// Main ProjectsTab — Crew Shared Projects
 export function ProjectsTab({
   crewId,
   sharedProjects = [],
@@ -539,7 +536,7 @@ export function ProjectsTab({
           description="We encountered an issue fetching the mission board for this crew. Please verify network connectivity."
           action={
             refetch && (
-              <Button size="sm" variant="outline" onClick={refetch} className="gap-2">
+              <Button size="sm" variant="outline" onClick={refetch} className="gap-1.5 h-8 text-[12px]">
                 <RefreshCw className="w-3.5 h-3.5" /> Retry Load
               </Button>
             )
@@ -551,32 +548,31 @@ export function ProjectsTab({
 
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-[1400px] mx-auto">
-      {/* Board Header & Control Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-border)] flex items-center justify-center text-[var(--accent)] shrink-0">
-              <FolderKanban className="w-4.5 h-4.5" />
-            </div>
-            <div>
-              <Heading level={3} className="text-[16px] font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2">
-                Mission Execution Board
-                <Badge variant="primary" size="xs" className="font-mono">
-                  {sharedProjects.length}
-                </Badge>
-              </Heading>
-              <Text variant="muted" className="text-[12px] mt-0.5">
-                Centralized squad projects with real-time health radar, task linkage, and Gantt tracking.
-              </Text>
-            </div>
+      {/* Section Header & Toolbar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {/* Section Header */}
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[var(--accent-soft)] border border-[var(--accent-border)] flex items-center justify-center text-[var(--accent)] shrink-0">
+            <FolderKanban className="w-4 h-4" />
+          </div>
+          <div>
+            <Heading level={3} className="text-[14px] font-semibold tracking-tight text-[var(--text-primary)] flex items-center gap-2">
+              Shared Projects
+              <Badge variant="outline" size="xs" className="font-mono">
+                {sharedProjects.length}
+              </Badge>
+            </Heading>
+            <Text variant="muted" className="text-[12px] mt-0.5">
+              Execution projects linked to this crew, with live health and task tracking.
+            </Text>
           </div>
         </div>
 
         {/* Toolbar Controls */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Search Box */}
-          <div className="relative flex-1 sm:w-56">
-            <Search className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <div className="relative flex-1 sm:w-52">
+            <Search className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <Input
               type="text"
               placeholder="Search projects..."
@@ -588,10 +584,10 @@ export function ProjectsTab({
 
           {/* Health Radar Filter Dropdown */}
           <Select value={healthFilter} onValueChange={setHealthFilter}>
-            <SelectTrigger className="h-8 w-[140px] text-[12px] bg-[var(--bg-card)] border-[var(--border-subtle)] font-medium">
+            <SelectTrigger className="h-8 w-[136px] text-[12px] bg-[var(--bg-card)] border-[var(--border-subtle)] font-medium">
               <SelectValue placeholder="Health Status" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl">
+            <SelectContent className="rounded-lg">
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="on_track">🟢 On Track</SelectItem>
               <SelectItem value="at_risk">🟡 At Risk</SelectItem>
@@ -601,35 +597,41 @@ export function ProjectsTab({
           </Select>
 
           {/* View Switcher (Grid vs Mini-Gantt) */}
-          <div className="flex items-center bg-[var(--bg-subtle)] p-0.5 rounded-lg border border-[var(--border-subtle)]">
-            <IconButton
+          <div className="flex items-center gap-1 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg p-1">
+            <button
               type="button"
-              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-              size="xs"
               onClick={() => setViewMode('grid')}
-              className={cn("h-7 px-2 gap-1.5 text-[11px] font-semibold", viewMode === 'grid' && "bg-[var(--bg-card)] shadow-xs")}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium transition-all',
+                viewMode === 'grid'
+                  ? 'bg-[var(--accent-soft)] text-[var(--accent)] shadow-sm'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
+              )}
               title="Grid Cards View"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Grid</span>
-            </IconButton>
-            <IconButton
+            </button>
+            <button
               type="button"
-              variant={viewMode === 'timeline' ? 'secondary' : 'ghost'}
-              size="xs"
               onClick={() => setViewMode('timeline')}
-              className={cn("h-7 px-2 gap-1.5 text-[11px] font-semibold", viewMode === 'timeline' && "bg-[var(--bg-card)] shadow-xs")}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium transition-all',
+                viewMode === 'timeline'
+                  ? 'bg-[var(--accent-soft)] text-[var(--accent)] shadow-sm'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
+              )}
               title="Mini-Gantt Timeline View"
             >
               <GanttChart className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Timeline</span>
-            </IconButton>
+            </button>
           </div>
 
           {/* Share Project Modal Trigger */}
           <Button
             size="sm"
-            className="h-8 text-[12px] font-semibold gap-1.5 shadow-sm"
+            className="h-8 text-[12px] font-medium gap-1.5"
             onClick={() => setIsShareModalOpen(true)}
           >
             <Plus className="w-3.5 h-3.5" /> Share Project
@@ -642,17 +644,19 @@ export function ProjectsTab({
         <ProjectsTabSkeleton viewMode={viewMode} />
       ) : sharedProjects.length === 0 ? (
         /* UX State 2: Empty State */
-        <EmptyState
+        <ImmersiveEmptyState
           icon={FolderKanban}
-          title="No Shared Projects Yet"
-          description="Link execution projects to this crew workspace to track mission objectives, health radar badges, and task deliverables together."
-          actionLabel="Share First Project"
-          onAction={() => setIsShareModalOpen(true)}
-          className="bg-[var(--bg-card)]"
+          title="No shared projects yet"
+          description="Link execution projects to this crew workspace to track objectives, health radar badges, and task deliverables together."
+          action={
+            <Button size="sm" onClick={() => setIsShareModalOpen(true)} className="h-8 text-[12px] gap-1.5">
+              <Plus className="w-3.5 h-3.5" /> Share First Project
+            </Button>
+          }
         />
       ) : filteredProjects.length === 0 ? (
         /* UX State 6: Filtered Empty State */
-        <div className="flex flex-col items-center justify-center py-12 text-center bg-[var(--bg-card)] border border-dashed border-[var(--border-subtle)] rounded-xl p-6">
+        <div className="flex flex-col items-center justify-center py-12 text-center bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-6">
           <Filter className="w-8 h-8 text-[var(--text-muted)] mb-2.5 opacity-60" />
           <Heading level={4} className="text-[14px] font-semibold text-[var(--text-primary)] mb-1">
             No projects match your filter
@@ -667,14 +671,14 @@ export function ProjectsTab({
               setSearchQuery('');
               setHealthFilter('all');
             }}
-            className="text-[12px] gap-1.5"
+            className="h-8 text-[12px] gap-1.5"
           >
             <RefreshCw className="w-3 h-3" /> Clear Filters
           </Button>
         </div>
       ) : viewMode === 'grid' ? (
         /* UX State 4: Active Grid View */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <AnimatePresence mode="popLayout">
             {filteredProjects.map((project, index) => (
               <SharedProjectCard
@@ -702,7 +706,7 @@ export function ProjectsTab({
       <Modal open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
         <ModalContent className="sm:max-w-md">
           <ModalHeader>
-            <ModalTitle className="flex items-center gap-2 text-[16px]">
+            <ModalTitle className="flex items-center gap-2 text-[15px] font-semibold">
               <Sparkles className="w-4 h-4 text-[var(--accent)]" />
               Share Project with Crew
             </ModalTitle>
@@ -725,7 +729,7 @@ export function ProjectsTab({
                   <SelectTrigger className="w-full h-10 text-[13px] bg-[var(--bg-card)] border-[var(--border-default)]">
                     <SelectValue placeholder="Choose a project to link..." />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl max-h-60">
+                  <SelectContent className="rounded-lg max-h-60">
                     {shareableProjects.map((proj) => (
                       <SelectItem key={proj.id} value={String(proj.id)}>
                         <div className="flex items-center justify-between gap-4 w-full">
@@ -748,7 +752,7 @@ export function ProjectsTab({
               variant="outline"
               size="sm"
               onClick={() => setIsShareModalOpen(false)}
-              className="text-[12px]"
+              className="h-8 text-[12px]"
             >
               Cancel
             </Button>
@@ -757,7 +761,7 @@ export function ProjectsTab({
               size="sm"
               onClick={handleShareSubmit}
               disabled={!selectedProjId || shareMutation.isPending || shareableProjects.length === 0}
-              className="text-[12px] gap-1.5"
+              className="h-8 text-[12px] gap-1.5"
             >
               {shareMutation.isPending ? (
                 <>
@@ -777,8 +781,8 @@ export function ProjectsTab({
       <Modal open={!!unshareTarget} onOpenChange={(open) => !open && setUnshareTarget(null)}>
         <ModalContent className="sm:max-w-md">
           <ModalHeader>
-            <ModalTitle className="text-[16px] text-[var(--danger)] flex items-center gap-2">
-              <AlertTriangle className="w-4.5 h-4.5 shrink-0" />
+            <ModalTitle className="text-[15px] font-semibold text-[var(--danger)] flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
               Unshare Project from Crew?
             </ModalTitle>
             <ModalDescription className="text-[13px]">
@@ -793,7 +797,7 @@ export function ProjectsTab({
               variant="outline"
               size="sm"
               onClick={() => setUnshareTarget(null)}
-              className="text-[12px]"
+              className="h-8 text-[12px]"
             >
               Cancel
             </Button>
@@ -803,7 +807,7 @@ export function ProjectsTab({
               size="sm"
               onClick={handleConfirmUnshare}
               disabled={unshareMutation.isPending}
-              className="text-[12px] gap-1.5"
+              className="h-8 text-[12px] gap-1.5"
             >
               {unshareMutation.isPending ? (
                 <>
@@ -821,4 +825,3 @@ export function ProjectsTab({
     </div>
   );
 }
-

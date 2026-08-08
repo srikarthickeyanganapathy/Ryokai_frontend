@@ -271,9 +271,12 @@ export function AppSidebar({ isOpen, onClose }) {
     ],
     CREWS: [
       { to: '/app/calendar', icon: ICONS.calendar, label: 'Calendar' },
+      { to: '/app/notes', icon: ICONS.notes, label: 'Notes' },
       { to: '/app/analytics', icon: ICONS.analytics, label: 'Analytics' },
     ],
     ORG: [
+      { to: '/app/calendar', icon: ICONS.calendar, label: 'Calendar' },
+      { to: '/app/notes', icon: ICONS.notes, label: 'Notes' },
       { to: '/app/goals', icon: ICONS.goals, label: 'Goals' },
       { to: '/app/workload', icon: ICONS.workload, label: 'Workload' },
       { to: '/app/leave-requests', icon: ICONS.leave, label: 'Leaves' },

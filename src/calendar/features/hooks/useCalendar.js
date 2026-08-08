@@ -1,35 +1,78 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as calendarApi from '../api/calendar.api';
 import { queryKeys } from '@/shared/api/queryKeys';
+import { normalizeCalendarEvent } from '../../entities/model/normalizer';
 import { toast } from 'sonner';
 
-export function useCalendarEvents(start, end) {
+/**
+ * Derive a stable scope key from workspace scope for query key partitioning.
+ */
+const scopeKey = (scope) => {
+  if (scope?.orgId) return `org:${scope.orgId}`;
+  if (scope?.crewId) return `crew:${scope.crewId}`;
+  return 'personal';
+};
+
+export { scopeKey };
+
+/**
+ * Fetch events for a date range + workspace scope.
+ */
+export function useCalendarEvents(start, end, scope = {}) {
+  const sk = scopeKey(scope);
   return useQuery({
-    queryKey: queryKeys.calendarEvents.range(start, end),
-    queryFn: () => calendarApi.getCalendarEvents(start, end),
+    queryKey: queryKeys.calendarEvents.range(start, end, sk),
+    queryFn: async () => {
+      const events = await calendarApi.getCalendarEvents(start, end, scope);
+      return Array.isArray(events) ? events.map(normalizeCalendarEvent) : events;
+    },
     enabled: !!start && !!end,
   });
 }
 
-export function useCreateEvent() {
+export function useCreateEvent(scope = {}) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: calendarApi.createCalendarEvent,
+    mutationFn: (payload) => calendarApi.createCalendarEvent(payload, scope),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.calendarEvents.all });
+      queryClient.invalidateQueries({ queryKey: ['calendarEvents'] });
     },
     onError: () => toast.error('Could not create event'),
   });
 }
 
+/**
+ * Update event with optimistic UI — patches all cached calendar event
+ * query arrays in-place, rolls back on error.
+ */
 export function useUpdateEvent() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, payload }) => calendarApi.updateCalendarEvent(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.calendarEvents.all });
+    onMutate: async ({ id, payload }) => {
+      await queryClient.cancelQueries({ queryKey: ['calendarEvents'] });
+      const snapshots = {};
+      queryClient.getQueriesData({ queryKey: ['calendarEvents'] }).forEach(([k, data]) => {
+        snapshots[k] = data;
+        if (Array.isArray(data)) {
+          queryClient.setQueryData(k, data.map(ev =>
+            ev.id === id ? { ...ev, ...payload, id } : ev
+          ));
+        }
+      });
+      return { snapshots };
     },
-    onError: () => toast.error('Could not update event'),
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.snapshots) {
+        Object.entries(ctx.snapshots).forEach(([k, data]) => {
+          queryClient.setQueryData(k, data);
+        });
+      }
+      toast.error('Could not update event');
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['calendarEvents'] });
+    },
   });
 }
 
@@ -38,7 +81,7 @@ export function useDeleteEvent() {
   return useMutation({
     mutationFn: calendarApi.deleteCalendarEvent,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.calendarEvents.all });
+      queryClient.invalidateQueries({ queryKey: ['calendarEvents'] });
     },
     onError: () => toast.error('Could not delete event'),
   });

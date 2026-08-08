@@ -1,69 +1,59 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
+import { format, isToday, isSameDay } from 'date-fns'
+import {
   Pin, Plus, Trash2, Search, StickyNote, Calendar, FileText, Clock,
-  Sparkles, TrendingUp, Hash, Edit3, ArrowUpDown, Layers, CheckCircle2,
-  Lightbulb, BookOpen, Zap, Archive
+  Sparkles, Hash, ArrowUpDown, Layers, CheckCircle2,
+  Lightbulb, BookOpen, Archive, LayoutGrid, List as ListIcon,
+  PenLine, Check, Timer, CornerDownLeft, TrendingUp
 } from '@/shared/ui/Icons'
 import { Button } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Input } from '@/shared/ui/Input'
 import { Badge } from '@/shared/ui/Badge'
 import { cn } from '@/shared/lib/cn'
-import { useNotes, useDeleteNote, useUpdateNote } from '@/note'
+import { useNotes, useDeleteNote, useUpdateNote, useCreateNote } from '@/note'
 import { NotePanel } from '@/note'
+import { noteDna } from '../entities/model/dna'
 import { PageShell, PageHero, PageToolbar, PageContent, PageStats } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { InteractiveCard } from '@/shared/ui/InteractiveCard'
+import { SPRINGS, TIMING, EASING, STAGGER_FAST } from '@/shared/lib/uxTokens'
+import { useWorkspace } from '@/shared/workspace-framework'
 
 /* ──────────────────────────────────────────────────────────
  * Color System — maps note.color to gradient + accent styles
  * ────────────────────────────────────────────────────────── */
 const COLOR_THEMES = {
   default: {
-    bg: 'var(--bg-elevated)',
-    glow: 'transparent',
-    accent: 'var(--text-primary)',
-    chip: 'var(--bg-subtle)',
-    border: 'var(--border-subtle)',
+    bg: 'var(--bg-elevated)', glow: 'transparent', accent: 'var(--text-primary)',
+    chip: 'var(--bg-subtle)', border: 'var(--border-subtle)',
     gradient: 'linear-gradient(135deg, var(--bg-elevated), var(--bg-subtle))',
     dotColor: 'var(--text-muted)',
   },
   amber: {
-    bg: 'rgba(245, 158, 11, 0.04)',
-    glow: 'rgba(245, 158, 11, 0.12)',
-    accent: '#F59E0B',
-    chip: 'rgba(245, 158, 11, 0.1)',
-    border: 'rgba(245, 158, 11, 0.2)',
+    bg: 'rgba(245, 158, 11, 0.04)', glow: 'rgba(245, 158, 11, 0.12)', accent: '#F59E0B',
+    chip: 'rgba(245, 158, 11, 0.1)', border: 'rgba(245, 158, 11, 0.2)',
     gradient: 'linear-gradient(135deg, rgba(245,158,11,0.06), rgba(245,158,11,0.02))',
     dotColor: '#F59E0B',
   },
   rose: {
-    bg: 'rgba(244, 63, 94, 0.04)',
-    glow: 'rgba(244, 63, 94, 0.12)',
-    accent: '#F43F5E',
-    chip: 'rgba(244, 63, 94, 0.1)',
-    border: 'rgba(244, 63, 94, 0.2)',
+    bg: 'rgba(244, 63, 94, 0.04)', glow: 'rgba(244, 63, 94, 0.12)', accent: '#F43F5E',
+    chip: 'rgba(244, 63, 94, 0.1)', border: 'rgba(244, 63, 94, 0.2)',
     gradient: 'linear-gradient(135deg, rgba(244,63,94,0.06), rgba(244,63,94,0.02))',
     dotColor: '#F43F5E',
   },
   sky: {
-    bg: 'rgba(14, 165, 233, 0.04)',
-    glow: 'rgba(14, 165, 233, 0.12)',
-    accent: '#0EA5E9',
-    chip: 'rgba(14, 165, 233, 0.1)',
-    border: 'rgba(14, 165, 233, 0.2)',
+    bg: 'rgba(14, 165, 233, 0.04)', glow: 'rgba(14, 165, 233, 0.12)', accent: '#0EA5E9',
+    chip: 'rgba(14, 165, 233, 0.1)', border: 'rgba(14, 165, 233, 0.2)',
     gradient: 'linear-gradient(135deg, rgba(14,165,233,0.06), rgba(14,165,233,0.02))',
     dotColor: '#0EA5E9',
   },
   violet: {
-    bg: 'rgba(139, 92, 246, 0.04)',
-    glow: 'rgba(139, 92, 246, 0.12)',
-    accent: '#8B5CF6',
-    chip: 'rgba(139, 92, 246, 0.1)',
-    border: 'rgba(139, 92, 246, 0.2)',
+    bg: 'rgba(139, 92, 246, 0.04)', glow: 'rgba(139, 92, 246, 0.12)', accent: '#8B5CF6',
+    chip: 'rgba(139, 92, 246, 0.1)', border: 'rgba(139, 92, 246, 0.2)',
     gradient: 'linear-gradient(135deg, rgba(139,92,246,0.06), rgba(139,92,246,0.02))',
     dotColor: '#8B5CF6',
   },
@@ -76,10 +66,27 @@ const SORT_OPTIONS = [
   { id: 'words', label: 'Word Count', icon: FileText },
 ]
 
-/* ──────────────────────────────────────────────────────────
- * MiniMarkdownPreview — lightweight inline markdown rendering
- * for card previews (strips code blocks, shows structure)
- * ────────────────────────────────────────────────────────── */
+const FRESHNESS_COLORS = {
+  fresh: 'var(--success)',
+  recent: 'var(--warning)',
+  old: 'var(--text-tertiary)',
+}
+
+const TYPE_META = {
+  text: { label: 'Text', color: 'var(--text-muted)' },
+  checklist: { label: 'Checklist', color: 'var(--success)' },
+  code: { label: 'Code', color: 'var(--accent)' },
+  quote: { label: 'Quote', color: 'var(--warning)' },
+}
+
+function detectType(content) {
+  const c = content || ''
+  if (/^[-*]\s+\[[ xX]\]\s+/m.test(c)) return 'checklist'
+  if (c.includes('```')) return 'code'
+  if (/^>\s/m.test(c)) return 'quote'
+  return 'text'
+}
+
 function MiniMarkdownPreview({ content, maxLines = 4 }) {
   const preview = useMemo(() => {
     if (!content?.trim()) return []
@@ -126,7 +133,7 @@ function MiniMarkdownPreview({ content, maxLines = 4 }) {
           case 'todo': return (
             <div key={i} className={cn("flex items-center gap-1.5 text-[11px]", line.done ? "text-[var(--text-muted)] line-through" : "text-[var(--text-secondary)]")}>
               <span className={cn("w-3 h-3 rounded border shrink-0 flex items-center justify-center", line.done ? "bg-[var(--success)] border-[var(--success)]" : "border-[var(--border-subtle)]")}>
-                {line.done && <CheckCircle2 className="w-2.5 h-2.5 text-white" />}
+                {line.done && <Check className="w-2.5 h-2.5 text-white" />}
               </span>
               <span className="truncate">{formatInline(line.text)}</span>
             </div>
@@ -142,24 +149,118 @@ function MiniMarkdownPreview({ content, maxLines = 4 }) {
   )
 }
 
-/* ──────────────────────────────────────────────────────────
- * NoteCard — premium note card with markdown preview,
- * color theming, hover actions, and metadata
- * ────────────────────────────────────────────────────────── */
+function CaptureStrip({ onCreate, isCreating }) {
+  const [open, setOpen] = useState(false)
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+  const type = detectType(content)
+  const typeMeta = TYPE_META[type]
+  const wordCount = content.trim() ? content.trim().split(/\s+/).filter(Boolean).length : 0
+  const inputRef = useRef(null)
+
+  useEffect(() => {
+    if (open) inputRef.current?.focus()
+  }, [open])
+
+  const submit = useCallback(() => {
+    const trimmed = content.trim()
+    if (!trimmed) return
+    const fallbackTitle = trimmed.split('\n')[0]?.replace(/^[#>*\s-]+/, '').replace(/^\[[ xX]\]\s*/, '').slice(0, 60) || 'Untitled Note'
+    onCreate({
+      title: title.trim() || fallbackTitle,
+      content: trimmed,
+      color: 'default',
+      isPinned: false,
+    })
+    setTitle('')
+    setContent('')
+    setOpen(false)
+  }, [title, content, onCreate])
+
+  const onKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }
+    else if (e.key === 'Escape' && open) { setOpen(false); setTitle(''); setContent('') }
+  }
+
+  return (
+    <motion.div layout className="relative">
+      <AnimatePresence mode="wait" initial={false}>
+        {!open ? (
+          <motion.button
+            key="collapsed"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15, ease: EASING.out }}
+            onClick={() => setOpen(true)}
+            className="w-full flex items-center gap-3 px-4 h-11 rounded-xl border border-dashed border-[var(--border-subtle)] bg-[var(--bg-elevated)]/60 hover:border-[var(--accent-border)] hover:bg-[var(--accent-soft)]/40 transition-colors group cursor-text"
+          >
+            <PenLine className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors" strokeWidth={1.5} />
+            <span className="text-[13px] text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors">Capture a thought — it becomes a note</span>
+            <span className="ml-auto hidden sm:flex items-center gap-1 text-[10px] font-mono text-[var(--text-tertiary)]">
+              <kbd className="px-1.5 py-0.5 rounded border border-[var(--border-subtle)] bg-[var(--bg-subtle)]">Enter</kbd>
+              <span>to save</span>
+            </span>
+          </motion.button>
+        ) : (
+          <motion.div
+            key="expanded"
+            initial={{ opacity: 0, y: 6, scale: 0.99 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6, scale: 0.99 }}
+            transition={SPRINGS.fast}
+            className="rounded-xl border border-[var(--accent-border)] bg-[var(--bg-elevated)] shadow-lg overflow-hidden"
+          >
+            <input
+              ref={inputRef}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={onKeyDown}
+              placeholder="Note title (optional — auto-detected from content)"
+              className="w-full px-4 py-3 bg-transparent text-[14px] font-semibold tracking-tight text-[var(--text-primary)] placeholder:text-[var(--text-muted)] border-b border-[var(--border-subtle)] focus:outline-none"
+            />
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              onKeyDown={onKeyDown}
+              placeholder="Start typing… - [ ] makes a checklist, triple-backtick makes code, > makes a quote"
+              rows={3}
+              className="w-full px-4 py-3 bg-transparent text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none resize-none leading-relaxed"
+            />
+            <div className="flex items-center gap-2 px-4 py-2.5 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40">
+              <span
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold font-mono transition-colors"
+                style={{ backgroundColor: `${typeMeta.color}15`, color: typeMeta.color }}
+              >
+                {type === 'checklist' && <CheckCircle2 className="w-3 h-3" />}
+                {type === 'code' && <Hash className="w-3 h-3" />}
+                {type === 'quote' && <Lightbulb className="w-3 h-3" />}
+                {type === 'text' && <FileText className="w-3 h-3" />}
+                {typeMeta.label}
+              </span>
+              {wordCount > 0 && <span className="text-[10px] font-mono tabular-nums text-[var(--text-muted)]">{wordCount} words</span>}
+              <span className="ml-auto hidden sm:flex items-center gap-1 text-[10px] text-[var(--text-tertiary)] font-mono">
+                <kbd className="px-1 py-0.5 rounded border border-[var(--border-subtle)] bg-[var(--bg-card)]">⏎</kbd> save
+                <span className="mx-1">·</span>
+                <kbd className="px-1 py-0.5 rounded border border-[var(--border-subtle)] bg-[var(--bg-card)]">Esc</kbd> close
+              </span>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" className="h-7 text-[11px]" onClick={() => { setOpen(false); setTitle(''); setContent('') }}>Cancel</Button>
+                <Button size="sm" className="h-7 text-[11px] gap-1" onClick={submit} disabled={isCreating || !content.trim()} isLoading={isCreating}>
+                  <CornerDownLeft className="w-3 h-3" /> Capture
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
 function NoteCard({ note, index, onOpen, onDelete, onTogglePin, isPinnedSection }) {
   const theme = COLOR_THEMES[note.color] || COLOR_THEMES.default
-  const wordCount = useMemo(() => (note.content || '').split(/\s+/).filter(Boolean).length, [note.content])
-  const hasChecklist = useMemo(() => /^[-*]\s+\[[ x]\]\s+/m.test(note.content || ''), [note.content])
-  const checklistTotal = useMemo(() => {
-    const matches = (note.content || '').match(/^[-*]\s+\[[ x]\]\s+/gm)
-    return matches ? matches.length : 0
-  }, [note.content])
-  const checklistDone = useMemo(() => {
-    const matches = (note.content || '').match(/^[-*]\s+\[x\]\s+/gm)
-    return matches ? matches.length : 0
-  }, [note.content])
-  const hasCode = useMemo(() => note.content?.includes('```'), [note.content])
-  const hasQuote = useMemo(() => /^>\s/m.test(note.content || ''), [note.content])
+  const dna = noteDna(note)
   const updatedDate = useMemo(() => {
     if (!note.updatedAt) return null
     const d = new Date(note.updatedAt)
@@ -177,42 +278,31 @@ function NoteCard({ note, index, onOpen, onDelete, onTogglePin, isPinnedSection 
       initial={{ opacity: 0, y: 12, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
-      transition={{ delay: index * 0.04, type: 'spring', stiffness: 300, damping: 24 }}
+      transition={{ delay: Math.min(index * 0.04, 0.4), type: 'spring', stiffness: 300, damping: 24 }}
       whileHover={{ y: -4 }}
       whileTap={{ scale: 0.98 }}
     >
       <InteractiveCard
         onClick={() => onOpen(note)}
         className={cn('h-full p-4 group relative')}
-        style={{
-          background: theme.gradient,
-          borderColor: theme.border,
-        }}
+        style={{ background: theme.gradient, borderColor: theme.border }}
       >
-        {/* Color dot indicator */}
         <div
-          className="absolute top-3 right-3 w-2 h-2 rounded-full opacity-70"
-          style={{ backgroundColor: theme.dotColor }}
+          className="absolute top-3 right-3 w-2 h-2 rounded-full opacity-80"
+          style={{ backgroundColor: FRESHNESS_COLORS[dna.freshness] }}
+          title={dna.freshness === 'fresh' ? 'Edited recently' : dna.freshness === 'recent' ? 'Edited this week' : 'Older note'}
         />
 
-        {/* Pin badge for pinned section */}
         {isPinnedSection && (
           <div className="absolute -top-2 -left-2 w-5 h-5 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-md z-10">
             <Pin className="w-2.5 h-2.5 text-white fill-white" />
           </div>
         )}
 
-        {/* Header: Title + Actions */}
         <div className="flex items-start justify-between gap-2 mb-2.5">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div
-              className="w-1 h-4 rounded-full shrink-0"
-              style={{ backgroundColor: theme.accent }}
-            />
-            <Heading
-              level={4}
-              className="line-clamp-1 text-[13px] font-semibold tracking-tight text-[var(--text-primary)]"
-            >
+            <div className="w-1 h-4 rounded-full shrink-0" style={{ backgroundColor: theme.accent }} />
+            <Heading level={4} className="line-clamp-1 text-[13px] font-semibold tracking-tight text-[var(--text-primary)]">
               {note.title || 'Untitled Note'}
             </Heading>
           </div>
@@ -237,49 +327,70 @@ function NoteCard({ note, index, onOpen, onDelete, onTogglePin, isPinnedSection 
           </div>
         </div>
 
-        {/* Markdown preview body */}
         <div className="min-h-[3.5em] mb-3">
           <MiniMarkdownPreview content={note.content} maxLines={4} />
         </div>
 
-        {/* Feature tags */}
-        {(hasChecklist || hasCode || hasQuote) && (
+        {/* Tags chips */}
+        {note.tags && note.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-2.5">
+            {note.tags.slice(0, 4).map(tag => (
+              <span key={tag} className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium font-mono" style={{ backgroundColor: theme.chip, color: theme.accent }}>
+                {tag}
+              </span>
+            ))}
+            {note.tags.length > 4 && (
+              <span className="text-[9px] font-mono text-[var(--text-muted)]">+{note.tags.length - 4}</span>
+            )}
+          </div>
+        )}
+
+        {dna.hasChecklist && (
+          <div className="mb-2.5">
+            <div className="h-[3px] rounded-full bg-[var(--bg-subtle)] overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-[var(--success)]"
+                initial={{ width: 0 }}
+                animate={{ width: `${dna.progress}%` }}
+                transition={{ duration: 0.6, ease: EASING.out }}
+              />
+            </div>
+          </div>
+        )}
+
+        {(dna.hasChecklist || dna.hasCode || dna.hasQuote) && (
           <div className="flex items-center gap-1 mb-2.5 flex-wrap">
-            {hasChecklist && checklistTotal > 0 && (
-              <span
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold"
-                style={{ backgroundColor: theme.chip, color: theme.accent }}
-              >
+            {dna.hasChecklist && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold" style={{ backgroundColor: theme.chip, color: theme.accent }}>
                 <CheckCircle2 className="w-2.5 h-2.5" />
-                {checklistDone}/{checklistTotal}
+                {dna.checklistDone}/{dna.checklistTotal}
               </span>
             )}
-            {hasCode && (
-              <span
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold"
-                style={{ backgroundColor: theme.chip, color: theme.accent }}
-              >
+            {dna.hasCode && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold" style={{ backgroundColor: theme.chip, color: theme.accent }}>
                 <Hash className="w-2.5 h-2.5" /> Code
               </span>
             )}
-            {hasQuote && (
-              <span
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold"
-                style={{ backgroundColor: theme.chip, color: theme.accent }}
-              >
+            {dna.hasQuote && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold" style={{ backgroundColor: theme.chip, color: theme.accent }}>
                 <Lightbulb className="w-2.5 h-2.5" /> Quote
               </span>
             )}
           </div>
         )}
 
-        {/* Footer: metadata */}
         <div className="flex items-center gap-2.5 pt-2.5 border-t text-[10px] text-[var(--text-tertiary)]" style={{ borderColor: theme.border }}>
           <span className="flex items-center gap-1">
             <FileText className="w-2.5 h-2.5" />
-            <span className="font-mono tabular-nums">{wordCount}</span>
+            <span className="font-mono tabular-nums">{dna.words}</span>
             <span className="text-[var(--text-muted)]">words</span>
           </span>
+          {dna.words > 0 && (
+            <span className="flex items-center gap-1">
+              <Timer className="w-2.5 h-2.5" />
+              <span className="font-mono tabular-nums">{dna.readingMinutes}m</span>
+            </span>
+          )}
           {updatedDate && (
             <span className="flex items-center gap-1 ml-auto">
               <Clock className="w-2.5 h-2.5" />
@@ -288,7 +399,6 @@ function NoteCard({ note, index, onOpen, onDelete, onTogglePin, isPinnedSection 
           )}
         </div>
 
-        {/* Hover glow effect */}
         <div
           className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
           style={{ boxShadow: `0 4px 20px ${theme.glow}` }}
@@ -298,18 +408,81 @@ function NoteCard({ note, index, onOpen, onDelete, onTogglePin, isPinnedSection 
   )
 }
 
-/* ──────────────────────────────────────────────────────────
- * NoteSkeleton — loading placeholder
- * ────────────────────────────────────────────────────────── */
+function StreamDay({ group, onOpen, onDelete, onTogglePin }) {
+  const words = group.notes.reduce((acc, n) => acc + (noteDna(n).words || 0), 0)
+  return (
+    <div className="relative pl-6">
+      <div className="absolute left-0 top-1 bottom-0 w-px bg-[var(--border-subtle)]" />
+      {group.notes.map((note, i) => (
+        <motion.div
+          key={note.id}
+          className="absolute -left-[5px] w-[11px] h-[11px] rounded-full border-2 border-[var(--bg-base)]"
+          style={{ top: 26 + i * 62, backgroundColor: FRESHNESS_COLORS[noteDna(note).freshness] }}
+        />
+      ))}
+
+      <div className="sticky top-0 z-10 flex items-center gap-2.5 py-2 bg-[var(--bg-base)]/85 backdrop-blur-md">
+        <span className="text-[12px] font-bold text-[var(--text-primary)] tracking-tight">{group.label}</span>
+        <span className="text-[10px] font-mono text-[var(--text-tertiary)] tabular-nums">{group.notes.length} note{group.notes.length !== 1 ? 's' : ''} · {words} words</span>
+        <div className="flex-1 h-px bg-[var(--border-subtle)]" />
+      </div>
+
+      <div className="space-y-2 pb-6">
+        {group.notes.map((note, idx) => {
+          const theme = COLOR_THEMES[note.color] || COLOR_THEMES.default
+          const dna = noteDna(note)
+          return (
+            <motion.div
+              key={note.id}
+              layout
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ delay: Math.min(idx * 0.05, 0.3), duration: 0.2, ease: EASING.out }}
+            >
+              <InteractiveCard variant="flat" onClick={() => onOpen(note)} className="px-4 py-3 group">
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-8 rounded-full shrink-0" style={{ backgroundColor: theme.accent }} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] font-semibold tracking-tight text-[var(--text-primary)] truncate">{note.title || 'Untitled Note'}</span>
+                      {note.isPinned && <Pin className="w-3 h-3 fill-[var(--accent)] text-[var(--accent)] shrink-0" />}
+                      {dna.hasChecklist && (
+                        <span className="shrink-0 text-[9px] font-mono font-semibold px-1.5 py-0.5 rounded" style={{ backgroundColor: theme.chip, color: theme.accent }}>
+                          {dna.checklistDone}/{dna.checklistTotal}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-[var(--text-secondary)] truncate mt-0.5">
+                      {note.content ? note.content.replace(/^[-*]\s+\[[ xX]\]\s+/gm, '').replace(/[#>*`]/g, '').split('\n').find(l => l.trim())?.slice(0, 90) || 'Empty note' : 'Empty note'}
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-[10px] font-mono tabular-nums text-[var(--text-tertiary)] hidden sm:block">
+                    {note.updatedAt ? format(new Date(note.updatedAt), 'h:mm a') : ''}
+                  </span>
+                  <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={(e) => { e.stopPropagation(); onTogglePin(note) }} className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer" title="Pin">
+                      <Pin className={cn('w-3 h-3', note.isPinned ? 'fill-[var(--accent)] text-[var(--accent)]' : 'text-[var(--text-muted)]')} />
+                    </button>
+                    <button onClick={(e) => onDelete(e, note.id)} className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-[var(--danger-soft)] transition-colors cursor-pointer" title="Delete">
+                      <Trash2 className="w-3 h-3 text-[var(--text-muted)] hover:text-[var(--danger)]" />
+                    </button>
+                  </div>
+                </div>
+              </InteractiveCard>
+            </motion.div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function NoteSkeleton() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className="h-[180px] rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4 flex flex-col animate-pulse"
-          style={{ animationDelay: `${i * 100}ms` }}
-        >
+        <div key={i} className="h-[180px] rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4 flex flex-col animate-pulse" style={{ animationDelay: `${i * 100}ms` }}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-1 h-4 rounded-full bg-[var(--bg-subtle)]" />
             <div className="h-4 w-2/3 bg-[var(--bg-subtle)] rounded-md" />
@@ -329,26 +502,15 @@ function NoteSkeleton() {
   )
 }
 
-/* ──────────────────────────────────────────────────────────
- * EmptyState — creative empty state with onboarding nudge
- * ────────────────────────────────────────────────────────── */
 function NotesEmptyState({ searchQuery, onAction, hasFilters }) {
   if (hasFilters) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-[var(--border-subtle)] rounded-2xl bg-[var(--bg-subtle)]/30"
-      >
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-[var(--border-subtle)] rounded-2xl bg-[var(--bg-subtle)]/30">
         <div className="w-14 h-14 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] flex items-center justify-center mb-4">
           <Search className="w-6 h-6 text-[var(--text-tertiary)]" />
         </div>
-        <Heading level={3} className="text-[16px] font-bold tracking-tight mb-1.5 text-[var(--text-primary)]">
-          No notes match your search
-        </Heading>
-        <Text variant="muted" className="text-[13px] max-w-sm mb-5 leading-relaxed">
-          Try a different keyword or clear your filters to see all notes.
-        </Text>
+        <Heading level={3} className="text-[16px] font-bold tracking-tight mb-1.5 text-[var(--text-primary)]">No notes match your search</Heading>
+        <Text variant="muted" className="text-[13px] max-w-sm mb-5 leading-relaxed">Try a different keyword or clear your filters to see all notes.</Text>
         <Button variant="outline" size="sm" onClick={onAction} className="h-8 text-[12px] gap-1.5">
           <Archive className="w-3.5 h-3.5" /> Clear Filters
         </Button>
@@ -357,12 +519,7 @@ function NotesEmptyState({ searchQuery, onAction, hasFilters }) {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden flex flex-col items-center justify-center py-20 text-center border border-dashed border-[var(--border-subtle)] rounded-2xl bg-gradient-to-b from-[var(--bg-subtle)]/40 to-[var(--bg-elevated)]"
-    >
-      {/* Decorative floating note icons */}
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden flex flex-col items-center justify-center py-20 text-center border border-dashed border-[var(--border-subtle)] rounded-2xl bg-gradient-to-b from-[var(--bg-subtle)]/40 to-[var(--bg-elevated)]">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(5)].map((_, i) => (
           <motion.div
@@ -383,18 +540,17 @@ function NotesEmptyState({ searchQuery, onAction, hasFilters }) {
         transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         className="relative z-10 w-16 h-16 rounded-2xl bg-[var(--accent-soft)] border border-[var(--accent-border)] flex items-center justify-center mb-5 shadow-lg"
       >
-        <Lightbulb className="w-7 h-7 text-[var(--accent)]" />
+        <Sparkles className="w-7 h-7 text-[var(--accent)]" />
       </motion.div>
 
       <Heading level={3} className="relative z-10 text-[18px] font-bold tracking-tight mb-2 text-[var(--text-primary)]">
-        Your notebook is a blank canvas
+        Your garden is a blank canvas
       </Heading>
       <Text variant="muted" className="relative z-10 text-[13px] max-w-md mb-6 leading-relaxed">
         Capture ideas, draft specs, keep checklists, or jot down meeting notes.
-        Everything is private to your workspace.
+        Use the capture strip above — everything stays private to your workspace.
       </Text>
 
-      {/* Quick-start suggestion chips */}
       <div className="relative z-10 flex flex-wrap items-center justify-center gap-2 mb-6 max-w-md">
         {[
           { icon: CheckCircle2, label: 'Project checklist', color: 'var(--success)' },
@@ -415,22 +571,16 @@ function NotesEmptyState({ searchQuery, onAction, hasFilters }) {
 
       <Button onClick={onAction} size="sm" className="relative z-10 h-9 text-[13px] gap-2 font-semibold">
         <Plus className="w-4 h-4" />
-        Create Your First Note
+        Plant Your First Note
       </Button>
     </motion.div>
   )
 }
 
-/* ──────────────────────────────────────────────────────────
- * StatChip — compact stat for the stats strip
- * ────────────────────────────────────────────────────────── */
 function StatChip({ icon: Icon, label, value, accent }) {
   return (
     <div className="flex items-center gap-2.5 p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
-      <div
-        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-        style={{ backgroundColor: `${accent}15` }}
-      >
+      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${accent}15` }}>
         <Icon className="w-4 h-4" style={{ color: accent }} />
       </div>
       <div className="min-w-0">
@@ -441,21 +591,45 @@ function StatChip({ icon: Icon, label, value, accent }) {
   )
 }
 
-/* ══════════════════════════════════════════════════════════
- * NotesPage — Enhanced with creative UI
- * ══════════════════════════════════════════════════════════ */
+/* ── Workspace scope helpers ── */
+function useNoteScope() {
+  const { workspaceMode, activeOrganization, activeCrew } = useWorkspace()
+  if (workspaceMode === 'ORG' && activeOrganization?.id) return { orgId: activeOrganization.id }
+  if (workspaceMode === 'CREWS' && activeCrew?.id) return { crewId: activeCrew.id }
+  return {}
+}
+
+const WORKSPACE_EYEBROW = {
+  PERSONAL: 'Personal · Garden',
+  ORG: (org) => `${org?.name || 'Organization'} · Garden`,
+  CREWS: (crew) => `${crew?.name || 'Crew'} · Garden`,
+}
+
+/* ══════════════════════════════════════════════════════
+ * NotesPage — Notes Garden (Canvas + Stream modes)
+ * ══════════════════════════════════════════════════════ */
 export function NotesPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const { data: notes = [], isLoading } = useNotes()
+  const scope = useNoteScope()
+  const { workspaceMode, activeOrganization, activeCrew } = useWorkspace()
+
+  const { data: notes = [], isLoading } = useNotes(scope)
   const deleteNote = useDeleteNote()
   const updateNote = useUpdateNote()
+  const createNote = useCreateNote(scope)
   const { confirm, dialog } = useConfirmDialog()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('updated')
   const [showSortMenu, setShowSortMenu] = useState(false)
+  const [gardenMode, setGardenMode] = useState(() => searchParams.get('view') === 'stream' ? 'stream' : 'canvas')
   const [activeNote, setActiveNote] = useState(null)
   const [isPanelOpen, setIsPanelOpen] = useState(false)
+
+  const setMode = (mode) => {
+    setGardenMode(mode)
+    setSearchParams(params => { params.set('view', mode); return params }, { replace: true })
+  }
 
   const handleDeleteNote = async (e, noteId) => {
     e.stopPropagation()
@@ -463,9 +637,12 @@ export function NotesPage() {
       title: 'Delete Note?',
       description: 'Are you sure you want to delete this note? This action cannot be undone.',
       danger: true,
+      confirmLabel: 'Delete Note',
     })
     if (confirmed) deleteNote.mutate(noteId)
   }
+
+  const handleCreate = (payload) => createNote.mutate(payload)
 
   const openNew = () => { setActiveNote(null); setIsPanelOpen(true) }
   const openEdit = (note) => { setActiveNote(note); setIsPanelOpen(true) }
@@ -494,42 +671,54 @@ export function NotesPage() {
     if (!searchQuery.trim()) return notes
     const q = searchQuery.toLowerCase()
     return notes.filter(n =>
-      n.title?.toLowerCase().includes(q) || n.content?.toLowerCase().includes(q)
+      n.title?.toLowerCase().includes(q) || n.content?.toLowerCase().includes(q) ||
+      (n.tags || []).some(t => t.toLowerCase().includes(q))
     )
   }, [notes, searchQuery])
 
   const sortedNotes = useMemo(() => {
     const sorted = [...filteredNotes]
     switch (sortBy) {
-      case 'title':
-        return sorted.sort((a, b) => (a.title || '').localeCompare(b.title || ''))
-      case 'created':
-        return sorted.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
-      case 'words':
-        return sorted.sort((a, b) =>
-          (b.content || '').split(/\s+/).filter(Boolean).length -
-          (a.content || '').split(/\s+/).filter(Boolean).length
-        )
+      case 'title': return sorted.sort((a, b) => (a.title || '').localeCompare(b.title || ''))
+      case 'created': return sorted.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+      case 'words': return sorted.sort((a, b) => noteDna(b).words - noteDna(a).words)
       case 'updated':
-      default:
-        return sorted.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
+      default: return sorted.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
     }
   }, [filteredNotes, sortBy])
 
   const pinnedNotes = useMemo(() => sortedNotes.filter(n => n.isPinned), [sortedNotes])
   const otherNotes = useMemo(() => sortedNotes.filter(n => !n.isPinned), [sortedNotes])
 
-  /* ── Stats ── */
-  const stats = useMemo(() => {
-    const totalWords = notes.reduce((acc, n) => acc + (n.content || '').split(/\s+/).filter(Boolean).length, 0)
-    const checklists = notes.filter(n => /^[-*]\s+\[[ x]\]\s+/m.test(n.content || '')).length
-    const withCode = notes.filter(n => n.content?.includes('```')).length
-    return {
-      total: notes.length,
-      words: totalWords,
-      checklists,
-      code: withCode,
+  const streamGroups = useMemo(() => {
+    const groups = []
+    for (const note of sortedNotes) {
+      const ts = note.updatedAt || note.createdAt
+      if (!ts) continue
+      const d = new Date(ts)
+      const key = format(d, 'yyyy-MM-dd')
+      const label = isToday(d) ? 'Today' : isYesterday(d) ? 'Yesterday' : format(d, 'EEEE, MMM d')
+      let g = groups[groups.length - 1]
+      if (!g || g.key !== key) { g = { key, label, date: d, notes: [] }; groups.push(g) }
+      g.notes.push(note)
     }
+    return groups
+  }, [sortedNotes])
+
+  const stats = useMemo(() => {
+    let totalWords = 0
+    let checklistTotal = 0
+    let checklistDone = 0
+    const activeDays = new Set()
+    for (const n of notes) {
+      const dna = noteDna(n)
+      totalWords += dna.words
+      checklistTotal += dna.checklistTotal
+      checklistDone += dna.checklistDone
+      const ts = n.updatedAt || n.createdAt
+      if (ts) activeDays.add(format(new Date(ts), 'yyyy-MM-dd'))
+    }
+    return { total: notes.length, words: totalWords, checklistTotal, checklistDone, activeDays: activeDays.size }
   }, [notes])
 
   const pageState = isLoading ? 'loading' : (filteredNotes.length === 0 ? 'empty' : 'ready')
@@ -540,12 +729,19 @@ export function NotesPage() {
     setSortBy('updated')
   }, [])
 
+  const workspaceModeLabel = workspaceMode === 'ORG' ? 'ORG' : workspaceMode === 'CREWS' ? 'CREWS' : 'PERSONAL'
+  const eyebrow = workspaceMode === 'ORG'
+    ? WORKSPACE_EYEBROW.ORG(activeOrganization)
+    : workspaceMode === 'CREWS'
+      ? WORKSPACE_EYEBROW.CREWS(activeCrew)
+      : WORKSPACE_EYEBROW.PERSONAL
+
   return (
-    <PageShell maxWidth="default" workspaceMode="PERSONAL">
+    <PageShell maxWidth="default" workspaceMode={workspaceModeLabel}>
       <PageHero
-        title="Private Notes & Scratchpad"
-        subtitle="Capture ideas, draft specs, and keep checklists in your personal workspace."
-        eyebrow="Personal"
+        title="Notes Garden"
+        subtitle="Capture, cultivate, and revisit your thoughts — canvas or stream, every note has a story."
+        eyebrow={eyebrow}
         icon={StickyNote}
       >
         <Button onClick={openNew} size="sm" className="gap-1.5 h-8 text-[12px] shrink-0 font-semibold shadow-xs">
@@ -554,39 +750,52 @@ export function NotesPage() {
         </Button>
       </PageHero>
 
-      {/* Stats Strip */}
+      <motion.div variants={STAGGER_FAST.item}>
+        <CaptureStrip onCreate={handleCreate} isCreating={createNote.isPending} />
+      </motion.div>
+
       {!isLoading && notes.length > 0 && (
         <PageStats>
           <StatChip icon={StickyNote} label="Total Notes" value={stats.total} accent="var(--accent)" />
           <StatChip icon={FileText} label="Total Words" value={stats.words.toLocaleString()} accent="var(--info)" />
-          <StatChip icon={CheckCircle2} label="Checklists" value={stats.checklists} accent="var(--success)" />
-          <StatChip icon={Hash} label="With Code" value={stats.code} accent="var(--warning)" />
+          <StatChip icon={CheckCircle2} label="Checklist Items" value={`${stats.checklistDone}/${stats.checklistTotal}`} accent="var(--success)" />
+          <StatChip icon={TrendingUp} label="Active Days" value={stats.activeDays} accent="var(--warning)" />
         </PageStats>
       )}
 
       <PageToolbar>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
-          {/* Search */}
           <div className="relative flex-1 max-w-md">
             <Search className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <Input
               type="text"
-              placeholder="Search notes by title or content..."
+              placeholder="Search notes by title, content, or tags..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 h-8 text-[12px]"
             />
             {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
-              >
+              <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer">
                 <span className="text-[14px]">×</span>
               </button>
             )}
           </div>
 
-          {/* Sort dropdown */}
+          <div className="flex items-center bg-[var(--bg-subtle)] rounded-lg p-0.5 border border-[var(--border-subtle)]">
+            <button
+              onClick={() => setMode('canvas')}
+              className={cn('flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-md transition-all cursor-pointer', gardenMode === 'canvas' ? 'bg-[var(--bg-elevated)] shadow-sm text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]')}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" /> Canvas
+            </button>
+            <button
+              onClick={() => setMode('stream')}
+              className={cn('flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-md transition-all cursor-pointer', gardenMode === 'stream' ? 'bg-[var(--bg-elevated)] shadow-sm text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]')}
+            >
+              <ListIcon className="w-3.5 h-3.5" /> Stream
+            </button>
+          </div>
+
           <div className="relative">
             <button
               onClick={() => setShowSortMenu(!showSortMenu)}
@@ -611,12 +820,7 @@ export function NotesPage() {
                       <button
                         key={opt.id}
                         onClick={() => { setSortBy(opt.id); setShowSortMenu(false) }}
-                        className={cn(
-                          "w-full flex items-center gap-2 px-3 py-1.5 text-[12px] transition-colors cursor-pointer text-left",
-                          sortBy === opt.id
-                            ? "bg-[var(--accent-soft)] text-[var(--accent)] font-semibold"
-                            : "text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]"
-                        )}
+                        className={cn("w-full flex items-center gap-2 px-3 py-1.5 text-[12px] transition-colors cursor-pointer text-left", sortBy === opt.id ? "bg-[var(--accent-soft)] text-[var(--accent)] font-semibold" : "text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]")}
                       >
                         <opt.icon className="w-3.5 h-3.5" />
                         {opt.label}
@@ -632,25 +836,13 @@ export function NotesPage() {
       </PageToolbar>
 
       <PageContent>
-        <PageState
-          state={pageState}
-          stateProps={{
-            loadingVariant: 'cards',
-            onAction: openNew,
-            actionLabel: 'New Note',
-          }}
-        >
+        <PageState state={pageState} stateProps={{ loadingVariant: 'cards', onAction: openNew, actionLabel: 'New Note' }}>
           {isLoading ? (
             <NoteSkeleton />
           ) : filteredNotes.length === 0 ? (
-            <NotesEmptyState
-              searchQuery={searchQuery}
-              onAction={hasFilters ? clearFilters : openNew}
-              hasFilters={hasFilters}
-            />
-          ) : (
+            <NotesEmptyState searchQuery={searchQuery} onAction={hasFilters ? clearFilters : openNew} hasFilters={hasFilters} />
+          ) : gardenMode === 'canvas' ? (
             <div className="space-y-8">
-              {/* Pinned Notes */}
               {pinnedNotes.length > 0 && (
                 <section>
                   <div className="flex items-center gap-2 mb-3">
@@ -658,34 +850,21 @@ export function NotesPage() {
                       <div className="w-5 h-5 rounded-md bg-[var(--accent-soft)] flex items-center justify-center">
                         <Pin className="w-3 h-3 fill-[var(--accent)] text-[var(--accent)]" />
                       </div>
-                      <span className="text-[11px] font-bold text-[var(--accent)] uppercase tracking-wider">
-                        Pinned
-                      </span>
+                      <span className="text-[11px] font-bold text-[var(--accent)] uppercase tracking-wider">Pinned</span>
                     </div>
-                    <Badge variant="secondary" size="xs" className="font-mono text-[10px]">
-                      {pinnedNotes.length}
-                    </Badge>
+                    <Badge variant="secondary" size="xs" className="font-mono text-[10px]">{pinnedNotes.length}</Badge>
                     <div className="flex-1 h-px bg-[var(--border-subtle)]" />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <AnimatePresence mode="popLayout">
                       {pinnedNotes.map((note, idx) => (
-                        <NoteCard
-                          key={note.id}
-                          note={note}
-                          index={idx}
-                          onOpen={openEdit}
-                          onDelete={handleDeleteNote}
-                          onTogglePin={togglePin}
-                          isPinnedSection
-                        />
+                        <NoteCard key={note.id} note={note} index={idx} onOpen={openEdit} onDelete={handleDeleteNote} onTogglePin={togglePin} isPinnedSection />
                       ))}
                     </AnimatePresence>
                   </div>
                 </section>
               )}
 
-              {/* Other Notes */}
               {otherNotes.length > 0 && (
                 <section>
                   <div className="flex items-center gap-2 mb-3">
@@ -697,37 +876,41 @@ export function NotesPage() {
                         {pinnedNotes.length > 0 ? 'Other Notes' : 'All Notes'}
                       </span>
                     </div>
-                    <Badge variant="secondary" size="xs" className="font-mono text-[10px]">
-                      {otherNotes.length}
-                    </Badge>
+                    <Badge variant="secondary" size="xs" className="font-mono text-[10px]">{otherNotes.length}</Badge>
                     <div className="flex-1 h-px bg-[var(--border-subtle)]" />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <AnimatePresence mode="popLayout">
                       {otherNotes.map((note, idx) => (
-                        <NoteCard
-                          key={note.id}
-                          note={note}
-                          index={idx}
-                          onOpen={openEdit}
-                          onDelete={handleDeleteNote}
-                          onTogglePin={togglePin}
-                          isPinnedSection={false}
-                        />
+                        <NoteCard key={note.id} note={note} index={idx} onOpen={openEdit} onDelete={handleDeleteNote} onTogglePin={togglePin} isPinnedSection={false} />
                       ))}
                     </AnimatePresence>
                   </div>
                 </section>
               )}
             </div>
+          ) : (
+            <div className="max-w-3xl mx-auto">
+              <AnimatePresence mode="popLayout">
+                {streamGroups.map(group => (
+                  <StreamDay key={group.key} group={group} onOpen={openEdit} onDelete={handleDeleteNote} onTogglePin={togglePin} />
+                ))}
+              </AnimatePresence>
+            </div>
           )}
         </PageState>
       </PageContent>
 
-      <NotePanel note={activeNote} isOpen={isPanelOpen} onClose={closePanel} />
+      <NotePanel note={activeNote} isOpen={isPanelOpen} onClose={closePanel} notes={notes} />
       {dialog}
     </PageShell>
   )
+}
+
+function isYesterday(d) {
+  const y = new Date()
+  y.setDate(y.getDate() - 1)
+  return isSameDay(d, y)
 }
 
 export default NotesPage

@@ -9,36 +9,36 @@ import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
 import { useAuth, usePermissions } from '@/identity'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
-/* ─── Priority accent bar colors (left border + glow) ─── */
+/* ─── Priority accent bars ─── */
 const PRIORITY_ACCENTS = {
-  URGENT:  { bar: '#EF4444', glow: 'rgba(239,68,68,0.12)',  bg: 'rgba(239,68,68,0.03)' },
-  HIGH:    { bar: '#F59E0B', glow: 'rgba(245,158,11,0.12)', bg: 'rgba(245,158,11,0.03)' },
-  MEDIUM:  { bar: '#3B82F6', glow: 'rgba(59,130,246,0.10)', bg: 'rgba(59,130,246,0.02)' },
-  LOW:     { bar: '#6B7280', glow: 'rgba(107,114,128,0.08)', bg: 'transparent' },
+  URGENT:  { bar: 'bg-red-500', glow: 'shadow-[0_0_16px_rgba(239,68,68,0.15)]', border: 'border-red-500/20 hover:border-red-500/40' },
+  HIGH:    { bar: 'bg-orange-400', glow: 'shadow-[0_0_12px_rgba(251,146,60,0.12)]', border: 'border-orange-400/20 hover:border-orange-400/35' },
+  MEDIUM:  { bar: 'bg-[var(--accent)]', glow: 'shadow-[0_0_12px_var(--accent-border)]', border: 'border-[var(--accent-border)] hover:border-[var(--accent-border)]' },
+  LOW:     { bar: 'bg-[var(--text-tertiary)]', glow: '', border: '' },
 }
-const DEFAULT_ACCENT = { bar: 'var(--border-subtle)', glow: 'transparent', bg: 'transparent' }
+const DEFAULT_ACCENT = { bar: 'bg-[var(--border-subtle)]', glow: '', border: '' }
 
 function getDueInfo(dueDate) {
   if (!dueDate) return null
   const now = new Date()
   const due = new Date(dueDate)
   const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24))
-  if (diffDays < 0) return { label: 'Overdue', color: 'text-[var(--danger)]', bg: 'bg-[var(--danger-soft)]' }
-  if (diffDays === 0) return { label: 'Today', color: 'text-[var(--warning)]', bg: 'bg-[var(--warning-soft)]' }
-  if (diffDays <= 2) return { label: 'Soon', color: 'text-amber-400', bg: 'bg-amber-500/10' }
+  if (diffDays < 0) return { label: 'Overdue', color: 'text-[var(--danger)] bg-[var(--danger-soft)]' }
+  if (diffDays === 0) return { label: 'Today', color: 'text-amber-500 bg-amber-500/10' }
+  if (diffDays <= 2) return { label: 'Soon', color: 'text-orange-400 bg-orange-400/10' }
   return null
 }
 
-export function KanbanTaskCard({ task, onClick }) {
+export function KanbanTaskCard({ task, onClick, onQuickComplete, onQuickDelete }) {
   const { user } = useAuth()
   const { canEditTask, isSuperAdmin } = usePermissions()
   const { workspaceMode } = useWorkspace()
 
-  const assigneeUsername = typeof task.assignee === 'object' ? task.assignee?.username : (task.assignee || task.assignedTo);
-  const creatorUsername = typeof task.creator === 'object' ? task.creator?.username : task.creator;
-  const isAssignee = assigneeUsername === user?.username || assigneeUsername === user?.id || (typeof task.assignee === 'object' && task.assignee?.id === user?.id);
-  const isCreator = creatorUsername === user?.username || (typeof task.creator === 'object' && task.creator?.id === user?.id) || task.createdBy === user?.id;
-  const isAuthorized = workspaceMode === 'PERSONAL' || isSuperAdmin || canEditTask || isAssignee || isCreator;
+  const assigneeUsername = typeof task.assignee === 'object' ? task.assignee?.username : (task.assignee || task.assignedTo)
+  const creatorUsername = typeof task.creator === 'object' ? task.creator?.username : task.creator
+  const isAssignee = assigneeUsername === user?.username || assigneeUsername === user?.id || (typeof task.assignee === 'object' && task.assignee?.id === user?.id)
+  const isCreator = creatorUsername === user?.username || (typeof task.creator === 'object' && task.creator?.id === user?.id) || task.createdBy === user?.id
+  const isAuthorized = workspaceMode === 'PERSONAL' || isSuperAdmin || canEditTask || isAssignee || isCreator
 
   const {
     attributes, listeners, setNodeRef, transform, transition, isDragging,
@@ -48,92 +48,133 @@ export function KanbanTaskCard({ task, onClick }) {
 
   if (isDragging) {
     return (
-      <div ref={setNodeRef} style={style} className="w-full min-h-[100px] bg-[var(--bg-elevated)]/50 border-2 border-dashed border-[var(--border-default)] rounded-[var(--radius-lg)] opacity-50" />
+      <div ref={setNodeRef} style={style} className="w-full min-h-[88px] rounded-lg border-2 border-dashed border-[var(--accent-border)] bg-[var(--accent-soft)]/30 opacity-50" />
     )
   }
 
   const accent = PRIORITY_ACCENTS[task.priority] || DEFAULT_ACCENT
   const isDone = task.status === 'Done' || task.status === 'COMPLETED' || task.status === 'APPROVED'
   const dueInfo = getDueInfo(task.dueDate)
-  const initials = (typeof task.assignedTo === 'object' ? task.assignedTo?.username : task.assignedTo || '')
-    .slice(0, 2).toUpperCase() || '?'
+  const initials = (typeof task.assignedTo === 'object'
+    ? (task.assignedTo?.username || '?')
+    : (task.assignedTo || task.assigneeUsername || '?')
+  ).slice(0, 2).toUpperCase()
+
+  const ringColor = isDone
+    ? 'ring-emerald-400/50'
+    : task.priority === 'URGENT'
+      ? 'ring-red-400/50'
+      : 'ring-[var(--accent-border)]'
 
   return (
     <motion.div
       ref={setNodeRef}
       style={style}
+      layout
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
       whileHover={isDragging ? undefined : { y: -2, scale: 1.01 }}
-      whileTap={isDragging ? undefined : { scale: 0.98 }}
+      whileTap={isDragging ? undefined : { scale: 0.985 }}
       {...attributes}
       {...listeners}
       onClick={() => onClick && onClick(task)}
       className={cn(
-        "group relative bg-[var(--bg-elevated)] rounded-[var(--radius-md)] p-3.5 mb-2.5 touch-none",
-        "border border-[var(--border-subtle)] hover:border-[var(--border-strong)]",
-        "shadow-[var(--inset-highlight-soft)] hover:shadow-[var(--shadow-md),var(--inset-highlight)]",
-        "transition-shadow duration-200",
-        isAuthorized ? "cursor-grab active:cursor-grabbing" : "cursor-default",
-        isDone && "opacity-75"
+        'group relative rounded-lg p-3.5 mb-2.5',
+        'bg-[var(--bg-card)]',
+        'border border-[var(--border-subtle)]',
+        'shadow-[var(--shadow-xs)]',
+        'hover:shadow-[var(--shadow-md)] hover:border-[var(--accent-border)]/40',
+        'transition-all duration-[var(--duration-base)] ease-[var(--ease-out)]',
+        isAuthorized ? 'cursor-grab active:cursor-grabbing' : 'cursor-default',
+        isDone && 'opacity-70 saturate-50',
+        accent.border,
+        accent.glow,
       )}
     >
-      {/* Priority accent bar */}
-      <div
-        className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full"
-        style={{ backgroundColor: accent.bar }}
-      />
+      {/* Left accent bar */}
+      <div className={cn('absolute left-0 top-3 bottom-3 w-[3px] rounded-full', accent.bar)} />
 
-      {/* Title */}
-      <h4 className={cn(
-        "text-[13px] font-medium leading-snug line-clamp-2 mb-2 pr-1",
-        isDone && "line-through text-[var(--text-secondary)]"
-      )}>
-        {task.title}
-      </h4>
-
-      {/* Tags & Priority row */}
-      <div className="flex items-center flex-wrap gap-1.5 mb-2.5">
-        <Badge size="xs" className={cn(PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM, "font-medium")}>
-          {normalizePriority(task.priority)}
-        </Badge>
-        {task.projectName && (
-          <span className="text-[10px] text-[var(--text-muted)] bg-[var(--bg-subtle)] px-1.5 py-0.5 rounded-md font-medium truncate max-w-[100px]">
-            {task.projectName}
-          </span>
-        )}
-      </div>
-
-      {/* Footer: Due date + Assignee */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          {task.dueDate ? (
-            <span className={cn(
-              "flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-              dueInfo ? `${dueInfo.color} ${dueInfo.bg}` : "text-[var(--text-muted)] bg-[var(--bg-subtle)]"
-            )}>
-              <Icons.calendar className="w-3 h-3" />
-              {new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-              {dueInfo && <span className="font-semibold">· {dueInfo.label}</span>}
+      <div className="pl-2.5 space-y-2.5">
+        {/* Task ref + hover actions */}
+        <div className="flex items-center justify-between gap-2">
+          {task.id && (
+            <span className="text-[9px] font-mono text-[var(--text-muted)] tracking-tight">
+              #{typeof task.id === 'string' ? task.id.slice(0, 8) : task.id}
             </span>
-          ) : (
-            <span className="text-[10px] text-[var(--text-muted)]">—</span>
+          )}
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {!isDone && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onQuickComplete?.(task) }}
+                className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--success)] hover:bg-[var(--success)]/10 transition-colors"
+                title="Quick complete"
+              >
+                <Icons.check className="w-3 h-3" />
+              </button>
+            )}
+            <button
+              onClick={(e) => { e.stopPropagation(); onQuickDelete?.(task.id) }}
+              className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger)]/10 transition-colors"
+              title="Delete task"
+            >
+              <Icons.trash className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+
+        {/* Title */}
+        <h4 className={cn(
+          'text-[13px] font-semibold leading-snug line-clamp-2 text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent)]',
+          isDone && 'line-through text-[var(--text-muted)] group-hover:text-[var(--text-muted)]'
+        )}>
+          {task.title}
+        </h4>
+
+        {/* Tags row */}
+        <div className="flex items-center flex-wrap gap-1.5">
+          <span className={cn(
+            'px-1.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider',
+            PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM
+          )}>
+            {normalizePriority(task.priority)}
+          </span>
+          {task.projectName && (
+            <span className="text-[10px] text-[var(--text-muted)] bg-[var(--bg-subtle)] px-1.5 py-0.5 rounded-md font-medium truncate max-w-[90px] border border-[var(--border-subtle)]">
+              {task.projectName}
+            </span>
           )}
         </div>
-        
-        {task.assignedTo && (
-          <div
-            className="w-6 h-6 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px] font-bold ring-2 ring-[var(--bg-elevated)] shadow-sm"
-            title={typeof task.assignedTo === 'object' ? task.assignedTo.username : task.assignedTo}
-          >
-            {initials}
-          </div>
-        )}
-      </div>
 
-      {/* Hover glow */}
-      <div
-        className="absolute inset-0 rounded-[var(--radius-md)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-        style={{ boxShadow: `0 4px 16px ${accent.glow}` }}
-      />
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-0.5">
+          <div className="flex items-center gap-1.5">
+            {task.dueDate ? (
+              <span className={cn(
+                'flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md',
+                dueInfo ? dueInfo.color : 'text-[var(--text-muted)] bg-[var(--bg-subtle)]'
+              )}>
+                <Icons.calendar className="w-3 h-3" />
+                {new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+              </span>
+            ) : (
+              <span className="text-[10px] text-[var(--text-muted)]">—</span>
+            )}
+          </div>
+
+          {task.assignedTo && (
+            <div
+              className={cn(
+                'w-6 h-6 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px] font-bold ring-2 shrink-0',
+                ringColor
+              )}
+              title={typeof task.assignedTo === 'object' ? task.assignedTo.username : task.assignedTo}
+            >
+              {initials}
+            </div>
+          )}
+        </div>
+      </div>
     </motion.div>
   )
 }

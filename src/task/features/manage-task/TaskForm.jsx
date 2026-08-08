@@ -18,7 +18,7 @@ import { crewApi } from '@/crew'
 import { queryKeys } from '@/shared/api/queryKeys'
 
 export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, fixedProjectId, fixedTeamId, fixedCrewId }) {
-  const { workspaceMode, activeOrganization } = useWorkspace()
+  const { workspaceMode, activeOrganization, activeCrew } = useWorkspace()
   const [taskSearchQuery, setTaskSearchQuery] = useState('')
   const { data: searchTasks = [], isLoading: isSearchLoading } = useTaskSearch(taskSearchQuery)
 
@@ -53,10 +53,19 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
     enabled: !!activeOrganization?.id && !isPersonalMode
   })
 
+  // Project dropdown — scoped to the active workspace (isolation: only projects
+  // the user can see in the CURRENT workspace are offered; the backend re-checks
+  // access on save).
+  const projectScopeParams = useMemo(() => {
+    if (workspaceMode === 'ORG' && activeOrganization?.id) return { orgId: activeOrganization.id }
+    if (workspaceMode === 'CREWS' && activeCrew?.id) return { crewId: activeCrew.id }
+    if (workspaceMode === 'CREWS') return { scope: 'CREWS' }
+    return { scope: 'PERSONAL' }
+  }, [workspaceMode, activeOrganization?.id, activeCrew?.id])
+
   const { data: projects = [] } = useQuery({
-    queryKey: ['projects'],
-    queryFn: () => projectsApi.getProjects(),
-    enabled: !isPersonalMode
+    queryKey: ['projects', 'workspace', workspaceMode, activeOrganization?.id, activeCrew?.id],
+    queryFn: () => projectsApi.getProjects(projectScopeParams),
   })
 
   const form = useForm({
@@ -79,6 +88,9 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
   useEffect(() => {
     form.setValue('assigneeUsername', '')
   }, [watchedTeamId, form])
+
+  const fixedProject = useMemo(() => projects.find(p => String(p.id) === String(fixedProjectId)), [projects, fixedProjectId])
+  const fixedTeam = useMemo(() => teams.find(t => String(t.id) === String(fixedTeamId)), [teams, fixedTeamId])
 
   const handleSubmit = (data) => {
     const payload = {
@@ -265,34 +277,57 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
             )}
           />
 
-          {workspaceMode === 'CREWS' && !fixedCrewId && (
-            <FormField
-              control={form.control}
-              name="crewId"
-              rules={{ required: 'Crew is required' }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Crew</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value?.toString() || ""}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Crew" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {crews.map(c => (
-                        <SelectItem key={c.id} value={c.id.toString()}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                              {/* Fixed project context: task is bound to this project — project only, no team picker */}
+          {fixedProjectId && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--accent-border)] bg-[var(--accent-soft)]/40">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] shrink-0" />
+              <span className="text-[11px] text-[var(--text-secondary)]">
+                Task will be added to project{' '}
+                <strong className="text-[var(--accent)] font-semibold">
+                  {fixedProject?.name || ('#' + fixedProjectId)}
+                </strong>
+              </span>
+            </div>
           )}
 
+          {/* Fixed team context: show the team + optional project narrowed to it */}
+          {fixedTeamId && !fixedProjectId && !isPersonalMode && (
+            <div className="grid grid-cols-2 gap-4 border-t pt-4 mt-2">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] shrink-0" />
+                <span className="text-[11px] text-[var(--text-secondary)]">
+                  Team: <strong className="text-[var(--text-primary)] font-semibold">{fixedTeam?.name || ('#' + fixedTeamId)}</strong>
+                </span>
+              </div>
+              <FormField
+                control={form.control}
+                name="projectId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project (Optional)</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value?.toString() || ""}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="No Project" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">No Project</SelectItem>
+                        {projects.filter(p => p.teamId?.toString() === String(fixedTeamId) || p.team?.id?.toString() === String(fixedTeamId)).map(p => (
+                          <SelectItem key={p.id} value={p.id.toString()}>
+                            {p.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
+
+          {/* Org workspace: team + org projects */}
           {!isPersonalMode && workspaceMode === 'ORG' && !fixedProjectId && !fixedTeamId && (
             <div className="grid grid-cols-2 gap-4 border-t pt-4 mt-2">
               <FormField
@@ -325,12 +360,12 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
                 control={form.control}
                 name="projectId"
                 render={({ field }) => {
-                  // Only show projects that belong to the selected team (if a team is selected)
-                  // If no team is selected, we might want to hide project or show global projects.
+                  // Projects visible in this workspace; narrowed to the selected
+                  // team's projects when a team is picked.
                   const currentTeamId = watchedTeamId;
                   const filteredProjects = currentTeamId
-                    ? projects.filter(p => p.team?.id?.toString() === currentTeamId)
-                    : projects.filter(p => !p.team);
+                    ? projects.filter(p => p.teamId?.toString() === currentTeamId || p.team?.id?.toString() === currentTeamId)
+                    : projects;
 
                   return (
                     <FormItem>
@@ -354,6 +389,62 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
                     </FormItem>
                   )
                 }}
+              />
+            </div>
+          )}
+
+          {/* Crew workspace: crew selector + crew-shared projects */}
+          {!isPersonalMode && workspaceMode === 'CREWS' && !fixedProjectId && !fixedCrewId && (
+            <div className="grid grid-cols-2 gap-4 border-t pt-4 mt-2">
+              <FormField
+                control={form.control}
+                name="crewId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Crew</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value?.toString() || ""}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Crew" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {crews.map(c => (
+                          <SelectItem key={c.id} value={c.id.toString()}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="projectId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project (Optional)</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value?.toString() || ""}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="No Project" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">No Project</SelectItem>
+                        {projects.map(p => (
+                          <SelectItem key={p.id} value={p.id.toString()}>
+                            {p.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
           )}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heading, Text, Label } from '@/shared/ui/Typography';
@@ -9,7 +9,7 @@ import { Textarea } from '@/shared/ui/Textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/Select';
 import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { toast } from 'sonner';
-import { FilterTabs } from '@/shared/ui/FilterTabs';
+import { Icons } from '@/shared/ui/Icons';
 import { StatPill } from '@/shared/ui/StatPill';
 import { PageShell, PageHero, PageToolbar, PageContent } from '@/shared/ui/PageShell';
 import { PageState } from '@/shared/ui/PageState';
@@ -102,6 +102,178 @@ function RadialProgressRing({ progress = 0, size = 46, strokeWidth = 4, hue = 23
   );
 }
 
+/* ─── KPI / Category / Compare (Teams-module design language) ─── */
+
+function AnimatedCounter({ value, duration = 0.8 }) {
+  const [display, setDisplay] = useState(0)
+  useEffect(() => {
+    let raf
+    const start = performance.now()
+    const from = display
+    const tick = (now) => {
+      const p = Math.min((now - start) / (duration * 1000), 1)
+      const eased = 1 - Math.pow(1 - p, 3)
+      setDisplay(Math.round(from + (value - from) * eased))
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, duration])
+  return <>{display.toLocaleString()}</>
+}
+
+function StatKPI({ icon: Icon, label, value, sublabel, hue = 220 }) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4 shadow-[var(--shadow-xs)] transition-all duration-300 hover:border-[var(--border-default)] hover:shadow-[var(--shadow-sm)]">
+      <div
+        className="absolute inset-0 pointer-events-none opacity-20"
+        style={{ background: `radial-gradient(circle at 90% -20%, hsl(${hue} 70% 55% / 0.4), transparent 60%)` }}
+        aria-hidden="true"
+      />
+      <div className="relative flex items-center justify-between">
+        <div className="min-w-0">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">{label}</div>
+          <div className="text-[24px] font-bold text-[var(--text-primary)] leading-none mt-2 tabular-nums">
+            <AnimatedCounter value={value} />
+          </div>
+          {sublabel && <div className="text-[11px] text-[var(--text-secondary)] mt-1.5 truncate">{sublabel}</div>}
+        </div>
+        <span
+          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border"
+          style={{ background: `hsl(${hue} 60% 50% / 0.12)`, color: `hsl(${hue} 70% 60%)`, borderColor: `hsl(${hue} 60% 50% / 0.2)` }}
+        >
+          <Icon className="w-4 h-4" />
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function CategoryChip({ label, count, isActive, onClick, hue = 230 }) {
+  return (
+    <motion.button
+      whileTap={{ scale: 0.96 }}
+      onClick={onClick}
+      className={cn(
+        'relative px-4 py-2 rounded-xl text-[13px] font-medium transition-colors duration-200 whitespace-nowrap',
+        isActive
+          ? 'text-[var(--text-primary)]'
+          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
+      )}
+    >
+      <span>{label}</span>
+      <span
+        className={cn(
+          'ml-1.5 text-[11px] px-1.5 py-0.5 rounded-full tabular-nums',
+          isActive ? 'bg-[var(--accent)]/12 text-[var(--accent)]' : 'bg-[var(--bg-subtle)] text-[var(--text-muted)]'
+        )}
+      >
+        {count}
+      </span>
+      {isActive && (
+        <motion.div
+          layoutId="crew-category-indicator"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
+          style={{ background: `hsl(${hue} 70% 50%)` }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        />
+      )}
+    </motion.button>
+  )
+}
+
+function CompareBar({ label, values, max, hues }) {
+  return (
+    <div className="space-y-1">
+      <Text size="xs" className="text-[var(--text-muted)] font-medium">{label}</Text>
+      <div className="space-y-1">
+        {values.map((v, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full shrink-0" style={{ background: `hsl(${hues[i]} 65% 50%)` }} />
+            <div className="flex-1 h-6 bg-[var(--bg-subtle)] rounded-lg overflow-hidden">
+              <motion.div
+                className="h-full rounded-lg"
+                style={{ background: `linear-gradient(90deg, hsl(${hues[i]} 65% 50%), hsl(${(hues[i] + 20) % 360} 55% 55%))` }}
+                initial={{ width: 0 }}
+                animate={{ width: `${max > 0 ? (v / max) * 100 : 0}%` }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 + i * 0.1 }}
+              />
+            </div>
+            <Text size="xs" className="text-[var(--text-primary)] tabular-nums w-8 text-right font-semibold">{v}</Text>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function crewStats(crew) {
+  const memberCount = crew.memberCount ?? crew.activeMembers?.length ?? 0
+  const completed = crew.completedTasksCount ?? crew.completedTasks ?? 0
+  const total = crew.totalTasksCount ?? crew.totalTasks ?? (crew.activeTasks ? crew.activeTasks + completed : 0)
+  const progress = total > 0 ? (completed / total) * 100 : (crew.progress ?? 0)
+  return {
+    memberCount,
+    completed,
+    total,
+    progress: Math.round(progress),
+    projectCount: crew.projectCount ?? 0,
+  }
+}
+
+function ComparePanel({ crews, statsMap, onClose }) {
+  if (crews.length === 0) return null
+  const hues = crews.map(c => getCrewColorMeta(c).hue)
+
+  const memberCounts = crews.map(c => statsMap[c.id]?.memberCount ?? 0)
+  const taskCounts = crews.map(c => statsMap[c.id]?.total ?? 0)
+  const projectCounts = crews.map(c => statsMap[c.id]?.projectCount ?? 0)
+  const completionRates = crews.map(c => statsMap[c.id]?.progress ?? 0)
+  const maxMembers = Math.max(...memberCounts, 1)
+  const maxTasks = Math.max(...taskCounts, 1)
+  const maxProjects = Math.max(...projectCounts, 1)
+
+  return (
+    <motion.div
+      initial={{ y: '100%' }}
+      animate={{ y: 0 }}
+      exit={{ y: '100%' }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--bg-card)] border-t border-[var(--border-subtle)] rounded-t-2xl shadow-2xl max-h-[55vh] overflow-y-auto"
+    >
+      <div className="sticky top-0 bg-[var(--bg-card)] z-10 px-6 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between rounded-t-2xl">
+        <div className="flex items-center gap-3">
+          <Icons.scale className="w-5 h-5 text-[var(--accent)]" />
+          <Heading level={4} className="text-[14px] font-bold tracking-tight mb-0">Crew Comparison</Heading>
+          <span className="text-[11px] text-[var(--text-muted)]">{crews.length} selected · click a crew's scale icon to add/remove</span>
+        </div>
+        <button onClick={onClose} className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+      <div className="px-6 py-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <CompareBar label="Members" values={memberCounts} max={maxMembers} hues={hues} />
+        <CompareBar label="Tasks" values={taskCounts} max={maxTasks} hues={hues} />
+        <CompareBar label="Projects" values={projectCounts} max={maxProjects} hues={hues} />
+        <CompareBar label="Completion %" values={completionRates} max={100} hues={hues} />
+      </div>
+      <div className="px-6 pb-5 flex flex-wrap gap-2">
+        {crews.map((c, i) => (
+          <span key={c.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium"
+            style={{ background: `hsl(${hues[i]} 60% 50% / 0.12)`, color: `hsl(${hues[i]} 70% 55%)` }}>
+            <span className="w-2 h-2 rounded-full" style={{ background: `hsl(${hues[i]} 70% 55%)` }} />
+            {c.name}
+          </span>
+        ))}
+      </div>
+    </motion.div>
+  )
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   CrewsPage - Crew Mission Control
+   ══════════════════════════════════════════════════════════════════════ */
 export function CrewsPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -139,6 +311,19 @@ export function CrewsPage() {
   const ownedCount = useMemo(() => crews.filter(c => c.myRole === 'CREATOR' || c.myRole === 'OWNER').length, [crews]);
   const joinedCount = useMemo(() => crews.filter(c => c.myRole === 'MEMBER').length, [crews]);
 
+  // Compare drawer state (teams-module design language)
+  const [compareIds, setCompareIds] = useState([]);
+  const compareCrews = useMemo(() => crews.filter(c => compareIds.includes(c.id)), [crews, compareIds]);
+  const statsMap = useMemo(() => {
+    const map = {};
+    crews.forEach(c => { map[c.id] = crewStats(c); });
+    return map;
+  }, [crews]);
+  const roster = useMemo(() => crews.reduce((sum, c) => sum + (c.memberCount ?? c.activeMembers?.length ?? 0), 0), [crews]);
+  const toggleCompare = useCallback((id) => {
+    setCompareIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : (prev.length >= 4 ? prev : [...prev, id]));
+  }, []);
+
   const filteredCrews = useMemo(() => crews.filter(crew => {
     const matchesSearch = crew.name.toLowerCase().includes(searchQuery.toLowerCase()) || crew.description?.toLowerCase().includes(searchQuery.toLowerCase());
     if (!matchesSearch) return false;
@@ -167,24 +352,38 @@ export function CrewsPage() {
       </PageHero>
 
       {crews.length > 0 && (
-        <PageToolbar>
-          <div className="flex flex-wrap items-center gap-3 w-full">
-            <StatPill icon={Users} label="Total Crews" value={crews.length} highlight />
-            <StatPill icon={Shield} label="Owned" value={ownedCount} />
-            <StatPill icon={Users} label="Joined" value={joinedCount} />
-            <FilterTabs
-              filters={[{ value: 'ALL', label: 'All Squads' }, { value: 'OWNED', label: 'Owned' }, { value: 'JOINED', label: 'Joined' }]}
-              value={activeTab} onChange={setActiveTab}
-              counts={{ ALL: crews.length, OWNED: ownedCount, JOINED: joinedCount }}
-            />
-            <div className="relative flex-1 max-w-sm">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" aria-hidden="true" />
-              <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search crews..." aria-label="Search crews"
-                className="w-full pl-9 pr-8 py-2 text-[13px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-xs" />
-              {searchQuery && <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5" title="Clear search"><X className="w-3.5 h-3.5" /></button>}
-            </div>
+        <>
+          {/* KPI Strip — matches teams module design language */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+            <StatKPI icon={Users} label="Total Crews" value={crews.length} sublabel="Squads in your orbit" hue={239} />
+            <StatKPI icon={Shield} label="Owned" value={ownedCount} sublabel={ownedCount > 0 ? 'Crews you own' : 'No crews owned yet'} hue={38} />
+            <StatKPI icon={UserPlus} label="Joined" value={joinedCount} sublabel="Crews you belong to" hue={160} />
+            <StatKPI icon={MessageSquare} label="Roster" value={roster} sublabel="Members across all crews" hue={263} />
           </div>
-        </PageToolbar>
+
+          <PageToolbar>
+            <div className="flex flex-wrap items-center gap-3 w-full">
+              {/* Category chips with animated indicator */}
+              <div className="flex items-center gap-1 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-1">
+                {[{ key: 'ALL', label: 'All Squads' }, { key: 'OWNED', label: 'Owned' }, { key: 'JOINED', label: 'Joined' }].map(opt => (
+                  <CategoryChip
+                    key={opt.key}
+                    label={opt.label}
+                    count={opt.key === 'ALL' ? crews.length : opt.key === 'OWNED' ? ownedCount : joinedCount}
+                    isActive={activeTab === opt.key}
+                    onClick={() => setActiveTab(opt.key)}
+                  />
+                ))}
+              </div>
+              <div className="relative flex-1 max-w-sm">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" aria-hidden="true" />
+                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search crews..." aria-label="Search crews"
+                  className="w-full pl-9 pr-8 py-2 text-[13px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-xs" />
+                {searchQuery && <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5" title="Clear search"><X className="w-3.5 h-3.5" /></button>}
+              </div>
+            </div>
+          </PageToolbar>
+        </>
       )}
 
       <PageContent>
@@ -203,7 +402,7 @@ export function CrewsPage() {
           ) : (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">
-              {filteredCrews.map((crew) => <CrewCard key={crew.id} crew={crew} navigate={navigate} />)}
+              {filteredCrews.map((crew) => <CrewCard key={crew.id} crew={crew} navigate={navigate} isCompareSelected={compareIds.includes(crew.id)} onToggleCompare={toggleCompare} />)}
             </motion.div>
           )}
         </PageState>
@@ -262,11 +461,16 @@ export function CrewsPage() {
           </form>
         </ModalContent>
       </Modal>
+      <AnimatePresence>
+        {compareCrews.length > 0 && (
+          <ComparePanel crews={compareCrews} statsMap={statsMap} onClose={() => setCompareIds([])} />
+        )}
+      </AnimatePresence>
     </PageShell>
   );
 }
 
-function CrewCard({ crew, navigate }) {
+function CrewCard({ crew, navigate, isCompareSelected = false, onToggleCompare }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const isOwner = crew.myRole === 'CREATOR' || crew.myRole === 'OWNER';
@@ -289,7 +493,7 @@ function CrewCard({ crew, navigate }) {
   return (
     <motion.div onClick={handleCardClick} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCardClick(); } }}
       whileHover={{ y: -4, scale: 1.01 }} whileTap={{ scale: 0.98 }}
-      className={cn("group relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-5 flex flex-col transition-all duration-300 overflow-hidden cursor-pointer outline-none", "hover:border-[var(--accent-border)] hover:shadow-xl")}
+      className={cn("group relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-5 flex flex-col transition-all duration-300 overflow-hidden cursor-pointer outline-none", "hover:border-[var(--accent-border)] hover:shadow-xl", isCompareSelected && "ring-2 ring-[var(--accent)] border-[var(--accent-border)]")}
       style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
       <div className="absolute inset-0 pointer-events-none transition-opacity duration-500 opacity-30 group-hover:opacity-70"
         style={{ background: `radial-gradient(circle at 90% 10%, hsl(${colorMeta.hue} ${colorMeta.sat}% ${colorMeta.light}% / 0.15) 0%, transparent 65%)` }} />
@@ -305,7 +509,21 @@ function CrewCard({ crew, navigate }) {
             </div>
           </div>
         </div>
-        <div className="relative shrink-0" ref={menuRef}>
+        <div className="relative shrink-0 flex items-center gap-1" ref={menuRef}>
+          {/* Compare toggle (teams-module design language) */}
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleCompare?.(crew.id); }}
+            aria-label={isCompareSelected ? 'Remove from comparison' : 'Add to comparison'}
+            title={isCompareSelected ? 'Remove from comparison' : 'Add to comparison'}
+            className={cn(
+              'w-8 h-8 rounded-lg flex items-center justify-center transition-colors border',
+              isCompareSelected
+                ? 'text-[var(--accent)] bg-[var(--accent-soft)] border-[var(--accent-border)]'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] border-transparent hover:border-[var(--border-subtle)]'
+            )}
+          >
+            <Icons.scale className="w-4 h-4" />
+          </button>
           <button onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }} aria-label="Quick jump context menu" className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-colors border border-transparent hover:border-[var(--border-subtle)]"><MoreVertical className="w-4 h-4" /></button>
           <AnimatePresence>
             {isMenuOpen && (

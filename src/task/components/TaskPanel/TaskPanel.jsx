@@ -1,11 +1,8 @@
-
-import { Input } from '@/shared/ui/Input';
-
-import React, { useState, useRef, useEffect } from 'react'
+﻿import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
-import { IconButton, Button } from '@/shared/ui/Button'
+import { Button } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'
 import { Checkbox } from '@/shared/ui/Checkbox'
 import { Progress } from '@/shared/ui/Progress'
@@ -14,94 +11,54 @@ import { normalizePriority } from '@/shared/lib/priority'
 import { ChecklistForm } from './ChecklistForm'
 import { TaskComments, TaskDependencies, TaskEvidence } from './TaskPanelExtras'
 import ActivityTimeline from '../Nebula/explorers/ActivityTimeline'
-import { 
+import {
   useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, useReorderChecklistItems,
   useUpdateTask, useArchiveTask, useDeleteTask, useReassignTask,
   useSubmitTask, useApproveTask, useRejectTask, useRecallTask, useClaimTask,
   useCompletePersonalTask, useCompleteCrewTask
 } from '../../entities/hooks/useTasks'
-import { useComments, useAddComment, useTaskHistory, useAddDependency, useRemoveDependency, useTaskList, useEvidence, useAddEvidence, useDeleteEvidence, useUploadAttachment } from '../../entities/hooks/useTasks'
-import { normalizeTask } from '../../entities/api/task.api'
 import { useCrewMembers } from '@/crew'
 import { useUsersList } from '@/identity'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
-import { Archive, CheckCircle2, Send, RotateCcw, UserPlus, XCircle, Link2 } from '@/shared/ui/Icons'
-import { getKanbanColumnForTask, toBackendStatus } from '@/shared/lib/status'
 import { usePermissions } from '@/identity'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { useAuth } from '@/identity'
-import { useRealtime } from '@/app/providers/RealTimeProvider'
-import { useQueryClient } from '@tanstack/react-query'
-import { queryKeys } from '@/shared/api/queryKeys'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { toast } from 'sonner'
 import { SaveToggle } from '@/library/saved/features/components/SaveToggle'
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
+import { toBackendStatus } from '@/shared/lib/status'
 
-/**
- * Docked Utility Panel Component for Left Dock Column (VS Code Style)
- */
-function DockedUtilityPanel({
-  title,
-  icon: Icon,
-  badge,
-  onClose,
-  children
-}) {
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.96 }}
-      transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-      className="flex-1 flex flex-col min-h-[220px] rounded-[18px] bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] shadow-2xl shadow-black/40 overflow-hidden"
-    >
-      {/* Compact Utility Header */}
-      <div className="px-3.5 py-2 bg-[var(--bg-elevated)]/60 border-b border-[var(--color-border-subtle)] flex items-center justify-between shrink-0 select-none">
-        <div className="flex items-center gap-2">
-          {Icon && <Icon className="w-3.5 h-3.5 text-[var(--accent)]" />}
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-primary)] font-mono">
-            {title}
-          </span>
-          {badge && (
-            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-[var(--bg-hover)] text-[var(--text-muted)] border border-[var(--color-border-subtle)]">
-              {badge}
-            </span>
-          )}
-        </div>
-
-        <button
-          type="button"
-          onClick={onClose}
-          className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors"
-          title="Close Utility Window"
-        >
-          <Icons.x className="w-3.5 h-3.5" />
-        </button>
-      </div>
-
-      {/* Utility Body Container */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-3.5 text-[var(--text-primary)]">
-        {children}
-      </div>
-    </motion.div>
-  )
+/* â”€â”€â”€ Status accent map â”€â”€â”€ */
+const STATUS_STYLE = {
+  TODO:       { bg: 'bg-sky-500/10', text: 'text-sky-500', border: 'border-sky-500/20', dot: 'bg-sky-400' },
+  IN_PROGRESS:{ bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/20', dot: 'bg-amber-400' },
+  SUBMITTED:  { bg: 'bg-purple-500/10', text: 'text-purple-500', border: 'border-purple-500/20', dot: 'bg-purple-400' },
+  APPROVED:   { bg: 'bg-emerald-500/10', text: 'text-emerald-500', border: 'border-emerald-500/20', dot: 'bg-emerald-400' },
+  COMPLETED:  { bg: 'bg-emerald-500/10', text: 'text-emerald-500', border: 'border-emerald-500/20', dot: 'bg-emerald-400' },
+  DONE:       { bg: 'bg-emerald-500/10', text: 'text-emerald-500', border: 'border-emerald-500/20', dot: 'bg-emerald-400' },
+  REJECTED:   { bg: 'bg-red-500/10', text: 'text-red-500', border: 'border-red-500/20', dot: 'bg-red-400' },
 }
 
-export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default' }) {
+const TABS = [
+  { id: 'details', label: 'Details' },
+  { id: 'comments', label: 'Comments' },
+  { id: 'evidence', label: 'Evidence' },
+  { id: 'activity', label: 'Activity' },
+]
+
+export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default', isDocked = false }) {
   const { workspaceMode } = useWorkspace()
   const isPersonal = workspaceMode === 'PERSONAL'
   const { user } = useAuth()
-  const { 
-    canArchiveTask, canEditTask, canDeleteTask, canAssignTask, 
+  const {
+    canArchiveTask, canEditTask, canDeleteTask, canAssignTask,
     canChecklistEdit, canDependencyEdit, canCommentTask, canAlter, canReview
   } = usePermissions()
   const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
   const creatorUsername = typeof task?.creator === 'object' ? task?.creator?.username : task?.creator
   const assigneeUsername = typeof task?.assignee === 'object' ? task?.assignee?.username : (task?.assignee || task?.assignedTo)
-
   const isCreator = creatorUsername === user?.username || creatorUsername === user?.id
   const isAssignee = assigneeUsername === user?.username || assigneeUsername === user?.id || (typeof task?.assignee === 'object' && task?.assignee?.id === user?.id) || (typeof task?.assignedTo === 'object' && task?.assignedTo?.id === user?.id)
   const canAlterCreator = canAlter(creatorUsername)
@@ -119,43 +76,31 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   const toggleChecklistItem = useToggleChecklistItem(task?.id)
   const deleteChecklistItem = useDeleteChecklistItem(task?.id)
   const reorderChecklist = useReorderChecklistItems(task?.id)
-  
+
   const handleMoveChecklistItem = (index, direction) => {
     if (!task?.checklists) return;
     const items = [...task.checklists];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= items.length) return;
-    
-    const temp = items[index];
-    items[index] = items[targetIndex];
-    items[targetIndex] = temp;
-    
+    const temp = items[index]; items[index] = items[targetIndex]; items[targetIndex] = temp;
     reorderChecklist.mutate(items.map(i => i.id));
   }
-  
+
   const updateTask = useUpdateTask()
   const archiveTaskMutation = useArchiveTask()
   const deleteTaskMutation = useDeleteTask()
   const reassignTask = useReassignTask()
   const { data: orgUsers = [] } = useUsersList()
   const { data: crewMembersData = [] } = useCrewMembers(task?.crewId || task?.crew?.id)
-  
+
   const assignableUsers = React.useMemo(() => {
     if (!task) return []
-    if (task.crewId || task.crew) {
-      return crewMembersData.map(m => m.user ? { id: m.user.id, username: m.user.username } : m)
-    }
+    if (task.crewId || task.crew) return crewMembersData.map(m => m.user ? { id: m.user.id, username: m.user.username } : m)
     if (task.teamId) return orgUsers.filter(u => u.teamId === task.teamId)
     return orgUsers
   }, [orgUsers, crewMembersData, task])
 
-  // Independent Attached Utility States (Default: Only Inspector Opens First)
-  const [isCommentsOpen, setIsCommentsOpen] = useState(false)
-  const [isEvidenceOpen, setIsEvidenceOpen] = useState(false)
-  const [isActivityOpen, setIsActivityOpen] = useState(false)
-
-  const hasAnyUtilityOpen = isCommentsOpen || isEvidenceOpen || isActivityOpen
-
+  const [activeTab, setActiveTab] = useState('details')
   const [localEdits, setLocalEdits] = useState({})
   const [isDirty, setIsDirty] = useState(false)
   const [syncedTaskId, setSyncedTaskId] = useState(task?.id)
@@ -169,29 +114,12 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
     setIsDirty(false)
   }
 
-  const { subscribeToTask } = useRealtime()
-  const queryClient = useQueryClient()
-
-  // Real-time task subscription
-  useEffect(() => {
-    if (isOpen && task?.id) {
-      return subscribeToTask(task.id, (updatedTask) => {
-        const normalized = normalizeTask(updatedTask)
-        queryClient.setQueryData([...queryKeys.tasks.detail(task.id)], normalized)
-        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.lists() })
-      })
-    }
-  }, [isOpen, task?.id, subscribeToTask, queryClient])
-
-  // Sync contentEditable refs when task changes or panel opens
   useEffect(() => {
     if (isOpen && task) {
-      if (titleRef.current && document.activeElement !== titleRef.current && titleRef.current.textContent !== task.title) {
+      if (titleRef.current && document.activeElement !== titleRef.current && titleRef.current.textContent !== task.title)
         titleRef.current.textContent = task.title || ''
-      }
-      if (descRef.current && document.activeElement !== descRef.current && descRef.current.textContent !== (task.description || '')) {
+      if (descRef.current && document.activeElement !== descRef.current && descRef.current.textContent !== (task.description || ''))
         descRef.current.textContent = task.description || ''
-      }
     }
   }, [isOpen, task])
 
@@ -203,24 +131,23 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   const completePersonalTaskMutation = useCompletePersonalTask()
   const completeCrewTaskMutation = useCompleteCrewTask()
 
-  const renderStateMachineActions = (size = "sm") => {
+  const currentStatus = toBackendStatus(task?.currentStatus || task?.status)
+  const st = STATUS_STYLE[currentStatus] || STATUS_STYLE.TODO
+
+  /* â”€â”€ State machine action buttons â”€â”€ */
+  const renderStateActions = (size = "sm") => {
     if (!task) return null
-    const currentStatus = toBackendStatus(task.currentStatus || task.status)
     const isCrewTask = !!(task.crewId || task.crew)
     const isTaskPersonal = isPersonal || task.isPersonal
-    const isUnclaimed = !task.assignedTo && !task.assignee || task.assignedTo === 'Unassigned' || task.assignee === 'Unassigned' || task.assignedTo === '' || task.assignee === '';
+    const isUnclaimed = !task.assignedTo && !task.assignee
 
     if (isTaskPersonal) {
       if (currentStatus !== 'DONE' && currentStatus !== 'COMPLETED' && currentStatus !== 'APPROVED') {
         return (
-          <Button 
-            size={size} 
-            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+          <Button size={size} className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg"
             onClick={() => completePersonalTaskMutation.mutate(task.id)}
-            isLoading={completePersonalTaskMutation.isPending}
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            Complete
+            isLoading={completePersonalTaskMutation.isPending}>
+            <Icons.checkCircle2 className="w-4 h-4" /> Complete
           </Button>
         )
       }
@@ -231,57 +158,34 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
       return (
         <div className="flex items-center gap-2">
           {isUnclaimed && currentStatus !== 'COMPLETED' && currentStatus !== 'DONE' && (
-            <Button 
-              size={size}
-              variant="outline"
-              className="gap-1.5 border-orange-500/50 text-orange-500 hover:bg-orange-500/10"
-              onClick={() => claimTaskMutation.mutate(task.id)}
-              isLoading={claimTaskMutation.isPending}
-            >
-              <UserPlus className="w-4 h-4" />
-              Claim Task
+            <Button size={size} variant="outline" className="gap-1.5 rounded-lg font-medium"
+              onClick={() => claimTaskMutation.mutate(task.id)} isLoading={claimTaskMutation.isPending}>
+              <Icons.userPlus className="w-4 h-4" /> Claim
             </Button>
           )}
           {!isUnclaimed && (currentStatus === 'IN_PROGRESS' || currentStatus === 'TODO') && (
-            <Button 
-              size={size}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
-              onClick={() => completeCrewTaskMutation.mutate(task.id)}
-              isLoading={completeCrewTaskMutation.isPending}
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              Complete Task
+            <Button size={size} className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg"
+              onClick={() => completeCrewTaskMutation.mutate(task.id)} isLoading={completeCrewTaskMutation.isPending}>
+              <Icons.checkCircle2 className="w-4 h-4" /> Complete
             </Button>
           )}
         </div>
       )
     }
 
-    // Default Org Workflow
     return (
       <div className="flex items-center gap-2">
         {isCrewTask && isUnclaimed && currentStatus !== 'COMPLETED' && currentStatus !== 'APPROVED' && currentStatus !== 'DONE' && (
-          <Button 
-            size={size}
-            variant="outline"
-            className="gap-1.5 border-orange-500/50 text-orange-500 hover:bg-orange-500/10"
-            onClick={() => claimTaskMutation.mutate(task.id)}
-            isLoading={claimTaskMutation.isPending}
-          >
-            <UserPlus className="w-4 h-4" />
-            Claim Task
+          <Button size={size} variant="outline" className="gap-1.5 rounded-lg font-medium"
+            onClick={() => claimTaskMutation.mutate(task.id)} isLoading={claimTaskMutation.isPending}>
+            <Icons.userPlus className="w-4 h-4" /> Claim
           </Button>
         )}
 
-        {(currentStatus === 'TODO' || currentStatus === 'IN_PROGRESS' || currentStatus === 'IN_PROGRESS') && (isAssignee || isCreator || canEditTask) && !isUnclaimed && (
-          <Button 
-            size={size}
-            className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white gap-1.5"
-            onClick={() => submitTaskMutation.mutate(task.id)}
-            isLoading={submitTaskMutation.isPending}
-          >
-            <Send className="w-4 h-4" />
-            Submit for Review
+        {(currentStatus === 'TODO' || currentStatus === 'IN_PROGRESS') && (isAssignee || isCreator || canEditTask) && !isUnclaimed && (
+          <Button size={size} className="gap-1.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold rounded-lg"
+            onClick={() => submitTaskMutation.mutate(task.id)} isLoading={submitTaskMutation.isPending}>
+            <Icons.send className="w-4 h-4" /> Submit for Review
           </Button>
         )}
 
@@ -289,84 +193,53 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
           hasAssignPerm ? (
             <Popover open={isReassignOpen} onOpenChange={setIsReassignOpen}>
               <PopoverTrigger asChild>
-                <Button size={size} className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5">
-                  <UserPlus className="w-4 h-4" />
-                  Reassign Task
+                <Button size={size} className="gap-1.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold rounded-lg">
+                  <Icons.userPlus className="w-4 h-4" /> Reassign
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-52 p-1">
-                <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-semibold">Reassign Task</Text>
-                <div className="space-y-0.5 max-h-48 overflow-y-auto custom-scrollbar">
+              <PopoverContent align="end" className="w-52 p-1.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-[var(--shadow-lg)] rounded-lg">
+                <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-bold tracking-wider text-[10px]">Reassign to</Text>
+                <div className="space-y-0.5 max-h-44 overflow-y-auto custom-scrollbar">
                   {assignableUsers.map(u => (
-                    <Button
-                      key={u.id}
-                      variant="ghost"
-                      onClick={() => {
-                        reassignTask.mutate({ taskId: task.id, newAssigneeId: u.id }, {
-                          onSuccess: () => setIsReassignOpen(false)
-                        })
-                      }}
-                      className="w-full flex items-center gap-2 px-2 py-1 text-xs justify-start"
-                    >
-                      <div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px] shrink-0 font-bold">
+                    <button key={u.id}
+                      onClick={() => reassignTask.mutate({ taskId: task.id, newAssigneeId: u.id }, { onSuccess: () => setIsReassignOpen(false) })}
+                      className="w-full flex items-center gap-2.5 px-2.5 py-2 text-[12px] rounded-lg hover:bg-[var(--bg-hover)] transition-colors text-left">
+                      <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px] font-bold shrink-0">
                         {u.username.charAt(0).toUpperCase()}
                       </div>
-                      <span className="truncate text-[var(--text-primary)]">{u.username}</span>
-                    </Button>
+                      <span className="truncate text-[var(--text-primary)] font-medium">{u.username}</span>
+                    </button>
                   ))}
                 </div>
               </PopoverContent>
             </Popover>
           ) : (
-            <Badge variant="outline" className="border-red-500/50 text-red-400 bg-red-500/10 px-2.5 py-1 text-xs">
-              Rejected (Requires Reassignment by Assignor)
+            <Badge variant="outline" className="border-red-500/30 text-[var(--danger)] bg-[var(--danger-soft)] px-2.5 py-1 text-[11px] font-semibold rounded-lg">
+              Rejected (requires reassignment)
             </Badge>
           )
         )}
-        
+
         {currentStatus === 'SUBMITTED' && (isAssignee || isCreator || canEditTask) && (
-          <Button 
-            size={size}
-            variant="outline"
-            className="gap-1.5"
-            onClick={() => recallTaskMutation.mutate(task.id)}
-            isLoading={recallTaskMutation.isPending}
-          >
-            <RotateCcw className="w-4 h-4" />
-            Recall
+          <Button size={size} variant="outline" className="gap-1.5 rounded-lg font-medium"
+            onClick={() => recallTaskMutation.mutate(task.id)} isLoading={recallTaskMutation.isPending}>
+            <Icons.rotateCcw className="w-4 h-4" /> Recall
           </Button>
         )}
 
         {currentStatus === 'SUBMITTED' && (canReview || isCreator) && !isAssignee && (
           <>
-            <Button 
-              size={size}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
-              onClick={() => approveTaskMutation.mutate(task.id)}
-              isLoading={approveTaskMutation.isPending}
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              Approve
+            <Button size={size} className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg"
+              onClick={() => approveTaskMutation.mutate(task.id)} isLoading={approveTaskMutation.isPending}>
+              <Icons.checkCircle2 className="w-4 h-4" /> Approve
             </Button>
-            <Button 
-              size={size}
-              className="bg-[var(--danger)] hover:bg-[var(--danger-hover)] text-white gap-1.5"
+            <Button size={size} className="gap-1.5 bg-[var(--danger)] hover:opacity-90 text-white font-semibold rounded-lg"
               onClick={async () => {
-                const reason = await confirm({
-                  title: 'Reject task',
-                  description: 'Provide a reason for rejection.',
-                  requireInput: true,
-                  inputPlaceholder: 'Rejection reason:',
-                  danger: true
-                });
-                if (reason && typeof reason === 'string' && reason.trim() !== '') {
-                  rejectTaskMutation.mutate({ id: task.id, reason });
-                }
+                const reason = await confirm({ title: 'Reject task', description: 'Provide a reason for rejection.', requireInput: true, inputPlaceholder: 'Rejection reason:', danger: true });
+                if (reason && typeof reason === 'string' && reason.trim() !== '') rejectTaskMutation.mutate({ id: task.id, reason });
               }}
-              isLoading={rejectTaskMutation.isPending}
-            >
-              <XCircle className="w-4 h-4" />
-              Reject
+              isLoading={rejectTaskMutation.isPending}>
+              <Icons.xCircle className="w-4 h-4" /> Reject
             </Button>
           </>
         )}
@@ -375,31 +248,13 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   }
 
   const handleArchive = async () => {
-    const isConfirmed = await confirm({
-      title: 'Archive Task',
-      description: 'Are you sure you want to archive this task? It can be unarchived later from settings.',
-      confirmLabel: 'Archive',
-      danger: true,
-    })
-    if (isConfirmed) {
-      archiveTaskMutation.mutate(task.id, {
-        onSuccess: () => onClose()
-      })
-    }
+    if (await confirm({ title: 'Archive Task', description: 'Are you sure? It can be unarchived later.', confirmLabel: 'Archive', danger: true }))
+      archiveTaskMutation.mutate(task.id, { onSuccess: () => onClose() })
   }
 
   const handleDelete = async () => {
-    const isConfirmed = await confirm({
-      title: 'Delete Task Permanently',
-      description: 'This action cannot be undone. All subtasks, evidence, and comments will be permanently deleted.',
-      confirmLabel: 'Delete',
-      danger: true,
-    })
-    if (isConfirmed) {
-      deleteTaskMutation.mutate(task.id, {
-        onSuccess: () => onClose()
-      })
-    }
+    if (await confirm({ title: 'Delete Task Permanently', description: 'This cannot be undone. All subtasks, evidence, and comments will be deleted.', confirmLabel: 'Delete', danger: true }))
+      deleteTaskMutation.mutate(task.id, { onSuccess: () => onClose() })
   }
 
   if (!isOpen || !task) return null
@@ -408,433 +263,313 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Transparent Backdrop (No Blur, No Dark Mask Ã¢â‚¬â€ Nebula / Board is 100% visible) */}
+          {!isDocked && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={onClose} className="fixed inset-0 bg-transparent z-30 pointer-events-auto" />
+          )}
+
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-transparent z-30 pointer-events-auto"
-          />
-
-          {/* ====================================================================== */}
-          {/* ATTACHED LEFT DOCK COLUMN (16px gap from Inspector, Floating) */}
-          {/* ====================================================================== */}
-          <AnimatePresence>
-            {hasAnyUtilityOpen && (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ type: 'spring', damping: 26, stiffness: 260 }}
-                className="fixed top-4 bottom-4 right-[calc(52vw+32px)] w-[360px] md:w-[420px] max-w-[calc(48vw-48px)] z-40 flex flex-col gap-3.5 overflow-hidden pointer-events-auto"
-              >
-                <AnimatePresence mode="popLayout">
-                  {isCommentsOpen && (
-                    <DockedUtilityPanel
-                      key="comments-dock"
-                      title="Comments"
-                      icon={Icons.messageSquare}
-                      badge="Thread"
-                      onClose={() => setIsCommentsOpen(false)}
-                    >
-                      <TaskComments taskId={task.id} hasCommentPerm={hasCommentPerm} />
-                    </DockedUtilityPanel>
-                  )}
-
-                  {isEvidenceOpen && (
-                    <DockedUtilityPanel
-                      key="evidence-dock"
-                      title="Evidence & Links"
-                      icon={Icons.link}
-                      badge="Media Preview"
-                      onClose={() => setIsEvidenceOpen(false)}
-                    >
-                      <TaskEvidence taskId={task.id} hasEditPerm={isAssignee || (isPersonal && isCreator)} />
-                    </DockedUtilityPanel>
-                  )}
-
-                  {isActivityOpen && (
-                    <DockedUtilityPanel
-                      key="activity-dock"
-                      title="Activity Log"
-                      icon={Icons.clock}
-                      badge="Timeline"
-                      onClose={() => setIsActivityOpen(false)}
-                    >
-                      <ActivityTimeline taskId={task.id} />
-                    </DockedUtilityPanel>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* ====================================================================== */}
-          {/* RIGHT WORKSPACE: TASK INSPECTOR (Floating IDE Workspace, Radius 20px) */}
-          {/* ====================================================================== */}
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            initial={isDocked ? false : { x: '100%', opacity: 0, scale: 0.95 }}
+            animate={isDocked ? { x: 0 } : { x: 0, opacity: 1, scale: 1 }}
+            exit={isDocked ? false : { x: '100%', opacity: 0, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-4 bottom-4 right-4 w-[52vw] max-w-[820px] min-w-[440px] z-40 bg-[var(--bg-elevated)] shadow-2xl shadow-black/50 border border-[var(--color-border-subtle)] rounded-[20px] overflow-hidden flex flex-col pointer-events-auto"
+            className={cn(
+              "flex flex-col pointer-events-auto overflow-hidden",
+              isDocked
+                ? "w-full h-full bg-[var(--bg-base)]/90 backdrop-blur-2xl border-l border-[var(--border-subtle)]"
+                : "fixed top-0 right-0 bottom-0 md:top-4 md:bottom-4 md:right-4 w-full md:w-[440px] z-40 bg-[var(--bg-base)] shadow-2xl shadow-black/10 border border-[var(--border-subtle)] md:rounded-3xl"
+            )}
           >
-            {/* Task Inspector Header & Active Utility Toggle Controls */}
-            <div className="flex items-center justify-between px-6 py-3.5 border-b border-[var(--color-border-subtle)] bg-[var(--bg-subtle)]/40 shrink-0">
-              <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                <Badge variant="outline" className="font-mono text-[10px] uppercase">{task.id}</Badge>
-                {task.status === 'Done' && (
-                  <Badge className="bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]">
-                    Completed
-                  </Badge>
-                )}
-                <div className="ml-2">
-                  {renderStateMachineActions("xs")}
-                </div>
-                <SaveToggle entityType={ENTITY_TYPES.TASK} entityId={task.id} className="ml-1" />
+            {/* â”€â”€ Header â”€â”€ */}
+            <div className="flex items-center justify-between px-5 py-3.5 shrink-0 border-b border-[var(--border-subtle)]">
+              <div className="flex items-center gap-2.5">
+                <button onClick={onClose}
+                  className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-colors">
+                  <Icons.chevronLeft className="w-4 h-4" />
+                </button>
+                <Badge variant="outline" className="font-mono text-[10px] font-semibold text-[var(--text-muted)] border-[var(--border-subtle)] bg-[var(--bg-subtle)] rounded-lg px-2 py-0.5">
+                  #{task.id}
+                </Badge>
               </div>
 
-              {/* Utility Panel Active Toggle Controls */}
-              <div className="flex items-center gap-1.5 bg-[var(--bg-elevated)] p-1 rounded-xl border border-[var(--color-border-subtle)]">
-                <button
-                  type="button"
-                  onClick={() => setIsCommentsOpen(!isCommentsOpen)}
-                  className={cn(
-                    "px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 text-xs font-medium",
-                    isCommentsOpen ? "bg-[var(--accent)] text-white font-semibold shadow-xs" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
-                  )}
-                  title="Toggle Comments Utility Panel"
-                >
-                  <Icons.messageSquare className="w-3.5 h-3.5" />
-                  <span>Comments</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsEvidenceOpen(!isEvidenceOpen)}
-                  className={cn(
-                    "px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 text-xs font-medium",
-                    isEvidenceOpen ? "bg-[var(--accent)] text-white font-semibold shadow-xs" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
-                  )}
-                  title="Toggle Evidence Utility Panel"
-                >
-                  <Icons.link className="w-3.5 h-3.5" />
-                  <span>Evidence</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsActivityOpen(!isActivityOpen)}
-                  className={cn(
-                    "px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 text-xs font-medium",
-                    isActivityOpen ? "bg-[var(--accent)] text-white font-semibold shadow-xs" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]"
-                  )}
-                  title="Toggle Activity Log Utility Panel"
-                >
-                  <Icons.clock className="w-3.5 h-3.5" />
-                  <span>Activity Log</span>
-                </button>
-              </div>
-
-              <div className="flex items-center gap-1">
-                {hasArchivePerm && (
-                  <IconButton variant="ghost" onClick={handleArchive} title="Archive Task">
-                    <Archive className="w-4 h-4" />
-                  </IconButton>
-                )}
-                {hasDeletePerm && (
-                  <IconButton variant="ghost" className="text-[var(--danger)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]" onClick={handleDelete} title="Delete Task">
-                    <Icons.trash2 className="w-4 h-4" />
-                  </IconButton>
-                )}
-                <IconButton 
-                  variant="ghost" 
-                  title="Copy Task Link" 
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/app/tasks?task=${task.id}`)
-                    toast.success('Task link copied to clipboard')
-                  }}
-                >
-                  <Link2 className="w-4 h-4" />
-                </IconButton>
-                <IconButton variant="ghost" onClick={onClose}>
+              <div className="flex items-center gap-0.5">
+                <SaveToggle entityType={ENTITY_TYPES.TASK} entityId={task.id} className="mr-1" />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-colors">
+                      <Icons.moreHorizontal className="w-4 h-4" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-44 p-1.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-[var(--shadow-lg)] rounded-lg">
+                    <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/app/tasks?task=${task.id}`); toast.success('Link copied') }}
+                      className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)] transition-colors text-left">
+                      <Icons.link className="w-3.5 h-3.5" /> Copy Link
+                    </button>
+                    {hasArchivePerm && (
+                      <button onClick={handleArchive}
+                        className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)] transition-colors text-left">
+                        <Icons.archive className="w-3.5 h-3.5" /> Archive
+                      </button>
+                    )}
+                    {hasDeletePerm && (
+                      <button onClick={handleDelete}
+                        className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12px] font-semibold text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors text-left">
+                        <Icons.trash2 className="w-3.5 h-3.5" /> Delete
+                      </button>
+                    )}
+                  </PopoverContent>
+                </Popover>
+                <button onClick={onClose}
+                  className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-colors">
                   <Icons.x className="w-4 h-4" />
-                </IconButton>
+                </button>
               </div>
             </div>
 
-            {/* Task Inspector Scrollable Body (CONTAINS ONLY SPECS, ATTRIBUTES, CHECKLIST, DEPENDENCIES) */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
-              
-              {/* Title */}
-              <div>
-                <Heading 
-                  level={2} 
-                  ref={titleRef}
-                  contentEditable={hasEditPerm} 
-                  suppressContentEditableWarning
-                  onBlur={() => {
-                    const text = titleRef.current?.textContent || ''
-                    if (text !== task.title) {
-                      setLocalEdits(prev => ({ ...prev, title: text }))
-                      setIsDirty(true)
-                    }
-                  }}
-                  className="text-2xl font-semibold tracking-tight text-[var(--text-primary)] outline-none hover:bg-[var(--bg-subtle)] p-2 -ml-2 rounded-xl transition-colors duration-[var(--duration-base)] cursor-text"
-                >
-                  {task?.title || ''}
-                </Heading>
+            {/* â”€â”€ Title & Identity â”€â”€ */}
+            <div className="px-6 pt-5 pb-4 shrink-0">
+              <h1 ref={titleRef} contentEditable={hasEditPerm} suppressContentEditableWarning
+                onBlur={() => { const t = titleRef.current?.textContent || ''; if (t !== task.title) { setLocalEdits(p => ({ ...p, title: t })); setIsDirty(true) } }}
+                className="text-2xl font-bold tracking-tight text-[var(--text-primary)] leading-tight outline-none hover:bg-[var(--bg-subtle)] px-2 py-1 -ml-2 rounded-lg transition-colors cursor-text mb-3">
+                {task?.title || ''}
+              </h1>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wide border', st.bg, st.text, st.border)}>
+                  <div className={cn('w-1.5 h-1.5 rounded-full shadow-sm', st.dot)} />
+                  {task.status === 'Done' || task.status === 'COMPLETED' ? 'Completed' : task.status}
+                </span>
+                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wide bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)]">
+                  {normalizePriority(task.priority)} Priority
+                </span>
+                {renderStateActions("xs")}
               </div>
+            </div>
 
-              {/* Description */}
-              <section className="space-y-2">
-                <Text size="xs" variant="muted" className="uppercase tracking-wider font-semibold">Description</Text>
-                <div 
-                  ref={descRef}
-                  contentEditable={hasEditPerm}
-                  suppressContentEditableWarning
-                  onBlur={() => {
-                    const text = descRef.current?.textContent || ''
-                    if (text !== (task.description || '')) {
-                      setLocalEdits(prev => ({ ...prev, description: text }))
-                      setIsDirty(true)
-                    }
-                  }}
-                  className="text-sm text-[var(--text-primary)] leading-relaxed min-h-[90px] outline-none hover:bg-[var(--bg-subtle)] p-3 -mx-3 rounded-xl transition-colors duration-[var(--duration-base)] cursor-text whitespace-pre-wrap border border-transparent focus:border-[var(--accent-border)] placeholder:text-[var(--text-tertiary)]"
-                >
-                  {task?.description || (hasEditPerm ? '' : 'No description provided.')}
-                </div>
-              </section>
-
-              {/* Attributes Card */}
-              <div className="space-y-4 bg-[var(--bg-subtle)]/40 p-4 rounded-2xl border border-[var(--color-border-subtle)]">
-                <Text size="xs" variant="muted" className="uppercase tracking-wider font-semibold mb-2">Attributes</Text>
-                
-                {/* Status */}
-                <div className="flex items-center justify-between">
-                  <Text size="xs" variant="muted">Status</Text>
-                  <Badge variant="outline" className="font-medium uppercase tracking-wide">{task.status}</Badge>
-                </div>
-
-                {/* Priority */}
-                <div className="flex items-center justify-between">
-                  <Text size="xs" variant="muted">Priority</Text>
-                  <Badge variant="outline" className="uppercase font-mono text-[10px]">{task.priority}</Badge>
-                </div>
-
-                {/* Assignee Ã¢â‚¬â€ hidden in personal mode */}
-                {!isPersonal && (
-                  <div className="flex items-center justify-between">
-                    <Text size="xs" variant="muted">Assignee</Text>
-                    {hasAssignPerm ? (
-                      <Popover open={isReassignOpen} onOpenChange={setIsReassignOpen}>
-                        <PopoverTrigger asChild>
-                          <span className="font-medium text-xs flex items-center gap-1.5 cursor-pointer hover:bg-[var(--bg-hover)] px-2 py-1 rounded-lg transition-colors text-[var(--text-primary)]">
-                            <div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px] font-bold">
-                              {(task?.assignedTo || 'U').charAt(0).toUpperCase()}
-                            </div>
-                            {task.assignedTo || 'Unassigned'}
-                          </span>
-                        </PopoverTrigger>
-                        <PopoverContent align="end" className="w-52 p-1">
-                          <Text size="xs" variant="muted" className="px-2 py-1.5 uppercase font-semibold">Reassign Task</Text>
-                          <div className="space-y-0.5 max-h-48 overflow-y-auto custom-scrollbar">
-                            {assignableUsers.map(u => (
-                              <Button
-                                key={u.id}
-                                variant="ghost"
-                                onClick={() => {
-                                  reassignTask.mutate({ taskId: task.id, newAssigneeId: u.id }, {
-                                    onSuccess: () => setIsReassignOpen(false)
-                                  })
-                                }}
-                                className="w-full flex items-center gap-2 px-2 py-1 text-xs justify-start"
-                              >
-                                <div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px] shrink-0 font-bold">
-                                  {u.username.charAt(0).toUpperCase()}
-                                </div>
-                                <span className="truncate text-[var(--text-primary)]">{u.username}</span>
-                              </Button>
-                            ))}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    ) : (
-                      <span className="font-medium text-xs flex items-center gap-1.5 text-[var(--text-primary)]">
-                        <div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px]">
-                          {(task?.assignedTo || 'U').charAt(0).toUpperCase()}
-                        </div>
-                        {task.assignedTo || 'Unassigned'}
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                {/* Due Date (Editable) */}
-                <div className="flex items-center justify-between">
-                  <Text size="xs" variant="muted">Due Date</Text>
-                  {hasEditPerm ? (
-                    <input
-                      type="date"
-                      value={task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : ''}
-                      onChange={(e) => {
-                        const val = e.target.value
-                        const newDate = val || null
-                        updateTask.mutate({ id: task.id, payload: { dueDate: newDate } }, {
-                          onSuccess: () => toast.success('Due date updated')
-                        })
-                      }}
-                      className="bg-transparent border border-[var(--color-border-subtle)] hover:border-[var(--accent-border)] rounded-md px-2 py-0.5 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] cursor-pointer"
-                    />
-                  ) : (
-                    <Text size="xs" className="font-medium text-[var(--text-primary)]">
-                      {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No deadline'}
-                    </Text>
+            {/* â”€â”€ Tabs â”€â”€ */}
+            <div className="px-5 shrink-0 border-b border-[var(--border-subtle)] flex gap-1">
+              {TABS.map(tab => (
+                <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "relative py-2.5 px-3 text-[12px] font-semibold whitespace-nowrap transition-colors rounded-t-lg",
+                    activeTab === tab.id ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  )}>
+                  {tab.label}
+                  {activeTab === tab.id && (
+                    <motion.div layoutId="task-panel-tab-bar" className="absolute left-1 right-1 bottom-0 h-[2px] bg-[var(--accent)] rounded-full"
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }} />
                   )}
-                </div>
-              </div>
+                </button>
+              ))}
+            </div>
 
-              {/* Side-by-Side Grid: Checklist (Left) & Dependencies (Right) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                
-                {/* Checklist Card */}
-                <div className="space-y-3 bg-[var(--bg-subtle)]/40 p-4 rounded-2xl border border-[var(--color-border-subtle)]">
-                  {/* Header */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Icons.checkSquare className="w-3.5 h-3.5 text-[var(--accent)]" />
-                      <Text size="xs" variant="muted" className="uppercase tracking-wider font-semibold">Checklist</Text>
-                    </div>
-                    {task.checklists?.length > 0 && (
-                      <Badge variant="outline" className="font-mono text-[10px] tabular-nums px-1.5 py-0">
-                        {task.checklists.filter(c => c.completed).length}/{task.checklists.length}
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Progress Bar */}
-                  {task.checklists?.length > 0 && (() => {
-                    const done = task.checklists.filter(c => c.completed).length
-                    const total = task.checklists.length
-                    const pct = Math.round((done / total) * 100)
-                    return (
-                      <div className="flex items-center gap-2">
-                        <Progress value={pct} className="h-1 flex-1" />
-                        <Text size="xs" variant="muted" className="font-mono tabular-nums text-[10px] shrink-0">
-                          {pct}%
-                        </Text>
+            {/* â”€â”€ Tab Content â”€â”€ */}
+            {activeTab === 'details' && (
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-6">
+                  {/* Left column */}
+                  <div className="space-y-6 min-w-0">
+                    {/* Description */}
+                    <section>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icons.chevronLeft className="w-3.5 h-3.5 text-[var(--accent)]" />
+                        <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.05em]">Description</span>
                       </div>
-                    )
-                  })()}
+                      <div ref={descRef} contentEditable={hasEditPerm} suppressContentEditableWarning
+                        onBlur={() => { const t = descRef.current?.textContent || ''; if (t !== (task.description || '')) { setLocalEdits(p => ({ ...p, description: t })); setIsDirty(true) } }}
+                        className="text-[13px] text-[var(--text-primary)] leading-relaxed min-h-[80px] outline-none hover:bg-[var(--bg-subtle)] p-3 -mx-3 rounded-lg transition-colors cursor-text whitespace-pre-wrap border border-transparent focus:border-[var(--accent-border)]">
+                        {task?.description || (hasEditPerm ? '' : 'No description provided.')}
+                      </div>
+                    </section>
 
-                  {/* Items */}
-                  {task.checklists?.length > 0 ? (
-                    <div className="space-y-0.5">
-                      <AnimatePresence initial={false}>
-                        {task.checklists.map((item, index) => (
-                          <motion.div
-                            key={item.id}
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            className="group"
-                          >
-                            <div className={cn(
-                              "flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors duration-150",
-                              "hover:bg-[var(--bg-elevated)]/60",
-                              item.completed && "opacity-60"
-                            )}>
-                              <Checkbox
-                                checked={item.completed}
-                                disabled={!hasChecklistPerm}
-                                onCheckedChange={() => toggleChecklistItem.mutate(item.id)}
-                                className="shrink-0"
-                              />
-                              <span className={cn(
-                                "flex-1 text-xs leading-snug select-text transition-all duration-200",
-                                item.completed
-                                  ? "line-through text-[var(--text-muted)]"
-                                  : "text-[var(--text-primary)]"
-                              )}>
-                                {item.text}
-                              </span>
-                              {hasChecklistPerm && (
-                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                                  <div className="flex flex-col">
-                                    <button
-                                      type="button"
-                                      className="p-0 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed"
-                                      onClick={() => handleMoveChecklistItem(index, 'up')}
-                                      disabled={index === 0 || reorderChecklist.isPending}
-                                    >
-                                      <Icons.chevronUp className="w-3 h-3" />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="p-0 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed"
-                                      onClick={() => handleMoveChecklistItem(index, 'down')}
-                                      disabled={index === task.checklists.length - 1 || reorderChecklist.isPending}
-                                    >
-                                      <Icons.chevronDown className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    className="p-1 rounded text-[var(--text-muted)] hover:text-[var(--danger)]"
-                                    onClick={() => deleteChecklistItem.mutate(item.id)}
-                                    title="Remove item"
-                                  >
-                                    <Icons.x className="w-3 h-3" />
-                                  </button>
+                    {/* Checklist */}
+                    <section className="pt-5 border-t border-[var(--border-subtle)]">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Icons.checkSquare className="w-3.5 h-3.5 text-[var(--accent)]" />
+                          <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.05em]">Checklist</span>
+                        </div>
+                        {task.checklists?.length > 0 && (
+                          <Badge variant="outline" className="font-mono text-[10px] tabular-nums font-semibold border-[var(--border-subtle)]">
+                            {task.checklists.filter(c => c.completed).length}/{task.checklists.length}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {task.checklists?.length > 0 && (() => {
+                        const done = task.checklists.filter(c => c.completed).length
+                        const pct = Math.round((done / task.checklists.length) * 100)
+                        return (
+                          <div className="flex items-center gap-2 mb-3">
+                            <Progress value={pct} className="h-1.5 flex-1" />
+                            <span className="text-[10px] font-bold text-[var(--text-muted)] font-mono tabular-nums shrink-0">{pct}%</span>
+                          </div>
+                        )
+                      })()}
+
+                      {task.checklists?.length > 0 ? (
+                        <div className="space-y-0.5">
+                          <AnimatePresence initial={false}>
+                            {task.checklists.map((item, index) => (
+                              <motion.div key={item.id}
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="group">
+                                <div className={cn("flex items-center gap-2.5 px-2 py-2 rounded-lg transition-colors hover:bg-[var(--bg-subtle)]", item.completed && "opacity-50")}>
+                                  <Checkbox checked={item.completed} disabled={!hasChecklistPerm}
+                                    onCheckedChange={() => toggleChecklistItem.mutate(item.id)} className="shrink-0" />
+                                  <span className={cn("flex-1 text-[12px] leading-snug", item.completed ? "line-through text-[var(--text-muted)]" : "text-[var(--text-primary)] font-medium")}>
+                                    {item.text}
+                                  </span>
+                                  {hasChecklistPerm && (
+                                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button onClick={() => handleMoveChecklistItem(index, 'up')} disabled={index === 0}
+                                        className="p-0.5 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] disabled:opacity-20"><Icons.chevronUp className="w-3 h-3" /></button>
+                                      <button onClick={() => handleMoveChecklistItem(index, 'down')} disabled={index === task.checklists.length - 1}
+                                        className="p-0.5 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] disabled:opacity-20"><Icons.chevronDown className="w-3 h-3" /></button>
+                                      <button onClick={() => deleteChecklistItem.mutate(item.id)} className="p-1 rounded text-[var(--text-muted)] hover:text-[var(--danger)]"><Icons.x className="w-3 h-3" /></button>
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                          </motion.div>
-                        ))}
-                      </AnimatePresence>
-                    </div>
-                  ) : (
-                    <div className="py-4 text-center">
-                      <Text size="xs" variant="muted" className="text-[var(--text-tertiary)]">No items yet</Text>
-                    </div>
-                  )}
-                  
-                  {hasChecklistPerm && (
-                    <div className="pt-1 border-t border-[var(--color-border-subtle)]/50">
-                      <ChecklistForm 
-                        onSubmit={(data) => addChecklistItem.mutate(data.text)}
-                        isLoading={addChecklistItem.isPending}
-                      />
-                    </div>
-                  )}
-                </div>
+                              </motion.div>
+                            ))}
+                          </AnimatePresence>
+                        </div>
+                      ) : (
+                        <div className="py-6 text-center rounded-lg bg-[var(--bg-subtle)]/50">
+                          <span className="text-[11px] text-[var(--text-muted)]">No checklist items yet</span>
+                        </div>
+                      )}
 
-                {/* Dependencies Card */}
-                <div className="bg-[var(--bg-subtle)]/40 p-4 rounded-2xl border border-[var(--color-border-subtle)]">
-                  <TaskDependencies task={task} hasDependencyPerm={hasDependencyPerm} />
-                </div>
+                      {hasChecklistPerm && (
+                        <div className="pt-3 mt-3 border-t border-[var(--border-subtle)]">
+                          <ChecklistForm onSubmit={(data) => addChecklistItem.mutate(data.text)} isLoading={addChecklistItem.isPending} />
+                        </div>
+                      )}
+                    </section>
 
+                    {/* Dependencies */}
+                    <section className="pt-5 border-t border-[var(--border-subtle)]">
+                      <TaskDependencies task={task} hasDependencyPerm={hasDependencyPerm} />
+                    </section>
+                  </div>
+
+                  {/* Right column: Attributes */}
+                  <div className="space-y-4 shrink-0">
+                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.05em] block mb-1">Attributes</span>
+
+                    <div className="space-y-3 p-4 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)]">
+                      {/* Status */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-[var(--text-muted)]">Status</span>
+                        <span className={cn('px-2 py-0.5 rounded-md text-[11px] font-semibold uppercase tracking-wide', st.bg, st.text)}>
+                          {task.status === 'Done' || task.status === 'COMPLETED' ? 'Completed' : task.status}
+                        </span>
+                      </div>
+
+                      {/* Priority */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-[var(--text-muted)]">Priority</span>
+                        <span className="text-[11px] font-semibold uppercase tracking-wide text-[var(--accent)]">{normalizePriority(task.priority)}</span>
+                      </div>
+
+                      {/* Assignee */}
+                      {!isPersonal && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] text-[var(--text-muted)]">Assignee</span>
+                          {hasAssignPerm ? (
+                            <Popover open={isReassignOpen} onOpenChange={setIsReassignOpen}>
+                              <PopoverTrigger asChild>
+                                <button className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors cursor-pointer">
+                                  <div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[8px] font-bold">
+                                    {(task?.assignedTo || 'U').charAt(0).toUpperCase()}
+                                  </div>
+                                  {task.assignedTo || 'Unassigned'}
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent align="end" className="w-52 p-1.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-[var(--shadow-lg)] rounded-lg">
+                                <span className="block px-2 py-1.5 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Reassign to</span>
+                                <div className="space-y-0.5 max-h-44 overflow-y-auto custom-scrollbar">
+                                  {assignableUsers.map(u => (
+                                    <button key={u.id}
+                                      onClick={() => reassignTask.mutate({ taskId: task.id, newAssigneeId: u.id }, { onSuccess: () => setIsReassignOpen(false) })}
+                                      className="w-full flex items-center gap-2.5 px-2.5 py-2 text-[12px] rounded-lg hover:bg-[var(--bg-hover)] transition-colors text-left">
+                                      <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[9px] font-bold shrink-0">
+                                        {u.username.charAt(0).toUpperCase()}
+                                      </div>
+                                      <span className="truncate text-[var(--text-primary)] font-medium">{u.username}</span>
+                                    </button>
+                                  ))}
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          ) : (
+                            <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--text-primary)]">
+                              <div className="w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[8px]">{((task?.assignedTo || 'U')).charAt(0).toUpperCase()}</div>
+                              {task.assignedTo || 'Unassigned'}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Due Date */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-[var(--text-muted)]">Due</span>
+                        {hasEditPerm ? (
+                          <input type="date"
+                            value={task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : ''}
+                            onChange={(e) => updateTask.mutate({ id: task.id, payload: { dueDate: e.target.value || null } }, { onSuccess: () => toast.success('Due date updated') })}
+                            className="bg-transparent border border-[var(--border-subtle)] hover:border-[var(--accent-border)] rounded-lg px-2 py-1 text-[11px] font-medium text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] cursor-pointer w-[130px] transition-colors" />
+                        ) : (
+                          <span className="text-[11px] font-semibold text-[var(--text-primary)]">
+                            {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'None'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
+            )}
 
-            </div>
+            {activeTab === 'comments' && (
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
+                <TaskComments taskId={task.id} hasCommentPerm={hasCommentPerm} />
+              </div>
+            )}
 
-            {/* Task Inspector Footer */}
-            <div className="px-6 py-4 border-t border-[var(--color-border-subtle)] bg-[var(--bg-subtle)] flex items-center justify-between gap-3 shrink-0">
-              <Text size="xs" variant="muted">Created {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : 'Ã¢â‚¬â€'}</Text>
+            {activeTab === 'evidence' && (
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
+                <TaskEvidence taskId={task.id} hasEditPerm={isAssignee || (isPersonal && isCreator)} />
+              </div>
+            )}
+
+            {activeTab === 'activity' && (
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
+                <ActivityTimeline taskId={task.id} />
+              </div>
+            )}
+
+            {/* â”€â”€ Footer â”€â”€ */}
+            <div className="px-5 py-3.5 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 backdrop-blur-sm flex items-center justify-between gap-3 shrink-0">
+              <span className="text-[11px] text-[var(--text-muted)]">
+                Created {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : 'â€”'}
+              </span>
               <div className="flex items-center gap-2">
-                {renderStateMachineActions("sm")}
-                <Button size="sm" disabled={!isDirty || updateTask.isPending} isLoading={updateTask.isPending} onClick={() => {
-                  updateTask.mutate({ id: task.id, payload: localEdits }, {
-                    onSuccess: () => setIsDirty(false)
-                  })
-                  onUpdate?.(localEdits)
-                }}>Save Changes</Button>
+                {renderStateActions("sm")}
+                <Button size="sm" disabled={!isDirty || updateTask.isPending} isLoading={updateTask.isPending}
+                  onClick={() => { updateTask.mutate({ id: task.id, payload: localEdits }, { onSuccess: () => setIsDirty(false) }); onUpdate?.(localEdits) }}
+                  className="rounded-lg font-semibold">
+                  Save Changes
+                </Button>
               </div>
             </div>
           </motion.div>
+          {confirmDialog}
         </>
       )}
-      {confirmDialog}
     </AnimatePresence>
   )
 }
+

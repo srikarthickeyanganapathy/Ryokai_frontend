@@ -21,6 +21,7 @@ export function DataTable({
   emptyStateTitle = "🎉 You're all caught up.",
   emptyStateDescription = "Create your first task.",
   emptyStateAction,
+  emptyStateNode,
   rowSelection,
   setRowSelection,
   onRowClick,
@@ -123,17 +124,23 @@ export function DataTable({
                 // Empty State
                 <tr>
                   <td colSpan={columns.length} className="p-6">
-                    <EmptyState
-                      icon={Icons.inbox}
-                      title={emptyStateTitle}
-                      description={emptyStateDescription}
-                      actionLabel={emptyStateAction ? "Add New" : undefined}
-                      onAction={undefined}
-                    />
-                    {emptyStateAction && (
-                      <div className="flex justify-center mt-[-1rem] pb-4">
-                        {emptyStateAction}
-                      </div>
+                    {emptyStateNode ? (
+                      emptyStateNode
+                    ) : (
+                      <>
+                        <EmptyState
+                          icon={Icons.inbox}
+                          title={emptyStateTitle}
+                          description={emptyStateDescription}
+                          actionLabel={emptyStateAction ? "Add New" : undefined}
+                          onAction={undefined}
+                        />
+                        {emptyStateAction && (
+                          <div className="flex justify-center mt-[-1rem] pb-4">
+                            {emptyStateAction}
+                          </div>
+                        )}
+                      </>
                     )}
                   </td>
                 </tr>

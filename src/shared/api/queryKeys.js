@@ -58,7 +58,8 @@ export const queryKeys = {
     list: (orgId) => ['goals', 'list', orgId],
   },
   notes: {
-    all: ['notes']
+    all: ['notes'],
+    scoped: (scopeKey) => ['notes', scopeKey],
   },
   saved: {
     all: ['savedItems']
@@ -85,7 +86,11 @@ export const queryKeys = {
   },
   calendarEvents: {
     all: ['calendarEvents'],
-    range: (start, end) => [...queryKeys.calendarEvents.all, 'range', start, end],
+    scoped: (scopeKey) => ['calendarEvents', scopeKey],
+    range: (start, end, scopeKey) => {
+      const base = scopeKey ? ['calendarEvents', scopeKey] : ['calendarEvents'];
+      return [...base, 'range', start, end];
+    },
   },
   focus: {
     active: ['focus', 'active'],

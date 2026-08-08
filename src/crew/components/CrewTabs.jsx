@@ -12,13 +12,14 @@ const TABS = [
   { id: 'members', label: 'Members', icon: Icons.users },
 ]
 
-export function CrewTabs({ activeTab, setActiveTab, tabCounts }) {
+export function CrewTabs({ activeTab, setActiveTab, tabCounts, sticky = true }) {
   return (
     <DetailTabs
       tabs={TABS}
       activeTab={activeTab}
       onChange={setActiveTab}
       counts={tabCounts}
+      sticky={sticky}
     />
   )
 }

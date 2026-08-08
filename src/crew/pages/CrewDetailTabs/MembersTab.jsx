@@ -4,13 +4,12 @@ import { Heading, Text, Label } from '@/shared/ui/Typography';
 import { Button, IconButton } from '@/shared/ui/Button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/Select';
 import { Input } from '@/shared/ui/Input';
-import { Avatar, AvatarFallback } from '@/shared/ui/Avatar';
 import { Badge } from '@/shared/ui/Badge';
 import { cn } from '@/shared/lib/cn';
 import { toast } from 'sonner';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/shared/ui/Modal';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from '@/shared/ui/Drawer';
+import { Drawer, DrawerContent } from '@/shared/ui/Drawer';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import {
@@ -19,7 +18,7 @@ import {
   useCreateCrewInviteLink,
   useRemoveCrewMember,
   useTransferCrewOwnership,
-} from '@/crew/features/hooks/useCrews';
+} from '@/crew';
 import { useTaskList } from '@/task';
 import {
   Search,
@@ -39,35 +38,48 @@ import {
   Sparkles,
   Briefcase,
   CheckCircle2,
-  Clock,
-  AlertTriangle,
   X,
   Zap,
   Flame,
-  ShieldAlert,
   UserCheck,
-  ExternalLink,
-  Filter,
-  RefreshCw,
   Info,
   ChevronRight,
-  Shield,
-  Layers,
 } from '@/shared/ui/Icons';
 
-// --- Presence Configurations ---
+// --- Presence Configurations (standard app tokens) ---
 const PRESENCE_CONFIG = {
   active: {
     label: 'Active',
-    dotBg: 'bg-emerald-500',
-    textColor: 'text-emerald-500',
+    dotBg: 'bg-[var(--success)]',
+    textColor: 'text-[var(--success)]',
   },
   offline: {
     label: 'Offline',
-    dotBg: 'bg-slate-400 dark:bg-slate-600',
+    dotBg: 'bg-[var(--text-tertiary)]',
     textColor: 'text-[var(--text-muted)]',
   },
 };
+
+// Stable fallback timestamp — module scope keeps render pure (React Compiler)
+const FALLBACK_NOW = Date.now();
+
+// Deterministic hue for avatar gradients (teams design language)
+function hashHue(str) {
+  return Math.abs((str || '').split('').reduce((acc, c) => c.charCodeAt(0) + ((acc << 5) - acc), 0)) % 360;
+}
+
+function formatJoinDate(joinedAt, options) {
+  return new Date(joinedAt || FALLBACK_NOW).toLocaleDateString(undefined, options);
+}
+
+function getMemberInitial(member) {
+  return (member?.username || 'U').charAt(0).toUpperCase();
+}
+
+function getAvatarGradient(member) {
+  const hue = hashHue(member?.username || member?.email || '');
+  return `linear-gradient(135deg, hsl(${hue} 70% 55%), hsl(${(hue + 35) % 360} 65% 40%))`;
+}
 
 function getMemberPresence(member) {
   if (!member) return 'offline';
@@ -97,8 +109,8 @@ function getMemberWorkload(username, tasks = []) {
 
   const count = activeTasks.length;
   let level = 'Low';
-  let colorClass = 'bg-emerald-500';
-  let badgeClass = 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+  let colorClass = 'bg-[var(--accent)]';
+  let badgeClass = 'bg-[var(--accent-soft)] text-[var(--accent)] border-transparent';
 
   if (count >= 5) {
     level = 'High';
@@ -131,7 +143,7 @@ function getMemberBadges(member, workload) {
     badges.push({
       label: 'Owner',
       icon: Crown,
-      class: 'bg-amber-500/10 text-amber-500 border-amber-500/30',
+      class: 'bg-[var(--warning-soft)] text-[var(--warning)] border-transparent',
     });
   } else if (isAdmin) {
     badges.push({
@@ -181,11 +193,92 @@ const highlightText = (text, query) => {
   );
 };
 
-// --- Minimalist Member Grid Card Component ---
+/* ══════════════════════════════════════════════════════
+   Presentational primitives — hoisted to module scope
+   (React Compiler: no components defined during render)
+   ══════════════════════════════════════════════════════ */
+
+// Role badge chip (shared Badge component — teams design language)
+function RoleBadge({ member }) {
+  const isOwner = member.role === 'CREATOR' || member.role === 'OWNER';
+
+  if (isOwner) {
+    return (
+      <Badge variant="warning" size="xs" className="gap-1 font-mono uppercase tracking-wider">
+        <Crown className="w-3 h-3" />
+        Owner
+      </Badge>
+    );
+  }
+  if (member.role === 'ADMIN') {
+    return (
+      <Badge variant="primary" size="xs" className="gap-1 font-mono uppercase tracking-wider">
+        <ShieldCheck className="w-3 h-3" />
+        Admin
+      </Badge>
+    );
+  }
+  return (
+    <Badge variant="outline" size="xs" className="gap-1 font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+      <UserCheck className="w-3 h-3" />
+      Member
+    </Badge>
+  );
+}
+
+// Presence status dot + label
+function PresenceChip({ presence }) {
+  const cfg = PRESENCE_CONFIG[presence] || PRESENCE_CONFIG.offline;
+  return (
+    <span className={cn('inline-flex items-center gap-1.5 text-[10px] font-medium', cfg.textColor)}>
+      <span className={cn('w-2 h-2 rounded-full', cfg.dotBg)} />
+      {cfg.label}
+    </span>
+  );
+}
+
+// Hue-gradient avatar with presence dot (teams design language)
+function MemberAvatar({ member, size = 'md', className }) {
+  const presence = getMemberPresence(member);
+  const cfg = PRESENCE_CONFIG[presence] || PRESENCE_CONFIG.offline;
+
+  const sizes = {
+    sm: 'w-9 h-9 text-xs',
+    md: 'w-10 h-10 text-sm',
+    lg: 'w-16 h-16 text-xl',
+  };
+  const dotSizes = {
+    sm: 'w-2.5 h-2.5',
+    md: 'w-3 h-3',
+    lg: 'w-4 h-4',
+  };
+
+  return (
+    <div className={cn('relative shrink-0', className)}>
+      <div
+        className={cn(
+          'rounded-xl flex items-center justify-center font-bold text-white shadow-sm border border-white/10',
+          sizes[size]
+        )}
+        style={{ background: getAvatarGradient(member) }}
+      >
+        {getMemberInitial(member)}
+      </div>
+      <span
+        className={cn(
+          'absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-[var(--bg-card)]',
+          dotSizes[size],
+          cfg.dotBg
+        )}
+      />
+    </div>
+  );
+}
+
+// --- Minimalist Member Grid Card Component (teams design language) ---
 function MemberCard({ member, isCreator, index, searchQuery, workload, onSelect, onTransfer, onRemove }) {
   const isOwner = member.role === 'CREATOR' || member.role === 'OWNER';
   const presence = getMemberPresence(member);
-  const presenceCfg = PRESENCE_CONFIG[presence] || PRESENCE_CONFIG.offline;
 
   return (
     <motion.div
@@ -193,60 +286,25 @@ function MemberCard({ member, isCreator, index, searchQuery, workload, onSelect,
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03, duration: 0.2 }}
       onClick={() => onSelect(member)}
-      className="group bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-5 transition-all duration-200 hover:border-[var(--accent-border)] hover:shadow-md cursor-pointer flex flex-col justify-between"
+      className="group bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 hover:border-[var(--accent-border)] hover:shadow-sm transition-all duration-200 cursor-pointer flex flex-col justify-between"
     >
       <div>
-        {/* Card Header: Role & Presence Status */}
-        <div className="flex items-center justify-between mb-4">
-          <span
-            className={cn(
-              'text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1 border',
-              isOwner
-                ? 'bg-amber-500/10 text-amber-500 border-amber-500/30'
-                : member.role === 'ADMIN'
-                ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30'
-                : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)]'
-            )}
-          >
-            {isOwner ? <Crown className="w-3 h-3 text-amber-500" /> : <ShieldCheck className="w-3 h-3" />}
-            {isOwner ? 'Owner' : member.role === 'ADMIN' ? 'Admin' : 'Member'}
-          </span>
-
-          <span
-            className={cn(
-              'inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full border bg-[var(--bg-subtle)]',
-              presenceCfg.textColor,
-              'border-[var(--border-subtle)]'
-            )}
-          >
-            <span className={cn('w-2 h-2 rounded-full', presenceCfg.dotBg)} />
-            {presenceCfg.label}
-          </span>
+        {/* Card Header: Role Badge & Presence Status */}
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <RoleBadge member={member} />
+          <PresenceChip presence={presence} />
         </div>
 
         {/* Member Identity */}
-        <div className="flex items-center gap-3.5 mb-4">
-          <div className="relative shrink-0">
-            <Avatar className="w-12 h-12 rounded-full bg-[var(--accent)] text-white font-bold text-base transition-transform duration-200 group-hover:scale-105">
-              <AvatarFallback className="bg-[var(--accent)] text-white font-semibold">
-                {member.username?.charAt(0).toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <span
-              className={cn(
-                'absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[var(--bg-card)]',
-                presenceCfg.dotBg
-              )}
-            />
-          </div>
-
+        <div className="flex items-center gap-3 mb-3">
+          <MemberAvatar member={member} size="md" />
           <div className="min-w-0 flex-1">
-            <Heading level={4} className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight truncate">
+            <div className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight truncate">
               {highlightText(member.username || 'Unknown', searchQuery)}
-            </Heading>
-            <div className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] font-medium mt-0.5">
+            </div>
+            <div className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] font-medium mt-0.5 truncate">
               <Mail className="w-3 h-3 shrink-0" />
-              <span className="truncate max-w-[170px]">
+              <span className="truncate">
                 {highlightText(member.email || 'No email registered', searchQuery)}
               </span>
             </div>
@@ -254,39 +312,53 @@ function MemberCard({ member, isCreator, index, searchQuery, workload, onSelect,
         </div>
 
         {/* Workload Progress Bar */}
-        <div className="space-y-1.5 mb-4">
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="text-[var(--text-muted)] font-medium flex items-center gap-1">
+        <div className="space-y-1.5 mb-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold flex items-center gap-1">
               <Briefcase className="w-3 h-3 text-[var(--accent)]" />
               Active Workload
             </span>
-            <span className="font-semibold text-[var(--text-primary)]">
-              {workload.active} active tasks
-            </span>
+            <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0 font-semibold', workload.badgeClass)}>
+              {workload.level}
+            </Badge>
           </div>
-          <div className="w-full h-1.5 bg-[var(--bg-subtle)] rounded-full overflow-hidden border border-[var(--border-subtle)]">
+          <div className="w-full h-1.5 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
             <div
               className={cn('h-full rounded-full transition-all duration-500', workload.colorClass)}
               style={{ width: `${Math.min(100, Math.max(10, (workload.active / 6) * 100))}%` }}
             />
           </div>
         </div>
+
+        {/* Workload Stat Cells */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="text-center bg-[var(--bg-subtle)] rounded-lg py-1.5">
+            <div className="text-sm font-bold text-[var(--text-primary)] tabular-nums">{workload.total}</div>
+            <div className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider">Total</div>
+          </div>
+          <div className="text-center bg-[var(--bg-subtle)] rounded-lg py-1.5">
+            <div className="text-sm font-bold text-[var(--accent)] tabular-nums">{workload.active}</div>
+            <div className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider">Active</div>
+          </div>
+          <div className="text-center bg-[var(--bg-subtle)] rounded-lg py-1.5">
+            <div className="text-sm font-bold text-emerald-500 tabular-nums">{workload.completed}</div>
+            <div className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider">Done</div>
+          </div>
+        </div>
       </div>
 
       {/* Card Footer: Metadata & Actions */}
-      <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2 text-[11px]">
-        <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
+      <div className="pt-3 mt-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2">
+        <span className="flex items-center gap-1.5 text-[11px] text-[var(--text-muted)] font-medium">
           <CalendarDays className="w-3 h-3" />
-          <span>
-            Joined {new Date(member.joinedAt || Date.now()).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
-          </span>
-        </div>
+          Joined {formatJoinDate(member.joinedAt, { month: 'short', year: 'numeric' })}
+        </span>
 
         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 text-[11px] px-2 font-medium text-[var(--accent)] hover:bg-[var(--accent-soft)]"
+            className="h-8 text-[12px] px-2 font-medium text-[var(--accent)] hover:bg-[var(--accent-soft)]"
             onClick={() => onSelect(member)}
           >
             Profile
@@ -298,7 +370,7 @@ function MemberCard({ member, isCreator, index, searchQuery, workload, onSelect,
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 text-[10px] px-2 font-semibold border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-amber-500"
+                className="h-8 text-[11px] px-2 font-semibold border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-amber-500"
                 title="Transfer Crew Ownership"
                 onClick={() => onTransfer(member.userId)}
               >
@@ -307,7 +379,7 @@ function MemberCard({ member, isCreator, index, searchQuery, workload, onSelect,
               <IconButton
                 variant="ghost"
                 size="sm"
-                className="h-7 w-7 text-[var(--danger)] hover:bg-[var(--danger-soft)]"
+                className="h-8 w-8 text-[var(--danger)] hover:bg-[var(--danger-soft)]"
                 title="Remove Member"
                 onClick={() => onRemove(member.userId)}
               >
@@ -326,15 +398,15 @@ function MemberTable({ members, isCreator, searchQuery, getWorkload, onSelect, o
   return (
     <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden shadow-sm">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-[13px]">
-          <thead className="bg-[var(--bg-subtle)]/70 text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider border-b border-[var(--border-subtle)]">
+        <table className="w-full text-left">
+          <thead className="bg-[var(--bg-subtle)]/70 border-b border-[var(--border-subtle)]">
             <tr>
-              <th className="py-3 px-4">Member</th>
-              <th className="py-3 px-4">Role</th>
-              <th className="py-3 px-4">Presence & Focus</th>
-              <th className="py-3 px-4">Workload</th>
-              <th className="py-3 px-4">Joined Date</th>
-              <th className="py-3 px-4 text-right">Actions</th>
+              <th className="py-3 px-4 text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Member</th>
+              <th className="py-3 px-4 text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Role</th>
+              <th className="py-3 px-4 text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Presence</th>
+              <th className="py-3 px-4 text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Workload</th>
+              <th className="py-3 px-4 text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Joined</th>
+              <th className="py-3 px-4 text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border-subtle)]">
@@ -353,16 +425,9 @@ function MemberTable({ members, isCreator, searchQuery, getWorkload, onSelect, o
                   {/* Member Name & Email */}
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-3">
-                      <div className="relative shrink-0">
-                        <Avatar className={cn('w-9 h-9 rounded-full bg-[var(--accent)] text-white font-bold text-xs', presenceCfg.haloRing)}>
-                          <AvatarFallback className="bg-[var(--accent)] text-white font-semibold">
-                            {member.username?.charAt(0).toUpperCase() || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className={cn('absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border border-[var(--bg-card)]', presenceCfg.dotBg)} />
-                      </div>
+                      <MemberAvatar member={member} size="sm" />
                       <div className="min-w-0">
-                        <span className="font-semibold text-[var(--text-primary)] block truncate">
+                        <span className="font-semibold text-[var(--text-primary)] block truncate text-[13px]">
                           {highlightText(member.username || 'Unknown', searchQuery)}
                         </span>
                         <span className="text-[11px] text-[var(--text-muted)] block truncate">
@@ -374,41 +439,29 @@ function MemberTable({ members, isCreator, searchQuery, getWorkload, onSelect, o
 
                   {/* Role Badge */}
                   <td className="py-3.5 px-4">
-                    <span
-                      className={cn(
-                        'text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md uppercase tracking-wider inline-flex items-center gap-1 border',
-                        isOwner
-                          ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                          : member.role === 'ADMIN'
-                          ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                          : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)]'
-                      )}
-                    >
-                      {isOwner ? <Crown className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
-                      {isOwner ? 'Owner' : member.role === 'ADMIN' ? 'Admin' : 'Member'}
-                    </span>
+                    <RoleBadge member={member} />
                   </td>
 
-                  {/* Presence & Focus Status */}
+                  {/* Presence Status */}
                   <td className="py-3.5 px-4">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-primary)]">
-                        <span className={cn('w-2 h-2 rounded-full shrink-0', presenceCfg.dotBg)} />
-                        <span>{presenceCfg.label}</span>
-                      </div>
-                    </div>
+                    <span className={cn('inline-flex items-center gap-1.5 text-[12px] font-medium', presenceCfg.textColor)}>
+                      <span className={cn('w-2 h-2 rounded-full shrink-0', presenceCfg.dotBg)} />
+                      <span>{presenceCfg.label}</span>
+                    </span>
                   </td>
 
                   {/* Workload Indicator */}
                   <td className="py-3.5 px-4">
                     <div className="space-y-1 max-w-[130px]">
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="font-medium text-[var(--text-secondary)]">{workload.active} Active</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">
+                          {workload.active} Active
+                        </span>
                         <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0 font-semibold', workload.badgeClass)}>
                           {workload.level}
                         </Badge>
                       </div>
-                      <div className="w-full h-1 bg-[var(--bg-subtle)] rounded-full overflow-hidden border border-[var(--border-subtle)]">
+                      <div className="w-full h-1 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
                         <div
                           className={cn('h-full rounded-full', workload.colorClass)}
                           style={{ width: `${Math.min(100, Math.max(10, (workload.active / 6) * 100))}%` }}
@@ -419,7 +472,7 @@ function MemberTable({ members, isCreator, searchQuery, getWorkload, onSelect, o
 
                   {/* Joined Date */}
                   <td className="py-3.5 px-4 text-[12px] text-[var(--text-muted)]">
-                    {new Date(member.joinedAt || Date.now()).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {formatJoinDate(member.joinedAt, { month: 'short', day: 'numeric', year: 'numeric' })}
                   </td>
 
                   {/* Actions */}
@@ -428,7 +481,7 @@ function MemberTable({ members, isCreator, searchQuery, getWorkload, onSelect, o
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 text-[11px] px-2 font-medium text-[var(--accent)] hover:bg-[var(--accent-soft)]"
+                        className="h-8 text-[12px] px-2 font-medium text-[var(--accent)] hover:bg-[var(--accent-soft)]"
                         onClick={() => onSelect(member)}
                       >
                         Details
@@ -439,7 +492,7 @@ function MemberTable({ members, isCreator, searchQuery, getWorkload, onSelect, o
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-7 text-[10px] px-2 font-semibold"
+                            className="h-8 text-[11px] px-2 font-semibold"
                             onClick={() => onTransfer(member.userId)}
                           >
                             Transfer Owner
@@ -447,7 +500,7 @@ function MemberTable({ members, isCreator, searchQuery, getWorkload, onSelect, o
                           <IconButton
                             variant="ghost"
                             size="sm"
-                            className="h-7 w-7 text-[var(--danger)] hover:bg-[var(--danger-soft)]"
+                            className="h-8 w-8 text-[var(--danger)] hover:bg-[var(--danger-soft)]"
                             onClick={() => onRemove(member.userId)}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -479,23 +532,14 @@ function MemberDetailDrawer({ member, isOpen, onClose, workload, isCreator, onTr
     <Drawer open={isOpen} onOpenChange={onClose}>
       <DrawerContent side="right" className="sm:max-w-md w-full flex flex-col h-full bg-[var(--bg-card)] border-l border-[var(--border-subtle)] p-0">
         {/* Drawer Header Banner */}
-        <div className="p-6 border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 relative">
+        <div className="p-5 border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 relative">
           <div className="flex items-start gap-4">
-            <div className="relative shrink-0">
-              <Avatar className={cn('w-16 h-16 rounded-full bg-[var(--accent)] text-white font-bold text-xl shadow-md', presenceCfg.haloRing)}>
-                <AvatarFallback className="bg-[var(--accent)] text-white">
-                  {member.username?.charAt(0).toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <span className={cn('absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full border-2 border-[var(--bg-card)]', presenceCfg.dotBg)} />
-            </div>
+            <MemberAvatar member={member} size="lg" />
 
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <Heading level={3} className="text-lg font-semibold text-[var(--text-primary)] truncate">
-                  {member.username || 'Unknown Member'}
-                </Heading>
-              </div>
+              <Heading level={3} className="text-[16px] font-semibold text-[var(--text-primary)] truncate mb-1">
+                {member.username || 'Unknown Member'}
+              </Heading>
 
               <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mb-2">
                 <Mail className="w-3.5 h-3.5 shrink-0" />
@@ -518,13 +562,13 @@ function MemberDetailDrawer({ member, isOpen, onClose, workload, isCreator, onTr
         </div>
 
         {/* Drawer Body Details */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-5 space-y-6">
           {/* Presence & Focus Card */}
           <div className="space-y-2">
-            <Text variant="muted" className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+            <Text variant="muted" className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">
               Current Focus & Presence
             </Text>
-            <div className="bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-xl p-4 space-y-2">
+            <div className="bg-[var(--bg-subtle)]/60 border border-[var(--border-subtle)] rounded-xl p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-[var(--text-muted)] font-medium">Status</span>
                 <span className={cn('text-xs font-semibold flex items-center gap-1.5', presenceCfg.textColor)}>
@@ -534,46 +578,42 @@ function MemberDetailDrawer({ member, isOpen, onClose, workload, isCreator, onTr
               </div>
               <div className="pt-2 border-t border-[var(--border-subtle)] flex items-start gap-2">
                 <Zap className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-[11px] text-[var(--text-muted)]">Active status updated recently</p>
-                </div>
+                <p className="text-[11px] text-[var(--text-muted)]">Active status updated recently</p>
               </div>
             </div>
           </div>
 
           {/* Workload Metrics Summary */}
           <div className="space-y-2">
-            <Text variant="muted" className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+            <Text variant="muted" className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">
               Workload Metrics
             </Text>
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-xl p-3 text-center">
-                <span className="text-xl font-bold text-[var(--text-primary)] block">{workload.total}</span>
-                <span className="text-[10px] text-[var(--text-muted)] font-medium uppercase">Total Tasks</span>
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-3 text-center">
+                <span className="text-xl font-bold text-[var(--text-primary)] block tabular-nums">{workload.total}</span>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Total</span>
               </div>
-              <div className="bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-xl p-3 text-center">
-                <span className="text-xl font-bold text-[var(--accent)] block">{workload.active}</span>
-                <span className="text-[10px] text-[var(--text-muted)] font-medium uppercase">In Progress</span>
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-3 text-center">
+                <span className="text-xl font-bold text-[var(--accent)] block tabular-nums">{workload.active}</span>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">In Progress</span>
               </div>
-              <div className="bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-xl p-3 text-center">
-                <span className="text-xl font-bold text-emerald-500 block">{workload.completed}</span>
-                <span className="text-[10px] text-[var(--text-muted)] font-medium uppercase">Completed</span>
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-3 text-center">
+                <span className="text-xl font-bold text-emerald-500 block tabular-nums">{workload.completed}</span>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Completed</span>
               </div>
             </div>
           </div>
 
           {/* Assigned Tasks List */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Text variant="muted" className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-                Assigned Tasks ({workload.memberTasks.length})
-              </Text>
-            </div>
+            <Text variant="muted" className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">
+              Assigned Tasks ({workload.memberTasks.length})
+            </Text>
 
             {workload.memberTasks.length > 0 ? (
               <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                 {workload.memberTasks.map((t) => (
-                  <div key={t.id} className="bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-lg p-3 flex items-center justify-between gap-2">
+                  <div key={t.id} className="bg-[var(--bg-subtle)]/60 border border-[var(--border-subtle)] rounded-lg p-3 flex items-center justify-between gap-2 hover:border-[var(--border-default)] transition-colors">
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-semibold text-[var(--text-primary)] truncate">{t.title}</p>
                       <div className="flex items-center gap-2 mt-1 text-[10px] text-[var(--text-muted)]">
@@ -589,7 +629,7 @@ function MemberDetailDrawer({ member, isOpen, onClose, workload, isCreator, onTr
                 ))}
               </div>
             ) : (
-              <div className="p-4 bg-[var(--bg-subtle)] border border-dashed border-[var(--border-subtle)] rounded-xl text-center">
+              <div className="p-4 bg-[var(--bg-subtle)]/40 border border-dashed border-[var(--border-subtle)] rounded-xl text-center">
                 <Text variant="muted" size="xs">No tasks currently assigned in this crew.</Text>
               </div>
             )}
@@ -597,15 +637,15 @@ function MemberDetailDrawer({ member, isOpen, onClose, workload, isCreator, onTr
 
           {/* Activity Log */}
           <div className="space-y-3">
-            <Text variant="muted" className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+            <Text variant="muted" className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">
               Recent Activity
             </Text>
             <div className="space-y-2 text-xs text-[var(--text-secondary)]">
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)]">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-subtle)]/60 border border-[var(--border-subtle)]">
                 <Activity className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
-                <span className="truncate">Joined crew on {new Date(member.joinedAt || Date.now()).toLocaleDateString()}</span>
+                <span className="truncate">Joined crew on {formatJoinDate(member.joinedAt)}</span>
               </div>
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)]">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-subtle)]/60 border border-[var(--border-subtle)]">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                 <span className="truncate">Completed {workload.completed} tasks in workspace</span>
               </div>
@@ -620,7 +660,7 @@ function MemberDetailDrawer({ member, isOpen, onClose, workload, isCreator, onTr
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full text-xs gap-1.5"
+                className="w-full h-8 text-[12px] gap-1.5"
                 onClick={() => {
                   onClose();
                   onTransfer(member.userId);
@@ -632,7 +672,7 @@ function MemberDetailDrawer({ member, isOpen, onClose, workload, isCreator, onTr
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full text-xs gap-1.5 text-[var(--danger)] border-[var(--danger)]/30 hover:bg-[var(--danger-soft)]"
+                className="w-full h-8 text-[12px] gap-1.5 text-[var(--danger)] hover:bg-[var(--danger-soft)]"
                 onClick={() => {
                   onClose();
                   onRemove(member.userId);
@@ -643,7 +683,7 @@ function MemberDetailDrawer({ member, isOpen, onClose, workload, isCreator, onTr
               </Button>
             </div>
           )}
-          <Button variant="outline" className="w-full text-xs" onClick={onClose}>
+          <Button variant="outline" className="w-full h-8 text-[12px]" onClick={onClose}>
             Close Profile
           </Button>
         </div>
@@ -768,12 +808,36 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
     return (
       <div className="p-4 sm:p-6 space-y-6 max-w-[1400px] mx-auto animate-pulse">
         <div className="flex flex-col sm:flex-row justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
-          <div className="h-10 bg-[var(--bg-subtle)] rounded-lg w-64" />
-          <div className="h-10 bg-[var(--bg-subtle)] rounded-lg w-72" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)]" />
+            <div className="space-y-2">
+              <div className="h-4 bg-[var(--bg-subtle)] rounded w-40" />
+              <div className="h-3 bg-[var(--bg-subtle)] rounded w-56" />
+            </div>
+          </div>
+          <div className="h-8 bg-[var(--bg-subtle)] rounded-lg w-72" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-64 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-5" />
+            <div key={i} className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="h-5 w-16 bg-[var(--bg-subtle)] rounded-full" />
+                <div className="h-4 w-14 bg-[var(--bg-subtle)] rounded-full" />
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[var(--bg-subtle)]" />
+                <div className="space-y-1.5 flex-1">
+                  <div className="h-3.5 bg-[var(--bg-subtle)] rounded w-24" />
+                  <div className="h-3 bg-[var(--bg-subtle)] rounded w-32" />
+                </div>
+              </div>
+              <div className="h-1.5 bg-[var(--bg-subtle)] rounded-full" />
+              <div className="grid grid-cols-3 gap-2">
+                {[1, 2, 3].map((n) => (
+                  <div key={n} className="h-12 bg-[var(--bg-subtle)] rounded-lg" />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -817,20 +881,24 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
             </ModalHeader>
             <form onSubmit={handleSendInvite} className="space-y-4 pt-2">
               <div className="space-y-1.5">
-                <Label>Email Address</Label>
-                <Input
-                  type="email"
-                  placeholder="colleague@company.com"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  required
-                />
+                <Label className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Email Address</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                  <Input
+                    type="email"
+                    placeholder="colleague@company.com"
+                    className="pl-9 h-9 text-[12px]"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
               <ModalFooter>
-                <Button type="button" variant="outline" onClick={() => setIsInviteModalOpen(false)}>
+                <Button type="button" variant="outline" size="sm" className="h-8 text-[12px]" onClick={() => setIsInviteModalOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" isLoading={inviteMutation.isPending}>
+                <Button type="submit" size="sm" className="h-8 text-[12px]" isLoading={inviteMutation.isPending}>
                   Send Invitation
                 </Button>
               </ModalFooter>
@@ -859,23 +927,24 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
         </div>
       )}
 
-      {/* Directory Header Toolbar */}
+      {/* Directory Header Toolbar — teams design language (icon chip + title + subtitle) */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
-        <div>
-          <Heading level={3} className="text-lg font-semibold text-[var(--text-primary)] tracking-tight flex items-center gap-2">
-            <Users className="w-5 h-5 text-[var(--accent)]" />
-            Living Team Directory
-          </Heading>
-          <Text variant="muted" className="text-xs mt-0.5 flex items-center gap-2">
-            <span>
-              {actualMembers.length} of {memberCap} seats filled
-            </span>
-            <span>•</span>
-            <span className="text-emerald-500 font-medium flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              {actualMembers.filter((m) => getMemberPresence(m) === 'active').length} Active Now
-            </span>
-          </Text>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center border border-[var(--accent-border)] shrink-0">
+            <Users className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <Heading level={3} className="text-[14px] font-semibold tracking-tight text-[var(--text-primary)]">
+              Crew Members
+            </Heading>
+            <Text variant="muted" className="text-[12px] mt-0.5">
+              {actualMembers.length} of {memberCap} seats filled ·{' '}
+              <span className="text-[var(--success)] font-medium inline-flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)]" />
+                {actualMembers.filter((m) => getMemberPresence(m) === 'active').length} active now
+              </span>
+            </Text>
+          </div>
         </div>
 
         {/* Controls: Search, Filters, View Switcher & Action Buttons */}
@@ -887,7 +956,7 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search members or email..."
-              className="w-full pl-9 pr-8 py-1.5 text-xs font-medium bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg focus:outline-none focus:border-[var(--accent)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] transition-all shadow-sm"
+              className="w-full h-8 pl-9 pr-8 text-[12px] font-medium bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg focus:outline-none focus:border-[var(--accent)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] transition-all shadow-sm"
             />
             {searchQuery && (
               <button
@@ -913,11 +982,11 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
           </Select>
 
           {/* View Switcher Toggle */}
-          <div className="flex items-center bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-lg p-0.5">
+          <div className="flex items-center h-8 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-lg p-0.5">
             <button
               onClick={() => setViewMode('grid')}
               className={cn(
-                'p-1.5 rounded-md transition-colors text-xs flex items-center gap-1 font-medium',
+                'h-7 px-2.5 rounded-md transition-colors flex items-center gap-1 font-medium',
                 viewMode === 'grid'
                   ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
@@ -929,7 +998,7 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
             <button
               onClick={() => setViewMode('table')}
               className={cn(
-                'p-1.5 rounded-md transition-colors text-xs flex items-center gap-1 font-medium',
+                'h-7 px-2.5 rounded-md transition-colors flex items-center gap-1 font-medium',
                 viewMode === 'table'
                   ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
@@ -943,7 +1012,7 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
           {/* Invite Buttons */}
           <Button
             size="sm"
-            className="h-8 text-xs font-semibold gap-1.5"
+            className="h-8 text-[12px] font-semibold gap-1.5"
             onClick={() => setIsInviteModalOpen(true)}
           >
             <UserPlus className="w-3.5 h-3.5" />
@@ -953,7 +1022,7 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
           <Button
             variant="outline"
             size="sm"
-            className="h-8 text-xs font-semibold gap-1.5 border-dashed"
+            className="h-8 text-[12px] font-semibold gap-1.5 border-dashed"
             onClick={handleCreateInviteLink}
             isLoading={inviteLinkMutation.isPending}
           >
@@ -978,7 +1047,7 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
           <Button
             variant="outline"
             size="sm"
-            className="h-7 text-xs gap-1 font-semibold shrink-0"
+            className="h-8 text-[12px] gap-1 font-semibold shrink-0"
             onClick={() => {
               navigator.clipboard.writeText(inviteLink);
               setIsLinkCopied(true);
@@ -995,17 +1064,19 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
       {/* State 3: Filter / Search Empty Results State */}
       {filteredMembers.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-[var(--border-subtle)] rounded-xl bg-[var(--bg-card)] p-6">
-          <Search className="w-8 h-8 text-[var(--text-muted)] mb-3" />
-          <Heading level={4} className="text-base font-semibold text-[var(--text-primary)]">
+          <div className="w-10 h-10 rounded-lg bg-[var(--bg-subtle)] flex items-center justify-center mb-3">
+            <Search className="w-4 h-4 text-[var(--text-muted)]" />
+          </div>
+          <Heading level={4} className="text-[14px] font-semibold text-[var(--text-primary)]">
             No matching team members found
           </Heading>
-          <Text variant="muted" className="text-xs mt-1 max-w-sm">
+          <Text variant="muted" size="sm" className="text-[12px] mt-1 max-w-sm">
             We couldn't find any members matching "{searchQuery}". Try clearing search filters.
           </Text>
           <Button
             variant="outline"
             size="sm"
-            className="mt-4 text-xs font-semibold"
+            className="mt-4 h-8 text-[12px] font-semibold"
             onClick={() => {
               setSearchQuery('');
               setRoleFilter('ALL');
@@ -1083,13 +1154,13 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
           </ModalHeader>
           <form onSubmit={handleSendInvite} className="space-y-4 pt-2">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-[var(--text-secondary)]">Email Address</Label>
+              <Label className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Email Address</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <Input
                   type="email"
                   placeholder="colleague@company.com"
-                  className="pl-9 text-xs font-medium"
+                  className="pl-9 h-9 text-[12px]"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   required
@@ -1097,10 +1168,10 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
               </div>
             </div>
             <ModalFooter>
-              <Button type="button" variant="outline" size="sm" onClick={() => setIsInviteModalOpen(false)}>
+              <Button type="button" variant="outline" size="sm" className="h-8 text-[12px]" onClick={() => setIsInviteModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" size="sm" isLoading={inviteMutation.isPending}>
+              <Button type="submit" size="sm" className="h-8 text-[12px]" isLoading={inviteMutation.isPending}>
                 Send Invitation
               </Button>
             </ModalFooter>
@@ -1113,4 +1184,3 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
     </div>
   );
 }
-

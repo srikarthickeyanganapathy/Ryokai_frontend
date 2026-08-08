@@ -5,6 +5,7 @@ import { Button } from '@/shared/ui/Button';
 import { PageShell, PageHero, PageStats, PageContent } from '@/shared/ui/PageShell';
 import { InteractiveCard } from '@/shared/ui/InteractiveCard';
 import { useTaskList, useCompleteCrewTask, useDeleteTask } from '@/task';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { TasksTable } from '@/task';
 import { TaskPanel } from '@/task';
 import { toast } from 'sonner';
@@ -21,13 +22,30 @@ import {
 } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 
+const StatWidget = ({ icon: Icon, label, value, iconBg, iconColor, alertBorder }) => (
+  <InteractiveCard padding={false} className="overflow-hidden">
+    <div className={cn(
+      "p-4 flex items-center gap-3",
+      alertBorder && "border-l-2 border-[var(--danger)]"
+    )}>
+      <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center border shrink-0", iconBg, iconColor)}>
+        <Icon className="w-4 h-4" />
+      </div>
+      <div>
+        <div className="text-[18px] font-bold text-[var(--text-primary)] leading-none tabular-nums">{value}</div>
+        <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mt-1">{label}</div>
+      </div>
+    </div>
+  </InteractiveCard>
+);
+
 export function CrewTasksPage() {
-  const { data: rawTasks = [], isLoading } = useTaskList({ scope: 'crew' });
+  const { activeCrew } = useWorkspace()
+  const { data: rawTasks = [], isLoading } = useTaskList(activeCrew?.id ? { crewId: activeCrew.id } : { scope: 'crew' });
   
-  const tasks = useMemo(() => {
-    if (!Array.isArray(rawTasks)) return [];
-    return rawTasks.filter(t => !(!t.crewId && !t.crew));
-  }, [rawTasks]);
+  // Backend scopes to the crew including tasks of shared/owned projects,
+  // so pass through as-is (no client-side crewId filter that would drop them).
+  const tasks = useMemo(() => (Array.isArray(rawTasks) ? rawTasks : []), [rawTasks]);
   
   const [rowSelection, setRowSelection] = useState({});
   const [selectedTask, setSelectedTask] = useState(null);
@@ -91,23 +109,6 @@ export function CrewTasksPage() {
     });
     setRowSelection({});
   };
-
-  const StatWidget = ({ icon: Icon, label, value, iconBg, iconColor, alertBorder }) => (
-    <InteractiveCard padding={false} className="overflow-hidden">
-      <div className={cn(
-        "p-4 flex items-center gap-3",
-        alertBorder && "border-l-2 border-[var(--danger)]"
-      )}>
-        <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center border shrink-0", iconBg, iconColor)}>
-          <Icon className="w-4 h-4" />
-        </div>
-        <div>
-          <div className="text-[18px] font-bold text-[var(--text-primary)] leading-none tabular-nums">{value}</div>
-          <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mt-1">{label}</div>
-        </div>
-      </div>
-    </InteractiveCard>
-  );
 
   return (
     <PageShell maxWidth="default">

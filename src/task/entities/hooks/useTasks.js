@@ -6,18 +6,36 @@ import { toast } from 'sonner';
 import { useAuth } from '@/identity';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
+/**
+ * Workspace isolation: derive the server-side scope from the active workspace.
+ *   PERSONAL -> no params (backend returns only own personal tasks)
+ *   ORG      -> { orgId }   (backend returns ONLY that org's tasks)
+ *   CREWS    -> { crewId }  (backend returns ONLY that crew's tasks)
+ * Explicit caller filters win over the derived scope.
+ */
+function useWorkspaceScope() {
+  const { workspaceMode, activeOrganization, activeCrew } = useWorkspace();
+  if (workspaceMode === 'ORG' && activeOrganization?.id) return { orgId: activeOrganization.id };
+  if (workspaceMode === 'CREWS' && activeCrew?.id) return { crewId: activeCrew.id };
+  return {};
+}
+
 export const useTaskList = (filters) => {
+  const wsScope = useWorkspaceScope();
+  const effectiveFilters = { ...wsScope, ...(filters || {}) };
   return useQuery({
-    queryKey: [...queryKeys.tasks.list(filters)],
-    queryFn: () => taskApi.getTasks(filters),
+    queryKey: [...queryKeys.tasks.list(effectiveFilters)],
+    queryFn: () => taskApi.getTasks(effectiveFilters),
     select: (data) => data?.content || data || [],
   });
 };
 
 export const useTaskSearch = (searchQuery) => {
+  const wsScope = useWorkspaceScope();
+  const effectiveFilters = { ...wsScope, search: searchQuery };
   return useQuery({
-    queryKey: [...queryKeys.tasks.list({ search: searchQuery })],
-    queryFn: () => taskApi.getTasks({ search: searchQuery }),
+    queryKey: [...queryKeys.tasks.list(effectiveFilters)],
+    queryFn: () => taskApi.getTasks(effectiveFilters),
     select: (data) => data?.content || data || [],
     enabled: !!searchQuery,
   });

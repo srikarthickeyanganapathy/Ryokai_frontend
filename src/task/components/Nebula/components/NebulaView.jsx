@@ -78,7 +78,7 @@ const transformTasksToWorkGraph = (tasks = []) => {
   return { nodes, links };
 };
 
-export default function NebulaView({ tasks = [], onTaskSelect }) {
+export default function NebulaView({ tasks = [], selectedTask = null, onTaskSelect }) {
   const { workspaceMode, activeOrganization } = useWorkspace();
   const { user } = useAuth();
 
@@ -91,7 +91,12 @@ export default function NebulaView({ tasks = [], onTaskSelect }) {
   const [customFilters, setCustomFilters] = useState({});
 
   // Selection & Windows
-  const [selectedTaskNode, setSelectedTaskNode] = useState(null);
+  const [selectedTaskNode, setSelectedTaskNode] = useState(selectedTask);
+  
+  useEffect(() => {
+    setSelectedTaskNode(selectedTask);
+  }, [selectedTask]);
+
   const [openWindows, setOpenWindows] = useState([]);
   const [isAutoRotating, setIsAutoRotating] = useState(false);
 
@@ -322,7 +327,7 @@ export default function NebulaView({ tasks = [], onTaskSelect }) {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-screen overflow-hidden select-none"
+      className="relative w-full h-full overflow-hidden select-none"
       style={{
         background: 'radial-gradient(ellipse at 50% 40%, #0a0e1a 0%, #05060d 60%, #000000 100%)'
       }}

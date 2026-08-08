@@ -24,7 +24,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { getFeedbackForAction } from '@/shared/lib/statusRegistry';
 
-export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange }) {
+export function KanbanBoard({ tasks, isLoading, emptyState, onTaskClick, onTaskStatusChange, onQuickComplete, onQuickDelete }) {
   const [activeTask, setActiveTask] = useState(null)
   const [reassignModalTask, setReassignModalTask] = useState(null)
   const { user } = useAuth()
@@ -241,9 +241,19 @@ export function KanbanBoard({ tasks, isLoading, onTaskClick, onTaskStatusChange 
               column={column} 
               tasks={tasksByColumn[column.id] || []} 
               onTaskClick={onTaskClick}
+              onQuickComplete={onQuickComplete}
+              onQuickDelete={onQuickDelete}
             />
           </motion.div>
         ))}
+
+        {emptyState && (
+          <div className="absolute inset-0 top-12 z-10 flex items-center justify-center pointer-events-none">
+            <div className="pointer-events-auto bg-[var(--bg-base)]/60 backdrop-blur-md p-8 rounded-3xl border border-[var(--color-border-subtle)] shadow-[var(--shadow-lg)]">
+              {emptyState}
+            </div>
+          </div>
+        )}
 
         <DragOverlay dropAnimation={null}>
           <AnimatePresence>

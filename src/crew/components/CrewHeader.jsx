@@ -41,10 +41,10 @@ export function CrewHeader({
   // 1. Loading State (Tier 1 UX)
   if (isLoading) {
     return (
-      <div className="relative overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border-subtle)] bg-[var(--bg-card)] p-6 shadow-[var(--shadow-sm)] animate-pulse">
+      <div className="relative overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-6 shadow-[var(--shadow-sm)] animate-pulse">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-[var(--radius-lg)] bg-[var(--bg-subtle)] shrink-0" />
+            <div className="w-14 h-14 rounded-lg bg-[var(--bg-subtle)] shrink-0" />
             <div className="space-y-3 min-w-0 flex-1">
               <div className="h-6 w-48 bg-[var(--bg-subtle)] rounded-[var(--radius-sm)]" />
               <div className="h-4 w-72 bg-[var(--bg-subtle)] rounded-[var(--radius-sm)]" />
@@ -55,8 +55,8 @@ export function CrewHeader({
             </div>
           </div>
           <div className="flex gap-2">
-            <div className="h-9 w-24 bg-[var(--bg-subtle)] rounded-[var(--radius-md)]" />
-            <div className="h-9 w-24 bg-[var(--bg-subtle)] rounded-[var(--radius-md)]" />
+            <div className="h-9 w-24 bg-[var(--bg-subtle)] rounded-md" />
+            <div className="h-9 w-24 bg-[var(--bg-subtle)] rounded-md" />
           </div>
         </div>
       </div>
@@ -66,7 +66,7 @@ export function CrewHeader({
   // 2. Empty / Uninitialized State Guard
   if (!crew) {
     return (
-      <div className="relative overflow-hidden rounded-[var(--radius-xl)] border border-dashed border-[var(--border-strong)] bg-[var(--bg-card)] p-8 text-center shadow-[var(--shadow-xs)]">
+      <div className="relative overflow-hidden rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-card)] p-8 text-center shadow-[var(--shadow-xs)]">
         <div className="flex flex-col items-center gap-3">
           <AlertTriangle className="w-8 h-8 text-[var(--warning)]" />
           <Heading level={3} className="text-[16px] font-semibold text-[var(--text-primary)]">
@@ -90,30 +90,17 @@ export function CrewHeader({
   const resolvedSocketStatus = socketStatus || (isConnected ? 'connected' : 'disconnected')
 
   return (
-    <div className="group relative overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-[var(--shadow-md)] transition-all duration-[var(--duration-base)] ease-[var(--ease-out)] hover:border-[var(--border-default)]">
-      {/* Dynamic Ambient HSL Brand Glow Layer */}
-      <div
-        className="absolute inset-0 pointer-events-none transition-opacity duration-[var(--duration-slow)] opacity-20 group-hover:opacity-30"
-        style={{
-          background: `radial-gradient(ellipse at 18% -20%, hsl(${hue} 85% 55% / 0.35), hsl(${(hue + 45) % 360} 75% 45% / 0.15) 50%, transparent 80%)`,
-        }}
-        aria-hidden="true"
-      />
-
-      {/* Top Hairline Inset Highlight */}
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent opacity-60" aria-hidden="true" />
-
-      {/* Main Mission Control Content Bar */}
-      <div className="relative px-6 py-5 flex flex-col xl:flex-row xl:items-center justify-between gap-6 z-10">
+    <div className="group relative overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-[var(--shadow-sm)] transition-all duration-200 hover:border-[var(--accent-border)] hover:shadow-[var(--shadow-md)]">
+      {/* Main Content Bar */}
+      <div className="relative px-6 py-5 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         
         {/* Left Column: Brand Identity & Metadata */}
         <div className="min-w-0 flex items-start gap-4 flex-1">
-          {/* Avatar with Ambient Glow Ring */}
+          {/* Avatar */}
           <div
-            className="relative w-13 h-13 rounded-[var(--radius-lg)] text-white flex items-center justify-center font-bold text-xl shadow-[var(--shadow-sm)] shrink-0 transition-transform duration-[var(--duration-fast)] group-hover:scale-105"
+            className="relative w-11 h-11 rounded-xl text-white flex items-center justify-center font-bold text-lg shadow-[var(--shadow-sm)] shrink-0"
             style={{
               background: `linear-gradient(135deg, hsl(${hue} 75% 52%), hsl(${(hue + 40) % 360} 70% 40%))`,
-              boxShadow: `0 0 20px -3px hsl(${hue} 80% 50% / 0.4)`,
             }}
           >
             {crew.name.charAt(0).toUpperCase()}
@@ -209,22 +196,22 @@ export function CrewHeader({
               </div>
 
               {/* Metric Badges */}
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-md)] bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
                 <FolderIcon className="w-3.5 h-3.5 text-[var(--accent)]" />
                 <span>{sharedProjects?.length || 0} Projects</span>
               </span>
 
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-md)] bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
                 <ChecklistIcon className="w-3.5 h-3.5 text-[var(--accent)]" />
                 <span>{crewTasks?.length || 0} Tasks</span>
               </span>
 
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-md)] bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
                 <ChatIcon className="w-3.5 h-3.5 text-[var(--accent)]" />
                 <span>{channels?.length || 0} Channels</span>
               </span>
 
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-md)] bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
                 <CheckIcon className="w-3.5 h-3.5 text-[var(--success)]" />
                 <span className="font-mono">{completionRate || 0}% Done</span>
               </span>
@@ -239,7 +226,7 @@ export function CrewHeader({
             variant="primary"
             size="sm"
             onClick={onOpenTasks}
-            className="gap-1.5 text-[12px] h-8.5 font-medium shadow-[var(--shadow-sm)] transition-all duration-[var(--duration-fast)] active:scale-95 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+            className="gap-1.5 text-[12px] h-8 font-medium shadow-[var(--shadow-sm)] transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
             title="Create or assign a new crew task"
           >
             <Icons.plus className="w-3.5 h-3.5" />
@@ -251,7 +238,7 @@ export function CrewHeader({
             variant="outline"
             size="sm"
             onClick={onNewBoard}
-            className="gap-1.5 text-[12px] h-8.5 font-medium border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] transition-all duration-[var(--duration-fast)] active:scale-95"
+            className="gap-1.5 text-[12px] h-8 font-medium border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] transition-all duration-200 active:scale-95"
             title="Open a new collaborative whiteboard"
           >
             <Pencil className="w-3.5 h-3.5" />
@@ -263,7 +250,7 @@ export function CrewHeader({
             variant="ghost"
             size="sm"
             onClick={onOpenChat}
-            className="gap-1.5 text-[12px] h-8.5 font-medium hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[var(--duration-fast)] active:scale-95"
+            className="gap-1.5 text-[12px] h-8 font-medium hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-200 active:scale-95"
             title="Open crew discussions channel"
           >
             <ChatIcon className="w-3.5 h-3.5" />
@@ -281,7 +268,7 @@ export function CrewHeader({
               variant="outline"
               size="sm"
               onClick={onLeave}
-              className="gap-1.5 text-[12px] h-8.5 font-medium text-[var(--danger)] bg-transparent hover:bg-[var(--danger-soft)] border-[var(--danger-soft)] hover:border-[var(--danger)]/40 transition-all duration-[var(--duration-fast)] active:scale-95"
+              className="gap-1.5 text-[12px] h-8 font-medium text-[var(--danger)] bg-transparent hover:bg-[var(--danger-soft)] border-[var(--danger-soft)] hover:border-[var(--danger)]/40 transition-all duration-200 active:scale-95"
               title="Leave this crew"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -294,7 +281,7 @@ export function CrewHeader({
             variant="ghost"
             size="sm"
             onClick={() => navigate('/app/crews')}
-            className="gap-1 text-[12px] h-8.5 font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all duration-[var(--duration-fast)]"
+            className="gap-1 text-[12px] h-8 font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all duration-200"
             title="Navigate back to Crews overview"
           >
             <Icons.chevronLeft className="w-4 h-4" />

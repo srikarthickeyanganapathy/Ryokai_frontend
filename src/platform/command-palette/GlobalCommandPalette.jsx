@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   CommandDialog,
   CommandEmpty,
@@ -16,7 +16,10 @@ import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 export function GlobalCommandPalette() {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
   const { setWorkspaceMode, organizations = [], setActiveOrganization } = useWorkspace()
+  
+  const isTasksPage = location.pathname.startsWith('/app/tasks')
 
   useEffect(() => {
     const down = (e) => {
@@ -39,6 +42,31 @@ export function GlobalCommandPalette() {
       <CommandInput placeholder="Type a command or search workspace..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
+        
+        {isTasksPage && (
+          <>
+            <CommandGroup heading="Task Actions">
+              <CommandItem onSelect={() => runCommand(() => navigate('/app/tasks?create=true'))}>
+                <Icons.plus className="mr-2 h-4 w-4 text-blue-500" />
+                <span>Create New Task</span>
+                <CommandShortcut>C</CommandShortcut>
+              </CommandItem>
+              <CommandItem onSelect={() => runCommand(() => navigate('/app/tasks?view=list'))}>
+                <Icons.list className="mr-2 h-4 w-4" />
+                <span>Switch to List View</span>
+              </CommandItem>
+              <CommandItem onSelect={() => runCommand(() => navigate('/app/tasks?view=kanban'))}>
+                <Icons.kanban className="mr-2 h-4 w-4" />
+                <span>Switch to Kanban View</span>
+              </CommandItem>
+              <CommandItem onSelect={() => runCommand(() => navigate('/app/tasks?view=nebula'))}>
+                <Icons.network className="mr-2 h-4 w-4" />
+                <span>Switch to Nebula View</span>
+              </CommandItem>
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        )}
         
         <CommandGroup heading="Navigation">
           <CommandItem onSelect={() => runCommand(() => navigate('/app'))}>

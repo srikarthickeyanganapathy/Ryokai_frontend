@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
 import { Text } from '@/shared/ui/Typography'
+import { Flag } from '@/shared/ui/Icons'
 import { isToday, isTomorrow, parseISO, isAfter, startOfToday, format } from 'date-fns'
 import { cn } from '@/shared/lib/cn'
 
@@ -42,8 +43,8 @@ export function MiniAgenda({ tasks = [], events = [], onTaskClick, onEventClick 
       <div key={`task-${item.id}`} onClick={() => onTaskClick(item)} className="p-2.5 bg-[var(--bg-subtle)]/50 border border-[var(--border-subtle)] rounded-md cursor-pointer hover:border-[var(--accent)] transition-colors group">
         <div className="flex items-start justify-between gap-2">
           <Text size="sm" className="font-medium text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors line-clamp-2 text-[12px]">
-            {item.type === 'MILESTONE' && '🎯 '}
-            {item.title}
+            {item.type === 'MILESTONE' && <Flag className="w-2.5 h-2.5 shrink-0 text-purple-500" />}
+            <span className="truncate">{item.title}</span>
           </Text>
           <span className="shrink-0 text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">{item.priority}</span>
         </div>

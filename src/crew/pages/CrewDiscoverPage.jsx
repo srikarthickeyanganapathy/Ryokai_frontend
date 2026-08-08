@@ -153,7 +153,6 @@ export function CrewDiscoverPage() {
       else if (lower.includes('market') || lower.includes('growth') || lower.includes('seo')) counts['Marketing'] = (counts['Marketing'] || 0) + 1;
       else if (lower.includes('prod') || lower.includes('roadmap')) counts['Product'] = (counts['Product'] || 0) + 1;
       else if (lower.includes('ops') || lower.includes('operation')) counts['Operations'] = (counts['Operations'] || 0) + 1;
-      else if (lower.includes('growth')) counts['Growth'] = (counts['Growth'] || 0) + 1;
       else if (lower.includes('research') || lower.includes('r&d')) counts['Research'] = (counts['Research'] || 0) + 1;
       else counts['Engineering'] = (counts['Engineering'] || 0) + 1;
     });

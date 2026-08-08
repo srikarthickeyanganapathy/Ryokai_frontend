@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+﻿import React, { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
@@ -103,7 +103,7 @@ export function TaskComments({ taskId, hasCommentPerm }) {
                   type="submit" 
                   size="sm" 
                   disabled={!text.trim() || addComment.isPending}
-                  className="bg-[var(--text-primary)] text-[var(--bg-elevated)] hover:opacity-90 rounded-full px-4 text-xs font-semibold"
+                  className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg px-4 text-xs font-semibold"
                 >
                   Comment
                 </Button>
@@ -228,7 +228,7 @@ export function TaskDependencies({ task, hasDependencyPerm }) {
           {task.blockedBy.map(dep => {
             const isResolved = dep.status === 'COMPLETED' || dep.status === 'APPROVED'
             return (
-              <div key={dep.id} className="group flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors duration-150 hover:bg-[var(--bg-elevated)]/60">
+              <div key={dep.id} className="group flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors duration-150 hover:bg-[var(--bg-subtle)]">
                 {isResolved ? (
                   <Icons.checkCircle className="w-3 h-3 text-[var(--success)] shrink-0" />
                 ) : (
@@ -261,7 +261,7 @@ export function TaskDependencies({ task, hasDependencyPerm }) {
         <div className="space-y-0.5">
           <Text size="xs" variant="muted" className="text-[10px] uppercase tracking-wider font-medium text-[var(--warning)] px-2 mb-1">Blocking</Text>
           {task.blocks.map(dep => (
-            <div key={dep.id} className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors duration-150 hover:bg-[var(--bg-elevated)]/60">
+            <div key={dep.id} className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-colors duration-150 hover:bg-[var(--bg-subtle)]">
               <Icons.alert className="w-3 h-3 text-[var(--warning)] shrink-0" />
               <span className="flex-1 text-xs leading-snug text-[var(--text-primary)] truncate">{dep.title}</span>
               <Badge variant="outline" className="text-[9px] px-1 py-0 font-mono">
@@ -415,7 +415,7 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
           return (
             <div 
               key={item.id} 
-              className="group relative flex flex-col sm:flex-row items-stretch overflow-hidden rounded-xl bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] hover:border-[var(--accent-border)] hover:shadow-md transition-all duration-200"
+              className="group relative flex flex-col sm:flex-row items-stretch overflow-hidden rounded-lg bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] hover:border-[var(--accent-border)] hover:shadow-md transition-all duration-200"
             >
               {/* Left Side: Thumbnail Preview or Link Favicon Badge */}
               {isImg ? (
@@ -499,7 +499,7 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
 
       {/* Add Evidence Form */}
       {hasEditPerm && (
-        <div className="p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] space-y-4 mt-4">
+        <div className="p-4 rounded-lg bg-[var(--bg-card)] border border-[var(--color-border-subtle)] space-y-4 mt-4">
           <div className="flex items-center gap-4 border-b border-[var(--color-border-subtle)] pb-2">
             <button
               onClick={() => setActiveTab('LINK')}
@@ -599,7 +599,7 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
           onClick={() => setPreviewImage(null)}
           className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 cursor-pointer animate-fadeIn backdrop-blur-sm"
         >
-          <div className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-xl shadow-2xl">
+          <div className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-lg shadow-2xl">
             <img src={previewImage} alt="Fullscreen Preview" className="max-w-full max-h-[85vh] object-contain" />
             <button 
               onClick={() => setPreviewImage(null)}

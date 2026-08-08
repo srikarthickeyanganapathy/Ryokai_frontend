@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { MonthView } from './MonthView'
 import { WeekView } from './WeekView'
-import { MiniAgenda } from './MiniAgenda'
+import { RadarPanel } from './RadarPanel'
 import { useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Filter } from '@/shared/ui/Icons'
 import { format, addMonths, subMonths, addWeeks, subWeeks, startOfToday, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns'
@@ -13,20 +14,25 @@ import { useCreateTask } from '@/task'
 import { useCreateEvent } from '../hooks/useCalendar'
 import { cn } from '@/shared/lib/cn'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
+import { EASING } from '@/shared/lib/uxTokens'
 
-export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEventClick, onVisibleRangeChange, TaskFormComponent }) {
+export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEventClick, onVisibleRangeChange, TaskFormComponent, scope = {} }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const mode = searchParams.get('mode') || 'month'
-  
+
   const [currentDate, setCurrentDate] = useState(startOfToday())
+  const [selectedDay, setSelectedDay] = useState(null)
   const [quickAddDate, setQuickAddDate] = useState(null)
   const [createType, setCreateType] = useState('event')
   const [filterType, setFilterType] = useState('all')
   const [filterOpen, setFilterOpen] = useState(false)
-  
+
   const createTaskMutation = useCreateTask()
-  const createEventMutation = useCreateEvent()
-  
+  const createEventMutation = useCreateEvent(scope)
+
+  const filteredTasks = filterType === 'events' ? [] : (tasks || [])
+  const filteredEvents = filterType === 'tasks' ? [] : (events || [])
+
   const handleCreate = (payload) => {
     if (createType === 'task') {
       const taskPayload = { ...payload, dueDate: payload.dueDate ? new Date(payload.dueDate).toISOString() : null }
@@ -46,6 +52,7 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
     const start = mode === 'month' ? startOfWeek(startOfMonth(currentDate)) : startOfWeek(currentDate)
     const end = mode === 'month' ? endOfWeek(endOfMonth(currentDate)) : endOfWeek(currentDate)
     onVisibleRangeChange({ start, end })
+    setSelectedDay(null)
   }, [currentDate, mode, onVisibleRangeChange])
 
   const setMode = (newMode) => {
@@ -54,7 +61,7 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
 
   const next = () => mode === 'month' ? setCurrentDate(addMonths(currentDate, 1)) : setCurrentDate(addWeeks(currentDate, 1))
   const prev = () => mode === 'month' ? setCurrentDate(subMonths(currentDate, 1)) : setCurrentDate(subWeeks(currentDate, 1))
-  const today = () => setCurrentDate(startOfToday())
+  const today = () => { setCurrentDate(startOfToday()); setSelectedDay(null) }
 
   return (
     <div className="flex flex-col lg:flex-row h-full gap-4">
@@ -76,7 +83,7 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
               <Button variant="ghost" onClick={() => setMode('month')} className={cn('px-2.5 py-1 text-[11px] font-medium rounded-sm transition-colors h-auto', mode === 'month' ? 'bg-[var(--bg-card)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]')}>Month</Button>
               <Button variant="ghost" onClick={() => setMode('week')} className={cn('px-2.5 py-1 text-[11px] font-medium rounded-sm transition-colors h-auto', mode === 'week' ? 'bg-[var(--bg-card)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]')}>Week</Button>
             </div>
-            
+
             <Popover open={filterOpen} onOpenChange={setFilterOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1.5">
@@ -96,16 +103,27 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
         </div>
 
         <div className="flex-1 overflow-hidden bg-[var(--bg-base)] flex flex-col min-h-0">
-          {mode === 'month' ? (
-            <MonthView tasks={tasks} events={events} currentDate={currentDate} isLoading={isLoading} onTaskClick={onTaskClick} onEventClick={onEventClick} onAddClick={(d) => setQuickAddDate(d)} />
-          ) : (
-            <WeekView tasks={tasks} events={events} currentDate={currentDate} isLoading={isLoading} onTaskClick={onTaskClick} onEventClick={onEventClick} onAddClick={(d) => setQuickAddDate(d)} />
-          )}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={mode}
+              className="flex-1 min-h-0 flex flex-col"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18, ease: EASING.out }}
+            >
+              {mode === 'month' ? (
+                <MonthView tasks={filteredTasks} events={filteredEvents} currentDate={currentDate} isLoading={isLoading} onTaskClick={onTaskClick} onEventClick={onEventClick} onAddClick={(d) => setQuickAddDate(d)} onSelectDay={setSelectedDay} />
+              ) : (
+                <WeekView tasks={filteredTasks} events={filteredEvents} currentDate={currentDate} isLoading={isLoading} onTaskClick={onTaskClick} onEventClick={onEventClick} onAddClick={(d) => setQuickAddDate(d)} onSelectDay={setSelectedDay} />
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
 
       <div className="w-full lg:w-72 shrink-0 hidden lg:block">
-        <MiniAgenda tasks={tasks} events={events} currentDate={currentDate} onTaskClick={onTaskClick} onEventClick={onEventClick} />
+        <RadarPanel tasks={filteredTasks} events={filteredEvents} selectedDay={selectedDay} onTaskClick={onTaskClick} onEventClick={onEventClick} onReset={() => setSelectedDay(null)} />
       </div>
 
       <Modal open={!!quickAddDate} onOpenChange={(open) => !open && setQuickAddDate(null)}>
@@ -120,7 +138,7 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
               <TaskFormComponent onSubmit={handleCreate} isLoading={createTaskMutation.isPending} defaultValues={{ title: '', description: '', assigneeUsername: '', priority: 'MEDIUM', dueDate: quickAddDate ? format(quickAddDate, `yyyy-MM-dd'T'${format(new Date(), 'HH:mm')}`) : '', tags: '', teamId: '' }} />
             ) : null
           ) : (
-            <EventForm onSubmit={handleCreate} onCancel={() => setQuickAddDate(null)} isLoading={createEventMutation.isPending} defaultValues={{ title: '', description: '', startTime: quickAddDate ? format(quickAddDate, "yyyy-MM-dd'T'HH:mm") : '', endTime: quickAddDate ? format(quickAddDate, "yyyy-MM-dd'T'HH:mm") : '', isAllDay: false }} />
+            <EventForm onSubmit={handleCreate} onCancel={() => setQuickAddDate(null)} isLoading={createEventMutation.isPending} defaultValues={{ title: '', description: '', location: '', startTime: quickAddDate ? format(quickAddDate, "yyyy-MM-dd'T'HH:mm") : '', endTime: quickAddDate ? format(quickAddDate, "yyyy-MM-dd'T'HH:mm") : '', isAllDay: false }} />
           )}
         </ModalContent>
       </Modal>

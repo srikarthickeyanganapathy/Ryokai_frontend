@@ -223,19 +223,8 @@ export function OverviewTab({
   isError = false,
   error = null,
   onRetry = null,
-  isFetching = false
 }) {
-  // Render Loading Skeleton (State 1)
-  if (isLoading) {
-    return <OverviewSkeleton />;
-  }
-
-  // Render Error State (State 2)
-  if (isError) {
-    return <OverviewErrorState error={error} onRetry={onRetry} />;
-  }
-
-  // Derived Task Metrics
+  // Derived Task Metrics — hooks must run unconditionally (React Compiler)
   const totalTasks = crewTasks.length;
   const activeTasks = useMemo(() => {
     return crewTasks.filter(t => {
@@ -275,7 +264,7 @@ export function OverviewTab({
         type: 'task',
         title: task.title,
         status: task.status || 'TODO',
-        timestamp: task.updatedAt || task.createdAt || Date.now(),
+        timestamp: task.updatedAt || task.createdAt || 0,
         actor: task.assignee?.username || task.assignedTo || 'Squad Member',
         icon: ListTodo,
         badgeVariant: task.status === 'COMPLETED' || task.status === 'Done' ? 'success' : 'primary'
@@ -289,7 +278,7 @@ export function OverviewTab({
         type: 'project',
         title: `Project "${proj.name || proj.title}" linked`,
         status: 'Linked',
-        timestamp: proj.createdAt || Date.now(),
+        timestamp: proj.createdAt || 0,
         actor: 'Squad Owner',
         icon: Folder,
         badgeVariant: 'secondary'
@@ -303,7 +292,7 @@ export function OverviewTab({
         type: 'channel',
         title: `Channel #${ch.name} operational`,
         status: 'Active',
-        timestamp: ch.createdAt || Date.now(),
+        timestamp: ch.createdAt || 0,
         actor: 'System',
         icon: MessageSquare,
         badgeVariant: 'default'
@@ -314,108 +303,82 @@ export function OverviewTab({
     return events.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 6);
   }, [crewTasks, sharedProjects, channels]);
 
+  // Render Loading Skeleton (State 1)
+  if (isLoading) {
+    return <OverviewSkeleton />;
+  }
+
+  // Render Error State (State 2)
+  if (isError) {
+    return <OverviewErrorState error={error} onRetry={onRetry} />;
+  }
+
   return (
     <div className="p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
       
       {/* ----------------------------------------------------------------- */}
-      {/* Header Operational Sync Status Bar (State 6: Revalidating indicator) */}
-      {/* ----------------------------------------------------------------- */}
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-2.5">
-          <div className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--success)] opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--success)]"></span>
+      {/* Header — teams design language (icon chip + title + meta) */}
+      <div className="flex items-center justify-between flex-wrap gap-3 px-1">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center border border-[var(--accent-border)] shrink-0">
+            <Target className="w-4 h-4" />
           </div>
-          <span className="text-[12px] font-medium text-[var(--text-secondary)] tracking-tight">
-            {isFetching ? 'Synchronizing Operational Feed...' : 'Live Crew Workspace Operational'}
-          </span>
+          <div className="min-w-0">
+            <Heading level={3} className="text-[14px] font-semibold tracking-tight text-[var(--text-primary)] mb-0">Crew Overview</Heading>
+            <Text variant="muted" className="text-[12px] mt-0.5 line-clamp-1">{crew?.description || 'Squad execution, collaboration and velocity at a glance.'}</Text>
+          </div>
         </div>
-        <div className="flex items-center gap-3 text-[11px] text-[var(--text-muted)] font-mono">
-          <span>Sprint Goal Active</span>
-          <span className="text-[var(--border-default)]">•</span>
-          <span>{new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-        </div>
-      </div>
-
-      {/* ----------------------------------------------------------------- */}
-      {/* HERO BANNER: Today's Mission (Requirement 1)                      */}
-      {/* ----------------------------------------------------------------- */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--bg-elevated)] via-[var(--bg-card)] to-[var(--bg-subtle)] border border-[var(--border-default)] p-6 sm:p-8 shadow-[var(--shadow-sm)]">
-        {/* Subtle mesh background accent */}
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 rounded-full bg-[var(--accent)]/5 blur-3xl pointer-events-none" />
-        
-        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-          <div className="space-y-3 max-w-2xl">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <Badge variant="primary" size="sm" className="gap-1 font-semibold uppercase tracking-wider text-[10px]">
-                <Target className="w-3 h-3" /> Today's Mission
-              </Badge>
-              <Badge variant="outline" size="sm" className="text-[11px] font-mono text-[var(--text-muted)] border-[var(--border-subtle)]">
-                {crew?.name || 'Crew Operations'}
-              </Badge>
-              {healthScore >= 80 && (
-                <Badge variant="success" size="sm" className="gap-1 text-[10px]">
-                  <Sparkles className="w-3 h-3" /> Target Ahead
-                </Badge>
-              )}
-            </div>
-
-            <div>
-              <Heading level={2} className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-                {crew?.name ? `${crew.name} Dashboard` : 'Squad Operations Center'}
-              </Heading>
-              <Text size="sm" className="text-[var(--text-secondary)] mt-1 line-clamp-2">
-                {crew?.description || 'Execute sprint tasks, collaborate in channels, and monitor squad velocity in real time.'}
-              </Text>
-            </div>
-
-            {/* Mission Progress Meter */}
-            <div className="pt-2 max-w-md space-y-2">
-              <div className="flex items-center justify-between text-[12px]">
-                <span className="text-[var(--text-secondary)] font-medium flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5 text-[var(--accent)]" /> Mission Progress
-                </span>
-                <span className="font-semibold tabular-nums text-[var(--text-primary)]">
-                  {completionRate}% <span className="text-[var(--text-muted)] font-normal">({doneTasksCount}/{totalTasks || 1} Done)</span>
-                </span>
-              </div>
-              <ProgressBar value={completionRate} max={100} barClassName="bg-[var(--accent)] h-2" />
-            </div>
-          </div>
-
-          {/* Quick Action Button Group */}
-          <div className="flex flex-wrap lg:flex-col gap-2.5 w-full lg:w-auto shrink-0 pt-2 lg:pt-0">
-            <Button
-              variant="primary"
-              size="md"
-              className="gap-2 justify-center shadow-md font-semibold text-[13px] flex-1 lg:flex-none"
-              onClick={() => setActiveTab('tasks')}
-            >
-              <Plus className="w-4 h-4" /> Add Task
-            </Button>
-            <div className="flex gap-2 w-full lg:w-auto">
-              <Button
-                variant="secondary"
-                size="sm"
-                className="gap-1.5 justify-center text-[12px] flex-1"
-                onClick={() => setActiveTab('channels')}
-              >
-                <MessageSquare className="w-3.5 h-3.5 text-[var(--accent)]" /> Chat
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="gap-1.5 justify-center text-[12px] flex-1"
-                onClick={() => setActiveTab('whiteboards')}
-              >
-                <Pencil className="w-3.5 h-3.5 text-[var(--warning)]" /> Board
-              </Button>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" size="sm" className="text-[10px] font-mono text-[var(--text-muted)]">
+            {new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+          </Badge>
+          <Badge
+            variant={healthScore >= 80 ? 'success' : healthScore >= 50 ? 'warning' : 'danger'}
+            size="sm"
+            className="gap-1 text-[10px]"
+          >
+            <Activity className="w-3 h-3" /> Health {healthScore}
+          </Badge>
         </div>
       </div>
 
-      {/* ----------------------------------------------------------------- */}
+      {/* Stat cards row — teams design language */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Total Tasks</div>
+          <div className="text-[22px] font-bold text-[var(--text-primary)] leading-none mt-2 tabular-nums">{totalTasks}</div>
+          <div className="text-[11px] text-[var(--text-secondary)] mt-1.5">{openTasksCount} open</div>
+        </div>
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">In Progress</div>
+          <div className="text-[22px] font-bold text-[var(--text-primary)] leading-none mt-2 tabular-nums">{activeTasks.length}</div>
+          <div className="text-[11px] text-[var(--text-secondary)] mt-1.5">active right now</div>
+        </div>
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Completed</div>
+          <div className="text-[22px] font-bold text-[var(--text-primary)] leading-none mt-2 tabular-nums">{doneTasksCount}</div>
+          <div className="text-[11px] text-[var(--text-secondary)] mt-1.5">{completionRate}% done</div>
+        </div>
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Members</div>
+          <div className="text-[22px] font-bold text-[var(--text-primary)] leading-none mt-2 tabular-nums">{members.length}</div>
+          <div className="text-[11px] text-[var(--text-secondary)] mt-1.5">{sharedProjects.length} projects · {channels.length} channels</div>
+        </div>
+      </div>
+
+      {/* Quick actions — teams design language */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Button variant="primary" size="sm" className="gap-1.5 h-8 text-[12px] font-semibold shadow-sm" onClick={() => setActiveTab('tasks')}>
+          <Plus className="w-3.5 h-3.5" /> Add Task
+        </Button>
+        <Button variant="outline" size="sm" className="gap-1.5 h-8 text-[12px]" onClick={() => setActiveTab('channels')}>
+          <MessageSquare className="w-3.5 h-3.5 text-[var(--accent)]" /> Chat
+        </Button>
+        <Button variant="outline" size="sm" className="gap-1.5 h-8 text-[12px]" onClick={() => setActiveTab('whiteboards')}>
+          <Pencil className="w-3.5 h-3.5 text-[var(--warning)]" /> Board
+        </Button>
+      </div>
+
       {/* GLOBAL EMPTY STATE (State 3: New Crew Onboarding)                  */}
       {/* ----------------------------------------------------------------- */}
       {isCrewEmpty && (

@@ -9,21 +9,48 @@ import { InlineEditable } from '@/shared/ui/InlineEditable'
 import { cn } from '@/shared/lib/cn'
 import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
 
-const statusIcons = {
-  'To Do': <div className="w-4 h-4 rounded-full border-2 border-[var(--color-border-default)]" />,
-  'In Review': <div className="w-4 h-4 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin-slow" />,
-  'Done': <Icons.check className="w-4 h-4 text-[var(--accent)]" />,
-  'Needs Work': <Icons.alert className="w-4 h-4 text-[var(--warning)]" />,
+const STATUS_INDICATORS = {
+  'To Do':      <div className="w-2.5 h-2.5 rounded-full border-2 border-[var(--text-tertiary)]" />,
+  'In Progress':<div className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.3)]" />,
+  'In Review':  <div className="w-2.5 h-2.5 rounded-full border-2 border-purple-400 animate-pulse" />,
+  'Done':       <Icons.check className="w-4 h-4 text-emerald-500" />,
+  'Needs Work': <Icons.alert className="w-4 h-4 text-[var(--danger)]" />,
 }
 
-export function TasksTable({ 
-  tasks, 
-  isLoading, 
-  rowSelection, 
-  setRowSelection, 
+function DueBadge({ dueDate }) {
+  if (!dueDate) return <span className="text-[var(--text-muted)] text-xs">—</span>
+  const due = new Date(dueDate)
+  const now = new Date()
+  const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24))
+  const dateStr = due.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+
+  if (diffDays < 0) return (
+    <span className="text-[11px] font-semibold text-[var(--danger)] bg-[var(--danger-soft)] px-2 py-0.5 rounded-md">
+      {dateStr} · Overdue
+    </span>
+  )
+  if (diffDays === 0) return (
+    <span className="text-[11px] font-semibold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md">
+      Today
+    </span>
+  )
+  if (diffDays <= 2) return (
+    <span className="text-[11px] font-semibold text-orange-400 bg-orange-400/10 px-2 py-0.5 rounded-md">
+      {dateStr} · Soon
+    </span>
+  )
+  return <span className="text-[var(--text-secondary)] text-xs">{dateStr}</span>
+}
+
+export function TasksTable({
+  tasks,
+  isLoading,
+  rowSelection,
+  setRowSelection,
   onTaskClick,
   onQuickComplete,
-  onQuickDelete 
+  onQuickDelete,
+  emptyState
 }) {
   const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
@@ -36,12 +63,12 @@ export function TasksTable({
     })
     if (ok) onQuickDelete(task)
   }
-  
+
   const columns = React.useMemo(() => [
     {
       id: 'select',
       header: ({ table }) => (
-        <div className="flex items-center px-1">
+        <div className="flex items-center pl-1">
           <Checkbox
             checked={table.getIsAllPageRowsSelected() ? true : (table.getIsSomePageRowsSelected() ? 'indeterminate' : false)}
             indeterminate={table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
@@ -50,7 +77,7 @@ export function TasksTable({
         </div>
       ),
       cell: ({ row }) => (
-        <div className="flex items-center px-1" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center pl-1" onClick={e => e.stopPropagation()}>
           <Checkbox
             checked={row.getIsSelected()}
             onCheckedChange={(v) => row.toggleSelected(!!v)}
@@ -63,20 +90,25 @@ export function TasksTable({
       header: 'Task',
       cell: ({ row }) => {
         const task = row.original
-        const isDone = task.status === 'Done'
+        const isDone = task.status === 'Done' || task.status === 'COMPLETED'
         return (
           <div className="flex items-center gap-3">
-            <div className="text-[var(--text-secondary)] shrink-0">
-              {statusIcons[task.status] || <div className="w-4 h-4 rounded-full border-2 border-[var(--color-border-default)]" />}
+            <div className="shrink-0">
+              {STATUS_INDICATORS[task.status] || STATUS_INDICATORS['To Do']}
             </div>
-            <InlineEditable
-              value={task.title}
-              onSave={(newTitle) => {
-                if (onTaskClick) onTaskClick({ ...task, title: newTitle })
-              }}
-              truncate
-              className={cn(isDone && 'line-through !text-[var(--text-secondary)]')}
-            />
+            <div className="min-w-0">
+              <InlineEditable
+                value={task.title}
+                onSave={(newTitle) => {
+                  if (onTaskClick) onTaskClick({ ...task, title: newTitle })
+                }}
+                truncate
+                className={cn(
+                  'font-medium text-[13px]',
+                  isDone && 'line-through text-[var(--text-muted)]'
+                )}
+              />
+            </div>
           </div>
         )
       },
@@ -87,11 +119,11 @@ export function TasksTable({
       cell: ({ row }) => {
         const projectName = row.original.projectName
         const projectId = row.original.projectId
-        if (!projectId) return <span className="text-[var(--text-muted)]">-</span>
+        if (!projectId) return <span className="text-[var(--text-muted)] text-xs">—</span>
         return (
-          <Badge variant="outline" className="text-xs bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-transparent">
-            {projectName || `Project #${projectId}`}
-          </Badge>
+          <span className="text-xs font-medium text-[var(--text-secondary)] bg-[var(--bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--border-subtle)]">
+            {projectName || `#${projectId}`}
+          </span>
         )
       }
     },
@@ -101,11 +133,11 @@ export function TasksTable({
       cell: ({ row }) => {
         const teamName = row.original.teamName || row.original.team?.name
         const teamId = row.original.teamId || row.original.team?.id
-        if (!teamId && !teamName) return <span className="text-[var(--text-muted)]">-</span>
+        if (!teamId && !teamName) return <span className="text-[var(--text-muted)] text-xs">—</span>
         return (
-          <Badge variant="outline" className="text-xs bg-indigo-500/10 text-indigo-400 border-indigo-500/20 font-medium">
-            {teamName || `Team #${teamId}`}
-          </Badge>
+          <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md">
+            {teamName || `#${teamId}`}
+          </span>
         )
       }
     },
@@ -115,32 +147,30 @@ export function TasksTable({
       cell: ({ row }) => {
         const p = row.original.priority
         return (
-          <Badge variant="outline" className={cn("text-xs", PRIORITY_COLORS[p] || PRIORITY_COLORS.MEDIUM)}>
+          <span className={cn(
+            "text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md",
+            PRIORITY_COLORS[p] || PRIORITY_COLORS.MEDIUM
+          )}>
             {normalizePriority(p)}
-          </Badge>
+          </span>
         )
       }
     },
     {
       accessorKey: 'dueDate',
       header: 'Due',
-      cell: ({ row }) => {
-        const d = row.original.dueDate
-        if (!d) return <span className="text-[var(--text-muted)]">-</span>
-        // Just formatting nicely for the demo
-        const dateStr = new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-        return <span className="text-[var(--text-secondary)] text-sm">{dateStr}</span>
-      }
+      cell: ({ row }) => <DueBadge dueDate={row.original.dueDate} />
     }
-  ], [])
+  ], [onTaskClick])
 
   return (
     <>
       {confirmDialog}
-      <DataTable 
+      <DataTable
         columns={columns}
         data={tasks || []}
         isLoading={isLoading}
+        emptyStateNode={emptyState}
         rowSelection={rowSelection}
         setRowSelection={setRowSelection}
         onRowClick={onTaskClick}

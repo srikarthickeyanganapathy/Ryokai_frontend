@@ -1,27 +1,37 @@
 import { Button } from '@/shared/ui/Button';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import React, { useMemo, useState } from 'react'
-import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth, isToday, parseISO } from 'date-fns'
+import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth, isToday, isWeekend, parseISO } from 'date-fns'
 import { DndContext, closestCenter, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { useUpdateTask } from '@/task'
 import { useUpdateEvent } from '../hooks/useCalendar'
 import { useDroppable, useDraggable } from '@dnd-kit/core'
 import { PRIORITY_COLORS } from '@/shared/lib/priority'
 import { cn } from '@/shared/lib/cn'
-import { Plus } from '@/shared/ui/Icons'
+import { Flag, Plus } from '@/shared/ui/Icons'
 import { toast } from 'sonner'
 
-function CalendarDayCell({ day, isCurrentMonth, children, onAddClick }) {
+function CalendarDayCell({ day, isCurrentMonth, heat = 0, children, onAddClick, onSelectDay }) {
   const { setNodeRef, isOver } = useDroppable({ id: format(day, 'yyyy-MM-dd') })
+  const weekend = isWeekend(day)
   return (
-    <div ref={setNodeRef} className={cn("h-full min-h-0 p-1.5 border-b border-r border-[var(--border-subtle)] bg-[var(--bg-base)] transition-colors group relative flex flex-col overflow-hidden", !isCurrentMonth && "bg-[var(--bg-subtle)]/30 opacity-50", isOver && "bg-[var(--accent-soft)] ring-2 ring-inset ring-[var(--accent)]/50")}>
-      <div className="flex items-center justify-between mb-1 shrink-0">
-        <span className={cn("text-[11px] font-medium w-5 h-5 flex items-center justify-center rounded-full", isToday(day) ? "bg-[var(--accent)] text-[var(--text-primary)]" : "text-[var(--text-secondary)]")}>{format(day, 'd')}</span>
+    <div ref={setNodeRef} className={cn("h-full min-h-0 p-1.5 border-b border-r border-[var(--border-subtle)] bg-[var(--bg-base)] transition-colors group relative flex flex-col overflow-hidden", !isCurrentMonth && "bg-[var(--bg-subtle)]/30 opacity-50", weekend && isCurrentMonth && "bg-[var(--bg-subtle)]/20", isOver && "bg-[var(--accent-soft)] ring-2 ring-inset ring-[var(--accent)]/50")}>
+      {/* Rhythm heat — intensity ∝ item count */}
+      {heat > 0 && <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: 'var(--accent)', opacity: heat }} />}
+      <div className="flex items-center justify-between mb-1 shrink-0 relative">
+        <button
+          onClick={() => onSelectDay && onSelectDay(day)}
+          className={cn("text-[11px] font-medium w-5 h-5 flex items-center justify-center rounded-full transition-colors cursor-pointer hover:bg-[var(--bg-hover)]", isToday(day) ? "bg-[var(--accent)] text-[var(--text-primary)] ring-2 ring-[var(--accent)]/30" : "text-[var(--text-secondary)]")}
+          title="Open day brief"
+        >
+          {format(day, 'd')}
+        </button>
+        {isToday(day) && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--accent)] animate-pulse" />}
         <Button variant="ghost" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddClick(day) }} className="opacity-0 group-hover:opacity-100 p-0.5 w-5 h-5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] rounded transition-all flex items-center justify-center">
           <Plus className="w-3 h-3" />
         </Button>
       </div>
-      <div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar flex-1 min-h-0 pr-0.5">{children}</div>
+      <div className="relative flex flex-col gap-1 overflow-y-auto custom-scrollbar flex-1 min-h-0 pr-0.5">{children}</div>
     </div>
   )
 }
@@ -34,7 +44,7 @@ function CalendarTaskChip({ task, onClick }) {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners} onClick={(e) => { if (!isDragging) onClick(task) }} className={cn("px-1.5 py-0.5 text-[11px] rounded border truncate cursor-grab active:cursor-grabbing transition-colors", colorClass, task.status === 'Done' && "opacity-50 line-through")}>
-      {task.type === 'MILESTONE' && '🎯 '}{task.title}
+      {task.type === 'MILESTONE' && <Flag className="w-2.5 h-2.5 inline mr-1 -mt-0.5 align-middle text-purple-500" />}{task.title}
     </div>
   )
 }
@@ -49,7 +59,7 @@ function CalendarEventChip({ event, onClick }) {
   )
 }
 
-export function MonthView({ tasks = [], events = [], currentDate, isLoading, onTaskClick, onEventClick, onAddClick }) {
+export function MonthView({ tasks = [], events = [], currentDate, isLoading, onTaskClick, onEventClick, onAddClick, onSelectDay }) {
   const updateTaskMutation = useUpdateTask()
   const updateEventMutation = useUpdateEvent()
   const [taskDateOverrides, setTaskDateOverrides] = useState({})
@@ -114,6 +124,14 @@ export function MonthView({ tasks = [], events = [], currentDate, isLoading, onT
     return map
   }, [effectiveEvents])
 
+  /* per-day counts for the Rhythm Heat */
+  const dayCounts = useMemo(() => {
+    const counts = {}
+    days.forEach(d => { const k = format(d, 'yyyy-MM-dd'); counts[k] = (tasksByDate[k]?.length || 0) + (eventsByDate[k]?.length || 0) })
+    return counts
+  }, [days, tasksByDate, eventsByDate])
+  const maxCount = useMemo(() => Math.max(1, ...Object.values(dayCounts)), [dayCounts])
+
   if (isLoading) {
     return (
       <div className="flex flex-col h-full space-y-2 p-4">
@@ -143,7 +161,7 @@ export function MonthView({ tasks = [], events = [], currentDate, isLoading, onT
           {days.map((day) => {
             const dateKey = format(day, 'yyyy-MM-dd')
             return (
-              <CalendarDayCell key={day.toISOString()} day={day} isCurrentMonth={isSameMonth(day, currentDate)} onAddClick={onAddClick}>
+              <CalendarDayCell key={day.toISOString()} day={day} isCurrentMonth={isSameMonth(day, currentDate)} heat={dayCounts[dateKey] > 0 ? 0.04 + (dayCounts[dateKey] / maxCount) * 0.12 : 0} onAddClick={onAddClick} onSelectDay={onSelectDay}>
                 {(tasksByDate[dateKey] || []).map(task => <CalendarTaskChip key={task.id} task={task} onClick={onTaskClick} />)}
                 {(eventsByDate[dateKey] || []).map(ev => <CalendarEventChip key={ev.id} event={ev} onClick={onEventClick} />)}
               </CalendarDayCell>

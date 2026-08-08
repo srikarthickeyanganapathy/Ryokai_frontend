@@ -27,17 +27,17 @@ import {
 import { cn } from '@/shared/lib/cn';
 
 // Ambient Particle Canvas / Background
+const AMBIENT_PARTICLES = Array.from({ length: 18 }).map((_, i) => ({
+  id: i,
+  x: Math.random() * 100,
+  y: Math.random() * 100,
+  size: Math.random() * 6 + 3,
+  duration: Math.random() * 8 + 6,
+  delay: Math.random() * 4,
+}));
+
 function AmbientParticleBackground() {
-  const particles = useMemo(() => {
-    return Array.from({ length: 18 }).map((_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 6 + 3,
-      duration: Math.random() * 8 + 6,
-      delay: Math.random() * 4,
-    }));
-  }, []);
+  const particles = AMBIENT_PARTICLES;
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
@@ -74,8 +74,7 @@ function AmbientParticleBackground() {
 }
 
 // Celebratory Confetti Burst Particle Components
-function ConfettiParticles() {
-  const confettiItems = useMemo(() => {
+const CONFETTI_ITEMS = (() => {
     const colors = [
       'var(--accent)', 
       'var(--info)', 
@@ -94,7 +93,11 @@ function ConfettiParticles() {
       duration: Math.random() * 0.6 + 1.2,
       delay: Math.random() * 0.15,
     }));
-  }, []);
+  })();
+
+function ConfettiParticles() {
+  const confettiItems = CONFETTI_ITEMS;
+
 
   return (
     <div className="absolute inset-0 pointer-events-none z-30 overflow-hidden">

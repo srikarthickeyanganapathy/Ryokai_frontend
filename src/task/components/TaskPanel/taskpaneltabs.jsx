@@ -1,5 +1,4 @@
 import React from 'react'
-import { motion } from 'framer-motion'
 import { cn } from '@/shared/lib/cn'
 
 const TABS = [
@@ -11,45 +10,35 @@ const TABS = [
 
 export function TaskPanelTabs({ activeTab, onChange, counts }) {
   return (
-    <div className="flex items-center border-b border-[var(--color-border-subtle)] bg-[var(--bg-subtle)]/30">
+    <div className="flex items-center bg-[var(--bg-subtle)] rounded-md p-0.5 border border-[var(--border-subtle)]">
       {TABS.map(tab => {
         const isActive = activeTab === tab.id
         const count = counts?.[tab.id]
         return (
-          <motion.button
+          <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.97 }}
             className={cn(
-              'relative flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-medium whitespace-nowrap transition-colors',
+              'flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-sm transition-colors',
               isActive
-                ? 'text-[var(--text-primary)]'
+                ? 'bg-[var(--bg-card)] shadow-sm text-[var(--text-primary)]'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             )}
           >
             {tab.label}
             {typeof count === 'number' && count > 0 && (
-              <motion.span
-                animate={{ scale: isActive ? 1 : 0.95 }}
+              <span
                 className={cn(
-                  'text-[10px] px-1.5 py-0 rounded-full tabular-nums font-semibold',
+                  'text-[9px] px-1.5 py-0 rounded-full tabular-nums font-semibold',
                   isActive
                     ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
                     : 'bg-[var(--bg-subtle)] text-[var(--text-muted)]'
                 )}
               >
                 {count}
-              </motion.span>
+              </span>
             )}
-            {isActive && (
-              <motion.div
-                layoutId="task-panel-tab-indicator"
-                className="absolute bottom-0 left-2 right-2 h-0.5 bg-[var(--accent)] rounded-full"
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              />
-            )}
-          </motion.button>
+          </button>
         )
       })}
     </div>
