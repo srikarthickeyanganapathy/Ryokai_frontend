@@ -8,7 +8,7 @@ export function DailyBriefWidget({ context }) {
   const { dailyBrief } = context;
 
   const stats = [
-    { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-500/10', label: 'Focus Tasks', value: dailyBrief.focusTasksCount },
+    { icon: CheckCircle, color: 'text-[var(--success)]', bg: 'bg-[var(--success-soft)]', label: 'Focus Tasks', value: dailyBrief.focusTasksCount },
     { icon: Clock, color: 'text-amber-500', bg: 'bg-amber-500/10', label: 'Reminders', value: dailyBrief.remindersCount },
     { icon: Calendar, color: 'text-blue-500', bg: 'bg-blue-500/10', label: 'Meetings', value: dailyBrief.meetingsCount },
   ];

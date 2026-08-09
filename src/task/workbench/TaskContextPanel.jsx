@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useRef, useState, useEffect } from 'react'
+import React, { useCallback, useRef, useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { TaskPanel } from '../components/TaskPanel/TaskPanel'
 import { Icons } from '@/shared/ui/Icons'
@@ -10,7 +10,7 @@ import { Button } from '@/shared/ui/Button'
  * Thin wrapper around the canonical TaskPanel.
  *
  * CRITICAL: TaskPanel.jsx already handles its own animation via motion.aside.
- * We do NOT wrap it with another AnimatePresence/motion â€” that causes double-animation glitches.
+ * We do NOT wrap it with another AnimatePresence/motion — that causes double-animation glitches.
  *
  * This component adds:
  *   - Desktop: resize handle (3px draggable left edge)
@@ -106,7 +106,7 @@ export function TaskContextPanel({
 
   return (
     <div className="flex shrink-0 h-full">
-      {/* Resize handle â€” user drags left to resize */}
+      {/* Resize handle — user drags left to resize */}
       <div
         onMouseDown={handleDragStart}
         className="w-[3px] shrink-0 cursor-col-resize hover:bg-[var(--accent)]/30 transition-colors z-10"

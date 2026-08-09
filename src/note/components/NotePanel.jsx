@@ -27,7 +27,7 @@ function OutlinePanel({ outline, onJump, onClose }) {
     <div className="border border-[var(--border-subtle)] rounded-lg bg-[var(--bg-subtle)]/40 overflow-hidden shrink-0">
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-[var(--border-subtle)]">
         <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Outline</span>
-        <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer" title="Close outline"><X className="w-3 h-3" /></button>
+        <IconButton variant="ghost" size="sm" onClick={onClose} title="Close outline"><X className="w-3 h-3" /></IconButton>
       </div>
       <div className="p-1.5 max-h-32 overflow-y-auto custom-scrollbar space-y-0.5">
         {outline.map((item, i) => (
@@ -88,14 +88,17 @@ function TagsEditor({ tags, onChange }) {
           >
             <Tag className="w-2.5 h-2.5" />
             {tag}
-            <button
+            <IconButton
+              variant="ghost"
+              size="sm"
               type="button"
               onClick={(e) => { e.stopPropagation(); removeTag(tag) }}
-              className="ml-0.5 opacity-60 group-hover:opacity-100 transition-opacity cursor-pointer"
+              className="ml-0.5 opacity-60 group-hover:opacity-100"
               title="Remove tag"
+              aria-label="Remove tag"
             >
               <X className="w-2.5 h-2.5" />
-            </button>
+            </IconButton>
           </span>
         ))}
         <input
@@ -258,6 +261,13 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
     }
   }, [isNew, createNote, updateNote, formData, note, onClose])
 
+  const handleClose = useCallback(() => {
+    if (isDirty && saveState !== 'saved') {
+      if (!window.confirm('You have unsaved changes. Close anyway?')) return
+    }
+    onClose()
+  }, [isDirty, saveState, onClose])
+
   const handleDelete = useCallback(async () => {
     const confirmed = await confirm({
       title: 'Delete Note',
@@ -278,11 +288,13 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
     if (!isOpen) return
     const onKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); handleSave() }
-      else if (e.key === 'Escape' && !document.querySelector('[role="dialog"]')) { onClose() }
+      else if (e.key === 'Escape' && !document.querySelector('[role="dialog"]')) {
+        handleClose()
+      }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [isOpen, handleSave, onClose])
+  }, [isOpen, handleSave, handleClose])
 
   if (!isOpen) return null
 
@@ -318,7 +330,7 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-50 flex justify-end">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={handleClose} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <motion.div
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 280 }}
@@ -343,14 +355,14 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
                   <IconButton variant="ghost" size="sm" title={zen ? 'Exit focus mode' : 'Focus mode (zen)'} onClick={() => { const next = !zen; setZen(next); if (next) setActiveTab('write') }} className={cn(zen && 'text-[var(--accent)] bg-[var(--accent-soft)]')}>
                     {zen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                   </IconButton>
-                  <IconButton variant="ghost" size="sm" title="Close" onClick={onClose}><X className="w-4 h-4" /></IconButton>
+                  <IconButton variant="ghost" size="sm" title="Close" onClick={handleClose}><X className="w-4 h-4" /></IconButton>
                 </div>
               </div>
 
               <div className="flex-1 p-6 flex flex-col space-y-5 overflow-hidden min-h-0">
                 <div className="space-y-1">
-                  <Label className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Note Title</Label>
-                  <input type="text" placeholder="Enter note title..." value={formData.title} onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))} className="w-full bg-transparent text-[18px] font-bold tracking-tight text-[var(--text-primary)] placeholder:text-[var(--text-muted)] border-b border-transparent hover:border-[var(--border-subtle)] focus:border-[var(--accent)] focus:outline-none py-1 transition-colors" />
+                  <Label htmlFor="note-title" className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Note Title</Label>
+                  <input id="note-title" type="text" placeholder="Enter note title..." value={formData.title} onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))} className="w-full bg-transparent text-[18px] font-bold tracking-tight text-[var(--text-primary)] placeholder:text-[var(--text-muted)] border-b border-transparent hover:border-[var(--border-subtle)] focus:border-[var(--accent)] focus:outline-none py-1 transition-colors" />
                 </div>
 
                 {!zen && (
@@ -407,7 +419,7 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
                           )}
                         </div>
                       )}
-                      <textarea ref={textareaRef} placeholder="Start typing your note ideas..." value={formData.content} onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))} className={cn('w-full flex-1 p-4 bg-transparent text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none resize-none font-mono leading-relaxed border-none', zen ? 'text-[14px]' : 'text-[12px]')} />
+                      <textarea ref={textareaRef} aria-label="Note content" placeholder="Start typing your note ideas..." value={formData.content} onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))} className={cn('w-full flex-1 p-4 bg-transparent text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none resize-none font-mono leading-relaxed border-none', zen ? 'text-[14px]' : 'text-[12px]')} />
                     </>
                   ) : !zen ? (
                     <div className="flex-1 p-4 overflow-y-auto bg-[var(--bg-card)]"><MarkdownPreviewer content={formData.content} /></div>
@@ -464,7 +476,7 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <Button variant="outline" onClick={onClose} className="text-[12px] h-8">Cancel</Button>
+                  <Button variant="outline" onClick={handleClose} className="text-[12px] h-8">Cancel</Button>
                   <Button onClick={handleSave} disabled={createNote.isPending || updateNote.isPending} className="gap-1.5 text-[12px] h-8"><Save className="w-3.5 h-3.5" /> {createNote.isPending || updateNote.isPending ? 'Saving…' : isNew ? 'Create Note' : 'Save Changes'}</Button>
                 </div>
               </div>

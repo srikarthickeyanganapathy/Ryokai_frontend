@@ -82,7 +82,7 @@ export function SessionsPage() {
                               {session.deviceInfo || 'Unknown Device'}
                             </Heading>
                             {session.current ? (
-                              <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                              <span className="px-2 py-0.5 rounded-full bg-[var(--success-soft)] text-[var(--success)] border border-[var(--success-border)] font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                 Current Device
                               </span>

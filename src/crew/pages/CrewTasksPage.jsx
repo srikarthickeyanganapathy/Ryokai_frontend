@@ -41,7 +41,7 @@ const StatWidget = ({ icon: Icon, label, value, iconBg, iconColor, alertBorder }
 
 export function CrewTasksPage() {
   const { activeCrew } = useWorkspace()
-  const { data: rawTasks = [], isLoading } = useTaskList(activeCrew?.id ? { crewId: activeCrew.id } : { scope: 'crew' });
+  const { data: { tasks: rawTasks = [] } = {}, isLoading } = useTaskList(activeCrew?.id ? { crewId: activeCrew.id } : { scope: 'crew' });
   
   // Backend scopes to the crew including tasks of shared/owned projects,
   // so pass through as-is (no client-side crewId filter that would drop them).
@@ -189,6 +189,7 @@ export function CrewTasksPage() {
                 isLoading={isLoading} 
                 rowSelection={rowSelection}
                 setRowSelection={setRowSelection}
+                getRowId={(row) => String(row.id)}
                 onTaskClick={setSelectedTask}
                 onQuickComplete={handleQuickComplete}
                 onQuickDelete={handleQuickDelete}

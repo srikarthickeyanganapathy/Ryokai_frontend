@@ -340,4 +340,7 @@ export const Icons = {
   userX: UserX,
   award: Award,
   cornerDownRight: CornerDownRight,
+  send: Send,
+  rotateCcw: RotateCcw,
+  
 }

@@ -89,6 +89,7 @@ export function AppTopbar({ onMenuClick }) {
           variant="ghost"
           className="lg:hidden"
           onClick={onMenuClick}
+          aria-label="Open navigation menu"
         >
           <Icons.menu className="w-5 h-5 text-[var(--text-secondary)]" />
         </IconButton>
@@ -112,28 +113,29 @@ export function AppTopbar({ onMenuClick }) {
               variant="ghost"
               className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               title="Quick Actions"
+              aria-label="Quick actions"
             >
               <Icons.plus className="w-5 h-5" />
             </IconButton>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-48 bg-[var(--bg-elevated)]/95 backdrop-blur-xl border-[var(--color-border-subtle)] rounded-2xl p-2 shadow-xl flex flex-col">
-            <button onClick={() => navigate('/app/tasks')} className="flex items-center gap-2.5 rounded-xl cursor-pointer p-2 hover:bg-[var(--bg-hover)] text-sm text-left">
+            <Button variant="ghost" size="sm" className="w-full justify-start rounded-xl" onClick={() => navigate('/app/tasks')}>
               <Icons.listTodo className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Create Task</span>
-            </button>
-            <button onClick={() => navigate('/app/projects')} className="flex items-center gap-2.5 rounded-xl cursor-pointer p-2 hover:bg-[var(--bg-hover)] text-sm text-left">
+            </Button>
+            <Button variant="ghost" size="sm" className="w-full justify-start rounded-xl" onClick={() => navigate('/app/projects')}>
               <Icons.folderClosed className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Create Project</span>
-            </button>
-            <button onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true, bubbles: true }))} className="flex items-center gap-2.5 rounded-xl cursor-pointer p-2 hover:bg-[var(--bg-hover)] text-sm text-left">
+            </Button>
+            <Button variant="ghost" size="sm" className="w-full justify-start rounded-xl" onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true, bubbles: true }))}>
               <Icons.pencil className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Capture Idea</span>
-            </button>
+            </Button>
             <Separator className="my-1 bg-[var(--color-border-subtle)]" />
-            <button onClick={() => navigate('/app/organizations')} className="flex items-center gap-2.5 rounded-xl cursor-pointer p-2 hover:bg-[var(--bg-hover)] text-sm text-left">
+            <Button variant="ghost" size="sm" className="w-full justify-start rounded-xl" onClick={() => navigate('/app/organizations')}>
               <Icons.userPlus className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Invite User</span>
-            </button>
+            </Button>
           </PopoverContent>
         </Popover>
 
@@ -143,6 +145,7 @@ export function AppTopbar({ onMenuClick }) {
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
           title="Toggle theme"
+          aria-label="Toggle theme"
         >
           {theme === 'dark' ? <Icons.sun className="w-5 h-5" /> : <Icons.moon className="w-5 h-5" />}
         </IconButton>
@@ -154,6 +157,8 @@ export function AppTopbar({ onMenuClick }) {
               <IconButton
                 variant="ghost"
                 className="relative text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              title="Notifications"
+              aria-label="Notifications"
               >
                 <Icons.bell className="w-5 h-5" />
                 {unread > 0 && (
@@ -169,13 +174,15 @@ export function AppTopbar({ onMenuClick }) {
             <div className="flex items-center justify-between px-3 py-2.5 border-b border-[var(--color-border-subtle)]">
               <Heading level={4} className="text-[13px]">Notifications</Heading>
               {unread > 0 && (
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[11px]"
                   onClick={() => markAllRead.mutate()}
-                  disabled={markAllRead.isPending}
-                  className="text-[11px] font-medium text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
+                  isLoading={markAllRead.isPending}
                 >
                   Mark all read
-                </button>
+                </Button>
               )}
             </div>
 
@@ -228,15 +235,19 @@ export function AppTopbar({ onMenuClick }) {
                         <Text className="text-sm font-medium leading-snug line-clamp-2">
                           {n.title}
                         </Text>
-                        <button
+                        <IconButton
+                          variant="ghost"
+                          size="sm"
+                          className="opacity-0 group-hover:opacity-100 shrink-0 transition-all"
+                          title="Dismiss"
+                          aria-label="Dismiss notification"
                           onClick={(e) => {
                             e.stopPropagation()
                             deleteNotification.mutate(n.id)
                           }}
-                          className="opacity-0 group-hover:opacity-100 p-0.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] shrink-0 transition-all"
                         >
                           <Icons.x className="w-3.5 h-3.5" />
-                        </button>
+                        </IconButton>
                       </div>
                       {n.message && (
                         <Text variant="muted" size="xs" className="line-clamp-1 mt-0.5">

@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import * as taskApi from '../api/task.api';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { toast } from 'sonner';
-import { useAuth } from '@/identity';
+import { useAuth, usePermissions } from '@/identity';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
+import { toBackendStatus } from '@/shared/lib/status';
 
 /**
  * Workspace isolation: derive the server-side scope from the active workspace.
@@ -22,11 +23,18 @@ function useWorkspaceScope() {
 
 export const useTaskList = (filters) => {
   const wsScope = useWorkspaceScope();
-  const effectiveFilters = { ...wsScope, ...(filters || {}) };
+  const { page = 0, size = 50, sort, ...restFilters } = filters || {};
+  const effectiveFilters = { ...wsScope, ...restFilters, page, size, ...(sort ? { sort } : {}) };
   return useQuery({
     queryKey: [...queryKeys.tasks.list(effectiveFilters)],
     queryFn: () => taskApi.getTasks(effectiveFilters),
-    select: (data) => data?.content || data || [],
+    select: (data) => ({
+      tasks: data?.content || (Array.isArray(data) ? data : []),
+      totalCount: data?.totalCount ?? data?.totalElements ?? (Array.isArray(data) ? data.length : 0),
+      totalPages: data?.totalPages ?? 0,
+      page: data?.page ?? effectiveFilters.page,
+      size: data?.size ?? effectiveFilters.size,
+    }),
   });
 };
 
@@ -36,7 +44,11 @@ export const useTaskSearch = (searchQuery) => {
   return useQuery({
     queryKey: [...queryKeys.tasks.list(effectiveFilters)],
     queryFn: () => taskApi.getTasks(effectiveFilters),
-    select: (data) => data?.content || data || [],
+    select: (data) => ({
+      tasks: data?.content || (Array.isArray(data) ? data : []),
+      totalCount: data?.totalCount ?? data?.totalElements ?? (Array.isArray(data) ? data.length : 0),
+      totalPages: data?.totalPages ?? 0,
+    }),
     enabled: !!searchQuery,
   });
 };
@@ -85,6 +97,10 @@ export const useCreateTask = () => {
       } else if (workspaceMode === 'CREWS') {
         const crewId = payload.crewId || activeCrew?.id || null; 
         taskPayload.crewId = crewId;
+        // FIX: crew tasks are claim-based — the backend maps a provided
+        // assigneeUsername to IN_PROGRESS (claimed). Never auto-assign the
+        // creator; crew tasks must start unclaimed (TODO) so members can claim.
+        delete taskPayload.assigneeUsername;
         return await taskApi.createCrewTask(taskPayload);
       } else {
         taskPayload.isPersonal = false;
@@ -436,6 +452,90 @@ export const useUpdateTask = () => {
       }
     },
   });
+};
+
+/**
+ * Shared status-transition router for kanban boards (projects / teams).
+ *
+ * The backend has NO `status` field on PUT /tasks/{id} — status changes MUST go
+ * through the dedicated state-transition endpoints (submit / approve / reject /
+ * recall / complete / complete-crew / claim). This hook routes a board drop to
+ * the correct mutation and enforces the same permission rules as the backend
+ * @PreAuthorize guards, so the UI fails closed instead of firing 403s.
+ *
+ * targetStatus accepts backend enums or board aliases:
+ *   'SUBMITTED' | 'IN_REVIEW'          -> submit for review
+ *   'APPROVED' | 'COMPLETED' | 'DONE'  -> complete (personal/crew) / approve (org)
+ *   'IN_PROGRESS' | 'TODO' | 'TO_DO'   -> recall (from review) or no-op
+ *   'REJECTED'                         -> rejected on boards (needs reason + reassign)
+ *
+ * Returns true when a mutation was fired, false when the move was rejected
+ * (a toast explains why).
+ */
+export const useTaskStatusChange = () => {
+  const { user } = useAuth();
+  const { workspaceMode } = useWorkspace();
+  const { canReview, canEditTask, isSuperAdmin } = usePermissions();
+
+  const submitMutation = useSubmitTask();
+  const approveMutation = useApproveTask();
+  const recallMutation = useRecallTask();
+  const completePersonalMutation = useCompletePersonalTask();
+  const completeCrewMutation = useCompleteCrewTask();
+
+  return useCallback((task, targetStatus) => {
+    if (!task?.id) return false;
+
+    const current = toBackendStatus(task.currentStatus || task.status);
+    const target = String(targetStatus || '').toUpperCase();
+
+    const isPersonalTask = workspaceMode === 'PERSONAL' || !!task.isPersonal;
+    const isCrewTask = !!(task.crewId || task.crew);
+    const isTerminal = current === 'COMPLETED' || current === 'APPROVED';
+
+    const doneTarget = target === 'DONE' || target === 'COMPLETED' || target === 'APPROVED';
+    const reviewTarget = target === 'SUBMITTED' || target === 'IN_REVIEW' || target === 'REVIEW';
+    const progressTarget = target === 'IN_PROGRESS' || target === 'TODO' || target === 'TO_DO' || target === 'ASSIGNED';
+
+    const assigneeName = typeof task.assignee === 'object' ? task.assignee?.username : (task.assignee || task.assignedTo);
+    const isAssignee = assigneeName === user?.username || (typeof task.assignee === 'object' && task.assignee?.id === user?.id);
+
+    if (doneTarget) {
+      if (isTerminal) { toast.info('Task is already completed'); return false; }
+      if (isPersonalTask) { completePersonalMutation.mutate(task.id); return true; }
+      if (isCrewTask) {
+        if (current === 'TODO' || current === 'IN_PROGRESS') { completeCrewMutation.mutate(task.id); return true; }
+        toast.error('Crew tasks can only be completed when claimed (In Progress)'); return false;
+      }
+      if (current !== 'SUBMITTED') { toast.error('Only tasks In Review can be approved'); return false; }
+      if (!canReview) { toast.error('You do not have permission to approve tasks'); return false; }
+      if (assigneeName && assigneeName === user?.username) { toast.error('You cannot approve your own task'); return false; }
+      approveMutation.mutate(task.id); return true;
+    }
+
+    if (reviewTarget) {
+      if (current === 'SUBMITTED') { toast.info('Task is already In Review'); return false; }
+      if (isPersonalTask) { toast.error('Personal tasks have no review step'); return false; }
+      if (isCrewTask) { toast.error('Crew tasks skip review — move to Done to complete'); return false; }
+      if (current !== 'TODO' && current !== 'IN_PROGRESS') { toast.error('Only To Do / In Progress tasks can be submitted for review'); return false; }
+      if (!isAssignee && !isSuperAdmin && !canEditTask) { toast.error('Only the assignee can submit a task for review'); return false; }
+      submitMutation.mutate(task.id); return true;
+    }
+
+    if (progressTarget) {
+      if (current === 'SUBMITTED') {
+        if (!isAssignee && !isSuperAdmin) { toast.error('Only the assignee can recall a submitted task'); return false; }
+        recallMutation.mutate(task.id); return true;
+      }
+      if (current === 'REJECTED') { toast.error('Rejected tasks must be reassigned first'); return false; }
+      if (isTerminal) { toast.error('Completed tasks cannot be reopened'); return false; }
+      toast.info('Task is already in progress'); return false;
+    }
+
+    toast.error('Unsupported status change');
+    return false;
+  }, [workspaceMode, user, canReview, canEditTask, isSuperAdmin,
+    submitMutation, approveMutation, recallMutation, completePersonalMutation, completeCrewMutation]);
 };
 
 export const useDeleteTask = () => {

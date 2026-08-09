@@ -9,13 +9,7 @@ import { InlineEditable } from '@/shared/ui/InlineEditable'
 import { cn } from '@/shared/lib/cn'
 import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
 
-const STATUS_INDICATORS = {
-  'To Do':      <div className="w-2.5 h-2.5 rounded-full border-2 border-[var(--text-tertiary)]" />,
-  'In Progress':<div className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.3)]" />,
-  'In Review':  <div className="w-2.5 h-2.5 rounded-full border-2 border-purple-400 animate-pulse" />,
-  'Done':       <Icons.check className="w-4 h-4 text-emerald-500" />,
-  'Needs Work': <Icons.alert className="w-4 h-4 text-[var(--danger)]" />,
-}
+import { StatusBadge } from '@/shared/ui/StatusBadge'
 
 function DueBadge({ dueDate }) {
   if (!dueDate) return <span className="text-[var(--text-muted)] text-xs">—</span>
@@ -47,6 +41,7 @@ export function TasksTable({
   isLoading,
   rowSelection,
   setRowSelection,
+  getRowId,
   onTaskClick,
   onQuickComplete,
   onQuickDelete,
@@ -94,7 +89,7 @@ export function TasksTable({
         return (
           <div className="flex items-center gap-3">
             <div className="shrink-0">
-              {STATUS_INDICATORS[task.status] || STATUS_INDICATORS['To Do']}
+              <StatusBadge status={task.status} showIcon={false} />
             </div>
             <div className="min-w-0">
               <InlineEditable
@@ -173,6 +168,7 @@ export function TasksTable({
         emptyStateNode={emptyState}
         rowSelection={rowSelection}
         setRowSelection={setRowSelection}
+        getRowId={getRowId}
         onRowClick={onTaskClick}
       />
     </>

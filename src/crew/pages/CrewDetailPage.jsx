@@ -11,7 +11,6 @@ import { ProjectsTab } from './CrewDetailTabs/ProjectsTab';
 import { MembersTab } from './CrewDetailTabs/MembersTab';
 import { WhiteboardsTab } from './CrewDetailTabs/WhiteboardsTab';
 import { OverviewTab } from './CrewDetailTabs/OverviewTab';
-import { CrewHeader } from '../components/CrewHeader';
 import { CrewTabs } from '../components/CrewTabs';
 import { useTaskList } from '@/task';
 import { useProjects } from '@/project';
@@ -112,7 +111,7 @@ export function CrewDetailPage() {
   const { data: crew, isLoading: isCrewLoading } = useCrew(crewId);
   const { data: members = [] } = useCrewMembers(crewId);
 
-  const { data: rawCrewTasks = [] } = useTaskList({ crewId });
+  const { data: { tasks: rawCrewTasks = [] } = {} } = useTaskList({ crewId });
 
   const isCreator = useMemo(() => {
     if (!crew) return false;
@@ -379,9 +378,13 @@ export function CrewDetailPage() {
               </div>
             </div>
 
-            {/* Tabs */}
+            {/* Tabs — centered nav (same bar as team, but the tab row is centered in the page) */}
             <div className="max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8">
-              <CrewTabs activeTab={activeTab} setActiveTab={setActiveTab} tabCounts={tabCounts} sticky={false} />
+              <div className="flex justify-center">
+                <div className="max-w-full">
+                  <CrewTabs activeTab={activeTab} setActiveTab={setActiveTab} tabCounts={tabCounts} sticky={false} />
+                </div>
+              </div>
             </div>
 
             {/* Content Area (with optional activity sidebar) */}
@@ -398,35 +401,18 @@ export function CrewDetailPage() {
                       transition={{ duration: 0.15, ease: 'easeOut' }}
                     >
                       {activeTab === 'overview' && (
-                        <>
-                          <div className="pt-4">
-                            <CrewHeader
-                              crew={crew}
-                              members={members}
-                              sharedProjects={sharedProjects}
-                              crewTasks={crewTasks}
-                              channels={channels}
-                              completionRate={completionRate}
-                              isCreator={isCreator}
-                              onLeave={handleLeaveCrew}
-                              onOpenChat={() => setActiveTab('channels')}
-                              onOpenTasks={() => setActiveTab('tasks')}
-                              onNewBoard={() => setActiveTab('whiteboards')}
-                            />
-                          </div>
-                          <div className="pt-4">
-                            <OverviewTab
-                              crew={crew}
-                              members={members}
-                              sharedProjects={sharedProjects}
-                              crewTasks={crewTasks}
-                              channels={channels}
-                              completionRate={completionRate}
-                              setActiveTab={setActiveTab}
-                              isCreator={isCreator}
-                            />
-                          </div>
-                        </>
+                        <div className="pt-4">
+                          <OverviewTab
+                            crew={crew}
+                            members={members}
+                            sharedProjects={sharedProjects}
+                            crewTasks={crewTasks}
+                            channels={channels}
+                            completionRate={completionRate}
+                            setActiveTab={setActiveTab}
+                            isCreator={isCreator}
+                          />
+                        </div>
                       )}
                       {activeTab === 'tasks' && (
                         <div className="pt-4">
@@ -440,7 +426,7 @@ export function CrewDetailPage() {
                       )}
                       {activeTab === 'projects' && (
                         <div className="pt-4">
-                          <ProjectsTab crewId={crewId} sharedProjects={sharedProjects} allProjects={allProjects} />
+                          <ProjectsTab crewId={crewId} sharedProjects={sharedProjects} allProjects={allProjects} isCreator={isCreator} />
                         </div>
                       )}
                       {activeTab === 'whiteboards' && (

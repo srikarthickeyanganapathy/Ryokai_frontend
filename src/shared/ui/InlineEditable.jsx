@@ -34,13 +34,6 @@ export function InlineEditable({
   const [editValue, setEditValue] = useState(value);
   const inputRef = useRef(null);
 
-  // Sync external value changes when NOT editing
-  useEffect(() => {
-    if (!isEditing) {
-      setEditValue(value);
-    }
-  }, [value, isEditing]);
-
   // Auto-focus input on edit
   useEffect(() => {
     if (isEditing && inputRef.current) {

@@ -42,6 +42,7 @@ function SidebarNavItem({ to, icon, label, isExpanded, end = false, badge, onCli
       end={end}
       onClick={onClick}
       title={!isExpanded ? label : undefined}
+      aria-label={label}
       className={({ isActive }) => cn(
         "relative flex items-center transition-all duration-150 group shrink-0 rounded-lg",
         isExpanded ? "w-full h-9 px-2.5 justify-start" : "justify-center w-10 h-10",

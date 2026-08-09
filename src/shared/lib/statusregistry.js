@@ -69,6 +69,24 @@ export const STATUS_REGISTRY = {
         description: 'Actively being worked on',
         productSemantic: 'taskActive',
     },
+    IN_REVIEW: {
+        icon: Clock, iconStroke: 1.5,
+        color: 'warning', colorClass: 'bg-[var(--warning-soft)] text-[var(--warning)] border-transparent',
+        motion: MOTION.IMPORTANT,
+        tone: 'warning',
+        ariaLabel: 'Task in review',
+        description: 'Awaiting reviewer approval',
+        productSemantic: 'reviewPending',
+    },
+    OPEN: {
+        icon: Circle, iconStroke: 1.5,
+        color: 'neutral', colorClass: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)]',
+        motion: MOTION.STANDARD,
+        tone: 'neutral',
+        ariaLabel: 'Open task',
+        description: 'Work not yet started',
+        productSemantic: 'taskDraft',
+    },
     SUBMITTED: {
         icon: Clock, iconStroke: 1.5,
         color: 'warning', colorClass: 'bg-[var(--warning-soft)] text-[var(--warning)] border-transparent',
@@ -140,6 +158,26 @@ export const STATUS_REGISTRY = {
         ariaLabel: 'Task archived',
         description: 'Stored for reference',
         productSemantic: 'taskDraft',
+    },
+    
+    // ── Leave/Exit Request States ──
+    OFFBOARDING: {
+        icon: Shield, iconStroke: 2,
+        color: 'warning', colorClass: 'bg-[var(--warning-soft)] text-[var(--warning)] border-transparent',
+        motion: MOTION.IMPORTANT,
+        tone: 'warning',
+        ariaLabel: 'Offboarding in progress',
+        description: 'Offboarding in progress',
+        productSemantic: null,
+    },
+    PENDING: {
+        icon: Circle, iconStroke: 1.5,
+        color: 'neutral', colorClass: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)]',
+        motion: MOTION.STANDARD,
+        tone: 'neutral',
+        ariaLabel: 'Pending request',
+        description: 'Pending',
+        productSemantic: null,
     },
 
     // ── Priority Levels ──

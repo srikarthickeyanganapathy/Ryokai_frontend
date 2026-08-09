@@ -37,7 +37,7 @@ export const useCrew = (crewId) => {
     queryKey: queryKeys.crews.detail(crewId),
     queryFn: () => crewApi.getCrew(crewId),
     enabled: !!crewId,
-    refetchInterval: 5000,
+    refetchInterval: 30000,
   });
 };
 
@@ -92,7 +92,7 @@ export const useCrewMembers = (crewId) => {
     queryKey: queryKeys.crews.members(crewId),
     queryFn: () => crewApi.getCrewMembers(crewId),
     enabled: !!crewId,
-    refetchInterval: 5000,
+    refetchInterval: 30000,
   });
 };
 
@@ -265,7 +265,7 @@ export const useChannelMessages = (crewId, channelId) => {
     queryKey: queryKeys.crews.messages(crewId, channelId),
     queryFn: () => crewApi.getChannelMessages(crewId, channelId),
     enabled: !!crewId && !!channelId,
-    refetchInterval: 5000, // simple polling fallback to STOMP/WS for instant messages
+    refetchInterval: 30000, // polling only — STOMP topic not yet available
   });
 };
 

@@ -7,10 +7,10 @@ import { cn } from '@/shared/lib/cn';
 import { Text } from '@/shared/ui/Typography';
 
 const PRIORITY_CONFIG = {
-  CRITICAL: { border: 'border-l-red-500', bg: 'bg-red-500/10', text: 'text-red-500', label: 'Critical' },
-  HIGH: { border: 'border-l-orange-500', bg: 'bg-orange-500/10', text: 'text-orange-500', label: 'High' },
-  MEDIUM: { border: 'border-l-blue-500', bg: 'bg-blue-500/10', text: 'text-blue-500', label: 'Medium' },
-  LOW: { border: 'border-l-gray-500', bg: 'bg-gray-500/10', text: 'text-gray-500', label: 'Low' },
+  CRITICAL: { border: 'border-l-[var(--danger)]', bg: 'bg-[var(--danger-soft)]', text: 'text-[var(--danger)]', label: 'Critical' },
+  HIGH: { border: 'border-l-[var(--warning)]', bg: 'bg-[var(--warning-soft)]', text: 'text-[var(--warning)]', label: 'High' },
+  MEDIUM: { border: 'border-l-[var(--accent)]', bg: 'bg-[var(--accent-soft)]', text: 'text-[var(--accent)]', label: 'Medium' },
+  LOW: { border: 'border-l-[var(--text-muted)]', bg: 'bg-[var(--bg-subtle)]', text: 'text-[var(--text-muted)]', label: 'Low' },
 };
 
 export function AnnouncementCard({ announcement, onRead, onOpen, onPin, onDelete, canManage, isPinned, index = 0 }) {
@@ -46,7 +46,7 @@ export function AnnouncementCard({ announcement, onRead, onOpen, onPin, onDelete
           </button>
         )}
         {canManage && (
-          <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="p-1.5 hover:bg-[var(--bg-hover)] rounded text-[var(--text-secondary)] hover:text-red-500" title="Delete">
+          <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="p-1.5 hover:bg-[var(--bg-hover)] rounded text-[var(--text-secondary)] hover:text-[var(--danger)]" title="Delete">
             <Icons.trash2 className="w-3.5 h-3.5" />
           </button>
         )}

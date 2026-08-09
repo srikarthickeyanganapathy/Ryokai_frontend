@@ -13,8 +13,7 @@
  */
 
 // ── Shell ─────────────────────────────────────────────────
-export { WorkspaceShell } from './shell/WorkspaceShell'
-export { useWorkspace } from '@/app/providers/WorkspaceProvider'
+// WorkspaceShell has been superseded by PageShell in shared/ui/PageShell.jsx
 
 // ── Layout Archetypes ─────────────────────────────────────
 export { CommandLayout } from './layouts/CommandLayout'

@@ -1,8 +1,8 @@
-﻿import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
-import { Button } from '@/shared/ui/Button'
+import { Button, IconButton } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'
 import { Checkbox } from '@/shared/ui/Checkbox'
 import { Progress } from '@/shared/ui/Progress'
@@ -28,17 +28,10 @@ import { toast } from 'sonner'
 import { SaveToggle } from '@/library/saved/features/components/SaveToggle'
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
 import { toBackendStatus } from '@/shared/lib/status'
+import { resolveStatus } from '@/shared/lib/statusregistry'
+import { StatusBadge } from '@/shared/ui/StatusBadge'
 
-/* â”€â”€â”€ Status accent map â”€â”€â”€ */
-const STATUS_STYLE = {
-  TODO:       { bg: 'bg-sky-500/10', text: 'text-sky-500', border: 'border-sky-500/20', dot: 'bg-sky-400' },
-  IN_PROGRESS:{ bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/20', dot: 'bg-amber-400' },
-  SUBMITTED:  { bg: 'bg-purple-500/10', text: 'text-purple-500', border: 'border-purple-500/20', dot: 'bg-purple-400' },
-  APPROVED:   { bg: 'bg-emerald-500/10', text: 'text-emerald-500', border: 'border-emerald-500/20', dot: 'bg-emerald-400' },
-  COMPLETED:  { bg: 'bg-emerald-500/10', text: 'text-emerald-500', border: 'border-emerald-500/20', dot: 'bg-emerald-400' },
-  DONE:       { bg: 'bg-emerald-500/10', text: 'text-emerald-500', border: 'border-emerald-500/20', dot: 'bg-emerald-400' },
-  REJECTED:   { bg: 'bg-red-500/10', text: 'text-red-500', border: 'border-red-500/20', dot: 'bg-red-400' },
-}
+/* Status colors handled by StatusBadge component via statusregistry */
 
 const TABS = [
   { id: 'details', label: 'Details' },
@@ -132,7 +125,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   const completeCrewTaskMutation = useCompleteCrewTask()
 
   const currentStatus = toBackendStatus(task?.currentStatus || task?.status)
-  const st = STATUS_STYLE[currentStatus] || STATUS_STYLE.TODO
+  const st = resolveStatus(currentStatus)
 
   /* â”€â”€ State machine action buttons â”€â”€ */
   const renderStateActions = (size = "sm") => {
@@ -283,10 +276,9 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
             {/* â”€â”€ Header â”€â”€ */}
             <div className="flex items-center justify-between px-5 py-3.5 shrink-0 border-b border-[var(--border-subtle)]">
               <div className="flex items-center gap-2.5">
-                <button onClick={onClose}
-                  className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-colors">
+                <IconButton variant="ghost" size="sm" onClick={onClose} title="Back" aria-label="Go back">
                   <Icons.chevronLeft className="w-4 h-4" />
-                </button>
+                </IconButton>
                 <Badge variant="outline" className="font-mono text-[10px] font-semibold text-[var(--text-muted)] border-[var(--border-subtle)] bg-[var(--bg-subtle)] rounded-lg px-2 py-0.5">
                   #{task.id}
                 </Badge>
@@ -296,33 +288,29 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                 <SaveToggle entityType={ENTITY_TYPES.TASK} entityId={task.id} className="mr-1" />
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-colors">
+                    <IconButton variant="ghost" size="sm" title="More actions" aria-label="More actions">
                       <Icons.moreHorizontal className="w-4 h-4" />
-                    </button>
+                    </IconButton>
                   </PopoverTrigger>
                   <PopoverContent align="end" className="w-44 p-1.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-[var(--shadow-lg)] rounded-lg">
-                    <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/app/tasks?task=${task.id}`); toast.success('Link copied') }}
-                      className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)] transition-colors text-left">
+                    <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/app/tasks?openTaskId=${task.id}`); toast.success('Link copied') }}>
                       <Icons.link className="w-3.5 h-3.5" /> Copy Link
-                    </button>
+                    </Button>
                     {hasArchivePerm && (
-                      <button onClick={handleArchive}
-                        className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)] transition-colors text-left">
+                      <Button variant="ghost" size="sm" className="w-full justify-start" onClick={handleArchive}>
                         <Icons.archive className="w-3.5 h-3.5" /> Archive
-                      </button>
+                      </Button>
                     )}
                     {hasDeletePerm && (
-                      <button onClick={handleDelete}
-                        className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12px] font-semibold text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors text-left">
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-[var(--danger)]" onClick={handleDelete}>
                         <Icons.trash2 className="w-3.5 h-3.5" /> Delete
-                      </button>
+                      </Button>
                     )}
                   </PopoverContent>
                 </Popover>
-                <button onClick={onClose}
-                  className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-colors">
+                <IconButton variant="ghost" size="sm" onClick={onClose} aria-label="Close task panel">
                   <Icons.x className="w-4 h-4" />
-                </button>
+                </IconButton>
               </div>
             </div>
 
@@ -335,10 +323,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
               </h1>
 
               <div className="flex flex-wrap items-center gap-2">
-                <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wide border', st.bg, st.text, st.border)}>
-                  <div className={cn('w-1.5 h-1.5 rounded-full shadow-sm', st.dot)} />
-                  {task.status === 'Done' || task.status === 'COMPLETED' ? 'Completed' : task.status}
-                </span>
+                <StatusBadge status={currentStatus} variant="pill" />
                 <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wide bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)]">
                   {normalizePriority(task.priority)} Priority
                 </span>
@@ -424,11 +409,9 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                                   </span>
                                   {hasChecklistPerm && (
                                     <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <button onClick={() => handleMoveChecklistItem(index, 'up')} disabled={index === 0}
-                                        className="p-0.5 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] disabled:opacity-20"><Icons.chevronUp className="w-3 h-3" /></button>
-                                      <button onClick={() => handleMoveChecklistItem(index, 'down')} disabled={index === task.checklists.length - 1}
-                                        className="p-0.5 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] disabled:opacity-20"><Icons.chevronDown className="w-3 h-3" /></button>
-                                      <button onClick={() => deleteChecklistItem.mutate(item.id)} className="p-1 rounded text-[var(--text-muted)] hover:text-[var(--danger)]"><Icons.x className="w-3 h-3" /></button>
+                                      <IconButton variant="ghost" size="sm" className="p-0.5" onClick={() => handleMoveChecklistItem(index, 'up')} disabled={index === 0} aria-label="Move checklist item up"><Icons.chevronUp className="w-3 h-3" /></IconButton>
+                                      <IconButton variant="ghost" size="sm" className="p-0.5" onClick={() => handleMoveChecklistItem(index, 'down')} disabled={index === task.checklists.length - 1} aria-label="Move checklist item down"><Icons.chevronDown className="w-3 h-3" /></IconButton>
+                                      <IconButton variant="ghost" size="sm" className="p-1 rounded text-[var(--text-muted)] hover:text-[var(--danger)]" title="Delete checklist item" aria-label="Delete checklist item" onClick={() => deleteChecklistItem.mutate(item.id)}><Icons.x className="w-3 h-3" /></IconButton>
                                     </div>
                                   )}
                                 </div>
@@ -463,9 +446,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                       {/* Status */}
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] text-[var(--text-muted)]">Status</span>
-                        <span className={cn('px-2 py-0.5 rounded-md text-[11px] font-semibold uppercase tracking-wide', st.bg, st.text)}>
-                          {task.status === 'Done' || task.status === 'COMPLETED' ? 'Completed' : task.status}
-                        </span>
+                        <StatusBadge status={currentStatus} />
                       </div>
 
                       {/* Priority */}
@@ -554,7 +535,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
             {/* â”€â”€ Footer â”€â”€ */}
             <div className="px-5 py-3.5 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 backdrop-blur-sm flex items-center justify-between gap-3 shrink-0">
               <span className="text-[11px] text-[var(--text-muted)]">
-                Created {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : 'â€”'}
+                Created {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '—'}
               </span>
               <div className="flex items-center gap-2">
                 {renderStateActions("sm")}

@@ -70,9 +70,9 @@ export function ImmersiveBadge({ children, tone = 'neutral', className }) {
   const tones = {
     neutral: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)]',
     accent: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]/50',
-    success: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-    warning: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-    danger: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
+    success: 'bg-[var(--success-soft)] text-emerald-600 dark:text-emerald-400 border-[var(--success-border)]',
+    warning: 'bg-[var(--warning-soft)] text-amber-600 dark:text-amber-400 border-amber-500/20',
+    danger: 'bg-[var(--danger-soft)] text-red-600 dark:text-red-400 border-[var(--danger-border)]',
   };
 
   return (
@@ -103,17 +103,17 @@ export function ImmersiveMetric({ label, value, icon: Icon, tone = 'default', su
   const tones = {
     default: 'text-[var(--text-primary)]',
     accent: 'text-[var(--accent)]',
-    success: 'text-emerald-500',
-    warning: 'text-amber-500',
-    danger: 'text-red-500',
+    success: 'text-[var(--success)]',
+    warning: 'text-[var(--warning)]',
+    danger: 'text-[var(--danger)]',
   };
 
   const iconBgTones = {
     default: 'bg-[var(--bg-subtle)] text-[var(--text-muted)]',
     accent: 'bg-[var(--accent-soft)] text-[var(--accent)]',
-    success: 'bg-emerald-500/10 text-emerald-500',
-    warning: 'bg-amber-500/10 text-amber-500',
-    danger: 'bg-red-500/10 text-red-500',
+    success: 'bg-[var(--success-soft)] text-[var(--success)]',
+    warning: 'bg-[var(--warning-soft)] text-[var(--warning)]',
+    danger: 'bg-[var(--danger-soft)] text-[var(--danger)]',
   };
 
   return (

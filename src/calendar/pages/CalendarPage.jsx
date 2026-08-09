@@ -11,7 +11,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { Edit3, CalendarDays, Target, Gauge, Zap } from '@/shared/ui/Icons'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { PageShell, PageHero, PageContent, PageStats } from '@/shared/ui/PageShell'
-import { useWorkspace } from '@/shared/workspace-framework'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
 function StatChip({ icon: Icon, label, value, accent }) {
   return (
@@ -40,7 +40,7 @@ export function CalendarPage() {
     return { start: startOfWeek(startOfMonth(now)), end: endOfWeek(endOfMonth(now)) }
   })
 
-  const { data: tasks = [], isLoading: tasksLoading } = useTaskList()
+  const { data: { tasks = [] } = {}, isLoading: tasksLoading } = useTaskList()
   const { data: events = [], isLoading: eventsLoading } = useCalendarEvents(
     visibleRange.start.toISOString(), visibleRange.end.toISOString(), scope
   )

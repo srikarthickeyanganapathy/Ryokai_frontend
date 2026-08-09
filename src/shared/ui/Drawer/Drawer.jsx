@@ -23,8 +23,8 @@ DrawerOverlay.displayName = DialogPrimitive.Overlay.displayName
 
 export const DrawerContent = forwardRef(({ className, children, side = 'right', ...props }, ref) => {
   const sideVariants = {
-    right: 'inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm',
-    left: 'inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm',
+    right: 'inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm max-sm:w-full',
+    left: 'inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm max-sm:w-full',
   }
 
   return (

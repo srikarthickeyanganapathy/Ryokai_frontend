@@ -6,7 +6,7 @@ import { Button } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'
 import { Icons } from '@/shared/ui/Icons'
 import { useTeam, useTeamMessages, useSendTeamMessage, useDeleteTeamMessage, useOrgTeams, useOrgMembers } from '../../features/hooks/useOrganizations'
-import { useTaskList, useReassignTask } from '@/task'
+import { useTaskList, useReassignTask, useTaskStatusChange } from '@/task'
 import { useProjects, useCreateProject } from '@/project'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { ProjectForm } from '@/project'
@@ -121,10 +121,11 @@ export function TeamDetailPage() {
   const sendMessageMutation = useSendTeamMessage(teamId)
   const deleteMessageMutation = useDeleteTeamMessage(teamId)
 
-  const { data: allTasks = [], isLoading: tasksLoading } = useTaskList({ teamId: Number(teamId) })
+  const { data: { tasks: allTasks = [] } = {}, isLoading: tasksLoading } = useTaskList({ teamId: Number(teamId) })
   const { data: allProjects = [], isLoading: projectsLoading } = useProjects()
   const createProjectMutation = useCreateProject()
   const reassignTaskMutation = useReassignTask()
+  const changeTaskStatus = useTaskStatusChange()
   const { data: orgMembers = [] } = useOrgMembers(orgId)
 
   // Sticky header observer
@@ -283,6 +284,20 @@ export function TeamDetailPage() {
         },
       },
     )
+  }
+
+  // Wire the team kanban drop -> shared task status transitions (useTasks only).
+  // Board columns: 'To Do'/'In Progress' -> IN_PROGRESS, 'In Review' -> SUBMITTED, 'Done' -> DONE.
+  // Permission gating lives in useTaskStatusChange (mirrors backend @PreAuthorize rules).
+  const handleUpdateTaskStatus = (taskId, targetStatus) => {
+    if (isReadOnly) return
+    const task = teamTasks.find(t => String(t.id) === String(taskId))
+    if (!task) return
+    const normalized = String(targetStatus || '').toUpperCase().replace(/\s+/g, '_')
+    const mapped = normalized === 'IN_REVIEW' || normalized === 'REVIEW'
+      ? 'SUBMITTED'
+      : (normalized === 'TO_DO' ? 'IN_PROGRESS' : normalized)
+    changeTaskStatus(task, mapped)
   }
 
   const isLoading = teamLoading || tasksLoading || projectsLoading
@@ -472,6 +487,7 @@ export function TeamDetailPage() {
                         assigningTaskId={assigningTaskId}
                         setAssigningTaskId={setAssigningTaskId}
                         handleAssignTask={handleAssignTask}
+                        onUpdateTaskStatus={handleUpdateTaskStatus}
                       />
                     )}
                     {activeTab === 'members' && (

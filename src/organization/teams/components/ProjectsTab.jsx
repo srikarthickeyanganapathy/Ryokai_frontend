@@ -380,8 +380,7 @@ export function ProjectsTab({ teamProjects, hasProjectIdOnTasks, tasksForProject
   const sortedProjects = useMemo(() => resolveSort(teamProjects, sortBy), [teamProjects, sortBy])
 
   const handleStatusChange = (projectId, newStatus) => {
-    // Callback placeholder — parent can wire this up
-    console.log('Status change:', projectId, newStatus)
+console.log('Status change:', projectId, newStatus)
   }
 
   return (

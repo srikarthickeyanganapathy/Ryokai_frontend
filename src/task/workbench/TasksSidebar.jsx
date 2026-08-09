@@ -17,8 +17,6 @@ const SCOPES = [
 const VIEWS = [
   { id: 'kanban',  label: 'Kanban',  iconKey: 'layout' },
   { id: 'list',    label: 'List',    iconKey: 'listTodo' },
-  { id: 'table',   label: 'Table',   iconKey: 'grid' },
-  { id: 'nebula',  label: 'Nebula',  iconKey: 'compass' },
 ]
 
 const Icon = ({ name, className }) => {
@@ -129,10 +127,10 @@ export function TasksSidebar({
 
         {stats.today.length > 0 && (
           <div
-            className="w-7 h-7 rounded-sm bg-amber-500/10 border border-amber-500/20 flex items-center justify-center"
+            className="w-7 h-7 rounded-sm bg-[var(--warning-soft)] border border-amber-500/20 flex items-center justify-center"
             title={`${stats.today.length} due today`}
           >
-            <span className="text-[9px] font-bold text-amber-500 tabular-nums">
+            <span className="text-[9px] font-bold text-[var(--warning)] tabular-nums">
               {stats.today.length}
             </span>
           </div>
@@ -247,7 +245,7 @@ export function TasksSidebar({
             </span>
           )}
           {stats.today.length > 0 && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-sm text-[10px] font-semibold bg-amber-500/10 text-amber-500">
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-sm text-[10px] font-semibold bg-[var(--warning-soft)] text-[var(--warning)]">
               {stats.today.length} today
             </span>
           )}

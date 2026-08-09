@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/shared/api/api';
@@ -8,24 +8,25 @@ import { useNavigate } from 'react-router-dom';
 
 export function CalendarWidget() {
   const navigate = useNavigate();
-  const today = new Date().toISOString().split('T')[0];
-  const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const { today, nextWeek } = useMemo(() => {
+    const now = new Date();
+    const t = now.toISOString().split('T')[0];
+    const nw = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    return { today: t, nextWeek: nw };
+  }, []);
 
-  const { data: events = [], isLoading } = useQuery({
+  const { data: events = [], isLoading, isError, error } = useQuery({
     queryKey: queryKeys.calendarEvents.range(today, nextWeek),
     queryFn: async () => {
-      try {
-        const startDateTime = `${today}T00:00:00`;
-        const endDateTime = `${nextWeek}T23:59:59`;
-        const res = await api.get('/calendar-events', { 
-          params: { start: startDateTime, end: endDateTime } 
-        });
-        return Array.isArray(res.data) ? res.data : res.data?.content || [];
-      } catch (err) {
-        // Fallback for when backend calendar API is not yet implemented
-        return [];
-      }
-    }
+      const startDateTime = `${today}T00:00:00`;
+      const endDateTime = `${nextWeek}T23:59:59`;
+      const res = await api.get('/calendar-events', { 
+        params: { start: startDateTime, end: endDateTime } 
+      });
+      return Array.isArray(res.data) ? res.data : res.data?.content || [];
+    },
+    retry: false, // Calendar events are non-critical; don't hammer on failure
+    staleTime: 30000,
   });
 
   return (
@@ -50,6 +51,13 @@ export function CalendarWidget() {
             {[1,2].map(i => (
               <div key={i} className="h-8 rounded-lg bg-[var(--bg-subtle)] animate-pulse" />
             ))}
+          </div>
+        ) : isError ? (
+          <div className="text-center py-4">
+            <Calendar className="h-8 w-8 mx-auto text-[var(--text-tertiary)] mb-2 opacity-40" />
+            <p className="text-xs text-[var(--text-tertiary)]">
+              {error?.response?.status === 404 ? 'Calendar unavailable' : 'Could not load events'}
+            </p>
           </div>
         ) : events.length === 0 ? (
           <div className="text-center py-4">

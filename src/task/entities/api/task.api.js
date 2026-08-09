@@ -151,7 +151,11 @@ export const addDependency = async (taskId, dependsOnId) => {
 };
 
 export const updateTask = async (taskId, payload) => {
-  const { data } = await api.put(`/tasks/${taskId}`, { ...payload, tags: toBackendTags(payload.tags) });
+  // FIX: backend TaskUpdateRequestDTO has NO status field — status changes must go through
+  // the dedicated state-transition endpoints (submit/approve/reject/recall/complete/claim),
+  // never through PUT /tasks/{id}. Strip it so callers can't accidentally rely on it.
+  const { status, ...rest } = payload || {};
+  const { data } = await api.put(`/tasks/${taskId}`, { ...rest, tags: toBackendTags(rest.tags) });
   return normalizeTask(data);
 };
 

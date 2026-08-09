@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useAuth } from './useAuth';
 import { useOrganizations, useOrgMembers } from '@/organization';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { usePermissionStore } from '../store/permissionStore';
+import { usePermissionStore, resolvePermission, resolveRole } from '../store/permissionStore';
 import { useEffect } from 'react';
 
 const EMPTY_PERMISSIONS = [];
@@ -55,45 +55,45 @@ export const usePermissions = () => {
 
   const isAdminOrAbove = isSuperAdmin || orgRole === 'ADMIN';
 
-  // Computed permission flags dynamically from DB permissions
-  const canManage = isAdminOrAbove || permissions.includes('ROLE_UPDATE');
-  const canAssign = isAdminOrAbove || permissions.includes('TASK_ASSIGN');
-  const canReview = isAdminOrAbove || permissions.includes('TASK_APPROVE') || permissions.includes('TASK_REJECT');
-  const canCreateTeam = isAdminOrAbove || permissions.includes('TEAM_CREATE');
-  const canManageTeam = isAdminOrAbove || permissions.includes('TEAM_UPDATE');
-  const canCreateProject = isAdminOrAbove || permissions.includes('PROJECT_CREATE');
-  const canManageProject = isAdminOrAbove || permissions.includes('PROJECT_UPDATE');
-  const canInviteMembers = isAdminOrAbove || permissions.includes('MEMBER_INVITE');
-  const canRemoveMembers = isAdminOrAbove || permissions.includes('MEMBER_REMOVE');
-  const canManageLeaveRequests = isAdminOrAbove || permissions.includes('LEAVE_APPROVE');
-  const canManageRoles = isAdminOrAbove || permissions.includes('ROLE_UPDATE');
+  // Computed permission flags — canonical source: resolvePermission() pure fn
+  const canManage = isAdminOrAbove || resolvePermission('ROLE_UPDATE', permissions);
+  const canAssign = isAdminOrAbove || resolvePermission('TASK_ASSIGN', permissions);
+  const canReview = isAdminOrAbove || resolvePermission('TASK_APPROVE', permissions) || resolvePermission('TASK_REJECT', permissions);
+  const canCreateTeam = isAdminOrAbove || resolvePermission('TEAM_CREATE', permissions);
+  const canManageTeam = isAdminOrAbove || resolvePermission('TEAM_UPDATE', permissions);
+  const canCreateProject = isAdminOrAbove || resolvePermission('PROJECT_CREATE', permissions);
+  const canManageProject = isAdminOrAbove || resolvePermission('PROJECT_UPDATE', permissions);
+  const canInviteMembers = isAdminOrAbove || resolvePermission('MEMBER_INVITE', permissions);
+  const canRemoveMembers = isAdminOrAbove || resolvePermission('MEMBER_REMOVE', permissions);
+  const canManageLeaveRequests = isAdminOrAbove || resolvePermission('LEAVE_APPROVE', permissions);
+  const canManageRoles = isAdminOrAbove || resolvePermission('ROLE_UPDATE', permissions);
   const canManageUsers = isSuperAdmin;
-  const canManageAnnouncements = isAdminOrAbove || permissions.includes('ANNOUNCEMENT_UPDATE');
-  const canViewAnnouncements = isAdminOrAbove || permissions.includes('ANNOUNCEMENT_VIEW');
-  const canCreateAnnouncements = isAdminOrAbove || permissions.includes('ANNOUNCEMENT_CREATE');
-  const canDeleteAnnouncements = isAdminOrAbove || permissions.includes('ANNOUNCEMENT_DELETE');
-  const canManageGoals = isAdminOrAbove || permissions.includes('GOAL_UPDATE');
-  const canViewGoals = isAdminOrAbove || permissions.includes('GOAL_VIEW');
-  const canCreateGoals = isAdminOrAbove || permissions.includes('GOAL_CREATE');
-  const canDeleteGoals = isAdminOrAbove || permissions.includes('GOAL_DELETE');
-  const canManageOrganization = isAdminOrAbove || permissions.includes('ORG_PROFILE_UPDATE');
-  const canViewOrganization = isAdminOrAbove || permissions.includes('ORG_VIEW');
-  const canViewOrgWideDashboard = isAdminOrAbove || permissions.includes('DASHBOARD_VIEW');
-  const canOverrideTask = isAdminOrAbove || permissions.includes('TASK_OVERRIDE');
-  const canViewAnalytics = isAdminOrAbove || permissions.includes('DASHBOARD_VIEW');
+  const canManageAnnouncements = isAdminOrAbove || resolvePermission('ANNOUNCEMENT_UPDATE', permissions);
+  const canViewAnnouncements = isAdminOrAbove || resolvePermission('ANNOUNCEMENT_VIEW', permissions);
+  const canCreateAnnouncements = isAdminOrAbove || resolvePermission('ANNOUNCEMENT_CREATE', permissions);
+  const canDeleteAnnouncements = isAdminOrAbove || resolvePermission('ANNOUNCEMENT_DELETE', permissions);
+  const canManageGoals = isAdminOrAbove || resolvePermission('GOAL_UPDATE', permissions);
+  const canViewGoals = isAdminOrAbove || resolvePermission('GOAL_VIEW', permissions);
+  const canCreateGoals = isAdminOrAbove || resolvePermission('GOAL_CREATE', permissions);
+  const canDeleteGoals = isAdminOrAbove || resolvePermission('GOAL_DELETE', permissions);
+  const canManageOrganization = isAdminOrAbove || resolvePermission('ORG_PROFILE_UPDATE', permissions);
+  const canViewOrganization = isAdminOrAbove || resolvePermission('ORG_VIEW', permissions);
+  const canViewOrgWideDashboard = isAdminOrAbove || resolvePermission('DASHBOARD_VIEW', permissions);
+  const canOverrideTask = isAdminOrAbove || resolvePermission('TASK_OVERRIDE', permissions);
+  const canViewAnalytics = isAdminOrAbove || resolvePermission('DASHBOARD_VIEW', permissions);
 
   // Task-scoped permissions
-  const canViewTask = isAdminOrAbove || permissions.includes('TASK_VIEW');
-  const canCreateTask = isAdminOrAbove || permissions.includes('TASK_CREATE');
-  const canAssignTask = isAdminOrAbove || permissions.includes('TASK_ASSIGN');
-  const canEditTask = isAdminOrAbove || permissions.includes('TASK_UPDATE');
-  const canDeleteTask = isAdminOrAbove || permissions.includes('TASK_DELETE');
-  const canReviewTask = isAdminOrAbove || permissions.includes('TASK_APPROVE') || permissions.includes('TASK_REJECT');
+  const canViewTask = isAdminOrAbove || resolvePermission('TASK_VIEW', permissions);
+  const canCreateTask = isAdminOrAbove || resolvePermission('TASK_CREATE', permissions);
+  const canAssignTask = isAdminOrAbove || resolvePermission('TASK_ASSIGN', permissions);
+  const canEditTask = isAdminOrAbove || resolvePermission('TASK_UPDATE', permissions);
+  const canDeleteTask = isAdminOrAbove || resolvePermission('TASK_DELETE', permissions);
+  const canReviewTask = isAdminOrAbove || resolvePermission('TASK_APPROVE', permissions) || resolvePermission('TASK_REJECT', permissions);
   const canCommentTask = canViewTask;
   const canChecklistEdit = canEditTask;
-  const canDependencyEdit = isAdminOrAbove || permissions.includes('TASK_DEPENDENCY_UPDATE');
-  const canReassignTask = isAdminOrAbove || permissions.includes('TASK_REASSIGN');
-  const canArchiveTask = isAdminOrAbove || permissions.includes('TASK_ARCHIVE');
+  const canDependencyEdit = isAdminOrAbove || resolvePermission('TASK_DEPENDENCY_UPDATE', permissions);
+  const canReassignTask = isAdminOrAbove || resolvePermission('TASK_REASSIGN', permissions);
+  const canArchiveTask = isAdminOrAbove || resolvePermission('TASK_ARCHIVE', permissions);
 
   // Helper to enforce rank-based power dynamics in UI
   const canAlter = (targetUsername) => {
@@ -196,7 +196,7 @@ export const usePermissions = () => {
   };
 };
 
-/** Quick check â€” whether user has an org, without full membership fetch */
+/** Quick check — whether user has an org, without full membership fetch */
 export const useHasOrganization = () => {
   const { data: orgsData } = useOrganizations();
   const organizations = orgsData?.content || orgsData || [];

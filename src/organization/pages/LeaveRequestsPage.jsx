@@ -13,7 +13,7 @@ import { Plus, Inbox, Calendar, Clock, Sparkles, AlertCircle } from '@/shared/ui
 import {
   ModularToolbar,
 } from '@/shared/workspace-framework';
-import { SearchPlugin } from '@/shared/workspace-framework/toolbar/plugins/SearchPlugin';
+import { SearchPlugin } from '@/shared/workspace-framework';
 import { PageShell, PageHero, PageContent, PageToolbar } from '@/shared/ui/PageShell';
 import { PageState } from '@/shared/ui/PageState';
 

@@ -90,6 +90,7 @@ function ColumnVisibilityToggle({ visibleColumns, onToggle }) {
           size="sm"
           className="h-8 w-8 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           title="Toggle columns"
+          aria-label="Toggle columns"
         >
           <Columns className="w-4 h-4" />
         </IconButton>
@@ -137,6 +138,7 @@ function QuickRowActions({ member, onView, onMessage, onTasks }) {
         size="sm"
         className="h-7 w-7 text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-soft)]/50"
         title="View profile"
+        aria-label="View profile"
         onClick={(e) => { e.stopPropagation(); onView?.(member); }}
       >
         <Eye className="w-3.5 h-3.5" />
@@ -146,6 +148,7 @@ function QuickRowActions({ member, onView, onMessage, onTasks }) {
         size="sm"
         className="h-7 w-7 text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-soft)]/50"
         title="Send message"
+        aria-label="Send message"
         onClick={(e) => { e.stopPropagation(); onMessage?.(member); }}
       >
         <Mail className="w-3.5 h-3.5" />
@@ -155,6 +158,7 @@ function QuickRowActions({ member, onView, onMessage, onTasks }) {
         size="sm"
         className="h-7 w-7 text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-soft)]/50"
         title="View tasks"
+        aria-label="View tasks"
         onClick={(e) => { e.stopPropagation(); onTasks?.(member); }}
       >
         <CheckSquareIcon className="w-3.5 h-3.5" />
@@ -582,6 +586,7 @@ export function DirectoryTableView({
                     size="sm"
                     className="h-7 w-7"
                     title="Remove Member"
+                    aria-label="Remove member"
                     onClick={() => onRemoveMember && onRemoveMember(member)}
                   >
                     <Icons.trash2 className="w-3.5 h-3.5" />
@@ -625,6 +630,7 @@ export function DirectoryTableView({
       <DataTable
         columns={columns}
         data={sortedMembers}
+        getRowId={(row) => row.id}
         isLoading={isLoading}
         emptyStateTitle="No organization members found"
         emptyStateDescription="Try adjusting your search query or role filters."

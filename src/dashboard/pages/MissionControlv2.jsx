@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/shared/lib/cn';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { useAuth } from '@/identity';
-import { usePermissions } from '@/identity/features/authentication/hooks/usePermissions';
+import { usePermissions } from '@/identity';
 import { useDrawerManager } from '@/shared/workspace-framework';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';

@@ -94,7 +94,7 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
                 <Text size="xs" variant="muted" className="px-2 py-1 uppercase font-bold tracking-wide text-[10px]">View Items</Text>
                 <div className="space-y-0.5 mt-1">
                   {[{ id: 'all', label: 'All Items' }, { id: 'tasks', label: 'Tasks Only' }, { id: 'events', label: 'Events Only' }].map(item => (
-                    <button key={item.id} onClick={() => { setFilterType(item.id); setFilterOpen(false) }} className={cn("w-full text-left px-2 py-1.5 rounded-md text-[12px] font-medium transition-colors", filterType === item.id ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]")}>{item.label}</button>
+                    <Button key={item.id} variant="ghost" size="sm" className="w-full justify-start" onClick={() => { setFilterType(item.id); setFilterOpen(false) }}>{item.label}</Button>
                   ))}
                 </div>
               </PopoverContent>

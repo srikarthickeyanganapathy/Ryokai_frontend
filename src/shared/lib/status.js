@@ -1,29 +1,35 @@
 /**
  * Status normalization between frontend display values and backend enum values.
  * Backend TaskStatus enum: TODO, ASSIGNED, SUBMITTED, APPROVED, REJECTED, COMPLETED.
+ * Canonical status definitions in statusregistry.js — this module provides
+ * normalization/conversion utilities only.
  * 
  * - TODO / COMPLETED are used for personal tasks (isPersonal = true)
  * - ASSIGNED / SUBMITTED / APPROVED / REJECTED are used for org tasks
  * 
- * Frontend display: To Do, In Review, Needs Work, Done
+ * Frontend display: To Do, In Progress, In Review, Approved, Rejected, Done
  */
 
-// Backend enum -> Frontend display
+// Backend enum -> Frontend display (labels aligned with statusregistry.js)
 const BACKEND_TO_FRONTEND = {
   TODO:        'To Do',        // personal task, not yet started
-  IN_PROGRESS: 'To Do',        // task is sitting with the assignee
+  IN_PROGRESS: 'In Progress',   // task is sitting with the assignee
   SUBMITTED:   'In Review',    // assignee submitted for review
-  APPROVED:    'Done',         // reviewer approved
-  REJECTED:    'Needs Work',   // reviewer rejected, assignee must redo
+  APPROVED:    'Approved',      // reviewer approved
+  REJECTED:    'Rejected',      // reviewer rejected, assignee must redo
   COMPLETED:   'Done',         // personal task, marked complete
 };
 
 // Frontend display -> Backend enum
 const FRONTEND_TO_BACKEND = {
   'To Do':       'IN_PROGRESS',
+  'In Progress': 'IN_PROGRESS',
   'In Review':   'SUBMITTED',
+  'Approved':    'APPROVED',
   'Done':        'APPROVED',
+  'Rejected':    'REJECTED',
   'Needs Work':  'REJECTED',
+  'Completed':   'COMPLETED',
 };
 
 /** Normalize a backend status to frontend display value */

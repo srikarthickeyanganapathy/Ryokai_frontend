@@ -114,6 +114,7 @@ export function PlatformOrganizationsPage() {
         <DataTable
           columns={columns}
           data={filteredOrgs}
+          getRowId={(row) => row.id}
           loading={isLoading}
           emptyMessage="No organizations found."
         />

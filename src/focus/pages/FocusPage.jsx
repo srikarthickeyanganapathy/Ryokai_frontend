@@ -15,7 +15,7 @@ import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
 
 export function FocusPage() {
-  const { data: tasks = [], isLoading } = useTaskList()
+  const { data: { tasks = [] } = {}, isLoading } = useTaskList()
   const updateTaskMutation = useUpdateTask()
   const claimTaskMutation = useClaimTask()
   const completePersonalTaskMutation = useCompletePersonalTask()

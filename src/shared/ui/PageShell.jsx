@@ -46,7 +46,7 @@ export function PageShell({
   };
 
   return (
-    <motion.div
+    <motion.main
       variants={STAGGER_FAST.container}
       initial="hidden"
       animate="show"
@@ -59,7 +59,7 @@ export function PageShell({
       data-workspace={workspaceMode}
     >
       {children}
-    </motion.div>
+    </motion.main>
   );
 }
 
@@ -72,6 +72,8 @@ export function PageHero({
   eyebrow,
   icon: Icon,
   children,
+  actions,
+  meta,
   className,
   size = 'default',
 }) {
@@ -97,8 +99,12 @@ export function PageHero({
         )}
         <h1 className={cn(sizeMap[size], 'tracking-tight text-[var(--text-primary)]')}>{title}</h1>
         {subtitle && <p className="text-[13px] text-[var(--text-secondary)] mt-1.5 leading-relaxed">{subtitle}</p>}
+        {meta && <p className="text-[11px] text-[var(--text-tertiary)] mt-1">{meta}</p>}
       </div>
-      {children && <div className="flex items-center gap-2 shrink-0">{children}</div>}
+      <div className="flex items-center gap-2 shrink-0">
+        {actions}
+        {children}
+      </div>
     </motion.div>
   );
 }

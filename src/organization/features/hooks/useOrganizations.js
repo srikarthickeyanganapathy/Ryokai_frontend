@@ -526,7 +526,7 @@ export const useTeam = (teamId) => {
     queryKey: ['teams', teamId],
     queryFn: () => orgApi.getTeam(teamId),
     enabled: !!teamId,
-    refetchInterval: 5000,
+    refetchInterval: 30000,
   });
 };
 
@@ -583,7 +583,7 @@ export const useTeamMessages = (teamId) => {
     queryKey: ['teams', teamId, 'messages'],
     queryFn: () => orgApi.getTeamMessages(teamId),
     enabled: !!teamId,
-    refetchInterval: 5000,
+    refetchInterval: 30000, // Poll every 30s as fallback to STOMP
   });
 };
 

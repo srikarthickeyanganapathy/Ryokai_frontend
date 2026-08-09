@@ -12,18 +12,22 @@ export function OrganizationIdentity({ org }) {
   const canEdit = isOrgAdmin || can('ORG_PROFILE_UPDATE');
   const updateOrgMutation = useUpdateOrganization(org?.id);
 
-  const [name, setName] = useState(org?.name || '');
-  const [description, setDescription] = useState(org?.description || '');
-  
   // Track specifically which field is being updated for targeted loading states
   const [activeField, setActiveField] = useState(null);
 
+  // Derive name/description from org prop directly; effects are for external sync only
+  const [name, setName] = useState(org?.name || '');
+  const [description, setDescription] = useState(org?.description || '');
+  const prevOrgRef = React.useRef(org?.id);
+
+  // Sync state only when org identity changes (different org loaded)
   useEffect(() => {
-    if (org && !updateOrgMutation.isPending) {
+    if (org && org.id !== prevOrgRef.current && !updateOrgMutation.isPending) {
+      prevOrgRef.current = org.id;
       setName(org.name || '');
       setDescription(org.description || '');
     }
-  }, [org?.name, org?.description]);
+  }, [org?.id]);
 
   const handleNameBlur = () => {
     if (name.trim() && name !== org?.name) {

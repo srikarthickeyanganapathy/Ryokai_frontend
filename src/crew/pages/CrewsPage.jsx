@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heading, Text, Label } from '@/shared/ui/Typography';
-import { Button } from '@/shared/ui/Button';
+import { Button, IconButton } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
 import { Input } from '@/shared/ui/Input';
 import { Textarea } from '@/shared/ui/Textarea';
@@ -74,7 +74,7 @@ function MemberAvatarStack({ members = [], max = 4 }) {
                 style={{ background: `linear-gradient(135deg, hsl(${hue} 65% 50%), hsl(${(hue + 30) % 360} 60% 40%))` }}>
                 {(m.username || m.name || '?').charAt(0).toUpperCase()}
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-1 ring-[var(--bg-card)]" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-[var(--success)] ring-1 ring-[var(--bg-card)]" />
             </div>
           );
         })}
@@ -248,9 +248,9 @@ function ComparePanel({ crews, statsMap, onClose }) {
           <Heading level={4} className="text-[14px] font-bold tracking-tight mb-0">Crew Comparison</Heading>
           <span className="text-[11px] text-[var(--text-muted)]">{crews.length} selected · click a crew's scale icon to add/remove</span>
         </div>
-        <button onClick={onClose} className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]">
+        <IconButton variant="ghost" size="sm" onClick={onClose} title="Close comparison">
           <X className="w-4 h-4" />
-        </button>
+        </IconButton>
       </div>
       <div className="px-6 py-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <CompareBar label="Members" values={memberCounts} max={maxMembers} hues={hues} />
@@ -379,7 +379,7 @@ export function CrewsPage() {
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" aria-hidden="true" />
                 <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search crews..." aria-label="Search crews"
                   className="w-full pl-9 pr-8 py-2 text-[13px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-xs" />
-                {searchQuery && <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5" title="Clear search"><X className="w-3.5 h-3.5" /></button>}
+                {searchQuery && <IconButton variant="ghost" size="sm" className="absolute right-2.5 top-1/2 -translate-y-1/2" onClick={() => setSearchQuery('')} title="Clear search"><X className="w-3.5 h-3.5" /></IconButton>}
               </div>
             </div>
           </PageToolbar>
@@ -415,7 +415,7 @@ export function CrewsPage() {
               <Heading level={3} className="text-[17px] font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2"><Sparkles className="w-4 h-4 text-[var(--accent)]" /> Create Mission Crew</Heading>
               <Text variant="muted" className="text-[12px] mt-0.5">Establish a collaborative mission team with real-time text channels, whiteboards, and shared projects.</Text>
             </div>
-            <button onClick={() => setIsCreateOpen(false)} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-lg hover:bg-[var(--bg-subtle)] transition-colors"><X className="w-4 h-4" /></button>
+            <IconButton variant="ghost" size="sm" onClick={() => setIsCreateOpen(false)} title="Close"><X className="w-4 h-4" /></IconButton>
           </div>
           <form onSubmit={handleCreateCrew} className="space-y-5">
             <div className="relative p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40 overflow-hidden transition-all duration-300"
@@ -511,31 +511,31 @@ function CrewCard({ crew, navigate, isCompareSelected = false, onToggleCompare }
         </div>
         <div className="relative shrink-0 flex items-center gap-1" ref={menuRef}>
           {/* Compare toggle (teams-module design language) */}
-          <button
+          <IconButton variant="ghost" size="sm"
             onClick={(e) => { e.stopPropagation(); onToggleCompare?.(crew.id); }}
             aria-label={isCompareSelected ? 'Remove from comparison' : 'Add to comparison'}
             title={isCompareSelected ? 'Remove from comparison' : 'Add to comparison'}
             className={cn(
-              'w-8 h-8 rounded-lg flex items-center justify-center transition-colors border',
+              'border',
               isCompareSelected
                 ? 'text-[var(--accent)] bg-[var(--accent-soft)] border-[var(--accent-border)]'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] border-transparent hover:border-[var(--border-subtle)]'
+                : 'text-[var(--text-muted)] border-transparent'
             )}
           >
             <Icons.scale className="w-4 h-4" />
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }} aria-label="Quick jump context menu" className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-colors border border-transparent hover:border-[var(--border-subtle)]"><MoreVertical className="w-4 h-4" /></button>
+          </IconButton>
+          <IconButton variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }} aria-label="Quick jump context menu"><MoreVertical className="w-4 h-4" /></IconButton>
           <AnimatePresence>
             {isMenuOpen && (
               <motion.div initial={{ opacity: 0, scale: 0.95, y: -4 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: -4 }} transition={{ duration: 0.15 }}
                 className="absolute right-0 top-9 z-50 w-48 py-1.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl shadow-xl backdrop-blur-md">
                 <div className="px-3 py-1 text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-bold border-b border-[var(--border-subtle)] mb-1">Quick Jump</div>
-                <button onClick={(e) => handleQuickJump(e, 'channels')} className="w-full px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] flex items-center gap-2.5 transition-colors cursor-pointer"><MessageSquare className="w-3.5 h-3.5 text-[var(--accent)]" /> Text Channels</button>
-                <button onClick={(e) => handleQuickJump(e, 'tasks')} className="w-full px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] flex items-center gap-2.5 transition-colors cursor-pointer"><CheckSquare className="w-3.5 h-3.5 text-[var(--accent)]" /> Task Board</button>
-                <button onClick={(e) => handleQuickJump(e, 'whiteboards')} className="w-full px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] flex items-center gap-2.5 transition-colors cursor-pointer"><Layout className="w-3.5 h-3.5 text-[var(--accent)]" /> Whiteboards</button>
-                <button onClick={(e) => handleQuickJump(e, 'projects')} className="w-full px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] flex items-center gap-2.5 transition-colors cursor-pointer"><Folder className="w-3.5 h-3.5 text-[var(--accent)]" /> Shared Projects</button>
+                <Button variant="ghost" size="sm" className="w-full justify-start" onClick={(e) => handleQuickJump(e, 'channels')}><MessageSquare className="w-3.5 h-3.5 text-[var(--accent)]" /> Text Channels</Button>
+                <Button variant="ghost" size="sm" className="w-full justify-start" onClick={(e) => handleQuickJump(e, 'tasks')}><CheckSquare className="w-3.5 h-3.5 text-[var(--accent)]" /> Task Board</Button>
+                <Button variant="ghost" size="sm" className="w-full justify-start" onClick={(e) => handleQuickJump(e, 'whiteboards')}><Layout className="w-3.5 h-3.5 text-[var(--accent)]" /> Whiteboards</Button>
+                <Button variant="ghost" size="sm" className="w-full justify-start" onClick={(e) => handleQuickJump(e, 'projects')}><Folder className="w-3.5 h-3.5 text-[var(--accent)]" /> Shared Projects</Button>
                 <div className="border-t border-[var(--border-subtle)] my-1" />
-                <button onClick={(e) => handleQuickJump(e, 'overview')} className="w-full px-3 py-1.5 text-[12px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] flex items-center gap-2.5 transition-colors cursor-pointer"><Settings className="w-3.5 h-3.5 text-[var(--text-muted)]" /> Crew Settings</button>
+                <Button variant="ghost" size="sm" className="w-full justify-start" onClick={(e) => handleQuickJump(e, 'overview')}><Settings className="w-3.5 h-3.5 text-[var(--text-muted)]" /> Crew Settings</Button>
               </motion.div>
             )}
           </AnimatePresence>

@@ -20,7 +20,7 @@ export function InboxWidget() {
             Inbox
           </CardTitle>
           <button 
-            onClick={() => navigate('/app/notifications')}
+            onClick={() => navigate('/app/inbox')}
             className="text-xs text-[var(--text-tertiary)] hover:text-[var(--accent)] flex items-center gap-1 transition-colors"
           >
             View All <ArrowRight className="h-3 w-3" />

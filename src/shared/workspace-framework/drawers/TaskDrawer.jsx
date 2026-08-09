@@ -4,6 +4,8 @@ import { Badge } from '@/shared/ui/Badge'
 import { Button } from '@/shared/ui/Button'
 import { cn } from '@/shared/lib/cn'
 import { Calendar, Flag, User, Clock, ExternalLink, CheckCircle2 } from '@/shared/ui/Icons'
+import { PRIORITY_COLORS } from '@/shared/lib/priority'
+import { resolveStatus } from '@/shared/lib/statusregistry'
 
 /**
  * TaskDrawer
@@ -18,21 +20,10 @@ import { Calendar, Flag, User, Clock, ExternalLink, CheckCircle2 } from '@/share
  * WEF Boundary: Pure UI. No API calls. All data injected via props.
  */
 
-const PRIORITY_COLORS = {
-  CRITICAL: 'text-[var(--danger)] bg-[var(--danger-soft)]',
-  HIGH: 'text-[var(--warning)] bg-[var(--warning-soft)]',
-  MEDIUM: 'text-[var(--accent)] bg-[var(--accent-soft)]',
-  LOW: 'text-[var(--text-muted)] bg-[var(--bg-subtle)]',
-}
-
-const STATUS_COLORS = {
-  TODO: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)]',
-  IN_PROGRESS: 'bg-blue-500/10 text-blue-500',
-  ASSIGNED: 'bg-amber-500/10 text-amber-500',
-  SUBMITTED: 'bg-purple-500/10 text-purple-500',
-  APPROVED: 'bg-[var(--success-soft)] text-[var(--success)]',
-  COMPLETED: 'bg-[var(--success-soft)] text-[var(--success)]',
-  REJECTED: 'bg-[var(--danger-soft)] text-[var(--danger)]',
+/** Maps CRITICAL priority label (some data sources) to canonical URGENT key */
+const normalizePriorityKey = (p) => {
+  const key = String(p || '').toUpperCase()
+  return key === 'CRITICAL' ? 'URGENT' : key
 }
 
 export function TaskDrawer({ data, onClose }) {
@@ -49,10 +40,10 @@ export function TaskDrawer({ data, onClose }) {
       {/* Header */}
       <div className="p-6 pb-5 border-b border-[var(--border-subtle)]">
         <div className="flex items-start gap-3 mb-3">
-          <Badge className={cn('text-[10px] font-mono uppercase', STATUS_COLORS[displayStatus] || STATUS_COLORS.TODO)}>
+          <Badge className={cn('text-[10px] font-mono uppercase', resolveStatus(displayStatus).colorClass)}>
             {displayStatus.replace('_', ' ')}
           </Badge>
-          <Badge className={cn('text-[10px] font-mono uppercase', PRIORITY_COLORS[displayPriority] || PRIORITY_COLORS.MEDIUM)}>
+          <Badge className={cn('text-[10px] font-mono uppercase', PRIORITY_COLORS[normalizePriorityKey(displayPriority)] || PRIORITY_COLORS.MEDIUM)}>
             {displayPriority}
           </Badge>
         </div>

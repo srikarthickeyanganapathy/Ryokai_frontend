@@ -23,7 +23,7 @@ import { useCrewMembers, useCrews } from '@/crew';
 import { ProjectForm } from '../components/ProjectForm';
 import { CrewProjectShareModal } from '../components/CrewProjectShareModal';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { useTaskList, useCreateTask, useReassignTask } from '@/task';
+import { useTaskList, useCreateTask, useReassignTask, useTaskStatusChange } from '@/task';
 import { TaskForm } from '@/task';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover';
 import { toast } from 'sonner';
@@ -32,7 +32,7 @@ import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority';
 import { SaveToggle } from '@/library/saved/features/components/SaveToggle';
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes';
 import { normalizeStatus, PROJECT_STATUS_COLORS } from '@/shared/lib/status';
-import { usePermissions } from '@/identity';
+import { usePermissions, useAuth } from '@/identity';
 import {
   calculateHealthScore, getHealthStatus, formatRelativeDate,
   getTaskAnalytics, getTeamContributions
@@ -81,7 +81,7 @@ function PriorityDot({ priority }) {
 }
 
 /* ── Task Card ── */
-function TaskCard({ task, canAssignTask, assigningTaskId, setAssigningTaskId, assignableMembers, onAssign }) {
+function TaskCard({ task, canAssignTask, canDrag, onDragStart, assigningTaskId, setAssigningTaskId, assignableMembers, onAssign }) {
   const isDone = classifyTaskStatus(task.status) === 'done';
   const priority = normalizePriority(task.priority);
   const column = KANBAN_COLUMNS.find(c => c.id === classifyTaskStatus(task.status));
@@ -93,7 +93,12 @@ function TaskCard({ task, canAssignTask, assigningTaskId, setAssigningTaskId, as
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -4 }}
       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-      className="group relative bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl p-3.5 hover:border-[var(--accent-border)] hover:shadow-[var(--shadow-sm)] transition-all duration-[var(--duration-fast)]"
+      draggable={canDrag}
+      onDragStart={canDrag ? (e) => onDragStart?.(e, task) : undefined}
+      className={cn(
+        'group relative bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl p-3.5 hover:border-[var(--accent-border)] hover:shadow-[var(--shadow-sm)] transition-all duration-[var(--duration-fast)]',
+        canDrag && 'cursor-grab active:cursor-grabbing'
+      )}
     >
       {/* Left color bar */}
       <div className={cn('absolute left-0 top-3 bottom-3 w-[3px] rounded-full', column.colorBar)} />
@@ -203,13 +208,16 @@ export function ProjectDetailPage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const { workspaceMode } = useWorkspace();
-  const { canManageProject, canAssignTask } = usePermissions();
+  const { canManageProject, canAssignTask, canEditTask, canReview, canReviewTask, isSuperAdmin } = usePermissions();
+  const { user } = useAuth();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
   const [assigningTaskId, setAssigningTaskId] = useState(null);
+  const [draggedTaskId, setDraggedTaskId] = useState(null);
+  const [dragOverCol, setDragOverCol] = useState(null);
 
   const { data: project, isLoading: projectLoading, isError: projectError } = useProject(Number(projectId));
   const { data: rawActivities } = useProjectActivities(Number(projectId));
@@ -218,10 +226,11 @@ export function ProjectDetailPage() {
   const { data: team } = useTeam(project?.teamId);
   const { data: orgMembers = [] } = useOrgMembers(project?.organizationId);
 
-  const { data: rawTasks, isLoading: tasksLoading } = useTaskList({ projectId: Number(projectId) });
+  const { data: { tasks: rawTasks = [] } = {}, isLoading: tasksLoading } = useTaskList({ projectId: Number(projectId) });
   const projectTasks = Array.isArray(rawTasks) ? rawTasks : rawTasks?.content || [];
   const createTaskMutation = useCreateTask();
   const reassignTaskMutation = useReassignTask();
+  const changeTaskStatus = useTaskStatusChange();
 
   const updateProjectMutation = useUpdateProject();
   const deleteProjectMutation = useDeleteProject();
@@ -287,6 +296,38 @@ export function ProjectDetailPage() {
         setAssigningTaskId(null);
       }
     });
+  };
+
+  /* ── Kanban drag & drop status updates (permission-gated, useTasks only) ── */
+  // A card may be dragged when the user holds any task-transition permission,
+  // or is the assignee/creator of that task (submit / recall / complete rights).
+  const canDragTask = (task) => {
+    if (!task?.id) return false;
+    if (workspaceMode === 'PERSONAL' || isSuperAdmin || canEditTask || canAssignTask || canReview || canReviewTask) return true;
+    const me = user?.username;
+    const assignee = typeof task.assignee === 'object' ? task.assignee?.username : (task.assignee || task.assignedTo);
+    const creator = typeof task.creator === 'object' ? task.creator?.username : task.creator;
+    return assignee === me || creator === me;
+  };
+
+  const handleTaskDrop = (e, columnId) => {
+    e.preventDefault();
+    const columnKey = dragOverCol;
+    setDragOverCol(null);
+    if (!draggedTaskId || !columnKey) return;
+    const task = projectTasks.find(t => String(t.id) === String(draggedTaskId));
+    setDraggedTaskId(null);
+    if (!task) return;
+    if (classifyTaskStatus(task.status) === columnKey) return; // same column
+    const mapped = columnKey === 'review'
+      ? 'SUBMITTED'
+      : (columnKey === 'done' ? 'DONE' : 'IN_PROGRESS');
+    changeTaskStatus(task, mapped);
+  };
+
+  const handleTaskDragStart = (e, task) => {
+    e.dataTransfer.effectAllowed = 'move';
+    setDraggedTaskId(String(task.id));
   };
 
   const daysRemaining = project?.dueDate
@@ -433,9 +474,19 @@ export function ProjectDetailPage() {
                   <div className="grid grid-cols-4 gap-3 min-w-[720px]">
                     {KANBAN_COLUMNS.map(column => {
                       const tasks = kanbanColumns[column.id] || [];
+                      const isDragOver = dragOverCol === column.id;
 
                       return (
-                        <div key={column.id} className="flex flex-col min-h-[320px]">
+                        <div
+                          key={column.id}
+                          className={cn(
+                            'flex flex-col min-h-[320px] rounded-xl transition-all',
+                            isDragOver && 'bg-[var(--accent-soft)]/20 ring-2 ring-[var(--accent)]/30 ring-inset'
+                          )}
+                          onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverCol(column.id); }}
+                          onDragLeave={() => setDragOverCol(prev => prev === column.id ? null : prev)}
+                          onDrop={(e) => handleTaskDrop(e, column.id)}
+                        >
                           {/* Column header */}
                           <div className="flex items-center justify-between mb-2.5 px-1">
                             <div className="flex items-center gap-2">
@@ -460,6 +511,8 @@ export function ProjectDetailPage() {
                                     key={task.id}
                                     task={task}
                                     canAssignTask={canAssignTask}
+                                    canDrag={canDragTask(task)}
+                                    onDragStart={handleTaskDragStart}
                                     assigningTaskId={assigningTaskId}
                                     setAssigningTaskId={setAssigningTaskId}
                                     assignableMembers={assignableMembers}

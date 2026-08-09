@@ -5,7 +5,7 @@ import { Textarea } from '@/shared/ui/Textarea';
 import { Text } from '@/shared/ui/Typography';
 import { Label } from '@/shared/ui/Typography/Label';
 import { Skeleton } from '@/shared/ui/Skeleton';
-import { useExitBlockers, useRequestExit } from '@/organization/features/hooks/useOrganizations';
+import { useExitBlockers, useRequestExit } from '@/organization';
 import { CheckCircle2, AlertCircle, ClipboardList, Folder, Users, ShieldAlert, ChevronRight } from '@/shared/ui/Icons';
 
 export function MemberExitModal({ isOpen, onClose, orgId }) {
@@ -40,7 +40,7 @@ export function MemberExitModal({ isOpen, onClose, orgId }) {
 
   const renderBlockerIcon = (text) => {
     if (text.toLowerCase().includes('task')) {
-      return <ClipboardList className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />;
+      return <ClipboardList className="w-3.5 h-3.5 text-[var(--warning)] shrink-0 mt-0.5" />;
     }
     if (text.toLowerCase().includes('project')) {
       return <Folder className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />;
@@ -48,7 +48,7 @@ export function MemberExitModal({ isOpen, onClose, orgId }) {
     if (text.toLowerCase().includes('team') || text.toLowerCase().includes('lead')) {
       return <Users className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />;
     }
-    return <AlertCircle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />;
+    return <AlertCircle className="w-3.5 h-3.5 text-[var(--warning)] shrink-0 mt-0.5" />;
   };
 
   return (
@@ -74,8 +74,8 @@ export function MemberExitModal({ isOpen, onClose, orgId }) {
               {!isLoadingBlockers && (
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                   totalActiveItems === 0
-                    ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                    : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                    ? 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success-border)]'
+                    : 'bg-[var(--warning-soft)] text-[var(--warning)] border-amber-500/20'
                 }`}>
                   {totalActiveItems === 0 ? 'Clear to Depart' : `${totalActiveItems} Active Responsibility${totalActiveItems > 1 ? 's' : ''}`}
                 </span>
@@ -89,7 +89,7 @@ export function MemberExitModal({ isOpen, onClose, orgId }) {
               </div>
             ) : blockers.length === 0 ? (
               <div className="flex items-start gap-2 text-xs text-[var(--text-secondary)] bg-[var(--bg-elevated)] p-3 rounded-lg border border-[var(--border-subtle)]">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-[var(--success)] shrink-0 mt-0.5" />
                 <div className="space-y-0.5">
                   <span className="font-medium text-[var(--text-primary)] block">Zero Pending Blockers</span>
                   <span className="text-[11px] text-[var(--text-muted)]">You have no active assigned tasks or team leadership roles. You are fully ready for smooth offboarding.</span>
@@ -101,7 +101,7 @@ export function MemberExitModal({ isOpen, onClose, orgId }) {
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {openTasksCount > 0 && (
                     <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-[var(--bg-elevated)] text-[var(--text-secondary)] px-2 py-0.5 rounded border border-[var(--border-subtle)]">
-                      <ClipboardList className="w-3 h-3 text-amber-500" /> {openTasksCount} Assigned Task{openTasksCount > 1 ? 's' : ''}
+                      <ClipboardList className="w-3 h-3 text-[var(--warning)]" /> {openTasksCount} Assigned Task{openTasksCount > 1 ? 's' : ''}
                     </span>
                   )}
                   {ownedProjectsCount > 0 && (
@@ -127,8 +127,8 @@ export function MemberExitModal({ isOpen, onClose, orgId }) {
                 </div>
 
                 <div className="pt-1 border-t border-[var(--border-subtle)]">
-                  <Text size="xs" variant="muted" className="text-[11px] flex items-center gap-1 text-amber-500/90">
-                    <ShieldAlert className="w-3 h-3 shrink-0 text-amber-500" />
+                  <Text size="xs" variant="muted" className="text-[11px] flex items-center gap-1 text-[var(--warning)]/90">
+                    <ShieldAlert className="w-3 h-3 shrink-0 text-[var(--warning)]" />
                     <span>These items will be highlighted for administrative handover during your offboarding period.</span>
                   </Text>
                 </div>

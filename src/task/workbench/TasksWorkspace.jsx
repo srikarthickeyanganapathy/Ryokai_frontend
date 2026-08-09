@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/shared/lib/cn'
+import { Button, IconButton } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
-import { Button } from '@/shared/ui/Button'
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
 import { KanbanBoard } from '../components/KanbanBoard/KanbanBoard'
 import { TasksTable } from '../components/TableView/TasksTable'
@@ -126,13 +126,14 @@ export function TasksWorkspace({
       <div className="flex items-center gap-2 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--bg-card)]/60">
         {/* Sidebar toggle (drawer mode only) */}
         {showSidebarToggle && (
-          <button
+          <IconButton
+            variant="ghost"
+            size="sm"
             onClick={onSidebarToggle}
-            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-colors"
             aria-label="Open task navigation"
           >
             <Icons.menu className="w-4 h-4" />
-          </button>
+          </IconButton>
         )}
 
         {/* Search */}
@@ -146,12 +147,16 @@ export function TasksWorkspace({
             className="w-full pl-9 pr-8 py-1.5 text-[13px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent-border)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
           />
           {globalFilter && (
-            <button
+            <IconButton
+              variant="ghost"
+              size="sm"
+              className="absolute right-2 top-1/2 -translate-y-1/2"
+              title="Clear search"
+              aria-label="Clear search"
               onClick={() => setGlobalFilter('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             >
               <Icons.x className="w-3 h-3" />
-            </button>
+            </IconButton>
           )}
         </div>
 
@@ -232,16 +237,18 @@ export function TasksWorkspace({
               </div>
             )}
             {activeFilterCount > 0 && (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
                 onClick={() => {
                   onPriorityFilterChange([])
                   onProjectFilterChange('ALL')
                   onTeamFilterChange('ALL')
                 }}
-                className="w-full text-left px-2 pt-2 border-t border-[var(--border-subtle)] text-[11px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               >
                 Clear filters
-              </button>
+              </Button>
             )}
           </PopoverContent>
         </Popover>
@@ -263,28 +270,23 @@ export function TasksWorkspace({
           </PopoverTrigger>
           <PopoverContent align="start" className="w-40 p-2 bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-lg rounded-lg">
             {[
-              { label: 'Newest', value: 'newest' },
-              { label: 'Oldest', value: 'oldest' },
-              { label: 'Priority ↑', value: 'priority_asc' },
-              { label: 'Priority ↓', value: 'priority_desc' },
-              { label: 'Due soonest', value: 'due_asc' },
-              { label: 'Due latest', value: 'due_desc' },
+              { label: 'Newest', value: 'updated' },
+              { label: 'Priority', value: 'priority' },
+              { label: 'Due soonest', value: 'dueDate' },
+              { label: 'Title A–Z', value: 'title' },
             ].map(opt => (
-              <button
+              <Button
                 key={opt.value}
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
                 onClick={() => {
                   onSortChange?.(opt.value)
                   setSortOpen(false)
                 }}
-                className={cn(
-                  'w-full text-left px-2.5 py-1.5 rounded-lg text-[12px] font-medium transition-colors',
-                  sortBy === opt.value
-                    ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
-                    : 'text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
-                )}
               >
                 {opt.label}
-              </button>
+              </Button>
             ))}
           </PopoverContent>
         </Popover>
@@ -342,6 +344,7 @@ export function TasksWorkspace({
                         emptyState={null}
                         rowSelection={rowSelection}
                         setRowSelection={setRowSelection}
+                        getRowId={(row) => String(row.id)}
                         onTaskClick={onTaskClick}
                         onQuickComplete={onQuickComplete}
                         onQuickDelete={onQuickDelete}

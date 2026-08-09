@@ -64,7 +64,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
   const toggleInspector = useCallback(() => {
     setInspectorOpen((prev) => {
       const next = !prev;
-      try { localStorage.setItem(INSPECTOR_STORAGE_KEY, String(next)); } catch (e) {}
+      try { localStorage.setItem(INSPECTOR_STORAGE_KEY, String(next)); } catch (e) { /* localStorage unavailable */ }
       return next;
     });
   }, []);
@@ -78,7 +78,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
       const next = new Set(prev);
       if (next.has(roleId)) next.delete(roleId);
       else next.add(roleId);
-      try { localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify([...next])); } catch (e) {}
+      try { localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify([...next])); } catch (e) { /* localStorage unavailable */ }
       return next;
     });
   }, []);
@@ -86,7 +86,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
   const pushRecentRole = useCallback((roleId) => {
     setRecentRoleIds((prev) => {
       const next = [roleId, ...prev.filter((id) => id !== roleId)].slice(0, RECENT_LIMIT);
-      try { localStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(next)); } catch (e) {}
+      try { localStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(next)); } catch (e) { /* localStorage unavailable */ }
       return next;
     });
   }, []);

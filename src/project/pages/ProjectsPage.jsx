@@ -13,7 +13,7 @@ import { useOrgTeams } from '@/organization';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { PageShell, PageHero, PageStats, PageToolbar, PageContent, PageEmptyState, FloatingActions } from '@/shared/ui/PageShell';
 import { FilterTabs } from '@/shared/ui/FilterTabs';
-import { SearchPlugin } from '@/shared/workspace-framework/toolbar/plugins/SearchPlugin';
+import { SearchPlugin } from '@/shared/workspace-framework';
 import { getPortfolioMetrics, calculateHealthScore, formatRelativeDate } from '../features/utils/projectUtils';
 import {
   FolderKanban, Plus, TrendingUp, CalendarClock,
@@ -29,6 +29,7 @@ const PROJECT_TABS = [
 
 export function ProjectsPage() {
   const [globalFilter, setGlobalFilter] = useState('');
+  const [debouncedFilter, setDebouncedFilter] = useState('');
   const [activeTab, setActiveTab] = useState('ALL');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const navigate = useNavigate();
@@ -37,7 +38,13 @@ export function ProjectsPage() {
   const { canCreateProject } = usePermissions();
   const canCreate = workspaceMode === 'PERSONAL' || workspaceMode === 'CREWS' || canCreateProject;
 
-  const { data: allProjects = [], isLoading, isError, error, refetch } = useProjects({ search: globalFilter });
+  // Debounce search input to avoid per-keystroke API requests
+  React.useEffect(() => {
+    const timer = setTimeout(() => setDebouncedFilter(globalFilter), 300);
+    return () => clearTimeout(timer);
+  }, [globalFilter]);
+
+  const { data: allProjects = [], isLoading, isError, error, refetch } = useProjects({ search: debouncedFilter });
   const createProjectMutation = useCreateProject();
 
   const projects = useMemo(() => {

@@ -218,6 +218,7 @@ export function FocusTimer({ task, onTaskComplete }) {
           variant="outline"
           size="lg"
           title="Reset Timer"
+          aria-label="Reset timer"
           onClick={resetTimer}
           className="rounded-full w-9 h-9 sm:w-10 sm:h-10 border-[var(--color-border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
         >
@@ -251,6 +252,7 @@ export function FocusTimer({ task, onTaskComplete }) {
           variant="outline"
           size="lg"
           title={soundEnabled ? "Mute Chime" : "Enable Chime"}
+          aria-label={soundEnabled ? "Mute chime" : "Enable chime"}
           onClick={() => setSoundEnabled(!soundEnabled)}
           className={cn(
             "rounded-full w-9 h-9 sm:w-10 sm:h-10 border-[var(--color-border-subtle)] transition-colors",

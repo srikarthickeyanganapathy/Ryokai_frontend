@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
@@ -47,18 +47,35 @@ export function TasksPage() {
 
   const [taskScope, setTaskScope] = useState('all')
   const [globalFilter, setGlobalFilter] = useState('')
+  const [debouncedFilter, setDebouncedFilter] = useState('')
+  const debounceRef = useRef(null)
+
+  // Debounce search input by 300ms to avoid per-keystroke re-filters
+  useEffect(() => {
+    debounceRef.current = setTimeout(() => setDebouncedFilter(globalFilter), 300)
+    return () => clearTimeout(debounceRef.current)
+  }, [globalFilter])
+
   const [priorityFilter, setPriorityFilter] = useState([])
   const [projectFilter, setProjectFilter] = useState('ALL')
   const [teamFilter, setTeamFilter] = useState('ALL')
   const [sortBy, setSortBy] = useState('dueDate')
   const [rowSelection, setRowSelection] = useState({})
   const [selectedTask, setSelectedTask] = useState(null)
+  const [currentPage, setCurrentPage] = useState(0)
+  const PAGE_SIZE = 50
 
   const { workspaceMode, activeOrganization } = useWorkspace()
-  const { data: rawTasks = [], isLoading, isError, error, refetch } = useTaskList()
+  const { data: taskData, isLoading, isError, error, refetch } = useTaskList({ page: currentPage, size: PAGE_SIZE })
+  const rawTasks = taskData?.tasks ?? []
+  const totalCount = taskData?.totalCount ?? 0
+  const totalPages = taskData?.totalPages ?? 0
   const { data: allProjects = [] } = useProjects()
   const { data: orgTeams = [] } = useOrgTeams(activeOrganization?.id)
   const { data: allUsers } = useUsersList()
+
+  // Reset page when workspace/scope/filters change
+  useEffect(() => { setCurrentPage(0) }, [workspaceMode, activeOrganization?.id, taskScope, debouncedFilter, priorityFilter])
 
   const projectsList = useMemo(() => (allProjects || []).map((p) => ({ id: p.id, name: p.name })), [allProjects])
   const teamsList = useMemo(() => (orgTeams || []).map((t) => ({ id: t.id, name: t.name })), [orgTeams])
@@ -68,8 +85,8 @@ export function TasksPage() {
     if (!rawTasks) return []
     let result = filterTasksByWorkspace(rawTasks, workspaceMode, activeOrganization)
 
-    if (globalFilter) {
-      const lower = globalFilter.toLowerCase()
+    if (debouncedFilter) {
+      const lower = debouncedFilter.toLowerCase()
       result = result.filter(
         (t) => t.title?.toLowerCase().includes(lower) || t.description?.toLowerCase().includes(lower)
       )
@@ -122,7 +139,7 @@ export function TasksPage() {
     workspaceMode,
     activeOrganization,
     taskScope,
-    globalFilter,
+    debouncedFilter,
     priorityFilter,
     sortBy,
     user,
@@ -219,8 +236,10 @@ export function TasksPage() {
   const handleQuickDelete = (id) => deleteTaskMutation.mutate(id)
 
   /* ─── Bulk operations ─── */
-  const selectedIndices = Object.keys(rowSelection).map(Number)
-  const selectedTasks = selectedIndices.map((i) => tasks[i]).filter(Boolean)
+  const selectedIds = Object.keys(rowSelection)
+  const selectedTasks = selectedIds
+    .map((id) => tasks.find((t) => String(t.id) === id))
+    .filter(Boolean)
   const [isBulkAssignOpen, setIsBulkAssignOpen] = useState(false)
 
   const handleBulkComplete = () => {
@@ -452,6 +471,33 @@ export function TasksPage() {
         }
       />
 
+      {/* ── Pagination bar ── */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl mt-4">
+          <span className="text-[12px] text-[var(--text-tertiary)]">
+            {totalCount} tasks · Page {currentPage + 1} of {totalPages}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage <= 0}
+              onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+            >
+              ← Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage >= totalPages - 1}
+              onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+            >
+              Next →
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* ── Reassign modal ── */}
       <Modal open={!!reassignData} onOpenChange={(o) => !o && setReassignData(null)}>
         <ModalContent className="sm:max-w-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 rounded-lg">
@@ -500,7 +546,7 @@ export function TasksPage() {
       {/* ── Bulk assign modal ── */}
       <Modal open={isBulkAssignOpen} onOpenChange={setIsBulkAssignOpen}>
         <ModalContent className="sm:max-w-sm bg-[var(--bg-card)] border border-[var(--border-subtle)] p-4 rounded-lg">
-          <Heading level={4} className="mb-3 text-[var(--text-primary)]">
+          <Heading level={3} className="mb-3 text-[var(--text-primary)]">
             Assign to
           </Heading>
           <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar">

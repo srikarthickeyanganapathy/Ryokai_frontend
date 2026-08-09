@@ -13,7 +13,7 @@ import {
   ProjectDrawer,
   TeamDrawer,
 } from '@/shared/workspace-framework'
-import { SignalDrawer } from '@/dashboard/features/SignalDrawer'
+import { SignalDrawer } from '@/dashboard'
 
 /** Registry of contextual drawers keyed by drawer ID. */
 const DRAWER_REGISTRY = {

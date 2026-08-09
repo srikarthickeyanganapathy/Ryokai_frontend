@@ -7,20 +7,10 @@ import React, { useMemo } from 'react'
 import ExplorerNavBar from './ExplorerNavBar'
 import { AlertTriangle, ArrowDown, ArrowUp, Route, ShieldAlert } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
-
-const STATUS_COLORS = {
-  COMPLETED: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-  DONE: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-  IN_PROGRESS: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
-  IN_REVIEW: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  SUBMITTED: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  OPEN: 'text-slate-400 bg-slate-500/10 border-slate-500/30',
-  TODO: 'text-slate-400 bg-slate-500/10 border-slate-500/30'
-}
-
+import { resolveStatus } from '@/shared/lib/statusregistry'
 function TaskRow({ task, onClick, depth = 0, isActive }) {
   const status = task.status || task.currentStatus || 'OPEN'
-  const statusColor = STATUS_COLORS[status] || STATUS_COLORS.OPEN
+  const statusColor = resolveStatus(status).colorClass || resolveStatus('TODO').colorClass
 
   return (
     <button

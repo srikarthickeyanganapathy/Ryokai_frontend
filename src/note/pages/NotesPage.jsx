@@ -8,7 +8,7 @@ import {
   Lightbulb, BookOpen, Archive, LayoutGrid, List as ListIcon,
   PenLine, Check, Timer, CornerDownLeft, TrendingUp
 } from '@/shared/ui/Icons'
-import { Button } from '@/shared/ui/Button'
+import { Button, IconButton } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Input } from '@/shared/ui/Input'
 import { Badge } from '@/shared/ui/Badge'
@@ -21,7 +21,7 @@ import { PageState } from '@/shared/ui/PageState'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { InteractiveCard } from '@/shared/ui/InteractiveCard'
 import { SPRINGS, TIMING, EASING, STAGGER_FAST } from '@/shared/lib/uxTokens'
-import { useWorkspace } from '@/shared/workspace-framework'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
 /* ──────────────────────────────────────────────────────────
  * Color System — maps note.color to gradient + accent styles
@@ -310,20 +310,12 @@ function NoteCard({ note, index, onOpen, onDelete, onTogglePin, isPinnedSection 
             "flex items-center gap-0.5 shrink-0 transition-opacity",
             isPinnedSection ? "opacity-80" : "opacity-0 group-hover:opacity-100"
           )}>
-            <button
-              onClick={(e) => { e.stopPropagation(); onTogglePin(note) }}
-              className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer"
-              title={note.isPinned ? 'Unpin' : 'Pin'}
-            >
+            <IconButton variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onTogglePin(note) }} className="w-6 h-6" title={note.isPinned ? 'Unpin' : 'Pin'}>
               <Pin className={cn('w-3 h-3', note.isPinned ? 'fill-[var(--accent)] text-[var(--accent)]' : 'text-[var(--text-muted)]')} />
-            </button>
-            <button
-              onClick={(e) => onDelete(e, note.id)}
-              className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-[var(--danger-soft)] transition-colors cursor-pointer"
-              title="Delete"
-            >
-              <Trash2 className="w-3 h-3 text-[var(--text-muted)] hover:text-[var(--danger)]" />
-            </button>
+            </IconButton>
+            <IconButton variant="ghost" size="sm" onClick={(e) => onDelete(e, note.id)} className="w-6 h-6 hover:text-[var(--danger)]" title="Delete">
+              <Trash2 className="w-3 h-3" />
+            </IconButton>
           </div>
         </div>
 
@@ -461,12 +453,12 @@ function StreamDay({ group, onOpen, onDelete, onTogglePin }) {
                     {note.updatedAt ? format(new Date(note.updatedAt), 'h:mm a') : ''}
                   </span>
                   <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={(e) => { e.stopPropagation(); onTogglePin(note) }} className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer" title="Pin">
+                    <IconButton variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onTogglePin(note) }} className="w-6 h-6" title="Pin">
                       <Pin className={cn('w-3 h-3', note.isPinned ? 'fill-[var(--accent)] text-[var(--accent)]' : 'text-[var(--text-muted)]')} />
-                    </button>
-                    <button onClick={(e) => onDelete(e, note.id)} className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-[var(--danger-soft)] transition-colors cursor-pointer" title="Delete">
-                      <Trash2 className="w-3 h-3 text-[var(--text-muted)] hover:text-[var(--danger)]" />
-                    </button>
+                    </IconButton>
+                    <IconButton variant="ghost" size="sm" onClick={(e) => onDelete(e, note.id)} className="w-6 h-6 hover:text-[var(--danger)]" title="Delete">
+                      <Trash2 className="w-3 h-3" />
+                    </IconButton>
                   </div>
                 </div>
               </InteractiveCard>
@@ -775,9 +767,9 @@ export function NotesPage() {
               className="pl-9 h-8 text-[12px]"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer">
+              <IconButton variant="ghost" size="sm" className="absolute right-2.5 top-1/2 -translate-y-1/2" onClick={() => setSearchQuery('')} title="Clear search">
                 <span className="text-[14px]">×</span>
-              </button>
+              </IconButton>
             )}
           </div>
 

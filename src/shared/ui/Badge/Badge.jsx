@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { cn } from '@/shared/lib/cn'
 
-export function Badge({ className, variant = 'default', size = 'md', ...props }) {
+export const Badge = memo(function Badge({ className, variant = 'default', size = 'md', ...props }) {
   const badgeVariants = {
     default: 'bg-[var(--bg-hover)] text-[var(--text-secondary)] border border-[var(--border-subtle)]',
     primary: 'bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)]',
@@ -30,4 +30,4 @@ export function Badge({ className, variant = 'default', size = 'md', ...props })
       {...props}
     />
   )
-}
+})

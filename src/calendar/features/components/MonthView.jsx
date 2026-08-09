@@ -39,7 +39,7 @@ function CalendarDayCell({ day, isCurrentMonth, heat = 0, children, onAddClick, 
 function CalendarTaskChip({ task, onClick }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task.id, data: task })
   const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50, opacity: 0.8 } : undefined
-  const typeColors = { MILESTONE: 'bg-purple-500/10 text-purple-500 border-purple-500/20' }
+  const typeColors = { MILESTONE: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]' }
   const colorClass = task.type === 'MILESTONE' ? typeColors.MILESTONE : (PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM)
 
   return (

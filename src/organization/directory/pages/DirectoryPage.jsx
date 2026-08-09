@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import {
@@ -7,8 +7,8 @@ import {
   useRemoveMember,
   useOrgRoles,
   useOrgTeams,
-} from '../../features/hooks/useOrganizations';
-import { useTaskList } from '@/task/entities/hooks/useTasks';
+} from '@/organization';
+import { useTaskList } from '@/task';
 import { Heading, Text } from '@/shared/ui/Typography';
 import {
   Mail,
@@ -113,10 +113,19 @@ export function DirectoryPage() {
   const { data: members = [], isLoading: isMembersLoading } = useOrgMembers(orgId);
   const { data: roles = [] } = useOrgRoles(orgId);
   const { data: teams = [], isLoading: isTeamsLoading } = useOrgTeams(orgId);
-  const { data: allTasks = [], isLoading: isTasksLoading } = useTaskList({});
+  const { data: { tasks: allTasks = [] } = {}, isLoading: isTasksLoading } = useTaskList({});
 
   // Local interface UI state
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const searchDebounceRef = useRef(null)
+
+  // Debounce search input by 300ms to avoid per-keystroke re-filters
+  useEffect(() => {
+    searchDebounceRef.current = setTimeout(() => setDebouncedSearchQuery(searchQuery), 300)
+    return () => clearTimeout(searchDebounceRef.current)
+  }, [searchQuery])
+
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table' | 'orgchart'
   const [groupByRole, setGroupByRole] = useState(false);
   const [selectedRoleFilter, setSelectedRoleFilter] = useState('ALL');
@@ -221,7 +230,7 @@ export function DirectoryPage() {
   // ───────── Multi-criteria Filter Execution ─────────
 
   const filteredMembers = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
+    const q = debouncedSearchQuery.toLowerCase().trim();
     const now = Date.now();
     const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
 
@@ -248,7 +257,7 @@ export function DirectoryPage() {
           && memberTeamsMap[member.userId].some(t => (t.id?.toString() ?? t.name) === selectedTeamFilter));
       return nameMatch && roleMatch && teamMatch;
     });
-  }, [members, searchQuery, selectedRoleFilter, selectedTeamFilter, memberTeamsMap, memberTasksMap, quickView]);
+  }, [members, debouncedSearchQuery, selectedRoleFilter, selectedTeamFilter, memberTeamsMap, memberTasksMap, quickView]);
 
   // Role grouping cluster calculations for Grid mode
   const groupedMembers = useMemo(() => {
@@ -873,6 +882,9 @@ export function DirectoryPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Compare team members"
             onClick={() => setCompareModalOpen(false)}
           >
             <motion.div
@@ -896,6 +908,7 @@ export function DirectoryPage() {
                   size="sm"
                   onClick={() => setCompareModalOpen(false)}
                   className="h-8 w-8"
+                  aria-label="Close comparison"
                 >
                   <X className="w-4 h-4" />
                 </IconButton>
@@ -1278,6 +1291,7 @@ function MemberCardGrid({
                         size="sm"
                         className="h-7 w-7 opacity-80 hover:opacity-100 transition-opacity"
                         title="Remove Member"
+                        aria-label="Remove member"
                         onClick={async () => {
                           if (
                             await confirm({

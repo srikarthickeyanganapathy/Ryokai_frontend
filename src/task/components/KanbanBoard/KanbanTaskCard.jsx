@@ -11,7 +11,7 @@ import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
 /* ─── Priority accent bars ─── */
 const PRIORITY_ACCENTS = {
-  URGENT:  { bar: 'bg-red-500', glow: 'shadow-[0_0_16px_rgba(239,68,68,0.15)]', border: 'border-red-500/20 hover:border-red-500/40' },
+  URGENT:  { bar: 'bg-[var(--danger)]', glow: 'shadow-[0_0_16px_var(--danger-soft)]', border: 'border-[var(--danger)]/20 hover:border-[var(--danger)]/40' },
   HIGH:    { bar: 'bg-orange-400', glow: 'shadow-[0_0_12px_rgba(251,146,60,0.12)]', border: 'border-orange-400/20 hover:border-orange-400/35' },
   MEDIUM:  { bar: 'bg-[var(--accent)]', glow: 'shadow-[0_0_12px_var(--accent-border)]', border: 'border-[var(--accent-border)] hover:border-[var(--accent-border)]' },
   LOW:     { bar: 'bg-[var(--text-tertiary)]', glow: '', border: '' },

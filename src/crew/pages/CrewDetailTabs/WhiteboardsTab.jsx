@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heading, Text, Label } from '@/shared/ui/Typography';
-import { Button } from '@/shared/ui/Button';
+import { Button, IconButton } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Link } from 'react-router-dom';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog';
@@ -327,22 +327,26 @@ function WhiteboardCard({ board, crewId, isCreator, onDelete, isFavorite, onTogg
 
           {/* Action Buttons */}
           <div className="flex items-center gap-1">
-            <button
+            <IconButton
+              variant="ghost"
+              size="sm"
               onClick={(e) => { e.preventDefault(); onToggleFavorite(board.id); }}
-              className="p-1.5 rounded-md hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-amber-500 transition-colors"
               title={isFavorite ? "Unstar" : "Star"}
+              aria-label={isFavorite ? "Unstar whiteboard" : "Star whiteboard"}
             >
               <Star className={cn("w-4 h-4", isFavorite && "fill-amber-500 text-amber-500")} />
-            </button>
+            </IconButton>
             
             {isCreator && (
-              <button
+              <IconButton
+                variant="ghost"
+                size="sm"
                 onClick={(e) => onDelete(e, board.id)}
-                className="p-1.5 rounded-md hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors"
                 title="Delete Whiteboard"
+                aria-label="Delete whiteboard"
               >
                 <Trash2 className="w-4 h-4" />
-              </button>
+              </IconButton>
             )}
 
             <Link
@@ -379,22 +383,28 @@ function WhiteboardCard({ board, crewId, isCreator, onDelete, isFavorite, onTogg
 
         {/* Quick Action Overlay */}
         <div className="absolute top-2.5 right-2.5 flex gap-1 opacity-90 group-hover:opacity-100 transition-opacity">
-          <button 
-            onClick={(e) => { e.preventDefault(); onToggleFavorite(board.id); }} 
-            className="p-1.5 rounded-lg bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border-subtle)] hover:border-[var(--accent-border)] text-[var(--text-muted)] hover:text-amber-500 transition-colors shadow-xs"
+          <IconButton 
+            variant="ghost"
+            size="sm"
+            className="bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border-subtle)] hover:border-[var(--accent-border)]"
+            onClick={(e) => { e.preventDefault(); onToggleFavorite(board.id); }}
             title={isFavorite ? "Unstar" : "Star"}
+            aria-label={isFavorite ? "Unstar whiteboard" : "Star whiteboard"}
           >
             <Star className={cn("w-3.5 h-3.5", isFavorite && "fill-amber-500 text-amber-500")} />
-          </button>
+          </IconButton>
 
           {isCreator && (
-            <button 
-              onClick={(e) => onDelete(e, board.id)} 
-              className="p-1.5 rounded-lg bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border-subtle)] hover:border-[var(--danger-border)] text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors shadow-xs"
+            <IconButton 
+              variant="ghost"
+              size="sm"
+              className="bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border-subtle)] hover:border-[var(--danger-border)]"
+              onClick={(e) => onDelete(e, board.id)}
               title="Delete"
+              aria-label="Delete whiteboard"
             >
               <Trash2 className="w-3.5 h-3.5" />
-            </button>
+            </IconButton>
           )}
         </div>
       </div>

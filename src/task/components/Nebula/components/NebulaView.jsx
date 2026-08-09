@@ -9,13 +9,7 @@ import useGraphWorkspace from '../hooks/useGraphWorkspace';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { useAuth } from '@/identity';
 import { filterTasksByWorkspace } from '@/shared/lib/workspaceTaskFilter';
-
-const PRIORITY_COLORS = {
-  URGENT: '#ef4444',
-  HIGH: '#f97316',
-  MEDIUM: '#3b82f6',
-  LOW: '#10b981'
-};
+import { PRIORITY_HEX } from '@/shared/lib/priority';
 
 const transformTasksToWorkGraph = (tasks = []) => {
   const nodes = [];
@@ -24,7 +18,7 @@ const transformTasksToWorkGraph = (tasks = []) => {
 
   tasks.forEach(task => {
     const priority = (task.priority || 'MEDIUM').toUpperCase();
-    const color = PRIORITY_COLORS[priority] || '#3b82f6';
+    const color = PRIORITY_HEX[priority] || '#3b82f6';
 
     nodes.push({
       id: task.id,

@@ -8,9 +8,7 @@ import { Textarea } from '@/shared/ui/Textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/Select';
 import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { ImmersiveEmptyState } from '@/shared/ui/Immersive';
-import { useCreateCrewTask } from '@/crew';
-import { useCompleteCrewTask, TaskPanel } from '@/task';
-import { useClaimTask } from '@/task';
+import { useCreateTask, useCompleteCrewTask, useClaimTask, TaskPanel } from '@/task';
 import { useAuth } from '@/identity';
 import { cn } from '@/shared/lib/cn';
 import { PRIORITY_COLORS, normalizePriority } from '@/shared/lib/priority';
@@ -195,7 +193,9 @@ export function TasksTab({ crewId, tasks }) {
   const [selectedTasks, setSelectedTasks] = useState(new Set())
   const [showFilters, setShowFilters] = useState(false)
 
-  const createTaskMutation = useCreateCrewTask(crewId)
+  // FIX: reuse the shared useTasks hook — useCreateTask routes to POST /tasks/crew
+  // in CREWS workspace mode (same backend contract, single mutation source of truth).
+  const createTaskMutation = useCreateTask()
   const claimTaskMutation = useClaimTask()
   const completeTaskMutation = useCompleteCrewTask()
 
@@ -208,7 +208,7 @@ export function TasksTab({ crewId, tasks }) {
   const handleCreateTask = (e) => {
     e.preventDefault()
     if (!title.trim()) return
-    createTaskMutation.mutate({ title, description, priority, dueDate: dueDate || null }, {
+    createTaskMutation.mutate({ title, description, priority, dueDate: dueDate || null, crewId: Number(crewId) }, {
       onSuccess: () => { setIsCreateOpen(false); setTitle(''); setDescription(''); setPriority('MEDIUM'); setDueDate('') }
     })
   }

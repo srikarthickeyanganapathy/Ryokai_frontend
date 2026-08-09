@@ -118,8 +118,8 @@ function getMemberWorkload(username, tasks = []) {
     badgeClass = 'bg-rose-500/10 text-rose-500 border-rose-500/20';
   } else if (count >= 3) {
     level = 'Medium';
-    colorClass = 'bg-amber-500';
-    badgeClass = 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+    colorClass = 'bg-[var(--warning)]';
+    badgeClass = 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning-border)]';
   }
 
   return {
@@ -381,6 +381,7 @@ function MemberCard({ member, isCreator, index, searchQuery, workload, onSelect,
                 size="sm"
                 className="h-8 w-8 text-[var(--danger)] hover:bg-[var(--danger-soft)]"
                 title="Remove Member"
+                aria-label="Remove member"
                 onClick={() => onRemove(member.userId)}
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -501,6 +502,8 @@ function MemberTable({ members, isCreator, searchQuery, getWorkload, onSelect, o
                             variant="ghost"
                             size="sm"
                             className="h-8 w-8 text-[var(--danger)] hover:bg-[var(--danger-soft)]"
+                            title="Remove member"
+                            aria-label="Remove member"
                             onClick={() => onRemove(member.userId)}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -708,7 +711,7 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
 
   // Queries & Mutations
   const { data: fetchedMembers, isLoading: isMembersLoading, isError: isMembersError, refetch: refetchMembers } = useCrewMembers(crewId);
-  const { data: rawCrewTasks = [] } = useTaskList({ crewId });
+  const { data: { tasks: rawCrewTasks = [] } = {} } = useTaskList({ crewId });
 
   const inviteMutation = useInviteCrewMember(crewId);
   const inviteLinkMutation = useCreateCrewInviteLink(crewId);
@@ -959,12 +962,16 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
               className="w-full h-8 pl-9 pr-8 text-[12px] font-medium bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg focus:outline-none focus:border-[var(--accent)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] transition-all shadow-sm"
             />
             {searchQuery && (
-              <button
+              <IconButton
+                variant="ghost"
+                size="sm"
+                className="absolute right-2 top-1/2 -translate-y-1/2"
+                title="Clear search"
+                aria-label="Clear search"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5"
               >
                 <X className="w-3.5 h-3.5" />
-              </button>
+              </IconButton>
             )}
           </div>
 

@@ -44,6 +44,7 @@ export function ChecklistForm({ onSubmit, isLoading }) {
           variant="outline" 
           size="sm"
           disabled={isLoading}
+          aria-label="Add checklist item"
           className="shrink-0"
         >
           {isLoading 

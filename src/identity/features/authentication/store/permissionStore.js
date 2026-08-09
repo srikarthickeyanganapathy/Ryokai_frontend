@@ -1,6 +1,28 @@
 import { create } from 'zustand';
 
 /**
+ * Pure function: check if a permission code exists in a permissions array.
+ * This is the canonical source of truth — used by both inline computed
+ * booleans AND the Zustand store snapshot.
+ */
+export const resolvePermission = (permissionName, permissionList) => {
+  if (!permissionList?.length) return false;
+  return permissionList.some(p =>
+    (typeof p === 'string' ? p : p?.name) === permissionName
+  );
+};
+
+/**
+ * Pure function: check if a role name exists in a roles array.
+ */
+export const resolveRole = (roleName, roleList) => {
+  if (!roleList?.length) return false;
+  return roleList.some(r =>
+    (typeof r === 'string' ? r : r?.name) === roleName
+  );
+};
+
+/**
  * Zustand store for managing the frontend snapshot of the user's permissions.
  * React Query remains the authoritative source of truth for the server state.
  * This store merely caches a synchronized snapshot to allow fast, synchronous
@@ -40,7 +62,7 @@ export const usePermissionStore = create((set, get) => ({
   hasPermission: (permissionName) => {
     const { permissions, isLoaded } = get();
     if (!isLoaded) return false;
-    return permissions.some(p => (typeof p === 'string' ? p : p.name) === permissionName);
+    return resolvePermission(permissionName, permissions);
   },
 
   /**
@@ -49,6 +71,6 @@ export const usePermissionStore = create((set, get) => ({
   hasRole: (roleName) => {
     const { roles, isLoaded } = get();
     if (!isLoaded) return false;
-    return roles.some(r => r.name === roleName);
+    return resolveRole(roleName, roles);
   }
 }));

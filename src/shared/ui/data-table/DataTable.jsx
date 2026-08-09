@@ -25,6 +25,7 @@ export function DataTable({
   rowSelection,
   setRowSelection,
   onRowClick,
+  getRowId,
 }) {
   const [sorting, setSorting] = React.useState([])
 
@@ -41,6 +42,7 @@ export function DataTable({
       ...(rowSelection !== undefined ? { rowSelection } : {}),
     },
     enableRowSelection: true,
+    ...(getRowId ? { getRowId } : {}),
   })
 
   return (

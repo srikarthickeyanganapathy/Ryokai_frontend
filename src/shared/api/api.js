@@ -7,6 +7,22 @@ const api = axios.create({
   withCredentials: false
 });
 
+/**
+ * Debounced error toast — prevents flooding when many queries fail simultaneously
+ * (e.g. backend down triggers 10+ concurrent API calls).
+ */
+let lastToastMessage = '';
+let lastToastTime = 0;
+const TOAST_DEBOUNCE_MS = 3000;
+const debouncedToast = (message) => {
+  const now = Date.now();
+  if (message !== lastToastMessage || now - lastToastTime > TOAST_DEBOUNCE_MS) {
+    lastToastMessage = message;
+    lastToastTime = now;
+    toast.error(message, { id: 'api-error' });
+  }
+};
+
 // We no longer use proactive refresh because cross-tab race conditions on the timer
 // cause the backend to detect token reuse and revoke all sessions.
 // Instead, we use Web Locks API in the reactive interceptor to cleanly handle concurrency.
@@ -40,8 +56,10 @@ api.interceptors.request.use(
 );
 
 // --- Date Transform ---
-const transformDates = (obj) => {
+const transformDates = (obj, seen = new WeakSet()) => {
   if (obj === null || obj === undefined || typeof obj !== 'object') return obj;
+  if (seen.has(obj)) return obj; // guard against circular references
+  seen.add(obj);
 
   for (const key of Object.keys(obj)) {
     const val = obj[key];
@@ -63,11 +81,11 @@ const transformDates = (obj) => {
       } else {
         // Only recursively transform if it's an array of objects to prevent accidental primitive corruption
         if (val.length > 0 && typeof val[0] === 'object') {
-          transformDates(val);
+          transformDates(val, seen);
         }
       }
     } else if (typeof val === 'object') {
-      transformDates(val);
+      transformDates(val, seen);
     }
   }
   return obj;
@@ -148,19 +166,19 @@ api.interceptors.response.use(
           toast.error(error.response.data?.message || "Conflict error");
         }
       } else if (error.response.status === 400 && error.response.data) {
-        // Extract detailed validation errors from Spring Boot responses
         const data = error.response.data;
         if (data.errors && typeof data.errors === 'object') {
           const details = Object.values(data.errors).join(', ');
           data.message = data.message ? `${data.message}: ${details}` : details;
         }
+        toast.error(data.message || 'Validation error');
       } else if (error.response.status === 429) {
-        toast.error("Rate limited — please slow down");
+        debouncedToast("Rate limited — please slow down");
       } else if (error.response.status >= 500) {
-        toast.error("Server error — try again");
+        debouncedToast("Server error — try again");
       }
     } else if (error.message === 'Network Error') {
-      toast.error("Network error — check your connection");
+      debouncedToast("Network error — check your connection");
     }
 
     return Promise.reject(error);

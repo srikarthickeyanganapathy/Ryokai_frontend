@@ -67,10 +67,10 @@ function PriorityBreakdown({ tasks }) {
   }
 
   const colors = {
-    Urgent: { bar: 'bg-red-500', text: 'text-red-500' },
-    High: { bar: 'bg-orange-500', text: 'text-orange-500' },
-    Medium: { bar: 'bg-yellow-500', text: 'text-yellow-500' },
-    Low: { bar: 'bg-blue-500', text: 'text-blue-500' },
+    Urgent: { bar: 'bg-red-500', text: 'text-[var(--danger)]' },
+    High: { bar: 'bg-orange-500', text: 'text-[var(--warning)]' },
+    Medium: { bar: 'bg-yellow-500', text: 'text-[var(--warning)]' },
+    Low: { bar: 'bg-blue-500', text: 'text-[var(--accent)]' },
   }
 
   return (
@@ -217,7 +217,7 @@ function BurndownBurnupChart({ tasks, dateRange }) {
             onClick={() => setMode('burnup')}
             className={cn(
               'px-2.5 py-1 rounded-md text-[10px] font-medium transition-all',
-              mode === 'burnup' ? 'bg-[var(--bg-card)] text-emerald-500 shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+              mode === 'burnup' ? 'bg-[var(--bg-card)] text-[var(--success)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
             )}
           >
             <TrendingUp className="w-3 h-3 inline mr-1" />
@@ -340,9 +340,9 @@ function CycleTimeAnalysis({ tasks }) {
       <div className="grid grid-cols-4 gap-2 mb-3">
         {[
           { label: 'Average', value: `${metrics.avg}h`, color: 'text-[var(--accent)]' },
-          { label: 'Min', value: `${metrics.min}h`, color: 'text-emerald-500' },
+          { label: 'Min', value: `${metrics.min}h`, color: 'text-[var(--success)]' },
           { label: 'Max', value: `${metrics.max}h`, color: 'text-[var(--danger)]' },
-          { label: 'Median', value: `${metrics.median}h`, color: 'text-amber-500' },
+          { label: 'Median', value: `${metrics.median}h`, color: 'text-[var(--warning)]' },
         ].map(m => (
           <motion.div
             key={m.label}
@@ -440,7 +440,7 @@ function ThroughputMetrics({ tasks, dateRange }) {
         </div>
         <div className="flex items-center gap-1">
           <span className="text-[var(--text-muted)]">Best week:</span>
-          <span className="font-semibold text-emerald-500 tabular-nums">{Math.max(...weeklyData.data)}</span>
+          <span className="font-semibold text-[var(--success)] tabular-nums">{Math.max(...weeklyData.data)}</span>
         </div>
         <div className="flex items-center gap-1">
           <span className="text-[var(--text-muted)]">Weeks:</span>
@@ -481,7 +481,7 @@ function PredictiveForecast({ tasks, throughputAvg }) {
           variant="subtle"
           className={cn(
             'text-[9px] ml-auto',
-            confidence > 70 ? 'text-emerald-500' : confidence > 50 ? 'text-amber-500' : 'text-[var(--danger)]'
+            confidence > 70 ? 'text-[var(--success)]' : confidence > 50 ? 'text-[var(--warning)]' : 'text-[var(--danger)]'
           )}
         >
           {confidence}% confidence
@@ -549,7 +549,7 @@ function TeamComparison({ teamTasks, teamName, insights }) {
             {diff !== 0 && (
               <div className={cn(
                 'flex items-center gap-0.5 text-[9px] font-medium',
-                diff > 0 ? 'text-emerald-500' : 'text-[var(--danger)]'
+                diff > 0 ? 'text-[var(--success)]' : 'text-[var(--danger)]'
               )}>
                 {diff > 0 ? <ArrowUpRight className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
                 {Math.abs(diff)}{m.format === 'pct' ? 'pp' : ''}
@@ -578,7 +578,7 @@ function KeyInsights({ tasks, insights }) {
       items.push({
         icon: insights.completionRateDelta > 0 ? TrendingUp : TrendingDown,
         text: `Completion rate ${direction} ${Math.abs(insights.completionRateDelta)}% ${insights.dateRangeLabel || 'this week'}`,
-        color: insights.completionRateDelta > 0 ? 'text-emerald-500' : 'text-amber-500',
+        color: insights.completionRateDelta > 0 ? 'text-[var(--success)]' : 'text-[var(--warning)]',
       })
     }
 
@@ -588,7 +588,7 @@ function KeyInsights({ tasks, insights }) {
       items.push({
         icon: AlertCircle,
         text: `Review bottleneck detected — ${reviewTasks} tasks awaiting review`,
-        color: 'text-amber-500',
+        color: 'text-[var(--warning)]',
       })
     }
 
@@ -741,7 +741,7 @@ export function InsightsTab({ teamTasks, teamProjects, insights }) {
       {/* ── Header: Key Insights + Date Range + Export ── */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-amber-500" />
+          <Sparkles className="w-4 h-4 text-[var(--warning)]" />
           <Heading level={4} className="text-[13px] font-semibold">Key Insights</Heading>
         </div>
         <div className="flex items-center gap-2">
@@ -870,9 +870,9 @@ export function InsightsTab({ teamTasks, teamProjects, insights }) {
           <div className="grid grid-cols-4 gap-2 mt-4 pt-3 border-t border-[var(--border-subtle)]">
             {[
               { label: 'To Do', val: statusBreakdown.todo, color: 'text-slate-500' },
-              { label: 'Progress', val: statusBreakdown.inProgress, color: 'text-blue-500' },
-              { label: 'Review', val: statusBreakdown.review, color: 'text-purple-500' },
-              { label: 'Done', val: statusBreakdown.done, color: 'text-emerald-500' },
+              { label: 'Progress', val: statusBreakdown.inProgress, color: 'text-[var(--accent)]' },
+              { label: 'Review', val: statusBreakdown.review, color: 'text-[var(--accent)]' },
+              { label: 'Done', val: statusBreakdown.done, color: 'text-[var(--success)]' },
             ].map(s => (
               <div key={s.label} className="text-center">
                 <div className={cn('text-lg font-bold tabular-nums', s.color)}>{Math.round((s.val / Math.max(teamTasks.length, 1)) * 100)}%</div>
@@ -885,7 +885,7 @@ export function InsightsTab({ teamTasks, teamProjects, insights }) {
         {/* Priority Breakdown */}
         <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-2 mb-3">
-            <Icons.flag className="w-4 h-4 text-amber-500" />
+            <Icons.flag className="w-4 h-4 text-[var(--warning)]" />
             <Heading level={4} className="text-[13px] font-semibold">Active Tasks by Priority</Heading>
           </div>
           <PriorityBreakdown tasks={teamTasks} />
@@ -937,7 +937,7 @@ export function InsightsTab({ teamTasks, teamProjects, insights }) {
                     <div className="flex items-center gap-2 shrink-0 text-[10px]">
                       <span className="text-[var(--accent)] font-semibold tabular-nums">{m.active}</span>
                       <span className="text-[var(--text-muted)]">/</span>
-                      <span className="text-emerald-500 font-semibold tabular-nums">{m.done}</span>
+                      <span className="text-[var(--success)] font-semibold tabular-nums">{m.done}</span>
                       <span className="text-[var(--text-muted)] tabular-nums">({m.completionRate}%)</span>
                     </div>
                   </div>
@@ -1002,7 +1002,7 @@ export function InsightsTab({ teamTasks, teamProjects, insights }) {
           {/* Quick stats */}
           <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-[var(--border-subtle)]">
             <div className="text-center">
-              <div className="text-sm font-bold text-amber-500 tabular-nums">{insights?.busiestMember ? '●' : '—'}</div>
+              <div className="text-sm font-bold text-[var(--warning)] tabular-nums">{insights?.busiestMember ? '●' : '—'}</div>
               <div className="text-[9px] text-[var(--text-muted)] uppercase">Busiest</div>
               {insights?.busiestMember && <div className="text-[10px] font-medium truncate">@{insights.busiestMember}</div>}
             </div>
@@ -1020,7 +1020,7 @@ export function InsightsTab({ teamTasks, teamProjects, insights }) {
         {/* Attention Items */}
         <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-2 mb-3">
-            <Icons.alertCircle className="w-4 h-4 text-amber-500" />
+            <Icons.alertCircle className="w-4 h-4 text-[var(--warning)]" />
             <Heading level={4} className="text-[13px] font-semibold">Attention Required</Heading>
           </div>
           <div className="grid grid-cols-3 gap-2">
@@ -1030,10 +1030,10 @@ export function InsightsTab({ teamTasks, teamProjects, insights }) {
               transition={{ delay: 0.05 }}
               className="flex flex-col items-center p-3 rounded-lg bg-red-500/5 border border-red-500/10"
             >
-              <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center mb-2">
-                <Icons.alertTriangle className="w-4 h-4 text-red-500" />
+              <div className="w-8 h-8 rounded-lg bg-[var(--danger-soft)] flex items-center justify-center mb-2">
+                <Icons.alertTriangle className="w-4 h-4 text-[var(--danger)]" />
               </div>
-              <div className="text-lg font-bold text-red-500 tabular-nums">{insights?.highPriorityCount || 0}</div>
+              <div className="text-lg font-bold text-[var(--danger)] tabular-nums">{insights?.highPriorityCount || 0}</div>
               <div className="text-[10px] text-[var(--text-muted)] text-center">High Priority</div>
             </motion.div>
             <motion.div
@@ -1042,10 +1042,10 @@ export function InsightsTab({ teamTasks, teamProjects, insights }) {
               transition={{ delay: 0.1 }}
               className="flex flex-col items-center p-3 rounded-lg bg-amber-500/5 border border-amber-500/10"
             >
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center mb-2">
-                <Icons.helpCircle className="w-4 h-4 text-amber-500" />
+              <div className="w-8 h-8 rounded-lg bg-[var(--warning-soft)] flex items-center justify-center mb-2">
+                <Icons.helpCircle className="w-4 h-4 text-[var(--warning)]" />
               </div>
-              <div className="text-lg font-bold text-amber-500 tabular-nums">{insights?.unassignedCount || 0}</div>
+              <div className="text-lg font-bold text-[var(--warning)] tabular-nums">{insights?.unassignedCount || 0}</div>
               <div className="text-[10px] text-[var(--text-muted)] text-center">Unassigned</div>
             </motion.div>
             <motion.div
@@ -1066,7 +1066,7 @@ export function InsightsTab({ teamTasks, teamProjects, insights }) {
         {/* Project Status Breakdown */}
         <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-2 mb-3">
-            <Icons.folder className="w-4 h-4 text-amber-500" />
+            <Icons.folder className="w-4 h-4 text-[var(--warning)]" />
             <Heading level={4} className="text-[13px] font-semibold">Project Status</Heading>
           </div>
 

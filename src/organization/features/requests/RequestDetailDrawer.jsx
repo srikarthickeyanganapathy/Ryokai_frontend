@@ -84,19 +84,19 @@ export function RequestDetailDrawer({ request, isOpen, onClose }) {
     switch (status) {
       case 'APPROVED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--success-soft)] text-[var(--success)] border border-[var(--success-border)]">
             <CheckCircle2 className="w-4 h-4" /> Approved & Locked
           </span>
         );
       case 'REJECTED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-500 border border-red-500/20">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--danger-soft)] text-[var(--danger)] border border-[var(--danger-border)]">
             <XCircle className="w-4 h-4" /> Rejected / Declined
           </span>
         );
       case 'OFFBOARDING':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--warning-soft)] text-[var(--warning)] border border-amber-500/20">
             <ShieldAlert className="w-4 h-4" /> Offboarding Checklist Active
           </span>
         );
@@ -194,7 +194,7 @@ export function RequestDetailDrawer({ request, isOpen, onClose }) {
                     {(request.isEmergency || request.isHalfDay) && (
                       <div className="flex items-center gap-2 pt-2 border-t border-[var(--border-subtle)] mt-2">
                         {request.isEmergency && (
-                          <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-red-500/10 text-red-500 border border-red-500/20 flex items-center gap-1">
+                          <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-[var(--danger-soft)] text-[var(--danger)] border border-[var(--danger-border)] flex items-center gap-1">
                             <AlertCircle className="w-3 h-3" /> Marked Emergency Absence
                           </span>
                         )}
@@ -249,7 +249,7 @@ export function RequestDetailDrawer({ request, isOpen, onClose }) {
             {/* System Guardrail Impact Analysis */}
             <div className="p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/30 space-y-2">
               <div className="flex items-center gap-2 text-xs font-medium text-[var(--text-primary)]">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                <ShieldCheck className="w-4 h-4 text-[var(--success)]" />
                 <span>Assignment Validator Protection</span>
               </div>
               <Text size="xs" variant="muted" className="leading-relaxed">
@@ -286,7 +286,7 @@ export function RequestDetailDrawer({ request, isOpen, onClose }) {
                       size="sm"
                       onClick={handleReject}
                       disabled={actions.isProcessing}
-                      className="text-xs text-red-500 hover:bg-red-500/10 hover:text-red-600"
+                      className="text-xs text-[var(--danger)] hover:bg-[var(--danger-soft)] hover:text-[var(--danger)]"
                     >
                       Decline
                     </Button>

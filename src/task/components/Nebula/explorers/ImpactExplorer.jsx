@@ -5,9 +5,9 @@ import { cn } from '@/shared/lib/cn'
 
 const PRIORITY_BADGE = {
   URGENT: 'text-rose-400 bg-rose-500/10 border-rose-500/30',
-  HIGH: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  MEDIUM: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
-  LOW: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30'
+  HIGH: 'text-amber-400 bg-[var(--warning-soft)] border-amber-500/30',
+  MEDIUM: 'text-blue-400 bg-[var(--accent-soft)] border-blue-500/30',
+  LOW: 'text-emerald-400 bg-[var(--success-soft)] border-emerald-500/30'
 }
 
 export default function ImpactExplorer({ context, navigator, analysis, onCenterOnGraph }) {
@@ -155,7 +155,7 @@ export default function ImpactExplorer({ context, navigator, analysis, onCenterO
           </div>
           <div className="flex flex-wrap gap-1.5">
             {affectedAssignees.map(name => (
-              <span key={name} className="text-[11px] px-2 py-1 rounded-full bg-purple-500/10 border border-purple-500/25 text-purple-300 font-mono">
+              <span key={name} className="text-[11px] px-2 py-1 rounded-full bg-[var(--accent-soft)] border border-purple-500/25 text-purple-300 font-mono">
                 {name}
               </span>
             ))}

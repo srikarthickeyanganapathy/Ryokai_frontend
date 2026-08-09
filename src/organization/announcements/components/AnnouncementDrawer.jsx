@@ -9,10 +9,10 @@ import { Text } from '@/shared/ui/Typography';
 import { MarkdownPreviewer } from '@/shared/ui/MarkdownPreviewer';
 
 const PRIORITY_CONFIG = {
-  CRITICAL: { bg: 'bg-red-500/10', text: 'text-red-500', label: 'Critical' },
-  HIGH: { bg: 'bg-orange-500/10', text: 'text-orange-500', label: 'High' },
-  MEDIUM: { bg: 'bg-blue-500/10', text: 'text-blue-500', label: 'Medium' },
-  LOW: { bg: 'bg-gray-500/10', text: 'text-gray-500', label: 'Low' },
+  CRITICAL: { bg: 'bg-[var(--danger-soft)]', text: 'text-[var(--danger)]', label: 'Critical' },
+  HIGH: { bg: 'bg-[var(--warning-soft)]', text: 'text-[var(--warning)]', label: 'High' },
+  MEDIUM: { bg: 'bg-[var(--accent-soft)]', text: 'text-[var(--accent)]', label: 'Medium' },
+  LOW: { bg: 'bg-[var(--bg-subtle)]', text: 'text-[var(--text-muted)]', label: 'Low' },
 };
 
 export function AnnouncementDrawer({ announcement, isOpen, onClose, onPin, onDelete, canManage }) {
@@ -58,7 +58,7 @@ export function AnnouncementDrawer({ announcement, isOpen, onClose, onPin, onDel
           <MarkdownPreviewer content={announcement.content} className="text-[var(--text-primary)]" />
           
           {announcement.expiresAt && (
-            <div className={cn("mt-6 p-3 rounded-lg border flex items-center gap-2 text-xs", isExpired ? "bg-red-500/10 border-red-500/20 text-red-500" : "bg-[var(--bg-subtle)] border-[var(--border-subtle)] text-[var(--text-secondary)]")}>
+            <div className={cn("mt-6 p-3 rounded-lg border flex items-center gap-2 text-xs", isExpired ? "bg-[var(--danger-soft)] border-[var(--danger-border)] text-[var(--danger)]" : "bg-[var(--bg-subtle)] border-[var(--border-subtle)] text-[var(--text-secondary)]")}>
               <Icons.clock className="w-3.5 h-3.5" />
               {isExpired ? `Expired ${formatRelative(new Date(announcement.expiresAt), new Date())}` : `Expires ${formatRelative(new Date(announcement.expiresAt), new Date())}`}
             </div>
@@ -68,7 +68,7 @@ export function AnnouncementDrawer({ announcement, isOpen, onClose, onPin, onDel
           <div className="mt-6">
             <Text className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">Attachments</Text>
             <div className="border border-dashed border-[var(--border-subtle)] rounded-lg p-3 flex items-center gap-3 bg-[var(--bg-subtle)]/30">
-              <div className="w-9 h-9 rounded bg-red-500/10 text-red-500 flex items-center justify-center">
+              <div className="w-9 h-9 rounded bg-[var(--danger-soft)] text-[var(--danger)] flex items-center justify-center">
                 <Icons.paperclip className="w-4 h-4" />
               </div>
               <div className="flex-1">

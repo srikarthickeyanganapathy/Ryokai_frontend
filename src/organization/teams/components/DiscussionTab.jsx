@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Text } from '@/shared/ui/Typography'
-import { Button } from '@/shared/ui/Button'
+import { Button, IconButton } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
 import { ImmersiveEmptyState } from '@/shared/ui/Immersive'
 import { cn } from '@/shared/lib/cn'
@@ -371,9 +371,9 @@ export function DiscussionTab({ messages = [], messagesLoading, user, canManage,
               className="w-full pl-8 pr-3 py-1.5 bg-[var(--bg-subtle)] rounded-lg text-[12px] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/30 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-[var(--accent-soft)]">
-                <Icons.x className="w-3 h-3 text-[var(--text-muted)]" />
-              </button>
+              <IconButton variant="ghost" size="sm" className="absolute right-2 top-1/2 -translate-y-1/2" onClick={() => setSearchQuery('')} title="Clear search">
+                <Icons.x className="w-3 h-3" />
+              </IconButton>
             )}
           </div>
 
@@ -533,7 +533,7 @@ export function DiscussionTab({ messages = [], messagesLoading, user, canManage,
                             'p-1 rounded-md transition-all',
                             pinnedMessages.includes(msg.id)
                               ? 'text-[var(--accent)] bg-[var(--accent-soft)]'
-                              : 'text-[var(--text-muted)] hover:text-amber-500 hover:bg-amber-500/10'
+                              : 'text-[var(--text-muted)] hover:text-[var(--warning)] hover:bg-[var(--warning-soft)]'
                           )}
                           title={pinnedMessages.includes(msg.id) ? 'Unpin' : 'Pin'}
                         >

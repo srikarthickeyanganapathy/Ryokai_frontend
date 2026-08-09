@@ -375,7 +375,7 @@ export function ChannelsTab({ crewId, channels = [], isCreator }) {
                         <span className="truncate">{chan.name}</span>
                       </span>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
                         {isCreator && (
                           <button 
                             onClick={(e) => handleDeleteChannel(chan.id, e)} 
@@ -470,7 +470,7 @@ export function ChannelsTab({ crewId, channels = [], isCreator }) {
                   >
                     {(m.username || 'U').charAt(0).toUpperCase()}
                   </div>
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-[var(--bg-card)]" />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[var(--success)] ring-2 ring-[var(--bg-card)]" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-1">

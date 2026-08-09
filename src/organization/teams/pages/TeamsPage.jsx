@@ -7,6 +7,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { Icons } from '@/shared/ui/Icons'
 import { PageShell, PageHero, PageContent, PageStats, PageToolbar } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
+import { formatTimeAgo } from '@/shared/pages/overview/OverviewWidgets'
 import { SegmentedToggle } from '@/shared/ui/SegmentedToggle'
 import { useOrgTeams, useOrgMembers } from '../../features/hooks/useOrganizations'
 import { useTaskList } from '@/task'
@@ -39,18 +40,6 @@ const MOOD_EMOJIS = ['🚀', '🔥', '⚡', '🎯', '🌟', '💡', '🛠️', '
 
 function teamMood(name) {
   return MOOD_EMOJIS[hashIndex(name, MOOD_EMOJIS.length)]
-}
-
-function formatTimeAgo(dateStr) {
-  if (!dateStr) return null
-  const diff = Date.now() - new Date(dateStr).getTime()
-  const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return `${mins}m ago`
-  const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
-  const days = Math.floor(hrs / 24)
-  return `${days}d ago`
 }
 
 function pseudoActivityTimestamp(teamId) {
@@ -864,6 +853,9 @@ function QuickCreateModal({ isOpen, onClose, onCreateWithTemplate }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Create new team"
         >
           <div className="absolute inset-0 bg-black/40" onClick={handleClose} />
           <motion.div
@@ -1145,7 +1137,7 @@ export const TeamsPage = () => {
   const orgId = activeOrganization?.id
   const { data: teams = [], isLoading: teamsLoading } = useOrgTeams(orgId)
   const { data: members = [] } = useOrgMembers(orgId)
-  const { data: allTasks = [] } = useTaskList({ scope: 'org' })
+  const { data: { tasks: allTasks = [] } = {} } = useTaskList({ scope: 'org' })
   const { data: allProjects = [] } = useProjects()
 
   const { canManage, canCreateTeam, canManageTeam } = usePermissions()
@@ -1171,11 +1163,11 @@ export const TeamsPage = () => {
     try {
       const stored = localStorage.getItem('ryokai_team_favorites')
       return stored ? JSON.parse(stored) : []
-    } catch { return [] }
+    } catch { /* parse error */ return [] }
   })
 
   useEffect(() => {
-    try { localStorage.setItem('ryokai_team_favorites', JSON.stringify(favorites)) } catch {}
+    try { localStorage.setItem('ryokai_team_favorites', JSON.stringify(favorites)) } catch { /* localStorage unavailable */ }
   }, [favorites])
 
   const toggleFavorite = useCallback((teamId) => {

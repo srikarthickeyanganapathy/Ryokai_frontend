@@ -254,7 +254,7 @@ export default function UIDesignSystem() {
                 <Button isLoading>Loading</Button>
                 <Button disabled>Disabled</Button>
                 <Button variant="primary"><Icons.settings className="mr-2 h-4 w-4" /> With Icon</Button>
-                <IconButton><Icons.settings className="h-5 w-5" /></IconButton>
+                <IconButton aria-label="Style guide demo icon button"><Icons.settings className="h-5 w-5" /></IconButton>
               </ShowcaseGroup>
             </Section>
 

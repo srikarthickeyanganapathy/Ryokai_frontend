@@ -252,7 +252,7 @@ export function WeekView({ tasks = [], events = [], currentDate, isLoading, onTa
             const dateKey = format(day, 'yyyy-MM-dd')
             const allDayEvents = (eventsByDate[dateKey] || []).filter(ev => ev.isAllDay)
             const dayTasks = (tasksByDate[dateKey] || []).filter(t => t.status !== 'Done')
-            const typeColors = { MILESTONE: 'bg-purple-500/10 text-purple-500 border-purple-500/20' }
+            const typeColors = { MILESTONE: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]' }
             return (
               <div key={dateKey} className="px-1 pb-1.5 border-r border-[var(--border-subtle)] last:border-r-0">
                 <div className="text-center relative group">

@@ -7,9 +7,9 @@ import { cn } from '@/shared/lib/cn'
 
 const PRIORITY_STYLE = {
   URGENT: 'text-rose-400 bg-rose-500/10 border-rose-500/30',
-  HIGH: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  MEDIUM: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
-  LOW: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30'
+  HIGH: 'text-amber-400 bg-[var(--warning-soft)] border-amber-500/30',
+  MEDIUM: 'text-blue-400 bg-[var(--accent-soft)] border-blue-500/30',
+  LOW: 'text-emerald-400 bg-[var(--success-soft)] border-emerald-500/30'
 }
 
 function Stat({ icon: Icon, label, value, color, onClick }) {

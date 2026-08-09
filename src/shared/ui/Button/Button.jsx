@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react'
+import React, { forwardRef, memo } from 'react'
 import { cn } from '@/shared/lib/cn'
 import { Slot } from '@radix-ui/react-slot'
 
@@ -18,7 +18,7 @@ const buttonSizes = {
   xl: 'h-12 px-6 text-sm rounded-full gap-2',
 }
 
-export const Button = forwardRef(({
+export const Button = memo(forwardRef(({
   className,
   variant = 'primary',
   size = 'md',
@@ -60,8 +60,9 @@ export const Button = forwardRef(({
       )}
     </Comp>
   )
-})
-Button.displayName = 'Button'
+}));
+
+Button.displayName = 'Button';
 
 export const IconButton = forwardRef(({ className, size = 'md', ...props }, ref) => {
   const iconSizes = {

@@ -13,7 +13,7 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { KanbanColumn } from './KanbanColumn'
 import { KanbanTaskCard } from './KanbanTaskCard'
 import { normalizeStatus, getKanbanColumnForTask, KANBAN_COLUMNS, toBackendStatus } from '@/shared/lib/status'
-import { useSubmitTask, useApproveTask, useRejectTask, useReassignTask, useUpdateTask, useCompletePersonalTask, useCompleteCrewTask, useRecallTask } from '../../entities/hooks/useTasks'
+import { useSubmitTask, useApproveTask, useRejectTask, useReassignTask, useCompletePersonalTask, useCompleteCrewTask, useRecallTask } from '../../entities/hooks/useTasks'
 import { useAuth, usePermissions, useUsersList } from '@/identity'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { toast } from 'sonner'
@@ -41,7 +41,6 @@ export function KanbanBoard({ tasks, isLoading, emptyState, onTaskClick, onTaskS
   const approveMutation = useApproveTask();
   const rejectMutation = useRejectTask();
   const reassignMutation = useReassignTask();
-  const updateTaskMutation = useUpdateTask();
 
   const completePersonalTaskMutation = useCompletePersonalTask();
   const completeCrewTaskMutation = useCompleteCrewTask();
@@ -73,6 +72,13 @@ export function KanbanBoard({ tasks, isLoading, emptyState, onTaskClick, onTaskS
     })
   }
 
+  /**
+   * @known-duplicate — This ~200-line inline status-transition router duplicates
+   * `useTaskStatusChange()` in entities/hooks/useTasks.js. The KanbanBoard version adds
+   * optimistic localTaskMap updates + reassign-modal flow that the shared hook doesn't yet
+   * support. TODO: extend useTaskStatusChange with onSuccess/onError callbacks
+   * and optimistic-update support, then replace this inline impl.
+   */
   const handleStatusTransition = async (task, targetColumn) => {
     let targetStatus = toBackendStatus(targetColumn);
     const currentStatus = toBackendStatus(task.currentStatus);
@@ -93,7 +99,10 @@ export function KanbanBoard({ tasks, isLoading, emptyState, onTaskClick, onTaskS
       if (targetStatus === 'COMPLETED') {
         completePersonalTaskMutation.mutate(task.id, { onError, onSuccess: () => fireMicroFeedback('task.complete', task) })
       } else {
-        updateTaskMutation.mutate({ id: task.id, payload: { status: targetStatus } }, { onError })
+        // FIX: backend has no reopen endpoint for personal tasks — PUT /tasks/{id}
+        // ignores `status`, so this previously failed silently. Block it explicitly.
+        toast.error('Completed personal tasks cannot be reopened')
+        rollbackTask(task.id)
       }
       return;
     }
@@ -220,7 +229,7 @@ export function KanbanBoard({ tasks, isLoading, emptyState, onTaskClick, onTaskS
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.25 }}
-      className="flex gap-4 pb-4 items-start overflow-x-auto custom-scrollbar"
+      className="flex gap-4 pb-4 items-start overflow-x-auto custom-scrollbar snap-x snap-mandatory scroll-px-4"
     >
       {confirmDialog}
       <DndContext
@@ -288,7 +297,7 @@ export function KanbanBoard({ tasks, isLoading, emptyState, onTaskClick, onTaskS
             </ModalHeader>
 
             {reassignModalTask.rejectionReason && (
-              <div className="p-3 mb-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400">
+              <div className="p-3 mb-3 rounded-xl bg-[var(--danger-soft)] border border-red-500/30 text-xs text-red-400">
                 <span className="font-semibold">Rejection Reason:</span> {reassignModalTask.rejectionReason}
               </div>
             )}

@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
@@ -182,7 +182,7 @@ export function TaskComments({ taskId, hasCommentPerm }) {
 
 export function TaskDependencies({ task, hasDependencyPerm }) {
   const { workspaceMode, activeOrganization } = useWorkspace()
-  const { data: rawTasks = [] } = useTaskList(task?.projectId ? { projectId: task.projectId } : {})
+  const { data: { tasks: rawTasks = [] } = {} } = useTaskList(task?.projectId ? { projectId: task.projectId } : {})
   const addDependency = useAddDependency(task?.id)
   const removeDependency = useRemoveDependency(task?.id)
   const [selectedId, setSelectedId] = useState('')
@@ -241,14 +241,16 @@ export function TaskDependencies({ task, hasDependencyPerm }) {
                   {dep.status || 'PENDING'}
                 </Badge>
                 {hasDependencyPerm && (
-                  <button
-                    type="button"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--danger)]"
+                  <IconButton
+                    variant="ghost"
+                    size="sm"
+                    className="p-0.5 opacity-0 group-hover:opacity-100 hover:text-[var(--danger)]"
                     onClick={() => removeDependency.mutate(dep.id)}
                     title="Remove dependency"
+                    aria-label="Remove dependency"
                   >
                     <Icons.x className="w-3 h-3" />
-                  </button>
+                  </IconButton>
                 )}
               </div>
             )
@@ -303,6 +305,7 @@ export function TaskDependencies({ task, hasDependencyPerm }) {
               size="sm"
               className="shrink-0"
               title="Add dependency"
+              aria-label="Add dependency"
             >
               <Icons.plus className="w-3.5 h-3.5" />
             </IconButton>
@@ -486,6 +489,7 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
                       size="xs" 
                       className="h-7 w-7 text-[var(--danger)] hover:bg-[var(--danger-soft)]"
                       onClick={() => deleteEvidence.mutate(item.id)}
+                      aria-label="Delete evidence"
                     >
                       <Icons.trash className="w-3.5 h-3.5" />
                     </IconButton>
@@ -601,12 +605,15 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
         >
           <div className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-lg shadow-2xl">
             <img src={previewImage} alt="Fullscreen Preview" className="max-w-full max-h-[85vh] object-contain" />
-            <button 
+            <IconButton 
+              variant="ghost"
+              size="sm"
               onClick={() => setPreviewImage(null)}
-              className="absolute top-3 right-3 p-1.5 rounded-full bg-black/60 text-white hover:bg-black transition-colors"
+              className="absolute top-3 right-3 bg-black/60 text-white hover:bg-black rounded-full"
+              aria-label="Close preview"
             >
               <Icons.x className="w-5 h-5" />
-            </button>
+            </IconButton>
           </div>
         </div>
       )}

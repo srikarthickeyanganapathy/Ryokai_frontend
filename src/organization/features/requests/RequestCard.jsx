@@ -5,7 +5,8 @@ import { RequestDetailDrawer } from './RequestDetailDrawer';
 import { Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog';
-import { Calendar, Clock, LogOut, AlertCircle, CheckCircle2, XCircle, ShieldAlert, Sparkles, ChevronRight } from '@/shared/ui/Icons';
+import { Calendar, Clock, LogOut, AlertCircle, Sparkles, ChevronRight } from '@/shared/ui/Icons';
+import { StatusBadge } from '@/shared/ui/StatusBadge';
 import { formatRelative } from 'date-fns';
 
 export function RequestCard({ request, index = 0 }) {
@@ -55,40 +56,7 @@ export function RequestCard({ request, index = 0 }) {
     actions.cancelRequest(request.id, request.requestType);
   };
 
-  const getStatusIndicator = (status) => {
-    switch (status) {
-      case 'APPROVED':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-            <CheckCircle2 className="w-3 h-3" /> Approved
-          </span>
-        );
-      case 'REJECTED':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-500 border border-red-500/20">
-            <XCircle className="w-3 h-3" /> Rejected
-          </span>
-        );
-      case 'OFFBOARDING':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-500 border border-amber-500/20">
-            <ShieldAlert className="w-3 h-3" /> Offboarding In Progress
-          </span>
-        );
-      case 'CANCELLED':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--bg-subtle)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
-            Cancelled
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--bg-subtle)] text-[var(--text-primary)] border border-[var(--border-default)]">
-            <Clock className="w-3 h-3 text-[var(--text-secondary)]" /> Pending Review
-          </span>
-        );
-    }
-  };
+  const getStatusIndicator = (status) => <StatusBadge status={status} variant="pill" />;
 
   const formatSubmittedDate = (val) => {
     try {

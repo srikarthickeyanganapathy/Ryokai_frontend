@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Modal, ModalContent, ModalHeader, ModalTitle } from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
@@ -6,43 +9,54 @@ import { Textarea } from '@/shared/ui/Textarea';
 import { Label } from '@/shared/ui/Typography';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select';
 import { useCreateAnnouncement } from '../../features/hooks/useAnnouncements';
-// The DatePicker is not guaranteed to exist in shared/ui but assuming the user meant standard inputs if missing. Let's use standard native input type="date" if DatePicker is complex, or rely on DatePicker if they have it.
-// Wait, the user specifically imported DatePicker in their snippet: `import { DatePicker } from '@/shared/ui/DatePicker';`
-// I will keep their import. If it fails, they can provide it.
 import { DatePicker } from '@/shared/ui/DatePicker';
 import { format } from 'date-fns';
 
+const announcementSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200, 'Title must be under 200 characters'),
+  content: z.string().min(1, 'Content is required'),
+  priority: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']),
+  audience: z.string().min(1),
+  category: z.string().min(1),
+  expiresAt: z.date().nullable(),
+});
+
 export function CreateAnnouncementModal({ isOpen, onClose, orgId }) {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [priority, setPriority] = useState('MEDIUM');
-  const [audience, setAudience] = useState('Entire Organization');
-  const [category, setCategory] = useState('General');
-  const [expiresAt, setExpiresAt] = useState(null);
-  
+  const { register, handleSubmit, watch, setValue, reset, formState: { errors, isValid } } = useForm({
+    resolver: zodResolver(announcementSchema),
+    defaultValues: {
+      title: '',
+      content: '',
+      priority: 'MEDIUM',
+      audience: 'Entire Organization',
+      category: 'General',
+      expiresAt: null,
+    },
+    mode: 'onChange',
+  });
+
+  const priority = watch('priority');
+  const audience = watch('audience');
+  const category = watch('category');
+  const expiresAt = watch('expiresAt');
+  const title = watch('title');
+  const content = watch('content');
+
   const createMutation = useCreateAnnouncement(orgId);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!title.trim() || !content.trim()) return;
-    
+  const onSubmit = (data) => {
     createMutation.mutate({
-      title,
-      content,
-      priority,
-      audience,
-      category,
-      expiresAt: expiresAt ? format(expiresAt, "yyyy-MM-dd'T'HH:mm:ss") : null,
+      title: data.title,
+      content: data.content,
+      priority: data.priority,
+      audience: data.audience,
+      category: data.category,
+      expiresAt: data.expiresAt ? format(data.expiresAt, "yyyy-MM-dd'T'HH:mm:ss") : null,
     }, {
       onSuccess: () => {
-        setTitle('');
-        setContent('');
-        setPriority('MEDIUM');
-        setAudience('Entire Organization');
-        setCategory('General');
-        setExpiresAt(null);
+        reset();
         onClose();
-      }
+      },
     });
   };
 
@@ -52,22 +66,21 @@ export function CreateAnnouncementModal({ isOpen, onClose, orgId }) {
         <ModalHeader>
           <ModalTitle>New Announcement</ModalTitle>
         </ModalHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
           <div className="space-y-1.5">
             <Label>Title</Label>
             <Input
               type="text"
               required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
               placeholder="Important Update"
+              {...register('title')}
             />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Priority</Label>
-              <Select value={priority} onValueChange={setPriority}>
+              <Select value={priority} onValueChange={(v) => setValue('priority', v, { shouldValidate: true })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="CRITICAL">Critical</SelectItem>
@@ -79,7 +92,7 @@ export function CreateAnnouncementModal({ isOpen, onClose, orgId }) {
             </div>
             <div className="space-y-1.5">
               <Label>Audience</Label>
-              <Select value={audience} onValueChange={setAudience}>
+              <Select value={audience} onValueChange={(v) => setValue('audience', v, { shouldValidate: true })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Entire Organization">Entire Organization</SelectItem>
@@ -93,7 +106,7 @@ export function CreateAnnouncementModal({ isOpen, onClose, orgId }) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Category</Label>
-              <Select value={category} onValueChange={setCategory}>
+              <Select value={category} onValueChange={(v) => setValue('category', v, { shouldValidate: true })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="General">General</SelectItem>
@@ -105,9 +118,9 @@ export function CreateAnnouncementModal({ isOpen, onClose, orgId }) {
             </div>
             <div className="space-y-1.5">
               <Label>Expires At (Optional)</Label>
-              <DatePicker 
+              <DatePicker
                 date={expiresAt}
-                setDate={setExpiresAt}
+                setDate={(d) => setValue('expiresAt', d, { shouldValidate: true })}
                 placeholder="Select date"
               />
             </div>
@@ -117,10 +130,8 @@ export function CreateAnnouncementModal({ isOpen, onClose, orgId }) {
             <Label>Message</Label>
             <Textarea
               required
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={5}
               placeholder="Write your announcement here... (Markdown supported)"
+              {...register('content')}
             />
           </div>
 
@@ -128,7 +139,7 @@ export function CreateAnnouncementModal({ isOpen, onClose, orgId }) {
             <Button variant="ghost" type="button" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={createMutation.isPending || !title.trim() || !content.trim()}>
+            <Button type="submit" disabled={createMutation.isPending || !isValid}>
               {createMutation.isPending ? 'Posting...' : 'Post Announcement'}
             </Button>
           </div>

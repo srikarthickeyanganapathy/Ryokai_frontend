@@ -20,6 +20,14 @@ export const PRIORITY_COLORS = {
   LOW: 'bg-[var(--bg-hover)] text-[var(--text-secondary)] border-[var(--border-subtle)]',
 }
 
+/** Hex equivalents for SVG/Canvas/3D rendering contexts that can't consume Tailwind classes */
+export const PRIORITY_HEX = {
+  URGENT: '#ef4444',
+  HIGH: '#f97316',
+  MEDIUM: '#3b82f6',
+  LOW: '#22c55e',
+}
+
 /** Normalize any priority value to a display label */
 export const normalizePriority = (p) => {
   if (!p) return 'Medium'

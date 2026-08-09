@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { MotionConfig } from "framer-motion";
 import { AppProvider } from "@/app/providers/AppProvider";
 import { ErrorBoundary } from "@/app/providers/ErrorBoundary";
 import { InspectorProvider } from "@/context/InspectorContext";
@@ -11,6 +12,7 @@ import { RouteResolver } from "@/app/router/RouteResolver";
 import { SessionExpiredListener } from "@/app/router/SessionExpiredListener";
 import { MainLayout } from "@/app/layouts/MainLayout";
 import { PlatformLayout } from "@/app/layouts/PlatformLayout";
+import { PlatformPageGuard } from "@/platform/admin/components/PlatformGuard";
 import { RouteLoader } from "@/shared/ui/RouteLoader";
 
 // Route-level code splitting
@@ -69,6 +71,7 @@ const AcceptInvitePage = Loadable(lazy(() => import("@/organization/pages/Accept
 
 export default function App() {
   return (
+    <MotionConfig reducedMotion="user">
     <ErrorBoundary>
       <InspectorProvider>
         <AppProvider>
@@ -93,17 +96,17 @@ export default function App() {
               <Route element={<ProtectedRoute />}>
                 <Route path="/invite/accept/:token" element={<AcceptInvitePage />} />
 
-                {/* PLATFORM APP (Control Plane) */}
+                {/* PLATFORM APP (Control Plane) with per-route role guards */}
                 <Route path="/platform" element={<PlatformRoute />}>
                   <Route element={<PlatformLayout />}>
                     <Route index element={<Navigate to="/platform/dashboard" replace />} />
-                    <Route path="dashboard" element={<PlatformDashboardPage />} />
-                    <Route path="organizations" element={<PlatformOrganizationsPage />} />
-                    <Route path="users" element={<PlatformUsersPage />} />
-                    <Route path="monitoring" element={<PlatformMonitoringPage />} />
-                    <Route path="audit" element={<PlatformAuditPage />} />
+                    <Route path="dashboard" element={<PlatformPageGuard><PlatformDashboardPage /></PlatformPageGuard>} />
+                    <Route path="organizations" element={<PlatformPageGuard><PlatformOrganizationsPage /></PlatformPageGuard>} />
+                    <Route path="users" element={<PlatformPageGuard><PlatformUsersPage /></PlatformPageGuard>} />
+                    <Route path="monitoring" element={<PlatformPageGuard><PlatformMonitoringPage /></PlatformPageGuard>} />
+                    <Route path="audit" element={<PlatformPageGuard><PlatformAuditPage /></PlatformPageGuard>} />
                     <Route path="health" element={<Navigate to="/platform/monitoring" replace />} />
-                    <Route path="settings" element={<PlatformSettingsPage />} />
+                    <Route path="settings" element={<PlatformPageGuard><PlatformSettingsPage /></PlatformPageGuard>} />
                   </Route>
                 </Route>
 
@@ -145,7 +148,9 @@ export default function App() {
                 </Route>
               </Route>
 
-              <Route path="/ui" element={<UIDesignSystem />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/ui" element={<UIDesignSystem />} />
+              </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <SessionExpiredListener />
@@ -153,5 +158,6 @@ export default function App() {
         </AppProvider>
       </InspectorProvider>
     </ErrorBoundary>
+    </MotionConfig>
   );
 }

@@ -10,7 +10,8 @@ import {
 } from '@/shared/ui/Icons'
 import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
-import { InsightSection, useWorkspace } from '@/shared/workspace-framework'
+import { InsightSection } from '@/shared/workspace-framework'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
 const containerVariants = {
   hidden: { opacity: 0 },

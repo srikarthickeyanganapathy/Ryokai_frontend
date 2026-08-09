@@ -4,6 +4,7 @@ export * from './features/authentication/hooks/usePermissions';
 export * from './features/authentication/hooks/useAuthMutations';
 export * from './features/authentication/model/AuthContext';
 export * from './features/authentication/api/auth.api';
+export { resolvePermission, resolveRole } from './features/authentication/store/permissionStore';
 export * from './components/auth/LoginForm';
 export * from './components/auth/RegisterForm';
 export * from './components/auth/ForgotPasswordForm';

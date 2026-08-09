@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/shared/api/api';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { usePermissions } from '@/identity/features/authentication/hooks/usePermissions';
+import { usePermissions } from '@/identity';
 
 export function OrganizationGoals() {
   const { activeOrganization } = useWorkspace();

@@ -1,19 +1,8 @@
 /**
  * Ryokai — Status Language System
- * ─────────────────────────────────────────────────────────
- * Beyond color: every status has a semantic icon, label, and
- * visual priority. Users identify icons 3x faster than color.
- *
- * Also provides the motion hierarchy:
- *   Critical (task complete, notification) → bounce spring
- *   Medium  (drawer, modal)               → normal spring
- *   Low     (hover, card lift)             → fast spring
- *
- * Motion priority table:
- *   CRITICAL  → duration 300ms, bounce ease, ripple
- *   IMPORTANT → duration 250ms, normal spring, scale
- *   STANDARD  → duration 200ms, fast spring, color-only
- *   SUBTLE    → duration 120ms, no scale, fade-only
+ * @deprecated Use `@/shared/lib/statusregistry` instead.
+ * The STATUS_MAP and MOTION_PRIORITY here are kept only for backward compat.
+ * New code should import { resolveStatus, getSemanticColor, getMotion } from '@/shared/lib/statusregistry'.
  */
 
 import React from 'react';

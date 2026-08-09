@@ -7,7 +7,7 @@ import { Icons } from '@/shared/ui/Icons';
 export function NebulaSpacePage() {
   const navigate = useNavigate();
   // Fetch all tasks for the nebula workspace overview
-  const { data: rawTasks, isLoading, isError } = useTaskList({ limit: 1000 });
+  const { data: { tasks: rawTasks = [] } = {}, isLoading, isError } = useTaskList({ limit: 1000 });
   const tasks = Array.isArray(rawTasks) ? rawTasks : rawTasks?.content || [];
 
   const [selectedTaskId, setSelectedTaskId] = useState(null);

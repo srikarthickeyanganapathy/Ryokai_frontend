@@ -119,6 +119,7 @@ export function PlatformUsersPage() {
           <DataTable 
             columns={columns}
             data={filteredUsers}
+            getRowId={(row) => row.id}
             isLoading={usersLoading || rolesLoading}
             emptyStateTitle="No users found."
           />

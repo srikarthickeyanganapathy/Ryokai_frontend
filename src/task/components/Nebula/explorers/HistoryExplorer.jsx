@@ -78,9 +78,9 @@ export default function HistoryExplorer({ context, navigator, analysis, onCenter
 
       {/* Staleness Warning */}
       {lifecycle.isStale && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/25">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--warning-soft)] border border-amber-500/25">
           <Clock size={14} className="text-amber-400 shrink-0" />
-          <span className="text-xs text-amber-500 font-medium">
+          <span className="text-xs text-[var(--warning)] font-medium">
             No activity for {lifecycle.daysSinceUpdate} days — this task may be stalled
           </span>
         </div>

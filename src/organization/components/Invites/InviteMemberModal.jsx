@@ -16,7 +16,6 @@ const EMPTY_ROLES = [];
 export function InviteMemberModal({ isOpen, onClose, orgId }) {
   const [activeTab, setActiveTab] = useState('direct'); // 'direct' or 'link'
   const [username, setUsername] = useState('');
-  const [roleId, setRoleId] = useState('');
   const [generatedLink, setGeneratedLink] = useState('');
   
   const { data: rawRoles, isLoading: rolesLoading } = useOrgRoles(orgId);
@@ -38,23 +37,28 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
     });
   }, [roles, myMembership?.rolePriority, isSuperAdmin]);
 
-  // Set default role when roles load or change
+  // Derive default role from available roles for auto-selection
+  const defaultRoleId = useMemo(() => {
+    if (assignableRoles.length === 0) return '';
+    const employeeRole = assignableRoles.find(r => r.name === 'EMPLOYEE') || assignableRoles[0];
+    return employeeRole ? employeeRole.id.toString() : '';
+  }, [assignableRoles]);
+
+  // User-selected role; resets when modal opens/closes
+  const [userSelectedRole, setUserSelectedRole] = useState('');
+  const effectiveRoleId = userSelectedRole || defaultRoleId;
+
+  // Reset user selection when modal closes
   useEffect(() => {
-    if (assignableRoles.length > 0) {
-      const isValidRole = assignableRoles.some(r => r.id.toString() === roleId);
-      if (!roleId || !isValidRole) {
-        const employeeRole = assignableRoles.find(r => r.name === 'EMPLOYEE') || assignableRoles[0];
-        if (employeeRole) {
-          setRoleId(employeeRole.id.toString());
-        }
-      }
+    if (!isOpen) {
+      setUserSelectedRole('');
     }
-  }, [assignableRoles, roleId]);
+  }, [isOpen]);
 
   const handleSubmitDirect = (e) => {
     e.preventDefault();
-    if (!username || !roleId) return;
-    inviteMutation.mutate({ username, roleId }, {
+    if (!username || !effectiveRoleId) return;
+    inviteMutation.mutate({ username, roleId: effectiveRoleId }, {
       onSuccess: () => {
         setUsername('');
         onClose();
@@ -63,8 +67,8 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
   };
 
   const handleGenerateLink = () => {
-    if (!roleId) return;
-    linkMutation.mutate(roleId, {
+    if (!effectiveRoleId) return;
+    linkMutation.mutate(effectiveRoleId, {
       onSuccess: (data) => {
         const inviteToken = data?.token || data?.inviteToken || data;
         const link = data?.link || `${window.location.origin}/invite/accept/${inviteToken}`;
@@ -110,9 +114,9 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
           <div className="space-y-1.5">
             <Label className="text-sm font-medium text-[var(--text-secondary)]">Role for new member</Label>
             <Select
-              value={roleId}
+              value={effectiveRoleId}
               onValueChange={(val) => {
-                setRoleId(val);
+                setUserSelectedRole(val);
                 setGeneratedLink('');
               }}
               disabled={rolesLoading || assignableRoles.length === 0}
@@ -144,7 +148,7 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
                 <Button type="button" variant="ghost" onClick={onClose}>
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" disabled={inviteMutation.isPending || !username || !roleId}>
+                <Button type="submit" variant="primary" disabled={inviteMutation.isPending || !username || !effectiveRoleId}>
                   {inviteMutation.isPending ? 'Inviting...' : 'Send Invite'}
                 </Button>
               </ModalFooter>
@@ -162,7 +166,7 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
                   </div>
                 ) : (
                   <div className="text-sm text-[var(--text-muted)] border border-dashed border-[var(--border-subtle)] rounded-lg p-4 text-center">
-                    Generate a secure link to allow anyone with the link to join as <strong>{assignableRoles.find(r => r.id.toString() === roleId)?.name || 'a member'}</strong>.
+                    Generate a secure link to allow anyone with the link to join as <strong>{assignableRoles.find(r => r.id.toString() === effectiveRoleId)?.name || 'a member'}</strong>.
                   </div>
                 )}
               </div>
@@ -175,7 +179,7 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
                   type="button" 
                   variant="primary" 
                   onClick={handleGenerateLink}
-                  disabled={linkMutation.isPending || !roleId}
+                  disabled={linkMutation.isPending || !effectiveRoleId}
                 >
                   {linkMutation.isPending ? 'Generating...' : generatedLink ? 'Generate New Link' : 'Generate Link'}
                 </Button>

@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Button, IconButton } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
-import { Avatar, AvatarFallback } from '@/shared/ui/Avatar';
-import { Progress } from '@/shared/ui/Progress';
+import { InteractiveCard } from '@/shared/ui/InteractiveCard';
 import { Input } from '@/shared/ui/Input';
 import {
   Modal,
@@ -18,10 +17,9 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { ImmersiveEmptyState } from '@/shared/ui/Immersive';
 import { useShareProjectWithCrew, useUnshareProjectFromCrew } from '@/crew';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   FolderKanban,
-  Star,
   ArrowUpRight,
   Unlink,
   AlertTriangle,
@@ -37,68 +35,8 @@ import {
   Clock,
   Check,
   Loader2,
-  Crown,
 } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
-
-// Radial Progress Ring Component
-function ProgressRing({ progress = 0, size = 48, strokeWidth = 4 }) {
-  const normalizedProgress = Math.min(100, Math.max(0, progress));
-  const radius = (size - strokeWidth) / 2;
-  const circumference = radius * 2 * Math.PI;
-  const offset = circumference - (normalizedProgress / 100) * circumference;
-
-  const getColor = (p) => {
-    if (p >= 75) return 'var(--success)';
-    if (p >= 40) return 'var(--warning)';
-    return 'var(--danger)';
-  };
-
-  return (
-    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="var(--bg-subtle)"
-          strokeWidth={strokeWidth}
-          fill="transparent"
-        />
-        <motion.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={getColor(normalizedProgress)}
-          strokeWidth={strokeWidth}
-          fill="transparent"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-[11px] font-bold text-[var(--text-primary)] font-mono">
-          {Math.round(normalizedProgress)}%
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// Date formatter helper
-function formatDate(dateStr) {
-  if (!dateStr) return 'Active';
-  try {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return String(dateStr);
-    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-  } catch {
-    return String(dateStr);
-  }
-}
 
 // Health Radar derivation logic
 function getHealthInfo(project) {
@@ -124,7 +62,7 @@ function getHealthInfo(project) {
       badgeVariant: 'warning',
       indicatorBg: 'bg-[var(--warning-soft)]',
       indicatorText: 'text-[#B45309] dark:text-[var(--warning)]',
-      dotColor: 'bg-amber-500',
+      dotColor: 'bg-[var(--warning)]',
       Icon: AlertTriangle,
     };
   }
@@ -150,6 +88,46 @@ function getHealthInfo(project) {
     dotColor: 'bg-emerald-500',
     Icon: CheckCircle2,
   };
+}
+
+// Team-style health score utilities (mirrors @/project/features/utils/projectUtils —
+// inlined here to respect the domain barrel boundary)
+function calculateHealthScore(project) {
+  if (!project) return 100;
+  if (project.status === 'COMPLETED' || Number(project.progress) >= 100) return 100;
+  let score = 80;
+  const progress = Number(project.progress) || 0;
+  const tasksTotal = Number(project.tasksTotal) || 0;
+  const tasksCompleted = Number(project.tasksCompleted) || 0;
+  if (tasksTotal > 0 && tasksCompleted / tasksTotal >= progress / 100) score += 5;
+  if (project.dueDate) {
+    const dueDate = new Date(project.dueDate);
+    const now = new Date();
+    const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) score -= 35;
+    else if (diffDays <= 3 && progress < 80) score -= 20;
+    else if (diffDays <= 7 && progress < 50) score -= 10;
+  }
+  if (project.status === 'OFF_TRACK') score -= 25;
+  if (project.status === 'AT_RISK') score -= 15;
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+function getHealthStatus(score) {
+  if (score >= 85) return { label: 'Excellent', tone: 'success' };
+  if (score >= 70) return { label: 'Healthy', tone: 'accent' };
+  if (score >= 50) return { label: 'At Risk', tone: 'warning' };
+  return { label: 'Critical', tone: 'danger' };
+}
+function formatRelativeDate(isoString) {
+  if (!isoString) return 'No due date';
+  const dueDate = new Date(isoString);
+  const now = new Date();
+  const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+  if (diffDays < 0) return `Overdue by ${Math.abs(diffDays)} day(s)`;
+  if (diffDays === 0) return 'Due Today';
+  if (diffDays === 1) return 'Due Tomorrow';
+  if (diffDays <= 7) return `${diffDays} days left`;
+  return dueDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
 // Shimmer Skeleton Loader for State 1
@@ -192,16 +170,23 @@ function ProjectsTabSkeleton({ viewMode }) {
 }
 
 // Project Card Component for Grid View
-function SharedProjectCard({ project, index, isFavorite, onToggleFavorite, onRequestUnshare }) {
-  const completion = project.completion ?? project.progress ?? 0;
-  const healthInfo = getHealthInfo(project);
-  const category = project.category || project.department || 'Mission';
-  const ownerName = project.createdBy || project.ownerName || project.owner?.username || 'Lead';
-  const members = project.members || project.sharedUsers || [];
+// Team-look Shared Project Card — structural clone of @/project/components/ProjectCard.
+// Click / arrow open the project workspace (functional); unshare kept only for creators
+// (backend DELETE /crew/{id}/projects/{projectId}). Favorites removed: client-only, no persistence.
+function SharedProjectCard({ project, index, canUnshare, onRequestUnshare }) {
+  const navigate = useNavigate();
+  const { id, name, description, progress = 0, tasksTotal = 0, tasksCompleted = 0, dueDate, status } = project;
+  const tasksLeft = (tasksTotal || 0) - (tasksCompleted || 0);
+  const healthScore = calculateHealthScore(project);
+  const health = getHealthStatus(healthScore);
+  const formattedDueDate = formatRelativeDate(dueDate);
+  const isOverdue = formattedDueDate.includes('Overdue');
 
-  // Derive task metrics
-  const totalTasks = project.totalTasks ?? project.tasksCount ?? (project.tasks ? project.tasks.length : 10);
-  const completedTasks = project.completedTasks ?? Math.round((completion / 100) * totalTasks);
+  const radius = 16;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - ((progress || 0) / 100) * circumference;
+
+  const handleOpen = () => navigate(`/app/projects/${id}`);
 
   return (
     <motion.div
@@ -209,126 +194,98 @@ function SharedProjectCard({ project, index, isFavorite, onToggleFavorite, onReq
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.2, delay: index * 0.04 }}
-      className="group relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden hover:border-[var(--accent-border)] hover:shadow-sm transition-all flex flex-col"
+      className="block h-full group"
     >
-      {/* Health accent bar at top */}
-      <div className={cn('h-0.5 w-full shrink-0', healthInfo.dotColor)} />
-
-      <div className="p-4 flex-1 flex flex-col">
-        {/* Header: Category & Health Chip + Favorite Action */}
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <Badge variant="outline" size="xs" className="text-[10px] uppercase tracking-wider font-semibold">
-              {category}
-            </Badge>
+      <InteractiveCard onClick={handleOpen} className="h-full flex flex-col p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-2">
             <span className={cn(
-              "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] font-medium",
-              healthInfo.indicatorText
+              "px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold border",
+              health.tone === 'success' && 'bg-green-500/10 text-green-500 border-green-500/20',
+              health.tone === 'accent' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+              health.tone === 'warning' && 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
+              health.tone === 'danger' && 'bg-red-500/10 text-red-500 border-red-500/20'
             )}>
-              <span className={cn("w-1.5 h-1.5 rounded-full", healthInfo.dotColor)} />
-              {healthInfo.label}
+              {health.label} {healthScore}
             </span>
           </div>
-
-          <IconButton
-            type="button"
-            variant="ghost"
-            size="xs"
-            onClick={() => onToggleFavorite(project.id)}
-            className="text-[var(--text-muted)] hover:text-amber-500 transition-colors shrink-0"
-            title={isFavorite ? 'Remove favorite' : 'Mark favorite'}
-          >
-            <Star className={cn("w-4 h-4", isFavorite && "fill-amber-500 text-amber-500")} />
-          </IconButton>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Badge variant="outline" className={cn('text-[10px]', status === 'COMPLETED' ? 'bg-[var(--success-soft)] text-[var(--success)]' : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)]')}>{status || 'ACTIVE'}</Badge>
+            {canUnshare && (
+              <IconButton
+                type="button"
+                variant="ghost"
+                size="xs"
+                onClick={(e) => { e.stopPropagation(); onRequestUnshare(project) }}
+                className="text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors shrink-0"
+                title="Unshare from Crew"
+                aria-label="Unshare from crew"
+              >
+                <Unlink className="w-3.5 h-3.5" />
+              </IconButton>
+            )}
+          </div>
         </div>
 
-        {/* Project Title & Info */}
-        <div className="mb-3">
-          <Heading level={4} className="text-[15px] font-semibold tracking-tight text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors line-clamp-1">
-            {project.name}
+        <button onClick={handleOpen} className="text-left w-full">
+          <Heading level={4} className="text-[15px] font-semibold tracking-tight text-[var(--text-primary)] mb-1 group-hover:text-[var(--accent)] transition-colors truncate">
+            {name}
           </Heading>
-          {project.description && (
-            <Text variant="muted" className="text-[12px] line-clamp-2 mt-1 leading-relaxed">
-              {project.description}
-            </Text>
-          )}
+        </button>
+
+        <button onClick={handleOpen} className="text-left w-full">
+          <Text size="sm" variant="muted" className="text-[12px] leading-relaxed mb-4 line-clamp-2 min-h-[32px]">
+            {description || 'No description provided.'}
+          </Text>
+        </button>
+
+        <div className="mt-auto flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]/50">
+          <button onClick={handleOpen} className="flex items-center gap-3 text-left">
+            <div className="relative w-10 h-10 flex items-center justify-center">
+              <svg className="w-10 h-10 transform -rotate-90 absolute inset-0" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r={radius} fill="none" stroke="var(--bg-subtle)" strokeWidth="3" />
+                <circle
+                  cx="18" cy="18" r={radius}
+                  fill="none"
+                  stroke="var(--accent)"
+                  strokeWidth="3"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <span className="text-[10px] font-bold text-[var(--text-primary)]">{progress || 0}%</span>
+            </div>
+            <div className="text-[11px] text-[var(--text-muted)] font-medium">
+              <div>{tasksCompleted || 0}/{tasksTotal || 0} Tasks</div>
+              <div className="text-[var(--text-tertiary)]">{tasksLeft > 0 ? `${tasksLeft} left` : 'All done'}</div>
+            </div>
+          </button>
+
+          {dueDate ? (
+            <button onClick={handleOpen} className={cn(
+              "text-[11px] font-medium px-2 py-1 rounded-md",
+              isOverdue ? "bg-red-500/10 text-red-500" : "bg-[var(--bg-subtle)] text-[var(--text-secondary)]"
+            )}>
+              {formattedDueDate}
+            </button>
+          ) : null}
+
+          <button
+            onClick={handleOpen}
+            className="text-[10px] font-medium text-[var(--text-tertiary)] hover:text-[var(--accent)] transition-colors px-2 py-1 rounded-md hover:bg-[var(--bg-subtle)]"
+            title="Open full project"
+          >
+            →
+          </button>
         </div>
-
-        {/* Radar & Task Metrics Box */}
-        <div className="p-3 bg-[var(--bg-subtle)]/60 rounded-lg border border-[var(--border-subtle)] mb-4 flex items-center justify-between gap-4">
-          <div className="flex-1 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">
-                Task Execution
-              </span>
-              <span className="font-mono text-[11px] text-[var(--text-muted)] font-semibold">
-                {completedTasks}/{totalTasks}
-              </span>
-            </div>
-            <Progress value={(completedTasks / Math.max(totalTasks, 1)) * 100} className="h-1.5" />
-            <div className="text-[10px] text-[var(--text-muted)]">
-              Updated {formatDate(project.lastUpdated || project.updatedAt)}
-            </div>
-          </div>
-          <ProgressRing progress={completion} size={44} strokeWidth={4} />
-        </div>
-
-        {/* Footer: Lead Avatar & Actions */}
-        <div className="mt-auto pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2">
-          {/* Squad Avatars */}
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="relative shrink-0" title={`Project Lead: ${ownerName}`}>
-              <Avatar size="xs">
-                <AvatarFallback className="bg-[var(--accent)] text-white font-bold text-[10px]">
-                  {ownerName.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <Crown className="w-2.5 h-2.5 text-amber-500 absolute -top-1 -right-1 drop-shadow" />
-            </div>
-
-            <div className="flex -space-x-1.5 overflow-hidden shrink-0">
-              {members.slice(0, 3).map((u, i) => (
-                <Avatar key={i} size="xs" className="border border-[var(--bg-card)]">
-                  <AvatarFallback className="bg-[var(--bg-subtle)] text-[var(--text-secondary)] text-[9px] font-semibold">
-                    {(u.username || 'M').charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-            </div>
-
-            <span className="text-[11px] text-[var(--text-muted)] truncate font-medium">
-              {ownerName}
-            </span>
-          </div>
-
-          {/* Quick Links */}
-          <div className="flex items-center gap-0.5 shrink-0">
-            <Link
-              to={`/app/projects/${project.id}`}
-              className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-colors"
-              title="Open Project Workspace"
-            >
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
-            <IconButton
-              type="button"
-              variant="ghost"
-              size="xs"
-              onClick={() => onRequestUnshare(project)}
-              className="text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors"
-              title="Unshare from Crew"
-            >
-              <Unlink className="w-4 h-4" />
-            </IconButton>
-          </div>
-        </div>
-      </div>
+      </InteractiveCard>
     </motion.div>
   );
 }
 
 // Mini-Gantt Timeline View
-function MiniGanttTimelineView({ projects, isFavorite, onToggleFavorite, onRequestUnshare }) {
+function MiniGanttTimelineView({ projects, canUnshare, onRequestUnshare }) {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const currentMonthIdx = new Date().getMonth();
   const visibleMonths = [
@@ -383,21 +340,10 @@ function MiniGanttTimelineView({ projects, isFavorite, onToggleFavorite, onReque
                       {project.name}
                     </Link>
                   </div>
-                  <IconButton
-                    type="button"
-                    variant="ghost"
-                    size="xs"
-                    onClick={() => onToggleFavorite(project.id)}
-                    className="text-[var(--text-muted)] hover:text-amber-500 transition-colors shrink-0"
-                  >
-                    <Star className={cn("w-3.5 h-3.5", isFavorite(project.id) && "fill-amber-500 text-amber-500")} />
-                  </IconButton>
+
                 </div>
 
                 <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
-                  <Badge variant="outline" size="xs" className="text-[10px]">
-                    {project.category || 'Mission'}
-                  </Badge>
                   <span className="truncate">Lead: @{ownerName}</span>
                 </div>
               </div>
@@ -428,6 +374,7 @@ function MiniGanttTimelineView({ projects, isFavorite, onToggleFavorite, onReque
                   >
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </Link>
+                  {canUnshare && (
                   <IconButton
                     type="button"
                     variant="ghost"
@@ -435,9 +382,11 @@ function MiniGanttTimelineView({ projects, isFavorite, onToggleFavorite, onReque
                     onClick={() => onRequestUnshare(project)}
                     className="text-[var(--text-muted)] hover:text-[var(--danger)] h-6 w-6"
                     title="Unshare Project"
+                    aria-label="Unshare project"
                   >
                     <Unlink className="w-3.5 h-3.5" />
                   </IconButton>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -451,6 +400,7 @@ function MiniGanttTimelineView({ projects, isFavorite, onToggleFavorite, onReque
 // Main ProjectsTab — Crew Shared Projects
 export function ProjectsTab({
   crewId,
+  isCreator = false,
   sharedProjects = [],
   allProjects = [],
   isLoading = false,
@@ -460,23 +410,12 @@ export function ProjectsTab({
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'timeline'
   const [searchQuery, setSearchQuery] = useState('');
   const [healthFilter, setHealthFilter] = useState('all');
-  const [favorites, setFavorites] = useState(new Set());
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedProjId, setSelectedProjId] = useState('');
   const [unshareTarget, setUnshareTarget] = useState(null);
 
   const shareMutation = useShareProjectWithCrew(crewId);
   const unshareMutation = useUnshareProjectFromCrew(crewId);
-
-  // Toggle Favorites
-  const toggleFavorite = (id) => {
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
 
   // Filter projects ready to share (not already shared)
   const shareableProjects = useMemo(() => {
@@ -685,8 +624,7 @@ export function ProjectsTab({
                 key={project.id}
                 project={project}
                 index={index}
-                isFavorite={favorites.has(project.id)}
-                onToggleFavorite={toggleFavorite}
+                canUnshare={isCreator}
                 onRequestUnshare={(proj) => setUnshareTarget(proj)}
               />
             ))}
@@ -696,8 +634,7 @@ export function ProjectsTab({
         /* UX State 5: Mini-Gantt Timeline View */
         <MiniGanttTimelineView
           projects={filteredProjects}
-          isFavorite={(id) => favorites.has(id)}
-          onToggleFavorite={toggleFavorite}
+          canUnshare={isCreator}
           onRequestUnshare={(proj) => setUnshareTarget(proj)}
         />
       )}

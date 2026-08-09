@@ -4,8 +4,8 @@ import { Building2, Home, Settings, ShieldAlert, Key } from '@/shared/ui/Icons';
 import { useOrganization, useOrgMembers, useOrgTeams, useLeaveRequests } from '../features/hooks/useOrganizations';
 import { usePermissions } from '@/identity';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { PageShell } from '@/shared/ui/PageShell';
 import {
-  WorkspaceShell,
   ConfigurationLayout,
   PageStateContainer,
 } from '@/shared/workspace-framework';
@@ -26,7 +26,7 @@ export function OrganizationAdministrationPage() {
   const { data: leaveRequests = [], isLoading: leaveLoading } = useLeaveRequests(orgId);
   
   const { data: projects = [], isLoading: projectsLoading } = useProjects({ organizationId: orgId });
-  const { data: tasks = [], isLoading: tasksLoading } = useTaskList({ organizationId: orgId });
+  const { data: { tasks = [] } = {}, isLoading: tasksLoading } = useTaskList({ organizationId: orgId });
   const { data: goals = [], isLoading: goalsLoading } = useGoals(orgId);
   
   const { isOrgAdmin, can } = usePermissions();
@@ -57,7 +57,7 @@ export function OrganizationAdministrationPage() {
   ];
 
   return (
-    <WorkspaceShell maxWidth="narrow">
+    <PageShell maxWidth="narrow">
       <PageStateContainer
         state={pageState}
         loadingConfig={{ variant: 'default' }}
@@ -96,6 +96,6 @@ export function OrganizationAdministrationPage() {
           )}
         </ConfigurationLayout>
       </PageStateContainer>
-    </WorkspaceShell>
+    </PageShell>
   );
 }

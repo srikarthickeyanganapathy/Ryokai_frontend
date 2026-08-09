@@ -6,13 +6,13 @@ import { useDrawerManager } from '@/shared/workspace-framework';
 import { motion } from 'framer-motion';
 
 const SIGNAL_ICON_MAP = {
-  APPROVAL_REQUIRED: { icon: CheckSquare, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-  MENTION: { icon: MessageSquare, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-  BLOCKED: { icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-500/10' },
-  TASK_DUE_SOON: { icon: Bell, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-  TASK_OVERDUE: { icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-500/10' },
-  TASK_COMMENTED: { icon: MessageSquare, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-  ANNOUNCEMENT: { icon: FileText, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+  APPROVAL_REQUIRED: { icon: CheckSquare, color: 'text-[var(--warning)]', bg: 'bg-[var(--warning-soft)]' },
+  MENTION: { icon: MessageSquare, color: 'text-[var(--accent)]', bg: 'bg-[var(--accent-soft)]' },
+  BLOCKED: { icon: AlertCircle, color: 'text-[var(--danger)]', bg: 'bg-[var(--danger-soft)]' },
+  TASK_DUE_SOON: { icon: Bell, color: 'text-[var(--warning)]', bg: 'bg-[var(--warning-soft)]' },
+  TASK_OVERDUE: { icon: AlertCircle, color: 'text-[var(--danger)]', bg: 'bg-[var(--danger-soft)]' },
+  TASK_COMMENTED: { icon: MessageSquare, color: 'text-[var(--accent)]', bg: 'bg-[var(--accent-soft)]' },
+  ANNOUNCEMENT: { icon: FileText, color: 'text-[var(--accent)]', bg: 'bg-[var(--accent-soft)]' },
 };
 
 export function SignalStrip({ interrupts }) {

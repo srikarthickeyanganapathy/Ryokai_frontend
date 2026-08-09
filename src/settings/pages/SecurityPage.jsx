@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { InteractiveCard } from '@/shared/ui/InteractiveCard'
@@ -10,9 +10,26 @@ import { SettingsRow } from '@/shared/ui/SettingsRow'
 import { Switch } from '@/shared/ui/Switch'
 import { useChangePassword } from '@/identity'
 import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
+import { toast } from 'sonner'
 
 export function SecurityPage() {
   const changePassword = useChangePassword()
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
+  const [twoFactorPending, setTwoFactorPending] = useState(false)
+
+  const handleTwoFactorToggle = async (checked) => {
+    setTwoFactorPending(true)
+    try {
+      // TODO: Replace with actual 2FA API call when backend endpoint is available
+      // await toggleTwoFactor(checked)
+      setTwoFactorEnabled(checked)
+      toast.success(checked ? 'Two-factor authentication enabled' : 'Two-factor authentication disabled')
+    } catch {
+      toast.error('Failed to update two-factor authentication')
+    } finally {
+      setTwoFactorPending(false)
+    }
+  }
 
   const form = useForm({
     defaultValues: {
@@ -179,7 +196,11 @@ export function SecurityPage() {
               <InteractiveCard padding={false} className="overflow-hidden">
                 <div className="px-6">
                   <SettingsRow label="Authenticator App (TOTP)" description="Secure your account using Google Authenticator or 1Password">
-                    <Switch defaultChecked={false} />
+                    <Switch
+                      checked={twoFactorEnabled}
+                      onCheckedChange={handleTwoFactorToggle}
+                      disabled={twoFactorPending}
+                    />
                   </SettingsRow>
                 </div>
               </InteractiveCard>

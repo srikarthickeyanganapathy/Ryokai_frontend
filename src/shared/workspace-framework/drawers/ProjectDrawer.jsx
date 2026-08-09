@@ -5,6 +5,15 @@ import { Button } from '@/shared/ui/Button'
 import { Progress } from '@/shared/ui/Progress'
 import { cn } from '@/shared/lib/cn'
 import { Calendar, Users, FolderKanban, ExternalLink, Clock } from '@/shared/ui/Icons'
+import { resolveStatus } from '@/shared/lib/statusregistry'
+
+const STATUS_CONFIG = {
+  ACTIVE: { label: 'Active', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
+  COMPLETED: { label: 'Completed', color: 'bg-sky-500/10 text-sky-500 border-sky-500/20' },
+  ON_HOLD: { label: 'On Hold', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
+  CANCELLED: { label: 'Cancelled', color: 'bg-red-500/10 text-red-500 border-red-500/20' },
+  ARCHIVED: { label: 'Archived', color: 'bg-gray-500/10 text-gray-500 border-gray-500/20' },
+}
 
 /**
  * ProjectDrawer
@@ -19,13 +28,6 @@ import { Calendar, Users, FolderKanban, ExternalLink, Clock } from '@/shared/ui/
  * WEF Boundary: Pure UI. No API calls. All data injected via props.
  */
 
-const STATUS_CONFIG = {
-  ACTIVE: { label: 'Active', color: 'bg-[var(--accent-soft)] text-[var(--accent)]' },
-  COMPLETED: { label: 'Completed', color: 'bg-[var(--success-soft)] text-[var(--success)]' },
-  ARCHIVED: { label: 'Archived', color: 'bg-[var(--bg-subtle)] text-[var(--text-muted)]' },
-  ON_HOLD: { label: 'On Hold', color: 'bg-amber-500/10 text-amber-500' },
-}
-
 export function ProjectDrawer({ data, onClose }) {
   if (!data) return null
 
@@ -35,7 +37,7 @@ export function ProjectDrawer({ data, onClose }) {
     dueDate, teamName, organizationName
   } = data
 
-  const statusConfig = STATUS_CONFIG[status] || STATUS_CONFIG.ACTIVE
+  const statusDef = STATUS_CONFIG[status] || STATUS_CONFIG.ACTIVE
   const progress = taskCount > 0 ? Math.round((completedCount / taskCount) * 100) : 0
 
   return (
@@ -50,8 +52,8 @@ export function ProjectDrawer({ data, onClose }) {
             <Heading level={3} className="text-lg font-semibold truncate">
               {name}
             </Heading>
-            <Badge className={cn('text-[10px] font-mono uppercase mt-1', statusConfig.color)}>
-              {statusConfig.label}
+            <Badge className={cn('text-[10px] font-mono uppercase mt-1', statusDef.color)}>
+              {statusDef.label}
             </Badge>
           </div>
         </div>

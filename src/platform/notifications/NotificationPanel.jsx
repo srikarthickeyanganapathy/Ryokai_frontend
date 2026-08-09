@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Bell, Trash2, X, Check, ExternalLink, Mail, UserCheck, UserX, ShieldAlert } from '@/shared/ui/Icons'
 import { Button, IconButton } from '@/shared/ui/Button'
@@ -15,7 +15,7 @@ export function NotificationPanel({ notification, isOpen, onClose }) {
   const acceptInviteMutation = useAcceptInvite()
   const declineInviteMutation = useDeclineInvite()
 
-  const { data: tasks = [] } = useTaskList()
+  const { data: { tasks = [] } = {} } = useTaskList()
   const [selectedTask, setSelectedTask] = useState(null)
 
   const [panelWidth, setPanelWidth] = useState(() => {
@@ -128,6 +128,7 @@ export function NotificationPanel({ notification, isOpen, onClose }) {
                     variant="ghost"
                     size="sm"
                     title="Delete Notification"
+                    aria-label="Delete notification"
                     onClick={handleDelete}
                     className="text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]"
                   >
@@ -138,6 +139,7 @@ export function NotificationPanel({ notification, isOpen, onClose }) {
                     variant="ghost"
                     size="sm"
                     title="Close"
+                    aria-label="Close notification"
                     onClick={onClose}
                   >
                     <X className="w-4 h-4" />

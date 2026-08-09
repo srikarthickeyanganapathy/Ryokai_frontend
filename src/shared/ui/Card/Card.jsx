@@ -1,8 +1,8 @@
-import React, { forwardRef } from 'react'
+import React, { forwardRef, memo } from 'react'
 import { cn } from '@/shared/lib/cn'
 import { Surface } from '@/shared/ui/Surface'
 
-export const Card = forwardRef(({ className, variant = 'elevated', ...props }, ref) => (
+export const Card = memo(forwardRef(({ className, variant = 'elevated', ...props }, ref) => (
   <Surface
     ref={ref}
     variant={variant}
@@ -10,7 +10,7 @@ export const Card = forwardRef(({ className, variant = 'elevated', ...props }, r
     className={cn('text-[var(--text-primary)]', className)}
     {...props}
   />
-))
+)))
 Card.displayName = 'Card'
 
 export const CardHeader = forwardRef(({ className, ...props }, ref) => (

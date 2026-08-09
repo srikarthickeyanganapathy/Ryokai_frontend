@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { cn } from '@/shared/lib/cn';
 
-export function Skeleton({ className, ...props }) {
+export const Skeleton = memo(function Skeleton({ className, ...props }) {
   return (
     <div
       className={cn('animate-pulse rounded-md bg-[var(--bg-subtle)]/70 border border-[var(--color-border-subtle)]/30', className)}
       {...props}
     />
   );
-}
+})
 
 export function TableSkeleton({ rows = 5, columns = 4, className }) {
   return (

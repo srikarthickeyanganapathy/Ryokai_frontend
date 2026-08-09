@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/shared/ui/Button';
+import { Button, IconButton } from '@/shared/ui/Button';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Badge } from '@/shared/ui/Badge';
 import { ErrorState } from '@/shared/ui/ErrorState';
@@ -246,7 +246,7 @@ export function CrewDiscoverPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-muted)] pointer-events-none" />
               <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Search squads by name or mission..."
                 className="w-full pl-9 pr-8 py-1.5 text-[13px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent)] transition-colors text-[var(--text-primary)] placeholder:text-[var(--text-muted)]" />
-              {keyword && <button onClick={() => setKeyword('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer"><X className="w-3.5 h-3.5" /></button>}
+              {keyword && <IconButton variant="ghost" size="sm" className="absolute right-2.5 top-1/2 -translate-y-1/2" onClick={() => setKeyword('')} title="Clear search"><X className="w-3.5 h-3.5" /></IconButton>}
             </div>
           </div>
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-1">

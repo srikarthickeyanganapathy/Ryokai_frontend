@@ -703,6 +703,7 @@ export function WorkloadPage() {
                   },
                 ]}
                 data={filteredRows}
+                getRowId={(row) => row.id}
                 isLoading={isLoading}
                 emptyStateTitle="No workload data"
                 emptyStateDescription="No active task assignments found in this organization."

@@ -20,7 +20,7 @@ import { queryKeys } from '@/shared/api/queryKeys'
 export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, fixedProjectId, fixedTeamId, fixedCrewId }) {
   const { workspaceMode, activeOrganization, activeCrew } = useWorkspace()
   const [taskSearchQuery, setTaskSearchQuery] = useState('')
-  const { data: searchTasks = [], isLoading: isSearchLoading } = useTaskSearch(taskSearchQuery)
+  const { data: { tasks: searchTasks = [] } = {}, isLoading: isSearchLoading } = useTaskSearch(taskSearchQuery)
 
   const { data: crews = [] } = useQuery({
     queryKey: queryKeys.crews.all,

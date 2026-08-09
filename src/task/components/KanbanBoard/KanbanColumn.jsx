@@ -56,7 +56,7 @@ export function KanbanColumn({ column, tasks, onTaskClick, onQuickComplete, onQu
       layout
       className={cn(
         "flex flex-col rounded-lg border shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-slow)] ease-[var(--ease-out)] overflow-hidden",
-        collapsed ? "w-[52px] min-w-[52px] flex-none" : "w-[85vw] max-w-[320px] sm:w-[320px] flex-shrink-0"
+        collapsed ? "w-[52px] min-w-[52px] flex-none" : "w-[85vw] max-w-[320px] sm:w-[320px] flex-shrink-0 snap-start"
       )}
       style={{ backgroundColor: style.bg, borderColor: isOver ? style.accent : style.border }}
     >

@@ -11,7 +11,7 @@ import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
 import { PageState } from '@/shared/ui/PageState';
 import { ModeSelector } from '../features/ModeSelector';
 import { WIDGET_REGISTRY } from '../config/WidgetRegistry';
-import { usePermissions } from '@/identity/features/authentication/hooks/usePermissions';
+import { usePermissions } from '@/identity';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { useAuth } from '@/identity';
 

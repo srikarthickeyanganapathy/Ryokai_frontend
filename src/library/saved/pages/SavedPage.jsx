@@ -12,10 +12,10 @@ import { cn } from '@/shared/lib/cn'
 
 const typeConfig = {
   PROJECT: { label: 'Project', accent: 'text-[var(--accent)]', bg: 'bg-[var(--accent-soft)]' },
-  ORGANIZATION: { label: 'Organization', accent: 'text-purple-500', bg: 'bg-purple-500/10' },
+  ORGANIZATION: { label: 'Organization', accent: 'text-[var(--accent)]', bg: 'bg-[var(--accent-soft)]' },
   TEAM: { label: 'Team', accent: 'text-indigo-500', bg: 'bg-indigo-500/10' },
-  TASK: { label: 'Task', accent: 'text-amber-500', bg: 'bg-amber-500/10' },
-  NOTE: { label: 'Note', accent: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+  TASK: { label: 'Task', accent: 'text-[var(--warning)]', bg: 'bg-[var(--warning-soft)]' },
+  NOTE: { label: 'Note', accent: 'text-[var(--success)]', bg: 'bg-[var(--success-soft)]' },
 }
 
 const routeFor = (item) => {
