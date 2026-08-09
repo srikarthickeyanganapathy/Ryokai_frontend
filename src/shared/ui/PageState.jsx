@@ -92,6 +92,9 @@ export function PageState({
   children,
   className,
 }) {
+  // Module-aware messages for empty state — must be called before any early return (rules of hooks)
+  const moduleIdentity = useModuleIdentity(moduleId);
+
   // ── LOADING ──
   if (state === 'loading') {
     return <PageStateSkeleton variant={stateProps.loadingVariant || 'table'} className={className} />;
@@ -106,9 +109,6 @@ export function PageState({
   const cfg = stateConfigs[state] || stateConfigs.error;
   const Icon = stateProps.icon || cfg.icon;
   const tone = stateProps.tone || cfg.tone;
-
-  // Module-aware messages for empty state
-  const moduleIdentity = moduleId ? useModuleIdentity(moduleId) : null;
 
   const title = state === 'empty'
     ? (stateProps.title || moduleIdentity?.emptyMessage?.split('.')[0] || 'Nothing here yet')

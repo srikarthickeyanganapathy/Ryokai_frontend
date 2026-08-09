@@ -57,6 +57,7 @@ export function ProgressBar({ value, className, barClassName, glow = true, heigh
 
   useEffect(() => {
     if (previous.current !== value) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- deliberate value-change animation trigger
       setGlowing(true);
       previous.current = value;
       const t = setTimeout(() => setGlowing(false), 700);

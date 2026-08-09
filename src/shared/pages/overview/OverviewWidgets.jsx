@@ -115,10 +115,10 @@ export function BottleneckDetector({ tasks }) {
           'Blocked': 'bg-[var(--danger)]',
         }
         const textColors = {
-          'Review': 'text-purple-600',
-          'In Progress': 'text-blue-600',
+          'Review': 'text-[var(--accent)]',
+          'In Progress': 'text-[var(--accent)]',
           'To Do': 'text-slate-600',
-          'Blocked': 'text-red-600',
+          'Blocked': 'text-[var(--danger)]',
         }
 
         return (
@@ -368,8 +368,8 @@ export function RecentWins({ tasks }) {
               </>
             )}
           </AnimatePresence>
-          <div className="w-6 h-6 rounded-md bg-emerald-500/10 flex items-center justify-center shrink-0">
-            <Icons.checkCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+          <div className="w-6 h-6 rounded-md bg-[var(--success-soft)] flex items-center justify-center shrink-0">
+            <Icons.checkCircle2 className="w-3.5 h-3.5 text-[var(--success)]" />
           </div>
           <div className="min-w-0 flex-1">
             <Text size="xs" className="font-medium text-[var(--text-primary)] truncate">{task.title}</Text>
@@ -429,7 +429,7 @@ export function VelocitySparkline({ tasks }) {
         </div>
         <div className={cn(
           'flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md',
-          trend === 'up' ? 'text-emerald-500 bg-emerald-500/10' : trend === 'down' ? 'text-[var(--warning)] bg-amber-500/10' : 'text-[var(--text-muted)] bg-[var(--bg-subtle)]'
+          trend === 'up' ? 'text-[var(--success)] bg-[var(--success-soft)]' : trend === 'down' ? 'text-[var(--warning)] bg-[var(--warning-soft)]' : 'text-[var(--text-muted)] bg-[var(--bg-subtle)]'
         )}>
           <Icons.trendingUp className={cn('w-3 h-3', trend === 'down' && 'rotate-180')} />
           {avg}/day
@@ -642,7 +642,7 @@ export function UpcomingDeadlines({ tasks }) {
             <span className="text-[12px] font-medium text-[var(--text-primary)] truncate flex-1">{task.title}</span>
             <span className={cn(
               'text-[10px] font-semibold tabular-nums shrink-0 px-1.5 py-0.5 rounded-md',
-              isOverdue ? 'bg-red-500/10 text-red-500' : daysLeft <= 2 ? 'bg-amber-500/10 text-amber-500' : 'text-[var(--text-muted)] bg-[var(--bg-subtle)]'
+              isOverdue ? 'bg-[var(--danger-soft)] text-[var(--danger)]' : daysLeft <= 2 ? 'bg-[var(--warning-soft)] text-[var(--warning)]' : 'text-[var(--text-muted)] bg-[var(--bg-subtle)]'
             )}>
               {isOverdue ? `${Math.abs(daysLeft)}d overdue` : daysLeft === 0 ? 'Today' : daysLeft === 1 ? '1d' : `${daysLeft}d`}
             </span>

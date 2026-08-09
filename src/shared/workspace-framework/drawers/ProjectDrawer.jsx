@@ -8,10 +8,10 @@ import { Calendar, Users, FolderKanban, ExternalLink, Clock } from '@/shared/ui/
 import { resolveStatus } from '@/shared/lib/statusregistry'
 
 const STATUS_CONFIG = {
-  ACTIVE: { label: 'Active', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
+  ACTIVE: { label: 'Active', color: 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success-border)]' },
   COMPLETED: { label: 'Completed', color: 'bg-sky-500/10 text-sky-500 border-sky-500/20' },
-  ON_HOLD: { label: 'On Hold', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
-  CANCELLED: { label: 'Cancelled', color: 'bg-red-500/10 text-red-500 border-red-500/20' },
+  ON_HOLD: { label: 'On Hold', color: 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning-border)]' },
+  CANCELLED: { label: 'Cancelled', color: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger-border)]' },
   ARCHIVED: { label: 'Archived', color: 'bg-gray-500/10 text-gray-500 border-gray-500/20' },
 }
 

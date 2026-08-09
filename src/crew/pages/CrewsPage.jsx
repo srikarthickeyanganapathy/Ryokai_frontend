@@ -438,15 +438,15 @@ export function CrewsPage() {
                 })}
               </div>
             </div>
-            <div className="space-y-1.5"><Label className="text-[12px] font-semibold text-[var(--text-secondary)]">Crew Name <span className="text-red-500">*</span></Label><Input value={crewName} onChange={(e) => setCrewName(e.target.value)} placeholder="e.g. Core Engineering, Product Guild, Apollo 11..." required className="h-10 text-[13px] rounded-lg bg-[var(--bg-card)]" /></div>
+            <div className="space-y-1.5"><Label className="text-[12px] font-semibold text-[var(--text-secondary)]">Crew Name <span className="text-[var(--danger)]">*</span></Label><Input value={crewName} onChange={(e) => setCrewName(e.target.value)} placeholder="e.g. Core Engineering, Product Guild, Apollo 11..." required className="h-10 text-[13px] rounded-lg bg-[var(--bg-card)]" /></div>
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between"><Label className="text-[12px] font-semibold text-[var(--text-secondary)]">Mission Objective</Label><span className={cn("text-[10px] font-mono", crewDesc.length > 250 ? "text-amber-500" : "text-[var(--text-muted)]")}>{crewDesc.length}/280</span></div>
+              <div className="flex items-center justify-between"><Label className="text-[12px] font-semibold text-[var(--text-secondary)]">Mission Objective</Label><span className={cn("text-[10px] font-mono", crewDesc.length > 250 ? "text-[var(--warning)]" : "text-[var(--text-muted)]")}>{crewDesc.length}/280</span></div>
               <Textarea value={crewDesc} onChange={(e) => setCrewDesc(e.target.value.slice(0, 280))} placeholder="What is the primary objective of this crew?" className="min-h-[85px] text-[13px] rounded-lg resize-none bg-[var(--bg-card)]" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-[12px] font-semibold text-[var(--text-secondary)] flex items-center gap-1.5"><UserPlus className="w-3.5 h-3.5 text-[var(--accent)]" /> Initial Member Invites</Label>
               <div className="p-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] focus-within:ring-2 focus-within:ring-[var(--accent)]/30 focus-within:border-[var(--accent)] transition-all space-y-2">
-                <div className="flex flex-wrap gap-1.5">{inviteEmails.map((email) => <span key={email} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] text-[11px] font-medium">{email}<button type="button" onClick={() => setInviteEmails(inviteEmails.filter(e => e !== email))} className="hover:text-red-500 transition-colors p-0.5"><X className="w-3 h-3" /></button></span>)}</div>
+                <div className="flex flex-wrap gap-1.5">{inviteEmails.map((email) => <span key={email} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] text-[11px] font-medium">{email}<button type="button" onClick={() => setInviteEmails(inviteEmails.filter(e => e !== email))} className="hover:text-[var(--danger)] transition-colors p-0.5"><X className="w-3 h-3" /></button></span>)}</div>
                 <input type="email" value={inviteInput} onChange={(e) => setInviteInput(e.target.value)} onKeyDown={handleAddInviteEmail} placeholder={inviteEmails.length === 0 ? "Type member email & press Enter or comma..." : "Add another email..."} className="w-full text-[12px] bg-transparent outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)]" />
               </div>
             </div>
@@ -503,7 +503,7 @@ function CrewCard({ crew, navigate, isCompareSelected = false, onToggleCompare }
           <div className="min-w-0 flex-1">
             <Heading level={4} className="text-[15px] font-bold leading-tight truncate tracking-tight text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors" title={crew.name}>{crew.name}</Heading>
             <div className="flex items-center gap-2 mt-1">
-              {isOwner ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Owner</span>
+              {isOwner ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--warning-soft)] text-[var(--warning)] border border-[var(--warning-border)]"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Owner</span>
                 : isMember ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)]"><span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" /> Member</span>
                 : <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--text-muted)]"><Globe className="w-3 h-3" /> {crew.visibility?.replace('_', ' ') || 'Public'}</span>}
             </div>

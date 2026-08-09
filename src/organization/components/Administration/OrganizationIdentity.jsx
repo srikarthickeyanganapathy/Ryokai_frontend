@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Input } from '@/shared/ui/Input';
 import { Textarea } from '@/shared/ui/Textarea';
@@ -18,16 +18,6 @@ export function OrganizationIdentity({ org }) {
   // Derive name/description from org prop directly; effects are for external sync only
   const [name, setName] = useState(org?.name || '');
   const [description, setDescription] = useState(org?.description || '');
-  const prevOrgRef = React.useRef(org?.id);
-
-  // Sync state only when org identity changes (different org loaded)
-  useEffect(() => {
-    if (org && org.id !== prevOrgRef.current && !updateOrgMutation.isPending) {
-      prevOrgRef.current = org.id;
-      setName(org.name || '');
-      setDescription(org.description || '');
-    }
-  }, [org?.id]);
 
   const handleNameBlur = () => {
     if (name.trim() && name !== org?.name) {

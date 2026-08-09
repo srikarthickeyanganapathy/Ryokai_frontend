@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AppSidebar, AppTopbar, GlobalCommandPalette } from '@/platform/workspace'
-import { WorkspaceInspector } from '@/components/inspector/WorkspaceInspector'
+import { WorkspaceInspector } from "@/shared/workspace-framework/interactions/inspector/WorkspaceInspector"
 import { useShortcuts } from "@/shared/hooks/useShortcuts"
 import { CosmicBackground } from '@/shared/ui/CosmicBackground'
 import {

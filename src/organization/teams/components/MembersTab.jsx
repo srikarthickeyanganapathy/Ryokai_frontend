@@ -18,20 +18,20 @@ function hashHue(str) {
 
 const SKILL_COLORS = {
   'React': 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20',
-  'TypeScript': 'bg-blue-500/10 text-blue-600 border-blue-500/20',
-  'JavaScript': 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
-  'Node.js': 'bg-green-500/10 text-green-600 border-green-500/20',
-  'Python': 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+  'TypeScript': 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]',
+  'JavaScript': 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning-border)]',
+  'Node.js': 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success-border)]',
+  'Python': 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]',
   'Design': 'bg-pink-500/10 text-pink-600 border-pink-500/20',
-  'Figma': 'bg-purple-500/10 text-purple-600 border-purple-500/20',
+  'Figma': 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]',
   'Backend': 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20',
-  'DevOps': 'bg-orange-500/10 text-orange-600 border-orange-500/20',
+  'DevOps': 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning-border)]',
   'Frontend': 'bg-teal-500/10 text-teal-600 border-teal-500/20',
   'Management': 'bg-slate-500/10 text-slate-600 border-slate-500/20',
   'Database': 'bg-rose-500/10 text-rose-600 border-rose-500/20',
   'Testing': 'bg-lime-500/10 text-lime-600 border-lime-500/20',
   'UI/UX': 'bg-violet-500/10 text-violet-600 border-violet-500/20',
-  'Mobile': 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+  'Mobile': 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning-border)]',
 }
 
 const AVAILABILITY = ['available', 'focus', 'busy', 'offline']
@@ -82,7 +82,7 @@ function TeamStrengthRadar({ members }) {
   return (
     <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
       <div className="flex items-center gap-2 mb-3">
-        <Icons.compass className="w-4 h-4 text-purple-500" />
+        <Icons.compass className="w-4 h-4 text-[var(--accent)]" />
         <Text className="text-[13px] font-semibold">Team Strength Radar</Text>
       </div>
       <div className="flex items-center gap-4">
@@ -245,8 +245,8 @@ function KudosButton({ memberName }) {
         className={cn(
           'flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold transition-all',
           open
-            ? 'bg-amber-500/10 text-amber-600'
-            : 'text-[var(--text-muted)] hover:text-amber-500 hover:bg-amber-500/5'
+            ? 'bg-[var(--warning-soft)] text-[var(--warning)]'
+            : 'text-[var(--text-muted)] hover:text-[var(--warning)] hover:bg-[var(--warning-soft)]/50'
         )}
       >
         <Icons.award className="w-3 h-3" />
@@ -314,7 +314,7 @@ function PeerComparisonModal({ members, memberTaskStats, workload, onClose }) {
       username,
       stats: memberTaskStats[username] || { total: 0, done: 0, active: 0, review: 0 },
       workload: workload[username] || 0,
-      skills: m.skills || [],
+      skills: (members.find(m => m.username === username)?.skills) || [],
     }))
     : null
 
@@ -336,7 +336,7 @@ function PeerComparisonModal({ members, memberTaskStats, workload, onClose }) {
       >
         <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-2">
-            <Icons.scale className="w-4 h-4 text-purple-500" />
+            <Icons.scale className="w-4 h-4 text-[var(--accent)]" />
             <Text className="text-[14px] font-semibold">Peer Comparison</Text>
           </div>
           <button onClick={onClose} className="p-1 rounded-md hover:bg-[var(--bg-subtle)] transition-colors">
@@ -381,8 +381,8 @@ function PeerComparisonModal({ members, memberTaskStats, workload, onClose }) {
 
               {[
                 { label: 'Active', key: 'active', color: 'text-[var(--text-primary)]' },
-                { label: 'Review', key: 'review', color: 'text-purple-500' },
-                { label: 'Completed', key: 'done', color: 'text-emerald-500' },
+                { label: 'Review', key: 'review', color: 'text-[var(--accent)]' },
+                { label: 'Completed', key: 'done', color: 'text-[var(--success)]' },
                 { label: 'Workload', key: 'workload', color: 'text-[var(--text-primary)]' },
               ].map(row => (
                 <React.Fragment key={row.key}>
@@ -525,9 +525,9 @@ export function MembersTab({ team, workload, teamTasks, hasProjectIdOnTasks, has
           const availability = m.status || 'offline'
 
           const availConfig = {
-            available: { color: 'bg-emerald-400', label: 'Available', text: 'text-emerald-600' },
-            focus: { color: 'bg-amber-400', label: 'Focusing', text: 'text-amber-600' },
-            busy: { color: 'bg-red-400', label: 'Busy', text: 'text-red-600' },
+            available: { color: 'bg-emerald-400', label: 'Available', text: 'text-[var(--success)]' },
+            focus: { color: 'bg-amber-400', label: 'Focusing', text: 'text-[var(--warning)]' },
+            busy: { color: 'bg-red-400', label: 'Busy', text: 'text-[var(--danger)]' },
             offline: { color: 'bg-slate-300', label: 'Offline', text: 'text-slate-500' },
           }
           const avail = availConfig[availability] || availConfig.offline
@@ -588,11 +588,11 @@ export function MembersTab({ team, workload, teamTasks, hasProjectIdOnTasks, has
                   <div className="text-[9px] text-[var(--text-muted)] uppercase">Active</div>
                 </div>
                 <div className="text-center bg-[var(--bg-subtle)] rounded-lg py-1.5">
-                  <div className="text-sm font-bold text-purple-500 tabular-nums">{stats.review}</div>
+                  <div className="text-sm font-bold text-[var(--accent)] tabular-nums">{stats.review}</div>
                   <div className="text-[9px] text-[var(--text-muted)] uppercase">Review</div>
                 </div>
                 <div className="text-center bg-[var(--bg-subtle)] rounded-lg py-1.5">
-                  <div className="text-sm font-bold text-emerald-500 tabular-nums">{stats.done}</div>
+                  <div className="text-sm font-bold text-[var(--success)] tabular-nums">{stats.done}</div>
                   <div className="text-[9px] text-[var(--text-muted)] uppercase">Done</div>
                 </div>
               </div>

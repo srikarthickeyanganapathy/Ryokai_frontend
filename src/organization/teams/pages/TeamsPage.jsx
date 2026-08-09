@@ -1135,7 +1135,7 @@ export const TeamsPage = () => {
   const { user } = useAuth()
   const { activeOrganization, workspaceMode } = useWorkspace()
   const orgId = activeOrganization?.id
-  const { data: teams = [], isLoading: teamsLoading } = useOrgTeams(orgId)
+  const { data: teams = [], isLoading: teamsLoading, isError: teamsError, error, refetch: refetchTeams } = useOrgTeams(orgId)
   const { data: members = [] } = useOrgMembers(orgId)
   const { data: { tasks: allTasks = [] } = {} } = useTaskList({ scope: 'org' })
   const { data: allProjects = [] } = useProjects()
@@ -1252,7 +1252,7 @@ export const TeamsPage = () => {
     setCreateTeamModalOpen(true)
   }, [])
 
-  const pageState = teamsLoading ? 'loading' : 'ready'
+  const pageState = teamsError ? 'error' : teamsLoading ? 'loading' : 'ready'
   const isTeamEmpty = teams.length === 0
 
   if (!activeOrganization || workspaceMode === 'PERSONAL') {

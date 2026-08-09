@@ -9,8 +9,8 @@ export function DailyBriefWidget({ context }) {
 
   const stats = [
     { icon: CheckCircle, color: 'text-[var(--success)]', bg: 'bg-[var(--success-soft)]', label: 'Focus Tasks', value: dailyBrief.focusTasksCount },
-    { icon: Clock, color: 'text-amber-500', bg: 'bg-amber-500/10', label: 'Reminders', value: dailyBrief.remindersCount },
-    { icon: Calendar, color: 'text-blue-500', bg: 'bg-blue-500/10', label: 'Meetings', value: dailyBrief.meetingsCount },
+    { icon: Clock, color: 'text-[var(--warning)]', bg: 'bg-[var(--warning-soft)]', label: 'Reminders', value: dailyBrief.remindersCount },
+    { icon: Calendar, color: 'text-[var(--accent)]', bg: 'bg-[var(--accent-soft)]', label: 'Meetings', value: dailyBrief.meetingsCount },
   ];
 
   return (
@@ -49,11 +49,11 @@ export function DailyBriefWidget({ context }) {
               transition={{ delay: 0.24 }}
               className="flex items-center gap-2 ml-auto"
             >
-              <div className="p-1.5 rounded-lg bg-purple-500/10">
-                <Zap className="w-4 h-4 text-purple-500" />
+              <div className="p-1.5 rounded-lg bg-[var(--accent-soft)]">
+                <Zap className="w-4 h-4 text-[var(--accent)]" />
               </div>
               <div>
-                <p className="text-sm font-bold text-purple-500">{dailyBrief.streakMessage}</p>
+                <p className="text-sm font-bold text-[var(--accent)]">{dailyBrief.streakMessage}</p>
                 <p className="text-[10px] text-[var(--text-tertiary)]">Streak</p>
               </div>
             </motion.div>

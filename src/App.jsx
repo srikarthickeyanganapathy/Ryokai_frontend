@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { MotionConfig } from "framer-motion";
 import { AppProvider } from "@/app/providers/AppProvider";
 import { ErrorBoundary } from "@/app/providers/ErrorBoundary";
-import { InspectorProvider } from "@/context/InspectorContext";
+import { InspectorProvider } from "@/shared/workspace-framework/interactions/InspectorContext";
 
 import { AuthLayout } from "@/app/layouts/AuthLayout";
 import { ProtectedRoute, PlatformRoute, TenantRoute } from "@/app/router/ProtectedRoute";
@@ -63,7 +63,7 @@ const SecurityPage = Loadable(lazy(() => import("@/settings/pages/SecurityPage")
 const SessionsPage = Loadable(lazy(() => import("@/settings/pages/SessionsPage").then(m => ({ default: m.SessionsPage }))));
 const CalendarPage = Loadable(lazy(() => import("@/calendar/pages/CalendarPage").then(m => ({ default: m.CalendarPage }))));
 const NotesPage = Loadable(lazy(() => import("@/note/pages/NotesPage").then(m => ({ default: m.NotesPage }))));
-const SavedPage = Loadable(lazy(() => import("@/library/saved/pages/SavedPage").then(m => ({ default: m.SavedPage }))));
+const SavedPage = Loadable(lazy(() => import("@/saved/pages/SavedPage").then(m => ({ default: m.SavedPage }))));
 const WorkloadPage = Loadable(lazy(() => import("@/organization/workload/pages/WorkloadPage").then(m => ({ default: m.WorkloadPage }))));
 const GoalsPage = Loadable(lazy(() => import("@/organization/goals/pages/GoalsPage").then(m => ({ default: m.GoalsPage }))));
 const WhiteboardPage = Loadable(lazy(() => import("@/whiteboard/pages/WhiteboardPage").then(m => ({ default: m.WhiteboardPage }))));

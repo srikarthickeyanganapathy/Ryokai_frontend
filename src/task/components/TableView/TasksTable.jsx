@@ -24,7 +24,7 @@ function DueBadge({ dueDate }) {
     </span>
   )
   if (diffDays === 0) return (
-    <span className="text-[11px] font-semibold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md">
+    <span className="text-[11px] font-semibold text-[var(--warning)] bg-[var(--warning-soft)] px-2 py-0.5 rounded-md">
       Today
     </span>
   )
@@ -159,7 +159,7 @@ export function TasksTable({
   ], [onTaskClick])
 
   return (
-    <>
+    <div aria-live="polite">
       {confirmDialog}
       <DataTable
         columns={columns}
@@ -171,6 +171,6 @@ export function TasksTable({
         getRowId={getRowId}
         onRowClick={onTaskClick}
       />
-    </>
+    </div>
   )
 }

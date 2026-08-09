@@ -9,7 +9,8 @@ import { normalizePriority } from '@/shared/lib/priority'
 
 /* ══════════════════════════════════════════════════════
    Helpers
-   ══════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════ */
+
 
 import { formatTimeAgo, hashHue, SprintProgressRing, BottleneckDetector, RiskRadar, AiWeeklyDigest, RecentWins, VelocitySparkline, HealthGauge, WorkloadDistribution, ProjectProgress, UpcomingDeadlines } from '@/shared/pages/overview/OverviewWidgets';
 
@@ -37,7 +38,7 @@ export function OverviewTab({
     teamTasks.slice(0, 10).forEach(task => {
       events.push({
         id: `t-${task.id}`, title: task.title, status: task.status || 'TODO',
-        timestamp: task.updatedAt || task.createdAt || Date.now(),
+        timestamp: task.updatedAt || task.createdAt || new Date().toISOString(),
         actor: task.assignedTo || 'Unassigned', type: 'task',
       })
     })

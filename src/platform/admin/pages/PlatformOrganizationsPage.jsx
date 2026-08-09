@@ -63,9 +63,9 @@ export function PlatformOrganizationsPage() {
             size="sm" 
             onClick={() => activateOrg.mutate(org.id)}
             disabled={activateOrg.isPending}
-            className="h-7 text-xs border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10"
+            className="h-7 text-xs border-[var(--success-border)] text-[var(--success)] hover:bg-[var(--success-soft)]"
           >
-            <Icons.checkCircle className="mr-1.5 h-3.5 w-3.5 text-emerald-500" />
+            <Icons.checkCircle className="mr-1.5 h-3.5 w-3.5 text-[var(--success)]" />
             Activate
           </Button>
         ) : (
@@ -81,7 +81,7 @@ export function PlatformOrganizationsPage() {
               if (confirmed) suspendOrg.mutate(org.id)
             }}
             disabled={suspendOrg.isPending}
-            className="h-7 text-xs text-red-500 hover:bg-red-500/10 hover:text-red-600"
+            className="h-7 text-xs text-[var(--danger)] hover:bg-[var(--danger-soft)] hover:text-[var(--danger)]"
           >
             <Icons.slash className="mr-1.5 h-3.5 w-3.5" />
             Suspend

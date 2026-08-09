@@ -48,12 +48,7 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
   const [userSelectedRole, setUserSelectedRole] = useState('');
   const effectiveRoleId = userSelectedRole || defaultRoleId;
 
-  // Reset user selection when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      setUserSelectedRole('');
-    }
-  }, [isOpen]);
+  // Reset on reopen via key in parent — no effect needed
 
   const handleSubmitDirect = (e) => {
     e.preventDefault();

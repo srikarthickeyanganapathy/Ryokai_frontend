@@ -475,7 +475,7 @@ export function ChannelsTab({ crewId, channels = [], isCreator }) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-1">
                     <span className="text-[13px] font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--accent)] transition-colors">@{m.username}</span>
-                    {m.role === 'CREATOR' && <span className="text-amber-500 text-[11px]" title="Crew Owner">👑</span>}
+                    {m.role === 'CREATOR' && <span className="text-[var(--warning)] text-[11px]" title="Crew Owner">👑</span>}
                   </div>
                   <span className="text-[10px] text-[var(--text-muted)] block truncate font-medium">
                     {m.role === 'CREATOR' ? 'Crew Owner' : 'Squad Member'}
@@ -604,7 +604,7 @@ export function ChannelsTab({ crewId, channels = [], isCreator }) {
         <DrawerContent side="right" className="sm:max-w-md bg-[var(--bg-card)] p-5 border-l border-[var(--border-subtle)] flex flex-col h-full">
           <DrawerHeader className="border-b border-[var(--border-subtle)] pb-3 mb-3 text-left">
             <DrawerTitle className="text-[15px] font-semibold flex items-center gap-2">
-              <Pin className="w-4 h-4 text-amber-500 fill-amber-500/20" /> Pinned Announcements
+              <Pin className="w-4 h-4 text-[var(--warning)] fill-[var(--warning-soft)]" /> Pinned Announcements
             </DrawerTitle>
             <DrawerDescription className="text-[12px]">
               Pinned messages in #{activeChannel?.name}
@@ -815,10 +815,10 @@ function ChannelChatBox({
             onClick={onOpenPinnedDrawer}
             title="View Pinned Announcements"
           >
-            <Pin className="w-3.5 h-3.5 text-amber-500 fill-amber-500/20" />
+            <Pin className="w-3.5 h-3.5 text-[var(--warning)] fill-[var(--warning-soft)]" />
             <span className="hidden sm:inline font-medium">Pinned</span>
             {pinnedIds.length > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-amber-500/10 text-amber-600 text-[10px] font-bold font-mono">
+              <span className="px-1.5 py-0.2 rounded-full bg-[var(--warning-soft)] text-[var(--warning)] text-[10px] font-bold font-mono">
                 {pinnedIds.length}
               </span>
             )}
@@ -1016,8 +1016,8 @@ function ChannelChatBox({
                       {/* Pin Toggle */}
                       <button 
                         className={cn(
-                          "p-1 rounded-md text-[var(--text-muted)] hover:text-amber-500 hover:bg-amber-500/10 transition-colors",
-                          isPinned && "text-amber-500 bg-amber-500/10"
+                          "p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--warning)] hover:bg-[var(--warning-soft)] transition-colors",
+                          isPinned && "text-[var(--warning)] bg-[var(--warning-soft)]"
                         )} 
                         onClick={() => onTogglePin(msg.id)} 
                         title={isPinned ? "Unpin message" : "Pin message"}
@@ -1289,7 +1289,7 @@ function PinnedMessagesList({ crewId, channelId, pinnedIds, onUnpin }) {
     <div className="space-y-2">
       {pinnedMessages.map((msg) => (
         <div key={msg.id} className="group flex items-start gap-2.5 p-2.5 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px]">
-          <Pin className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />
+          <Pin className="w-3 h-3 text-[var(--warning)] shrink-0 mt-0.5" />
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2 mb-0.5">
               <span className="text-[11px] font-semibold text-[var(--text-primary)] truncate">@{msg.authorUsername}</span>

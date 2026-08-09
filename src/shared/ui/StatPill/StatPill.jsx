@@ -15,6 +15,8 @@ import { cn } from '@/shared/lib/cn';
 export function StatPill({ icon: Icon, label, value, highlight, className }) {
   return (
     <div
+      role="status"
+      aria-live="polite"
       className={cn(
         'flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border transition-colors',
         highlight

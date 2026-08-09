@@ -22,6 +22,7 @@ export function TeamTabs({ activeTab, setActiveTab, tabCounts }) {
   // Animate count changes
   useEffect(() => {
     if (!tabCounts) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- deliberate tab-count animation sync
     setPrevCounts(tabCounts)
   }, [tabCounts])
 

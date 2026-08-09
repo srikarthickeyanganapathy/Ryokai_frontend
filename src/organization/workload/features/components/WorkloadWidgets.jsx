@@ -269,17 +269,8 @@ export function DistributionChart({ rows, threshold }) {
   );
 }
 
-export function LeaderboardPanel({ rows, threshold }) {
-  const topOver = [...rows]
-    .filter((r) => (r.totalActiveCount ?? 0) > threshold)
-    .sort((a, b) => (b.totalActiveCount ?? 0) - (a.totalActiveCount ?? 0))
-    .slice(0, 3);
-  const topUnder = [...rows]
-    .filter((r) => (r.totalActiveCount ?? 0) < threshold * 0.5)
-    .sort((a, b) => (a.totalActiveCount ?? 0) - (b.totalActiveCount ?? 0))
-    .slice(0, 3);
-
-  const Panel = ({ title, icon: Icon, users, tone }) => (
+function WorkloadPeerPanel({ title, icon: Icon, users, tone, threshold }) {
+  return (
     <div className="glass-panel rounded-xl p-4 border border-[var(--color-border-subtle)]">
       <div className="flex items-center gap-2 mb-3">
         <Icon
@@ -332,20 +323,33 @@ export function LeaderboardPanel({ rows, threshold }) {
       )}
     </div>
   );
+}
+
+export function LeaderboardPanel({ rows, threshold }) {
+  const topOver = [...rows]
+    .filter((r) => (r.totalActiveCount ?? 0) > threshold)
+    .sort((a, b) => (b.totalActiveCount ?? 0) - (a.totalActiveCount ?? 0))
+    .slice(0, 3);
+  const topUnder = [...rows]
+    .filter((r) => (r.totalActiveCount ?? 0) < threshold * 0.5)
+    .sort((a, b) => (a.totalActiveCount ?? 0) - (b.totalActiveCount ?? 0))
+    .slice(0, 3);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <Panel
+      <WorkloadPeerPanel
         title="Most Overloaded"
         icon={AlertCircle}
         users={topOver}
         tone="danger"
+        threshold={threshold}
       />
-      <Panel
+      <WorkloadPeerPanel
         title="Available Capacity"
         icon={CheckCircle}
         users={topUnder}
         tone="accent"
+        threshold={threshold}
       />
     </div>
   );

@@ -254,6 +254,7 @@ export function WorkloadPage() {
 
   useEffect(() => {
     if (orgId && rows.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- deliberate org-scoped history init
       setHistory(ensureHistory(orgId, rows));
     }
   }, [orgId, rows]);

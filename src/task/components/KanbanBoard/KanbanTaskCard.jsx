@@ -24,7 +24,7 @@ function getDueInfo(dueDate) {
   const due = new Date(dueDate)
   const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24))
   if (diffDays < 0) return { label: 'Overdue', color: 'text-[var(--danger)] bg-[var(--danger-soft)]' }
-  if (diffDays === 0) return { label: 'Today', color: 'text-amber-500 bg-amber-500/10' }
+  if (diffDays === 0) return { label: 'Today', color: 'text-[var(--warning)] bg-[var(--warning-soft)]' }
   if (diffDays <= 2) return { label: 'Soon', color: 'text-orange-400 bg-orange-400/10' }
   return null
 }

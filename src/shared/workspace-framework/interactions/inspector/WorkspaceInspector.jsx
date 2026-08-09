@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useInspector } from '@/context/InspectorContext';
+import { useInspector } from "@/shared/workspace-framework/interactions/InspectorContext";
 import { X, Loader2 } from '@/shared/ui/Icons';
 import { useEntityInspector } from './useEntityInspector';
 

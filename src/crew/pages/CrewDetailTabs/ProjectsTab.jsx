@@ -201,10 +201,10 @@ function SharedProjectCard({ project, index, canUnshare, onRequestUnshare }) {
           <div className="flex items-center gap-2">
             <span className={cn(
               "px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold border",
-              health.tone === 'success' && 'bg-green-500/10 text-green-500 border-green-500/20',
-              health.tone === 'accent' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-              health.tone === 'warning' && 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
-              health.tone === 'danger' && 'bg-red-500/10 text-red-500 border-red-500/20'
+              health.tone === 'success' && 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success-border)]',
+              health.tone === 'accent' && 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]',
+              health.tone === 'warning' && 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning-border)]',
+              health.tone === 'danger' && 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger-border)]'
             )}>
               {health.label} {healthScore}
             </span>
@@ -265,7 +265,7 @@ function SharedProjectCard({ project, index, canUnshare, onRequestUnshare }) {
           {dueDate ? (
             <button onClick={handleOpen} className={cn(
               "text-[11px] font-medium px-2 py-1 rounded-md",
-              isOverdue ? "bg-red-500/10 text-red-500" : "bg-[var(--bg-subtle)] text-[var(--text-secondary)]"
+              isOverdue ? "bg-[var(--danger-soft)] text-[var(--danger)]" : "bg-[var(--bg-subtle)] text-[var(--text-secondary)]"
             )}>
               {formattedDueDate}
             </button>

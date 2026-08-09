@@ -110,10 +110,10 @@ export function DirectoryPage() {
   const { user } = useAuth();
 
   // Existing queries + new enrichment data sources
-  const { data: members = [], isLoading: isMembersLoading } = useOrgMembers(orgId);
+  const { data: members = [], isLoading: isMembersLoading, isError: isMembersError, error: membersError, refetch: refetchMembers } = useOrgMembers(orgId);
   const { data: roles = [] } = useOrgRoles(orgId);
-  const { data: teams = [], isLoading: isTeamsLoading } = useOrgTeams(orgId);
-  const { data: { tasks: allTasks = [] } = {}, isLoading: isTasksLoading } = useTaskList({});
+  const { data: teams = [], isLoading: isTeamsLoading, isError: isTeamsError, error: teamsError, refetch: refetchTeams } = useOrgTeams(orgId);
+  const { data: { tasks: allTasks = [] } = {}, isLoading: isTasksLoading, isError: isTaskssError, error: tasksError, refetch: refetchTasks } = useTaskList({});
 
   // Local interface UI state
   const [searchQuery, setSearchQuery] = useState('');
@@ -231,7 +231,7 @@ export function DirectoryPage() {
 
   const filteredMembers = useMemo(() => {
     const q = debouncedSearchQuery.toLowerCase().trim();
-    const now = Date.now();
+    const now = new Date().getTime();
     const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
 
     return members.filter((member) => {
@@ -416,8 +416,10 @@ export function DirectoryPage() {
 
   if (!activeOrganization) return null;
 
+  const isError = isMembersError || isTeamsError || isTaskssError;
   const isLoading = isMembersLoading || isTeamsLoading;
-  const pageState = isLoading ? 'loading' : 'ready';
+  const pageState = isError ? 'error' : isLoading ? 'loading' : 'ready';
+  const handleRetry = () => { refetchMembers(); refetchTeams(); refetchTasks(); };
   const adminCount = members.filter(m => m.rolePriority === 0).length;
   const isQuickViewActive = quickView !== null;
 
@@ -641,12 +643,13 @@ export function DirectoryPage() {
             icon: UserIcon,
             title: 'No organization members found',
             description: 'Try adjusting your filter parameters or inviting new teammates.',
+            onRetry: handleRetry,
           }}
         >
           {filteredMembers.length === 0 ? (
             <div className="text-center py-16 sm:py-20 bg-[var(--bg-subtle)] border border-dashed border-[var(--border-subtle)] rounded-2xl">
               <UserIcon className="h-10 w-10 text-[var(--text-muted)] mx-auto mb-4" />
-              <Heading level={4} className="text-[var(--text-secondary)] mb-2">
+              <Heading level={2} className="text-[var(--text-secondary)] mb-2">
                 No members found
               </Heading>
               <Text variant="muted" className="text-sm">
@@ -899,7 +902,7 @@ export function DirectoryPage() {
               <div className="flex items-center justify-between p-5 border-b border-[var(--border-subtle)]">
                 <div className="flex items-center gap-2.5">
                   <GitCompare className="w-5 h-5 text-[var(--accent)]" />
-                  <Heading level={4} className="text-[15px] font-semibold text-[var(--text-primary)]">
+                  <Heading level={2} className="text-[15px] font-semibold text-[var(--text-primary)]">
                     Member Comparison
                   </Heading>
                 </div>
@@ -1184,7 +1187,7 @@ function MemberCardGrid({
 
                 <div className="mt-2">
                   <div className="flex items-center gap-2">
-                    <Heading level={4} className={cn("truncate text-[15px] font-semibold tracking-tight", isSuspended ? "text-[var(--text-muted)] line-through" : "text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors")}>
+                    <Heading level={3} className={cn("truncate text-[15px] font-semibold tracking-tight", isSuspended ? "text-[var(--text-muted)] line-through" : "text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors")}>
                       {member.username}
                     </Heading>
                     {isSelf && <span className="text-[10px] bg-[var(--bg-subtle)] text-[var(--text-muted)] px-1.5 py-0.5 rounded font-normal border border-[var(--border-subtle)]">(You)</span>}

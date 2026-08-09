@@ -171,7 +171,7 @@ function BurndownBurnupChart({ tasks, dateRange }) {
       })
     }
     return result
-  }, [tasks.length, dateRange])
+  }, [tasks, dateRange])
 
   const width = 320
   const height = 120
@@ -410,7 +410,7 @@ function ThroughputMetrics({ tasks, dateRange }) {
     const avg = Math.round(total / weeks)
 
     return { data, total, avg, weeks }
-  }, [dateRange])
+  }, [tasks, dateRange])
 
   return (
     <div className="space-y-3">

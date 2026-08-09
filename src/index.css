@@ -1,13 +1,9 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 @import './shared/styles/tokens.css';
 
-/*
-  Ryokai — design system
-  Dense, quiet, keyboard-first. Chrome recedes; the accent (Radix Iris)
-  is spent only on focus, primary actions, and selection state.
-  Tokens live in tokens.css; this file mirrors them into Tailwind's
-  @theme so utility classes (bg-base, text-secondary, rounded-md, ...)
-  stay in sync with the same source of truth.
+/* Ryokai Premium Design System
+   Elevated utility layer with glass, gradients, noise, and
+   refined micro-interactions.
 */
 
 @theme {
@@ -16,33 +12,25 @@
   --color-bg-elevated: var(--bg-elevated);
   --color-bg-hover: var(--bg-hover);
   --color-bg-hover-strong: var(--bg-hover-strong);
-
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-tertiary: var(--text-tertiary);
-
-  /* Note: These resolve lazily against the cascade, so they automatically pick up .dark mode values. No need to redefine them in .dark */
   --color-border-subtle: var(--border-subtle);
   --color-border-default: var(--border-default);
   --color-border-strong: var(--border-strong);
-
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-soft: var(--accent-soft);
-
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
-
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-
   --radius-xs: var(--radius-xs);
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
-
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
@@ -50,145 +38,147 @@
 }
 
 @layer utilities {
-  /* Thin, unobtrusive scrollbars — present but never loud */
   .custom-scrollbar {
-    &::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: var(--border-strong);
-      border-radius: 999px;
-    }
-    &::-webkit-scrollbar-thumb:hover {
-      background: var(--text-tertiary);
-    }
+    &::-webkit-scrollbar { width: 6px; height: 6px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
+    &::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
   }
 
-  /* Crisp single-ring focus state, no double halo */
   .focus-ring {
-    &:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent);
-    }
+    &:focus-visible { outline: none; box-shadow: var(--focus-ring); }
   }
 
-  /* Raycast-style translucent panel — used for dashboard cards, command palette, popovers */
+  /* ── Glass Panel ── */
   .glass-panel {
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate, 1.8));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate, 1.8));
+    border: 1px solid var(--glass-border);
+  }
+  .glass-panel-strong {
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.8);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.8);
     border: 1px solid var(--glass-border);
   }
 
-  /* Soft ambient mesh gradient for hero/dashboard backdrops — subtle, never loud */
+  /* ── Mesh Background ── */
   .mesh-bg {
-    position: relative;
-    isolation: isolate;
+    position: relative; isolation: isolate;
   }
   .mesh-bg::before {
     content: '';
-    position: absolute;
-    inset: -20%;
-    z-index: -1;
-    pointer-events: none;
+    position: absolute; inset: -20%; z-index: -1; pointer-events: none;
     background:
       radial-gradient(40% 35% at 15% 0%, var(--mesh-1), transparent 70%),
       radial-gradient(35% 30% at 85% 10%, var(--mesh-2), transparent 70%),
-      radial-gradient(30% 30% at 50% 100%, var(--mesh-3), transparent 70%);
-    filter: blur(60px);
-    opacity: 0.9;
+      radial-gradient(30% 30% at 50% 100%, var(--mesh-3), transparent 70%),
+      radial-gradient(35% 30% at 25% 60%, var(--mesh-4), transparent 70%);
+    filter: blur(80px); opacity: 0.9;
   }
 
-  /* Accent glow ring — Linear-style emphasis for primary CTAs and active cards */
-  .accent-glow {
-    box-shadow: var(--accent-glow);
-    transition: box-shadow var(--duration-base) var(--ease-out);
+  /* ── Noise Texture Overlay ── */
+  .noise-overlay {
+    position: relative;
   }
-  .accent-glow:hover {
-    box-shadow: var(--accent-glow-lg);
-  }
-
-  /* Springy entrance — Radix-flavored pop for menus, cards, modals */
-  .spring-in {
-    animation: spring-in var(--duration-slow) var(--ease-spring) both;
+  .noise-overlay::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    opacity: var(--noise-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat; background-size: 128px 128px;
   }
 
-  /* Gentle rising fade for lists / dashboard widgets appearing in sequence */
-  .rise-in {
-    animation: rise-in var(--duration-slow) var(--ease-out) both;
+  /* ── Accent Glow ── */
+  .accent-glow { box-shadow: var(--accent-glow); transition: box-shadow var(--duration-base) var(--ease-out); }
+  .accent-glow:hover { box-shadow: var(--accent-glow-lg); }
+
+  /* ── Gradient Text ── */
+  .text-gradient {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  /* Keyboard shortcut chip, e.g. inside the command menu trigger */
+  /* ── Surface Gradient ── */
+  .surface-gradient-1 { background: var(--surface-gradient-1); }
+  .surface-gradient-2 { background: var(--surface-gradient-2); }
+
+  /* ── Shimmer/Skeleton ── */
+  .shimmer { position: relative; overflow: hidden; }
+  .shimmer::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shimmer 1.5s infinite;
+  }
+  .dark .shimmer::after {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  }
+
+  /* ── Spring In ── */
+  .spring-in { animation: spring-in var(--duration-slow) var(--ease-spring) both; }
+
+  /* ── Rise In ── */
+  .rise-in { animation: rise-in var(--duration-slow) var(--ease-out) both; }
+
+  /* ── KBD Chip ── */
   .kbd {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    line-height: 1;
-    color: var(--text-tertiary);
-    background: var(--bg-subtle);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-xs);
+    font-family: var(--font-mono); font-size: 11px; line-height: 1;
+    color: var(--text-tertiary); background: var(--bg-subtle);
+    border: 1px solid var(--border-default); border-radius: var(--radius-xs);
     padding: 3px 5px;
+  }
+
+  /* ── Card Hover Lift ── */
+  .card-lift {
+    transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
+  }
+  .card-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* ── Ring Glow (for avatars, status indicators) ── */
+  .ring-glow-accent { box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent-border); }
+  .ring-glow-success { box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--success-border); }
+
+  /* ── Divider with dot ── */
+  .divider-dotted {
+    border: none; border-top: 2px dotted var(--border-default);
   }
 }
 
 @layer base {
-  * {
-    border-color: var(--border-subtle);
-  }
-
-  ::selection {
-    background-color: var(--accent-soft);
-    color: var(--text-primary);
-  }
-
-  html {
-    color-scheme: light;
-  }
-
-  * {
-    scroll-behavior: smooth;
-  }
+  * { border-color: var(--border-subtle); }
+  ::selection { background-color: var(--accent-soft); color: var(--text-primary); }
+  html { color-scheme: light; }
+  * { scroll-behavior: smooth; }
 }
 
 @keyframes spring-in {
   0% { opacity: 0; transform: scale(0.94) translateY(4px); }
   100% { opacity: 1; transform: scale(1) translateY(0); }
 }
-
 @keyframes rise-in {
   0% { opacity: 0; transform: translateY(8px); }
   100% { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes shimmer {
   100% { transform: translateX(100%); }
 }
 
-/* --- View Transitions for Theme Toggle --- */
+/* ── View Transitions for Theme Toggle ── */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  mix-blend-mode: normal;
-  display: block;
+  mix-blend-mode: normal; display: block;
 }
-::view-transition-old(root) {
-  animation: none;
-  z-index: 1;
-}
-::view-transition-new(root) {
-  animation: theme-wipe 1.2s cubic-bezier(0.65, 0, 0.35, 1) both;
-  z-index: 2;
-}
-
+::view-transition-old(root) { animation: none; z-index: 1; }
+::view-transition-new(root) { animation: theme-wipe 1.2s cubic-bezier(0.65, 0, 0.35, 1) both; z-index: 2; }
 @keyframes theme-wipe {
   from { clip-path: circle(0% at 100% 0%); }
   to { clip-path: circle(150% at 100% 0%); }
 }
 
-/* ---- Accessibility: Reduced Motion ---- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -196,10 +186,4 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* ---- Focus Ring Utility ---- */
-.focus-ring:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
 }

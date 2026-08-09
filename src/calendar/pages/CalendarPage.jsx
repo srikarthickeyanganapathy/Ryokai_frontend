@@ -11,6 +11,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { Edit3, CalendarDays, Target, Gauge, Zap } from '@/shared/ui/Icons'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { PageShell, PageHero, PageContent, PageStats } from '@/shared/ui/PageShell'
+import { PageState } from '@/shared/ui/PageState'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
 function StatChip({ icon: Icon, label, value, accent }) {
@@ -40,8 +41,8 @@ export function CalendarPage() {
     return { start: startOfWeek(startOfMonth(now)), end: endOfWeek(endOfMonth(now)) }
   })
 
-  const { data: { tasks = [] } = {}, isLoading: tasksLoading } = useTaskList()
-  const { data: events = [], isLoading: eventsLoading } = useCalendarEvents(
+  const { data: { tasks = [] } = {}, isLoading: tasksLoading, isError: tasksError, refetch: refetchTasks } = useTaskList()
+  const { data: events = [], isLoading: eventsLoading, isError: eventsError, refetch: refetchEvents } = useCalendarEvents(
     visibleRange.start.toISOString(), visibleRange.end.toISOString(), scope
   )
 
@@ -92,6 +93,11 @@ export function CalendarPage() {
   const workspaceName = workspaceMode === 'ORG' ? activeOrganization?.name : workspaceMode === 'CREWS' ? activeCrew?.name : null
   const eyebrow = workspaceName ? `${workspaceName} · Time Deck` : 'Schedule Matrix & Event Telemetry'
 
+  const isLoading = tasksLoading || eventsLoading;
+  const isError = tasksError || eventsError;
+  const pageState = isError ? 'error' : isLoading ? 'loading' : 'ready';
+  const handleRetry = () => { refetchTasks(); refetchEvents(); };
+
   return (
     <PageShell maxWidth="wide" workspaceMode={workspaceModeLabel}>
       <PageHero
@@ -100,7 +106,7 @@ export function CalendarPage() {
         eyebrow={eyebrow}
       />
 
-      {!tasksLoading && !eventsLoading && (
+      {!isLoading && (
         <PageStats>
           <StatChip icon={CalendarDays} label="Events This Month" value={stats.eventsThisMonth} accent="var(--accent)" />
           <StatChip icon={Target} label="Deadlines This Week" value={stats.deadlinesThisWeek} accent="var(--warning)" />
@@ -110,6 +116,7 @@ export function CalendarPage() {
       )}
 
       <PageContent>
+        <PageState state={pageState} stateProps={{ onRetry: handleRetry, loadingVariant: 'dashboard' }}>
         <div className="flex-1 min-h-0 pt-2">
           <CalendarView
             tasks={tasks}
@@ -174,6 +181,7 @@ export function CalendarPage() {
           </ModalContent>
         </Modal>
         {dialog}
+        </PageState>
       </PageContent>
     </PageShell>
   )

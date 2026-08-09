@@ -230,7 +230,7 @@ export function OrganizationOverview({ org, counts }) {
 
       {/* ── Organization Identity ───────────────────────── */}
       <section>
-        <OrganizationIdentity org={org} />
+        <OrganizationIdentity org={org} key={org?.id} />
       </section>
 
       {/* Modals */}

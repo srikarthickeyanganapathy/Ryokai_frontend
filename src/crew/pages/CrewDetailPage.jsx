@@ -19,7 +19,7 @@ import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
 import { PageShell } from '@/shared/ui/PageShell';
 import { PageState } from '@/shared/ui/PageState';
 import { useAuth } from '@/identity';
-import { SaveToggle } from '@/library/saved/features/components/SaveToggle';
+import { SaveToggle } from '@/saved/features/components/SaveToggle';
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes';
 import { CrewStatusPill } from '../components/CrewStatusPill';
 import { cn } from '@/shared/lib/cn';

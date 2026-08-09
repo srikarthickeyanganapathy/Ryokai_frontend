@@ -135,6 +135,7 @@ export function RequestsProvider({ orgId, children }) {
   }), [
     orgId, filteredRequests, allRequests, isLoading, isError,
     activeTypeFilter, activeStatusFilter, canManageLeaveRequests, user,
+    approveRequest, rejectRequest, cancelRequest, submitLeaveRequest, submitExitRequest,
     requestLeaveMut.isPending, requestExitMut.isPending,
     approveLeaveMut.isPending, rejectLeaveMut.isPending, approveExitMut.isPending, rejectExitMut.isPending, cancelLeaveMut.isPending, cancelExitMut.isPending
   ]);

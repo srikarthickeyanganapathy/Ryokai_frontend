@@ -6,6 +6,7 @@ import { Progress } from '@/shared/ui/Progress'
 import { cn } from '@/shared/lib/cn'
 import { SPRINGS, FADE_IN_UP, TIMING } from '@/shared/lib/uxTokens'
 import { ProgressBar, PermissionButton, SummaryStat, AnalyticsStat } from '@/shared/ui/SharedWidgets'
+import { ChecklistIcon } from '@/shared/ui/Icons/custom'
 import {
   Pin,
   Copy,
@@ -96,6 +97,7 @@ function useAnimatedNumber(target, duration = 800, enabled = true) {
 
   useEffect(() => {
     if (!enabled || target == null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- deliberate animated counter
       setCurrent(target ?? 0)
       return
     }

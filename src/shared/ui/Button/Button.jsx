@@ -1,13 +1,15 @@
-import React, { forwardRef, memo } from 'react'
+﻿import React, { forwardRef, memo } from 'react'
 import { cn } from '@/shared/lib/cn'
 import { Slot } from '@radix-ui/react-slot'
 
 export const buttonVariants = {
   primary: 'bg-[var(--accent)] text-[var(--text-on-accent)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-active)] shadow-[var(--shadow-xs),var(--inset-highlight-soft)] hover:shadow-[var(--accent-glow),var(--inset-highlight)]',
-  secondary: 'bg-[var(--bg-elevated)] text-[var(--text-primary)] border border-[var(--border-default)] shadow-[var(--inset-highlight-soft)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)]',
+  gradient: 'bg-[var(--accent-gradient)] text-[var(--text-on-accent)] hover:bg-[var(--accent-gradient-hover)] active:brightness-90 shadow-[var(--shadow-sm),0_4px_20px_-4px_rgba(79,110,247,0.35)] hover:shadow-[var(--shadow-md),0_8px_30px_-6px_rgba(79,110,247,0.45)]',
+  secondary: 'bg-[var(--bg-elevated)] text-[var(--text-primary)] border border-[var(--border-default)] shadow-[var(--shadow-xs),var(--inset-highlight-soft)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-sm)]',
   ghost: 'bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]',
   outline: 'bg-transparent text-[var(--text-primary)] border border-[var(--border-default)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)]',
-  danger: 'bg-[var(--danger)] text-white hover:brightness-110 active:brightness-95',
+  danger: 'bg-[var(--danger)] text-white hover:brightness-110 active:brightness-95 shadow-[var(--shadow-xs)]',
+  success: 'bg-[var(--success)] text-white hover:brightness-110 active:brightness-95 shadow-[var(--shadow-xs)]',
 }
 
 const buttonSizes = {
@@ -36,8 +38,8 @@ export const Button = memo(forwardRef(({
       ref={ref}
       disabled={isDisabled}
       className={cn(
-        'inline-flex items-center justify-center font-medium select-none',
-        'transition-[background-color,border-color,color,filter,box-shadow,transform] duration-[var(--duration-base)] ease-[var(--ease-out)]',
+        'inline-flex items-center justify-center font-semibold select-none',
+        'transition-all duration-[var(--duration-base)] ease-[var(--ease-out)]',
         'focus-ring cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed disabled:pointer-events-none',
         'active:scale-[0.97] active:duration-[var(--duration-fast)]',
         isDisabled && 'pointer-events-none opacity-45 cursor-not-allowed',
@@ -64,7 +66,7 @@ export const Button = memo(forwardRef(({
 
 Button.displayName = 'Button';
 
-export const IconButton = forwardRef(({ className, size = 'md', ...props }, ref) => {
+export const IconButton = forwardRef(({ className, size = 'md', 'aria-label': ariaLabel, title, ...props }, ref) => {
   const iconSizes = {
     xs: 'h-6 w-6 rounded-full',
     sm: 'h-7 w-7 rounded-full',
@@ -77,6 +79,8 @@ export const IconButton = forwardRef(({ className, size = 'md', ...props }, ref)
     <Button
       ref={ref}
       size={size}
+      aria-label={ariaLabel || title || 'icon button'}
+      title={title}
       className={cn('px-0 flex-shrink-0', iconSizes[size], className)}
       {...props}
     />

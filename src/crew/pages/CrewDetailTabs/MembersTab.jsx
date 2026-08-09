@@ -163,7 +163,7 @@ function getMemberBadges(member, workload) {
     badges.push({
       label: 'Top Contributor',
       icon: Flame,
-      class: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
+      class: 'bg-[var(--warning-soft)] text-orange-400 border-[var(--warning-border)]',
     });
   }
 
@@ -171,7 +171,7 @@ function getMemberBadges(member, workload) {
     badges.push({
       label: 'Deep Work',
       icon: Zap,
-      class: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+      class: 'bg-[var(--accent-soft)] text-purple-400 border-[var(--accent-border)]',
     });
   }
 
@@ -341,7 +341,7 @@ function MemberCard({ member, isCreator, index, searchQuery, workload, onSelect,
             <div className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider">Active</div>
           </div>
           <div className="text-center bg-[var(--bg-subtle)] rounded-lg py-1.5">
-            <div className="text-sm font-bold text-emerald-500 tabular-nums">{workload.completed}</div>
+            <div className="text-sm font-bold text-[var(--success)] tabular-nums">{workload.completed}</div>
             <div className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider">Done</div>
           </div>
         </div>
@@ -370,7 +370,7 @@ function MemberCard({ member, isCreator, index, searchQuery, workload, onSelect,
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 text-[11px] px-2 font-semibold border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-amber-500"
+                className="h-8 text-[11px] px-2 font-semibold border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--warning)]"
                 title="Transfer Crew Ownership"
                 onClick={() => onTransfer(member.userId)}
               >
@@ -580,7 +580,7 @@ function MemberDetailDrawer({ member, isOpen, onClose, workload, isCreator, onTr
                 </span>
               </div>
               <div className="pt-2 border-t border-[var(--border-subtle)] flex items-start gap-2">
-                <Zap className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                <Zap className="w-4 h-4 text-[var(--warning)] shrink-0 mt-0.5" />
                 <p className="text-[11px] text-[var(--text-muted)]">Active status updated recently</p>
               </div>
             </div>
@@ -601,7 +601,7 @@ function MemberDetailDrawer({ member, isOpen, onClose, workload, isCreator, onTr
                 <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">In Progress</span>
               </div>
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-3 text-center">
-                <span className="text-xl font-bold text-emerald-500 block tabular-nums">{workload.completed}</span>
+                <span className="text-xl font-bold text-[var(--success)] block tabular-nums">{workload.completed}</span>
                 <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Completed</span>
               </div>
             </div>
@@ -649,7 +649,7 @@ function MemberDetailDrawer({ member, isOpen, onClose, workload, isCreator, onTr
                 <span className="truncate">Joined crew on {formatJoinDate(member.joinedAt)}</span>
               </div>
               <div className="flex items-center gap-2 p-2 rounded-lg bg-[var(--bg-subtle)]/60 border border-[var(--border-subtle)]">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[var(--success)] shrink-0" />
                 <span className="truncate">Completed {workload.completed} tasks in workspace</span>
               </div>
             </div>
@@ -669,7 +669,7 @@ function MemberDetailDrawer({ member, isOpen, onClose, workload, isCreator, onTr
                   onTransfer(member.userId);
                 }}
               >
-                <Crown className="w-3.5 h-3.5 text-amber-500" />
+                <Crown className="w-3.5 h-3.5 text-[var(--warning)]" />
                 Make Owner
               </Button>
               <Button
@@ -1062,7 +1062,7 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
               setTimeout(() => setIsLinkCopied(false), 2000);
             }}
           >
-            {isLinkCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+            {isLinkCopied ? <Check className="w-3.5 h-3.5 text-[var(--success)]" /> : <Copy className="w-3.5 h-3.5" />}
             {isLinkCopied ? 'Copied' : 'Copy Link'}
           </Button>
         </motion.div>

@@ -40,7 +40,7 @@ export function InboxWidget() {
             <p className="text-xs text-[var(--text-tertiary)]">Inbox is clear</p>
           </div>
         ) : (
-          <div className="space-y-1.5">
+          <div aria-live="polite" className="space-y-1.5">
             {notifications.slice(0, 5).map(msg => (
               <div 
                 key={msg.id} 

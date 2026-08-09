@@ -29,7 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover';
 import { toast } from 'sonner';
 import { cn } from '@/shared/lib/cn';
 import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority';
-import { SaveToggle } from '@/library/saved/features/components/SaveToggle';
+import { SaveToggle } from '@/saved/features/components/SaveToggle';
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes';
 import { normalizeStatus, PROJECT_STATUS_COLORS } from '@/shared/lib/status';
 import { usePermissions, useAuth } from '@/identity';

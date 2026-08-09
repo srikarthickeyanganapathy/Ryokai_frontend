@@ -134,7 +134,7 @@ export function RequestCard({ request, index = 0 }) {
                     </div>
                   )}
                   {request.isEmergency && (
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-red-500/10 text-red-400 border border-red-500/20 font-medium">
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[var(--danger-soft)] text-red-400 border border-[var(--danger-border)] font-medium">
                       <AlertCircle className="w-3.5 h-3.5 text-red-400" />
                       <span>Emergency</span>
                     </div>
@@ -183,7 +183,7 @@ export function RequestCard({ request, index = 0 }) {
                   size="sm"
                   onClick={handleReject}
                   disabled={actions.isProcessing}
-                  className="text-xs text-red-500 hover:bg-red-500/10 hover:text-red-600"
+                  className="text-xs text-[var(--danger)] hover:bg-[var(--danger-soft)] hover:text-[var(--danger)]"
                 >
                   Decline
                 </Button>

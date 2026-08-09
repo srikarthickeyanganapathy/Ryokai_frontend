@@ -28,7 +28,7 @@ export function PlatformSettingsPage() {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-[var(--text-secondary)]">Environment</span>
-              <span className="px-2 py-0.5 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded font-mono text-[11px] uppercase">Production</span>
+              <span className="px-2 py-0.5 bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] rounded font-mono text-[11px] uppercase">Production</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-[var(--text-secondary)]">Build Commit</span>
