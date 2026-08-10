@@ -1,321 +1,300 @@
-import React, { useMemo, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useMemo } from 'react'
+import { motion } from 'framer-motion'
+import { ArrowRight, Users, AlertTriangle, Activity, CalendarClock, Plus, CheckCircle2, FolderKanban, MessageSquare } from 'lucide-react'
 import { Heading, Text } from '@/shared/ui/Typography'
+import { Button } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'
-import { Icons } from '@/shared/ui/Icons'
+import { Avatar, AvatarFallback } from '@/shared/ui/Avatar'
+import { ProgressRing, ProgressBar } from '@/shared/ui/Progress'
+import { StatusBadge } from '@/shared/ui/StatusBadge'
+import { PriorityBadge } from '@/shared/ui/PriorityBadge'
+import { EmptyState } from '@/shared/ui/EmptyState'
 import { cn } from '@/shared/lib/cn'
-import { SPRINGS } from '@/shared/lib/uxTokens'
-import { normalizePriority } from '@/shared/lib/priority'
 
-/* ══════════════════════════════════════════════════════
-   Helpers
-   ══════════════════════════════════════════════════════ */
+/* ============================================================
+   components/OverviewTab.jsx â€” team command center.
+   Health strip (ring + status + overdue / in progress / due this
+   week) that routes into Work, open-task triage, project
+   progress, a member strip and a Recents + Upcoming rail.
+   All numbers derive from real team / tasks / projects / feed.
+   ============================================================ */
 
+function hashHue(str = '') {
+  let h = 0
+  for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h)
+  return Math.abs(h) % 360
+}
 
-import { formatTimeAgo, hashHue, SprintProgressRing, BottleneckDetector, RiskRadar, AiWeeklyDigest, RecentWins, VelocitySparkline, HealthGauge, WorkloadDistribution, ProjectProgress, UpcomingDeadlines } from '@/shared/ui/OverviewWidgets';
+function daysUntil(dateInput) {
+  if (!dateInput) return null
+  const d = new Date(dateInput)
+  if (isNaN(d.getTime())) return null
+  return Math.round((d.setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 86400000)
+}
+
+function dueInfo(dateInput) {
+  const d = daysUntil(dateInput)
+  if (d == null) return null
+  if (d < 0) return { label: d === -1 ? 'Overdue' : `${Math.abs(d)}d overdue`, tone: 'danger' }
+  if (d === 0) return { label: 'Today', tone: 'warning' }
+  if (d <= 7) return { label: `${d}d`, tone: 'warning' }
+  return { label: new Date(dateInput).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), tone: 'muted' }
+}
+
+function timeAgo(ts) {
+  if (!ts) return ''
+  const d = new Date(ts)
+  if (isNaN(d.getTime())) return ''
+  const s = Math.floor((Date.now() - d.getTime()) / 1000)
+  if (s < 60) return 'just now'
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`
+  return `${Math.floor(s / 86400)}d ago`
+}
+
+const isDone = t => (t.currentStatus || t.status || '').toUpperCase() === 'DONE'
+const isReview = t => /REVIEW|SUBMITTED/.test((t.currentStatus || t.status || '').toUpperCase())
+const isOpen = t => !isDone(t)
+
+function HealthStat({ icon: Icon, label, value, tone, onClick }) {
+  return (
+    <button onClick={onClick} className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-[var(--bg-subtle)] cursor-pointer">
+      <span className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
+        tone === 'danger' ? 'bg-[var(--danger)]/10 text-[var(--danger)]' : tone === 'warning' ? 'bg-[var(--warning)]/10 text-[var(--warning)]' : 'bg-[var(--accent-soft)] text-[var(--accent)]')}>
+        <Icon className="w-3.5 h-3.5" strokeWidth={2} />
+      </span>
+      <span>
+        <span className="block text-[15px] font-bold leading-none tabular-nums">{value}</span>
+        <span className="block text-[10.5px] font-semibold text-[var(--text-muted)] mt-0.5">{label}</span>
+      </span>
+    </button>
+  )
+}
 
 export function OverviewTab({
-  team, insights, teamTasks, teamProjects, observerCount, hasTaskTimestamps,
-  hasProjectIdOnTasks, canCreateProject, canAssignTask, canManage, isReadOnly,
-  onManageMembers, onCreateProject, onAssignTask, onOpenChat, onOpenTasks, setActiveTab
+  team,
+  insights,
+  teamTasks,
+  teamProjects,
+  members,
+  activityFeed,
+  observerCount,
+  canManage,
+  isReadOnly,
+  onManageMembers,
+  onCreateProject,
+  onOpenTasks,
+  onOpenProjects,
 }) {
   const totalTasks = teamTasks.length
-  const doneTasks = teamTasks.filter(t => t.status === 'Done' || t.status === 'COMPLETED').length
-  const activeTasksList = teamTasks.filter(t => {
-    const s = String(t.status || '').toUpperCase()
-    return s === 'IN_PROGRESS' || s === 'REVIEW' || s === 'DOING' || s === 'IN PROGRESS'
-  })
-  const isTeamEmpty = totalTasks === 0 && teamProjects.length === 0
+  const doneTasks = teamTasks.filter(isDone).length
 
   const healthScore = useMemo(() => {
-    if (isTeamEmpty) return 100
-    return Math.round((doneTasks / Math.max(totalTasks, 1)) * 60 + (insights.balanceScore / 100) * 40)
-  }, [totalTasks, doneTasks, insights.balanceScore, isTeamEmpty])
+    if (totalTasks === 0 && teamProjects.length === 0) return 100
+    return Math.round((doneTasks / Math.max(totalTasks, 1)) * 60 + (insights?.balanceScore ?? 50) / 100 * 40)
+  }, [totalTasks, doneTasks, teamProjects.length, insights])
 
-  // Activity feed — merged tasks + messages
-  const activityFeed = useMemo(() => {
-    const events = []
-    teamTasks.slice(0, 10).forEach(task => {
-      events.push({
-        id: `t-${task.id}`, title: task.title, status: task.status || 'TODO',
-        timestamp: task.updatedAt || task.createdAt || new Date().toISOString(),
-        actor: task.assignedTo || 'Unassigned', type: 'task',
-      })
-    })
-    return events.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 6)
-  }, [teamTasks])
+  const healthStatus = healthScore >= 80 ? 'Thriving' : healthScore >= 60 ? 'On track' : healthScore >= 40 ? 'Slipping' : 'At risk'
+  const healthTone = healthScore >= 80 ? 'success' : healthScore >= 60 ? 'accent' : healthScore >= 40 ? 'warning' : 'danger'
 
-  // Workload computation from members
-  const workload = useMemo(() => {
-    const counts = {}
-    team?.members?.forEach(m => { counts[m.username] = 0 })
-    teamTasks.forEach(t => {
-      if (t.assignedTo && t.status !== 'Done' && !t.archived) counts[t.assignedTo] = (counts[t.assignedTo] || 0) + 1
-    })
-    return counts
-  }, [team, teamTasks])
+  const overdue = teamTasks.filter(t => isOpen(t) && daysUntil(t.dueDate) != null && daysUntil(t.dueDate) < 0).length
+  const inProgress = teamTasks.filter(isOpen).length
+  const dueThisWeek = teamTasks.filter(t => { const d = daysUntil(t.dueDate); return isOpen(t) && d != null && d >= 0 && d <= 7 }).length
 
-  /* ── Empty State ── */
-  if (isTeamEmpty) {
-    return (
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="py-12">
-        <div className="text-center py-16 bg-[var(--bg-card)] border border-dashed border-[var(--border-subtle)] rounded-2xl">
-          <div className="w-12 h-12 rounded-2xl bg-[var(--bg-subtle)] flex items-center justify-center mx-auto mb-4">
-            <Icons.target className="w-5 h-5 text-[var(--text-muted)]" />
-          </div>
-          <Heading level={4} className="text-[14px] font-semibold mb-1">No data yet</Heading>
-          <Text variant="muted" size="sm">Create projects and assign tasks to see Pulse analytics here.</Text>
-          {canCreateProject && !isReadOnly && (
-            <button
-              onClick={onCreateProject}
-              className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 bg-[var(--accent)] text-white text-[12px] font-semibold rounded-lg hover:opacity-90 transition-opacity"
-            >
-              <Icons.plus className="w-3.5 h-3.5" /> Create First Project
-            </button>
-          )}
-        </div>
-      </motion.div>
-    )
-  }
+  const openTasks = useMemo(() => teamTasks.filter(isOpen).sort((a, b) => (daysUntil(a.dueDate) ?? 999) - (daysUntil(b.dueDate) ?? 999)).slice(0, 5), [teamTasks])
+
+  const upcoming = useMemo(() => teamTasks
+    .filter(t => isOpen(t) && daysUntil(t.dueDate) != null && daysUntil(t.dueDate) >= 0)
+    .sort((a, b) => daysUntil(a.dueDate) - daysUntil(b.dueDate))
+    .slice(0, 5), [teamTasks])
+
+  const recents = useMemo(() => [...(activityFeed || [])]
+    .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0))
+    .slice(0, 5), [activityFeed])
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={SPRINGS.normal}
-      className="py-5 space-y-4"
-    >
-      {/* ── AI Weekly Digest ── */}
-      <AiWeeklyDigest tasks={teamTasks} doneTasks={doneTasks} />
-
-      {/* ── Team Health Dashboard: 3-column analytical ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Sprint Progress Ring */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-1">
-            <Icons.zap className="w-4 h-4 text-[var(--accent)]" />
-            <Heading level={4} className="text-[13px] font-semibold">Sprint Progress</Heading>
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="pt-4">
+      {/* ---------- Health strip ---------- */}
+      <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-[var(--shadow-xs)] p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex items-center gap-3 shrink-0">
+          <ProgressRing value={healthScore} size={62} strokeWidth={5}>
+            <span className="text-[12px] font-bold tabular-nums">{healthScore}%</span>
+          </ProgressRing>
+          <div>
+            <p className="text-[13px] font-bold leading-none">Team health</p>
+            <Badge variant={healthTone === 'success' ? 'success' : healthTone === 'warning' ? 'warning' : healthTone === 'danger' ? 'danger' : 'accent'} className="mt-1.5">{healthStatus}</Badge>
           </div>
-          <SprintProgressRing tasks={teamTasks} />
         </div>
-
-        {/* Bottleneck Detector */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <Icons.alertTriangle className="w-4 h-4 text-amber-500" />
-            <Heading level={4} className="text-[13px] font-semibold">Flow Analysis</Heading>
-          </div>
-          <BottleneckDetector tasks={teamTasks} />
-        </div>
-
-        {/* Risk Radar */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <Icons.shieldAlert className="w-4 h-4 text-red-400" />
-            <Heading level={4} className="text-[13px] font-semibold">Risk Radar</Heading>
-          </div>
-          <RiskRadar tasks={teamTasks} />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 flex-1">
+          <HealthStat icon={AlertTriangle} label="Overdue" value={overdue} tone="danger" onClick={onOpenTasks} />
+          <HealthStat icon={Activity} label="In progress" value={inProgress} tone="accent" onClick={onOpenTasks} />
+          <HealthStat icon={CalendarClock} label="Due this week" value={dueThisWeek} tone="warning" onClick={onOpenTasks} />
         </div>
       </div>
 
-      {/* ── Active Task Pipeline + Deadlines ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Active Tasks Pipeline (col-span-2) */}
-        <div className="lg:col-span-2 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Icons.zap className="w-4 h-4 text-violet-500" />
-              <Heading level={4} className="text-[13px] font-semibold">Active Pipeline</Heading>
-              <Badge variant="primary" size="xs" className="text-[9px]">{activeTasksList.length}</Badge>
-            </div>
-            <button onClick={() => setActiveTab('tasks')} className="text-[11px] font-medium text-[var(--accent)] hover:underline">
-              Board →
-            </button>
-          </div>
-
-          {activeTasksList.length === 0 ? (
-            <div className="py-6 text-center bg-[var(--bg-subtle)]/40 rounded-xl border border-dashed border-[var(--border-subtle)]">
-              <Icons.checkCircle2 className="w-6 h-6 text-[var(--success)] mx-auto mb-2 opacity-60" />
-              <Text size="xs" variant="muted">All tasks completed or in backlog.</Text>
-            </div>
-          ) : (
-            <div className="space-y-1.5">
-              {activeTasksList.slice(0, 6).map(task => {
-                const isReview = String(task.status).toUpperCase().includes('REVIEW')
-                const priority = normalizePriority(task.priority)
-                const priColors = { URGENT: 'bg-red-500', HIGH: 'bg-orange-500', MEDIUM: 'bg-yellow-500', LOW: 'bg-blue-500' }
+      {/* ---------- Main grid ---------- */}
+      <div className="mt-4 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 items-start">
+        <div className="space-y-4 min-w-0">
+          {/* Open tasks */}
+          <section className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-[var(--shadow-xs)] overflow-hidden">
+            <header className="flex items-center gap-2 px-4 py-3 border-b border-[var(--border-subtle)]">
+              <Heading level={4} className="text-[13px] font-bold flex-1">Open tasks</Heading>
+              <Badge variant="neutral">{teamTasks.length}</Badge>
+              <Button size="xs" variant="ghost" className="gap-1 text-[11px]" onClick={onOpenTasks}>
+                View all <ArrowRight className="w-3 h-3" />
+              </Button>
+            </header>
+            <div className="divide-y divide-[var(--border-subtle)]">
+              {openTasks.length === 0 ? (
+                <EmptyState icon={Activity} title="All caught up" description="No open tasks right now." className="min-h-[110px]" />
+              ) : openTasks.map(t => {
+                const due = dueInfo(t.dueDate)
                 return (
-                  <div
-                    key={task.id}
-                    onClick={() => setActiveTab('tasks')}
-                    className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer group"
-                  >
-                    <div className={cn('w-1 h-7 rounded-full shrink-0', isReview ? 'bg-purple-400' : 'bg-[var(--accent)]')} />
-                    <div className="min-w-0 flex-1">
-                      <span className="text-[12px] font-medium text-[var(--text-primary)] truncate block group-hover:text-[var(--accent)] transition-colors">
-                        {task.title}
-                      </span>
-                      <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)] mt-0.5">
-                        <span>{task.assignedTo || 'Unassigned'}</span>
-                        <span>·</span>
-                        <span>{formatTimeAgo(task.updatedAt || task.createdAt)}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <span className={cn('w-1.5 h-1.5 rounded-full', priColors[priority] || 'bg-gray-400')} />
-                      <Badge variant={isReview ? 'warning' : 'primary'} size="xs" className="text-[9px]">
-                        {isReview ? 'Review' : 'Active'}
-                      </Badge>
-                    </div>
+                  <div key={t.id} className="flex items-center gap-3 px-4 py-2.5">
+                    <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', due?.tone === 'danger' ? 'bg-[var(--danger)]' : due?.tone === 'warning' ? 'bg-[var(--warning)]' : 'bg-[var(--accent)]')} />
+                    <span className="flex-1 min-w-0 truncate text-[12.5px] font-medium">{t.title}</span>
+                    <PriorityBadge priority={t.priority} />
+                    {due && <Badge variant={due.tone === 'danger' ? 'danger' : due.tone === 'warning' ? 'warning' : 'outline'} className="text-[10px] shrink-0">{due.label}</Badge>}
+                    <AssigneeAvatar name={typeof t.assignedTo === 'string' ? t.assignedTo : t.assignee?.username || t.assignedTo?.username} />
                   </div>
                 )
               })}
             </div>
-          )}
-        </div>
+          </section>
 
-        {/* Upcoming Deadlines */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <Icons.calendar className="w-4 h-4 text-amber-500" />
-            <Heading level={4} className="text-[13px] font-semibold">Deadlines</Heading>
-          </div>
-          <UpcomingDeadlines tasks={teamTasks} />
-        </div>
-      </div>
-
-      {/* ── Health Score + Workload + Recent Wins ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Team Health */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <Icons.activity className="w-4 h-4 text-emerald-500" />
-            <Heading level={4} className="text-[13px] font-semibold">Health Score</Heading>
-          </div>
-          <div className="flex items-center gap-4">
-            <HealthGauge score={healthScore} />
-            <div className="space-y-2.5 flex-1">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Completion</span>
-                <span className="text-[13px] font-bold text-[var(--success)] tabular-nums">{insights.completionRate}%</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Balance</span>
-                <span className="text-[13px] font-bold text-[var(--text-primary)] tabular-nums">{insights.balanceScore}%</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Unassigned</span>
-                <span className="text-[13px] font-bold text-[var(--warning)] tabular-nums">{insights.unassignedCount}</span>
-              </div>
-              {insights.highPriorityCount > 0 && (
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">High Pri</span>
-                  <span className="text-[13px] font-bold text-[var(--danger)] tabular-nums">{insights.highPriorityCount}</span>
-                </div>
+          {/* Projects */}
+          <section className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-[var(--shadow-xs)] overflow-hidden">
+            <header className="flex items-center gap-2 px-4 py-3 border-b border-[var(--border-subtle)]">
+              <Heading level={4} className="text-[13px] font-bold flex-1">Projects</Heading>
+              {!isReadOnly && canManage && (
+                <Button size="xs" variant="outline" className="gap-1 text-[11px]" onClick={onCreateProject}>
+                  <Plus className="w-3 h-3" /> New
+                </Button>
               )}
+              <Button size="xs" variant="ghost" className="gap-1 text-[11px]" onClick={onOpenProjects}>
+                View all <ArrowRight className="w-3 h-3" />
+              </Button>
+            </header>
+            <div className="divide-y divide-[var(--border-subtle)]">
+              {teamProjects.length === 0 ? (
+                <EmptyState icon={Users} title="No projects yet" description="Projects this team owns will show here." className="min-h-[110px]" />
+              ) : teamProjects.slice(0, 4).map(p => {
+                const progress = typeof p.progress === 'number' ? p.progress : 0
+                return (
+                  <div key={p.id} className="px-4 py-3">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="flex-1 min-w-0 truncate text-[12.5px] font-medium">{p.name}</span>
+                      <StatusBadge status={p.status} variant="pill" />
+                      <span className="text-[11px] font-bold tabular-nums text-[var(--text-muted)]">{progress}%</span>
+                    </div>
+                    <ProgressBar value={progress} height={4} />
+                  </div>
+                )
+              })}
             </div>
-          </div>
-          <div className="mt-3 pt-3 border-t border-[var(--border-subtle)]">
-            <div className="h-1.5 w-full bg-[var(--bg-subtle)] rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${insights.completionRate}%` }}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
-                className="h-full rounded-full bg-[var(--accent)]"
-              />
-            </div>
-            <div className="flex items-center justify-between mt-1.5">
-              <Text size="xs" variant="muted">{doneTasks} done</Text>
-              <Text size="xs" variant="muted">{totalTasks - doneTasks} remaining</Text>
-            </div>
-          </div>
-        </div>
+          </section>
 
-        {/* Workload Distribution */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Icons.barChart className="w-4 h-4 text-sky-500" />
-              <Heading level={4} className="text-[13px] font-semibold">Workload</Heading>
-            </div>
-            <button onClick={() => setActiveTab('members')} className="text-[11px] font-medium text-[var(--accent)] hover:underline">
-              Details →
-            </button>
-          </div>
-          <WorkloadDistribution workload={workload} />
-        </div>
-
-        {/* Recent Wins */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <Icons.award className="w-4 h-4 text-amber-500" />
-            <Heading level={4} className="text-[13px] font-semibold">Recent Wins</Heading>
-          </div>
-          <RecentWins tasks={teamTasks} />
-        </div>
-      </div>
-
-      {/* ── Team Velocity + Project Progress ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Team Velocity Sparkline */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-1">
-            <Icons.trendingUp className="w-4 h-4 text-blue-500" />
-            <Heading level={4} className="text-[13px] font-semibold">Velocity</Heading>
-          </div>
-          <VelocitySparkline tasks={teamTasks} />
-        </div>
-
-        {/* Project Progress */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Icons.folder className="w-4 h-4 text-amber-500" />
-              <Heading level={4} className="text-[13px] font-semibold">Projects</Heading>
-            </div>
-            <button onClick={() => setActiveTab('projects')} className="text-[11px] font-medium text-[var(--accent)] hover:underline">
-              All →
-            </button>
-          </div>
-          <ProjectProgress projects={teamProjects} tasksForProject={(pid) => hasProjectIdOnTasks ? teamTasks.filter(t => t.projectId === pid) : []} />
-        </div>
-      </div>
-
-      {/* ── Activity Timeline ── */}
-      <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Icons.clock className="w-4 h-4 text-[var(--accent)]" />
-            <Heading level={4} className="text-[13px] font-semibold">Activity Stream</Heading>
-          </div>
-          <Badge variant="outline" size="xs" className="text-[10px]">Last {Math.min(activityFeed.length, 6)}</Badge>
-        </div>
-
-        {activityFeed.length === 0 ? (
-          <Text size="xs" variant="muted" className="italic py-3">No recent activity.</Text>
-        ) : (
-          <div className="relative pl-5 space-y-3 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-[var(--border-subtle)]">
-            {activityFeed.map((event) => (
-              <div key={event.id} className="relative flex items-start gap-2.5">
-                <div className="absolute -left-5 top-1 w-3 h-3 rounded-full bg-[var(--bg-card)] border-2 border-[var(--accent)] flex items-center justify-center shrink-0">
-                  <div className="w-1 h-1 rounded-full bg-[var(--accent)]" />
+          {/* Member strip */}
+          <section className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-[var(--shadow-xs)] p-4">
+            <header className="flex items-center gap-2 mb-3">
+              <Heading level={4} className="text-[13px] font-bold flex-1">Members</Heading>
+              {canManage && (
+                <Button size="xs" variant="outline" className="text-[11px]" onClick={onManageMembers}>Manage</Button>
+              )}
+            </header>
+            {members.length === 0 ? (
+              <p className="text-[12px] text-[var(--text-muted)] py-1">No members yet.</p>
+            ) : (
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex -space-x-2">
+                  {members.slice(0, 8).map(m => (
+                    <Avatar key={m.username || m.id} className="w-8 h-8 border-2 border-[var(--bg-card)]" title={m.username || m.name}>
+                      <AvatarFallback className="text-[10px] font-bold" style={{ background: `hsl(${hashHue(m.username || m.name)} 65% 48%)`, color: '#fff' }}>
+                        {(m.username || m.name || '?').charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  ))}
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[12px] font-medium text-[var(--text-primary)] truncate">{event.title}</span>
-                    <span className="text-[10px] text-[var(--text-muted)] font-mono shrink-0">{formatTimeAgo(event.timestamp)}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px] text-[var(--text-secondary)] mt-0.5">
-                    <span>{event.actor}</span>
-                    <span>·</span>
-                    <Badge variant={event.type === 'message' ? 'secondary' : 'primary'} size="xs" className="text-[9px]">{event.status}</Badge>
-                  </div>
+                <div className="min-w-0">
+                  <p className="text-[12px] font-semibold truncate">{members.map(m => m.username || m.name).slice(0, 3).join(', ')}{members.length > 3 ? ` +${members.length - 3} more` : ''}</p>
+                  <p className="text-[10.5px] text-[var(--text-muted)]">
+                    {members.length} member{members.length !== 1 ? 's' : ''}
+                    {observerCount > 0 && ` Â· ${observerCount} observer${observerCount !== 1 ? 's' : ''}`}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            )}
+          </section>
+        </div>
+
+        {/* ---------- Rail ---------- */}
+        <aside className="space-y-4">
+          <section className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-[var(--shadow-xs)] p-4">
+            <Heading level={4} className="text-[13px] font-bold mb-3 flex items-center gap-2">
+              <Activity className="w-3.5 h-3.5 text-[var(--accent)]" /> Recents
+            </Heading>
+            {recents.length === 0 ? (
+              <p className="text-[11.5px] text-[var(--text-muted)] py-1">No activity yet.</p>
+            ) : (
+              <div className="space-y-2.5">
+                {recents.map((a, i) => {
+                  const who = a.user || a.actor || a.username || 'Someone'
+                  const target = a.target ? ` "${a.target}"` : ''
+                  const icon = a.type === 'task_completed'
+                    ? <CheckCircle2 className="w-3 h-3 text-[var(--success)]" />
+                    : a.type === 'project_created'
+                      ? <FolderKanban className="w-3 h-3 text-[var(--accent)]" />
+                      : <MessageSquare className="w-3 h-3 text-[var(--accent)]" />
+                  return (
+                    <div key={a.id || i} className="flex items-start gap-2">
+                      <span className="w-6 h-6 rounded-lg bg-[var(--bg-subtle)] flex items-center justify-center shrink-0 mt-0.5">{icon}</span>
+                      <p className="text-[11.5px] leading-snug min-w-0 flex-1">
+                        <span className="font-semibold text-[var(--text-primary)]">{who}</span>{' '}
+                        <span className="text-[var(--text-secondary)]">{a.action || 'did something'}{target}</span>
+                      </p>
+                      <span className="text-[9.5px] text-[var(--text-muted)] font-mono shrink-0">{a.time || ''}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </section>
+
+          <section className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-[var(--shadow-xs)] p-4">
+            <Heading level={4} className="text-[13px] font-bold mb-3 flex items-center gap-2">
+              <CalendarClock className="w-3.5 h-3.5 text-[var(--accent)]" /> Upcoming
+            </Heading>
+            {upcoming.length === 0 ? (
+              <p className="text-[11.5px] text-[var(--text-muted)] py-1">Nothing scheduled.</p>
+            ) : (
+              <div className="space-y-2">
+                {upcoming.map(t => {
+                  const due = dueInfo(t.dueDate)
+                  return (
+                    <div key={t.id} className="flex items-center gap-2">
+                      <span className="flex-1 min-w-0 truncate text-[11.5px]">{t.title}</span>
+                      {due && <Badge variant={due.tone === 'warning' ? 'warning' : 'outline'} className="text-[9.5px] shrink-0">{due.label}</Badge>}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </section>
+        </aside>
       </div>
     </motion.div>
   )
 }
+
+export function AssigneeAvatar({ name }) {
+  if (!name) return <span className="w-6 h-6 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)] shrink-0" />
+  return (
+    <Avatar className="w-6 h-6 shrink-0" title={name}>
+      <AvatarFallback className="text-[9px] font-bold" style={{ background: `hsl(${hashHue(name)} 65% 48%)`, color: '#fff' }}>
+        {name.charAt(0).toUpperCase()}
+      </AvatarFallback>
+    </Avatar>
+  )
+}
+
+export default OverviewTab

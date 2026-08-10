@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+﻿import React, { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDroppable } from '@dnd-kit/core'
@@ -10,7 +10,7 @@ import { useCreateTask } from '../../entities/hooks/useTasks'
 import { cn } from '@/shared/lib/cn'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
-/* ─── Column accent styles ─── */
+/* â”€â”€â”€ Column accent styles â”€â”€â”€ */
 const COLUMN_STYLES = {
   'To Do':       { accent: '#3B82F6', bg: 'rgba(59,130,246,0.025)', border: 'rgba(59,130,246,0.10)', dot: '#3B82F6' },
   'In Progress': { accent: '#F59E0B', bg: 'rgba(245,158,11,0.025)', border: 'rgba(245,158,11,0.10)', dot: '#F59E0B' },
@@ -18,7 +18,7 @@ const COLUMN_STYLES = {
   'Done':        { accent: '#10B981', bg: 'rgba(16,185,129,0.025)', border: 'rgba(16,185,129,0.10)', dot: '#10B981' },
 }
 
-export function KanbanColumn({ column, tasks, onTaskClick, onQuickComplete, onQuickDelete }) {
+export function KanbanColumn({ column, tasks, onTaskClick, onQuickComplete, onQuickDelete, responsive = false }) {
   const [isQuickAdding, setIsQuickAdding] = useState(false)
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [collapsed, setCollapsed] = useState(false)
@@ -56,7 +56,7 @@ export function KanbanColumn({ column, tasks, onTaskClick, onQuickComplete, onQu
       layout
       className={cn(
         "flex flex-col rounded-lg border shadow-[var(--shadow-xs)] transition-all duration-[var(--duration-slow)] ease-[var(--ease-out)] overflow-hidden",
-        collapsed ? "w-[52px] min-w-[52px] flex-none" : "w-[85vw] max-w-[320px] sm:w-[320px] flex-shrink-0 snap-start"
+        collapsed ? "w-[52px] min-w-[52px] flex-none" : responsive ? "flex-1 w-auto max-w-none min-w-0" : "w-[85vw] max-w-[320px] sm:w-[320px] flex-shrink-0 snap-start"
       )}
       style={{ backgroundColor: style.bg, borderColor: isOver ? style.accent : style.border }}
     >

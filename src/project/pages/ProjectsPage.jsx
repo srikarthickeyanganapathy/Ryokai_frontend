@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heading, Text } from '@/shared/ui/Typography';
@@ -12,19 +12,99 @@ import { ProjectForm } from '../components/ProjectForm';
 import { useOrgTeams } from '@/organization';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { PageShell, PageHero, PageStats, PageToolbar, PageContent, PageEmptyState, FloatingActions } from '@/shared/ui/PageShell';
-import { FilterTabs } from '@/shared/ui/FilterTabs';
 import { SearchPlugin } from '@/shared/workspace-framework';
 import { getPortfolioMetrics, calculateHealthScore, formatRelativeDate } from '../features/utils/projectUtils';
+import { cn } from '@/shared/lib/cn';
 import {
   FolderKanban, Plus, TrendingUp, CalendarClock,
   AlertTriangle, Folder, Activity
 } from 'lucide-react';
 
+function AnimatedCounter({ value, duration = 0.8 }) {
+  const [display, setDisplay] = useState(0)
+  useEffect(() => {
+    let raf
+    const start = performance.now()
+    const from = display
+    const tick = (now) => {
+      const p = Math.min((now - start) / (duration * 1000), 1)
+      const eased = 1 - Math.pow(1 - p, 3)
+      setDisplay(Math.round(from + (value - from) * eased))
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [value, duration])
+  return <>{typeof value === 'string' && value.includes('%') ? value : display.toLocaleString()}</>
+}
+
+function StatKPI({ icon: Icon, label, value, sublabel, hue = 220 }) {
+  const numericValue = typeof value === 'number' ? value : parseInt(value) || 0;
+  const isPercent = typeof value === 'string' && value.endsWith('%');
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4 shadow-[var(--shadow-xs)] transition-all duration-300 hover:border-[var(--border-default)] hover:shadow-[var(--shadow-sm)]">
+      <div
+        className="absolute inset-0 pointer-events-none opacity-20"
+        style={{ background: `radial-gradient(circle at 90% -20%, hsl(${hue} 70% 55% / 0.4), transparent 60%)` }}
+        aria-hidden="true"
+      />
+      <div className="relative flex items-center justify-between">
+        <div className="min-w-0">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">{label}</div>
+          <div className="text-[24px] font-bold text-[var(--text-primary)] leading-none mt-2 tabular-nums">
+            {isPercent ? value : <AnimatedCounter value={numericValue} />}
+          </div>
+          {sublabel && <div className="text-[11px] text-[var(--text-secondary)] mt-1.5 truncate">{sublabel}</div>}
+        </div>
+        <span
+          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border"
+          style={{ background: `hsl(${hue} 60% 50% / 0.12)`, color: `hsl(${hue} 70% 60%)`, borderColor: `hsl(${hue} 60% 50% / 0.2)` }}
+        >
+          <Icon className="w-4 h-4" />
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function CategoryChip({ label, count, isActive, onClick, hue = 230 }) {
+  return (
+    <motion.button
+      whileTap={{ scale: 0.96 }}
+      onClick={onClick}
+      className={cn(
+        'relative px-4 py-2 rounded-xl text-[13px] font-medium transition-colors duration-200 whitespace-nowrap',
+        isActive
+          ? 'text-[var(--text-primary)]'
+          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
+      )}
+    >
+      <span>{label}</span>
+      <span
+        className={cn(
+          'ml-1.5 text-[11px] px-1.5 py-0.5 rounded-full tabular-nums',
+          isActive ? 'bg-[var(--accent)]/12 text-[var(--accent)]' : 'bg-[var(--bg-subtle)] text-[var(--text-muted)]'
+        )}
+      >
+        {count}
+      </span>
+      {isActive && (
+        <motion.div
+          layoutId="activeChip"
+          className="absolute inset-0 bg-[var(--bg-subtle)] rounded-xl -z-10 border border-[var(--border-subtle)]"
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        />
+      )}
+    </motion.button>
+  )
+}
+
 const PROJECT_TABS = [
-  { value: 'ALL', label: 'All' },
-  { value: 'ACTIVE', label: 'Active' },
-  { value: 'COMPLETED', label: 'Completed' },
-  { value: 'ARCHIVED', label: 'Archived' },
+  { value: 'ALL', label: 'All', hue: 210 },
+  { value: 'ACTIVE', label: 'Active', hue: 160 },
+  { value: 'COMPLETED', label: 'Completed', hue: 260 },
+  { value: 'ARCHIVED', label: 'Archived', hue: 40 },
 ];
 
 export function ProjectsPage() {
@@ -63,6 +143,13 @@ export function ProjectsPage() {
 
   const metrics = useMemo(() => getPortfolioMetrics(projects), [projects]);
 
+  const statusCounts = useMemo(() => ({
+    ALL: projects.length,
+    ACTIVE: projects.filter(p => p.status !== 'COMPLETED' && p.status !== 'ARCHIVED').length,
+    COMPLETED: projects.filter(p => p.status === 'COMPLETED').length,
+    ARCHIVED: projects.filter(p => p.status === 'ARCHIVED').length,
+  }), [projects]);
+
   const upcomingDeadlines = useMemo(() => {
     const now = new Date();
     return projects
@@ -96,14 +183,18 @@ export function ProjectsPage() {
       </PageHero>
 
       <PageStats>
-        <StatTile icon={Folder} label="Portfolio" value={metrics.total} tone="default" />
-        <StatTile icon={TrendingUp} label="Progress" value={metrics.total > 0 ? `${Math.round(metrics.overallProgress / metrics.total)}%` : '0%'} tone="success" />
-        <StatTile icon={CalendarClock} label="Due This Week" value={metrics.endingThisWeek} tone="warning" />
-        <StatTile icon={AlertTriangle} label="At Risk" value={metrics.atRisk + metrics.overdue} tone={metrics.atRisk + metrics.overdue > 0 ? 'danger' : 'default'} />
+        <StatKPI icon={Folder} label="Portfolio" value={metrics.total} sublabel="Projects in scope" hue={210} />
+        <StatKPI icon={TrendingUp} label="Progress" value={metrics.total > 0 ? `${Math.round(metrics.overallProgress / metrics.total)}%` : '0%'} sublabel="Across all projects" hue={160} />
+        <StatKPI icon={CalendarClock} label="Due This Week" value={metrics.endingThisWeek} sublabel="Deadlines closing in" hue={40} />
+        <StatKPI icon={AlertTriangle} label="At Risk" value={metrics.atRisk + metrics.overdue} sublabel={metrics.atRisk + metrics.overdue > 0 ? 'Needs attention' : 'All healthy'} hue={metrics.atRisk + metrics.overdue > 0 ? 0 : 260} />
       </PageStats>
 
       <PageToolbar>
-        <FilterTabs filters={PROJECT_TABS} value={activeTab} onChange={setActiveTab} />
+        <div className="flex items-center gap-1 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-1 overflow-x-auto scrollbar-hide">
+  {PROJECT_TABS.map(tab => (
+    <CategoryChip key={tab.value} label={tab.label} count={statusCounts[tab.value]} isActive={activeTab === tab.value} onClick={() => setActiveTab(tab.value)} hue={tab.hue} />
+  ))}
+</div>
         <SearchPlugin value={globalFilter} onChange={setGlobalFilter} placeholder="Search projects..." className="w-full sm:w-72" />
       </PageToolbar>
 
@@ -178,23 +269,11 @@ export function ProjectsPage() {
             action={<Button variant="outline" onClick={() => setActiveTab('ALL')}>Show All</Button>}
           />
         ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ staggerChildren: 0.05 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
-          >
-            {projects.map((project, i) => (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.04, duration: 0.25 }}
-              >
-                <ProjectCard project={project} />
-              </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {projects.map(project => (
+              <ProjectCard key={project.id} project={project} />
             ))}
-          </motion.div>
+          </div>
         )}
       </PageContent>
 
@@ -228,32 +307,5 @@ export function ProjectsPage() {
         </ModalContent>
       </Modal>
     </PageShell>
-  );
-}
-
-function StatTile({ icon: Icon, label, value, tone = 'default' }) {
-  const toneMap = {
-    default: 'text-[var(--text-primary)]',
-    success: 'text-[var(--success)]',
-    warning: 'text-[var(--warning)]',
-    danger: 'text-[var(--danger)]',
-  };
-  const bgMap = {
-    default: 'bg-[var(--bg-subtle)]',
-    success: 'bg-[var(--success-soft)]',
-    warning: 'bg-[var(--warning-soft)]',
-    danger: 'bg-[var(--danger-soft)]',
-  };
-
-  return (
-    <motion.div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--accent-border)] transition-colors">
-      <div className={`${bgMap[tone]} w-9 h-9 rounded-lg flex items-center justify-center shrink-0`}>
-        <Icon className={`${toneMap[tone]} w-4 h-4`} strokeWidth={1.5} />
-      </div>
-      <div>
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">{label}</div>
-        <div className="text-lg font-bold tabular-nums text-[var(--text-primary)]">{value}</div>
-      </div>
-    </motion.div>
   );
 }

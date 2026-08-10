@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+﻿import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   DndContext,
@@ -24,7 +24,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { getFeedbackForAction } from '@/shared/lib/statusRegistry';
 
-export function KanbanBoard({ tasks, mode, isLoading, emptyState, onTaskClick, onTaskStatusChange, onQuickComplete, onQuickDelete }) {
+export function KanbanBoard({ tasks, mode, isLoading, emptyState, responsive = false, onTaskClick, onTaskStatusChange, onQuickComplete, onQuickDelete }) {
   const [activeTask, setActiveTask] = useState(null)
   const [reassignModalTask, setReassignModalTask] = useState(null)
   const { user } = useAuth()
@@ -86,7 +86,7 @@ export function KanbanBoard({ tasks, mode, isLoading, emptyState, onTaskClick, o
     }))
 
     const onError = (error) => {
-      toast.error(error?.response?.data?.message || 'Action failed — reverting task position')
+      toast.error(error?.response?.data?.message || 'Action failed â€” reverting task position')
       rollbackTask(task.id)
     }
 
@@ -153,7 +153,7 @@ export function KanbanBoard({ tasks, mode, isLoading, emptyState, onTaskClick, o
       if (taskAssignee && taskAssignee === user?.username) { toast.error('You cannot reject your own task'); rollbackTask(task.id); return; }
       const reason = await confirm({
         title: 'Send back for rework', description: 'Let them know what needs to change before it can be approved.',
-        requireInput: true, inputPlaceholder: 'e.g. Missing acceptance criteria for edge cases…', confirmLabel: 'Send back', danger: true,
+        requireInput: true, inputPlaceholder: 'e.g. Missing acceptance criteria for edge casesâ€¦', confirmLabel: 'Send back', danger: true,
       });
       if (reason === false) { rollbackTask(task.id); return; }
       rejectMutation.mutate({ id: task.id, reason: reason || 'Moved to Needs Work on Kanban' }, { onError });
@@ -229,7 +229,7 @@ export function KanbanBoard({ tasks, mode, isLoading, emptyState, onTaskClick, o
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.25 }}
-      className="flex gap-4 pb-4 items-start overflow-x-auto custom-scrollbar snap-x snap-mandatory scroll-px-4"
+      className={responsive ? "flex gap-3 pb-4 items-start overflow-x-auto custom-scrollbar" : "flex gap-4 pb-4 items-start overflow-x-auto custom-scrollbar snap-x snap-mandatory scroll-px-4"}
     >
       {confirmDialog}
       <DndContext
@@ -245,6 +245,7 @@ export function KanbanBoard({ tasks, mode, isLoading, emptyState, onTaskClick, o
             initial={{ opacity: 0, y: 24, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: idx * 0.1, type: 'spring', stiffness: 300, damping: 24 }}
+            className={responsive ? 'flex-1 min-w-[230px] flex' : undefined}
           >
             <KanbanColumn 
               column={column} 
@@ -252,6 +253,7 @@ export function KanbanBoard({ tasks, mode, isLoading, emptyState, onTaskClick, o
               onTaskClick={onTaskClick}
               onQuickComplete={onQuickComplete}
               onQuickDelete={onQuickDelete}
+              responsive={responsive}
             />
           </motion.div>
         ))}

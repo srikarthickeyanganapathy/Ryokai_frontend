@@ -1,585 +1,388 @@
-import React, { useState, useMemo, useCallback } from 'react'
-import { motion, AnimatePresence, useSpring } from 'framer-motion'
-import { Text } from '@/shared/ui/Typography'
-import { Badge } from '@/shared/ui/Badge'
-import { cn } from '@/shared/lib/cn'
-import { normalizePriority } from '@/shared/lib/priority'
-import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
-import { ImmersiveEmptyState } from '@/shared/ui/Immersive'
+import React, { useMemo, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Check, ArrowRight, AlertTriangle, CalendarClock, FolderKanban, Trash2, X, UserPlus } from 'lucide-react'
+import { Heading } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
-import {
-  CheckCheckIcon, Calendar, MoreHorizontal, Filter, Plus, CheckSquare,
-  Users, Clock, Tag, Archive, ArrowRight, AlertCircle, AlertTriangle,
-  ChevronDown, X, KanbanSquare, User, Target, ListTodo
-} from '@/shared/ui/Icons'
-import { Icons } from '@/shared/ui/Icons'
-import { KanbanBoard, TaskPanel } from '@/task'
+import { Badge } from '@/shared/ui/Badge'
+import { Avatar, AvatarFallback } from '@/shared/ui/Avatar'
+import { Checkbox } from '@/shared/ui/Checkbox'
+import { PriorityBadge } from '@/shared/ui/PriorityBadge'
+import { EmptyState } from '@/shared/ui/EmptyState'
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
+import { useDeleteTask, useRejectTask } from '@/task'
+import { toast } from 'sonner'
+import { cn } from '@/shared/lib/cn'
 
-const IS_DONE = (s) => s === 'Done' || s === 'COMPLETED'
-const IS_REVIEW = (s) => String(s || '').toUpperCase().includes('REVIEW')
+/* ============================================================
+   components/TasksTab.jsx — Work segment (tasks side).
+   Urgency-first groups (Overdue → This week → Later → No date →
+   Done), filter chips with live counts, and the full task
+   function set: quick-complete (canEditTask), inline assign
+   (canAssignTask), delete (canDeleteTask + confirm), row click →
+   TaskPanel, and a bulk bar (complete / submit for review /
+   send back / assign / delete) — all permission-rendered the
+   same way as the org-wide tasks page. Status changes go through
+   the page's real onUpdateTaskStatus; assignment through
+   handleAssignTask (taskId, memberId, username).
+   ============================================================ */
 
-const COLUMNS = [
-  { key: 'unassigned', title: 'To Do',     color: 'bg-slate-400',   accent: 'var(--text-muted)' },
-  { key: 'inProgress',  title: 'In Progress', color: 'bg-blue-400',   accent: '#3b82f6' },
-  { key: 'review',      title: 'In Review',   color: 'bg-purple-400', accent: '#8b5cf6' },
-  { key: 'completed',   title: 'Done',        color: 'bg-emerald-400',accent: '#10b981' },
-]
-
-const PRIORITY_DOT = { URGENT: 'bg-red-500', HIGH: 'bg-orange-500', MEDIUM: 'bg-yellow-500', LOW: 'bg-blue-500' }
-const PRIORITY_ORDER = ['URGENT', 'HIGH', 'MEDIUM', 'LOW']
-
-// Aging thresholds in days
-const STALE_THRESHOLD = 3
-const CRITICAL_STALE_THRESHOLD = 7
-
-const SAVED_VIEWS = [
-  { key: 'all',         label: 'All Tasks',     icon: ListTodo },
-  { key: 'myTasks',     label: 'My Tasks',      icon: User },
-  { key: 'unassigned',  label: 'Unassigned',    icon: Users },
-  { key: 'dueThisWeek', label: 'Due This Week', icon: Calendar },
-  { key: 'blocked',     label: 'Blocked',       icon: AlertCircle },
-]
-
-function isStale(task) {
-  if (!task.updatedAt && !task.updated_at) return false
-  const updated = new Date(task.updatedAt || task.updated_at)
-  const days = (Date.now() - updated.getTime()) / (1000 * 60 * 60 * 24)
-  return { days, stale: days >= STALE_THRESHOLD, critical: days >= CRITICAL_STALE_THRESHOLD }
+function hashHue(str = '') {
+  let h = 0
+  for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h)
+  return Math.abs(h) % 360
 }
 
-function isDueThisWeek(task) {
-  if (!task.dueDate) return false
-  const due = new Date(task.dueDate)
-  const now = new Date()
-  const endOfWeek = new Date(now)
-  endOfWeek.setDate(now.getDate() + (7 - now.getDay()))
-  return due >= now && due <= endOfWeek
+function daysUntil(dateInput) {
+  if (!dateInput) return null
+  const d = new Date(dateInput)
+  if (isNaN(d.getTime())) return null
+  return Math.round((d.setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 86400000)
 }
 
-function filterBySavedView(tasks, viewKey, currentUserId) {
-  switch (viewKey) {
-    case 'myTasks':
-      return tasks.filter(t => t.assignedTo === currentUserId)
-    case 'unassigned':
-      return tasks.filter(t => !t.assignedTo)
-    case 'dueThisWeek':
-      return tasks.filter(t => isDueThisWeek(t) || (t.dueDate && new Date(t.dueDate) < new Date() && !IS_DONE(t.status)))
-    case 'blocked':
-      return tasks.filter(t => t.status === 'BLOCKED' || t.blocked)
-    default:
-      return tasks
-  }
+function dueInfo(dateInput) {
+  const d = daysUntil(dateInput)
+  if (d == null) return null
+  if (d < 0) return { label: d === -1 ? 'Overdue' : `${Math.abs(d)}d overdue`, tone: 'danger' }
+  if (d === 0) return { label: 'Today', tone: 'warning' }
+  if (d <= 7) return { label: `${d}d`, tone: 'warning' }
+  return { label: new Date(dateInput).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), tone: 'muted' }
 }
 
-/* ── Animated Count Badge ── */
-function AnimatedCountBadge({ count }) {
-  const springCount = useSpring(count, { stiffness: 300, damping: 25 })
+const isDone = t => (t.currentStatus || t.status || '').toUpperCase() === 'DONE'
+const isReview = t => /REVIEW|SUBMITTED/.test((t.currentStatus || t.status || '').toUpperCase())
+const isOpen = t => !isDone(t)
+const statusOf = t => (t.currentStatus || t.status || 'TODO').toUpperCase()
 
+export function AssigneeAvatar({ name, size = 'md' }) {
+  const cls = size === 'sm' ? 'w-6 h-6 text-[9px]' : 'w-7 h-7 text-[10px]'
+  if (!name) return <span className={cn(cls, 'rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)] shrink-0')} />
   return (
-    <motion.span
-      className="text-[11px] font-mono font-semibold text-[var(--text-muted)] bg-[var(--bg-card)] px-1.5 py-0.5 rounded-md border border-[var(--border-subtle)] tabular-nums min-w-[24px] text-center inline-block"
-      animate={{ scale: [1, 1.15, 1] }}
-      transition={{ duration: 0.25, ease: 'easeOut' }}
-      key={count}
-    >
-      {count}
-    </motion.span>
+    <Avatar className={cn(cls, 'shrink-0')} title={name}>
+      <AvatarFallback className={cn(cls, 'font-bold')} style={{ background: `hsl(${hashHue(name)} 65% 48%)`, color: '#fff' }}>
+        {name.charAt(0).toUpperCase()}
+      </AvatarFallback>
+    </Avatar>
   )
 }
 
-/* ── Bulk Actions Toolbar ── */
-function BulkActionsToolbar({ count, onClear, onArchive }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -8, height: 0 }}
-      animate={{ opacity: 1, y: 0, height: 'auto' }}
-      exit={{ opacity: 0, y: -8, height: 0 }}
-      transition={{ duration: 0.2 }}
-      className="overflow-hidden mb-3"
-    >
-      <div className="flex items-center gap-3 px-3 py-2.5 bg-[var(--accent-soft)]/20 border border-[var(--accent-border)] rounded-xl">
-        <CheckSquare className="w-4 h-4 text-[var(--accent)]" />
-        <span className="text-[12px] font-semibold text-[var(--accent)]">{count} selected</span>
-        <div className="flex-1" />
-        <div className="flex items-center gap-1.5">
-          <Button variant="ghost" size="sm" className="text-[11px] h-7 gap-1">
-            <Users className="w-3 h-3" /> Assign
-          </Button>
-          <Button variant="ghost" size="sm" className="text-[11px] h-7 gap-1">
-            <ArrowRight className="w-3 h-3" /> Move
-          </Button>
-          <Button variant="ghost" size="sm" className="text-[11px] h-7 gap-1">
-            <Tag className="w-3 h-3" /> Priority
-          </Button>
-          <Button variant="ghost" size="sm" className="text-[11px] h-7 gap-1 text-[var(--danger)]" onClick={onArchive}>
-            <Archive className="w-3 h-3" /> Archive
-          </Button>
-        </div>
-        <button onClick={onClear} className="ml-2 p-1 rounded-md hover:bg-[var(--bg-subtle)] transition-colors">
-          <X className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-        </button>
-      </div>
-    </motion.div>
-  )
+function StatusChip({ task }) {
+  const s = statusOf(task)
+  const map = {
+    DONE: { label: 'Done', cls: 'bg-[var(--success-soft)] text-[var(--success)]' },
+    IN_PROGRESS: { label: 'In progress', cls: 'bg-[var(--accent-soft)] text-[var(--accent)]' },
+    REVIEW: { label: 'In review', cls: 'bg-[var(--warning-soft)] text-[var(--warning)]' },
+    SUBMITTED: { label: 'Submitted', cls: 'bg-[var(--warning-soft)] text-[var(--warning)]' },
+    REJECTED: { label: 'Rejected', cls: 'bg-[var(--danger-soft)] text-[var(--danger)]' },
+    TODO: { label: 'To do', cls: 'bg-[var(--bg-subtle)] text-[var(--text-muted)]' },
+  }
+  const m = map[s] || { label: s.replace(/_/g, ' ').toLowerCase(), cls: 'bg-[var(--bg-subtle)] text-[var(--text-muted)]' }
+  return <span className={cn('px-1.5 py-0.5 rounded-md text-[9.5px] font-bold uppercase tracking-wide shrink-0', m.cls)}>{m.label}</span>
 }
 
-/* ── KanbanCard (enhanced) ── */
-function KanbanCard({ task, team, canAssignTask, isReadOnly, assigningTaskId, setAssigningTaskId, handleAssignTask, onDragStart, isDragging, isSelected, onToggleSelect, isBulkMode }) {
-  const priority = normalizePriority(task.priority) || 'Medium'
-  const done = IS_DONE(task.status)
-  const isReview = IS_REVIEW(task.status)
-  const stale = isStale(task)
-  const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : null
-  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && !done
-
+function MemberList({ members, task, onPick, onClose }) {
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: isDragging ? 0.4 : 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-      draggable={!isReadOnly && !isBulkMode}
-      onDragStart={onDragStart}
-      className={cn(
-        'group relative p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--accent-border)] hover:shadow-sm transition-all cursor-grab active:cursor-grabbing',
-        done && 'opacity-50',
-        isSelected && 'ring-2 ring-[var(--accent)] border-[var(--accent)]'
-      )}
-    >
-      {/* Status indicator bar */}
-      <div className={cn(
-        'absolute top-0 left-0 right-0 h-0.5 rounded-t-xl',
-        done ? 'bg-emerald-400' : isReview ? 'bg-purple-400' : 'bg-[var(--accent)]'
-      )} />
-
-      <div className="flex items-start justify-between gap-2 mb-2 pt-1">
-        {/* Bulk select checkbox */}
-        {isBulkMode && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onToggleSelect?.(task.id) }}
-            className="shrink-0 mt-0.5"
-          >
-            <div className={cn(
-              'w-4 h-4 rounded border-2 flex items-center justify-center transition-all',
-              isSelected ? 'bg-[var(--accent)] border-[var(--accent)]' : 'border-[var(--border-subtle)] hover:border-[var(--accent-border)]'
-            )}>
-              {isSelected && <Icons.check className="w-3 h-3 text-white" strokeWidth={3} />}
-            </div>
-          </button>
-        )}
-
-        <span className={cn(
-          'text-[12px] font-medium leading-snug flex-1',
-          done ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'
-        )}>
-          {task.title}
-        </span>
-
-        <div className="flex items-center gap-1 shrink-0">
-          {/* Aging indicator */}
-          {!done && stale.stale && (
-            <div className="relative group/aging" title={`Last updated ${Math.round(stale.days)}d ago`}>
-              <Clock className={cn('w-3 h-3', stale.critical ? 'text-[var(--danger)]' : 'text-[var(--warning)]')} />
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 bg-[var(--text-primary)] text-white text-[9px] rounded-md whitespace-nowrap opacity-0 group-hover/aging:opacity-100 transition-opacity pointer-events-none z-10">
-                Last updated {Math.round(stale.days)} days ago
-                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-[var(--text-primary)]" />
-              </div>
-            </div>
-          )}
-          <span className={cn('w-1.5 h-1.5 rounded-full mt-1.5', PRIORITY_DOT[priority] || 'bg-gray-400')} title={`${priority} priority`} />
-        </div>
-      </div>
-
-      {/* Labels */}
-      {task.labels && task.labels.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-2">
-          {task.labels.slice(0, 3).map((l, i) => (
-            <span key={i} className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[var(--bg-subtle)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
-              {l}
-            </span>
-          ))}
-          {task.labels.length > 3 && (
-            <span className="text-[9px] text-[var(--text-muted)]">+{task.labels.length - 3}</span>
-          )}
-        </div>
-      )}
-
-      <div className="flex items-center justify-between">
-        {dueDate ? (
-          <span className={cn('text-[10px] font-medium flex items-center gap-1', isOverdue ? 'text-[var(--danger)]' : 'text-[var(--text-muted)]')}>
-            <Calendar className="w-3 h-3" /> {dueDate}
-          </span>
-        ) : (
-          <span />
-        )}
-
-        {task.assignedTo ? (
-          <div className="w-6 h-6 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-[9px] font-bold shrink-0 border border-[var(--accent-border)]" title={task.assignedTo}>
-            {String(task.assignedTo).charAt(0).toUpperCase()}
-          </div>
-        ) : (
-          <Popover open={assigningTaskId === task.id} onOpenChange={open => setAssigningTaskId(open ? task.id : null)}>
-            <PopoverTrigger asChild>
-              <button disabled={!canAssignTask || isReadOnly} className="text-[10px] font-medium text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors flex items-center gap-1">
-                <MoreHorizontal className="w-3 h-3" /> Assign
-              </button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-44 p-1">
-              <div className="space-y-0.5 max-h-40 overflow-y-auto">
-                {team?.members?.map(m => (
-                  <button key={m.id} onClick={() => handleAssignTask(task.id, m.id, m.username)}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 text-[12px] rounded-md hover:bg-[var(--bg-subtle)] transition-colors text-left"
-                  >
-                    <div className="w-5 h-5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-[9px] font-bold">
-                      {String(m.username).charAt(0).toUpperCase()}
-                    </div>
-                    <span className="truncate">{m.username}</span>
-                  </button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-        )}
-      </div>
-    </motion.div>
-  )
-}
-
-/* ══════════════════════════════════════════════════════
-   TasksTab — Kanban + swimlanes + filters + bulk select
-   ══════════════════════════════════════════════════════ */
-export function TasksTab({ teamTasks, taskBoard, team, canAssignTask, isReadOnly, assigningTaskId, setAssigningTaskId, handleAssignTask, onUpdateTaskStatus }) {
-  const [filterPriority, setFilterPriority] = useState('all')
-  const [filterAssignee, setFilterAssignee] = useState('all')
-  const [filterDueDate, setFilterDueDate] = useState('all')
-  const [filterLabel, setFilterLabel] = useState('all')
-  const [savedView, setSavedView] = useState('all')
-  const [swimlane, setSwimlane] = useState(false)
-  const [bulkMode, setBulkMode] = useState(false)
-  const [selectedTasks, setSelectedTasks] = useState(new Set())
-  const [draggedTask, setDraggedTask] = useState(null)
-  const [dragOverCol, setDragOverCol] = useState(null)
-  const [selectedTask, setSelectedTask] = useState(null)
-  const [showFilters, setShowFilters] = useState(false)
-
-  const PRIORITIES = ['all', 'URGENT', 'HIGH', 'MEDIUM', 'LOW']
-
-  // Collect unique assignees and labels
-  const assignees = useMemo(() => {
-    const set = new Set()
-    teamTasks.forEach(t => { if (t.assignedTo) set.add(t.assignedTo) })
-    return ['all', ...Array.from(set)]
-  }, [teamTasks])
-
-  const allLabels = useMemo(() => {
-    const set = new Set()
-    teamTasks.forEach(t => { t.labels?.forEach(l => set.add(l)) })
-    return ['all', ...Array.from(set)]
-  }, [teamTasks])
-
-  // Filter tasks
-  const filterTasks = useCallback((tasks) => {
-    let filtered = filterBySavedView(tasks, savedView, team?.currentUserId)
-
-    if (filterPriority !== 'all') {
-      filtered = filtered.filter(t => normalizePriority(t.priority)?.toUpperCase() === filterPriority)
-    }
-    if (filterAssignee !== 'all') {
-      filtered = filtered.filter(t => t.assignedTo === filterAssignee)
-    }
-    if (filterDueDate === 'today') {
-      const today = new Date().toDateString()
-      filtered = filtered.filter(t => t.dueDate && new Date(t.dueDate).toDateString() === today)
-    } else if (filterDueDate === 'week') {
-      filtered = filtered.filter(t => isDueThisWeek(t))
-    } else if (filterDueDate === 'overdue') {
-      filtered = filtered.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && !IS_DONE(t.status))
-    }
-    if (filterLabel !== 'all') {
-      filtered = filtered.filter(t => t.labels?.includes(filterLabel))
-    }
-
-    return filtered
-  }, [filterPriority, filterAssignee, filterDueDate, filterLabel, savedView, team])
-
-  const priorityCounts = useMemo(() => {
-    const counts = {}
-    PRIORITIES.forEach(p => {
-      counts[p] = p === 'all' ? teamTasks.length : teamTasks.filter(t => normalizePriority(t.priority)?.toUpperCase() === p).length
-    })
-    return counts
-  }, [teamTasks])
-
-  const handleDragStart = (e, task) => {
-    if (isReadOnly || bulkMode) return
-    setDraggedTask(task)
-    e.dataTransfer.effectAllowed = 'move'
-  }
-
-  const handleDrop = (e, columnKey) => {
-    e.preventDefault()
-    if (draggedTask && onUpdateTaskStatus) {
-      const col = COLUMNS.find(c => c.key === columnKey)
-      if (col && draggedTask.status !== col.title && !(columnKey === 'completed' && IS_DONE(draggedTask.status))) {
-        const targetStatus = col.title.toUpperCase().replace(' ', '_')
-        onUpdateTaskStatus(draggedTask.id, targetStatus)
-      }
-    }
-    setDraggedTask(null)
-    setDragOverCol(null)
-  }
-
-  const toggleSelect = (taskId) => {
-    setSelectedTasks(prev => {
-      const next = new Set(prev)
-      if (next.has(taskId)) next.delete(taskId)
-      else next.add(taskId)
-      return next
-    })
-  }
-
-  const clearSelection = () => {
-    setSelectedTasks(new Set())
-    setBulkMode(false)
-  }
-
-  const handleQuickCreate = (columnKey) => {
-    // Placeholder — parent can wire this up
-    console.log('Quick create in column:', columnKey)
-  }
-
-  // Group tasks for swimlane view
-  const getGroupedTasks = (rawTasks) => {
-    const tasks = filterTasks(rawTasks)
-    if (!swimlane) return { '': tasks }
-
-    const groups = {}
-    tasks.forEach(t => {
-      const key = t.assignedTo || 'Unassigned'
-      if (!groups[key]) groups[key] = []
-      groups[key].push(t)
-    })
-
-    // Ensure consistent group order
-    const order = Object.keys(groups).sort((a, b) => {
-      if (a === 'Unassigned') return -1
-      if (b === 'Unassigned') return 1
-      return a.localeCompare(b)
-    })
-    return Object.fromEntries(order.map(k => [k, groups[k]]))
-  }
-
-  if (teamTasks.length === 0) {
-    return (
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="py-5">
-        <ImmersiveEmptyState
-          icon={CheckCheckIcon}
-          title="No tasks yet"
-          description="Tasks assigned to this team will appear here in a kanban board."
-        />
-      </motion.div>
-    )
-  }
-
-  return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="py-5">
-      {/* Saved Views Bar */}
-      <div className="flex items-center gap-1 mb-3 overflow-x-auto pb-1">
-        {SAVED_VIEWS.map(view => {
-          const Icon = view.icon
-          const isActive = savedView === view.key
+    <>
+      <div className="fixed inset-0 z-30" onClick={onClose} />
+      <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="absolute right-0 top-7 z-40 min-w-[150px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl shadow-[var(--shadow-lg)] p-1.5">
+        <p className="px-2.5 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Assign to</p>
+        {members.length === 0 && <p className="px-2.5 pb-2 text-[11px] text-[var(--text-muted)]">No members.</p>}
+        {members.map(m => {
+          const name = m.username || m.name
+          const current = task && (task.assignedTo === name || task.assignee?.username === name)
           return (
-            <button
-              key={view.key}
-              onClick={() => setSavedView(view.key)}
-              className={cn(
-                'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all shrink-0',
-                isActive
-                  ? 'bg-[var(--accent-soft)] text-[var(--accent)] shadow-sm'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] border border-transparent hover:border-[var(--border-subtle)]'
-              )}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {view.label}
+            <button key={m.id || name} onClick={() => onPick(m)}
+              className={cn('w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] font-medium hover:bg-[var(--bg-subtle)] cursor-pointer text-left', current && 'text-[var(--accent)] font-bold')}>
+              <AssigneeAvatar name={name} size="sm" />
+              <span className="flex-1 min-w-0 truncate">{name}</span>
+              {current && <Check className="w-3 h-3" />}
             </button>
           )
         })}
+      </motion.div>
+    </>
+  )
+}
+
+export function TaskRow({ task, members, canAssignTask, canEditTask, canDeleteTask, isReadOnly, isAssigning, selected, onToggleSelect, onAssign, onComplete, onDelete, onOpen }) {
+  const [assignOpen, setAssignOpen] = useState(false)
+  const due = dueInfo(task.dueDate)
+  const done = isDone(task)
+  const review = isReview(task)
+  const canComplete = !done && !review && !isReadOnly && canEditTask
+
+  return (
+    <div
+      className={cn('flex items-center gap-2.5 px-3 py-2.5 relative transition-colors', isAssigning && 'bg-[var(--accent-soft)]/30', onOpen && 'cursor-pointer hover:bg-[var(--bg-subtle)]/50')}
+      onClick={() => onOpen?.(task)}
+    >
+      <Checkbox checked={!!selected} onCheckedChange={onToggleSelect} onClick={e => e.stopPropagation()} className="shrink-0" aria-label={`Select ${task.title}`} />
+      {canComplete && (
+        <button
+          onClick={e => { e.stopPropagation(); onComplete(task) }} title="Mark done"
+          className="w-6 h-6 rounded-lg border border-[var(--border-subtle)] flex items-center justify-center text-transparent hover:text-[var(--success)] hover:border-[var(--success)] hover:bg-[var(--success-soft)] transition-all shrink-0 cursor-pointer">
+          <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
+        </button>
+      )}
+      {done && (
+        <span className="w-6 h-6 rounded-lg bg-[var(--success-soft)] text-[var(--success)] border border-[var(--success)]/30 flex items-center justify-center shrink-0">
+          <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
+        </span>
+      )}
+      <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', due?.tone === 'danger' ? 'bg-[var(--danger)]' : due?.tone === 'warning' ? 'bg-[var(--warning)]' : 'bg-[var(--border-default)]')} />
+      <span className={cn('flex-1 min-w-0 truncate text-[12.5px]', done ? 'text-[var(--text-muted)] line-through' : 'font-medium')}>{task.title}</span>
+      <PriorityBadge priority={task.priority} />
+      {due && <Badge variant={due.tone === 'danger' ? 'danger' : due.tone === 'warning' ? 'warning' : 'outline'} className="text-[10px] shrink-0">{due.label}</Badge>}
+      <StatusChip task={task} />
+      {canDeleteTask && !isReadOnly && (
+        <button
+          onClick={e => { e.stopPropagation(); onDelete(task) }} title="Delete task"
+          className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-all shrink-0 cursor-pointer">
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      )}
+      <div className="relative shrink-0" onClick={e => e.stopPropagation()}>
+        <button onClick={() => canAssignTask && !isReadOnly && setAssignOpen(!assignOpen)} title="Assign"
+          className={cn('block rounded-lg transition-opacity cursor-pointer', (canAssignTask && !isReadOnly) ? 'hover:opacity-80' : 'pointer-events-none')}>
+          <AssigneeAvatar name={typeof task.assignedTo === 'string' ? task.assignedTo : task.assignee?.username || task.assignedTo?.username} />
+        </button>
+        {assignOpen && <MemberList members={members} task={task} onClose={() => setAssignOpen(false)} onPick={m => { onAssign(task.id, m.id, m.username || m.name); setAssignOpen(false) }} />}
+      </div>
+    </div>
+  )
+}
+
+const FILTERS = [
+  { value: 'all', label: 'All' },
+  { value: 'overdue', label: 'Overdue' },
+  { value: 'due', label: 'Due soon' },
+  { value: 'in_progress', label: 'In progress' },
+  { value: 'done', label: 'Done' },
+]
+
+export function TasksTab({
+  team, teamTasks, taskBoard, filter = 'all', onFilterChange,
+  canAssignTask, canEditTask, canDeleteTask, canReviewTask, isReadOnly,
+  assigningTaskId, setAssigningTaskId, handleAssignTask, onUpdateTaskStatus,
+  onViewProjects, onOpenTask,
+}) {
+  const members = team?.members || []
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
+  const deleteMutation = useDeleteTask()
+  const rejectMutation = useRejectTask()
+  const [selectedIds, setSelectedIds] = useState({})
+  const [assignOpen, setAssignOpen] = useState(false)
+
+  const counts = useMemo(() => {
+    const c = { all: teamTasks.length, overdue: 0, due: 0, in_progress: 0, done: 0 }
+    teamTasks.forEach(t => {
+      const d = daysUntil(t.dueDate)
+      if (isDone(t)) c.done += 1
+      else if (isOpen(t)) c.in_progress += 1
+      if (isOpen(t) && d != null && d < 0) c.overdue += 1
+      if (isOpen(t) && d != null && d >= 0 && d <= 7) c.due += 1
+    })
+    return c
+  }, [teamTasks])
+
+  const filtered = useMemo(() => {
+    let list = teamTasks
+    if (filter === 'overdue') list = list.filter(t => isOpen(t) && daysUntil(t.dueDate) != null && daysUntil(t.dueDate) < 0)
+    else if (filter === 'due') list = list.filter(t => { const d = daysUntil(t.dueDate); return isOpen(t) && d != null && d >= 0 && d <= 7 })
+    else if (filter === 'in_progress') list = list.filter(isOpen)
+    else if (filter === 'done') list = list.filter(isDone)
+    return list
+  }, [teamTasks, filter])
+
+  const groups = useMemo(() => {
+    const g = { overdue: [], thisWeek: [], later: [], noDate: [], done: [] }
+    filtered.forEach(t => {
+      const d = daysUntil(t.dueDate)
+      if (isDone(t)) g.done.push(t)
+      else if (d == null) g.noDate.push(t)
+      else if (d < 0) g.overdue.push(t)
+      else if (d <= 7) g.thisWeek.push(t)
+      else g.later.push(t)
+    })
+    const sortDue = (a, b) => daysUntil(a.dueDate) - daysUntil(b.dueDate)
+    g.overdue.sort(sortDue); g.thisWeek.sort(sortDue); g.later.sort(sortDue)
+    return [
+      { key: 'overdue', label: 'Overdue', tone: 'danger', items: g.overdue },
+      { key: 'thisWeek', label: 'This week', tone: 'warning', items: g.thisWeek },
+      { key: 'later', label: 'Later', tone: 'accent', items: g.later },
+      { key: 'noDate', label: 'No date', tone: 'muted', items: g.noDate },
+      { key: 'done', label: 'Done', tone: 'success', items: g.done },
+    ].filter(grp => grp.items.length > 0)
+  }, [filtered])
+
+  const selectedTasks = useMemo(() => teamTasks.filter(t => selectedIds[String(t.id)]), [teamTasks, selectedIds])
+  const selectedCount = selectedTasks.length
+
+  const handleAssign = (taskId, memberId, memberUsername) => {
+    setAssigningTaskId?.(taskId)
+    handleAssignTask?.(taskId, memberId, memberUsername)
+  }
+
+  const handleDelete = async (task) => {
+    const ok = await confirm({
+      title: 'Delete this task?',
+      description: `"${task.title}" will be permanently deleted.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    })
+    if (ok === false) return
+    deleteMutation.mutate(task.id)
+  }
+
+  /* ---- bulk actions (same semantics as the org-wide tasks page) ---- */
+  const handleBulkComplete = () => {
+    let skipped = 0
+    selectedTasks.forEach(t => {
+      if (!isDone(t) && !isReview(t)) onUpdateTaskStatus?.(t.id, 'DONE')
+      else skipped += 1
+    })
+    if (skipped > 0) toast.info(`${skipped} task(s) skipped (done or in review)`)
+    setSelectedIds({})
+  }
+
+  const handleBulkSubmit = () => {
+    let skipped = 0
+    selectedTasks.forEach(t => {
+      const s = statusOf(t)
+      if (['IN_PROGRESS', 'DOING', 'REJECTED', 'TODO', 'TO_DO'].includes(s)) onUpdateTaskStatus?.(t.id, 'SUBMITTED')
+      else skipped += 1
+    })
+    if (skipped > 0) toast.info(`${skipped} task(s) could not be submitted`)
+    setSelectedIds({})
+  }
+
+  const handleBulkReject = async () => {
+    if (!canReviewTask) { toast.error('You do not have permission to review tasks'); return }
+    const submittable = selectedTasks.filter(t => statusOf(t) === 'SUBMITTED')
+    if (submittable.length === 0) { toast.error('Only submitted tasks can be sent back'); return }
+    const reason = await confirm({
+      title: 'Send back for rework',
+      description: 'What needs to change?',
+      requireInput: true,
+      inputPlaceholder: 'e.g. Missing acceptance criteria...',
+      confirmLabel: 'Send back',
+      danger: true,
+    })
+    if (reason === false) return
+    submittable.forEach(t => rejectMutation.mutate({ id: t.id, reason: reason || 'Rework' }))
+    setSelectedIds({})
+  }
+
+  const handleBulkAssign = (member) => {
+    selectedTasks.forEach(t => handleAssign(t.id, member.id, member.username || member.name))
+    setAssignOpen(false)
+    setSelectedIds({})
+  }
+
+  const handleBulkDelete = async () => {
+    if (!canDeleteTask) { toast.error('You do not have permission to delete tasks'); return }
+    const ok = await confirm({
+      title: `Delete ${selectedCount} task${selectedCount !== 1 ? 's' : ''}?`,
+      description: 'This cannot be undone.',
+      confirmLabel: 'Delete',
+      danger: true,
+    })
+    if (ok === false) return
+    selectedTasks.forEach(t => deleteMutation.mutate(t.id))
+    setSelectedIds({})
+  }
+
+  const toggleSelect = (id) => setSelectedIds(prev => {
+    const next = { ...prev }
+    if (next[String(id)]) delete next[String(id)]
+    else next[String(id)] = true
+    return next
+  })
+
+  return (
+    <div className="pt-4">
+      {confirmDialog}
+
+      {/* Filter chips */}
+      <div className="flex items-center gap-1.5 flex-wrap mb-3">
+        {FILTERS.map(f => {
+          const active = filter === f.value
+          return (
+            <button key={f.value} onClick={() => onFilterChange?.(f.value)}
+              className={cn('px-3 py-1.5 rounded-full text-[11.5px] font-semibold border transition-all cursor-pointer',
+                active ? 'bg-[var(--accent-soft)] border-[var(--accent-border)] text-[var(--accent)]' : 'bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]')}>
+              {f.label} <span className="tabular-nums opacity-70">{counts[f.value]}</span>
+            </button>
+          )
+        })}
+        <span className="flex-1" />
+        {onViewProjects && (
+          <Button size="xs" variant="ghost" className="gap-1 text-[11px]" onClick={onViewProjects}>
+            <FolderKanban className="w-3 h-3" /> View projects <ArrowRight className="w-3 h-3" />
+          </Button>
+        )}
       </div>
 
-      {/* Toolbar: Filters + view toggles */}
-      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
-        <div className="flex items-center gap-1 flex-wrap">
-          {/* Priority filter chips */}
-          <div className="flex items-center gap-0.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg p-0.5">
-            {PRIORITIES.map(p => {
-              const isActive = filterPriority === p
-              const label = p === 'all' ? 'All' : p.charAt(0) + p.slice(1).toLowerCase()
-              const dot = p === 'all' ? null : PRIORITY_DOT[p]
-              return (
-                <button
-                  key={p}
-                  onClick={() => setFilterPriority(p)}
-                  className={cn(
-                    'px-2 py-1 rounded-md text-[10px] font-medium transition-all flex items-center gap-1',
-                    isActive
-                      ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
-                  )}
-                >
-                  {dot && <span className={cn('w-1.5 h-1.5 rounded-full', dot)} />}
-                  {label}
-                  <span className="text-[9px] opacity-70">{priorityCounts[p]}</span>
-                </button>
-              )
-            })}
-          </div>
-
-          {/* More filters toggle */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={cn(
-              'flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-all border',
-              showFilters
-                ? 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]'
-                : 'text-[var(--text-muted)] border-[var(--border-subtle)] hover:border-[var(--accent-border)] hover:text-[var(--text-primary)]'
-            )}
-          >
-            <Filter className="w-3 h-3" />
-            Filters
-            {(['today', 'week', 'overdue'].includes(filterDueDate) || filterAssignee !== 'all' || filterLabel !== 'all') && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-            )}
-          </button>
-        </div>
-
-        {/* Right toggles */}
-        <div className="flex items-center gap-1">
-          {/* Swimlane toggle */}
-          <button
-            onClick={() => setSwimlane(!swimlane)}
-            className={cn(
-              'flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-all border',
-              swimlane
-                ? 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]'
-                : 'text-[var(--text-muted)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'
-            )}
-          >
-            <KanbanSquare className="w-3 h-3" />
-            Swimlanes
-          </button>
-
-          {/* Bulk select toggle */}
-          <button
-            onClick={() => { setBulkMode(!bulkMode); if (bulkMode) clearSelection() }}
-            className={cn(
-              'flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-all border',
-              bulkMode
-                ? 'bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent-border)]'
-                : 'text-[var(--text-muted)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'
-            )}
-          >
-            <CheckSquare className="w-3 h-3" />
-            Select
-          </button>
-        </div>
-      </div>
-
-      {/* Extended filters panel */}
+      {/* Bulk bar */}
       <AnimatePresence>
-        {showFilters && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden mb-3"
-          >
-            <div className="flex items-center gap-3 px-3 py-2.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl">
-              {/* Assignee filter */}
-              {assignees.length > 1 && (
-                <div className="flex items-center gap-1.5">
-                  <Users className="w-3 h-3 text-[var(--text-muted)]" />
-                  <select
-                    value={filterAssignee}
-                    onChange={e => setFilterAssignee(e.target.value)}
-                    className="text-[10px] font-medium bg-transparent border border-[var(--border-subtle)] rounded-md px-2 py-1 text-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent-border)]"
-                  >
-                    <option value="all">All Assignees</option>
-                    {assignees.filter(a => a !== 'all').map(a => (
-                      <option key={a} value={a}>{a}</option>
-                    ))}
-                  </select>
-                </div>
+        {selectedCount > 0 && (
+          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
+            className="flex items-center gap-2 flex-wrap rounded-xl border border-[var(--accent-border)] bg-[var(--accent-soft)]/30 px-3 py-2 mb-3">
+            <span className="text-[12px] font-bold tabular-nums">{selectedCount} selected</span>
+            <Button size="xs" className="gap-1" onClick={handleBulkComplete}><Check className="w-3 h-3" /> Complete</Button>
+            <Button size="xs" variant="outline" onClick={handleBulkSubmit}>Submit for review</Button>
+            {canReviewTask && <Button size="xs" variant="outline" onClick={handleBulkReject}>Send back</Button>}
+            <div className="relative">
+              <Button size="xs" variant="outline" className="gap-1" onClick={() => setAssignOpen(!assignOpen)}>
+                <UserPlus className="w-3 h-3" /> Assign
+              </Button>
+              {assignOpen && (
+                <MemberList members={members} task={null} onClose={() => setAssignOpen(false)} onPick={handleBulkAssign} />
               )}
-
-              {/* Due date filter */}
-              <div className="flex items-center gap-1.5">
-                <Calendar className="w-3 h-3 text-[var(--text-muted)]" />
-                <select
-                  value={filterDueDate}
-                  onChange={e => setFilterDueDate(e.target.value)}
-                  className="text-[10px] font-medium bg-transparent border border-[var(--border-subtle)] rounded-md px-2 py-1 text-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent-border)]"
-                >
-                  <option value="all">All Dates</option>
-                  <option value="today">Today</option>
-                  <option value="week">This Week</option>
-                  <option value="overdue">Overdue</option>
-                </select>
-              </div>
-
-              {/* Label filter */}
-              {allLabels.length > 1 && (
-                <div className="flex items-center gap-1.5">
-                  <Tag className="w-3 h-3 text-[var(--text-muted)]" />
-                  <select
-                    value={filterLabel}
-                    onChange={e => setFilterLabel(e.target.value)}
-                    className="text-[10px] font-medium bg-transparent border border-[var(--border-subtle)] rounded-md px-2 py-1 text-[var(--text-secondary)] focus:outline-none focus:border-[var(--accent-border)]"
-                  >
-                    <option value="all">All Labels</option>
-                    {allLabels.filter(l => l !== 'all').map(l => (
-                      <option key={l} value={l}>{l}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div className="flex-1" />
-              <button
-                onClick={() => { setFilterAssignee('all'); setFilterDueDate('all'); setFilterLabel('all') }}
-                className="text-[10px] text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
-              >
-                Reset
-              </button>
             </div>
+            {canDeleteTask && (
+              <Button size="xs" variant="outline" className="gap-1 text-[var(--danger)]" onClick={handleBulkDelete}>
+                <Trash2 className="w-3 h-3" /> Delete
+              </Button>
+            )}
+            <button onClick={() => setSelectedIds({})} className="ml-auto p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] cursor-pointer">
+              <X className="w-3.5 h-3.5" />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Bulk actions toolbar */}
-      <AnimatePresence>
-        {bulkMode && selectedTasks.size > 0 && (
-          <BulkActionsToolbar
-            count={selectedTasks.size}
-            onClear={clearSelection}
-            onArchive={() => {
-              console.log('Archive:', Array.from(selectedTasks))
-              clearSelection()
-            }}
-          />
+      {/* Urgency groups */}
+      <div className="space-y-4">
+        {groups.length === 0 && (
+          <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-[var(--shadow-xs)]">
+            <EmptyState icon={Check} title="Nothing here" description="No tasks match this filter." className="min-h-[160px]" />
+          </div>
         )}
-      </AnimatePresence>
-
-      {/* Kanban Board */}
-      <KanbanBoard
-        tasks={filterTasks(teamTasks)}
-        mode="ORG"
-        onTaskClick={setSelectedTask}
-      />
-      {selectedTask && (
-        <TaskPanel task={selectedTask} isOpen={!!selectedTask} onClose={() => setSelectedTask(null)} />
-      )}
-    </motion.div>
+        {groups.map(grp => (
+          <section key={grp.key} className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-[var(--shadow-xs)] overflow-hidden">
+            <header className={cn('flex items-center gap-2 px-4 py-2.5 border-b border-[var(--border-subtle)]',
+              grp.tone === 'danger' && 'bg-[var(--danger)]/5', grp.tone === 'warning' && 'bg-[var(--warning)]/5')}>
+              {grp.tone === 'danger' && <AlertTriangle className="w-3.5 h-3.5 text-[var(--danger)]" />}
+              {grp.tone === 'warning' && <CalendarClock className="w-3.5 h-3.5 text-[var(--warning)]" />}
+              {grp.tone === 'accent' && <CalendarClock className="w-3.5 h-3.5 text-[var(--accent)]" />}
+              {grp.tone === 'success' && <Check className="w-3.5 h-3.5 text-[var(--success)]" />}
+              <Heading level={4} className="text-[12px] font-bold flex-1">{grp.label}</Heading>
+              <Badge variant="neutral" className="text-[10px] tabular-nums">{grp.items.length}</Badge>
+            </header>
+            <div className="divide-y divide-[var(--border-subtle)]">
+              {grp.items.map(t => (
+                <TaskRow key={t.id} task={t} members={members} canAssignTask={canAssignTask} canEditTask={canEditTask}
+                  canDeleteTask={canDeleteTask} isReadOnly={isReadOnly}
+                  isAssigning={assigningTaskId === t.id} selected={!!selectedIds[String(t.id)]}
+                  onToggleSelect={() => toggleSelect(t.id)} onAssign={handleAssign}
+                  onComplete={() => onUpdateTaskStatus?.(t.id, 'DONE')} onDelete={handleDelete} onOpen={onOpenTask} />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
   )
 }
+
+export default TasksTab
