@@ -1,9 +1,7 @@
 import React, { useState, useMemo } from 'react'
-import { motion } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
-import { Skeleton } from '@/shared/ui/Skeleton'
 import { Button, IconButton } from '@/shared/ui/Button'
 import {
   useNotificationList,
@@ -15,6 +13,7 @@ import { useAcceptInvite, useDeclineInvite } from '@/organization'
 import { NotificationPanel } from '@/platform/notifications'
 import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
 const typeIcons = {
   TASK_IN_PROGRESS: Icons.tasks,
@@ -31,6 +30,8 @@ export function InboxPage() {
   const [filterTab, setFilterTab] = useState('ALL')
   const [activeNotification, setActiveNotification] = useState(null)
   const [isPanelOpen, setIsPanelOpen] = useState(false)
+
+  const { workspaceMode } = useWorkspace()
 
   const { data: notifications = [], isLoading: notifLoading } = useNotificationList({ size: 100 })
   const markRead = useMarkRead()
@@ -57,12 +58,16 @@ export function InboxPage() {
     if (n.isRead === false) markRead.mutate(n.id)
   }
 
+  const workspaceModeLabel = workspaceMode === 'ORG' ? 'ORG' : workspaceMode === 'CREWS' ? 'CREWS' : 'PERSONAL'
+  const isEmpty = notifications.length === 0
+  const isFilterEmpty = !isEmpty && filteredNotifications.length === 0
+
   return (
-    <PageShell maxWidth="narrow">
+    <PageShell maxWidth="narrow" workspaceMode={workspaceModeLabel}>
       <PageHero
-        title="Action Inbox"
+        title="Inbox"
         subtitle={unreadCount > 0 ? `You have ${unreadCount} unread items requiring attention.` : "You're completely caught up."}
-        eyebrow="Inbox"
+        eyebrow="Action Center"
       >
         {unreadCount > 0 && (
           <Button variant="outline" size="sm" onClick={() => markAllRead.mutate()} isLoading={markAllRead.isPending} className="h-9 text-[13px] gap-2">
@@ -72,7 +77,7 @@ export function InboxPage() {
         )}
       </PageHero>
 
-      <div className="flex items-center gap-2 pb-4">
+      <div className="flex items-center gap-2 pb-4 flex-wrap">
         {[
           { id: 'ALL', label: 'All Activity', count: notifications.length },
           { id: 'UNREAD', label: 'Unread', count: unreadCount },
@@ -102,7 +107,15 @@ export function InboxPage() {
       <PageContent>
         <PageState state={notifLoading ? 'loading' : 'ready'} stateProps={{ loadingVariant: 'table' }}>
           <div className="flex-1 bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] shadow-sm overflow-hidden flex flex-col min-h-0">
-            {filteredNotifications.length === 0 ? (
+            {isEmpty ? (
+              <div className="py-24 flex flex-col items-center justify-center text-center">
+                <div className="w-12 h-12 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center mb-4">
+                  <Icons.inbox className="w-6 h-6 text-[var(--text-tertiary)]" />
+                </div>
+                <Heading level={4} className="text-base font-semibold">Your inbox is clear</Heading>
+                <Text variant="muted" className="mt-1 text-xs">New activity will appear here.</Text>
+              </div>
+            ) : isFilterEmpty ? (
               <div className="py-24 flex flex-col items-center justify-center text-center">
                 <div className="w-12 h-12 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center mb-4">
                   <Icons.inbox className="w-6 h-6 text-[var(--text-tertiary)]" />
@@ -112,20 +125,16 @@ export function InboxPage() {
               </div>
             ) : (
               <div className="divide-y divide-[var(--border-subtle)] overflow-y-auto custom-scrollbar">
-                {filteredNotifications.map((n, idx) => {
+                {filteredNotifications.map((n) => {
                   const IconComponent = typeIcons[n.type] || Icons.alert
                   const isRead = n.isRead !== false
                   const isSelected = activeNotification?.id === n.id && isPanelOpen
                   
                   return (
-                    <motion.div
+                    <div
                       key={n.id}
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.025, duration: 0.2 }}
-                      whileHover={{ x: 4 }}
                       className={cn(
-                        'flex items-start gap-4 p-5 transition-colors duration-[var(--duration-fast)] ease-out cursor-pointer group',
+                        'flex items-start gap-4 p-5 transition-colors ease-out cursor-pointer group',
                         isSelected
                           ? 'bg-[var(--accent-soft)] border-l-4 border-l-[var(--accent)]'
                           : !isRead
@@ -157,7 +166,7 @@ export function InboxPage() {
                             </Text>
 
                             {n.type === 'ORG_INVITE_RECEIVED' && n.deduplicationKey && (
-                              <div className="flex items-center gap-2.5 mt-4">
+                              <div className="flex items-center gap-2.5 mt-4 flex-wrap">
                                 <Button size="sm" variant="primary" isLoading={acceptInviteMutation.isPending} disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending} onClick={(e) => {
                                   e.stopPropagation();
                                   const inviteId = n.deduplicationKey.replace('org-invite:', '');
@@ -186,9 +195,9 @@ export function InboxPage() {
                       </div>
                       
                       {!isRead && (
-                        <div className="w-2 h-2 rounded-full bg-[var(--accent)] shrink-0 mt-4 shadow-[0_0_8px_var(--accent)]" />
+                        <div className="w-2 h-2 rounded-full bg-[var(--accent)] shrink-0 mt-4" />
                       )}
-                    </motion.div>
+                    </div>
                   )
                 })}
               </div>

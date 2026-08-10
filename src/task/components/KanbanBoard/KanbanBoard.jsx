@@ -12,8 +12,8 @@ import {
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { KanbanColumn } from './KanbanColumn'
 import { KanbanTaskCard } from './KanbanTaskCard'
-import { normalizeStatus, getKanbanColumnForTask, KANBAN_COLUMNS, toBackendStatus } from '@/shared/lib/status'
-import { useSubmitTask, useApproveTask, useRejectTask, useReassignTask, useCompletePersonalTask, useCompleteCrewTask, useRecallTask } from '../../entities/hooks/useTasks'
+import { normalizeStatus, getKanbanColumnForTask, PERSONAL_COLUMNS, CREW_COLUMNS, ORG_COLUMNS, toBackendStatus } from '@/shared/lib/status'
+import { useSubmitTask, useApproveTask, useRejectTask, useReassignTask, useCompletePersonalTask, useCompleteCrewTask, useRecallTask, useClaimTask } from '../../entities/hooks/useTasks'
 import { useAuth, usePermissions, useUsersList } from '@/identity'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { toast } from 'sonner'
@@ -24,7 +24,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { getFeedbackForAction } from '@/shared/lib/statusRegistry';
 
-export function KanbanBoard({ tasks, isLoading, emptyState, onTaskClick, onTaskStatusChange, onQuickComplete, onQuickDelete }) {
+export function KanbanBoard({ tasks, mode, isLoading, emptyState, onTaskClick, onTaskStatusChange, onQuickComplete, onQuickDelete }) {
   const [activeTask, setActiveTask] = useState(null)
   const [reassignModalTask, setReassignModalTask] = useState(null)
   const { user } = useAuth()
@@ -33,15 +33,19 @@ export function KanbanBoard({ tasks, isLoading, emptyState, onTaskClick, onTaskS
   const { workspaceMode } = useWorkspace()
   const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
-  const columns = workspaceMode === 'PERSONAL' 
-    ? KANBAN_COLUMNS.filter(c => c.id === 'To Do' || c.id === 'Done')
-    : KANBAN_COLUMNS
+  const effectiveMode = mode || workspaceMode || 'PERSONAL'
+  const columns = effectiveMode === 'PERSONAL'
+    ? PERSONAL_COLUMNS
+    : effectiveMode === 'CREWS'
+      ? CREW_COLUMNS
+      : ORG_COLUMNS
   
   const submitMutation = useSubmitTask();
   const approveMutation = useApproveTask();
   const rejectMutation = useRejectTask();
   const reassignMutation = useReassignTask();
 
+  const claimTaskMutation = useClaimTask();
   const completePersonalTaskMutation = useCompletePersonalTask();
   const completeCrewTaskMutation = useCompleteCrewTask();
   const recallTaskMutation = useRecallTask();
@@ -72,13 +76,6 @@ export function KanbanBoard({ tasks, isLoading, emptyState, onTaskClick, onTaskS
     })
   }
 
-  /**
-   * @known-duplicate — This ~200-line inline status-transition router duplicates
-   * `useTaskStatusChange()` in entities/hooks/useTasks.js. The KanbanBoard version adds
-   * optimistic localTaskMap updates + reassign-modal flow that the shared hook doesn't yet
-   * support. TODO: extend useTaskStatusChange with onSuccess/onError callbacks
-   * and optimistic-update support, then replace this inline impl.
-   */
   const handleStatusTransition = async (task, targetColumn) => {
     let targetStatus = toBackendStatus(targetColumn);
     const currentStatus = toBackendStatus(task.currentStatus);
@@ -93,32 +90,35 @@ export function KanbanBoard({ tasks, isLoading, emptyState, onTaskClick, onTaskS
       rollbackTask(task.id)
     }
 
-    if (workspaceMode === 'PERSONAL') {
+    if (effectiveMode === 'PERSONAL') {
       targetStatus = targetColumn === 'Done' ? 'COMPLETED' : 'TODO'
       if (targetStatus === currentStatus) { rollbackTask(task.id); return; }
       if (targetStatus === 'COMPLETED') {
         completePersonalTaskMutation.mutate(task.id, { onError, onSuccess: () => fireMicroFeedback('task.complete', task) })
       } else {
-        // FIX: backend has no reopen endpoint for personal tasks — PUT /tasks/{id}
-        // ignores `status`, so this previously failed silently. Block it explicitly.
         toast.error('Completed personal tasks cannot be reopened')
         rollbackTask(task.id)
       }
       return;
     }
 
-    if (task.crewId || task.crew) {
-      if (targetColumn === 'Done') {
-        if (currentStatus === 'IN_PROGRESS' || currentStatus === 'TODO') {
+    if (effectiveMode === 'CREWS' || task.crewId || task.crew) {
+      if (targetColumn === 'Completed' || targetColumn === 'Done') {
+        if (currentStatus !== 'COMPLETED' && currentStatus !== 'DONE' && currentStatus !== 'APPROVED') {
           completeCrewTaskMutation.mutate(task.id, { onError, onSuccess: () => fireMicroFeedback('task.complete', task) })
-        } else { toast.error('Crew task must be in To Do to complete'); rollbackTask(task.id) }
-      } else if (targetColumn === 'To Do') {
-        if (currentStatus === 'COMPLETED') { toast.error('Completed crew tasks cannot be reopened'); rollbackTask(task.id) }
+        } else { rollbackTask(task.id) }
+      } else if (targetColumn === 'Claimed') {
+        if (!task.assignee && !task.assigneeId && !task.assignedTo) {
+          claimTaskMutation.mutate(task.id, { onError })
+        } else { rollbackTask(task.id) }
+      } else if (targetColumn === 'Unclaimed') {
+        toast.error('Claimed or completed crew tasks cannot be un-claimed');
+        rollbackTask(task.id);
       }
       return;
     }
 
-    if (targetStatus === currentStatus) { rollbackTask(task.id); return; }
+    if (targetStatus === currentStatus || (targetColumn === 'Done' && isDoneStatus(currentStatus))) { rollbackTask(task.id); return; }
 
     if (currentStatus === 'APPROVED' || currentStatus === 'COMPLETED' || currentStatus === 'DONE') {
       toast.error('Approved or completed tasks are final and cannot be moved.');
@@ -134,20 +134,20 @@ export function KanbanBoard({ tasks, isLoading, emptyState, onTaskClick, onTaskS
       setReassignModalTask(task); return;
     }
 
-    if (targetStatus === 'SUBMITTED') {
+    if (targetColumn === 'In Review' || targetStatus === 'SUBMITTED') {
       if (!['IN_PROGRESS', 'TODO', 'TO_DO'].includes(currentStatus)) { toast.error('Tasks can only be submitted for review from To Do or In Progress'); rollbackTask(task.id); return; }
       const assigneeUsername = typeof task.assignee === 'object' ? task.assignee?.username : (task.assignee || task.assignedTo);
       const isAssignee = assigneeUsername === user?.username || assigneeUsername === user?.id || (typeof task.assignee === 'object' && task.assignee?.id === user?.id);
       if (!isAssignee && !isSuperAdmin) { toast.error('Only the assignee can submit a task for review'); rollbackTask(task.id); return; }
       submitMutation.mutate(task.id, { onError, onSuccess: () => fireMicroFeedback('task.create', task) });
-    } else if (targetStatus === 'APPROVED') {
-      if (currentStatus !== 'SUBMITTED') { toast.error('Can only approve tasks that are In Review'); rollbackTask(task.id); return; }
+    } else if (targetColumn === 'Done' || targetStatus === 'APPROVED') {
+      if (currentStatus !== 'SUBMITTED' && currentStatus !== 'IN_REVIEW') { toast.error('Can only approve tasks that are In Review'); rollbackTask(task.id); return; }
       if (!canReview) { toast.error('You do not have permission to review tasks'); rollbackTask(task.id); return; }
       const taskAssignee = typeof task.assignedTo === 'object' ? task.assignedTo?.username : (task.assignedTo || task.assignee);
       if (taskAssignee && taskAssignee === user?.username) { toast.error('You cannot approve your own task'); rollbackTask(task.id); return; }
       approveMutation.mutate(task.id, { onError, onSuccess: () => fireMicroFeedback('task.complete', task) });
-    } else if (targetStatus === 'REJECTED') {
-      if (currentStatus !== 'SUBMITTED') { toast.error('Can only reject tasks that are In Review'); rollbackTask(task.id); return; }
+    } else if (targetColumn === 'Rejected' || targetColumn === 'Needs Work' || targetStatus === 'REJECTED') {
+      if (currentStatus !== 'SUBMITTED' && currentStatus !== 'IN_REVIEW') { toast.error('Can only reject tasks that are In Review'); rollbackTask(task.id); return; }
       if (!canReview) { toast.error('You do not have permission to review tasks'); rollbackTask(task.id); return; }
       const taskAssignee = typeof task.assignedTo === 'object' ? task.assignedTo?.username : (task.assignedTo || task.assignee);
       if (taskAssignee && taskAssignee === user?.username) { toast.error('You cannot reject your own task'); rollbackTask(task.id); return; }
@@ -157,9 +157,9 @@ export function KanbanBoard({ tasks, isLoading, emptyState, onTaskClick, onTaskS
       });
       if (reason === false) { rollbackTask(task.id); return; }
       rejectMutation.mutate({ id: task.id, reason: reason || 'Moved to Needs Work on Kanban' }, { onError });
-    } else if (targetStatus === 'IN_PROGRESS' || targetColumn === 'Assigned' || targetColumn === 'In Progress') {
-      if (currentStatus === 'SUBMITTED') { recallTaskMutation.mutate(task.id, { onError }); }
-      else { toast.error('Only tasks in review can be recalled back to In Progress'); rollbackTask(task.id); }
+    } else if (targetColumn === 'To Do' || targetStatus === 'IN_PROGRESS') {
+      if (currentStatus === 'SUBMITTED' || currentStatus === 'IN_REVIEW') { recallTaskMutation.mutate(task.id, { onError }); }
+      else { toast.error('Only tasks in review can be recalled back to To Do'); rollbackTask(task.id); }
     } else {
       if (onTaskStatusChange) onTaskStatusChange(task, targetColumn);
     }
@@ -169,11 +169,11 @@ export function KanbanBoard({ tasks, isLoading, emptyState, onTaskClick, onTaskS
     const acc = {}
     columns.forEach(col => acc[col.id] = [])
     effectiveTasks?.forEach(task => {
-      const columnId = getKanbanColumnForTask(task)
+      const columnId = getKanbanColumnForTask(task, effectiveMode)
       if (acc[columnId]) acc[columnId].push(task)
     })
     return acc
-  }, [effectiveTasks, columns])
+  }, [effectiveTasks, columns, effectiveMode])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -194,12 +194,12 @@ export function KanbanBoard({ tasks, isLoading, emptyState, onTaskClick, onTaskS
     const isOverTask = over?.data?.current?.type === 'Task'
     const isOverColumn = over?.data?.current?.type === 'Column'
 
-    const activeColumn = getKanbanColumnForTask(active.data.current.task)
+    const activeColumn = getKanbanColumnForTask(active.data.current.task, effectiveMode)
     if (isActiveTask && isOverColumn && activeColumn !== overId) {
       handleStatusTransition(active.data.current.task, overId)
     }
     if (isActiveTask && isOverTask) {
-      const overColumn = getKanbanColumnForTask(over.data.current.task)
+      const overColumn = getKanbanColumnForTask(over.data.current.task, effectiveMode)
       if (activeColumn !== overColumn) handleStatusTransition(active.data.current.task, overColumn)
     }
   }

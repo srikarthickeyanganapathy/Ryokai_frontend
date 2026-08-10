@@ -38,7 +38,7 @@ const OrganizationsPage = Loadable(lazy(() => import("@/organization/pages/Organ
 const OrganizationAdministrationPage = Loadable(lazy(() => import("@/organization/pages/OrganizationAdministrationPage").then(m => ({ default: m.OrganizationAdministrationPage }))));
 const DirectoryPage = Loadable(lazy(() => import("@/organization/directory/pages/DirectoryPage").then(m => ({ default: m.DirectoryPage }))));
 const LeaveRequestsPage = Loadable(lazy(() => import("@/organization/pages/LeaveRequestsPage").then(m => ({ default: m.LeaveRequestsPage }))));
-const RolesPermissionsPage = Loadable(lazy(() => import("@/organization/Roles/pages/RolesPermissionsPage").then(m => ({ default: m.RolesPermissionsPage }))));
+const RolesPermissionsPage = Loadable(lazy(() => import("@/organization/roles/pages/RolesPermissionsPage").then(m => ({ default: m.RolesPermissionsPage }))));
 const AnnouncementsPage = Loadable(lazy(() => import("@/organization/announcements/pages/AnnouncementsPage").then(m => ({ default: m.AnnouncementsPage }))));
 const CrewsPage = Loadable(lazy(() => import("@/crew/pages/CrewsPage").then(m => ({ default: m.CrewsPage }))));
 const CrewDetailPage = Loadable(lazy(() => import("@/crew/pages/CrewDetailPage").then(m => ({ default: m.CrewDetailPage }))));

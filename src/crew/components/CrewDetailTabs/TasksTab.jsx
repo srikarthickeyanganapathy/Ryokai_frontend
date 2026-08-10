@@ -8,7 +8,7 @@ import { Textarea } from '@/shared/ui/Textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/Select';
 import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { ImmersiveEmptyState } from '@/shared/ui/Immersive';
-import { useCreateTask, useCompleteCrewTask, useClaimTask, TaskPanel } from '@/task';
+import { useCreateTask, useCompleteCrewTask, useClaimTask, TaskPanel, KanbanBoard } from '@/task';
 import { useAuth } from '@/identity';
 import { cn } from '@/shared/lib/cn';
 import { PRIORITY_COLORS, normalizePriority } from '@/shared/lib/priority';
@@ -541,82 +541,11 @@ export function TasksTab({ crewId, tasks }) {
       </AnimatePresence>
 
       {/* Kanban Board */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-        {COLUMNS.map(col => {
-          const rawTasks = taskBoard[col.key] || []
-          const tasks = filterTasks(rawTasks)
-          const grouped = getGroupedTasks(rawTasks)
-          const groupEntries = Object.entries(grouped)
-
-          return (
-            <div
-              key={col.key}
-              className="flex flex-col gap-2 p-2.5 rounded-xl transition-all min-h-[200px] bg-[var(--bg-subtle)]/30"
-            >
-              {/* Column header */}
-              <div className="flex items-center justify-between px-2 pb-2 border-b border-[var(--border-subtle)]">
-                <div className="flex items-center gap-2">
-                  <span className={cn('w-2 h-2 rounded-full', col.color)} />
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">{col.title}</span>
-                </div>
-                <AnimatedCountBadge count={tasks.length} />
-              </div>
-
-              {/* Cards */}
-              <div className="space-y-2 flex-1">
-                <AnimatePresence mode="popLayout">
-                  {swimlane ? (
-                    groupEntries.map(([assignee, assigneeTasks]) => (
-                      <div key={assignee} className="mb-2">
-                        <div className="flex items-center gap-2 px-1 pb-1.5 mb-1">
-                          <div className="w-4 h-4 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center text-[7px] font-bold text-[var(--text-muted)] border border-[var(--border-subtle)]">
-                            {assignee.charAt(0).toUpperCase()}
-                          </div>
-                          <span className="text-[9px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">{assignee}</span>
-                          <span className="text-[9px] text-[var(--text-muted)]/60">{assigneeTasks.length}</span>
-                        </div>
-                        <div className="space-y-1.5">
-                          {assigneeTasks.map(task => (
-                            <CrewTaskCard
-                              key={task.id}
-                              task={task}
-                              isSelected={selectedTasks.has(task.id)}
-                              isBulkMode={bulkMode}
-                              onToggleSelect={toggleSelect}
-                              onClaim={claimTaskMutation.mutate}
-                              onComplete={completeTaskMutation.mutate}
-                              onTaskClick={setSelectedTask}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    tasks.map(task => (
-                      <CrewTaskCard
-                        key={task.id}
-                        task={task}
-                        isSelected={selectedTasks.has(task.id)}
-                        isBulkMode={bulkMode}
-                        onToggleSelect={toggleSelect}
-                        onClaim={claimTaskMutation.mutate}
-                        onComplete={completeTaskMutation.mutate}
-                        onTaskClick={setSelectedTask}
-                      />
-                    ))
-                  )}
-                </AnimatePresence>
-
-                {tasks.length === 0 && (
-                  <div className="flex items-center justify-center h-16 border border-dashed border-[var(--border-subtle)] rounded-lg">
-                    <Text size="xs" variant="muted" className="opacity-40">Drop tasks here</Text>
-                  </div>
-                )}
-              </div>
-            </div>
-          )
-        })}
-      </div>
+      <KanbanBoard
+        tasks={filterTasks(tasks)}
+        mode="CREWS"
+        onTaskClick={setSelectedTask}
+      />
 
       {/* Floating Action Button */}
       <motion.button

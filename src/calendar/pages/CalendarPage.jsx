@@ -8,25 +8,11 @@ import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { Button } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Badge } from '@/shared/ui/Badge'
-import { Edit3, CalendarDays, Target, Gauge, Zap } from '@/shared/ui/Icons'
+import { Edit3 } from '@/shared/ui/Icons'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
-import { PageShell, PageHero, PageContent, PageStats } from '@/shared/ui/PageShell'
+import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
-
-function StatChip({ icon: Icon, label, value, accent }) {
-  return (
-    <div className="flex items-center gap-2.5 p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]">
-      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${accent}15` }}>
-        <Icon className="w-4 h-4" style={{ color: accent }} />
-      </div>
-      <div className="min-w-0">
-        <div className="text-[16px] font-bold text-[var(--text-primary)] tabular-nums leading-none font-mono">{value}</div>
-        <div className="text-[9px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mt-1 truncate">{label}</div>
-      </div>
-    </div>
-  )
-}
 
 export function CalendarPage() {
   const { workspaceMode, activeOrganization, activeCrew } = useWorkspace()
@@ -91,7 +77,11 @@ export function CalendarPage() {
 
   const workspaceModeLabel = workspaceMode === 'ORG' ? 'ORG' : workspaceMode === 'CREWS' ? 'CREWS' : 'PERSONAL'
   const workspaceName = workspaceMode === 'ORG' ? activeOrganization?.name : workspaceMode === 'CREWS' ? activeCrew?.name : null
-  const eyebrow = workspaceName ? `${workspaceName} · Time Deck` : 'Schedule Matrix & Event Telemetry'
+  const eyebrow = workspaceName ? `${workspaceName} Calendar` : 'Personal Calendar'
+
+  const subtitle = stats.next
+    ? `${stats.eventsThisMonth} events this month - ${stats.deadlinesThisWeek} deadlines this week - ${stats.busyRatio}% busy - Next: ${format(stats.next.t, 'MMM d, h:mm a')}`
+    : `${stats.eventsThisMonth} events this month - ${stats.deadlinesThisWeek} deadlines this week - ${stats.busyRatio}% busy - No upcoming items`
 
   const isLoading = tasksLoading || eventsLoading;
   const isError = tasksError || eventsError;
@@ -101,19 +91,10 @@ export function CalendarPage() {
   return (
     <PageShell maxWidth="wide" workspaceMode={workspaceModeLabel}>
       <PageHero
-        title="Calendar & Task Deadlines"
-        subtitle="View upcoming deadlines, scheduled milestones, and project events."
+        title="Calendar"
+        subtitle={subtitle}
         eyebrow={eyebrow}
       />
-
-      {!isLoading && (
-        <PageStats>
-          <StatChip icon={CalendarDays} label="Events This Month" value={stats.eventsThisMonth} accent="var(--accent)" />
-          <StatChip icon={Target} label="Deadlines This Week" value={stats.deadlinesThisWeek} accent="var(--warning)" />
-          <StatChip icon={Gauge} label="Weekly Busy Ratio" value={`${stats.busyRatio}%`} accent="var(--info)" />
-          <StatChip icon={Zap} label="Next Up" value={stats.next ? format(stats.next.t, 'MMM d · h:mm a') : 'Clear'} accent="var(--success)" />
-        </PageStats>
-      )}
 
       <PageContent>
         <PageState state={pageState} stateProps={{ onRetry: handleRetry, loadingVariant: 'dashboard' }}>

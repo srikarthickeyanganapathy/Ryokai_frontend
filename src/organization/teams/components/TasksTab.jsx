@@ -13,6 +13,7 @@ import {
   ChevronDown, X, KanbanSquare, User, Target, ListTodo
 } from '@/shared/ui/Icons'
 import { Icons } from '@/shared/ui/Icons'
+import { KanbanBoard, TaskPanel } from '@/task'
 
 const IS_DONE = (s) => s === 'Done' || s === 'COMPLETED'
 const IS_REVIEW = (s) => String(s || '').toUpperCase().includes('REVIEW')
@@ -259,6 +260,7 @@ export function TasksTab({ teamTasks, taskBoard, team, canAssignTask, isReadOnly
   const [selectedTasks, setSelectedTasks] = useState(new Set())
   const [draggedTask, setDraggedTask] = useState(null)
   const [dragOverCol, setDragOverCol] = useState(null)
+  const [selectedTask, setSelectedTask] = useState(null)
   const [showFilters, setShowFilters] = useState(false)
 
   const PRIORITIES = ['all', 'URGENT', 'HIGH', 'MEDIUM', 'LOW']
@@ -570,114 +572,14 @@ export function TasksTab({ teamTasks, taskBoard, team, canAssignTask, isReadOnly
       </AnimatePresence>
 
       {/* Kanban Board */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-        {COLUMNS.map(col => {
-          const rawTasks = taskBoard[col.key] || []
-          const tasks = filterTasks(rawTasks)
-          const isDragOver = dragOverCol === col.key
-          const grouped = getGroupedTasks(rawTasks)
-          const groupEntries = Object.entries(grouped)
-
-          return (
-            <div
-              key={col.key}
-              onDragOver={e => { e.preventDefault(); setDragOverCol(col.key) }}
-              onDrop={e => handleDrop(e, col.key)}
-              onDragLeave={() => setDragOverCol(null)}
-              className={cn(
-                'flex flex-col gap-2 p-2.5 rounded-xl transition-all min-h-[200px]',
-                isDragOver && !isReadOnly
-                  ? 'bg-[var(--accent-soft)]/30 ring-2 ring-[var(--accent)]/30 shadow-lg shadow-[var(--accent)]/10 scale-[1.01]'
-                  : 'bg-[var(--bg-subtle)]/30'
-              )}
-            >
-              {/* Column header */}
-              <div className="flex items-center justify-between px-2 pb-2 border-b border-[var(--border-subtle)]">
-                <div className="flex items-center gap-2">
-                  <span className={cn('w-2 h-2 rounded-full', col.color)} />
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">{col.title}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <AnimatedCountBadge count={tasks.length} />
-                  {!isReadOnly && (
-                    <button
-                      onClick={() => handleQuickCreate(col.key)}
-                      className="w-5 h-5 rounded-md flex items-center justify-center hover:bg-[var(--bg-subtle)] transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]"
-                      title={`Add task to ${col.title}`}
-                    >
-                      <Plus className="w-3 h-3" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Cards */}
-              <div className="space-y-2 flex-1">
-                <AnimatePresence mode="popLayout">
-                  {swimlane ? (
-                    // Swimlane view — grouped by assignee
-                    groupEntries.map(([assignee, assigneeTasks]) => (
-                      <div key={assignee} className="mb-2">
-                        <div className="flex items-center gap-2 px-1 pb-1.5 mb-1">
-                          <div className="w-4 h-4 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center text-[7px] font-bold text-[var(--text-muted)] border border-[var(--border-subtle)]">
-                            {assignee.charAt(0).toUpperCase()}
-                          </div>
-                          <span className="text-[9px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">{assignee}</span>
-                          <span className="text-[9px] text-[var(--text-muted)]/60">{assigneeTasks.length}</span>
-                        </div>
-                        <div className="space-y-1.5">
-                          {assigneeTasks.map(task => (
-                            <KanbanCard
-                              key={task.id}
-                              task={task}
-                              team={team}
-                              canAssignTask={canAssignTask}
-                              isReadOnly={isReadOnly}
-                              assigningTaskId={assigningTaskId}
-                              setAssigningTaskId={setAssigningTaskId}
-                              handleAssignTask={handleAssignTask}
-                              onDragStart={e => handleDragStart(e, task)}
-                              isDragging={draggedTask?.id === task.id}
-                              isSelected={selectedTasks.has(task.id)}
-                              onToggleSelect={toggleSelect}
-                              isBulkMode={bulkMode}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    // Flat view
-                    tasks.map(task => (
-                      <KanbanCard
-                        key={task.id}
-                        task={task}
-                        team={team}
-                        canAssignTask={canAssignTask}
-                        isReadOnly={isReadOnly}
-                        assigningTaskId={assigningTaskId}
-                        setAssigningTaskId={setAssigningTaskId}
-                        handleAssignTask={handleAssignTask}
-                        onDragStart={e => handleDragStart(e, task)}
-                        isDragging={draggedTask?.id === task.id}
-                        isSelected={selectedTasks.has(task.id)}
-                        onToggleSelect={toggleSelect}
-                        isBulkMode={bulkMode}
-                      />
-                    ))
-                  )}
-                </AnimatePresence>
-
-                {tasks.length === 0 && (
-                  <div className="flex items-center justify-center h-16 border border-dashed border-[var(--border-subtle)] rounded-lg">
-                    <Text size="xs" variant="muted" className="opacity-40">Drop tasks here</Text>
-                  </div>
-                )}
-              </div>
-            </div>
-          )
-        })}
-      </div>
+      <KanbanBoard
+        tasks={filterTasks(teamTasks)}
+        mode="ORG"
+        onTaskClick={setSelectedTask}
+      />
+      {selectedTask && (
+        <TaskPanel task={selectedTask} isOpen={!!selectedTask} onClose={() => setSelectedTask(null)} />
+      )}
     </motion.div>
   )
 }

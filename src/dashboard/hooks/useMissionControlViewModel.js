@@ -2,10 +2,14 @@ import { useEffect } from 'react';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/shared/api/api';
+import { useTaskList } from '@/task/entities/hooks/useTasks';
 
 export function useMissionControlViewModel() {
   const { workspaceMode, operatingMode, activeOrganization, activeCrew } = useWorkspace();
   const queryClient = useQueryClient();
+
+  const { data: taskListData } = useTaskList();
+  const fallbackTasks = taskListData?.tasks || [];
 
   const { data: context, isLoading: contextLoading, error: contextError } = useQuery({
     queryKey: [
@@ -39,11 +43,10 @@ export function useMissionControlViewModel() {
   return {
     pageState: contextLoading ? 'loading' : contextError ? 'error' : 'ready',
     context: context, // The aggregated MissionControlDTO
+    fallbackTasks,
     workspaceMode,
     operatingMode,
     
-    // Fallbacks for widgets that haven't been fully refactored yet,
-    // though the goal is to just pass `context` directly.
     focusTask: context?.focusPanel,
     focus: context?.focusPanel,
     interrupts: context?.signalStrip?.actions || [],

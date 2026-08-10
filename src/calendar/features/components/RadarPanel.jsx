@@ -1,10 +1,8 @@
 import React, { useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Text } from '@/shared/ui/Typography'
 import { Flag, CalendarDays, Clock, Radar, ChevronRight, X } from '@/shared/ui/Icons'
 import { isToday, isTomorrow, parseISO, isAfter, isBefore, isSameDay, startOfToday, startOfWeek, endOfWeek, format } from 'date-fns'
 import { cn } from '@/shared/lib/cn'
-import { EASING } from '@/shared/lib/uxTokens'
 
 const WEEK_CAP = 20 // weekly load ring capacity
 
@@ -21,18 +19,13 @@ function countdownLabel(item) {
     return format(date, 'h:mm a')
   }
   if (isTomorrow(date)) return 'Tomorrow'
-  return format(date, 'EEE · MMM d')
+  return format(date, 'EEE, MMM d')
 }
 
 function RadarItem({ item, onClick }) {
   const isEvent = item.__type === 'event'
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.97 }}
-      transition={{ duration: 0.18, ease: EASING.out }}
+    <div
       onClick={() => onClick(item)}
       className={cn(
         'p-2.5 rounded-lg border cursor-pointer hover:border-[var(--accent)] transition-colors group',
@@ -53,16 +46,14 @@ function RadarItem({ item, onClick }) {
       </div>
       {isEvent && !item.isAllDay && item.startTime && (
         <Text size="xs" variant="muted" className="mt-1 text-[10px] pl-3">
-          {format(parseISO(item.startTime), 'h:mm a')} – {item.endTime ? format(parseISO(item.endTime), 'h:mm a') : ''}
+          {format(parseISO(item.startTime), 'h:mm a')} - {item.endTime ? format(parseISO(item.endTime), 'h:mm a') : ''}
         </Text>
       )}
-    </motion.div>
+    </div>
   )
 }
 
-/* ──────────────────────────────────────────────────────────
- * RadarPanel — Deadline Radar + Day Brief (right rail)
- * ────────────────────────────────────────────────────────── */
+/* RadarPanel - Deadline Radar + Day Brief (right rail) */
 export function RadarPanel({ tasks = [], events = [], selectedDay, onTaskClick, onEventClick, onReset }) {
   const today = startOfToday()
   const weekStart = startOfWeek(today)
@@ -112,13 +103,11 @@ export function RadarPanel({ tasks = [], events = [], selectedDay, onTaskClick, 
           <div className="relative w-11 h-11" title={`${radar.weekCount} items this week (cap ${WEEK_CAP})`}>
             <svg viewBox="0 0 56 56" className="w-11 h-11 -rotate-90">
               <circle cx="28" cy="28" r={R} fill="none" stroke="var(--bg-subtle)" strokeWidth="5" />
-              <motion.circle
+              <circle
                 cx="28" cy="28" r={R} fill="none"
                 stroke="var(--accent)" strokeWidth="5" strokeLinecap="round"
                 strokeDasharray={CIRC}
-                initial={{ strokeDashoffset: CIRC }}
-                animate={{ strokeDashoffset: CIRC * (1 - loadPct) }}
-                transition={{ duration: 0.8, ease: EASING.out }}
+                style={{ strokeDashoffset: CIRC * (1 - loadPct) }}
               />
             </svg>
             <span className="absolute inset-0 flex items-center justify-center text-[10px] font-mono font-bold text-[var(--text-primary)] tabular-nums">{radar.weekCount}</span>
@@ -128,41 +117,32 @@ export function RadarPanel({ tasks = [], events = [], selectedDay, onTaskClick, 
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
         {/* Day Brief (when a day is selected) */}
-        <AnimatePresence>
-          {brief && (
-            <motion.div
-              key={`brief-${format(selectedDay, 'yyyy-MM-dd')}`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2, ease: EASING.out }}
-              className="rounded-xl border border-[var(--accent-border)] bg-[var(--accent-soft)]/40 p-3"
-            >
-              <div className="flex items-center justify-between mb-2.5">
-                <div>
-                  <Text size="sm" className="font-bold text-[var(--text-primary)] text-[12px] flex items-center gap-1.5 uppercase tracking-wider">
-                    <CalendarDays className="w-3.5 h-3.5 text-[var(--accent)]" /> {isToday(selectedDay) ? 'Today' : format(selectedDay, 'EEE, MMM d')}
-                  </Text>
-                  <Text size="xs" variant="muted" className="text-[10px] mt-0.5">{brief.length} item{brief.length !== 1 ? 's' : ''} scheduled</Text>
-                </div>
-                {onReset && (
-                  <button onClick={onReset} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer p-1" title="Back to radar">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
+        {brief && (
+          <div className="rounded-xl border border-[var(--accent-border)] bg-[var(--accent-soft)]/40 p-3">
+            <div className="flex items-center justify-between mb-2.5">
+              <div>
+                <Text size="sm" className="font-bold text-[var(--text-primary)] text-[12px] flex items-center gap-1.5 uppercase tracking-wider">
+                  <CalendarDays className="w-3.5 h-3.5 text-[var(--accent)]" /> {isToday(selectedDay) ? 'Today' : format(selectedDay, 'EEE, MMM d')}
+                </Text>
+                <Text size="xs" variant="muted" className="text-[10px] mt-0.5">{brief.length} item{brief.length !== 1 ? 's' : ''} scheduled</Text>
               </div>
-              {brief.length === 0 ? (
-                <div className="text-[11px] text-[var(--text-muted)] italic py-2">A clear day — no events or deadlines.</div>
-              ) : (
-                <div className="space-y-1.5">
-                  {brief.map(item => (
-                    <RadarItem key={`${item.__type}-${item.id}`} item={item} onClick={(it) => it.__type === 'event' ? onEventClick?.(it) : onTaskClick?.(it)} />
-                  ))}
-                </div>
+              {onReset && (
+                <button onClick={onReset} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer p-1" title="Back to radar">
+                  <X className="w-3.5 h-3.5" />
+                </button>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+            {brief.length === 0 ? (
+              <div className="text-[11px] text-[var(--text-muted)] italic py-2">A clear day - no events or deadlines.</div>
+            ) : (
+              <div className="space-y-1.5">
+                {brief.map(item => (
+                  <RadarItem key={`${item.__type}-${item.id}`} item={item} onClick={(it) => it.__type === 'event' ? onEventClick?.(it) : onTaskClick?.(it)} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Today */}
         <div>

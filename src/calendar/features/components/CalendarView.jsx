@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { MonthView } from './MonthView'
 import { WeekView } from './WeekView'
 import { RadarPanel } from './RadarPanel'
@@ -14,7 +13,6 @@ import { useCreateTask } from '@/task'
 import { useCreateEvent } from '../hooks/useCalendar'
 import { cn } from '@/shared/lib/cn'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
-import { EASING } from '@/shared/lib/uxTokens'
 
 export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEventClick, onVisibleRangeChange, TaskFormComponent, scope = {} }) {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -103,26 +101,15 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
         </div>
 
         <div className="flex-1 overflow-hidden bg-[var(--bg-base)] flex flex-col min-h-0">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={mode}
-              className="flex-1 min-h-0 flex flex-col"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.18, ease: EASING.out }}
-            >
-              {mode === 'month' ? (
-                <MonthView tasks={filteredTasks} events={filteredEvents} currentDate={currentDate} isLoading={isLoading} onTaskClick={onTaskClick} onEventClick={onEventClick} onAddClick={(d) => setQuickAddDate(d)} onSelectDay={setSelectedDay} />
-              ) : (
-                <WeekView tasks={filteredTasks} events={filteredEvents} currentDate={currentDate} isLoading={isLoading} onTaskClick={onTaskClick} onEventClick={onEventClick} onAddClick={(d) => setQuickAddDate(d)} onSelectDay={setSelectedDay} />
-              )}
-            </motion.div>
-          </AnimatePresence>
+          {mode === 'month' ? (
+            <MonthView tasks={filteredTasks} events={filteredEvents} currentDate={currentDate} isLoading={isLoading} onTaskClick={onTaskClick} onEventClick={onEventClick} onAddClick={(d) => setQuickAddDate(d)} onSelectDay={setSelectedDay} />
+          ) : (
+            <WeekView tasks={filteredTasks} events={filteredEvents} currentDate={currentDate} isLoading={isLoading} onTaskClick={onTaskClick} onEventClick={onEventClick} onAddClick={(d) => setQuickAddDate(d)} onSelectDay={setSelectedDay} />
+          )}
         </div>
       </div>
 
-      <div className="w-full lg:w-72 shrink-0 hidden lg:block">
+      <div className="w-full lg:w-72 shrink-0">
         <RadarPanel tasks={filteredTasks} events={filteredEvents} selectedDay={selectedDay} onTaskClick={onTaskClick} onEventClick={onEventClick} onReset={() => setSelectedDay(null)} />
       </div>
 

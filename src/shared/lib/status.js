@@ -70,12 +70,25 @@ export const isActiveStatus = (status) => {
 };
 
 /** Kanban column IDs mapped to backend status enums */
-export const KANBAN_COLUMNS = [
-  { id: 'To Do',       title: 'In Progress',    backendStatus: ['TODO', 'IN_PROGRESS'] },
-  { id: 'In Review',   title: 'In Review',   backendStatus: ['SUBMITTED'] },
-  { id: 'Needs Work',  title: 'Needs Work',  backendStatus: ['REJECTED'] },
-  { id: 'Done',        title: 'Done',        backendStatus: ['APPROVED', 'COMPLETED'] },
+export const PERSONAL_COLUMNS = [
+  { id: 'To Do', title: 'To Do', backendStatus: ['TODO', 'IN_PROGRESS', 'SUBMITTED', 'REJECTED'] },
+  { id: 'Done', title: 'Done', backendStatus: ['APPROVED', 'COMPLETED'] },
 ];
+
+export const CREW_COLUMNS = [
+  { id: 'Unclaimed', title: 'Unclaimed', backendStatus: ['TODO'] },
+  { id: 'Claimed', title: 'Claimed', backendStatus: ['IN_PROGRESS', 'SUBMITTED', 'REJECTED'] },
+  { id: 'Completed', title: 'Completed', backendStatus: ['APPROVED', 'COMPLETED'] },
+];
+
+export const ORG_COLUMNS = [
+  { id: 'To Do', title: 'To Do', backendStatus: ['TODO', 'IN_PROGRESS'] },
+  { id: 'In Review', title: 'In Review', backendStatus: ['SUBMITTED'] },
+  { id: 'Rejected', title: 'Needs Work', backendStatus: ['REJECTED'] },
+  { id: 'Done', title: 'Done', backendStatus: ['APPROVED', 'COMPLETED'] },
+];
+
+export const KANBAN_COLUMNS = ORG_COLUMNS;
 
 export const PROJECT_STATUS_COLORS = {
   ACTIVE: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/20',
@@ -83,17 +96,25 @@ export const PROJECT_STATUS_COLORS = {
   ARCHIVED: 'bg-[var(--danger-soft)] text-[var(--danger)] border-[var(--danger)]/20',
 };
 
-/** Given a task's backend status, return which kanban column it belongs to */
-export const getKanbanColumnForTask = (task) => {
-  const rawStatus = String(task.currentStatus || '').toUpperCase().replace(/\s+/g, '_');
-  // Check backendStatus arrays for a match
-  for (const col of KANBAN_COLUMNS) {
-    if (Array.isArray(col.backendStatus) && col.backendStatus.includes(rawStatus)) {
-      return col.id;
-    }
+/** Given a task's backend status and mode, return which kanban column it belongs to */
+export const getKanbanColumnForTask = (task, mode = 'ORG') => {
+  if (!task) return 'To Do';
+  const rawStatus = String(task.currentStatus || task.status || '').toUpperCase().replace(/\s+/g, '_');
+  const isDone = isDoneStatus(rawStatus);
+
+  if (mode === 'PERSONAL') {
+    return isDone ? 'Done' : 'To Do';
   }
-  // Fallback: normalize and match by display name
-  const display = normalizeStatus(task.currentStatus);
-  const colById = KANBAN_COLUMNS.find(c => c.id === display);
-  return colById ? colById.id : 'To Do';
+
+  if (mode === 'CREWS') {
+    if (isDone) return 'Completed';
+    const hasAssignee = !!(task.assignee || task.assigneeId || task.assignedTo);
+    return (hasAssignee || rawStatus === 'IN_PROGRESS' || rawStatus === 'SUBMITTED') ? 'Claimed' : 'Unclaimed';
+  }
+
+  // ORG mode (4 columns: To Do, In Review, Rejected, Done)
+  if (isDone) return 'Done';
+  if (rawStatus === 'SUBMITTED' || rawStatus === 'IN_REVIEW') return 'In Review';
+  if (rawStatus === 'REJECTED' || rawStatus === 'NEEDS_WORK') return 'Rejected';
+  return 'To Do';
 };

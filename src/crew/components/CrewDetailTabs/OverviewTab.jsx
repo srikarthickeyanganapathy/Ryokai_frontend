@@ -32,7 +32,7 @@ import {
 } from '@/shared/ui/Icons';
 
 // Helper function to format relative timestamps
-import { formatTimeAgo } from '@/shared/pages/overview/OverviewWidgets';
+import { formatTimeAgo } from '@/shared/ui/OverviewWidgets';
 
 
 function VelocitySparkline({ data = [4, 6, 5, 8, 7, 10, 12] }) {

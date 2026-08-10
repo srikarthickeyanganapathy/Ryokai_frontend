@@ -31,7 +31,7 @@ export const WIDGET_REGISTRY = [
     component: 'ExecutionQueue',
     placement: 'primary',
     order: 1,
-    workspaceModes: ['PERSONAL', 'CREWS'],
+    workspaceModes: ['PERSONAL', 'CREWS', 'ORG'],
     requiredPermissions: [],
     requiredCapabilities: [],
     lazy: false,

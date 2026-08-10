@@ -12,7 +12,7 @@ import { normalizePriority } from '@/shared/lib/priority'
    ══════════════════════════════════════════════════════ */
 
 
-import { formatTimeAgo, hashHue, SprintProgressRing, BottleneckDetector, RiskRadar, AiWeeklyDigest, RecentWins, VelocitySparkline, HealthGauge, WorkloadDistribution, ProjectProgress, UpcomingDeadlines } from '@/shared/pages/overview/OverviewWidgets';
+import { formatTimeAgo, hashHue, SprintProgressRing, BottleneckDetector, RiskRadar, AiWeeklyDigest, RecentWins, VelocitySparkline, HealthGauge, WorkloadDistribution, ProjectProgress, UpcomingDeadlines } from '@/shared/ui/OverviewWidgets';
 
 export function OverviewTab({
   team, insights, teamTasks, teamProjects, observerCount, hasTaskTimestamps,

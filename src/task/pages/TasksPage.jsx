@@ -1,570 +1,87 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Heading, Text } from '@/shared/ui/Typography'
-import { Button } from '@/shared/ui/Button'
-import { Icons } from '@/shared/ui/Icons'
-import { Modal, ModalContent } from '@/shared/ui/Modal'
-import { TaskForm } from '../features/manage-task/TaskForm'
-import { TasksWorkbench } from '../workbench'
-import {
-  useTaskList,
-  useUpdateTask,
-  useDeleteTask,
-  useSubmitTask,
-  useApproveTask,
-  useReassignTask,
-  useCompletePersonalTask,
-  useCompleteCrewTask,
-  useRecallTask,
-  useRejectTask,
-} from '../entities/hooks/useTasks'
-import { toast } from 'sonner'
-import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
-import { PRIORITY_OPTIONS } from '@/shared/lib/priority'
-import { useAuth, useUsersList, usePermissions } from '@/identity'
-import { useWorkspace } from '@/app/providers/WorkspaceProvider'
-import { filterTasksByWorkspace } from '@/shared/lib/workspaceTaskFilter'
-import { useProjects } from '@/project'
-import { useOrgTeams } from '@/organization'
-import { useCreateTaskWithDependencies } from '../entities/hooks/useTasks'
+import React, { useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useTasksPageLogic } from "../hooks/useTasksPageLogic";
+import { TasksWorkbench } from "../workbench";
+import { TasksModals } from "../features/TasksModals";
+import { PageShell, PageHero, PageToolbar } from "@/shared/ui/PageShell";
+import { PageState } from "@/shared/ui/PageState";
+import { Button } from "@/shared/ui/Button";
+import { Text } from "@/shared/ui/Typography";
+import { Icons } from "@/shared/ui/Icons";
+import { useConfirmDialog } from "@/shared/ui/ConfirmDialog";
+import { useRejectTask } from "../entities/hooks/useTasks";
+import { toast } from "sonner";
+import { ListTodo } from "lucide-react";
 
 export function TasksPage() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const viewMode = searchParams.get('view') || 'list'
-  const { user } = useAuth()
-  const { canReview, canEditTask, canDeleteTask, canAssignTask, canReviewTask } = usePermissions()
-  const { confirm, dialog: confirmDialog } = useConfirmDialog()
+  const logic = useTasksPageLogic();
+  const { confirm, dialog: confirmDialog } = useConfirmDialog();
+  const rejectTaskMutation = useRejectTask();
 
-  const setViewMode = (mode) => {
-    setSearchParams((p) => {
-      const currentTaskId = p.get('openTaskId')
-      p.set('view', mode)
-      if (currentTaskId) p.set('openTaskId', currentTaskId)
-      return p
-    }, { replace: true })
-  }
+  const handleBulkReject = useCallback(async () => {
+    const reason = await confirm({ title: "Send back for rework", description: "What needs to change?", requireInput: true, inputPlaceholder: "e.g. Missing criteria...", confirmLabel: "Send back", danger: true });
+    if (reason === false) return;
+    let skipped = 0;
+    logic.selectedTasks.forEach(task => { if (task.currentStatus?.toUpperCase() === "SUBMITTED") rejectTaskMutation.mutate({ id: task.id, reason: reason || "Rework" }); else skipped++; });
+    if (skipped > 0) toast.error(skipped + " task(s) skipped");
+    logic.setRowSelection({});
+  }, [confirm, logic.selectedTasks, rejectTaskMutation, logic.setRowSelection]);
 
-  const [taskScope, setTaskScope] = useState('all')
-  const [globalFilter, setGlobalFilter] = useState('')
-  const [debouncedFilter, setDebouncedFilter] = useState('')
-  const debounceRef = useRef(null)
-
-  // Debounce search input by 300ms to avoid per-keystroke re-filters
-  useEffect(() => {
-    debounceRef.current = setTimeout(() => setDebouncedFilter(globalFilter), 300)
-    return () => clearTimeout(debounceRef.current)
-  }, [globalFilter])
-
-  const [priorityFilter, setPriorityFilter] = useState([])
-  const [projectFilter, setProjectFilter] = useState('ALL')
-  const [teamFilter, setTeamFilter] = useState('ALL')
-  const [sortBy, setSortBy] = useState('dueDate')
-  const [rowSelection, setRowSelection] = useState({})
-  const [selectedTask, setSelectedTask] = useState(null)
-  const [currentPage, setCurrentPage] = useState(0)
-  const PAGE_SIZE = 50
-
-  const { workspaceMode, activeOrganization } = useWorkspace()
-  const { data: taskData, isLoading, isError, error, refetch } = useTaskList({ page: currentPage, size: PAGE_SIZE })
-  const rawTasks = taskData?.tasks ?? []
-  const totalCount = taskData?.totalCount ?? 0
-  const totalPages = taskData?.totalPages ?? 0
-  const { data: allProjects = [] } = useProjects()
-  const { data: orgTeams = [] } = useOrgTeams(activeOrganization?.id)
-  const { data: allUsers } = useUsersList()
-
-  // Reset page when workspace/scope/filters change
-  useEffect(() => { setCurrentPage(0) }, [workspaceMode, activeOrganization?.id, taskScope, debouncedFilter, priorityFilter])
-
-  const projectsList = useMemo(() => (allProjects || []).map((p) => ({ id: p.id, name: p.name })), [allProjects])
-  const teamsList = useMemo(() => (orgTeams || []).map((t) => ({ id: t.id, name: t.name })), [orgTeams])
-
-  /* ─── Task filtering & sorting (unchanged) ─── */
-  const tasks = useMemo(() => {
-    if (!rawTasks) return []
-    let result = filterTasksByWorkspace(rawTasks, workspaceMode, activeOrganization)
-
-    if (debouncedFilter) {
-      const lower = debouncedFilter.toLowerCase()
-      result = result.filter(
-        (t) => t.title?.toLowerCase().includes(lower) || t.description?.toLowerCase().includes(lower)
-      )
-    }
-    if (projectFilter !== 'ALL') {
-      result = result.filter(
-        (t) => String(t.projectId) === String(projectFilter) || String(t.projectName) === String(projectFilter)
-      )
-    }
-    if (teamFilter !== 'ALL') {
-      result = result.filter(
-        (t) => String(t.teamId) === String(teamFilter) || String(t.team?.id) === String(teamFilter)
-      )
-    }
-    if (taskScope === 'archived') {
-      result = result.filter((t) => t.archived)
-    } else {
-      result = result.filter((t) => !t.archived)
-      if (taskScope === 'assigned') result = result.filter((t) => t.assignedTo === user?.username)
-      else if (taskScope === 'completed') result = result.filter((t) => t.status === 'Done')
-      else if (taskScope === 'today') {
-        const today = new Date().toDateString()
-        result = result.filter((t) => t.dueDate && new Date(t.dueDate).toDateString() === today)
-      } else if (taskScope === 'upcoming') {
-        const today = new Date()
-        result = result.filter((t) => t.dueDate && new Date(t.dueDate) > today)
-      }
-    }
-    if (priorityFilter.length > 0) {
-      result = result.filter((t) => priorityFilter.includes(String(t.priority).toUpperCase()))
-    }
-
-    const priorityRank = Object.fromEntries(PRIORITY_OPTIONS.map((o, i) => [o.value, i]))
-    return [...result].sort((a, b) => {
-      if (sortBy === 'priority')
-        return (
-          (priorityRank[String(a.priority).toUpperCase()] ?? 99) -
-          (priorityRank[String(b.priority).toUpperCase()] ?? 99)
-        )
-      if (sortBy === 'title') return (a.title || '').localeCompare(b.title || '')
-      if (sortBy === 'updated')
-        return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0)
-      if (!a.dueDate && !b.dueDate) return 0
-      if (!a.dueDate) return 1
-      if (!b.dueDate) return -1
-      return new Date(a.dueDate) - new Date(b.dueDate)
-    })
-  }, [
-    rawTasks,
-    workspaceMode,
-    activeOrganization,
-    taskScope,
-    debouncedFilter,
-    priorityFilter,
-    sortBy,
-    user,
-    projectFilter,
-    teamFilter,
-  ])
-
-  /* ─── URL sync for selected task ─── */
-  useEffect(() => {
-    const id = searchParams.get('openTaskId')
-    if (id && tasks.length > 0) {
-      const t = tasks.find((t) => String(t.id) === String(id))
-      if (t) {
-        if (!selectedTask || selectedTask.id !== t.id) setSelectedTask(t)
-      } else {
-        setSelectedTask(null)
-        setSearchParams(
-          (p) => {
-            p.delete('openTaskId')
-            return p
-          },
-          { replace: true }
-        )
-      }
-    } else if (!id && selectedTask) {
-      setSelectedTask(null)
-    }
-  }, [searchParams, tasks, selectedTask, setSearchParams])
-
-  /* ─── Mutations ─── */
-  const updateTaskMutation = useUpdateTask()
-  const deleteTaskMutation = useDeleteTask()
-  const submitTaskMutation = useSubmitTask()
-  const approveTaskMutation = useApproveTask()
-  const reassignTaskMutation = useReassignTask()
-  const completePersonal = useCompletePersonalTask()
-  const completeCrew = useCompleteCrewTask()
-  const recallTask = useRecallTask()
-  const rejectTask = useRejectTask()
-  const [reassignData, setReassignData] = useState(null)
-  const [createOpen, setCreateOpen] = useState(false)
-  const createTaskMutation = useCreateTaskWithDependencies()
-
-  const isBulkPending =
-    completePersonal.isPending ||
-    completeCrew.isPending ||
-    submitTaskMutation.isPending ||
-    approveTaskMutation.isPending ||
-    reassignTaskMutation.isPending ||
-    rejectTask.isPending ||
-    deleteTaskMutation.isPending
-
-  const handleTaskSelect = (task) => {
-    setSelectedTask(task)
-    setSearchParams(
-      (p) => {
-        p.set('openTaskId', task.id)
-        return p
-      },
-      { replace: true }
-    )
-  }
-
-  const handleTaskClose = () => {
-    setSelectedTask(null)
-    setSearchParams(
-      (p) => {
-        p.delete('openTaskId')
-        return p
-      },
-      { replace: true }
-    )
-  }
-
-  const handleTaskStatusChange = (task, s) => toast.success(`→ ${s}`)
-
-  const handleQuickComplete = (task) => {
-    const current = task.currentStatus?.toUpperCase()
-    if (task.isPersonal) {
-      completePersonal.mutate(task.id)
-    } else if (task.crewId || task.crew) {
-      if (current === 'IN_PROGRESS') completeCrew.mutate(task.id)
-      else if (current === 'COMPLETED') toast.info('Already completed')
-      else toast.error('Crew task must be ASSIGNED to complete')
-    } else if (current === 'IN_PROGRESS' || current === 'TODO') {
-      submitTaskMutation.mutate(task.id, {
-        onSuccess: () => toast.success(`"${task.title}" submitted`),
-      })
-    } else if (current === 'REJECTED') {
-      toast.error('Rejected tasks must be reassigned first')
-    }
-  }
-
-  const handleQuickDelete = (id) => deleteTaskMutation.mutate(id)
-
-  /* ─── Bulk operations ─── */
-  const selectedIds = Object.keys(rowSelection)
-  const selectedTasks = selectedIds
-    .map((id) => tasks.find((t) => String(t.id) === id))
-    .filter(Boolean)
-  const [isBulkAssignOpen, setIsBulkAssignOpen] = useState(false)
-
-  const handleBulkComplete = () => {
-    let skipped = 0
-    selectedTasks.forEach((task) => {
-      const cur = task.currentStatus?.toUpperCase()
-      if (task.isPersonal) completePersonal.mutate(task.id)
-      else if (task.crewId || task.crew) {
-        if (cur === 'IN_PROGRESS') completeCrew.mutate(task.id)
-        else skipped++
-      } else if (cur === 'IN_PROGRESS' || cur === 'REJECTED') submitTaskMutation.mutate(task.id)
-      else if (cur === 'SUBMITTED') {
-        if (!canReview || task.assignedTo === user?.username) {
-          skipped++
-          return
-        }
-        approveTaskMutation.mutate(task.id)
-      }
-    })
-    if (skipped > 0) toast.error(`${skipped} task(s) skipped`)
-    setRowSelection({})
-  }
-
-  const handleBulkSubmit = () => {
-    let skipped = 0
-    selectedTasks.forEach((task) => {
-      const cur = task.currentStatus?.toUpperCase()
-      if (
-        !task.isPersonal &&
-        !task.crewId &&
-        !task.crew &&
-        (cur === 'IN_PROGRESS' || cur === 'REJECTED')
-      )
-        submitTaskMutation.mutate(task.id)
-      else skipped++
-    })
-    if (skipped > 0) toast.error(`${skipped} task(s) could not be submitted`)
-    setRowSelection({})
-  }
-
-  const handleBulkAssign = (targetUser) => {
-    if (!targetUser) return
-    selectedTasks.forEach((task) =>
-      reassignTaskMutation.mutate({ taskId: task.id, newAssigneeId: targetUser.id })
-    )
-    toast.success(`Reassigned to ${targetUser.username}`)
-    setIsBulkAssignOpen(false)
-    setRowSelection({})
-  }
-
-  const handleBulkDelete = () => {
-    selectedTasks.forEach((t) => deleteTaskMutation.mutate(t.id))
-    toast.success(`Deleted ${selectedTasks.length} task(s)`)
-    setRowSelection({})
-  }
-
-  const handleBulkReject = async () => {
-    const reason = await confirm({
-      title: 'Send back for rework',
-      description: 'What needs to change?',
-      requireInput: true,
-      inputPlaceholder: 'e.g. Missing criteria…',
-      confirmLabel: 'Send back',
-      danger: true,
-    })
-    if (reason === false) return
-    let skipped = 0
-    selectedTasks.forEach((task) => {
-      if (task.currentStatus?.toUpperCase() === 'SUBMITTED')
-        rejectTask.mutate({ id: task.id, reason: reason || 'Rework' })
-      else skipped++
-    })
-    if (skipped > 0) toast.error(`${skipped} task(s) skipped`)
-    setRowSelection({})
-  }
-
-  const handleReassignSubmit = (payload) => {
-    if (!reassignData) return
-    const u = allUsers?.find((x) => x.username === payload.assigneeUsername)
-    if (u)
-      reassignTaskMutation.mutate(
-        { taskId: reassignData.id, newAssigneeId: u.id },
-        {
-          onSuccess: () => {
-            setReassignData(null)
-            setRowSelection({})
-          },
-        }
-      )
-  }
-
-  const navigate = useNavigate()
-
-  /* ─── Derived state ─── */
-  const searchActive = globalFilter.length > 0
-  const filtersActive =
-    taskScope !== 'all' || priorityFilter.length > 0 || projectFilter !== 'ALL' || teamFilter !== 'ALL'
-
-  const handleClearFilters = () => {
-    setGlobalFilter('')
-    setPriorityFilter([])
-    setProjectFilter('ALL')
-    setTeamFilter('ALL')
-    setTaskScope('all')
-  }
-
-  const handleCreateTask = () => {
-    setCreateOpen(true)
-  }
-
-  const effectiveView = viewMode
+  const hasSelection = logic.selectedIds.length > 0;
 
   return (
     <>
       {confirmDialog}
+      <TasksModals createOpen={logic.createOpen} setCreateOpen={logic.setCreateOpen} reassignData={logic.reassignData} setReassignData={logic.setReassignData} isBulkAssignOpen={logic.isBulkAssignOpen} setIsBulkAssignOpen={logic.setIsBulkAssignOpen} allUsers={logic.allUsers} createTaskMutation={logic.createTaskMutation} updateTaskMutation={logic.updateTaskMutation} onReassignSubmit={logic.handleReassignSubmit} onCreateTask={logic.handleCreateTask} onBulkAssign={logic.handleBulkAssign} />
 
-      <TasksWorkbench
-        tasks={tasks}
-        isLoading={isLoading}
-        isError={isError}
-        error={error}
-        onRetry={refetch}
-        selectedTask={selectedTask}
-        onTaskSelect={handleTaskSelect}
-        onTaskClose={handleTaskClose}
-        activeView={effectiveView}
-        onViewChange={setViewMode}
-        onTaskStatusChange={handleTaskStatusChange}
-        onQuickComplete={handleQuickComplete}
-        onQuickDelete={handleQuickDelete}
-        rowSelection={rowSelection}
-        setRowSelection={setRowSelection}
-        user={user}
-        searchActive={searchActive}
-        filtersActive={filtersActive}
-        onClearFilters={handleClearFilters}
-        onCreateTask={handleCreateTask}
-        taskScope={taskScope}
-        onScopeChange={setTaskScope}
-        globalFilter={globalFilter}
-        setGlobalFilter={setGlobalFilter}
-        priorityFilter={priorityFilter}
-        onPriorityFilterChange={setPriorityFilter}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        projectFilter={projectFilter}
-        onProjectFilterChange={setProjectFilter}
-        teamFilter={teamFilter}
-        onTeamFilterChange={setTeamFilter}
-        projectsList={projectsList}
-        teamsList={teamsList}
-        workspaceFooter={
-          <AnimatePresence>
-            {Object.keys(rowSelection).length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 px-5 py-2.5 rounded-full bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] shadow-lg backdrop-blur-xl"
-              >
-                <Text size="sm" className="text-[13px] font-medium">
-                  {Object.keys(rowSelection).length} selected
-                </Text>
-                <div className="h-4 w-px bg-[var(--color-border-subtle)]" />
-                {(workspaceMode === 'PERSONAL' || canReviewTask) && (
-                  <Button
-                    variant="ghost"
-                    onClick={handleBulkComplete}
-                    disabled={isBulkPending}
-                    className="text-[13px] text-[var(--text-secondary)] hover:text-[var(--accent)]"
-                  >
-                    {workspaceMode === 'PERSONAL' ? 'Complete' : 'Approve'}
-                  </Button>
-                )}
-                {workspaceMode !== 'PERSONAL' && (
-                  <>
-                    {(workspaceMode === 'PERSONAL' || canEditTask) && (
-                      <Button
-                        variant="ghost"
-                        onClick={handleBulkSubmit}
-                        disabled={isBulkPending}
-                        className="text-[13px] text-[var(--text-secondary)] hover:text-[var(--accent)]"
-                      >
-                        Submit
-                      </Button>
-                    )}
-                    {(workspaceMode === 'PERSONAL' || canAssignTask) && (
-                      <Button
-                        variant="ghost"
-                        onClick={() => setIsBulkAssignOpen(true)}
-                        disabled={isBulkPending}
-                        className="text-[13px] text-[var(--text-secondary)] hover:text-[var(--accent)]"
-                      >
-                        Reassign
-                      </Button>
-                    )}
-                    {(workspaceMode === 'PERSONAL' || canReviewTask) && (
-                      <Button
-                        variant="ghost"
-                        onClick={handleBulkReject}
-                        disabled={isBulkPending}
-                        className="text-[13px] text-[var(--text-secondary)] hover:text-[var(--danger)]"
-                      >
-                        Reject
-                      </Button>
-                    )}
-                  </>
-                )}
-                {(workspaceMode === 'PERSONAL' || canDeleteTask) && (
-                  <Button
-                    variant="ghost"
-                    onClick={handleBulkDelete}
-                    disabled={isBulkPending}
-                    className="text-[13px] text-[var(--text-secondary)] hover:text-[var(--danger)]"
-                  >
-                    Delete
-                  </Button>
-                )}
-                <Button
-                  variant="ghost"
-                  onClick={() => setRowSelection({})}
-                  className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-                >
-                  <Icons.x className="w-4 h-4" />
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        }
-      />
+      <PageShell maxWidth="full">
+        {/* PageHero: context the user lands on */}
+        <PageHero
+          eyebrow={logic.workspaceMode === "PERSONAL" ? "Personal" : logic.workspaceMode === "CREWS" ? "Crew" : "Organization"}
+          title="Tasks"
+          subtitle="Manage, filter, and track your work across all views."
+          icon={ListTodo}
+        />
 
-      {/* ── Pagination bar ── */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl mt-4">
-          <span className="text-[12px] text-[var(--text-tertiary)]">
-            {totalCount} tasks · Page {currentPage + 1} of {totalPages}
-          </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage <= 0}
-              onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
-            >
-              ← Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage >= totalPages - 1}
-              onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
-            >
-              Next →
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Reassign modal ── */}
-      <Modal open={!!reassignData} onOpenChange={(o) => !o && setReassignData(null)}>
-        <ModalContent className="sm:max-w-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 rounded-lg">
-          <Heading level={3} className="mb-4 text-[var(--text-primary)]">
-            Reassign Task
-          </Heading>
-          {reassignData && (
-            <TaskForm
-              defaultValues={{
-                title: reassignData.title,
-                description: reassignData.description,
-                priority: reassignData.priority,
-                dueDate: reassignData.dueDate
-                  ? new Date(reassignData.dueDate).toISOString().slice(0, 16)
-                  : '',
-                assigneeUsername: reassignData.assignedTo || '',
-                tags: reassignData.tags || '',
-                teamId: reassignData.teamId ? reassignData.teamId.toString() : '',
-              }}
-              onSubmit={handleReassignSubmit}
-              isLoading={updateTaskMutation.isPending}
-            />
+        <PageState state={logic.isLoading ? "loading" : logic.isError ? "error" : "ready"} stateProps={{ loadingVariant: logic.viewMode === "kanban" ? "cards" : "table", onRetry: logic.refetch }} moduleId="tasks">
+          <TasksWorkbench
+            tasks={logic.tasks} isLoading={logic.isLoading} isError={logic.isError} error={logic.error} onRetry={logic.refetch}
+            selectedTask={logic.selectedTask} onTaskSelect={logic.handleTaskSelect} onTaskClose={logic.handleTaskClose}
+            activeView={logic.viewMode} onViewChange={logic.setViewMode}
+            onTaskStatusChange={logic.onTaskStatusChange} onQuickComplete={logic.handleQuickComplete} onQuickDelete={logic.handleQuickDelete}
+            rowSelection={logic.rowSelection} setRowSelection={logic.setRowSelection} user={logic.user}
+            searchActive={logic.searchActive} filtersActive={logic.filtersActive} onClearFilters={logic.handleClearFilters}
+            onCreateTask={() => logic.setCreateOpen(true)}
+            taskScope={logic.taskScope} onScopeChange={logic.setTaskScope}
+            globalFilter={logic.globalFilter} setGlobalFilter={logic.setGlobalFilter}
+            priorityFilter={logic.priorityFilter} onPriorityFilterChange={logic.setPriorityFilter}
+            sortBy={logic.sortBy} onSortChange={logic.setSortBy}
+            projectFilter={logic.projectFilter} onProjectFilterChange={logic.setProjectFilter}
+            teamFilter={logic.teamFilter} onTeamFilterChange={logic.setTeamFilter}
+            projectsList={logic.projectsList} teamsList={logic.teamsList}
+            workspaceFooter={
+              <AnimatePresence>
+                {hasSelection && (
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 px-5 py-2.5 rounded-full bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] shadow-lg backdrop-blur-xl">
+                    <Text size="sm" className="text-[13px] font-medium">{logic.selectedIds.length} selected</Text>
+                    <div className="h-4 w-px bg-[var(--color-border-subtle)]" />
+                    {(logic.workspaceMode === "PERSONAL" || logic.canReviewTask) && <Button variant="ghost" onClick={logic.handleBulkComplete} disabled={logic.isBulkPending} className="text-[13px] text-[var(--text-secondary)] hover:text-[var(--accent)]">{logic.workspaceMode === "PERSONAL" ? "Complete" : "Approve"}</Button>}
+                    {logic.workspaceMode !== "PERSONAL" && (<><Button variant="ghost" onClick={logic.handleBulkSubmit} disabled={logic.isBulkPending} className="text-[13px] text-[var(--text-secondary)] hover:text-[var(--accent)]">Submit</Button><Button variant="ghost" onClick={() => logic.setIsBulkAssignOpen(true)} disabled={logic.isBulkPending} className="text-[13px] text-[var(--text-secondary)] hover:text-[var(--accent)]">Reassign</Button><Button variant="ghost" onClick={handleBulkReject} disabled={logic.isBulkPending} className="text-[13px] text-[var(--text-secondary)] hover:text-[var(--danger)]">Reject</Button></>)}
+                    <Button variant="ghost" onClick={logic.handleBulkDelete} disabled={logic.isBulkPending} className="text-[13px] text-[var(--text-secondary)] hover:text-[var(--danger)]">Delete</Button>
+                    <Button variant="ghost" onClick={() => logic.setRowSelection({})} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"><Icons.x className="w-4 h-4" /></Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            }
+          />
+          {logic.totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl mt-4">
+              <span className="text-[12px] text-[var(--text-tertiary)]">{logic.totalCount} tasks · Page {logic.currentPage + 1} of {logic.totalPages}</span>
+              <div className="flex items-center gap-2"><Button variant="outline" size="sm" disabled={logic.currentPage <= 0} onClick={() => logic.setCurrentPage(p => Math.max(0, p - 1))}>←</Button><Button variant="outline" size="sm" disabled={logic.currentPage >= logic.totalPages - 1} onClick={() => logic.setCurrentPage(p => Math.min(logic.totalPages - 1, p + 1))}>→</Button></div>
+            </div>
           )}
-        </ModalContent>
-      </Modal>
-
-      {/* ── Create task modal ── */}
-      <Modal open={createOpen} onOpenChange={setCreateOpen}>
-        <ModalContent className="sm:max-w-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-xl rounded-lg p-0">
-          <div className="px-6 pt-6 pb-4 border-b border-[var(--border-subtle)]">
-            <Heading level={3} className="text-[15px] font-bold text-[var(--text-primary)]">New Task</Heading>
-          </div>
-          <div className="p-6">
-            <TaskForm
-              onSubmit={(p) =>
-                createTaskMutation.mutate(p, {
-                  onSuccess: () => setCreateOpen(false),
-                })
-              }
-              isLoading={createTaskMutation.isPending}
-            />
-          </div>
-        </ModalContent>
-      </Modal>
-
-      {/* ── Bulk assign modal ── */}
-      <Modal open={isBulkAssignOpen} onOpenChange={setIsBulkAssignOpen}>
-        <ModalContent className="sm:max-w-sm bg-[var(--bg-card)] border border-[var(--border-subtle)] p-4 rounded-lg">
-          <Heading level={3} className="mb-3 text-[var(--text-primary)]">
-            Assign to
-          </Heading>
-          <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar">
-            {(allUsers || []).map((u) => (
-              <button
-                key={u.id}
-                onClick={() => handleBulkAssign(u)}
-                className="w-full flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-[var(--bg-subtle)] transition-colors text-[13px] text-[var(--text-primary)] text-left"
-              >
-                <div className="w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
-                  {u.username.charAt(0).toUpperCase()}
-                </div>
-                <span>{u.username}</span>
-              </button>
-            ))}
-          </div>
-        </ModalContent>
-      </Modal>
+        </PageState>
+      </PageShell>
     </>
-  )
+  );
 }
