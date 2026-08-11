@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { Icons } from '@/shared/ui/Icons'
+import { Icons, Loader2 } from '@/shared/ui/Icons'
 import { IconButton, Button } from '@/shared/ui/Button'
 import { Avatar, AvatarFallback } from '@/shared/ui/Avatar'
 import { Input } from '@/shared/ui/Input'
@@ -14,6 +14,8 @@ import { cn } from '@/shared/lib/cn'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
 import { FileDropzone } from '@/shared/ui/FileDropzone'
+import { PageState } from '@/shared/ui/PageState'
+import { MessageSquare, Paperclip } from 'lucide-react'
 
 function getDomainFromUrl(url) {
   try {
@@ -115,9 +117,22 @@ export function TaskComments({ taskId, hasCommentPerm }) {
 
       {/* Comment List (YouTube Layout) */}
       <div className="space-y-5">
-        {isLoading && <Text variant="muted" size="sm">Loading comments...</Text>}
+        {isLoading && (
+          <div className="flex items-center justify-center p-6">
+            <Loader2 className="w-5 h-5 animate-spin text-[var(--accent)]" />
+          </div>
+        )}
         {!isLoading && comments.length === 0 && (
-          <Text variant="muted" size="sm" className="italic">No comments yet. Be the first to comment!</Text>
+          <div className="py-10">
+            <PageState 
+              state="empty" 
+              stateProps={{ 
+                icon: MessageSquare, 
+                title: 'No Comments Yet', 
+                message: 'Be the first to share your thoughts on this task.' 
+              }} 
+            />
+          </div>
         )}
         {comments.map((c, idx) => {
           const isLiked = !!likes[c.id]
@@ -405,9 +420,22 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
       </div>
 
       <div className="space-y-3">
-        {isLoading && <Text variant="muted" size="sm">Loading evidence...</Text>}
+        {isLoading && (
+          <div className="flex items-center justify-center p-6">
+            <Loader2 className="w-5 h-5 animate-spin text-[var(--accent)]" />
+          </div>
+        )}
         {!isLoading && evidence.length === 0 && (
-          <Text variant="muted" size="sm" className="italic">No evidence attached yet.</Text>
+          <div className="py-10">
+            <PageState 
+              state="empty" 
+              stateProps={{ 
+                icon: Paperclip, 
+                title: 'No Evidence Attached', 
+                message: 'Upload images or link resources to provide context.' 
+              }} 
+            />
+          </div>
         )}
         
         {/* WhatsApp / Instagram Rich Cards */}
