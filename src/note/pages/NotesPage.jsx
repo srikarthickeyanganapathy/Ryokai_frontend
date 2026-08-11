@@ -182,7 +182,7 @@ function CaptureStrip({ onCreate, isCreating }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full flex items-center gap-3 px-4 h-11 rounded-xl border border-dashed border-[var(--border-subtle)] bg-[var(--bg-elevated)]/60 hover:border-[var(--accent-border)] hover:bg-[var(--accent-soft)]/40 transition-colors group cursor-text"
+        className="w-full flex items-center gap-3 px-4 h-11 rounded-xl border border-dashed border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-[var(--accent-border)] hover:bg-[var(--accent-soft)]/40 transition-colors group cursor-text"
       >
         <PenLine className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors" strokeWidth={1.5} />
         <span className="text-[13px] text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors">Capture a thought - it becomes a note</span>
@@ -208,7 +208,7 @@ function CaptureStrip({ onCreate, isCreating }) {
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onKeyDown={onKeyDown}
-        placeholder="Start typing... - [ ] makes a checklist, triple-backtick makes code, > makes a quote"
+        placeholder="Start typing… — [ ] checklist, ``` code, > quote"
         rows={3}
         className="w-full px-4 py-3 bg-transparent text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none resize-none leading-relaxed"
       />
@@ -223,7 +223,7 @@ function CaptureStrip({ onCreate, isCreating }) {
           {type === 'text' && <FileText className="w-3 h-3" />}
           {typeMeta.label}
         </span>
-        {wordCount > 0 && <span className="text-[10px] font-mono tabular-nums text-[var(--text-muted)]">{wordCount} words</span>}
+        {wordCount > 0 && <span className="text-[10px] tabular-nums text-[var(--text-muted)]" style={{fontFamily: "'JetBrains Mono', monospace"}}>{wordCount} words</span>}
         <span className="ml-auto hidden sm:flex items-center gap-1 text-[10px] text-[var(--text-tertiary)] font-mono">
           <kbd className="px-1 py-0.5 rounded border border-[var(--border-subtle)] bg-[var(--bg-card)]">Enter</kbd> save
           <span className="mx-1">/</span>
@@ -259,7 +259,7 @@ function NoteCard({ note, onOpen, onDelete, onTogglePin, isPinnedSection }) {
     <InteractiveCard
       onClick={() => onOpen(note)}
       className={cn('h-full p-4 group relative')}
-      style={{ background: theme.gradient, borderColor: theme.border }}
+      className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)]"
     >
       <div
         className="absolute top-3 right-3 w-2 h-2 rounded-full opacity-80"
@@ -275,8 +275,8 @@ function NoteCard({ note, onOpen, onDelete, onTogglePin, isPinnedSection }) {
 
       <div className="flex items-start justify-between gap-2 mb-2.5">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <div className="w-1 h-4 rounded-full shrink-0" style={{ backgroundColor: theme.accent }} />
-          <Heading level={4} className="line-clamp-1 text-[13px] font-semibold tracking-tight text-[var(--text-primary)]">
+          <div className="w-1 h-5 rounded-full shrink-0" style={{ backgroundColor: theme.accent }} />
+          <Heading level={4} className="line-clamp-1 text-[14px] font-bold tracking-[-0.01em] text-[var(--text-primary)]" style={{fontFamily: "'Cormorant Garamond', 'Georgia', serif"}}>
             {note.title || 'Untitled Note'}
           </Heading>
         </div>
@@ -376,7 +376,7 @@ function StreamDay({ group, onOpen, onDelete, onTogglePin }) {
       ))}
 
       <div className="sticky top-0 z-10 flex items-center gap-2.5 py-2 bg-[var(--bg-base)]/85 backdrop-blur-md">
-        <span className="text-[12px] font-bold text-[var(--text-primary)] tracking-tight">{group.label}</span>
+        <span className="text-[12px] font-bold text-[var(--text-primary)] tracking-tight" style={{fontFamily: "'DM Sans', sans-serif"}}>{group.label}</span>
         <span className="text-[10px] font-mono text-[var(--text-tertiary)] tabular-nums">{group.notes.length} note{group.notes.length !== 1 ? 's' : ''} / {words} words</span>
         <div className="flex-1 h-px bg-[var(--border-subtle)]" />
       </div>
@@ -391,7 +391,7 @@ function StreamDay({ group, onOpen, onDelete, onTogglePin }) {
                 <div className="w-1 h-8 rounded-full shrink-0" style={{ backgroundColor: theme.accent }} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[13px] font-semibold tracking-tight text-[var(--text-primary)] truncate">{note.title || 'Untitled Note'}</span>
+                    <span className="text-[14px] font-bold tracking-[-0.01em] text-[var(--text-primary)] truncate" style={{fontFamily: "'Cormorant Garamond', 'Georgia', serif"}}>{note.title || 'Untitled Note'}</span>
                     {note.isPinned && <Pin className="w-3 h-3 fill-[var(--accent)] text-[var(--accent)] shrink-0" />}
                     {dna.hasChecklist && (
                       <span className="shrink-0 text-[9px] font-mono font-semibold px-1.5 py-0.5 rounded" style={{ backgroundColor: theme.chip, color: theme.accent }}>
@@ -651,17 +651,25 @@ export function NotesPage() {
 
   return (
     <PageShell maxWidth="default" workspaceMode={workspaceModeLabel}>
-      <PageHero
-        title="Notes"
-        subtitle={subtitle}
-        eyebrow={eyebrow}
-        icon={StickyNote}
-      >
-        <Button onClick={openNew} size="sm" className="gap-1.5 h-8 text-[12px] shrink-0 font-semibold shadow-xs">
-          <Plus className="w-3.5 h-3.5" />
-          New Note
-        </Button>
-      </PageHero>
+      {/* Editorial Hero */}
+      <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-6">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-[0.15em] mb-3" style={{fontFamily: "'JetBrains Mono', monospace", fontSize: '10px'}}>
+            {eyebrow}
+          </div>
+          <div className="w-[60px] h-[3px] bg-[var(--accent)] rounded-[2px] mb-4" />
+          <h1 className="text-[28px] leading-[34px] font-bold text-[var(--text-primary)] tracking-[-0.02em] mb-1.5" style={{fontFamily: "'Cormorant Garamond', 'Georgia', serif"}}>
+            Notes
+          </h1>
+          <div className="flex items-center gap-4 flex-wrap">
+            <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed" style={{fontFamily: "'DM Sans', sans-serif"}}>{subtitle}</p>
+            <Button onClick={openNew} size="sm" className="gap-1.5 h-8 text-[12px] shrink-0 font-semibold shadow-xs">
+              <Plus className="w-3.5 h-3.5" />
+              New Note
+            </Button>
+          </div>
+        </div>
+      </div>
 
       <div className="px-4 sm:px-6">
         <CaptureStrip onCreate={handleCreate} isCreating={createNote.isPending} />
@@ -746,7 +754,7 @@ export function NotesPage() {
                       <div className="w-5 h-5 rounded-md bg-[var(--accent-soft)] flex items-center justify-center">
                         <Pin className="w-3 h-3 fill-[var(--accent)] text-[var(--accent)]" />
                       </div>
-                      <span className="text-[11px] font-bold text-[var(--accent)] uppercase tracking-wider">Pinned</span>
+                      <span className="text-[11px] font-bold text-[var(--accent)] uppercase tracking-[0.1em]" style={{fontFamily: "'JetBrains Mono', monospace", fontSize: "10px"}}>Pinned</span>
                     </div>
                     <Badge variant="secondary" size="xs" className="font-mono text-[10px]">{pinnedNotes.length}</Badge>
                     <div className="flex-1 h-px bg-[var(--border-subtle)]" />
@@ -766,7 +774,7 @@ export function NotesPage() {
                       <div className="w-5 h-5 rounded-md bg-[var(--bg-subtle)] flex items-center justify-center">
                         <Layers className="w-3 h-3 text-[var(--text-muted)]" />
                       </div>
-                      <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                      <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-[0.1em]" style={{fontFamily: "'JetBrains Mono', monospace", fontSize: "10px"}}>
                         {pinnedNotes.length > 0 ? 'Other Notes' : 'All Notes'}
                       </span>
                     </div>
