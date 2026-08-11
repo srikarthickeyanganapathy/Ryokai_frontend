@@ -25,3 +25,7 @@ dist-ssr
 
 .env
 frontend_audit_report.md
+.openclaw
+.cluster
+docs/frontend-audit-2026-08-11.md
+docs/implementation-prompt-2026-08-11.md

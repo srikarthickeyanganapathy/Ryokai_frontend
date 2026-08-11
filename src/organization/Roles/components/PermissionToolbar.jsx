@@ -1,16 +1,19 @@
 import React from 'react';
-import { Input } from '@/shared/ui/Input';
 import { Button } from '@/shared/ui/Button';
-import { Search, MoreHorizontal, RotateCcw, ShieldAlert } from '@/shared/ui/Icons';
-import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover';
-import { cn } from '@/shared/lib/cn';
+import { SearchInput } from '@/shared/ui/SearchInput';
+import { MoreHorizontal, RotateCcw, ShieldAlert, ListPlus, ListMinus } from '@/shared/ui/Icons';
+import { DropdownMenu } from '@/shared/ui/DropdownMenu';
 
 export function PermissionToolbar({ searchQuery, onSearchChange, riskFilter = 'ALL', onRiskFilterChange, isAdmin, onEnableAll, onDisableAll, onReset }) {
   return (
     <div className="flex items-center gap-2 px-3.5 py-2.5 border-b border-[var(--border-subtle)] shrink-0 bg-[var(--bg-card)]/80 backdrop-blur-md">
-      <div className="relative flex-1 max-w-xs">
-        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-        <Input value={searchQuery} onChange={(e) => onSearchChange(e.target.value)} placeholder="Search permissions..." className="pl-8 h-7 text-[12px] rounded-md border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40 focus:bg-[var(--bg-card)] transition-colors" />
+      <div className="flex-1 max-w-xs">
+        <SearchInput
+          value={searchQuery}
+          onChange={onSearchChange}
+          placeholder="Search permissions..."
+          debounceMs={0}
+        />
       </div>
       <Button
         variant={riskFilter === 'ELEVATED' ? 'danger' : 'outline'}
@@ -24,19 +27,19 @@ export function PermissionToolbar({ searchQuery, onSearchChange, riskFilter = 'A
       </Button>
       <div className="flex-1" />
       {!isAdmin && (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0 text-[var(--text-muted)] hover:text-[var(--text-primary)]"><MoreHorizontal className="w-4 h-4" /></Button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-40 p-1">
-            <Button variant="ghost" size="sm" className="w-full justify-start text-[12px]" onClick={onEnableAll}>Enable All</Button>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-[12px]" onClick={onDisableAll}>Disable All</Button>
-            <div className="my-1 h-px bg-[var(--border-subtle)]" />
-            <Button variant="ghost" size="sm" className="w-full justify-between text-[12px]" onClick={onReset}><span>Reset module</span><RotateCcw className="w-3 h-3" /></Button>
-          </PopoverContent>
-        </Popover>
+        <DropdownMenu
+          trigger={
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+              <MoreHorizontal className="w-4 h-4" />
+            </Button>
+          }
+          items={[
+            { label: 'Enable All', icon: ListPlus, onClick: onEnableAll },
+            { label: 'Disable All', icon: ListMinus, onClick: onDisableAll },
+            { label: 'Reset module', icon: RotateCcw, onClick: onReset, separator: 'before' },
+          ]}
+        />
       )}
     </div>
   );
 }
-

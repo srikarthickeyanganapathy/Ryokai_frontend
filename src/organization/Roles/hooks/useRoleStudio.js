@@ -57,7 +57,6 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
   const [activePermission, setActivePermission] = useState(null);
   const [showReview, setShowReview] = useState(false);
   const [showCreateRole, setShowCreateRole] = useState(false);
-  const [confirmPerm, setConfirmPerm] = useState(null);
 
   // ── Inspector visibility — reclaim horizontal space for the permission list ──
   const [inspectorOpen, setInspectorOpen] = useState(() => readLocalBool(INSPECTOR_STORAGE_KEY, true));
@@ -285,14 +284,21 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     pushRecentRole(role.id);
   };
 
-  const togglePermission = (perm) => {
+  const togglePermission = async (perm) => {
     if (isAdminRole) return;
     const isCurrentlyEnabled = Boolean(localScopedPerms[perm.code]);
     if (
       !isCurrentlyEnabled &&
       (perm.riskLevel === 'CRITICAL' || perm.riskLevel === 'HIGH')
     ) {
-      setConfirmPerm(perm);
+      const ok = await confirm({
+        title: 'Critical Permission',
+        description: `"${perm.name}" (${perm.code})\n\n${perm.description || ''}\n\nGrant this privileged access?`,
+        danger: true,
+        confirmLabel: 'Enable access',
+        cancelLabel: 'Cancel',
+      });
+      if (ok) commitToggle(perm);
       return;
     }
     commitToggle(perm);
@@ -552,8 +558,6 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     setShowReview,
     showCreateRole,
     setShowCreateRole,
-    confirmPerm,
-    setConfirmPerm,
     handleCreateRole,
     handleDeleteRole,
     handleCloneRole,

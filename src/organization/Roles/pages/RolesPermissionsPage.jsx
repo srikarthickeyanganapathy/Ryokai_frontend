@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
 import { useOrgRoles } from '../../features/hooks/useOrganizations';
-import { PageHeader } from '@/shared/ui/PageHeader';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { usePermissions } from '@/identity';
 import { Heading, Text } from '@/shared/ui/Typography';
@@ -18,7 +17,6 @@ import { PermissionInspectorContent } from '../widgets/PermissionInspectorConten
 import { InspectorDrawer } from '../widgets/InspectorDrawer';
 import { ReviewDrawer } from '../widgets/ReviewDrawer';
 import { CreateRoleDrawer } from '../widgets/CreateRoleDrawer';
-import { CriticalPermissionDialog } from '../widgets/CriticalPermissionDialog';
 
 export function RolesPermissionsPage() {
   const { activeOrganization } = useWorkspace();
@@ -102,7 +100,6 @@ export function RolesPermissionsPage() {
 
             <ReviewDrawer open={studio.showReview} onOpenChange={studio.setShowReview} roleName={studio.selectedRole?.name} addedPerms={studio.addedPerms} removedPerms={studio.removedPerms} scopeChangedPerms={studio.scopeChangedPerms} priorityChanged={studio.priorityChanged} originalPriority={studio.selectedRole?.priority ?? 100} newPriority={studio.localPriority} changeRisk={studio.changeRisk} permissionMap={studio.PERMISSION_MAP} localScopedPerms={studio.localScopedPerms} originalMap={studio.originalMap} onSave={studio.handleSaveChanges} onDiscard={studio.handleDiscardChanges} />
             <CreateRoleDrawer roles={studio.roles} open={studio.showCreateRole} onOpenChange={studio.setShowCreateRole} onCreate={studio.handleCreateRole} isLoading={false} />
-            <CriticalPermissionDialog perm={studio.confirmPerm} roleName={studio.selectedRole?.name} open={!!studio.confirmPerm} onConfirm={() => { studio.commitToggle(studio.confirmPerm); studio.setConfirmPerm(null); }} onCancel={() => studio.setConfirmPerm(null)} />
             {studio.confirmDialog}
           </>
         )}

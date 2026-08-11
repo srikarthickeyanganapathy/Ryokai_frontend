@@ -95,7 +95,7 @@ export function MonthView({ tasks = [], events = [], currentDate, isLoading, onS
   }
 
   return (
-    <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-sm px-3.5 pt-4 pb-3">
+    <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-sm px-3.5 pt-4 pb-3 min-w-[640px] sm:min-w-0">
       <div className="flex items-center justify-between px-1 pb-3">
         <span className="text-[10px] font-bold tracking-[0.13em] uppercase text-[var(--text-tertiary)]">Month pulse</span>
         <span className="font-mono text-[9.5px] text-[var(--text-tertiary)]">dot size = activity</span>

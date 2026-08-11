@@ -5,7 +5,7 @@ import { DataTable } from '@/shared/ui/data-table/DataTable'
 import { useUsersList } from '@/identity'
 import { useRoles, useAssignUserRoles } from '@/platform/admin/features/hooks/useAdmin'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
-import { Input } from '@/shared/ui/Input'
+import { SearchInput } from '@/shared/ui/SearchInput'
 import { Icons } from '@/shared/ui/Icons'
 import { RolesTab } from '@/platform/admin/components/RolesTab'
 import { cn } from '@/shared/lib/cn'
@@ -93,15 +93,13 @@ export function PlatformUsersPage() {
         title="Platform Users"
         subtitle="Manage global identities and assign platform-level roles."
         actions={activeTab === 'users' ? (
-          <div className="w-[300px] relative">
-            <Icons.search className="absolute left-2.5 top-2.5 h-4 w-4 text-[var(--text-muted)]" />
-            <Input 
-              placeholder="Search users..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-9"
-            />
-          </div>
+          <SearchInput
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Search users..."
+            debounceMs={0}
+            className="w-[300px]"
+          />
         ) : null}
         className="mb-6"
       />

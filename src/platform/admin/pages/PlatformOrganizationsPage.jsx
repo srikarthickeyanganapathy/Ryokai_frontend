@@ -6,7 +6,7 @@ import { DataTable } from '@/shared/ui/data-table/DataTable'
 import { useAdminOrganizations, useSuspendOrganization, useActivateOrganization } from '@/platform/admin/features/hooks/useAdmin'
 import { Button } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
-import { Input } from '@/shared/ui/Input'
+import { SearchInput } from '@/shared/ui/SearchInput'
 import { Badge } from '@/shared/ui/Badge'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 
@@ -97,15 +97,13 @@ export function PlatformOrganizationsPage() {
         title="Organizations"
         subtitle="Oversight and governance of all platform tenants."
         actions={
-          <div className="w-[300px] relative">
-            <Icons.search className="absolute left-2.5 top-2.5 h-4 w-4 text-[var(--text-muted)]" />
-            <Input 
-              placeholder="Search organizations..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-9"
-            />
-          </div>
+          <SearchInput
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Search organizations..."
+            debounceMs={0}
+            className="w-[300px]"
+          />
         }
         className="mb-6"
       />

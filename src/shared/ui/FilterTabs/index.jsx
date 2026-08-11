@@ -1,1 +1,0 @@
-export { FilterTabs } from './FilterTabs';

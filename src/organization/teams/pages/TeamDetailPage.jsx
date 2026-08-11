@@ -6,7 +6,7 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'
 import { ProgressRing } from '@/shared/ui/Progress'
-import { SegmentedToggle } from '@/shared/ui/SegmentedToggle'
+import { PillNav } from '@/shared/ui/PillNav'
 import { PageShell } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
@@ -416,8 +416,9 @@ export function TeamDetailPage() {
               {/* Work segment: Tasks | Projects (always switchable) */}
               {activeTab === 'work' && (
                 <div className="mt-4">
-                  <SegmentedToggle
-                    options={[{ value: 'tasks', label: 'Tasks' }, { value: 'projects', label: 'Projects' }]}
+                  <PillNav
+                    variant="segmented"
+                    items={[{ value: 'tasks', label: 'Tasks' }, { value: 'projects', label: 'Projects' }]}
                     value={workView}
                     onChange={setWorkView}
                   />

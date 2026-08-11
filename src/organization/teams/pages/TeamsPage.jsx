@@ -9,7 +9,6 @@ import { PageShell, PageHero, PageContent, PageStats, PageToolbar } from '@/shar
 import { PageState } from '@/shared/ui/PageState'
 import { EntityCard, EntityStatStrip, EntityFilterBar } from '@/shared/ui/entity-card'
 import { formatTimeAgo } from '@/shared/ui/OverviewWidgets'
-import { SegmentedToggle } from '@/shared/ui/SegmentedToggle'
 import { useOrgTeams, useOrgMembers } from '../../features/hooks/useOrganizations'
 import { useTaskList } from '@/task'
 import { useProjects } from '@/project'
