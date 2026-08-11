@@ -313,7 +313,7 @@ export function CrewDetailPage() {
                   : 'bg-[var(--bg-base)]',
               )}
             >
-              <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className={cn('flex items-center gap-3 transition-all duration-200', isHeaderSticky ? 'py-2' : 'py-3')}>
                   {/* Back */}
                   <button
@@ -349,7 +349,9 @@ export function CrewDetailPage() {
                       <Text variant="muted" size="xs" className="line-clamp-1 ml-1 hidden md:inline">{crew.description}</Text>
                     )}
                     {!isHeaderSticky && (
-                      <CrewStatusPill completionRate={completionRate} crewTasks={crewTasks} members={members} size="sm" />
+                      <div className="hidden lg:block">
+                        <CrewStatusPill completionRate={completionRate} crewTasks={crewTasks} members={members} size="sm" />
+                      </div>
                     )}
                     <SaveToggle entityType={ENTITY_TYPES?.CREW || 'crew'} entityId={crew.id} className="ml-auto sm:ml-1" />
                   </div>
@@ -368,7 +370,7 @@ export function CrewDetailPage() {
                     <Button
                       variant="ghost" size="sm"
                       onClick={() => setShowSidebar(!showSidebar)}
-                      className={cn('gap-1 text-[11px] h-7 px-2', showSidebar && 'text-[var(--accent)] bg-[var(--accent-soft)]')}
+                      className={cn('gap-1 text-[11px] h-7 px-2 hidden lg:inline-flex', showSidebar && 'text-[var(--accent)] bg-[var(--accent-soft)]')}
                       title="Activity feed"
                     >
                       <Icons.activity className="w-3.5 h-3.5" />
@@ -378,18 +380,12 @@ export function CrewDetailPage() {
               </div>
             </div>
 
-            {/* Tabs — centered nav (same bar as team, but the tab row is centered in the page) */}
-            <div className="max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-center">
-                <div className="max-w-full">
-                  <CrewTabs activeTab={activeTab} setActiveTab={setActiveTab} tabCounts={tabCounts} sticky={false} />
-                </div>
-              </div>
-            </div>
-
             {/* Content Area (with optional activity sidebar) */}
-            <div className="flex-1 min-h-0 max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 pb-12">
-              <div className="flex gap-0">
+            <div className="flex-1 min-h-0 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-12">
+              <div className="mt-5 mb-2">
+                <CrewTabs activeTab={activeTab} setActiveTab={setActiveTab} tabCounts={tabCounts} sticky={false} />
+              </div>
+              <div className="flex flex-col lg:flex-row gap-6 lg:gap-0">
                 {/* Main Content */}
                 <div className="flex-1 min-w-0">
                   <AnimatePresence mode="wait">
@@ -451,7 +447,7 @@ export function CrewDetailPage() {
                       animate={{ width: 280, opacity: 1 }}
                       exit={{ width: 0, opacity: 0 }}
                       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                      className="overflow-hidden shrink-0 border-l border-[var(--border-subtle)]"
+                      className="hidden lg:block overflow-hidden shrink-0 border-l border-[var(--border-subtle)]"
                     >
                       <div className="w-[280px] pl-5 pr-3 pt-3 h-full max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-thin">
                         <div className="flex items-center justify-between mb-3 sticky top-0 bg-[var(--bg-base)] z-10 pb-2">

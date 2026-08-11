@@ -7,6 +7,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { Icons } from '@/shared/ui/Icons'
 import { PageShell, PageHero, PageContent, PageStats, PageToolbar } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
+import { EntityCard, EntityStatStrip, EntityFilterBar } from '@/shared/ui/entity-card'
 import { formatTimeAgo } from '@/shared/ui/OverviewWidgets'
 import { SegmentedToggle } from '@/shared/ui/SegmentedToggle'
 import { useOrgTeams, useOrgMembers } from '../../features/hooks/useOrganizations'
@@ -250,26 +251,18 @@ function TeamTile({ team, stats, isMember, orgId, canManage, canManageTeam, navi
     }
   }, [canEnterTeam, compareMode, navigate, orgId, team, onToggleCompare])
 
-  const springX = useSpring(0, { stiffness: 300, damping: 30 })
-  const springY = useSpring(0, { stiffness: 300, damping: 30 })
-
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = (e.clientX - rect.left) / rect.width - 0.5
-    const y = (e.clientY - rect.top) / rect.height - 0.5
-    springX.set(x * 4)
-    springY.set(y * 4)
-  }
-
-  const handleMouseLeave = () => {
-    springX.set(0)
-    springY.set(0)
-    setIsHovered(false)
-  }
+  const completionPct = stats.taskCount > 0 ? Math.round((stats.doneCount / stats.taskCount) * 100) : 0
+  const memberAvatars = (team.members || []).slice(0, 4).map((m, i) => ({
+    initials: (m.username || '?').charAt(0).toUpperCase(),
+    color: `hsl(${hashHue(m.username || String(i))} 55% 48%)`,
+    title: m.username,
+  }))
 
   return (
     <motion.div
       layout
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       variants={{
         hidden: { opacity: 0, y: 20, scale: 0.96 },
         show: {
@@ -279,177 +272,69 @@ function TeamTile({ team, stats, isMember, orgId, canManage, canManageTeam, navi
           transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
         },
       }}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleEnterTeam}
-      role="button"
-      tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && handleEnterTeam(e)}
-      style={{
-        x: springX,
-        y: springY,
-        rotateX: useTransform(springY, [-4, 4], [2, -2]),
-        rotateY: useTransform(springX, [-4, 4], [-2, 2]),
-      }}
-      className={cn(
-        'group relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-5 transition-all duration-300 overflow-hidden isolate',
-        canEnterTeam && !compareMode && 'cursor-pointer',
-        compareMode && 'cursor-pointer',
-        isSelected && 'ring-2 ring-[var(--accent)] border-[var(--accent-border)]',
-        !canEnterTeam && !compareMode && 'opacity-60 cursor-default',
-      )}
     >
-      {/* ── Gradient glow aura ── */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        animate={{ opacity: isHovered ? 0.08 : 0 }}
-        style={{
-          background: `radial-gradient(circle at 20% 0%, hsl(${hue} 80% 55%), transparent 55%)`,
-        }}
-        transition={{ duration: 0.3 }}
+      <EntityCard
+        type="team"
+        glyph={<TeamAvatar name={team.name} size="md" hue={hue} />}
+        name={team.name}
+        tagline={team.description || 'No description'}
+        disabled={!canEnterTeam && !compareMode}
+        selected={isSelected}
+        onClick={handleEnterTeam}
+        badges={[
+          <span key="mood" className="ec-badge ec-badge--ghost" title="Team mood">{mood}</span>,
+          ...(isMember ? [<span key="member" className="ec-badge ec-badge--accent"><span className="ec-dot" />Member</span>] : []),
+        ]}
+        actions={
+          <div className="ec-actions" style={{ position: 'relative' }}>
+            {compareMode && (
+              <button
+                type="button"
+                className={cn('ec-kebab', isSelected && 'text-[var(--accent)]')}
+                onClick={(e) => { e.stopPropagation(); onToggleCompare?.(team) }}
+                title={isSelected ? 'Remove from comparison' : 'Add to comparison'}
+                aria-label={isSelected ? 'Remove from comparison' : 'Add to comparison'}
+              >
+                <Icons.check className="w-4 h-4" />
+              </button>
+            )}
+            {canManageTeam && !compareMode && (
+              <button
+                type="button"
+                className="ec-kebab"
+                onClick={(e) => { e.stopPropagation(); setSelectedTeam(team) }}
+                title="Manage team"
+                aria-label="Manage team"
+              >
+                <Icons.settings className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        }
+        meta={[
+          { icon: <Icons.checkSquare style={{ width: 11, height: 11 }} />, text: `${stats.activeTaskCount} tasks` },
+          { icon: <Icons.folder style={{ width: 11, height: 11 }} />, text: `${stats.projectCount} projects` },
+          ...(lastActive ? [{ icon: <Icons.clock style={{ width: 11, height: 11 }} />, text: `Active ${lastActive}` }] : []),
+        ]}
+        avatars={memberAvatars}
+        avatarOverflow={Math.max(0, memberCount - 4)}
+        progress={stats.projectCount > 0 ? completionPct : null}
+        progressLabel={stats.projectCount > 0 ? `${completionPct}%` : undefined}
+        footer={
+          <div className="ec-card-foot">
+            <span className="text-[11px] text-[var(--text-muted)]">{memberCount} member{memberCount === 1 ? '' : 's'}</span>
+            {canEnterTeam && !compareMode && (
+              <span className="text-[11px] font-semibold flex items-center gap-1 transition-colors" style={{ color: isHovered ? `hsl(${hue} 70% 50%)` : 'var(--text-muted)' }}>
+                <motion.span animate={{ x: isHovered ? 2 : 0 }} transition={{ duration: 0.2 }}>→</motion.span>
+              </span>
+            )}
+          </div>
+        }
       />
-
-      {/* ── Compare checkbox ── */}
-      {compareMode && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="absolute top-3 right-3 z-10"
-          onClick={e => e.stopPropagation()}
-        >
-          <div
-            className={cn(
-              'w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-150',
-              isSelected ? 'bg-[var(--accent)] border-[var(--accent)]' : 'border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-[var(--accent-border)]'
-            )}
-            onClick={() => onToggleCompare?.(team)}
-          >
-            {isSelected && <Icons.check className="w-3 h-3 text-white" />}
-          </div>
-        </motion.div>
-      )}
-
-      {/* ── Mood emoji + Pulse ── */}
-      <div className="absolute top-3 left-5 flex items-center gap-2">
-        <span className="text-sm select-none" title="Team mood">{mood}</span>
-        <motion.div
-          animate={{ scale: [1, 1.3, 1], opacity: [1, 0.6, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-2 h-2 rounded-full bg-[var(--success)] shadow-[0_0_6px_var(--success)]"
-          title="Active"
-        />
-      </div>
-
-      {/* ── Top: Avatar + Name ── */}
-      <div className="flex items-start gap-3 mb-4 mt-6">
-        <TeamAvatar name={team.name} size="md" hue={hue} />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <Heading level={4} className="text-[14px] font-semibold truncate tracking-tight" title={team.name}>
-              {team.name}
-            </Heading>
-            {isMember && (
-              <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--accent)]" title="You're a member" />
-            )}
-          </div>
-          <Text variant="muted" size="xs" className="line-clamp-1 mt-0.5">
-            {team.description || 'No description'}
-          </Text>
-        </div>
-      </div>
-
-      {/* ── Mini stats row ── */}
-      <div className="grid grid-cols-3 gap-1.5 mb-4">
-        <div className="bg-[var(--bg-subtle)] rounded-lg px-2 py-2 text-center">
-          <div className="text-[15px] font-bold text-[var(--text-primary)] tabular-nums tracking-tight">
-            {stats.activeTaskCount}
-          </div>
-          <div className="text-[9px] text-[var(--text-muted)] font-medium uppercase tracking-wide">Tasks</div>
-        </div>
-        <div className="bg-[var(--bg-subtle)] rounded-lg px-2 py-2 text-center">
-          <div className="text-[15px] font-bold text-[var(--text-primary)] tabular-nums tracking-tight">
-            {stats.projectCount}
-          </div>
-          <div className="text-[9px] text-[var(--text-muted)] font-medium uppercase tracking-wide">Projects</div>
-        </div>
-        <div className="bg-[var(--bg-subtle)] rounded-lg px-1.5 py-2 flex items-center justify-center gap-1.5">
-          <TaskCompletionRing rate={stats.completionRate} size={28} strokeWidth={2.5} />
-          <div className="text-[9px] text-[var(--text-muted)] font-medium uppercase tracking-wide leading-tight text-center">Done</div>
-        </div>
-      </div>
-
-      {/* ── Project progress bar ── */}
-      {stats.projectCount > 0 && (
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-1">
-            <Text size="xs" className="text-[var(--text-muted)]">Project progress</Text>
-            <Text size="xs" className="text-[var(--text-muted)] tabular-nums">
-              {stats.projectCount > 0 ? Math.round((stats.doneCount / Math.max(stats.taskCount, 1)) * 100) : 0}%
-            </Text>
-          </div>
-          <MiniProgressBar
-            value={stats.taskCount > 0 ? (stats.doneCount / stats.taskCount) * 100 : 0}
-            max={100}
-            hue={hue}
-          />
-        </div>
-      )}
-
-      {/* ── Bottom: Members + Actions + Timestamp ── */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <div className="flex -space-x-1.5">
-            {team.members?.slice(0, 4).map((m, i) => (
-              <MemberAvatarPill key={m.id ?? i} member={m} index={i} />
-            ))}
-            {memberCount > 4 && (
-              <div className="w-6 h-6 rounded-full ring-2 ring-[var(--bg-card)] bg-[var(--bg-subtle)] flex items-center justify-center text-[9px] font-semibold text-[var(--text-muted)]">
-                +{memberCount - 4}
-              </div>
-            )}
-          </div>
-          <Text size="xs" className="text-[var(--text-muted)] tabular-nums">{memberCount}</Text>
-        </div>
-
-        {/* ── Quick actions ── */}
-        <motion.div
-          className="flex items-center gap-1"
-          animate={{ opacity: isHovered ? 1 : 0.5, x: isHovered ? 0 : 4 }}
-          transition={{ duration: 0.2 }}
-        >
-          {canManageTeam && !compareMode && (
-            <button
-              onClick={e => { e.stopPropagation(); setSelectedTeam(team) }}
-              className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-colors"
-              title="Manage team"
-            >
-              <Icons.settings className="w-3.5 h-3.5" />
-            </button>
-          )}
-          {canEnterTeam && !compareMode && (
-            <span
-              className="text-[11px] font-semibold flex items-center gap-1 transition-all duration-200"
-              style={{ color: isHovered ? `hsl(${hue} 70% 50%)` : 'var(--text-muted)' }}
-            >
-              <motion.span animate={{ x: isHovered ? 2 : 0 }} transition={{ duration: 0.2 }}>→</motion.span>
-            </span>
-          )}
-        </motion.div>
-      </div>
-
-      {/* ── Last active timestamp ── */}
-      {lastActive && (
-        <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
-          <Icons.clock className="w-2.5 h-2.5" />
-          <span>Active {lastActive}</span>
-        </div>
-      )}
     </motion.div>
   )
 }
 
-/* ── Team avatar ── */
 function TeamAvatar({ name, size = 'md', hue, className }) {
   const h = hue ?? hashHue(name || '?')
   const sizes = { sm: 'w-8 h-8 text-[10px]', md: 'w-11 h-11 text-sm', lg: 'w-14 h-14 text-base' }
@@ -1300,91 +1185,33 @@ export const TeamsPage = () => {
 
       {/* ── KPI Strip ── */}
       {!isTeamEmpty && (
-        <PageStats>
-          <StatKPI icon={Icons.users} label="Total Teams" value={teams.length} trend={12} trendLabel="↑12% this week" hue={220} />
-          <StatKPI icon={Icons.folder} label="Active Projects" value={totalProjects} trend={8} trendLabel="↑8% this week" hue={160} />
-          <StatKPI icon={Icons.checkSquare} label="Open Tasks" value={totalTasks} trend={-3} trendLabel="↓3% this week" hue={40} />
-          <StatKPI icon={Icons.userCheck || Icons.users} label="Members Online" value={membersOnline} trend={5} trendLabel="↑5% vs last week" hue={280} />
-        </PageStats>
+        <EntityStatStrip
+          stats={[
+            { key: 'total', label: 'Total Teams', value: <AnimatedCounter value={teams.length} />, sublabel: '↑12% this week', icon: Icons.users, tone: 'cyan', trend: { label: '+12%', dir: 'up' } },
+            { key: 'projects', label: 'Active Projects', value: <AnimatedCounter value={totalProjects} />, sublabel: '↑8% this week', icon: Icons.folder, tone: 'amber', trend: { label: '+8%', dir: 'up' } },
+            { key: 'tasks', label: 'Open Tasks', value: <AnimatedCounter value={totalTasks} />, sublabel: '↓3% this week', icon: Icons.checkSquare, tone: 'rose', trend: { label: '-3%', dir: 'down' } },
+            { key: 'online', label: 'Members Online', value: <AnimatedCounter value={membersOnline} />, sublabel: '↑5% vs last week', icon: Icons.userCheck || Icons.users, tone: 'emerald', trend: { label: '+5%', dir: 'up' } },
+          ]}
+        />
       )}
 
       {/* ── Smart Categorization Bar + Search ── */}
       {!isTeamEmpty && (
-        <PageToolbar>
-          <div className="flex-1 flex flex-col sm:flex-row gap-3 sm:items-center w-full">
-            {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <Icons.search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-              <input
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search teams by name or description..."
-                className="w-full pl-9 pr-8 py-2 text-[13px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent-border)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
-              />
-              {search && (
-                <button
-                  onClick={() => setSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
-                >
-                  <Icons.x className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Category chips */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-hide">
-              <CategoryChip
-                label="All Teams"
-                count={categoryCounts.all}
-                isActive={activeCategory === 'all'}
-                onClick={() => setActiveCategory('all')}
-                hue={210}
-              />
-              <CategoryChip
-                label="My Teams"
-                count={categoryCounts.mine}
-                isActive={activeCategory === 'mine'}
-                onClick={() => setActiveCategory('mine')}
-                hue={260}
-              />
-              {categoryCounts.engineering > 0 && (
-                <CategoryChip
-                  label="Engineering"
-                  count={categoryCounts.engineering}
-                  isActive={activeCategory === 'engineering'}
-                  onClick={() => setActiveCategory('engineering')}
-                  hue={220}
-                />
-              )}
-              {categoryCounts.design > 0 && (
-                <CategoryChip
-                  label="Design"
-                  count={categoryCounts.design}
-                  isActive={activeCategory === 'design'}
-                  onClick={() => setActiveCategory('design')}
-                  hue={310}
-                />
-              )}
-              {categoryCounts.marketing > 0 && (
-                <CategoryChip
-                  label="Marketing"
-                  count={categoryCounts.marketing}
-                  isActive={activeCategory === 'marketing'}
-                  onClick={() => setActiveCategory('marketing')}
-                  hue={340}
-                />
-              )}
-              <CategoryChip
-                label="Favorites"
-                count={categoryCounts.favorites}
-                isActive={activeCategory === 'favorites'}
-                onClick={() => setActiveCategory('favorites')}
-                hue={45}
-              />
-            </div>
-          </div>
-        </PageToolbar>
+        <EntityFilterBar
+          search={search}
+          onSearch={setSearch}
+          searchPlaceholder="Search teams by name or description..."
+          chips={[
+            { id: 'all', label: 'All Teams', count: categoryCounts.all },
+            { id: 'mine', label: 'My Teams', count: categoryCounts.mine },
+            ...(categoryCounts.engineering > 0 ? [{ id: 'engineering', label: 'Engineering', count: categoryCounts.engineering }] : []),
+            ...(categoryCounts.design > 0 ? [{ id: 'design', label: 'Design', count: categoryCounts.design }] : []),
+            ...(categoryCounts.marketing > 0 ? [{ id: 'marketing', label: 'Marketing', count: categoryCounts.marketing }] : []),
+            { id: 'favorites', label: 'Favorites', count: categoryCounts.favorites },
+          ]}
+          activeChip={activeCategory}
+          onChip={setActiveCategory}
+        />
       )}
 
       {/* ── Compare mode banner ── */}
@@ -1486,7 +1313,7 @@ export const TeamsPage = () => {
                 animate="show"
                 exit="hidden"
                 variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05, delayChildren: 0.05 } } }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                className="ec-grid"
               >
                 {filteredTeams.map(team => (
                   <TeamTile

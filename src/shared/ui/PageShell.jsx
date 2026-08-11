@@ -34,6 +34,7 @@ export function PageShell({
 }) {
   const widthMap = {
     narrow: 'max-w-[960px]',
+    '6xl': 'max-w-6xl',
     default: 'max-w-[1280px]',
     wide: 'max-w-[1440px]',
     full: 'max-w-full',

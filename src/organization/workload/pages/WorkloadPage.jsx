@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+﻿import React, { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Gauge,
@@ -13,7 +13,7 @@ import {
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
-import { FilterTabs } from '@/shared/ui/FilterTabs';
+import { PillNav } from '@/shared/ui/PillNav';
 import { cn } from '@/shared/lib/cn';
 import { usePermissions } from '@/identity';
 import { useWorkload } from '@/organization/workload/features/hooks/useWorkload';
@@ -295,7 +295,7 @@ export function WorkloadPage() {
   const toggleCard = (id) =>
     setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
 
-  /* ── No active org: empty fallback ── */
+  /* â”€â”€ No active org: empty fallback â”€â”€ */
   if (!orgId) {
     return (
       <PageShell maxWidth="default">
@@ -411,7 +411,7 @@ export function WorkloadPage() {
             {/* Quick Filters */}
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-[var(--text-muted)]" />
-              <FilterTabs
+              <PillNav
                 filters={FILTERS}
                 value={filter}
                 onChange={setFilter}

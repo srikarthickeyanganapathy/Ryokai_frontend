@@ -24,7 +24,7 @@ export function DetailTabs({ tabs, activeTab, onChange, counts, sticky = true, c
         className
       )}
     >
-      <div className="flex items-center gap-1 px-2 sm:px-4 overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-1 px-2 sm:px-4 overflow-x-auto overflow-y-hidden no-scrollbar pt-1 pb-0.5">
         {tabs.map((tab) => {
           const IconEl = tab.icon;
           const count = counts ? counts[tab.id] : undefined;

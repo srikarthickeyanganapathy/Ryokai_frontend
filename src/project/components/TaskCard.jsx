@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Check } from 'lucide-react'
 import { Badge } from '@/shared/ui/Badge'
 import { Avatar, AvatarFallback } from '@/shared/ui/Avatar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { normalizePriority, PRIORITY_HEX } from '@/shared/lib/priority'
 
 /* ============================================================
@@ -78,55 +79,52 @@ export function TaskCard({
             <Check className="w-3 h-3" strokeWidth={2.5} />
           </button>
         )}
-        {assignee ? (
-          <button
-            onClick={e => { e.stopPropagation(); if (canAssignTask) setAssigningTaskId(isAssigning ? null : String(task.id)) }}
-            title={assignee}
-            className="shrink-0 cursor-pointer"
-          >
-            <Avatar size="xs">
-              <AvatarFallback style={{ background: `linear-gradient(135deg, hsl(${hashHue(assignee)} 72% 52%), hsl(${(hashHue(assignee) + 35) % 360} 68% 38%))`, color: '#fff', fontSize: 8, fontWeight: 700 }}>
-                {assignee.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </button>
-        ) : (
-          canAssignTask && (
-            <button
-              onClick={e => { e.stopPropagation(); setAssigningTaskId(isAssigning ? null : String(task.id)) }}
-              className="w-6 h-6 rounded-full border border-dashed border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent-border)] flex items-center justify-center text-[13px] shrink-0 cursor-pointer"
-              title="Assign"
-            >
-              +
-            </button>
-          )
+        {(assignee || canAssignTask) && (
+          <Popover open={assigningTaskId === String(task.id)} onOpenChange={o => setAssigningTaskId(o ? String(task.id) : null)}>
+            <PopoverTrigger asChild>
+              {assignee ? (
+                <button onClick={e => e.stopPropagation()} title={assignee} className="shrink-0 cursor-pointer">
+                  <Avatar size="xs">
+                    <AvatarFallback style={{ background: `linear-gradient(135deg, hsl(${hashHue(assignee)} 72% 52%), hsl(${(hashHue(assignee) + 35) % 360} 68% 38%))`, color: '#fff', fontSize: 8, fontWeight: 700 }}>
+                      {assignee.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              ) : (
+                <button
+                  onClick={e => e.stopPropagation()}
+                  className="w-6 h-6 rounded-full border border-dashed border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent-border)] flex items-center justify-center text-[13px] shrink-0 cursor-pointer"
+                  title="Assign"
+                >
+                  +
+                </button>
+              )}
+            </PopoverTrigger>
+            <PopoverContent className="w-44 p-1.5" align="end">
+              <div className="text-[9.5px] font-bold uppercase tracking-wider text-[var(--text-muted)] px-2 py-1">Assign to</div>
+              {assignableMembers.map(m => {
+                const name = m.username || m.name
+                const on = name === assignee
+                return (
+                  <button
+                    key={String(m.userId || m.id || name)}
+                    onClick={() => { onAssign(task, m.userId || m.id, name); setAssigningTaskId(null) }}
+                    className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[12px] font-medium text-left hover:bg-[var(--bg-subtle)] cursor-pointer"
+                  >
+                    <Avatar size="xs">
+                      <AvatarFallback style={{ background: `linear-gradient(135deg, hsl(${hashHue(name)} 72% 52%), hsl(${(hashHue(name) + 35) % 360} 68% 38%))`, color: '#fff', fontSize: 8, fontWeight: 700 }}>
+                        {name?.charAt(0).toUpperCase() || '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="truncate">{name}</span>
+                    {on && <Check className="w-3 h-3 ml-auto text-[var(--accent)] shrink-0" strokeWidth={3} />}
+                  </button>
+                )
+              })}
+            </PopoverContent>
+          </Popover>
         )}
       </div>
-
-      {isAssigning && (
-        <div className="absolute right-0 top-9 z-50 min-w-[176px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl shadow-[var(--shadow-lg)] p-1.5" onClick={e => e.stopPropagation()}>
-          <div className="text-[9.5px] font-bold uppercase tracking-wider text-[var(--text-muted)] px-2 py-1">Assign to</div>
-          {assignableMembers.map(m => {
-            const name = m.username || m.name
-            const on = name === assignee
-            return (
-              <button
-                key={String(m.userId || m.id || name)}
-                onClick={() => { onAssign(task, m.userId || m.id, name); setAssigningTaskId(null) }}
-                className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-[12px] font-medium text-left hover:bg-[var(--bg-subtle)] cursor-pointer"
-              >
-                <Avatar size="xs">
-                  <AvatarFallback style={{ background: `linear-gradient(135deg, hsl(${hashHue(name)} 72% 52%), hsl(${(hashHue(name) + 35) % 360} 68% 38%))`, color: '#fff', fontSize: 8, fontWeight: 700 }}>
-                    {name?.charAt(0).toUpperCase() || '?'}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="truncate">{name}</span>
-                {on && <Check className="w-3 h-3 ml-auto text-[var(--accent)] shrink-0" strokeWidth={3} />}
-              </button>
-            )
-          })}
-        </div>
-      )}
     </motion.div>
   )
 }

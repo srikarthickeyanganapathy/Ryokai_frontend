@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   DndContext,
@@ -205,15 +205,16 @@ export function KanbanBoard({ tasks, mode, isLoading, emptyState, responsive = f
   }
 
   if (isLoading) {
+    const gridCols = columns.length === 3 ? "grid-cols-1 md:grid-cols-3" : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-4"
     return (
-      <div className="flex gap-4 pb-4 overflow-x-auto custom-scrollbar">
-        {Array.from({ length: 3 }).map((_, i) => (
+      <div className={responsive ? `grid ${gridCols} gap-3 pb-4` : "flex gap-4 pb-4 overflow-x-auto custom-scrollbar"}>
+        {Array.from({ length: responsive ? columns.length : 3 }).map((_, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1, duration: 0.3 }}
-            className="flex flex-col bg-[var(--bg-subtle)] rounded-[var(--radius-lg)] h-full w-[85vw] max-w-[320px] sm:w-[320px] shrink-0 border border-[var(--border-subtle)] p-3 gap-2.5"
+            className={responsive ? "flex flex-col bg-[var(--bg-subtle)] rounded-[var(--radius-lg)] h-40 border border-[var(--border-subtle)] p-3 gap-2.5" : "flex flex-col bg-[var(--bg-subtle)] rounded-[var(--radius-lg)] h-full w-[85vw] max-w-[320px] sm:w-[320px] shrink-0 border border-[var(--border-subtle)] p-3 gap-2.5"}
           >
             <Skeleton className="h-5 w-28" />
             <Skeleton className="h-20 w-full" />
@@ -224,12 +225,14 @@ export function KanbanBoard({ tasks, mode, isLoading, emptyState, responsive = f
     )
   }
 
+  const gridCols = columns.length === 3 ? "grid-cols-1 md:grid-cols-3" : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-4"
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.25 }}
-      className={responsive ? "flex gap-3 pb-4 items-start overflow-x-auto custom-scrollbar" : "flex gap-4 pb-4 items-start overflow-x-auto custom-scrollbar snap-x snap-mandatory scroll-px-4"}
+      className={responsive ? `relative grid ${gridCols} gap-3 pb-4 items-start` : "flex gap-4 pb-4 items-start overflow-x-auto custom-scrollbar snap-x snap-mandatory scroll-px-4"}
     >
       {confirmDialog}
       <DndContext
@@ -245,7 +248,7 @@ export function KanbanBoard({ tasks, mode, isLoading, emptyState, responsive = f
             initial={{ opacity: 0, y: 24, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: idx * 0.1, type: 'spring', stiffness: 300, damping: 24 }}
-            className={responsive ? 'flex-1 min-w-[230px] flex' : undefined}
+            className={responsive ? 'min-w-0' : undefined}
           >
             <KanbanColumn 
               column={column} 

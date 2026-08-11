@@ -1,9 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
+﻿import React, { useState, useMemo, useEffect } from 'react';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select';
-import { FilterTabs } from '@/shared/ui/FilterTabs';
+import { PillNav } from '@/shared/ui/PillNav';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/shared/ui/Modal';
 import { useInviteMember, useOrgRoles, useCreateInviteLink } from '@/organization';
 import { usePermissions } from '@/identity';
@@ -48,7 +48,7 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
   const [userSelectedRole, setUserSelectedRole] = useState('');
   const effectiveRoleId = userSelectedRole || defaultRoleId;
 
-  // Reset on reopen via key in parent — no effect needed
+  // Reset on reopen via key in parent â€” no effect needed
 
   const handleSubmitDirect = (e) => {
     e.preventDefault();
@@ -91,7 +91,7 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
         </ModalHeader>
 
         <div className="mt-4">
-          <FilterTabs
+          <PillNav
             filters={[
               { value: 'direct', label: 'Direct Invite' },
               { value: 'link', label: 'Shareable Link' },

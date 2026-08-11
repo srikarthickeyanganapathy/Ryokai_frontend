@@ -1,18 +1,67 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react'
-import { createPortal } from 'react-dom'
-import { motion, AnimatePresence } from 'framer-motion'
 import { isToday, parseISO } from 'date-fns'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
 import { Switch } from '@/shared/ui/Switch'
 import { useTaskList, useUpdateTask, useCompletePersonalTask, useCompleteCrewTask, useSubmitTask, useClaimTask } from '@/task'
-import { CheckCircle2, Play, Circle, Maximize2, Minimize2, Settings, Sparkles, Flame, Moon, Check, Calendar, Clock, ArrowRight } from '@/shared/ui/Icons'
+import { Check, Calendar, Clock, Settings, Maximize2, Minimize2 } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 import { normalizeStatus, isDoneStatus, toBackendStatus } from '@/shared/lib/status'
-import { FocusTimer } from '@/focus'
-import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
+import { FocusTimer, useActiveFocus } from '@/focus'
+import { PageShell } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
+import './focus-stage.css'
+
+const fmtDur = (m) => `${Math.floor(m / 60)}h ${m % 60}m`
+
+const StarGlyph = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+    <path d="m12 2 2.9 6.3 6.9.8-5.1 4.7 1.4 6.8-6.1-3.5-6.1 3.5 1.4-6.8L2.2 9.1l6.9-.8z" />
+  </svg>
+)
+
+const PulsarMark = () => (
+  <svg viewBox="0 0 100 100">
+    <rect width="100" height="100" rx="28" fill="#030712" />
+    <ellipse cx="50" cy="50" rx="44" ry="24" stroke="#00F0FF" strokeWidth="7" transform="rotate(-22 50 50)" fill="none" opacity=".9" />
+    <line x1="22" y1="2" x2="78" y2="98" stroke="#38BDF8" strokeWidth="4.5" strokeLinecap="round" />
+    <line x1="22" y1="2" x2="78" y2="98" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" />
+    <circle cx="50" cy="50" r="21" fill="url(#fzMarkCore)" />
+    <defs>
+      <radialGradient id="fzMarkCore" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stopColor="#FFFFFF" />
+        <stop offset="70%" stopColor="#E0F2FE" />
+        <stop offset="100%" stopColor="#0284C7" stopOpacity="0" />
+      </radialGradient>
+    </defs>
+  </svg>
+)
+
+function Starfield({ count = 80 }) {
+  const stars = useMemo(() => Array.from({ length: count }, () => {
+    const r = Math.random()
+    const cls = r < 0.08 ? 'fz-star b' : r < 0.2 ? 'fz-star y' : r < 0.32 ? 'fz-star c' : r < 0.5 ? 'fz-star s' : 'fz-star'
+    return {
+      left: (Math.random() * 100).toFixed(2),
+      top: (Math.random() * 100).toFixed(2),
+      delay: (Math.random() * 5).toFixed(2),
+      dur: (3 + Math.random() * 4).toFixed(2),
+      cls,
+    }
+  }), [count])
+  return (
+    <div className="fz-stars" aria-hidden="true">
+      {stars.map((s, i) => (
+        <span
+          key={i}
+          className={s.cls}
+          style={{ left: `${s.left}%`, top: `${s.top}%`, animationDelay: `${s.delay}s`, animationDuration: `${s.dur}s` }}
+        />
+      ))}
+    </div>
+  )
+}
 
 export function FocusPage() {
   const { data: { tasks = [] } = {}, isLoading } = useTaskList()
@@ -21,18 +70,20 @@ export function FocusPage() {
   const completePersonalTaskMutation = useCompletePersonalTask()
   const completeCrewTaskMutation = useCompleteCrewTask()
   const submitTaskMutation = useSubmitTask()
+  const { data: activeSession } = useActiveFocus()
 
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [showProgress, setShowProgress] = useState(true)
   const [selectedTaskId, setSelectedTaskId] = useState(null)
+  const [railCollapsed, setRailCollapsed] = useState(false)
   const zenContainerRef = useRef(null)
+  const centerRef = useRef(null)
 
-  // Native HTML5 Fullscreen Integration
   useEffect(() => {
     const handleFullscreenChange = () => {
       const isNativeFullscreen = Boolean(
-        document.fullscreenElement || 
-        document.webkitFullscreenElement || 
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
         document.mozFullScreenElement
       )
       setIsFullscreen(isNativeFullscreen)
@@ -76,7 +127,7 @@ export function FocusPage() {
 
   const { todayTasks, currentTask, remainingTime, progress, completedCount, totalCount } = useMemo(() => {
     const today = tasks.filter(t => t.dueDate && isToday(parseISO(t.dueDate)))
-    
+
     const pending = today.filter(t => !isDoneStatus(t.status) && normalizeStatus(t.status) !== 'Canceled')
       .sort((a, b) => {
         const aInProgress = normalizeStatus(a.status) === 'In Progress';
@@ -89,10 +140,10 @@ export function FocusPage() {
     const completed = today.filter(t => isDoneStatus(t.status)).length
     const total = today.length
     const prog = total === 0 ? 0 : Math.round((completed / total) * 100)
-    
+
     const remainingTime = pending.reduce((acc, t) => acc + (t.timeEstimateMinutes || 60), 0)
 
-    const active = selectedTaskId 
+    const active = selectedTaskId
       ? today.find(t => t.id === selectedTaskId) || pending[0] || null
       : pending[0] || null
 
@@ -117,249 +168,205 @@ export function FocusPage() {
     }
   }
 
-  const pageState = isLoading ? 'loading' : 'ready';
+  useEffect(() => {
+    if (!window.matchMedia || !window.matchMedia('(pointer:fine)').matches) return
+    let tx = 0, ty = 0, cx = 0, cy = 0, raf = null
+    const onMove = (e) => {
+      tx = (e.clientX / window.innerWidth - 0.5) * 14
+      ty = (e.clientY / window.innerHeight - 0.5) * 10
+      if (!raf) raf = requestAnimationFrame(loop)
+    }
+    const loop = () => {
+      cx += (tx - cx) * 0.06
+      cy += (ty - cy) * 0.06
+      if (centerRef.current) {
+        centerRef.current.style.transform = `translate3d(${cx.toFixed(2)}px, ${cy.toFixed(2)}px, 0)`
+      }
+      raf = Math.abs(tx - cx) > 0.05 || Math.abs(ty - cy) > 0.05 ? requestAnimationFrame(loop) : null
+    }
+    window.addEventListener('mousemove', onMove)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [])
+
+  const busy =
+    completePersonalTaskMutation.isPending ||
+    completeCrewTaskMutation.isPending ||
+    submitTaskMutation.isPending
+
+  const pageState = isLoading ? 'loading' : 'ready'
 
   return (
     <PageShell maxWidth="wide">
-      <PageState
-        state={pageState}
-        stateProps={{ loadingVariant: 'dashboard' }}
-      >
-        <div 
+      <PageState state={pageState} stateProps={{ loadingVariant: 'dashboard' }}>
+        <div
           ref={zenContainerRef}
           className={cn(
-            "flex flex-col transition-all duration-500 ease-out select-none max-w-7xl mx-auto w-full min-w-0 overflow-hidden text-[var(--text-primary)] [&:fullscreen]:w-screen [&:fullscreen]:h-screen [&:fullscreen]:bg-[#09090b] [&:fullscreen]:p-6 [&:fullscreen]:md:p-12 [&:fullscreen]:flex [&:fullscreen]:flex-col [&:fullscreen]:justify-center [&:fullscreen]:items-center [&:fullscreen]:overflow-y-auto",
-            isFullscreen 
-              ? "fixed inset-0 z-[999999] bg-[#09090b] w-screen h-screen p-6 md:p-12 flex flex-col justify-center items-center overflow-y-auto" 
-              : "h-full min-h-0 flex-1 py-2 px-2 sm:px-4"
+            'fz-stage relative w-full min-w-0 overflow-hidden transition-all duration-500',
+            'bg-[var(--bg-base)] [&:fullscreen]:bg-[var(--bg-base)]',
+            isFullscreen
+              ? 'fixed inset-0 z-[999999] w-screen h-screen items-center justify-center'
+              : 'py-2'
           )}
         >
-          <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center opacity-20">
-            <div className="w-[600px] h-[600px] rounded-full bg-radial from-[var(--accent)]/30 to-transparent blur-3xl" />
-          </div>
+          <Starfield />
+          <div className="fz-nebula n1" />
+          <div className="fz-nebula n2" />
+          <div className="fz-nebula n3" />
+          <div className="fz-vignette" />
 
-          {/* Floating Exit Button in Fullscreen */}
-          {isFullscreen && (
-            <div className="absolute top-6 right-6 z-50 flex items-center gap-2">
+          {/* Floating HUD */}
+          <div className="fz-hud">
+            <div className="fz-hud-brand font-mono">
+              <span className="fz-hud-divider" />
+              <span>Zen Focus</span>
+            </div>
+            <div className="fz-hud-actions">
+              <span className="fz-hud-status font-mono">
+                <i className="fz-dot" />
+                {activeSession ? 'Session live' : 'Focus ready'}
+              </span>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="icon" className="rounded-full w-9 h-9 bg-[var(--bg-elevated)] border-[var(--color-border-subtle)]">
-                    <Settings className="w-4 h-4 text-[var(--text-secondary)]" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full w-9 h-9 bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--glass-border)] text-[var(--text-secondary)]"
+                  >
+                    <Settings className="w-4 h-4" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent align="end" className="w-56 p-4">
                   <Heading level={4} className="text-sm mb-4">Focus Settings</Heading>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Text size="sm">Show Progress Bar</Text>
-                      <Switch checked={showProgress} onCheckedChange={setShowProgress} />
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <Text size="sm">Show Progress Bar</Text>
+                    <Switch checked={showProgress} onCheckedChange={setShowProgress} />
                   </div>
                 </PopoverContent>
               </Popover>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
-                className="rounded-full w-9 h-9 bg-[var(--bg-elevated)] border-[var(--color-border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 onClick={toggleFullscreen}
-                title="Exit Zen Mode"
+                title={isFullscreen ? 'Exit Zen Mode' : 'Enter Zen Mode'}
+                className="rounded-full w-9 h-9 bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--glass-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               >
-                <Minimize2 className="w-4.5 h-4.5" />
+                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </Button>
             </div>
-          )}
+          </div>
 
-          <div className="w-full relative z-10 space-y-4 my-auto flex flex-col justify-center">
-            
-            {/* EXECUTE STICKY HEADER (Hidden in Fullscreen) */}
-            {!isFullscreen && (
-              <PageHero
-                eyebrow="EXECUTE Mode · Distraction-Free Zen Sanctuary"
-                title="Zen Focus Stage"
-                actions={
-                  <div className="flex items-center gap-2 text-[var(--text-muted)]">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="ghost" size="icon" className="rounded-full w-8 h-8">
-                          <Settings className="w-4 h-4" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent align="end" className="w-56 p-4">
-                        <Heading level={4} className="text-sm mb-4">Focus Settings</Heading>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <Text size="sm">Show Progress Bar</Text>
-                            <Switch checked={showProgress} onCheckedChange={setShowProgress} />
-                          </div>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full w-8 h-8"
-                      onClick={toggleFullscreen}
-                      title="Enter Zen Mode"
-                    >
-                      <Maximize2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                }
-              />
+          {/* Center instrument */}
+          <div ref={centerRef} className="fz-center">
+            {currentTask ? (
+              <div className="fz-plaque">
+                <span className="fz-lockchip font-mono"><i className="fz-xhair" /> Target Lock</span>
+                <h2 className="fz-plaque-title">{currentTask.title}</h2>
+                <span className="fz-plaque-sub font-mono">
+                  {currentTask.isPersonal ? 'Personal' : (currentTask.crewId || currentTask.crew) ? 'Crew' : 'Submit'} · {fmtDur(currentTask.timeEstimateMinutes || 60)}
+                </span>
+                <button
+                  type="button"
+                  className="fz-key"
+                  disabled={busy}
+                  onClick={() => completeTask(currentTask)}
+                  title="Mark complete"
+                >
+                  <Check className="w-4 h-4 stroke-[3]" />
+                </button>
+              </div>
+            ) : (
+              <div className="fz-plaque">
+                <span className="fz-lockchip font-mono"><i className="fz-xhair" /> No Target</span>
+                <h2 className="fz-plaque-title" style={{ color: 'var(--text-tertiary)' }}>The sky is clear tonight</h2>
+                <span className="fz-plaque-sub font-mono">Pick a star from the chart</span>
+              </div>
             )}
 
-            {/* 2-COLUMN SPLIT LAYOUT */}
-            <PageContent>
-              <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-stretch">
-                
-                {/* LEFT: ZEN POMODORO TIMER */}
-                <div className="xl:col-span-7 space-y-4 w-full min-w-0 flex flex-col">
-                  <div className="p-4 sm:p-6 rounded-3xl bg-[var(--bg-elevated)]/70 backdrop-blur-xl border border-[var(--color-border-subtle)] shadow-xl flex-1 flex flex-col justify-center space-y-4">
-                    
-                    {currentTask ? (
-                      <div className="text-center space-y-1.5 shrink-0">
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] text-[11px] font-semibold border border-[var(--accent-border)]">
-                          <Flame className="w-3 h-3" />
-                          <span>Active Target</span>
-                        </div>
-                        <h1 className="text-lg sm:text-xl font-bold tracking-tight text-[var(--text-primary)] truncate max-w-md mx-auto">
-                          {currentTask.title}
-                        </h1>
-                        <div className="flex items-center justify-center gap-2 pt-0.5">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => completeTask(currentTask)}
-                            className="rounded-full text-xs h-7 px-3 gap-1 border-[var(--accent-border)] hover:bg-[var(--accent-soft)] text-[var(--accent)]"
-                          >
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            Mark Complete
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center py-2 space-y-1 shrink-0">
-                        <CheckCircle2 className="w-8 h-8 mx-auto text-[var(--accent)] opacity-60" />
-                        <Heading level={4} className="text-sm font-semibold">No active task queued</Heading>
-                        <Text variant="muted" className="text-[11px]">Select a task from today's list on the right or take a rest break.</Text>
-                      </div>
-                    )}
-
-                    <FocusTimer task={currentTask} />
-                  </div>
-                </div>
-
-                {/* RIGHT: TODAY'S TASKS */}
-                <div className="xl:col-span-5 space-y-4 w-full min-w-0 flex flex-col">
-                  
-                  <div className="p-4 rounded-2xl bg-[var(--bg-elevated)]/80 border border-[var(--color-border-subtle)] space-y-3 shadow-sm shrink-0">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Text variant="muted" className="uppercase tracking-widest text-[9px] font-mono font-semibold flex items-center gap-1 text-[var(--accent)]">
-                          <Calendar className="w-3 h-3" />
-                          Today's Target List
-                        </Text>
-                        <Heading level={3} className="text-sm font-bold mt-0.5">
-                          {completedCount} of {totalCount} Tasks Complete
-                        </Heading>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xl font-bold font-mono text-[var(--text-primary)]">{progress}%</span>
-                      </div>
-                    </div>
-
-                    {showProgress && (
-                      <div className="h-1.5 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${progress}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className="h-full bg-gradient-to-r from-[var(--accent)] to-emerald-400 rounded-full"
-                        />
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)] pt-0.5 border-t border-[var(--color-border-subtle)]">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> ~{Math.floor(remainingTime / 60)}h {remainingTime % 60}m remaining
-                      </span>
-                      <span>Click task to target</span>
-                    </div>
-                  </div>
-
-                  {/* Tasks scrollable list */}
-                  <div className="space-y-2 max-h-[260px] sm:max-h-[300px] xl:max-h-[340px] overflow-y-auto custom-scrollbar pr-1 flex-1">
-                    {todayTasks.length === 0 && (
-                      <div className="p-6 text-center rounded-2xl bg-[var(--bg-base)] border border-dashed border-[var(--color-border-subtle)] space-y-1.5">
-                        <CheckCircle2 className="w-7 h-7 mx-auto text-[var(--text-muted)] opacity-50" />
-                        <Text className="text-xs font-medium">No tasks scheduled for today</Text>
-                        <Text variant="muted" className="text-[11px]">Enjoy your relaxed Zen day!</Text>
-                      </div>
-                    )}
-
-                    {todayTasks.map(task => {
-                      const isDone = isDoneStatus(task.status)
-                      const isCurrentTarget = currentTask?.id === task.id
-
-                      return (
-                        <div
-                          key={task.id}
-                          onClick={() => !isDone && setSelectedTaskId(task.id)}
-                          className={cn(
-                            "group flex items-center justify-between p-3 rounded-xl border transition-all duration-200 cursor-pointer select-none",
-                            isCurrentTarget
-                              ? "bg-[var(--accent-soft)]/60 border-[var(--accent)] shadow-sm"
-                              : isDone
-                              ? "bg-[var(--bg-base)] opacity-60 border-[var(--color-border-subtle)]"
-                              : "bg-[var(--bg-base)] hover:bg-[var(--bg-elevated)] border-[var(--color-border-subtle)] hover:border-[var(--accent-border)]"
-                          )}
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                completeTask(task)
-                              }}
-                              className={cn(
-                                "w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-colors",
-                                isDone
-                                  ? "bg-emerald-500 border-emerald-500 text-white"
-                                  : "border-[var(--color-border-subtle)] hover:border-[var(--accent)] text-transparent hover:text-[var(--accent)]"
-                              )}
-                              title={isDone ? "Task Completed" : "Mark Complete"}
-                            >
-                              <Check className="w-3 h-3 stroke-[3]" />
-                            </button>
-
-                            <div className="min-w-0 flex-1">
-                              <span className={cn(
-                                "text-xs font-medium block truncate",
-                                isDone ? "line-through text-[var(--text-muted)]" : "text-[var(--text-primary)]"
-                              )}>
-                                {task.title}
-                              </span>
-                              {task.timeEstimateMinutes > 0 && (
-                                <span className="text-[10px] font-mono text-[var(--text-muted)]">
-                                  {Math.floor(task.timeEstimateMinutes / 60)}h {task.timeEstimateMinutes % 60}m
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          {isCurrentTarget && !isDone && (
-                            <span className="px-2 py-0.5 rounded-full bg-[var(--accent)] text-white font-mono text-[9px] uppercase font-semibold flex items-center gap-1 shrink-0 ml-2">
-                              Targeting <ArrowRight className="w-2.5 h-2.5" />
-                            </span>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
-            </PageContent>
+            <FocusTimer task={currentTask} />
           </div>
+
+          {/* Star Chart rail */}
+          <aside className={cn('fz-rail', railCollapsed && 'collapsed')}>
+            <div className="fz-rail-head">
+              <span className="fz-rail-title font-mono" data-count={totalCount}>
+                <StarGlyph />
+                <span>Star Chart</span>
+              </span>
+              <button
+                type="button"
+                className="fz-rail-collapse"
+                onClick={() => setRailCollapsed(c => !c)}
+                title={railCollapsed ? 'Expand chart' : 'Collapse chart'}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="m15 18-6-6 6-6" /></svg>
+              </button>
+            </div>
+            <div className="fz-rail-meta">
+              <span className="fz-rail-cnt tnum">{completedCount} of {totalCount} done</span>
+              <span className="fz-rail-pct tnum">{progress}%</span>
+            </div>
+            {showProgress && (
+              <div className="fz-constellation">
+                <div
+                  className={cn('fz-constfill', progress > 0 && progress < 100 && 'lit')}
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            )}
+            <div className="fz-rail-tasks">
+              {todayTasks.length === 0 && (
+                <div className="fz-rail-empty">
+                  <span className="fz-rail-empty-star">✦</span>
+                  <p>No tasks scheduled for today</p>
+                  <span>Enjoy your clear sky.</span>
+                </div>
+              )}
+
+              {todayTasks.map(task => {
+                const isDone = isDoneStatus(task.status)
+                const isCurrentTarget = currentTask?.id === task.id
+
+                return (
+                  <div
+                    key={task.id}
+                    onClick={() => !isDone && setSelectedTaskId(task.id)}
+                    className={cn(
+                      'fz-trow',
+                      isCurrentTarget && !isDone && 'locked',
+                      isDone && 'done'
+                    )}
+                  >
+                    <button
+                      type="button"
+                      className="fz-star-glyph"
+                      onClick={(e) => { e.stopPropagation(); completeTask(task) }}
+                      title={isDone ? 'Task Completed' : 'Mark Complete'}
+                    >
+                      <StarGlyph />
+                    </button>
+
+                    <div className="fz-tinfo">
+                      <span className={cn('fz-tinfo-title', isDone && 'done')}>{task.title}</span>
+                      {task.timeEstimateMinutes > 0 && (
+                        <span className="fz-tinfo-est tnum">{fmtDur(task.timeEstimateMinutes)}</span>
+                      )}
+                    </div>
+
+                    {isCurrentTarget && !isDone && (
+                      <span className="fz-lock-tag font-mono">Locked</span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+            <div className="fz-rail-foot font-mono">
+              <span className="tnum">~{Math.floor(remainingTime / 60)}h {remainingTime % 60}m left</span>
+              <span>Click a star to lock</span>
+            </div>
+          </aside>
         </div>
       </PageState>
     </PageShell>

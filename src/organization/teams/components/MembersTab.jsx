@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { Users, Crown, Star, UserPlus } from 'lucide-react'
 import { Button } from '@/shared/ui/Button'
 import { EmptyState } from '@/shared/ui/EmptyState'
-import { SegmentedToggle } from '@/shared/ui/SegmentedToggle'
+import { PillNav } from '@/shared/ui/PillNav'
 import { cn } from '@/shared/lib/cn'
 
 /* ============================================================
@@ -51,7 +51,7 @@ export function MembersTab({ team, workload = {}, teamTasks = [], hasProjectIdOn
   return (
     <div className="pt-4">
       <div className="flex items-center gap-2 flex-wrap mb-4">
-        <SegmentedToggle
+        <PillNav
           options={[{ value: 'all', label: 'All' }, { value: 'leads', label: 'Leads' }, { value: 'me', label: 'Me' }]}
           value={filter}
           onChange={setFilter}

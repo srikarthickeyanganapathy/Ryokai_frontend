@@ -5,7 +5,7 @@ import { Button } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 import { useCreateTaskWithDependencies } from '../../entities/hooks/useTasks'
-import { Modal, ModalContent } from '@/shared/ui/Modal'
+import { BottomSheet, BottomSheetContent } from '@/shared/ui/BottomSheet'
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
 import { Checkbox } from '@/shared/ui/Checkbox'
 import { TaskForm } from '../../features/manage-task/TaskForm'
@@ -174,17 +174,14 @@ export function TasksToolbar({
         </div>
       </div>
 
-      {/* Create modal */}
-      <Modal open={createOpen} onOpenChange={setCreateOpen}>
-        <ModalContent className="sm:max-w-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-xl rounded-2xl p-0">
-          <div className="px-6 pt-6 pb-4 border-b border-[var(--border-subtle)]">
-            <Heading level={3} className="text-[15px] font-bold">New Task</Heading>
-          </div>
-          <div className="p-6">
+      {/* Create bottom sheet */}
+      <BottomSheet open={createOpen} onOpenChange={setCreateOpen}>
+        <BottomSheetContent className="max-w-xl mx-auto">
+          <Heading level={3} className="text-[15px] font-bold mb-4">New Task</Heading>
+          
             <TaskForm onSubmit={(p) => createMutation.mutate(p, { onSuccess: () => setCreateOpen(false) })} isLoading={createMutation.isPending} />
-          </div>
-        </ModalContent>
-      </Modal>
+        </BottomSheetContent>
+      </BottomSheet>
 
       <BulkCreateTaskModal open={bulkOpen} onOpenChange={setBulkOpen} />
     </>

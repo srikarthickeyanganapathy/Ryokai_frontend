@@ -4,7 +4,7 @@ import { BarChart3, Download, TrendingUp, Timer, Target, Users, FolderKanban, Pi
 import { Heading } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { EmptyState } from '@/shared/ui/EmptyState'
-import { SegmentedToggle } from '@/shared/ui/SegmentedToggle'
+import { PillNav } from '@/shared/ui/PillNav'
 import { cn } from '@/shared/lib/cn'
 
 /* ============================================================
@@ -207,7 +207,7 @@ export function InsightsTab({ teamTasks = [], teamProjects = [], insights }) {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="pt-4">
       <div className="flex items-center gap-2 flex-wrap mb-4">
-        <SegmentedToggle options={RANGES} value={range} onChange={setRange} />
+        <PillNav options={RANGES} value={range} onChange={setRange} />
         <span className="text-[11px] text-[var(--text-secondary)]">Derived live from team tasks &amp; projects â€” no mocked metrics.</span>
         <span className="flex-1" />
         <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1.5" onClick={exportCsv}>

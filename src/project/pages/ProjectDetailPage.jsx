@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { cn } from '@/shared/lib/cn'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { Badge } from '@/shared/ui/Badge'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { ProgressRing } from '@/shared/ui/Progress'
@@ -39,6 +40,7 @@ import { ActivityTab } from '../components/ActivityTab'
 const defaultStatusColor = 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]'
 
 function hashHue(str = '') {
+  const navigate = useNavigate();
   let hash = 0
   for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash)
   return Math.abs(hash) % 360
@@ -55,7 +57,7 @@ function daysUntil(dateInput) {
 
 export function ProjectDetailPage() {
   const { projectId } = useParams()
-  const navigate = useNavigate()
+  // navigate already present
   const [searchParams, setSearchParams] = useSearchParams()
   const { workspaceMode } = useWorkspace()
   const { canManageProject, canAssignTask, canEditTask, canReview, canReviewTask, isSuperAdmin } = usePermissions()
@@ -154,7 +156,7 @@ export function ProjectDetailPage() {
   }), [project, userCrews])
 
   return (
-    <PageShell maxWidth="wide">
+    <PageShell maxWidth="6xl">
       <PageHero eyebrow={project?.status || 'ACTIVE'} title={project?.name || 'Project'} subtitle={project?.description}>
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)]">
@@ -182,25 +184,24 @@ export function ProjectDetailPage() {
                     <Share2 className="w-3.5 h-3.5" />{isSharedToCrew ? 'Crew Access' : 'Share'}
                   </Button>
                   <div className="relative">
-                    <Button variant="outline" size="sm" onClick={() => setIsMenuOpen(!isMenuOpen)} className="px-2">
-                      <MoreHorizontal className="w-3.5 h-3.5" />
-                    </Button>
-                    {isMenuOpen && (
-                      <>
-                        <div className="fixed inset-0 z-30" onClick={() => setIsMenuOpen(false)} />
-                        <div className="absolute right-0 top-9 z-40 min-w-[150px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl shadow-[var(--shadow-lg)] p-1.5">
-                          <button onClick={() => { setIsMenuOpen(false); setIsEditModalOpen(true) }} className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-[12px] font-medium hover:bg-[var(--bg-subtle)] cursor-pointer">
-                            <Edit3 className="w-3.5 h-3.5" /> Edit
-                          </button>
-                          <button onClick={() => { setIsMenuOpen(false); handleArchiveProject() }} className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-[12px] font-medium hover:bg-[var(--bg-subtle)] cursor-pointer">
-                            <Archive className="w-3.5 h-3.5" /> Archive
-                          </button>
-                          <button onClick={() => { setIsMenuOpen(false); setIsDeleteModalOpen(true) }} className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-[var(--danger)] hover:bg-[var(--danger-soft)] cursor-pointer">
-                            <Trash2 className="w-3.5 h-3.5" /> Delete
-                          </button>
-                        </div>
-                      </>
-                    )}
+                    <Popover open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="px-2">
+                          <MoreHorizontal className="w-3.5 h-3.5" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[150px] p-1.5" align="end">
+                        <button onClick={() => { setIsMenuOpen(false); setIsEditModalOpen(true) }} className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-[12px] font-medium hover:bg-[var(--bg-subtle)] cursor-pointer">
+                          <Edit3 className="w-3.5 h-3.5" /> Edit
+                        </button>
+                        <button onClick={() => { setIsMenuOpen(false); handleArchiveProject() }} className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-[12px] font-medium hover:bg-[var(--bg-subtle)] cursor-pointer">
+                          <Archive className="w-3.5 h-3.5" /> Archive
+                        </button>
+                        <button onClick={() => { setIsMenuOpen(false); setIsDeleteModalOpen(true) }} className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-[var(--danger)] hover:bg-[var(--danger-soft)] cursor-pointer">
+                          <Trash2 className="w-3.5 h-3.5" /> Delete
+                        </button>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </>
               )}
@@ -289,7 +290,7 @@ export function ProjectDetailPage() {
                     onAssign={handleAssignTask}
                     onUpdateStatus={handleQuickComplete}
                     onTaskDrop={handleTaskDrop}
-                    onTaskClick={(t) => setSelectedTaskId(t.id)}
+                    onTaskClick={(task) => navigate(`/app/tasks/${task.id}`, { state: { task } })}
                     onNewTask={() => setIsAddTaskOpen(true)}
                   />
                 )}
@@ -339,7 +340,7 @@ export function ProjectDetailPage() {
         </ModalContent>
       </Modal>
       {project && <CrewProjectShareModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} project={project} />}
-      <TaskPanel taskId={selectedTaskId} isOpen={!!selectedTaskId} onClose={() => setSelectedTaskId(null)} />
+        // Task detail opens in full page via /app/tasks/:taskId
 
       {/* Mobile FAB */}
       <AnimatePresence>

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, format, isWithinInterval, parseISO } from 'date-fns'
 import { useTaskList } from '@/task'
 import { useCalendarEvents, useUpdateEvent, useDeleteEvent, CalendarView, EventForm } from '@/calendar'
-import { TaskPanel } from '@/task'
+import { useNavigate } from 'react-router-dom'
 import { TaskForm } from '@/task'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { Button } from '@/shared/ui/Button'
@@ -10,11 +10,12 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { Badge } from '@/shared/ui/Badge'
 import { Edit3 } from '@/shared/ui/Icons'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
-import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
+import { PageShell, PageContent } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
 export function CalendarPage() {
+  const navigate = useNavigate();
   const { workspaceMode, activeOrganization, activeCrew } = useWorkspace()
   const scope = useMemo(() => {
     if (workspaceMode === 'ORG' && activeOrganization?.id) return { orgId: activeOrganization.id }
@@ -45,24 +46,6 @@ export function CalendarPage() {
     setEditingEvent(null)
   }
 
-  const stats = useMemo(() => {
-    const now = new Date()
-    const monthStart = startOfMonth(now)
-    const monthEnd = endOfMonth(now)
-    const weekStart = startOfWeek(now)
-    const weekEnd = endOfWeek(now)
-    const eventsThisMonth = events.filter(e => e.startTime && isWithinInterval(parseISO(e.startTime), { start: monthStart, end: monthEnd })).length
-    const deadlinesThisWeek = tasks.filter(t => t.dueDate && isWithinInterval(parseISO(t.dueDate), { start: weekStart, end: weekEnd })).length
-    const eventsThisWeek = events.filter(e => e.startTime && isWithinInterval(parseISO(e.startTime), { start: weekStart, end: weekEnd })).length
-    const busyRatio = Math.min(100, Math.round(((eventsThisWeek + deadlinesThisWeek) / 7) * 100))
-    const allItems = [
-      ...events.filter(e => e.startTime).map(e => ({ t: parseISO(e.startTime), title: e.title, kind: 'event' })),
-      ...tasks.filter(t => t.dueDate).map(t => ({ t: parseISO(t.dueDate), title: t.title, kind: 'task' })),
-    ].filter(i => i.t >= now).sort((a, b) => a.t - b.t)
-    const next = allItems[0] || null
-    return { eventsThisMonth, deadlinesThisWeek, busyRatio, next }
-  }, [events, tasks])
-
   const handleDeleteEvent = async (event) => {
     const confirmed = await confirm({
       title: 'Delete Event?',
@@ -79,10 +62,6 @@ export function CalendarPage() {
   const workspaceName = workspaceMode === 'ORG' ? activeOrganization?.name : workspaceMode === 'CREWS' ? activeCrew?.name : null
   const eyebrow = workspaceName ? `${workspaceName} Calendar` : 'Personal Calendar'
 
-  const subtitle = stats.next
-    ? `${stats.eventsThisMonth} events this month - ${stats.deadlinesThisWeek} deadlines this week - ${stats.busyRatio}% busy - Next: ${format(stats.next.t, 'MMM d, h:mm a')}`
-    : `${stats.eventsThisMonth} events this month - ${stats.deadlinesThisWeek} deadlines this week - ${stats.busyRatio}% busy - No upcoming items`
-
   const isLoading = tasksLoading || eventsLoading;
   const isError = tasksError || eventsError;
   const pageState = isError ? 'error' : isLoading ? 'loading' : 'ready';
@@ -90,28 +69,23 @@ export function CalendarPage() {
 
   return (
     <PageShell maxWidth="wide" workspaceMode={workspaceModeLabel}>
-      <PageHero
-        title="Calendar"
-        subtitle={subtitle}
-        eyebrow={eyebrow}
-      />
-
-      <PageContent>
+      <PageContent className="pt-6">
         <PageState state={pageState} stateProps={{ onRetry: handleRetry, loadingVariant: 'dashboard' }}>
-        <div className="flex-1 min-h-0 pt-2">
+        <div className="flex-1 min-h-0">
           <CalendarView
             tasks={tasks}
             events={events}
             isLoading={tasksLoading || eventsLoading}
             onVisibleRangeChange={setVisibleRange}
-            onTaskClick={setSelectedTask}
+            onTaskClick={(task) => navigate(`/app/tasks/${task.id}`, { state: { task } })}
             onEventClick={setSelectedEvent}
             TaskFormComponent={TaskForm}
             scope={scope}
+            eyebrow={eyebrow}
           />
         </div>
 
-        <TaskPanel task={selectedTask} isOpen={!!selectedTask} onClose={() => setSelectedTask(null)} />
+          // Task detail opens in full page via /app/tasks/:taskId
 
         <Modal open={!!selectedEvent || !!editingEvent} onOpenChange={(open) => !open && closeEventModal()}>
           <ModalContent className="sm:max-w-sm !bg-[var(--bg-card)] !backdrop-blur-none border border-[var(--border-subtle)] shadow-xl rounded-xl p-6">

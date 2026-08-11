@@ -457,29 +457,6 @@ export function TasksTab({ crewId, tasks }) {
             )}
           </button>
         </div>
-
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => setSwimlane(!swimlane)}
-            className={cn(
-              'flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-all border',
-              swimlane ? 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]' : 'text-[var(--text-muted)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'
-            )}
-          >
-            <KanbanSquare className="w-3 h-3" />
-            Swimlanes
-          </button>
-          <button
-            onClick={() => { setBulkMode(!bulkMode); if (bulkMode) clearSelection() }}
-            className={cn(
-              'flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-all border',
-              bulkMode ? 'bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent-border)]' : 'text-[var(--text-muted)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'
-            )}
-          >
-            <CheckSquare className="w-3 h-3" />
-            Select
-          </button>
-        </div>
       </div>
 
       {/* Extended filters panel */}
@@ -540,11 +517,11 @@ export function TasksTab({ crewId, tasks }) {
         )}
       </AnimatePresence>
 
-      {/* Kanban Board */}
       <KanbanBoard
         tasks={filterTasks(tasks)}
         mode="CREWS"
         onTaskClick={setSelectedTask}
+        responsive={true}
       />
 
       {/* Floating Action Button */}

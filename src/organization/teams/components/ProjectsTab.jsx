@@ -5,7 +5,8 @@ import { Button } from '@/shared/ui/Button'
 import { Avatar, AvatarFallback } from '@/shared/ui/Avatar'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { Input } from '@/shared/ui/Input'
-import { FilterTabs } from '@/shared/ui/FilterTabs'
+import { PillNav } from '@/shared/ui/PillNav'
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { ProjectCard } from '@/project/components/ProjectCard'
 import { cn } from '@/shared/lib/cn'
 
@@ -32,7 +33,6 @@ const STATUS_TABS = [
 export function ProjectsTab({ teamProjects, members, hasProjectIdOnTasks, tasksForProject, canCreateProject, isReadOnly, onCreateProject, onStatusChange }) {
   const [query, setQuery] = useState('')
   const [statusTab, setStatusTab] = useState('all')
-  const [menuFor, setMenuFor] = useState(null)
 
   const counts = useMemo(() => ({
     all: teamProjects.length,
@@ -52,7 +52,6 @@ export function ProjectsTab({ teamProjects, members, hasProjectIdOnTasks, tasksF
   }, [teamProjects, statusTab, query])
 
   const handleStatus = (projectId, newStatus) => {
-    setMenuFor(null)
     if (isReadOnly) return
     onStatusChange?.(projectId, newStatus)
   }
@@ -64,7 +63,7 @@ export function ProjectsTab({ teamProjects, members, hasProjectIdOnTasks, tasksF
           <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
           <Input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search projectsâ€¦" size="sm" className="pl-8" />
         </div>
-        <FilterTabs filters={STATUS_TABS} value={statusTab} onChange={setStatusTab} counts={counts} />
+        <PillNav filters={STATUS_TABS} value={statusTab} onChange={setStatusTab} counts={counts} />
         <span className="flex-1" />
         {canCreateProject && !isReadOnly && (
           <Button variant="primary" size="sm" className="gap-1.5 h-7 text-[11px]" onClick={onCreateProject}>
@@ -89,23 +88,21 @@ export function ProjectsTab({ teamProjects, members, hasProjectIdOnTasks, tasksF
                 {/* status menu */}
                 {!isReadOnly && (
                   <div className="absolute right-2.5 top-2.5 z-40">
-                    <button onClick={() => setMenuFor(menuFor === p.id ? null : p.id)}
-                      className="w-7 h-7 rounded-lg bg-[var(--bg-card)]/90 backdrop-blur border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer">
-                      <MoreVertical className="w-3.5 h-3.5" />
-                    </button>
-                    {menuFor === p.id && (
-                      <>
-                        <div className="fixed inset-0 z-30" onClick={() => setMenuFor(null)} />
-                        <div className="absolute right-0 top-8 z-40 min-w-[130px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl shadow-[var(--shadow-lg)] p-1.5">
-                          {['ACTIVE', 'COMPLETED', 'ARCHIVED'].map(s => (
-                            <button key={s} onClick={() => handleStatus(p.id, s)}
-                              className={cn('w-full text-left px-2.5 py-1.5 rounded-lg text-[12px] font-medium hover:bg-[var(--bg-subtle)] cursor-pointer', status === s && 'text-[var(--accent)] font-bold')}>
-                              {s.charAt(0) + s.slice(1).toLowerCase()}
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    )}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className="w-7 h-7 rounded-lg bg-[var(--bg-card)]/90 backdrop-blur border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer">
+                          <MoreVertical className="w-3.5 h-3.5" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[130px] p-1" align="end">
+                        {['ACTIVE', 'COMPLETED', 'ARCHIVED'].map(s => (
+                          <button key={s} onClick={() => handleStatus(p.id, s)}
+                            className={cn('w-full text-left px-2.5 py-1.5 rounded-lg text-[12px] font-medium hover:bg-[var(--bg-subtle)] cursor-pointer', status === s && 'text-[var(--accent)] font-bold')}>
+                            {s.charAt(0) + s.slice(1).toLowerCase()}
+                          </button>
+                        ))}
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 )}
 

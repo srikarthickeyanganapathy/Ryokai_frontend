@@ -299,7 +299,7 @@ export function TeamDetailPage() {
           <div className="flex flex-col h-full">
             {/* ---------- Header: identity + actions ---------- */}
             <div className="bg-[var(--bg-base)] border-b border-[var(--border-subtle)]">
-              <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center gap-3 py-3.5">
                   <button
                     onClick={() => navigate(`/app/organizations/${orgId}`)}
@@ -353,7 +353,7 @@ export function TeamDetailPage() {
               </div>
             </div>
 
-            <div className="max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 pb-12">
+            <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-12">
               {/* ---------- Attention band: triage first ---------- */}
               <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 <button

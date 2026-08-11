@@ -1,20 +1,21 @@
 import React, { useMemo, useState, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Plus, Search, ListTodo, ChevronDown, X, AlertTriangle, CalendarClock, Activity, Filter } from 'lucide-react'
+import { Plus, Search, ListTodo, X, AlertTriangle, CalendarClock, Activity } from 'lucide-react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'
 import { Input } from '@/shared/ui/Input'
 import { ProgressRing } from '@/shared/ui/Progress'
-import { SegmentedToggle } from '@/shared/ui/SegmentedToggle'
-import { FilterTabs } from '@/shared/ui/FilterTabs'
+import { PillNav } from '@/shared/ui/PillNav'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
 import { PageShell, PageHero } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { useTasksPageLogic } from '../hooks/useTasksPageLogic'
 import { TasksModals } from '../features/TasksModals'
-import { TaskPanel, useTaskStatusChange } from '@/task'
-import { useRejectTask } from '../entities/hooks/useTasks'
+import { TaskForm } from '../features/manage-task/TaskForm'
+import { useNavigate } from 'react-router-dom'
+import { useRejectTask, useTaskStatusChange } from '../entities/hooks/useTasks'
 import { toast } from 'sonner'
 import { cn } from '@/shared/lib/cn'
 import { PRIORITY_OPTIONS } from '@/shared/lib/priority'
@@ -63,11 +64,10 @@ const SCOPES = [
 export function TasksPage() {
   const logic = useTasksPageLogic()
   const { confirm, dialog: confirmDialog } = useConfirmDialog()
+  const navigate = useNavigate()
   const changeTaskStatus = useTaskStatusChange()
   const rejectTaskMutation = useRejectTask()
   const [statusFilter, setStatusFilter] = useState('all')
-  const [sortOpen, setSortOpen] = useState(false)
-  const [scopeOpen, setScopeOpen] = useState(false)
 
   /* ----- presentation derivations over logic.tasks ----- */
   const counts = useMemo(() => {
@@ -133,6 +133,10 @@ export function TasksPage() {
     logic.setRowSelection({})
   }, [confirm, logic.selectedTasks, rejectTaskMutation, logic.setRowSelection])
 
+  const handleTaskNavigate = useCallback((task) => {
+    navigate(`/app/tasks/${task.id}`, { state: { task } })
+  }, [navigate])
+
   const hasSelection = logic.selectedIds.length > 0
   const viewIsBoard = logic.viewMode !== 'list'
 
@@ -147,212 +151,219 @@ export function TasksPage() {
     <>
       {confirmDialog}
       <TasksModals
-        createOpen={logic.createOpen} setCreateOpen={logic.setCreateOpen}
         reassignData={logic.reassignData} setReassignData={logic.setReassignData}
         isBulkAssignOpen={logic.isBulkAssignOpen} setIsBulkAssignOpen={logic.setIsBulkAssignOpen}
         allUsers={logic.allUsers}
-        createTaskMutation={logic.createTaskMutation} updateTaskMutation={logic.updateTaskMutation}
-        onReassignSubmit={logic.handleReassignSubmit} onCreateTask={logic.handleCreateTask}
+        updateTaskMutation={logic.updateTaskMutation}
+        onReassignSubmit={logic.handleReassignSubmit}
         onBulkAssign={logic.handleBulkAssign}
       />
-
-      <PageShell maxWidth="full">
-        <PageHero
-          eyebrow={logic.workspaceMode === 'PERSONAL' ? 'Personal' : logic.workspaceMode === 'CREWS' ? 'Crew' : 'Organization'}
-          title="Tasks"
-          subtitle="Manage, filter, and track your work across all views."
-          icon={ListTodo}
-        >
-          <Button variant="primary" size="sm" className="gap-1.5 h-8 text-[12px] hidden sm:inline-flex" onClick={() => logic.setCreateOpen(true)}>
-            <Plus className="w-3.5 h-3.5" /> New Task
-          </Button>
-        </PageHero>
-
-        <PageState state={logic.isLoading ? 'loading' : logic.isError ? 'error' : 'ready'} stateProps={{ loadingVariant: 'cards', onRetry: logic.refetch }} moduleId="tasks">
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_270px] gap-4 items-start">
-            <div className="min-w-0 space-y-4">
-              {/* Attention band */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                <div className="flex items-center gap-3 rounded-2xl border border-[var(--danger)]/25 bg-[var(--danger)]/5 px-3.5 py-3">
-                  <div className="w-9 h-9 rounded-xl bg-[var(--danger)]/10 flex items-center justify-center shrink-0">
-                    <AlertTriangle className="w-4 h-4 text-[var(--danger)]" strokeWidth={2} />
-                  </div>
-                  <div>
-                    <p className="text-[17px] font-bold leading-none tabular-nums">{band.overdue}</p>
-                    <p className="text-[10.5px] font-semibold text-[var(--text-muted)] mt-1">Overdue</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 rounded-2xl border border-[var(--warning)]/25 bg-[var(--warning)]/5 px-3.5 py-3">
-                  <div className="w-9 h-9 rounded-xl bg-[var(--warning)]/10 flex items-center justify-center shrink-0">
-                    <CalendarClock className="w-4 h-4 text-[var(--warning)]" strokeWidth={2} />
-                  </div>
-                  <div>
-                    <p className="text-[17px] font-bold leading-none tabular-nums">{band.dueSoon}</p>
-                    <p className="text-[10.5px] font-semibold text-[var(--text-muted)] mt-1">Due soon</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 rounded-2xl border border-[var(--accent-border)]/60 bg-[var(--accent-soft)]/40 px-3.5 py-3">
-                  <div className="w-9 h-9 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center shrink-0">
-                    <Activity className="w-4 h-4 text-[var(--accent)]" strokeWidth={2} />
-                  </div>
-                  <div>
-                    <p className="text-[17px] font-bold leading-none tabular-nums">{band.inProgress}</p>
-                    <p className="text-[10.5px] font-semibold text-[var(--text-muted)] mt-1">In progress</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-3" title="Completion across all tasks">
-                  <ProgressRing value={band.completionRate} size={38} strokeWidth={3.5}>
-                    <span className="text-[10px] font-bold tabular-nums">{band.completionRate}%</span>
-                  </ProgressRing>
-                  <div>
-                    <p className="text-[13px] font-bold leading-none">done</p>
-                    <p className="text-[10.5px] font-semibold text-[var(--text-muted)] mt-1">{logic.totalCount} total</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Toolbar */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <SegmentedToggle
-                  options={[{ value: 'list', label: 'List' }, { value: 'board', label: 'Board' }]}
-                  value={viewIsBoard ? 'board' : 'list'}
-                  onChange={v => logic.setViewMode(v)}
-                />
-                <div className="relative">
-                  <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1" onClick={() => setScopeOpen(!scopeOpen)}>
-                    <Filter className="w-3 h-3" /> {SCOPES.find(s => s.value === logic.taskScope)?.label || 'All'}
-                    <ChevronDown className="w-3 h-3" />
-                  </Button>
-                  {scopeOpen && (
-                    <>
-                      <div className="fixed inset-0 z-30" onClick={() => setScopeOpen(false)} />
-                      <div className="absolute left-0 top-8 z-40 min-w-[150px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl shadow-[var(--shadow-lg)] p-1.5">
-                        {SCOPES.map(s => (
-                          <button key={s.value} onClick={() => { logic.setTaskScope(s.value); setScopeOpen(false) }}
-                            className={cn('w-full text-left px-2.5 py-1.5 rounded-lg text-[12px] font-medium hover:bg-[var(--bg-subtle)] cursor-pointer', s.value === logic.taskScope && 'text-[var(--accent)] font-bold')}>
-                            {s.label}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-                <div className="relative w-[180px] sm:w-[230px]">
-                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-                  <Input
-                    value={logic.globalFilter}
-                    onChange={e => logic.setGlobalFilter(e.target.value)}
-                    placeholder="Search tasks…"
-                    size="sm"
-                    className="pl-8"
-                  />
-                </div>
-                <div className="relative">
-                  <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1" onClick={() => setSortOpen(!sortOpen)}>
-                    Sort: {SORTS.find(s => s.value === logic.sortBy)?.label} <ChevronDown className="w-3 h-3" />
-                  </Button>
-                  {sortOpen && (
-                    <>
-                      <div className="fixed inset-0 z-30" onClick={() => setSortOpen(false)} />
-                      <div className="absolute right-0 top-8 z-40 min-w-[140px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl shadow-[var(--shadow-lg)] p-1.5">
-                        {SORTS.map(s => (
-                          <button key={s.value} onClick={() => { logic.setSortBy(s.value); setSortOpen(false) }}
-                            className={cn('w-full text-left px-2.5 py-1.5 rounded-lg text-[12px] font-medium hover:bg-[var(--bg-subtle)] cursor-pointer', s.value === logic.sortBy && 'text-[var(--accent)] font-bold')}>
-                            {s.label}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-                {logic.filtersActive && (
-                  <button onClick={logic.handleClearFilters} className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--accent)] hover:underline cursor-pointer">
-                    <X className="w-3 h-3" /> Clear filters
-                  </button>
-                )}
-                <span className="ml-auto text-[11.5px] text-[var(--text-muted)] tabular-nums hidden sm:inline">{logic.totalCount} tasks</span>
-              </div>
-
-              {/* Premium filter row: priority chips + project + team */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Priority</span>
-                {PRIORITY_OPTIONS.map(opt => {
-                  const active = logic.priorityFilter.includes(opt.value)
-                  return (
-                    <button key={opt.value}
-                      onClick={() => logic.setPriorityFilter(prev => active ? prev.filter(v => v !== opt.value) : [...prev, opt.value])}
-                      className={cn('px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all cursor-pointer',
-                        active ? 'bg-[var(--accent-soft)] border-[var(--accent-border)] text-[var(--accent)]' : 'bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-[var(--accent-border)] hover:text-[var(--text-primary)]')}>
-                      {opt.label}
-                    </button>
-                  )
-                })}
-                {logic.projectsList.length > 0 && (
-                  <select value={logic.projectFilter} onChange={e => logic.setProjectFilter(e.target.value)}
-                    className="h-7 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[11px] px-2 text-[var(--text-primary)] focus:outline-none cursor-pointer">
-                    <option value="ALL">All projects</option>
-                    {logic.projectsList.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
-                )}
-                {logic.teamsList.length > 0 && (
-                  <select value={logic.teamFilter} onChange={e => logic.setTeamFilter(e.target.value)}
-                    className="h-7 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[11px] px-2 text-[var(--text-primary)] focus:outline-none cursor-pointer">
-                    <option value="ALL">All teams</option>
-                    {logic.teamsList.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                  </select>
-                )}
-              </div>
-
-              {/* Status chips */}
-              <FilterTabs filters={STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} counts={counts} />
-
-              {/* Views */}
-              {viewIsBoard ? (
-                <TaskBoardSection
-                  tasks={visibleTasks}
-                  onStatusChange={handleUpdateTaskStatus}
-                  onOpen={logic.handleTaskSelect}
-                  canEdit={logic.canEditTask}
-                />
-              ) : (
-                <TaskListSection
-                  tasks={visibleTasks}
-                  selectedIds={logic.selectedIds}
-                  onToggleSelect={id => logic.setRowSelection(prev => {
-                    const next = { ...prev }
-                    if (next[id]) delete next[id]
-                    else next[id] = true
-                    return next
-                  })}
-                  user={logic.user}
-                  canEdit={logic.canEditTask}
-                  canDelete={logic.canDeleteTask}
-                  canAssign={logic.canAssignTask}
-                  onAssign={task => logic.setReassignData({ id: task.id, title: task.title, description: task.description, priority: task.priority })}
-                  onComplete={logic.handleQuickComplete}
-                  onDelete={logic.handleQuickDelete}
-                  onOpen={logic.handleTaskSelect}
-                />
-              )}
-
-              {/* Pager — your paginated API */}
-              {logic.totalPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-3 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl">
-                  <span className="text-[12px] text-[var(--text-tertiary)]">{logic.totalCount} tasks · Page {logic.currentPage + 1} of {logic.totalPages}</span>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" disabled={logic.currentPage <= 0} onClick={() => logic.setCurrentPage(p => Math.max(0, p - 1))}>‹</Button>
-                    <Button variant="outline" size="sm" disabled={logic.currentPage >= logic.totalPages - 1} onClick={() => logic.setCurrentPage(p => Math.min(logic.totalPages - 1, p + 1))}>›</Button>
-                  </div>
-                </div>
-              )}
+{logic.createOpen ? (
+      /* Full-page create form */
+      <div className="flex-1 min-h-0 flex items-start justify-center p-6">
+        <div className="w-full max-w-2xl">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-lg font-bold text-[var(--text-primary)]">New Task</h2>
+              <p className="text-[13px] text-[var(--text-muted)] mt-0.5">Create a new task for your workspace</p>
             </div>
-
-            {/* Rail — week ring + due today/tomorrow */}
-            <TasksRail tasks={logic.tasks} onOpen={logic.handleTaskSelect} />
+            <button
+              onClick={() => logic.setCreateOpen(false)}
+              className="text-[13px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              Cancel
+            </button>
           </div>
-        </PageState>
-      </PageShell>
+          <TaskForm onSubmit={logic.handleCreateTask} isLoading={logic.createTaskMutation.isPending} />
+        </div>
+      </div>
+    ) : (
+      <PageShell maxWidth="full">
+      <PageHero
+      eyebrow={logic.workspaceMode === 'PERSONAL' ? 'Personal' : logic.workspaceMode === 'CREWS' ? 'Crew' : 'Organization'}
+      title="Tasks"
+      subtitle="Manage, filter, and track your work across all views."
+      icon={ListTodo}
+      >
+      <Button variant="primary" size="sm" className="gap-1.5 h-8 text-[12px] hidden sm:inline-flex" onClick={() => logic.setCreateOpen(true)}>
+      <Plus className="w-3.5 h-3.5" /> New Task
+      </Button>
+      </PageHero>
 
+      <PageState state={logic.isLoading ? 'loading' : logic.isError ? 'error' : 'ready'} stateProps={{ loadingVariant: 'cards', onRetry: logic.refetch }} moduleId="tasks">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_270px] gap-4 items-start">
+      <div className="min-w-0 space-y-4">
+        {/* Attention band */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+      <div className="flex items-center gap-3 rounded-2xl border border-[var(--danger)]/25 bg-[var(--danger)]/5 px-3.5 py-3">
+        <div className="w-9 h-9 rounded-xl bg-[var(--danger)]/10 flex items-center justify-center shrink-0">
+          <AlertTriangle className="w-4 h-4 text-[var(--danger)]" strokeWidth={2} />
+        </div>
+        <div>
+          <p className="text-[17px] font-bold leading-none tabular-nums">{band.overdue}</p>
+          <p className="text-[10.5px] font-semibold text-[var(--text-muted)] mt-1">Overdue</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3 rounded-2xl border border-[var(--warning)]/25 bg-[var(--warning)]/5 px-3.5 py-3">
+        <div className="w-9 h-9 rounded-xl bg-[var(--warning)]/10 flex items-center justify-center shrink-0">
+          <CalendarClock className="w-4 h-4 text-[var(--warning)]" strokeWidth={2} />
+        </div>
+        <div>
+          <p className="text-[17px] font-bold leading-none tabular-nums">{band.dueSoon}</p>
+          <p className="text-[10.5px] font-semibold text-[var(--text-muted)] mt-1">Due soon</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3 rounded-2xl border border-[var(--accent-border)]/60 bg-[var(--accent-soft)]/40 px-3.5 py-3">
+        <div className="w-9 h-9 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center shrink-0">
+          <Activity className="w-4 h-4 text-[var(--accent)]" strokeWidth={2} />
+        </div>
+        <div>
+          <p className="text-[17px] font-bold leading-none tabular-nums">{band.inProgress}</p>
+          <p className="text-[10.5px] font-semibold text-[var(--text-muted)] mt-1">In progress</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-3" title="Completion across all tasks">
+        <ProgressRing value={band.completionRate} size={38} strokeWidth={3.5}>
+          <span className="text-[10px] font-bold tabular-nums">{band.completionRate}%</span>
+        </ProgressRing>
+        <div>
+          <p className="text-[13px] font-bold leading-none">done</p>
+          <p className="text-[10.5px] font-semibold text-[var(--text-muted)] mt-1">{logic.totalCount} total</p>
+        </div>
+      </div>
+        </div>
+
+        {/* Toolbar */}
+        <div className="flex items-center gap-2 flex-wrap">
+      <PillNav
+        options={[{ value: 'list', label: 'List' }, { value: 'board', label: 'Board' }]}
+        value={viewIsBoard ? 'board' : 'list'}
+        onChange={v => logic.setViewMode(v)}
+      />
+      <div className="w-[135px]">
+        <Select value={logic.taskScope} onValueChange={logic.setTaskScope}>
+          <SelectTrigger className="h-7 text-[11px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+        {SCOPES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="relative w-[180px] sm:w-[230px]">
+        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+        <Input
+          value={logic.globalFilter}
+          onChange={e => logic.setGlobalFilter(e.target.value)}
+          placeholder="Search tasks…"
+          size="sm"
+          className="pl-8"
+        />
+      </div>
+      <div className="w-[150px]">
+        <Select value={logic.sortBy} onValueChange={logic.setSortBy}>
+          <SelectTrigger className="h-7 text-[11px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+        {SORTS.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+      {logic.filtersActive && (
+        <button onClick={logic.handleClearFilters} className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--accent)] hover:underline cursor-pointer">
+          <X className="w-3 h-3" /> Clear filters
+        </button>
+      )}
+      <span className="ml-auto text-[11.5px] text-[var(--text-muted)] tabular-nums hidden sm:inline">{logic.totalCount} tasks</span>
+        </div>
+
+        {/* Premium filter row: priority chips + project + team */}
+        <div className="flex items-center gap-2 flex-wrap">
+      <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Priority</span>
+      <div className="inline-flex items-center bg-[var(--bg-subtle)] rounded-md p-0.5 border border-[var(--border-subtle)]">
+        {PRIORITY_OPTIONS.map(opt => {
+          const active = logic.priorityFilter.includes(opt.value)
+          return (
+        <button key={opt.value}
+          onClick={() => logic.setPriorityFilter(prev => active ? prev.filter(v => v !== opt.value) : [...prev, opt.value])}
+          className={cn('px-2.5 py-1 rounded-sm text-[11px] font-medium border-0 transition-all duration-150 cursor-pointer h-auto select-none whitespace-nowrap',
+            active ? 'bg-[var(--bg-card)] shadow-sm text-[var(--accent)]' : 'bg-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]')}>
+          {opt.label}
+        </button>
+          )
+        })}
+      </div>
+      {logic.projectsList.length > 0 && (
+        <div className="w-[150px]">
+          <Select value={String(logic.projectFilter)} onValueChange={logic.setProjectFilter}>
+        <SelectTrigger className="h-7 text-[11px]"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="ALL">All projects</SelectItem>
+          {logic.projectsList.map(p => <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>)}
+        </SelectContent>
+          </Select>
+        </div>
+      )}
+      {logic.teamsList.length > 0 && (
+        <div className="w-[140px]">
+          <Select value={String(logic.teamFilter)} onValueChange={logic.setTeamFilter}>
+        <SelectTrigger className="h-7 text-[11px]"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="ALL">All teams</SelectItem>
+          {logic.teamsList.map(t => <SelectItem key={t.id} value={String(t.id)}>{t.name}</SelectItem>)}
+        </SelectContent>
+          </Select>
+        </div>
+      )}
+        </div>
+
+        {/* Status chips */}
+        <PillNav filters={STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} counts={counts} />
+
+        {/* Views */}
+        {viewIsBoard ? (
+      <TaskBoardSection
+        tasks={visibleTasks}
+        onStatusChange={handleUpdateTaskStatus}
+        onOpen={handleTaskNavigate}
+        canEdit={logic.canEditTask}
+      />
+        ) : (
+      <TaskListSection
+        tasks={visibleTasks}
+        selectedIds={logic.selectedIds}
+        onToggleSelect={id => logic.setRowSelection(prev => {
+          const next = { ...prev }
+          if (next[id]) delete next[id]
+          else next[id] = true
+          return next
+        })}
+        user={logic.user}
+        canEdit={logic.canEditTask}
+        canDelete={logic.canDeleteTask}
+        canAssign={logic.canAssignTask}
+        onAssign={task => logic.setReassignData({ id: task.id, title: task.title, description: task.description, priority: task.priority })}
+        onComplete={logic.handleQuickComplete}
+        onDelete={logic.handleQuickDelete}
+        onOpen={handleTaskNavigate}
+      />
+        )}
+
+        {/* Pager — your paginated API */}
+        {logic.totalPages > 1 && (
+      <div className="flex items-center justify-between px-4 py-3 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl">
+        <span className="text-[12px] text-[var(--text-tertiary)]">{logic.totalCount} tasks · Page {logic.currentPage + 1} of {logic.totalPages}</span>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" disabled={logic.currentPage <= 0} onClick={() => logic.setCurrentPage(p => Math.max(0, p - 1))}>‹</Button>
+          <Button variant="outline" size="sm" disabled={logic.currentPage >= logic.totalPages - 1} onClick={() => logic.setCurrentPage(p => Math.min(logic.totalPages - 1, p + 1))}>›</Button>
+        </div>
+      </div>
+        )}
+      </div>
+
+      {/* Rail — week ring + due today/tomorrow */}
+      <TasksRail tasks={logic.tasks} onOpen={handleTaskNavigate} />
+      </div>
+      </PageState>
+      </PageShell>
+    )}
       {/* Bulk bar — your bulk mutations */}
       <AnimatePresence>
         {hasSelection && (
@@ -386,8 +397,6 @@ export function TasksPage() {
         <Plus className="w-5 h-5" strokeWidth={2.5} />
       </motion.button>
 
-      {/* Your task detail panel */}
-      <TaskPanel task={logic.selectedTask} isOpen={!!logic.selectedTask} onClose={logic.handleTaskClose} />
     </>
   )
 }

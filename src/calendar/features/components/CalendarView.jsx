@@ -1,35 +1,44 @@
 import React, { useState } from 'react'
 import { MonthView } from './MonthView'
 import { WeekView } from './WeekView'
-import { RadarPanel } from './RadarPanel'
+import { CalendarRail } from './CalendarRail'
+import { AgendaList } from './AgendaList'
 import { useSearchParams } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Filter } from '@/shared/ui/Icons'
-import { format, addMonths, subMonths, addWeeks, subWeeks, startOfToday, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns'
+import { ChevronLeft, ChevronRight } from '@/shared/ui/Icons'
+import { format, addMonths, subMonths, addWeeks, subWeeks, startOfToday, startOfWeek, endOfWeek, startOfMonth, endOfMonth, parseISO, isWithinInterval } from 'date-fns'
 import { Button } from '@/shared/ui/Button'
-import { Text, Heading } from '@/shared/ui/Typography'
+import { PillNav } from '@/shared/ui/PillNav'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { EventForm } from './EventForm'
 import { useCreateTask } from '@/task'
 import { useCreateEvent } from '../hooks/useCalendar'
 import { cn } from '@/shared/lib/cn'
-import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 
-export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEventClick, onVisibleRangeChange, TaskFormComponent, scope = {} }) {
+export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEventClick, onVisibleRangeChange, TaskFormComponent, scope = {}, eyebrow }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const mode = searchParams.get('mode') || 'month'
 
   const [currentDate, setCurrentDate] = useState(startOfToday())
-  const [selectedDay, setSelectedDay] = useState(null)
+  const [selectedDay, setSelectedDay] = useState(startOfToday())
   const [quickAddDate, setQuickAddDate] = useState(null)
   const [createType, setCreateType] = useState('event')
   const [filterType, setFilterType] = useState('all')
-  const [filterOpen, setFilterOpen] = useState(false)
 
   const createTaskMutation = useCreateTask()
   const createEventMutation = useCreateEvent(scope)
 
   const filteredTasks = filterType === 'events' ? [] : (tasks || [])
   const filteredEvents = filterType === 'tasks' ? [] : (events || [])
+
+  const rangeCounts = React.useMemo(() => {
+    const start = mode === 'month' ? startOfWeek(startOfMonth(currentDate)) : startOfWeek(currentDate)
+    const end = mode === 'month' ? endOfWeek(endOfMonth(currentDate)) : endOfWeek(currentDate)
+    const inRange = (iso) => iso ? isWithinInterval(parseISO(iso), { start, end }) : false
+    return {
+      events: (events || []).filter(e => inRange(e.startTime)).length,
+      tasks: (tasks || []).filter(t => inRange(t.dueDate)).length
+    }
+  }, [mode, currentDate, tasks, events])
 
   const handleCreate = (payload) => {
     if (createType === 'task') {
@@ -50,7 +59,6 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
     const start = mode === 'month' ? startOfWeek(startOfMonth(currentDate)) : startOfWeek(currentDate)
     const end = mode === 'month' ? endOfWeek(endOfMonth(currentDate)) : endOfWeek(currentDate)
     onVisibleRangeChange({ start, end })
-    setSelectedDay(null)
   }, [currentDate, mode, onVisibleRangeChange])
 
   const setMode = (newMode) => {
@@ -59,58 +67,69 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
 
   const next = () => mode === 'month' ? setCurrentDate(addMonths(currentDate, 1)) : setCurrentDate(addWeeks(currentDate, 1))
   const prev = () => mode === 'month' ? setCurrentDate(subMonths(currentDate, 1)) : setCurrentDate(subWeeks(currentDate, 1))
-  const today = () => { setCurrentDate(startOfToday()); setSelectedDay(null) }
+  const today = () => { setCurrentDate(startOfToday()); setSelectedDay(startOfToday()) }
 
   return (
-    <div className="flex flex-col lg:flex-row h-full gap-4">
-      <div className="flex-1 flex flex-col bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
-          <div className="flex items-center gap-3">
-            <h2 className="text-[16px] font-semibold text-[var(--text-primary)] tracking-tight">
-              {format(currentDate, mode === 'month' ? 'MMMM yyyy' : 'MMM yyyy')}
-            </h2>
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={prev}><ChevronLeft className="w-4 h-4" /></Button>
-              <Button variant="outline" size="sm" className="h-7 text-[11px]" onClick={today}>Today</Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={next}><ChevronRight className="w-4 h-4" /></Button>
-            </div>
+    <div className="flex flex-col h-full min-h-0 pb-12">
+      {/* Topbar equivalent (header inside view) */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-center gap-2 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-[var(--text-tertiary)] mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)] shrink-0" />
+            {eyebrow} · {mode === 'month' ? 'Month' : `Week of ${format(startOfWeek(currentDate), 'EEE d')}`}
           </div>
-
-          <div className="flex items-center gap-2">
-            <div className="flex items-center bg-[var(--bg-subtle)] rounded-md p-0.5 border border-[var(--border-subtle)]">
-              <Button variant="ghost" onClick={() => setMode('month')} className={cn('px-2.5 py-1 text-[11px] font-medium rounded-sm transition-colors h-auto', mode === 'month' ? 'bg-[var(--bg-card)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]')}>Month</Button>
-              <Button variant="ghost" onClick={() => setMode('week')} className={cn('px-2.5 py-1 text-[11px] font-medium rounded-sm transition-colors h-auto', mode === 'week' ? 'bg-[var(--bg-card)] shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]')}>Week</Button>
-            </div>
-
-            <Popover open={filterOpen} onOpenChange={setFilterOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1.5">
-                  <Filter className="w-3 h-3" /> {filterType !== 'all' ? filterType : 'Filter'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-40 p-1.5">
-                <Text size="xs" variant="muted" className="px-2 py-1 uppercase font-bold tracking-wide text-[10px]">View Items</Text>
-                <div className="space-y-0.5 mt-1">
-                  {[{ id: 'all', label: 'All Items' }, { id: 'tasks', label: 'Tasks Only' }, { id: 'events', label: 'Events Only' }].map(item => (
-                    <Button key={item.id} variant="ghost" size="sm" className="w-full justify-start" onClick={() => { setFilterType(item.id); setFilterOpen(false) }}>{item.label}</Button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
+          <h2 className="text-[44px] font-extrabold tracking-[-0.035em] text-[var(--text-primary)] leading-none flex items-baseline">
+            {format(currentDate, 'MMMM')} <span className="text-[15px] font-semibold text-[var(--text-tertiary)] tracking-[0.06em] ml-2.5">{format(currentDate, 'yyyy')}</span>
+          </h2>
+          <p className="mt-2 text-[11px] font-mono text-[var(--text-tertiary)]">
+            <span className="font-semibold text-[var(--text-secondary)]">{rangeCounts.events}</span> events · <span className="font-semibold text-[var(--text-secondary)]">{rangeCounts.tasks}</span> tasks this period
+          </p>
         </div>
-
-        <div className="flex-1 overflow-hidden bg-[var(--bg-base)] flex flex-col min-h-0">
-          {mode === 'month' ? (
-            <MonthView tasks={filteredTasks} events={filteredEvents} currentDate={currentDate} isLoading={isLoading} onTaskClick={onTaskClick} onEventClick={onEventClick} onAddClick={(d) => setQuickAddDate(d)} onSelectDay={setSelectedDay} />
-          ) : (
-            <WeekView tasks={filteredTasks} events={filteredEvents} currentDate={currentDate} isLoading={isLoading} onTaskClick={onTaskClick} onEventClick={onEventClick} onAddClick={(d) => setQuickAddDate(d)} onSelectDay={setSelectedDay} />
-          )}
+        
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 mr-2">
+            <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]" onClick={prev}><ChevronLeft className="w-4 h-4" /></Button>
+            <Button variant="outline" className="h-8 px-3.5 rounded-lg text-[12px] font-semibold text-[var(--accent)] border-[var(--accent-border)] bg-[var(--accent-soft)] hover:bg-[var(--accent-border)]" onClick={today}>Today</Button>
+            <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]" onClick={next}><ChevronRight className="w-4 h-4" /></Button>
+          </div>
+          <PillNav
+            options={[{ value: 'month', label: 'Month' }, { value: 'week', label: 'Week' }]}
+            value={mode}
+            onChange={setMode}
+          />
+          <PillNav
+            options={[{ value: 'all', label: 'All' }, { value: 'events', label: 'Events' }, { value: 'tasks', label: 'Tasks' }]}
+            value={filterType}
+            onChange={setFilterType}
+          />
         </div>
       </div>
 
-      <div className="w-full lg:w-72 shrink-0">
-        <RadarPanel tasks={filteredTasks} events={filteredEvents} selectedDay={selectedDay} onTaskClick={onTaskClick} onEventClick={onEventClick} onReset={() => setSelectedDay(null)} />
+      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0 items-start">
+        {/* Main section: map + agenda */}
+        <div className="flex-1 min-w-0 flex flex-col w-full">
+          <div className="shrink-0 overflow-x-auto custom-scrollbar">
+            {mode === 'month' ? (
+              <MonthView tasks={filteredTasks} events={filteredEvents} currentDate={currentDate} isLoading={isLoading} onTaskClick={onTaskClick} onEventClick={onEventClick} onSelectDay={setSelectedDay} selectedDay={selectedDay} />
+            ) : (
+              <WeekView tasks={filteredTasks} events={filteredEvents} currentDate={currentDate} isLoading={isLoading} onTaskClick={onTaskClick} onEventClick={onEventClick} onSelectDay={setSelectedDay} selectedDay={selectedDay} />
+            )}
+          </div>
+          
+          <AgendaList 
+            tasks={filteredTasks} 
+            events={filteredEvents} 
+            selectedDay={selectedDay} 
+            onTaskClick={onTaskClick} 
+            onEventClick={onEventClick} 
+            onAddClick={(d) => setQuickAddDate(d)} 
+          />
+        </div>
+
+        {/* Right rail */}
+        <div className="w-full lg:w-[290px] shrink-0 sticky top-4 flex flex-col gap-3.5">
+          <CalendarRail tasks={filteredTasks} events={filteredEvents} onTaskClick={onTaskClick} onEventClick={onEventClick} />
+        </div>
       </div>
 
       <Modal open={!!quickAddDate} onOpenChange={(open) => !open && setQuickAddDate(null)}>
@@ -132,3 +151,4 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
     </div>
   )
 }
+

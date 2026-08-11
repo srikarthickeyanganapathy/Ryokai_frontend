@@ -6,10 +6,12 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { cn } from '@/shared/lib/cn'
 import { useMarkRead, useDeleteNotification } from './hooks/useNotifications'
 import { useAcceptInvite, useDeclineInvite } from '@/organization'
-import { TaskPanel } from '@/task'
+import { useNavigate } from 'react-router-dom'
 import { useTaskList } from '@/task'
 
-export function NotificationPanel({ notification, isOpen, onClose }) {
+export function NotificationPanel({
+ notification, isOpen, onClose }) {
+  const navigate = useNavigate()
   const markRead = useMarkRead()
   const deleteNotification = useDeleteNotification()
   const acceptInviteMutation = useAcceptInvite()
@@ -209,7 +211,7 @@ export function NotificationPanel({ notification, isOpen, onClose }) {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setSelectedTask(linkedTask)}
+                        onClick={() => navigate(`/app/tasks/${linkedTask.id}`, { state: { task: linkedTask } })}
                         className="gap-1.5 text-xs h-8"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
@@ -233,12 +235,7 @@ export function NotificationPanel({ notification, isOpen, onClose }) {
         )}
       </AnimatePresence>
 
-      {/* LINKED TASK INSPECTOR PANEL */}
-      <TaskPanel
-        task={selectedTask}
-        isOpen={!!selectedTask}
-        onClose={() => setSelectedTask(null)}
-      />
+      {/* Task detail opens in full page via /app/tasks/:taskId */}
     </>
   )
 }

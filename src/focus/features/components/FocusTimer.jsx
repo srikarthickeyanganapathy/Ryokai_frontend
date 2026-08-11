@@ -1,17 +1,24 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Text, Heading } from '@/shared/ui/Typography'
+import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react'
+import { motion } from 'framer-motion'
 import { Button, IconButton } from '@/shared/ui/Button'
-import { Play, Pause, RotateCcw, SkipForward, Sparkles, Flame, CheckCircle, Volume2, VolumeX } from '@/shared/ui/Icons'
+import { Play, Pause, RotateCcw, Sparkles, Flame, Volume2, VolumeX } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 import { useActiveFocus, useStartFocus, useStopFocus } from '../hooks/useFocus'
+import '../../pages/focus-stage.css'
 
 const POMODORO_MODES = [
-  { id: 'focus', label: '25m Focus', minutes: 25, accent: 'var(--accent)' },
-  { id: 'shortBreak', label: '5m Break', minutes: 5, accent: 'var(--success)' },
-  { id: 'longBreak', label: '15m Reset', minutes: 15, accent: 'var(--accent)' },
+  { id: 'focus', label: '25m Focus', minutes: 25 },
+  { id: 'shortBreak', label: '5m Break', minutes: 5 },
+  { id: 'longBreak', label: '15m Reset', minutes: 15 },
 ]
 
+/**
+ * THE PULSAR — the timer is the Ryokai brand instrument:
+ * a tilted accretion disk (elliptical progress), a white-hot core
+ * (clock), a relativistic jet (running state) and orbiting
+ * accretion nodes (pomodoro counter). Presentation-only rewrite:
+ * state, hooks and API contracts are unchanged.
+ */
 export function FocusTimer({ task, onTaskComplete }) {
   const { data: activeSession, isLoading: activeLoading } = useActiveFocus()
   const startMutation = useStartFocus()
@@ -28,6 +35,8 @@ export function FocusTimer({ task, onTaskComplete }) {
   const progressPercent = Math.min(100, Math.max(0, ((totalSeconds - timeLeft) / totalSeconds) * 100))
 
   const intervalRef = useRef(null)
+  const diskRef = useRef(null)
+  const diskLenRef = useRef(null)
 
   // Switch modes and set countdown target
   const selectMode = (newModeId) => {
@@ -109,27 +118,27 @@ export function FocusTimer({ task, onTaskComplete }) {
     return `${pad(m)}:${pad(s)}`
   }
 
-  // SVG Circular Ring calculation
-  const radius = 110
-  const circumference = 2 * Math.PI * radius
-  const strokeDashoffset = circumference - (progressPercent / 100) * circumference
+  // Elliptical accretion-disk progress (path-based dashoffset)
+  useLayoutEffect(() => {
+    const path = diskRef.current
+    if (!path) return
+    if (diskLenRef.current == null) {
+      diskLenRef.current = path.getTotalLength()
+      path.style.strokeDasharray = diskLenRef.current
+    }
+    path.style.strokeDashoffset = diskLenRef.current * (1 - progressPercent / 100)
+  }, [progressPercent])
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4 w-full max-w-lg mx-auto py-1 select-none">
-      
+    <div className="flex flex-col items-center justify-center gap-4 w-full select-none">
       {/* POMODORO MODE SELECTOR PILLS */}
-      <div className="flex items-center flex-wrap justify-center gap-1 bg-[var(--bg-elevated)]/80 backdrop-blur-md border border-[var(--color-border-subtle)] p-1 rounded-2xl sm:rounded-full shadow-inner">
+      <div className="fz-modes">
         {POMODORO_MODES.map(m => (
           <button
             key={m.id}
             type="button"
             onClick={() => selectMode(m.id)}
-            className={cn(
-              'px-3 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold tracking-wide transition-all duration-300 flex items-center gap-1.5',
-              mode === m.id
-                ? 'bg-[var(--accent)] text-white shadow-md scale-105'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-            )}
+            className={cn('fz-mode-pill', mode === m.id && 'on')}
           >
             {m.id === 'focus' && <Flame className="w-3.5 h-3.5" />}
             {m.id === 'shortBreak' && <Sparkles className="w-3.5 h-3.5" />}
@@ -139,88 +148,66 @@ export function FocusTimer({ task, onTaskComplete }) {
         ))}
       </div>
 
-      {/* ZEN CIRCULAR POMODORO CLOCK */}
-      <div className="relative flex items-center justify-center">
-        {/* Ambient Pulsing Glow Circle */}
-        <div 
-          className={cn(
-            "absolute inset-0 rounded-full blur-2xl transition-opacity duration-1000",
-            isRunning ? "opacity-30 animate-pulse bg-[var(--accent)]" : "opacity-0 bg-transparent"
-          )}
-        />
+      {/* THE PULSAR */}
+      <div className={cn('fz-pulsar', isRunning && 'running')}>
+        {/* relativistic jet beam */}
+        <div className="fz-jet" />
 
-        <svg viewBox="0 0 288 288" className="w-44 h-44 sm:w-52 sm:h-52 md:w-56 md:h-56 transform -rotate-90">
-          {/* Background Track Circle */}
-          <circle
-            cx="144"
-            cy="144"
-            r={radius}
-            stroke="var(--color-border-subtle)"
-            strokeWidth="8"
-            fill="transparent"
-          />
-          {/* Active Progress Ring */}
-          <circle
-            cx="144"
-            cy="144"
-            r={radius}
-            stroke={currentMode.accent}
-            strokeWidth="9"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
-            fill="transparent"
-            className="transition-all duration-1000 ease-linear"
-          />
-        </svg>
+        {/* tilted accretion disk + elliptical progress */}
+        <div className="fz-disk-tilt">
+          <svg viewBox="-250 -160 500 320">
+            <defs>
+              <linearGradient id="fzDiskGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="var(--pulsar-disk-a)" />
+                <stop offset="100%" stopColor="var(--pulsar-disk-b)" />
+              </linearGradient>
+            </defs>
+            <ellipse className="fz-disk-tick" cx="0" cy="0" rx="200" ry="108" />
+            <path className="fz-disk-track" d="M 205 0 A 205 112 0 1 1 -205 0 A 205 112 0 1 1 205 0" />
+            <path ref={diskRef} className="fz-disk-prog" d="M 205 0 A 205 112 0 1 1 -205 0 A 205 112 0 1 1 205 0" />
+          </svg>
+        </div>
 
-        {/* Center Clock Display */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-1">
-          <motion.span 
+        {/* orbiting accretion nodes */}
+        <div className="fz-orbit-tilt">
+          <div className="fz-moons">
+            {[1, 2, 3, 4].map(idx => (
+              <span key={idx} className={cn('fz-moon', 'm' + idx, idx <= completedPomodoros && 'lit')}>
+                <i />
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* white-hot core + clock */}
+        <div className="fz-core-glow" />
+        <div className="fz-core-clock">
+          <motion.span
             key={timeLeft}
             initial={{ scale: 0.98 }}
             animate={{ scale: 1 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-mono font-bold tracking-tighter text-[var(--text-primary)]"
+            className="fz-time"
           >
             {formatTime(timeLeft)}
           </motion.span>
-
-          <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[var(--text-muted)] font-semibold">
+          <span className="fz-state">
             {isRunning ? (mode === 'focus' ? 'Deep Focus...' : 'Resting...') : 'Paused'}
           </span>
         </div>
       </div>
 
       {/* POMODORO CYCLE TRACKER */}
-      <div className="flex items-center gap-3">
-        <Text className="text-xs font-mono text-[var(--text-muted)] uppercase tracking-wider">
-          Pomodoros:
-        </Text>
-        <div className="flex items-center gap-1.5">
-          {[1, 2, 3, 4].map(idx => (
-            <div
-              key={idx}
-              className={cn(
-                "w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300",
-                idx <= completedPomodoros
-                  ? "bg-[var(--accent)] shadow-[0_0_8px_var(--accent)] scale-110"
-                  : "bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)]"
-              )}
-              title={`Pomodoro Session ${idx}`}
-            />
-          ))}
-        </div>
-      </div>
+      <div className="fz-pomo-note tnum">{completedPomodoros} / 4 moons lit</div>
 
       {/* CONTROLS TOOLBAR */}
-      <div className="flex items-center gap-3 sm:gap-4 pt-1">
+      <div className="flex items-center gap-3 sm:gap-4">
         <IconButton
           variant="outline"
           size="lg"
           title="Reset Timer"
           aria-label="Reset timer"
           onClick={resetTimer}
-          className="rounded-full w-9 h-9 sm:w-10 sm:h-10 border-[var(--color-border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          className="rounded-full w-9 h-9 sm:w-10 sm:h-10 border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] bg-[var(--glass-bg)] backdrop-blur-xl"
         >
           <RotateCcw className="w-4 h-4" />
         </IconButton>
@@ -232,7 +219,9 @@ export function FocusTimer({ task, onTaskComplete }) {
           isLoading={startMutation.isPending || stopMutation.isPending}
           className={cn(
             "rounded-full h-10 sm:h-11 px-6 sm:px-8 text-xs sm:text-sm font-semibold tracking-wide gap-2 shadow-lg transition-all duration-300 hover:scale-105",
-            isRunning ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[var(--accent)] text-white hover:opacity-90"
+            isRunning
+              ? "bg-amber-500 hover:bg-amber-600 text-white"
+              : "bg-[var(--accent)] text-[var(--text-on-accent)] hover:opacity-90"
           )}
         >
           {isRunning ? (
@@ -255,14 +244,13 @@ export function FocusTimer({ task, onTaskComplete }) {
           aria-label={soundEnabled ? "Mute chime" : "Enable chime"}
           onClick={() => setSoundEnabled(!soundEnabled)}
           className={cn(
-            "rounded-full w-9 h-9 sm:w-10 sm:h-10 border-[var(--color-border-subtle)] transition-colors",
-            soundEnabled ? "text-[var(--accent)]" : "text-[var(--text-muted)]"
+            "rounded-full w-9 h-9 sm:w-10 sm:h-10 border-[var(--border-subtle)] transition-colors bg-[var(--glass-bg)] backdrop-blur-xl",
+            soundEnabled ? "text-[var(--accent)]" : "text-[var(--text-tertiary)]"
           )}
         >
           {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
         </IconButton>
       </div>
-
     </div>
   )
 }

@@ -7,7 +7,7 @@ import { InteractiveCard } from '@/shared/ui/InteractiveCard';
 import { useTaskList, useCompleteCrewTask, useDeleteTask } from '@/task';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { TasksTable } from '@/task';
-import { TaskPanel } from '@/task';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { 
   ListTodo, 
@@ -40,6 +40,8 @@ const StatWidget = ({ icon: Icon, label, value, iconBg, iconColor, alertBorder }
 );
 
 export function CrewTasksPage() {
+  const navigate = useNavigate()
+
   const { activeCrew } = useWorkspace()
   const { data: { tasks: rawTasks = [] } = {}, isLoading } = useTaskList(activeCrew?.id ? { crewId: activeCrew.id } : { scope: 'crew' });
   
@@ -190,7 +192,7 @@ export function CrewTasksPage() {
                 rowSelection={rowSelection}
                 setRowSelection={setRowSelection}
                 getRowId={(row) => String(row.id)}
-                onTaskClick={setSelectedTask}
+                onTaskClick={(task) => navigate(`/app/tasks/${task.id}`, { state: { task } })}
                 onQuickComplete={handleQuickComplete}
                 onQuickDelete={handleQuickDelete}
               />
@@ -242,11 +244,7 @@ export function CrewTasksPage() {
             )}
           </AnimatePresence>
 
-          <TaskPanel
-            task={selectedTask}
-            isOpen={!!selectedTask}
-            onClose={() => setSelectedTask(null)}
-          />
+          {/* Task detail opens in full page via /app/tasks/:taskId */}
         </div>
       </PageContent>
     </PageShell>

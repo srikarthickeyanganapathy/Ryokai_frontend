@@ -8,8 +8,9 @@ import { ErrorState } from '@/shared/ui/ErrorState';
 import {
   Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter
 } from '@/shared/ui/Modal';
-import { PageShell, PageHero, PageToolbar, PageContent } from '@/shared/ui/PageShell';
+import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
 import { PageState } from '@/shared/ui/PageState';
+import { EntityCard, EntityStatStrip, EntityFilterBar } from '@/shared/ui/entity-card';
 import { useDiscoverCrews, useJoinPublicCrew } from '../features/hooks/useCrews';
 import { 
   Search, Users, Compass, Flame, Sparkles, TrendingUp, CheckCircle2, Loader2, Hash,
@@ -23,12 +24,6 @@ function DiscoverCrewCard({ crew, navigate, onJoin, isJoining, joined, onPreview
   const isMember = !!crew.myRole || joined;
   const isFull = (crew.memberCount ?? 0) >= (crew.memberCap ?? 50);
   const isInviteOnly = crew.visibility === 'INVITE_ONLY';
-  const visibilityConfig = {
-    PUBLIC: { icon: Globe, label: 'Public Squad' },
-    PUBLIC_LINK: { icon: Link2, label: 'Public Link' },
-    INVITE_ONLY: { icon: Lock, label: 'Invite Only' },
-  };
-  const VisIcon = visibilityConfig[crew.visibility]?.icon || Globe;
   const activityScore = useMemo(() => Math.min(100, Math.round(((crew.memberCount || 1) / (crew.memberCap || 50)) * 100 + 15)), [crew]);
   const onlineMembers = useMemo(() => Math.max(1, Math.round((crew.memberCount || 1) * 0.35)), [crew]);
   const categoryTag = useMemo(() => {
@@ -40,54 +35,47 @@ function DiscoverCrewCard({ crew, navigate, onJoin, isJoining, joined, onPreview
     if (lowerName.includes('prod') || lowerName.includes('roadmap')) return 'Product';
     return 'Engineering';
   }, [crew]);
+  const visLabel = crew.visibility === 'INVITE_ONLY' ? 'Invite Only' : crew.visibility === 'PUBLIC_LINK' ? 'Public Link' : 'Public Squad';
 
   return (
-    <motion.div layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.2 }}
-      className="group relative bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--accent-border)] rounded-xl p-5 flex flex-col justify-between gap-4 hover:shadow-lg transition-all duration-200 overflow-hidden"
-      whileHover={{ y: -3 }} whileTap={{ scale: 0.98 }}>
-      <div className="flex items-start justify-between gap-3 relative z-10">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[var(--accent-soft)] to-[var(--bg-subtle)] text-[var(--accent)] font-bold text-[14px] flex items-center justify-center border border-[var(--accent-border)] font-mono shadow-xs shrink-0 group-hover:scale-105 transition-transform duration-200">
-            {crew.name.slice(0, 2).toUpperCase()}</div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <Heading level={4} className="text-[15px] font-semibold tracking-tight truncate text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">{crew.name}</Heading>
-            </div>
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <span className="text-[10px] text-[var(--text-muted)] font-mono uppercase tracking-wider font-medium flex items-center gap-1"><VisIcon className="w-3 h-3 text-[var(--accent)]" /> {visibilityConfig[crew.visibility]?.label || 'Public Squad'}</span>
-              <span className="w-1 h-1 rounded-full bg-[var(--border-subtle)]"></span>
-              <span className="text-[10px] text-[var(--success)] font-medium flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[var(--success)] animate-pulse"></span>{onlineMembers} Active</span>
-            </div>
-          </div>
+    <EntityCard
+      type="discover"
+      glyph={<span className="text-[13px] font-bold font-mono">{crew.name.slice(0, 2).toUpperCase()}</span>}
+      name={crew.name}
+      tagline={crew.description || 'No detailed mission description provided for this crew.'}
+      onClick={() => onPreview(crew)}
+      showArrow
+      badges={[
+        <span key="cat" className="ec-badge ec-badge--accent">{categoryTag}</span>,
+        <span key="vis" className="ec-badge ec-badge--ghost">{visLabel}</span>,
+      ]}
+      meta={[
+        { icon: <Users style={{ width: 11, height: 11 }} />, text: `${crew.memberCount ?? 0}/${crew.memberCap ?? 50} members` },
+        { icon: <Activity style={{ width: 11, height: 11 }} />, text: `${onlineMembers} online` },
+      ]}
+      progress={activityScore}
+      progressLabel={`${activityScore}%`}
+      footer={
+        <div className="ec-card-foot">
+          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); onPreview(crew); }} className="h-8 px-2.5 text-[12px] gap-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)]">
+            <Eye className="w-3.5 h-3.5" /> Preview
+          </Button>
+          <AnimatePresence mode="wait">
+            {isMember ? (
+              <motion.button key="joined" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} onClick={(e) => { e.stopPropagation(); navigate(`/app/crews/${crew.id}`); }} className="flex items-center gap-1.5 px-3 h-8 text-[12px] font-semibold rounded-md bg-[var(--success-soft)] text-[var(--success)] border border-[var(--success)]/30 hover:bg-[var(--success)] hover:text-white transition-colors cursor-pointer">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Joined
+              </motion.button>
+            ) : isInviteOnly ? (
+              <div className="flex items-center gap-1.5 px-3 h-8 text-[12px] font-semibold rounded-md bg-[var(--bg-subtle)] text-[var(--text-muted)] border border-[var(--border-subtle)] cursor-not-allowed"><Lock className="w-3.5 h-3.5" /> Private</div>
+            ) : (
+              <Button key="join" size="sm" variant="primary" onClick={(e) => { e.stopPropagation(); onJoin(crew.id); }} disabled={isJoining || isFull} className={cn("h-8 text-[12px] gap-1.5 shadow-xs font-semibold", isFull && "opacity-60 cursor-not-allowed")}>
+                {isJoining ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Joining...</> : isFull ? "Squad Full" : <><Rocket className="w-3 h-3" /> Join Crew</>}
+              </Button>
+            )}
+          </AnimatePresence>
         </div>
-        <Badge variant="primary" size="xs" className="shrink-0 font-mono text-[10px]">{categoryTag}</Badge>
-      </div>
-      <Text variant="muted" className="text-[13px] line-clamp-2 min-h-[2.8em] leading-relaxed relative z-10">{crew.description || 'No detailed mission description provided for this crew.'}</Text>
-      <div className="grid grid-cols-2 gap-2 relative z-10 pt-1">
-        <div className="flex items-center gap-2.5 p-2.5 bg-[var(--bg-subtle)]/60 rounded-lg border border-[var(--border-subtle)]">
-          <Users className="w-4 h-4 text-[var(--accent)] shrink-0" />
-          <div className="flex flex-col min-w-0"><span className="block text-[12px] font-bold text-[var(--text-primary)] leading-none tabular-nums">{crew.memberCount ?? 0}/{crew.memberCap ?? 50}</span><span className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider mt-1 font-semibold truncate">Members</span></div>
-        </div>
-        <div className="flex items-center gap-2.5 p-2.5 bg-[var(--bg-subtle)]/60 rounded-lg border border-[var(--border-subtle)]">
-          <Flame className={cn("w-4 h-4 shrink-0", activityScore > 75 ? "text-[var(--danger)]" : "text-[var(--warning)]")} />
-          <div className="flex flex-col min-w-0"><span className="block text-[12px] font-bold text-[var(--text-primary)] leading-none tabular-nums">{activityScore}%</span><span className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider mt-1 font-semibold truncate">Activity Score</span></div>
-        </div>
-      </div>
-      <div className="mt-auto pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2 relative z-10">
-        <Button size="sm" variant="outline" onClick={() => onPreview(crew)} className="h-8 px-2.5 text-[12px] gap-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)]"><Eye className="w-3.5 h-3.5" /> Preview</Button>
-        <AnimatePresence mode="wait">
-          {isMember ? (
-            <motion.button key="joined" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} onClick={() => navigate(`/app/crews/${crew.id}`)} className="flex items-center gap-1.5 px-3 h-8 text-[12px] font-semibold rounded-md bg-[var(--success-soft)] text-[var(--success)] border border-[var(--success)]/30 hover:bg-[var(--success)] hover:text-white transition-colors cursor-pointer"><CheckCircle2 className="w-3.5 h-3.5" /> Joined</motion.button>
-          ) : isInviteOnly ? (
-            <div className="flex items-center gap-1.5 px-3 h-8 text-[12px] font-semibold rounded-md bg-[var(--bg-subtle)] text-[var(--text-muted)] border border-[var(--border-subtle)] cursor-not-allowed"><Lock className="w-3.5 h-3.5" /> Private</div>
-          ) : (
-            <Button key="join" size="sm" variant="primary" onClick={() => onJoin(crew.id)} disabled={isJoining || isFull} className={cn("h-8 text-[12px] gap-1.5 shadow-xs font-semibold", isFull && "opacity-60 cursor-not-allowed")}>
-              {isJoining ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Joining...</> : isFull ? "Squad Full" : <><Rocket className="w-3 h-3" /> Join Crew</>}
-            </Button>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.div>
+      }
+    />
   );
 }
 
@@ -211,7 +199,14 @@ export function CrewDiscoverPage() {
         </Button>
       </PageHero>
 
-      {featuredCrew && (
+      <EntityStatStrip
+        stats={[
+          { key: 'squads', label: 'Public Squads', value: Array.isArray(allCrews) ? allCrews.length : 0, sublabel: 'Discoverable missions', icon: Globe, tone: 'cyan' },
+          { key: 'seats', label: 'Seats Open', value: totalSeatsOpen, sublabel: 'Across the network', icon: Users, tone: 'emerald' },
+          { key: 'members', label: 'Members', value: (Array.isArray(allCrews) ? allCrews.reduce((a, c) => a + (c.memberCount || 0), 0) : 0).toLocaleString(), sublabel: 'Combined roster', icon: Users, tone: 'amber' },
+          { key: 'trending', label: 'Trending', value: trendingCrews.length, sublabel: 'Top ranked squads', icon: Flame, tone: 'rose' },
+        ]}
+      />      {featuredCrew && (
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}
           className="relative rounded-2xl bg-gradient-to-r from-[var(--accent-soft)] via-[var(--bg-card)] to-[var(--bg-subtle)] border border-[var(--accent-border)] p-6 overflow-hidden shadow-xs mx-auto max-w-5xl mb-4">
           <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-[var(--accent-soft)] rounded-full blur-3xl opacity-40 pointer-events-none" />
@@ -233,38 +228,34 @@ export function CrewDiscoverPage() {
         </motion.div>
       )}
 
-      <PageToolbar>
-        <div className="space-y-3 w-full">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-1 bg-[var(--bg-subtle)] p-1 rounded-lg border border-[var(--border-subtle)] w-full sm:w-fit">
-              {[{ id: 'ALL', label: 'All Public' }, { id: 'OPEN', label: 'Open Seats' }, { id: 'JOINED', label: 'My Squads' }].map((tab) => (
-                <button key={tab.id} onClick={() => setFilterTab(tab.id)}
-                  className={cn("px-3 py-1.5 text-[12px] font-medium rounded-md transition-colors whitespace-nowrap w-full sm:w-auto cursor-pointer", filterTab === tab.id ? "bg-[var(--bg-card)] text-[var(--text-primary)] shadow-xs font-semibold" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]")}>{tab.label}</button>
-              ))}
-            </div>
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-muted)] pointer-events-none" />
-              <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Search squads by name or mission..."
-                className="w-full pl-9 pr-8 py-1.5 text-[13px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent)] transition-colors text-[var(--text-primary)] placeholder:text-[var(--text-muted)]" />
-              {keyword && <IconButton variant="ghost" size="sm" className="absolute right-2.5 top-1/2 -translate-y-1/2" onClick={() => setKeyword('')} title="Clear search"><X className="w-3.5 h-3.5" /></IconButton>}
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-1">
-            <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1"><Filter className="w-3 h-3 text-[var(--accent)]" /> Categories:</span>
-            {categories.map((cat) => {
-              const count = categoryCounts[cat] ?? 0;
-              const isSelected = selectedCategory === cat;
-              return (
-                <button key={cat} onClick={() => setSelectedCategory(cat)}
-                  className={cn("px-2.5 py-1 text-[11px] font-medium rounded-full border transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 shrink-0",
-                    isSelected ? "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)] font-semibold shadow-xs" : "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)] hover:text-[var(--text-primary)]")}>
-                  <span>{cat}</span><span className={cn("px-1.5 py-0.2 text-[9px] font-mono rounded-full", isSelected ? "bg-[var(--accent)] text-white" : "bg-[var(--bg-subtle)] text-[var(--text-muted)]")}>{count}</span>
-                </button>
-              );
-            })}
-          </div>
+      <div className="w-full space-y-3">
+        <EntityFilterBar
+          search={keyword}
+          onSearch={setKeyword}
+          searchPlaceholder="Search squads by name or mission..."
+          chips={[
+            { id: 'ALL', label: 'All Public', count: Array.isArray(allCrews) ? allCrews.length : 0 },
+            { id: 'OPEN', label: 'Open Seats', count: (Array.isArray(allCrews) ? allCrews : []).filter(c => !c.myRole && ((c.memberCount ?? 0) < (c.memberCap ?? 50))).length },
+            { id: 'JOINED', label: 'My Squads', count: (Array.isArray(allCrews) ? allCrews : []).filter(c => !!c.myRole).length },
+          ]}
+          activeChip={filterTab}
+          onChip={setFilterTab}
+        />
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-1">
+          <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1"><Filter className="w-3 h-3 text-[var(--accent)]" /> Categories:</span>
+          {categories.map((cat) => {
+            const count = categoryCounts[cat] ?? 0;
+            const isSelected = selectedCategory === cat;
+            return (
+              <button key={cat} onClick={() => setSelectedCategory(cat)}
+                className={cn("px-2.5 py-1 text-[11px] font-medium rounded-full border transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 shrink-0",
+                  isSelected ? "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)] font-semibold shadow-xs" : "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)] hover:text-[var(--text-primary)]")}>
+                <span>{cat}</span><span className={cn("px-1.5 py-0.2 text-[9px] font-mono rounded-full", isSelected ? "bg-[var(--accent)] text-white" : "bg-[var(--bg-subtle)] text-[var(--text-muted)]")}>{count}</span>
+              </button>
+            );
+          })}
         </div>
-      </PageToolbar>
+      </div>
 
       <PageContent>
         <PageState state={pageState} moduleId="discover" stateProps={{ loadingVariant: 'cards' }}>
@@ -292,18 +283,12 @@ export function CrewDiscoverPage() {
                   {(keyword || selectedCategory !== 'All Missions' || filterTab !== 'ALL') && <Button variant="outline" size="sm" onClick={() => { setKeyword(''); setFilterTab('ALL'); setSelectedCategory('All Missions'); }} className="h-8 text-[12px] gap-1.5"><X className="w-3.5 h-3.5" /> Clear All Filters</Button>}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="ec-grid">
                   {crews.map(crew => <DiscoverCrewCard key={crew.id} crew={crew} navigate={navigate} onJoin={(id) => joinMutation.mutate(id)} isJoining={joinMutation.isPending && joinMutation.variables === crew.id} joined={joinMutation.isSuccess && joinMutation.variables === crew.id} onPreview={(c) => setPreviewCrew(c)} />)}
                 </div>
               )}
             </div>
             <div className="hidden lg:flex lg:flex-col gap-5">
-              <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 shadow-xs">
-                <div className="grid grid-cols-2 gap-2 text-center">
-                  <div className="p-3 bg-[var(--bg-subtle)]/60 rounded-lg border border-[var(--border-subtle)]"><span className="block text-[18px] font-bold text-[var(--text-primary)] font-mono">{allCrews.length}</span><span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Public Squads</span></div>
-                  <div className="p-3 bg-[var(--bg-subtle)]/60 rounded-lg border border-[var(--border-subtle)]"><span className="block text-[18px] font-bold text-[var(--accent)] font-mono">{totalSeatsOpen}</span><span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Seats Open</span></div>
-                </div>
-              </div>
               <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-5 shadow-xs sticky top-36">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-[var(--accent)]" /><Heading level={4} className="text-[14px] font-bold tracking-tight text-[var(--text-primary)]">Trending Squads</Heading></div>

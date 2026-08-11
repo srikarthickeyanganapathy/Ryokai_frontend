@@ -51,9 +51,8 @@ import { usePermissions, useAuth } from '@/identity';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
 import { InviteMemberModal } from '../../components/Invites/InviteMemberModal';
 import { PageState } from '@/shared/ui/PageState';
-import { toast } from 'sonner';
-
-// Child components for Phase 1 enhancements
+import { EntityCard, EntityStatStrip, EntityFilterBar } from '@/shared/ui/entity-card';
+import { PillNav } from '@/shared/ui/PillNav';
 import { MemberDetailDrawer } from '../components/MemberDetailDrawer';
 import { DirectoryOrgChart } from '../components/DirectoryOrgChart';
 import { DirectoryTableView } from '../components/DirectoryTableView';
@@ -450,73 +449,28 @@ export function DirectoryPage() {
         }
       />
 
-      <PageToolbar>
-        <div className="flex items-center gap-3 flex-wrap w-full">
-          {/* Search — matches teams pattern */}
-          <div className="relative flex-1 max-w-md">
-            <Icons.search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search by name, role or email..."
-              className="w-full pl-9 pr-8 py-2 text-[13px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent-border)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
-                <Icons.x className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          {/* View mode — Calendar-style pill buttons */}
-          <div className="flex items-center bg-[var(--bg-subtle)] rounded-md p-0.5 border border-[var(--border-subtle)]">
-            {[
+      <EntityFilterBar
+          search={searchQuery}
+          onSearch={setSearchQuery}
+          searchPlaceholder="Search by name, role or email..."
+          chips={[
+            { id: 'all', label: 'All', count: members.length },
+            { id: 'active', label: 'Active', count: analytics.activeThisWeek },
+            { id: 'unassigned', label: 'Unassigned', count: members.filter(m => (memberTeamsMap[m.userId] || []).length === 0).length },
+            { id: 'admins', label: 'Admins', count: members.filter(m => m.rolePriority === 0).length },
+          ]}
+          activeChip={quickView || 'all'}
+          onChip={(id) => setQuickView(id === 'all' ? null : id)}
+        >
+                    <PillNav
+            items={[
               { value: 'grid', label: 'Cards' },
               { value: 'table', label: 'Table' },
               { value: 'orgchart', label: 'Chart' },
-            ].map(opt => (
-              <Button
-                key={opt.value}
-                variant="ghost"
-                onClick={() => setViewMode(opt.value)}
-                className={cn(
-                  'px-2.5 py-1 text-[11px] font-medium rounded-sm transition-colors h-auto',
-                  viewMode === opt.value
-                    ? 'bg-[var(--bg-card)] shadow-sm text-[var(--text-primary)]'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-                )}
-              >
-                {opt.label}
-              </Button>
-            ))}
-          </div>
-
-          {/* Quick view presets — Calendar-style pill buttons */}
-          <div className="flex items-center bg-[var(--bg-subtle)] rounded-md p-0.5 border border-[var(--border-subtle)]">
-            {[
-              { value: 'all', label: 'All' },
-              { value: 'active', label: 'Active' },
-              { value: 'unassigned', label: 'Unassigned' },
-              { value: 'admins', label: 'Admins' },
-            ].map(opt => (
-              <Button
-                key={opt.value}
-                variant="ghost"
-                onClick={() => setQuickView(opt.value === 'all' ? null : opt.value)}
-                className={cn(
-                  'px-2.5 py-1 text-[11px] font-medium rounded-sm transition-colors h-auto',
-                  (quickView || 'all') === opt.value
-                    ? 'bg-[var(--bg-card)] shadow-sm text-[var(--text-primary)]'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-                )}
-              >
-                {opt.label}
-              </Button>
-            ))}
-          </div>
-
-          {/* Group by Role — Calendar-style compact toggle */}
+            ]}
+            value={viewMode}
+            onChange={setViewMode}
+          />
           {viewMode === 'grid' && (
             <Button
               variant="ghost"
@@ -532,11 +486,7 @@ export function DirectoryPage() {
               Grouped
             </Button>
           )}
-        </div>
-
-        {/* Compare button when 2 selected */}
-        {selectedIds.length === 2 && (
-          <div className="mt-2 flex justify-end">
+          {selectedIds.length === 2 && (
             <Button
               variant="primary"
               size="sm"
@@ -546,93 +496,19 @@ export function DirectoryPage() {
               <Icons.gitCompare className="w-3.5 h-3.5" />
               Compare (2)
             </Button>
-          </div>
-        )}
-      </PageToolbar>
+          )}
+        </EntityFilterBar>
 
       <PageContent>
-        {/* ───────── Analytics Summary Header ───────── */}
-        {pageState === 'ready' && members.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6"
-          >
-            {/* Total Members */}
-            <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg p-3 shadow-xs hover:shadow-sm transition-shadow">
-              <div className="flex items-center justify-between mb-1.5">
-                <Users className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">Total</span>
-              </div>
-              <div className="text-[22px] sm:text-[26px] font-bold text-[var(--text-primary)] tracking-tight">{analytics.totalMembers}</div>
-              <Text variant="muted" className="text-[11px] mt-0.5">
-                {analytics.newThisMonth > 0
-                  ? `${analytics.newThisMonth} new this month`
-                  : 'Members'}
-              </Text>
-            </div>
-
-            {/* Role Distribution */}
-            <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg p-3 shadow-xs hover:shadow-sm transition-shadow">
-              <div className="flex items-center justify-between mb-1.5">
-                <PieChart className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">Roles</span>
-              </div>
-              <div className="space-y-1.5 mt-1">
-                {['ADMIN', 'MANAGER', 'MEMBER'].map(role => {
-                  const count = roleDistribution[role] || 0;
-                  const pct = totalForRolePct > 0 ? Math.round((count / totalForRolePct) * 100) : 0;
-                  if (count === 0) return null;
-                  return (
-                    <div key={role} className="flex items-center gap-2">
-                      <span className="text-[10px] font-medium text-[var(--text-secondary)] w-[72px] truncate">{role}</span>
-                      <div className="flex-1 h-1 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${pct}%` }}
-                          transition={{ duration: 0.6, ease: 'easeOut' }}
-                          className="h-full bg-[var(--accent)] rounded-full opacity-80"
-                        />
-                      </div>
-                      <span className="text-[10px] text-[var(--text-muted)] w-7 text-right tabular-nums">{pct}%</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Teams Coverage */}
-            <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg p-3 shadow-xs hover:shadow-sm transition-shadow">
-              <div className="flex items-center justify-between mb-1.5">
-                <BarChart3 className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">Coverage</span>
-              </div>
-              <div className="text-[22px] sm:text-[26px] font-bold text-[var(--text-primary)] tracking-tight">{analytics.teamsCoveragePct}%</div>
-              <div className="mt-1.5 h-1 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${analytics.teamsCoveragePct}%` }}
-                  transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
-                  className="h-full bg-[var(--accent)] rounded-full"
-                />
-              </div>
-              <Text variant="muted" className="text-[11px] mt-1">members in ≥1 team</Text>
-            </div>
-
-            {/* Active This Week */}
-            <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg p-3 shadow-xs hover:shadow-sm transition-shadow">
-              <div className="flex items-center justify-between mb-1.5">
-                <Activity className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">Active</span>
-              </div>
-              <div className="text-[22px] sm:text-[26px] font-bold text-[var(--text-primary)] tracking-tight">{analytics.activeThisWeek}</div>
-              <Text variant="muted" className="text-[11px] mt-0.5">
-                {analytics.totalMembers > 0
-                  ? `${Math.round((analytics.activeThisWeek / analytics.totalMembers) * 100)}% active this week`
-                  : 'No recent activity'}
-              </Text>
-            </div>
-          </motion.div>
+                {pageState === 'ready' && members.length > 0 && (
+          <EntityStatStrip
+            stats={[
+              { key: 'total', label: 'Total Members', value: analytics.totalMembers, sublabel: analytics.newThisMonth > 0 ? `${analytics.newThisMonth} new this month` : 'Members', icon: Users, tone: 'cyan' },
+              { key: 'roles', label: 'Roles', value: Object.keys(analytics.roleCounts || {}).length || '—', sublabel: 'Role distribution', icon: PieChart, tone: 'amber' },
+              { key: 'coverage', label: 'Coverage', value: `${analytics.teamsCoveragePct}%`, sublabel: 'Members in ≥1 team', icon: BarChart3, tone: 'emerald' },
+              { key: 'active', label: 'Active', value: analytics.activeThisWeek, sublabel: analytics.totalMembers > 0 ? `${Math.round((analytics.activeThisWeek / analytics.totalMembers) * 100)}% active this week` : 'No recent activity', icon: Activity, tone: 'rose' },
+            ]}
+          />
         )}
 
         {/* ───────── Page State & Member Grid ───────── */}
@@ -1105,8 +981,8 @@ function MemberCardGrid({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        {membersList.map((member, index) => {
+      <div className="ec-grid">
+        {membersList.map((member) => {
           const currentRole = roles.find((r) => r.name === member.orgRole);
           const isSelf = member.userId === user?.id;
           const isLastAdmin = adminCount <= 1 && member.rolePriority === 0;
@@ -1121,199 +997,111 @@ function MemberCardGrid({
           const maxWorkload = Math.max(avgTasksPerMember, tasks.length, 1);
 
           return (
-            <motion.div
+            <EntityCard
               key={member.userId}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(index * 0.03, 0.25) }}
+              type="member"
+              name={member.username + (isSelf ? '  (You)' : '')}
+              tagline={member.email || 'No email provided'}
+              selected={isSelected}
+              disabled={isSuspended}
               onClick={() => onSelectMember(member)}
-              className={cn(
-                "group relative bg-[var(--bg-elevated)] border rounded-xl p-4 sm:p-5 transition-all duration-200 shadow-xs hover:shadow-md hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between overflow-hidden",
-                isSelected
-                  ? "border-[var(--accent)] bg-[var(--accent-soft)]/10 ring-2 ring-[var(--accent)]/30 shadow-[0_0_12px_rgba(var(--accent-rgb,99,102,241),0.15)]"
-                  : "border-[var(--border-subtle)] hover:border-[var(--accent-border)]"
-              )}
-            >
-              {/* Selection checkmark overlay */}
-              {isSelected && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-md z-10"
-                >
-                  <Check className="w-3.5 h-3.5 text-white" />
-                </motion.div>
-              )}
-
-              {/* Top Row: Checkbox, Avatar, Name & Role Badge */}
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-3">
-                    <div onClick={(e) => e.stopPropagation()} className="pt-0.5">
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={() => !disabledSelect && onToggleSelect(member.userId)}
-                        disabled={disabledSelect}
-                        aria-label={`Select ${member.username}`}
-                      />
-                    </div>
-
-                    <div className="relative">
-                      <div
-                        className="w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-sm shrink-0"
-                        style={{ background: `linear-gradient(135deg, hsl(${hue} 60% 46%), hsl(${(hue + 45) % 360} 65% 36%))` }}
-                      >
-                        {member.username?.charAt(0).toUpperCase() || '?'}
-                      </div>
-                      {/* Activity pulse indicator */}
-                      {isActiveNow && (
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[var(--success)] border-2 border-[var(--bg-elevated)] rounded-full" title="Active in last 24h">
-                          <span className="absolute inset-0 rounded-full bg-[var(--success)] animate-ping opacity-75" />
-                        </div>
-                      )}
-                      {isSuspended && (
-                        <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[var(--danger)] border-2 border-[var(--bg-elevated)] rounded-full" title="Suspended" />
-                      )}
-                    </div>
-                  </div>
-
-                  <Badge
-                    variant="outline"
-                    className="shrink-0 text-[10px] uppercase tracking-wider shadow-2xs font-medium"
+              glyph={
+                <div className="relative">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-sm"
+                    style={{ background: `linear-gradient(135deg, hsl(${hue} 60% 46%), hsl(${(hue + 45) % 360} 65% 36%))` }}
                   >
-                    {member.orgRole}
-                  </Badge>
-                </div>
-
-                <div className="mt-2">
-                  <div className="flex items-center gap-2">
-                    <Heading level={3} className={cn("truncate text-[15px] font-semibold tracking-tight", isSuspended ? "text-[var(--text-muted)] line-through" : "text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors")}>
-                      {member.username}
-                    </Heading>
-                    {isSelf && <span className="text-[10px] bg-[var(--bg-subtle)] text-[var(--text-muted)] px-1.5 py-0.5 rounded font-normal border border-[var(--border-subtle)]">(You)</span>}
+                    {member.username?.charAt(0).toUpperCase() || '?'}
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] truncate mt-0.5">
-                    <Mail className="h-3.5 w-3.5 flex-shrink-0 text-[var(--text-muted)]" />
-                    <span className="truncate">{member.email || "No email provided"}</span>
-                  </div>
-
-                  {/* Last active timestamp */}
-                  <div className="flex items-center gap-1 mt-1.5 text-[10px] text-[var(--text-muted)]">
-                    <Clock className="w-3 h-3 flex-shrink-0" />
-                    <span>{lastActive ? `Last active: ${lastActive}` : 'No recent activity'}</span>
-                    {isActiveNow && <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)]" />}
-                  </div>
-                </div>
-
-                {/* Team Affiliations and Workload Pills */}
-                <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
-                  {teams.length > 0 ? (
-                    teams.slice(0, 2).map((t) => (
-                      <Badge key={t.id || t.name} variant="outline" className="text-[10px] bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)] font-medium">
-                        <Users className="w-2.5 h-2.5 mr-1 text-[var(--text-muted)]" />
-                        {t.name}
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-[10px] text-[var(--text-muted)] bg-[var(--bg-subtle)] px-2 py-0.5 rounded-full italic border border-dashed border-[var(--border-subtle)]">
-                      No team assigned
-                    </span>
+                  {isActiveNow && (
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[var(--success)] border-2 border-[var(--bg-elevated)] rounded-full" title="Active in last 24h">
+                      <span className="absolute inset-0 rounded-full bg-[var(--success)] animate-ping opacity-75" />
+                    </div>
                   )}
-                  {teams.length > 2 && <span className="text-[10px] font-mono text-[var(--text-muted)] pl-0.5">+{teams.length - 2}</span>}
-
-                  <Badge variant="outline" className="text-[10px] bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)] font-medium ml-auto">
-                    <FolderKanban className={cn("w-2.5 h-2.5 mr-1", tasks.length > 0 ? "text-[var(--accent)]" : "text-[var(--text-muted)]")} />
-                    {tasks.length} {tasks.length === 1 ? 'Task' : 'Tasks'}
-                  </Badge>
+                  {isSuspended && (
+                    <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[var(--danger)] border-2 border-[var(--bg-elevated)] rounded-full" title="Suspended" />
+                  )}
                 </div>
-
-                {/* Mini workload bar: this member vs org average */}
-                <div className="mt-2.5 space-y-1">
-                  <div className="flex items-center justify-between text-[9px] text-[var(--text-muted)]">
-                    <span>Workload</span>
-                    <span>avg {avgTasksPerMember > 0 ? avgTasksPerMember : '—'}</span>
-                  </div>
-                  <div className="h-1.5 bg-[var(--bg-subtle)] rounded-full overflow-hidden flex">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: maxWorkload > 0 ? `${(tasks.length / maxWorkload) * 100}%` : '0%' }}
-                      transition={{ duration: 0.4, ease: 'easeOut', delay: index * 0.02 }}
-                      className={cn(
-                        "h-full rounded-full",
-                        tasks.length >= avgTasksPerMember && avgTasksPerMember > 0
-                          ? "bg-[var(--warning)]"
-                          : "bg-[var(--accent)]"
-                      )}
-                    />
-                    {avgTasksPerMember > 0 && (
-                      <div
-                        className="h-full w-0.5 bg-[var(--text-muted)]/50"
-                        style={{ marginLeft: `-${(avgTasksPerMember / maxWorkload) * 100}%` }}
-                      />
-                    )}
-                  </div>
+              }
+              badges={[
+                <span key="role" className="ec-badge ec-badge--ghost">{member.orgRole}</span>,
+                ...(isSuspended ? [<span key="susp" className="ec-badge ec-badge--rose">Suspended</span>] : []),
+              ]}
+              actions={
+                <div className="ec-actions" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={() => !disabledSelect && onToggleSelect(member.userId)}
+                    disabled={disabledSelect}
+                    aria-label={`Select ${member.username}`}
+                  />
                 </div>
-              </div>
-
-              {/* Bottom Row: Priority rank & Inline Governance Controls */}
-              <div className="mt-4 pt-3 border-t border-[var(--border-subtle)]/60 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] font-medium">
-                  <Shield className="h-3 w-3 text-[var(--accent)]" />
-                  <span>Rank #{member.rolePriority ?? 'N/A'}</span>
-                </div>
-
-                {(canManageRoles || canRemoveMembers) && (
-                  <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                    {canManageRoles && (
-                      <Select
-                        value={currentRole?.id?.toString() ?? ''}
-                        onValueChange={(val) =>
-                          updateRoleMutation.mutate({
-                            userId: member.userId,
-                            roleId: parseInt(val, 10),
-                          })
-                        }
-                        disabled={updateRoleMutation.isPending || isSelf || isLastAdmin}
-                      >
-                        <SelectTrigger className="w-[105px] h-7 text-[11px] font-medium bg-[var(--bg-card)] hover:bg-[var(--bg-hover)]">
-                          <SelectValue placeholder={member.orgRole || 'Role'} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {roles.map((role) => (
-                            <SelectItem key={role.id} value={role.id.toString()}>
-                              {role.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-
-                    {canRemoveMembers && !isSelf && !isLastAdmin && (
-                      <IconButton
-                        variant="danger"
-                        size="sm"
-                        className="h-7 w-7 opacity-80 hover:opacity-100 transition-opacity"
-                        title="Remove Member"
-                        aria-label="Remove member"
-                        onClick={async () => {
-                          if (
-                            await confirm({
-                              title: `Remove ${member.username} from organization?`,
-                              danger: true,
+              }
+              meta={[
+                { icon: <Clock style={{ width: 11, height: 11 }} />, text: lastActive ? `Active ${lastActive}` : 'No recent activity' },
+                { icon: <Users style={{ width: 11, height: 11 }} />, text: teams.length > 0 ? teams.slice(0, 2).map(t => t.name).join(', ') + (teams.length > 2 ? ` +${teams.length - 2}` : '') : 'No team assigned' },
+                { icon: <FolderKanban style={{ width: 11, height: 11 }} />, text: `${tasks.length} ${tasks.length === 1 ? 'Task' : 'Tasks'}` },
+              ]}
+              progress={maxWorkload > 0 ? Math.round((tasks.length / maxWorkload) * 100) : 0}
+              progressLabel={`Workload · avg ${avgTasksPerMember > 0 ? avgTasksPerMember : '—'}`}
+              footer={
+                <div className="ec-card-foot">
+                  <span className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] font-medium">
+                    <Shield className="h-3 w-3 text-[var(--accent)]" />
+                    <span>Rank #{member.rolePriority ?? 'N/A'}</span>
+                  </span>
+                  {(canManageRoles || canRemoveMembers) && (
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      {canManageRoles && (
+                        <Select
+                          value={currentRole?.id?.toString() ?? ''}
+                          onValueChange={(val) =>
+                            updateRoleMutation.mutate({
+                              userId: member.userId,
+                              roleId: parseInt(val, 10),
                             })
-                          ) {
-                            removeMemberMutation.mutate(member.userId);
                           }
-                        }}
-                        disabled={removeMemberMutation.isPending}
-                      >
-                        <Icons.trash2 className="w-3.5 h-3.5" />
-                      </IconButton>
-                    )}
-                  </div>
-                )}
-              </div>
-            </motion.div>
+                          disabled={updateRoleMutation.isPending || isSelf || isLastAdmin}
+                        >
+                          <SelectTrigger className="w-[105px] h-7 text-[11px] font-medium bg-[var(--bg-card)] hover:bg-[var(--bg-hover)]">
+                            <SelectValue placeholder={member.orgRole || 'Role'} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {roles.map((role) => (
+                              <SelectItem key={role.id} value={role.id.toString()}>
+                                {role.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                      {canRemoveMembers && !isSelf && !isLastAdmin && (
+                        <IconButton
+                          variant="danger"
+                          size="sm"
+                          className="h-7 w-7 opacity-80 hover:opacity-100 transition-opacity"
+                          title="Remove Member"
+                          aria-label="Remove member"
+                          onClick={async () => {
+                            if (
+                              await confirm({
+                                title: `Remove ${member.username} from organization?`,
+                                danger: true,
+                              })
+                            ) {
+                              removeMemberMutation.mutate(member.userId);
+                            }
+                          }}
+                          disabled={removeMemberMutation.isPending}
+                        >
+                          <Icons.trash2 className="w-3.5 h-3.5" />
+                        </IconButton>
+                      )}
+                    </div>
+                  )}
+                </div>
+              }
+            />
           );
         })}
       </div>

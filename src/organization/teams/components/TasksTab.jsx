@@ -7,6 +7,9 @@ import { Badge } from '@/shared/ui/Badge'
 import { Avatar, AvatarFallback } from '@/shared/ui/Avatar'
 import { Checkbox } from '@/shared/ui/Checkbox'
 import { PriorityBadge } from '@/shared/ui/PriorityBadge'
+import { StatusBadge } from '@/shared/ui/StatusBadge'
+import { PillNav } from '@/shared/ui/PillNav'
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { useDeleteTask, useRejectTask } from '@/task'
@@ -65,41 +68,24 @@ export function AssigneeAvatar({ name, size = 'md' }) {
   )
 }
 
-function StatusChip({ task }) {
-  const s = statusOf(task)
-  const map = {
-    DONE: { label: 'Done', cls: 'bg-[var(--success-soft)] text-[var(--success)]' },
-    IN_PROGRESS: { label: 'In progress', cls: 'bg-[var(--accent-soft)] text-[var(--accent)]' },
-    REVIEW: { label: 'In review', cls: 'bg-[var(--warning-soft)] text-[var(--warning)]' },
-    SUBMITTED: { label: 'Submitted', cls: 'bg-[var(--warning-soft)] text-[var(--warning)]' },
-    REJECTED: { label: 'Rejected', cls: 'bg-[var(--danger-soft)] text-[var(--danger)]' },
-    TODO: { label: 'To do', cls: 'bg-[var(--bg-subtle)] text-[var(--text-muted)]' },
-  }
-  const m = map[s] || { label: s.replace(/_/g, ' ').toLowerCase(), cls: 'bg-[var(--bg-subtle)] text-[var(--text-muted)]' }
-  return <span className={cn('px-1.5 py-0.5 rounded-md text-[9.5px] font-bold uppercase tracking-wide shrink-0', m.cls)}>{m.label}</span>
-}
-
-function MemberList({ members, task, onPick, onClose }) {
+function AssignList({ members, current, onPick }) {
   return (
-    <>
-      <div className="fixed inset-0 z-30" onClick={onClose} />
-      <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="absolute right-0 top-7 z-40 min-w-[150px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl shadow-[var(--shadow-lg)] p-1.5">
-        <p className="px-2.5 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Assign to</p>
-        {members.length === 0 && <p className="px-2.5 pb-2 text-[11px] text-[var(--text-muted)]">No members.</p>}
-        {members.map(m => {
-          const name = m.username || m.name
-          const current = task && (task.assignedTo === name || task.assignee?.username === name)
-          return (
-            <button key={m.id || name} onClick={() => onPick(m)}
-              className={cn('w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] font-medium hover:bg-[var(--bg-subtle)] cursor-pointer text-left', current && 'text-[var(--accent)] font-bold')}>
-              <AssigneeAvatar name={name} size="sm" />
-              <span className="flex-1 min-w-0 truncate">{name}</span>
-              {current && <Check className="w-3 h-3" />}
-            </button>
-          )
-        })}
-      </motion.div>
-    </>
+    <div className="p-1">
+      <p className="px-2 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Assign to</p>
+      {members.length === 0 && <p className="px-2.5 pb-2 text-[11px] text-[var(--text-muted)]">No members.</p>}
+      {members.map(m => {
+        const name = m.username || m.name
+        const isCurrent = name === current
+        return (
+          <button key={m.id || name} onClick={() => onPick(m)}
+            className={cn('w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] font-medium hover:bg-[var(--bg-subtle)] cursor-pointer text-left', isCurrent && 'text-[var(--accent)] font-bold')}>
+            <AssigneeAvatar name={name} size="sm" />
+            <span className="flex-1 min-w-0 truncate">{name}</span>
+            {isCurrent && <Check className="w-3 h-3" />}
+          </button>
+        )
+      })}
+    </div>
   )
 }
 
@@ -132,7 +118,7 @@ export function TaskRow({ task, members, canAssignTask, canEditTask, canDeleteTa
       <span className={cn('flex-1 min-w-0 truncate text-[12.5px]', done ? 'text-[var(--text-muted)] line-through' : 'font-medium')}>{task.title}</span>
       <PriorityBadge priority={task.priority} />
       {due && <Badge variant={due.tone === 'danger' ? 'danger' : due.tone === 'warning' ? 'warning' : 'outline'} className="text-[10px] shrink-0">{due.label}</Badge>}
-      <StatusChip task={task} />
+      <StatusBadge status={task.currentStatus || task.status} variant="pill" showIcon={false} className="shrink-0" />
       {canDeleteTask && !isReadOnly && (
         <button
           onClick={e => { e.stopPropagation(); onDelete(task) }} title="Delete task"
@@ -140,12 +126,18 @@ export function TaskRow({ task, members, canAssignTask, canEditTask, canDeleteTa
           <Trash2 className="w-3.5 h-3.5" />
         </button>
       )}
-      <div className="relative shrink-0" onClick={e => e.stopPropagation()}>
-        <button onClick={() => canAssignTask && !isReadOnly && setAssignOpen(!assignOpen)} title="Assign"
-          className={cn('block rounded-lg transition-opacity cursor-pointer', (canAssignTask && !isReadOnly) ? 'hover:opacity-80' : 'pointer-events-none')}>
-          <AssigneeAvatar name={typeof task.assignedTo === 'string' ? task.assignedTo : task.assignee?.username || task.assignedTo?.username} />
-        </button>
-        {assignOpen && <MemberList members={members} task={task} onClose={() => setAssignOpen(false)} onPick={m => { onAssign(task.id, m.id, m.username || m.name); setAssignOpen(false) }} />}
+      <div className="shrink-0" onClick={e => e.stopPropagation()}>
+        <Popover open={assignOpen} onOpenChange={setAssignOpen}>
+          <PopoverTrigger asChild>
+            <button title="Assign" className={cn('block rounded-lg transition-opacity cursor-pointer', (canAssignTask && !isReadOnly) ? 'hover:opacity-80' : 'pointer-events-none')}>
+              <AssigneeAvatar name={typeof task.assignedTo === 'string' ? task.assignedTo : task.assignee?.username || task.assignedTo?.username} />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-44 p-0" align="end">
+            <AssignList members={members} current={typeof task.assignedTo === 'string' ? task.assignedTo : task.assignee?.username || task.assignedTo?.username}
+              onPick={m => { setAssignOpen(false); onAssign(task.id, m.id, m.username || m.name) }} />
+          </PopoverContent>
+        </Popover>
       </div>
     </div>
   )
@@ -170,7 +162,7 @@ export function TasksTab({
   const deleteMutation = useDeleteTask()
   const rejectMutation = useRejectTask()
   const [selectedIds, setSelectedIds] = useState({})
-  const [assignOpen, setAssignOpen] = useState(false)
+  const [bulkAssignOpen, setBulkAssignOpen] = useState(false)
 
   const counts = useMemo(() => {
     const c = { all: teamTasks.length, overdue: 0, due: 0, in_progress: 0, done: 0 }
@@ -274,7 +266,6 @@ export function TasksTab({
 
   const handleBulkAssign = (member) => {
     selectedTasks.forEach(t => handleAssign(t.id, member.id, member.username || member.name))
-    setAssignOpen(false)
     setSelectedIds({})
   }
 
@@ -302,18 +293,9 @@ export function TasksTab({
     <div className="pt-4">
       {confirmDialog}
 
-      {/* Filter chips */}
-      <div className="flex items-center gap-1.5 flex-wrap mb-3">
-        {FILTERS.map(f => {
-          const active = filter === f.value
-          return (
-            <button key={f.value} onClick={() => onFilterChange?.(f.value)}
-              className={cn('px-3 py-1.5 rounded-full text-[11.5px] font-semibold border transition-all cursor-pointer',
-                active ? 'bg-[var(--accent-soft)] border-[var(--accent-border)] text-[var(--accent)]' : 'bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]')}>
-              {f.label} <span className="tabular-nums opacity-70">{counts[f.value]}</span>
-            </button>
-          )
-        })}
+      {/* Filter tabs + view shortcut */}
+      <div className="flex items-center gap-2 flex-wrap mb-3">
+        <PillNav filters={FILTERS} value={filter} onChange={v => onFilterChange?.(v)} counts={counts} />
         <span className="flex-1" />
         {onViewProjects && (
           <Button size="xs" variant="ghost" className="gap-1 text-[11px]" onClick={onViewProjects}>
@@ -332,12 +314,17 @@ export function TasksTab({
             <Button size="xs" variant="outline" onClick={handleBulkSubmit}>Submit for review</Button>
             {canReviewTask && <Button size="xs" variant="outline" onClick={handleBulkReject}>Send back</Button>}
             <div className="relative">
-              <Button size="xs" variant="outline" className="gap-1" onClick={() => setAssignOpen(!assignOpen)}>
-                <UserPlus className="w-3 h-3" /> Assign
-              </Button>
-              {assignOpen && (
-                <MemberList members={members} task={null} onClose={() => setAssignOpen(false)} onPick={handleBulkAssign} />
-              )}
+              <Popover open={bulkAssignOpen} onOpenChange={setBulkAssignOpen}>
+                <PopoverTrigger asChild>
+                  <Button size="xs" variant="outline" className="gap-1">
+                    <UserPlus className="w-3 h-3" /> Assign
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-44 p-0" align="start">
+                  <AssignList members={members} current={null}
+                    onPick={m => { setBulkAssignOpen(false); handleBulkAssign(m) }} />
+                </PopoverContent>
+              </Popover>
             </div>
             {canDeleteTask && (
               <Button size="xs" variant="outline" className="gap-1 text-[var(--danger)]" onClick={handleBulkDelete}>

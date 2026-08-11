@@ -31,6 +31,7 @@ const VerifyEmailPage = Loadable(lazy(() => import("@/identity/pages/VerifyEmail
 const SessionExpiredPage = Loadable(lazy(() => import("@/identity/pages/SessionExpiredPage").then(m => ({ default: m.SessionExpiredPage }))));
 const DashboardPage = Loadable(lazy(() => import("@/dashboard/pages/DashboardPage").then(m => ({ default: m.DashboardPage }))));
 const TasksPage = Loadable(lazy(() => import("@/task/pages/TasksPage").then(m => ({ default: m.TasksPage }))));
+const TaskDetailPage = Loadable(lazy(() => import("@/task/pages/TaskDetailPage").then(m => ({ default: m.default }))));
 const NebulaSpacePage = Loadable(lazy(() => import("@/task/pages/NebulaSpacePage").then(m => ({ default: m.NebulaSpacePage }))));
 const ProjectsPage = Loadable(lazy(() => import("@/project/pages/ProjectsPage").then(m => ({ default: m.ProjectsPage }))));
 const ProjectDetailPage = Loadable(lazy(() => import("@/project/pages/ProjectDetailPage").then(m => ({ default: m.ProjectDetailPage }))));
@@ -116,6 +117,7 @@ export default function App() {
                   <Route element={<MainLayout />}>
                     <Route index element={<DashboardPage />} />
                     <Route path="tasks" element={<TasksPage />} />
+                    <Route path="tasks/:taskId" element={<TaskDetailPage />} />
                     <Route path="projects" element={<ProjectsPage />} />
                     <Route path="projects/:projectId" element={<ProjectDetailPage />} />
                     <Route path="organizations" element={<OrganizationsPage />} />

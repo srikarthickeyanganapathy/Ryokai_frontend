@@ -33,7 +33,7 @@ export const DrawerContent = forwardRef(({ className, children, side = 'right', 
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          'fixed z-50 gap-4 bg-[var(--bg-elevated)] border-[var(--border-subtle)] p-6 shadow-[var(--shadow-lg),var(--inset-highlight-soft)] ease-[var(--ease-spring)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-[var(--duration-base)] data-[state=open]:duration-[var(--duration-slower)]',
+          'fixed z-50 gap-4 bg-[var(--bg-elevated)] border-[var(--border-subtle)] p-6 overflow-y-auto custom-scrollbar shadow-[var(--shadow-lg),var(--inset-highlight-soft)] ease-[var(--ease-spring)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-[var(--duration-base)] data-[state=open]:duration-[var(--duration-slower)]',
           sideVariants[side],
           className
         )}

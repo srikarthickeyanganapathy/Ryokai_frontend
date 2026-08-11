@@ -7,12 +7,12 @@ import { Badge } from '@/shared/ui/Badge';
 import { Input } from '@/shared/ui/Input';
 import { Textarea } from '@/shared/ui/Textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/Select';
-import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { toast } from 'sonner';
 import { Icons } from '@/shared/ui/Icons';
 import { StatPill } from '@/shared/ui/StatPill';
-import { PageShell, PageHero, PageToolbar, PageContent } from '@/shared/ui/PageShell';
+import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
 import { PageState } from '@/shared/ui/PageState';
+import { EntityCard, EntityStatStrip, EntityFilterBar } from '@/shared/ui/entity-card';
 import {
   Compass, Users, MoreVertical, MessageSquare, CheckSquare, Layout, Settings,
   Plus, X, Search, Sparkles, RefreshCw, Folder, Shield, UserPlus, ArrowRight, Check, Globe
@@ -354,62 +354,43 @@ export function CrewsPage() {
       {crews.length > 0 && (
         <>
           {/* KPI Strip — matches teams module design language */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
-            <StatKPI icon={Users} label="Total Crews" value={crews.length} sublabel="Squads in your orbit" hue={239} />
-            <StatKPI icon={Shield} label="Owned" value={ownedCount} sublabel={ownedCount > 0 ? 'Crews you own' : 'No crews owned yet'} hue={38} />
-            <StatKPI icon={UserPlus} label="Joined" value={joinedCount} sublabel="Crews you belong to" hue={160} />
-            <StatKPI icon={MessageSquare} label="Roster" value={roster} sublabel="Members across all crews" hue={263} />
-          </div>
+          <EntityStatStrip
+            stats={[
+              { key: 'total', label: 'Total Crews', value: crews.length, sublabel: 'Squads in your orbit', icon: Users, tone: 'cyan' },
+              { key: 'owned', label: 'Owned', value: ownedCount, sublabel: ownedCount > 0 ? 'Crews you own' : 'No crews owned yet', icon: Shield, tone: 'amber' },
+              { key: 'joined', label: 'Joined', value: joinedCount, sublabel: 'Crews you belong to', icon: UserPlus, tone: 'emerald' },
+              { key: 'roster', label: 'Roster', value: roster, sublabel: 'Members across all crews', icon: MessageSquare, tone: 'accent' },
+            ]}
+          />
 
-          <PageToolbar>
-            <div className="flex flex-wrap items-center gap-3 w-full">
-              {/* Category chips with animated indicator */}
-              <div className="flex items-center gap-1 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-1">
-                {[{ key: 'ALL', label: 'All Squads' }, { key: 'OWNED', label: 'Owned' }, { key: 'JOINED', label: 'Joined' }].map(opt => (
-                  <CategoryChip
-                    key={opt.key}
-                    label={opt.label}
-                    count={opt.key === 'ALL' ? crews.length : opt.key === 'OWNED' ? ownedCount : joinedCount}
-                    isActive={activeTab === opt.key}
-                    onClick={() => setActiveTab(opt.key)}
-                  />
-                ))}
-              </div>
-              <div className="relative flex-1 max-w-sm">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" aria-hidden="true" />
-                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search crews..." aria-label="Search crews"
-                  className="w-full pl-9 pr-8 py-2 text-[13px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-muted)] shadow-xs" />
-                {searchQuery && <IconButton variant="ghost" size="sm" className="absolute right-2.5 top-1/2 -translate-y-1/2" onClick={() => setSearchQuery('')} title="Clear search"><X className="w-3.5 h-3.5" /></IconButton>}
-              </div>
-            </div>
-          </PageToolbar>
+          <EntityFilterBar
+            search={searchQuery}
+            onSearch={setSearchQuery}
+            searchPlaceholder="Search crews..."
+            chips={[
+              { id: 'ALL', label: 'All Squads', count: crews.length },
+              { id: 'OWNED', label: 'Owned', count: ownedCount },
+              { id: 'JOINED', label: 'Joined', count: joinedCount },
+            ]}
+            activeChip={activeTab}
+            onChip={setActiveTab}
+          />
         </>
       )}
 
-      <PageContent>
-        <PageState state={pageState} moduleId="crews" stateProps={{ loadingVariant: 'cards' }}>
-          {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">
-              {Array.from({ length: 6 }).map((_, i) => <CrewCardSkeleton key={i} />)}
-            </div>
-          ) : filteredCrews.length === 0 && crews.length > 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-[var(--border-subtle)] rounded-2xl bg-[var(--bg-card)] p-8">
-              <div className="w-12 h-12 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center mb-3 text-[var(--text-muted)]"><Search className="w-6 h-6" /></div>
-              <Heading level={3} className="text-[15px] font-semibold tracking-tight text-[var(--text-primary)] mb-1">No crews match your filter</Heading>
-              <Text variant="muted" className="text-[13px] max-w-sm mb-4">We couldn't find any crew matching "{searchQuery}". Try searching for another term or reset filters.</Text>
-              <Button variant="outline" size="sm" onClick={() => { setSearchQuery(''); setActiveTab('ALL'); }} className="h-8 text-[12px] gap-1.5"><RefreshCw className="w-3.5 h-3.5" /> Reset Filters</Button>
-            </div>
-          ) : (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">
-              {filteredCrews.map((crew) => <CrewCard key={crew.id} crew={crew} navigate={navigate} isCompareSelected={compareIds.includes(crew.id)} onToggleCompare={toggleCompare} />)}
-            </motion.div>
-          )}
-        </PageState>
-      </PageContent>
 
-      <Modal open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <ModalContent className="sm:max-w-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-2xl rounded-2xl p-6 overflow-hidden">
+{isCreateOpen ? (
+      <div className="flex-1 min-h-0 flex flex-col">
+        <div className="shrink-0 px-6 py-3 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-base)]">
+          <div>
+            <h2 className="text-lg font-bold text-[var(--text-primary)]">Create Mission Crew</h2>
+            <p className="text-[12px] text-[var(--text-muted)] mt-0.5">Establish a collaborative mission team</p>
+          </div>
+          <button onClick={() => setIsCreateOpen(false)} className="text-[13px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">Cancel</button>
+        </div>
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+          <div className="max-w-2xl mx-auto">
+            
           <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4 mb-5">
             <div>
               <Heading level={3} className="text-[17px] font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2"><Sparkles className="w-4 h-4 text-[var(--accent)]" /> Create Mission Crew</Heading>
@@ -459,8 +440,35 @@ export function CrewsPage() {
               <Button type="submit" size="sm" variant="primary" className="h-9 text-[12px] px-5 rounded-lg shadow-sm gap-1.5 font-semibold" isLoading={createCrewMutation.isPending}><Sparkles className="w-3.5 h-3.5" /> Initialize Crew</Button>
             </div>
           </form>
-        </ModalContent>
-      </Modal>
+        
+          </div>
+        </div>
+      </div>
+    ) : (
+      <PageContent>
+        <PageState state={pageState} moduleId="crews" stateProps={{ loadingVariant: 'cards' }}>
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">
+              {Array.from({ length: 6 }).map((_, i) => <CrewCardSkeleton key={i} />)}
+            </div>
+          ) : filteredCrews.length === 0 && crews.length > 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-[var(--border-subtle)] rounded-2xl bg-[var(--bg-card)] p-8">
+              <div className="w-12 h-12 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center mb-3 text-[var(--text-muted)]"><Search className="w-6 h-6" /></div>
+              <Heading level={3} className="text-[15px] font-semibold tracking-tight text-[var(--text-primary)] mb-1">No crews match your filter</Heading>
+              <Text variant="muted" className="text-[13px] max-w-sm mb-4">We couldn't find any crew matching "{searchQuery}". Try searching for another term or reset filters.</Text>
+              <Button variant="outline" size="sm" onClick={() => { setSearchQuery(''); setActiveTab('ALL'); }} className="h-8 text-[12px] gap-1.5"><RefreshCw className="w-3.5 h-3.5" /> Reset Filters</Button>
+            </div>
+          ) : (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
+              className="ec-grid">
+              {filteredCrews.map((crew) => <CrewCard key={crew.id} crew={crew} navigate={navigate} isCompareSelected={compareIds.includes(crew.id)} onToggleCompare={toggleCompare} />)}
+            </motion.div>
+          )}
+        </PageState>
+      </PageContent>
+    )}
+
+
       <AnimatePresence>
         {compareCrews.length > 0 && (
           <ComparePanel crews={compareCrews} statsMap={statsMap} onClose={() => setCompareIds([])} />
@@ -490,41 +498,52 @@ function CrewCard({ crew, navigate, isCompareSelected = false, onToggleCompare }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMenuOpen]);
 
+  const roleBadge = isOwner ? (
+    <span key="role" className="ec-badge ec-badge--amber"><span className="ec-dot" /> Owner</span>
+  ) : isMember ? (
+    <span key="role" className="ec-badge ec-badge--accent"><span className="ec-dot" /> Member</span>
+  ) : (
+    <span key="role" className="ec-badge ec-badge--ghost"><Globe className="w-3 h-3" style={{ width: 10, height: 10 }} /> {crew.visibility?.replace('_', ' ') || 'Public'}</span>
+  );
+
+  const memberAvatars = (crew.activeMembers || []).slice(0, 4).map(m => ({
+    initials: (m.username || m.name || '?').charAt(0).toUpperCase(),
+    color: `hsl(${hashHue(m.username || m.name || '')} 65% 50%)`,
+    title: m.username || m.name || 'Member',
+  }));
+
   return (
-    <motion.div onClick={handleCardClick} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCardClick(); } }}
-      whileHover={{ y: -4, scale: 1.01 }} whileTap={{ scale: 0.98 }}
-      className={cn("group relative bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-5 flex flex-col transition-all duration-300 overflow-hidden cursor-pointer outline-none", "hover:border-[var(--accent-border)] hover:shadow-xl", isCompareSelected && "ring-2 ring-[var(--accent)] border-[var(--accent-border)]")}
-      style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
-      <div className="absolute inset-0 pointer-events-none transition-opacity duration-500 opacity-30 group-hover:opacity-70"
-        style={{ background: `radial-gradient(circle at 90% 10%, hsl(${colorMeta.hue} ${colorMeta.sat}% ${colorMeta.light}% / 0.15) 0%, transparent 65%)` }} />
-      <div className="flex items-start justify-between gap-3 mb-3.5 relative z-10">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <TeamAvatar name={crew.name} colorMeta={colorMeta} size="md" />
-          <div className="min-w-0 flex-1">
-            <Heading level={4} className="text-[15px] font-bold leading-tight truncate tracking-tight text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors" title={crew.name}>{crew.name}</Heading>
-            <div className="flex items-center gap-2 mt-1">
-              {isOwner ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--warning-soft)] text-[var(--warning)] border border-[var(--warning-border)]"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Owner</span>
-                : isMember ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)]"><span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" /> Member</span>
-                : <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--text-muted)]"><Globe className="w-3 h-3" /> {crew.visibility?.replace('_', ' ') || 'Public'}</span>}
-            </div>
-          </div>
-        </div>
-        <div className="relative shrink-0 flex items-center gap-1" ref={menuRef}>
-          {/* Compare toggle (teams-module design language) */}
-          <IconButton variant="ghost" size="sm"
+    <EntityCard
+      type="crew"
+      glyph={<TeamAvatar name={crew.name} colorMeta={colorMeta} size="md" />}
+      name={crew.name}
+      tagline={crew.description || 'No mission objective defined for this squad.'}
+      onClick={handleCardClick}
+      selected={isCompareSelected}
+      badges={[roleBadge]}
+      avatars={memberAvatars}
+      avatarOverflow={Math.max(0, (crew.activeMembers?.length || 0) - 4)}
+      meta={[
+        { icon: <Users style={{ width: 11, height: 11 }} />, text: `${memberCount}/${crew.memberCap || '∞'} members` },
+        { icon: <Folder style={{ width: 11, height: 11 }} />, text: `${crew.projectCount ?? 0} projects` },
+        { icon: <MessageSquare style={{ width: 11, height: 11 }} />, text: `${crew.channelCount ?? 1} channels` },
+      ]}
+      progress={progressPct}
+      progressLabel={`${Math.round(progressPct)}%`}
+      actions={
+        <div className="ec-actions" style={{ position: 'relative' }} ref={menuRef}>
+          <button
+            type="button"
+            className={cn('ec-kebab', isCompareSelected && 'text-[var(--accent)]')}
             onClick={(e) => { e.stopPropagation(); onToggleCompare?.(crew.id); }}
             aria-label={isCompareSelected ? 'Remove from comparison' : 'Add to comparison'}
             title={isCompareSelected ? 'Remove from comparison' : 'Add to comparison'}
-            className={cn(
-              'border',
-              isCompareSelected
-                ? 'text-[var(--accent)] bg-[var(--accent-soft)] border-[var(--accent-border)]'
-                : 'text-[var(--text-muted)] border-transparent'
-            )}
           >
             <Icons.scale className="w-4 h-4" />
-          </IconButton>
-          <IconButton variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }} aria-label="Quick jump context menu"><MoreVertical className="w-4 h-4" /></IconButton>
+          </button>
+          <button type="button" className="ec-kebab" onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }} aria-label="Quick jump context menu">
+            <MoreVertical className="w-4 h-4" />
+          </button>
           <AnimatePresence>
             {isMenuOpen && (
               <motion.div initial={{ opacity: 0, scale: 0.95, y: -4 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: -4 }} transition={{ duration: 0.15 }}
@@ -540,27 +559,18 @@ function CrewCard({ crew, navigate, isCompareSelected = false, onToggleCompare }
             )}
           </AnimatePresence>
         </div>
-      </div>
-      <Text variant="muted" size="sm" className="line-clamp-2 mb-4 min-h-[2.4em] text-[12.5px] leading-relaxed relative z-10">{crew.description || 'No mission objective defined for this squad.'}</Text>
-      <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-subtle)]/50 border border-[var(--border-subtle)] mb-4 relative z-10">
-        <div><div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">Active Roster</div><MemberAvatarStack members={crew.activeMembers || []} max={4} /></div>
-        <div className="flex items-center gap-2">
-          <div className="text-right"><div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-0.5">Completion</div><div className="text-[11px] font-bold text-[var(--text-primary)]">{completedTasks}/{totalTasks || 1} tasks</div></div>
-          <RadialProgressRing progress={progressPct} hue={colorMeta.hue} />
+      }
+      footer={
+        <div className="ec-card-foot">
+          <Button variant="default" size="sm" className="flex-1 h-9 text-[12px] font-semibold shadow-xs gap-1.5 group/btn" onClick={(e) => { e.stopPropagation(); handleCardClick(); }}>
+            <span>Enter Mission Portal</span><ArrowRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-1" />
+          </Button>
+          <Button variant="outline" size="sm" className="h-9 w-9 p-0 text-[12px] shrink-0 rounded-lg hover:border-[var(--accent)]" title="Crew Settings" onClick={(e) => handleQuickJump(e, 'overview')}>
+            <Settings className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+          </Button>
         </div>
-      </div>
-      <div className="flex flex-wrap items-center gap-2 mb-4 relative z-10">
-        <StatPill icon={Users} label="members" value={`${memberCount}/${crew.memberCap || '∞'}`} className="bg-[var(--bg-subtle)]/70 py-1 px-2.5 gap-1.5 [&_span:first-of-type]:text-[11px] [&_span:last-of-type]:text-[10px]" />
-        <StatPill icon={Folder} label="projects" value={crew.projectCount ?? 0} className="bg-[var(--bg-subtle)]/70 py-1 px-2.5 gap-1.5 [&_span:first-of-type]:text-[11px] [&_span:last-of-type]:text-[10px]" />
-        <StatPill icon={MessageSquare} label="channels" value={crew.channelCount ?? 1} className="bg-[var(--bg-subtle)]/70 py-1 px-2.5 gap-1.5 [&_span:first-of-type]:text-[11px] [&_span:last-of-type]:text-[10px]" />
-      </div>
-      <div className="mt-auto pt-3.5 border-t border-[var(--border-subtle)] flex items-center gap-2 relative z-10">
-        <Button variant="default" size="sm" className="flex-1 h-9 text-[12px] font-semibold shadow-xs gap-1.5 group/btn" onClick={(e) => { e.stopPropagation(); handleCardClick(); }}>
-          <span>Enter Mission Portal</span><ArrowRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-1" />
-        </Button>
-        <Button variant="outline" size="sm" className="h-9 w-9 p-0 text-[12px] shrink-0 rounded-lg hover:border-[var(--accent)]" title="Crew Settings" onClick={(e) => handleQuickJump(e, 'overview')}><Settings className="w-3.5 h-3.5 text-[var(--text-muted)]" /></Button>
-      </div>
-    </motion.div>
+      }
+    />
   );
 }
 

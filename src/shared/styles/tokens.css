@@ -1,62 +1,86 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════
-   Ryokai Premium Design Tokens v2
-   Elevated visual language with richer depth, gradients,
-   and refined motion.
+   Ryokai Dawn / Cosmic Design Tokens v4 — Premium Pass
+   Light mode = Dawn (sunrise warmth)   Dark mode = Cosmic (deep space)
+   Bridge color: coral (Dawn) <-> rose/magenta (Cosmic)
+   Luxe signature: champagne gold (Dawn) <-> starlight gold (Cosmic) —
+   reserved for moments that should feel special, not everyday UI.
    ═══════════════════════════════════════════════════════════════ */
 
 @layer base {
   :root {
-    --bg-base: #FAFBFC;
-    --bg-subtle: #F1F3F6;
-    --bg-sidebar: #F5F6F8;
+    /* ── Dawn: surfaces ── */
+    --bg-base: #FDF6F0;
+    --bg-subtle: #F7EAE1;
+    --bg-sidebar: #FBF1E9;
     --bg-elevated: #FFFFFF;
     --bg-card: var(--bg-elevated);
-    --bg-overlay: rgba(15, 23, 42, 0.45);
-    --bg-hover: #EEF0F4;
-    --bg-hover-strong: #E2E5EB;
-    --text-primary: #0B1120;
-    --text-secondary: #475569;
-    --text-tertiary: #94A3B8;
+    --bg-overlay: rgba(43, 36, 56, 0.45);
+    --bg-hover: #F3E2D6;
+    --bg-hover-strong: #E8D0BF;
+
+    /* ── Dawn: text ── */
+    --text-primary: #2B2438;
+    --text-secondary: #6B5F72;
+    --text-tertiary: #A79AAE;
     --text-on-accent: #FFFFFF;
-    --border-subtle: #E8ECF1;
-    --border-default: #DCE1E8;
-    --border-strong: #CBD1DB;
-    --accent: #4F6EF7;
-    --accent-hover: #3D5BE5;
-    --accent-active: #2E4AD4;
-    --accent-soft: rgba(79, 110, 247, 0.08);
-    --accent-border: rgba(79, 110, 247, 0.2);
-    --accent-gradient: linear-gradient(135deg, #4F6EF7 0%, #7C5CFC 50%, #A855F7 100%);
-    --accent-gradient-hover: linear-gradient(135deg, #3D5BE5 0%, #6B4BEB 50%, #9333EA 100%);
-    --accent-secondary: #1E293B;
-    --accent-secondary-soft: #F1F5F9;
-    --success: #10B981;
-    --success-soft: rgba(16, 185, 129, 0.1);
-    --success-border: rgba(16, 185, 129, 0.2);
-    --success-gradient: linear-gradient(135deg, #10B981 0%, #34D399 100%);
-    --warning: #F59E0B;
-    --warning-soft: rgba(245, 158, 11, 0.1);
-    --warning-border: rgba(245, 158, 11, 0.2);
-    --warning-gradient: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
-    --danger: #EF4444;
-    --danger-soft: rgba(239, 68, 68, 0.1);
-    --danger-border: rgba(239, 68, 68, 0.2);
-    --danger-gradient: linear-gradient(135deg, #EF4444 0%, #F87171 100%);
-    --info: #3B82F6;
-    --info-soft: rgba(59, 130, 246, 0.1);
-    --info-border: rgba(59, 130, 246, 0.2);
-    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-    --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.08), 0 4px 8px -2px rgba(0, 0, 0, 0.04);
-    --shadow-xl: 0 20px 40px -6px rgba(0, 0, 0, 0.1), 0 8px 16px -4px rgba(0, 0, 0, 0.05);
-    --shadow-2xl: 0 32px 64px -8px rgba(0, 0, 0, 0.14);
+
+    /* ── Dawn: borders ── */
+    --border-subtle: #F0DFD3;
+    --border-default: #E4CBB8;
+    --border-strong: #D3AE95;
+
+    /* ── Dawn: accent = Horizon Coral ── */
+    --accent: #F2724A;
+    --accent-hover: #E15A32;
+    --accent-active: #C74822;
+    --accent-soft: rgba(242, 114, 74, 0.1);
+    --accent-border: rgba(242, 114, 74, 0.25);
+    /* Sunrise gradient: rose -> coral -> gold, three real stops */
+    --accent-gradient: linear-gradient(135deg, #D1477A 0%, #F2724A 45%, #F5C453 100%);
+    --accent-gradient-hover: linear-gradient(135deg, #B93564 0%, #E15A32 45%, #E1A83A 100%);
+    --accent-secondary: #4C4177;
+    --accent-secondary-soft: #EDE9F7;
+
+    /* ── Dawn: Luxe signature — Champagne Gold, used sparingly ── */
+    --accent-luxe: #C6952F;
+    --accent-luxe-hover: #AD7E20;
+    --accent-luxe-soft: rgba(198, 148, 47, 0.12);
+    --accent-luxe-border: rgba(198, 148, 47, 0.32);
+    --luxe-gradient: linear-gradient(120deg, #B87F1E 0%, #E8C468 45%, #F5E3B3 65%, #C6952F 100%);
+    --luxe-glow: 0 0 0 1px var(--accent-luxe-border), 0 8px 28px -6px rgba(198, 148, 47, 0.35);
+
+    /* ── Dawn: semantic ── */
+    --success: #3E9D6F;
+    --success-soft: rgba(62, 157, 111, 0.1);
+    --success-border: rgba(62, 157, 111, 0.2);
+    --success-gradient: linear-gradient(135deg, #3E9D6F 0%, #6BC79A 100%);
+    --warning: #F5A623;
+    --warning-soft: rgba(245, 166, 35, 0.1);
+    --warning-border: rgba(245, 166, 35, 0.2);
+    --warning-gradient: linear-gradient(135deg, #F5A623 0%, #FBC02D 100%);
+    --danger: #E0546B;
+    --danger-soft: rgba(224, 84, 107, 0.1);
+    --danger-border: rgba(224, 84, 107, 0.2);
+    --danger-gradient: linear-gradient(135deg, #E0546B 0%, #EE8598 100%);
+    --info: #5B8DEF;
+    --info-soft: rgba(91, 141, 239, 0.1);
+    --info-border: rgba(91, 141, 239, 0.2);
+
+    /* ── Shadows: warm-tinted, layered deeper for real elevation ── */
+    --shadow-xs: 0 1px 2px rgba(50, 30, 20, 0.05);
+    --shadow-sm: 0 1px 3px rgba(50, 30, 20, 0.07), 0 1px 2px rgba(50, 30, 20, 0.04);
+    --shadow-md: 0 6px 12px -2px rgba(50, 30, 20, 0.09), 0 2px 6px -2px rgba(50, 30, 20, 0.05);
+    --shadow-lg: 0 16px 32px -6px rgba(50, 30, 20, 0.12), 0 6px 12px -3px rgba(50, 30, 20, 0.06);
+    --shadow-xl: 0 28px 56px -10px rgba(50, 30, 20, 0.15), 0 10px 20px -5px rgba(50, 30, 20, 0.08);
+    --shadow-2xl: 0 40px 80px -12px rgba(50, 30, 20, 0.2);
+    --shadow-3xl: 0 60px 120px -16px rgba(50, 30, 20, 0.26), 0 0 60px -20px var(--accent-soft);
     --inset-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
     --inset-highlight-soft: inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+
     --radius-xs: 4px;
     --radius-sm: 6px;
     --radius-md: 8px;
@@ -72,36 +96,45 @@
     --duration-base: 150ms;
     --duration-slow: 250ms;
     --duration-slower: 400ms;
-    --accent-glow: 0 0 0 1px var(--accent-border), 0 4px 20px -4px rgba(79, 110, 247, 0.3);
-    --accent-glow-lg: 0 0 0 1px var(--accent-border), 0 12px 40px -8px rgba(79, 110, 247, 0.4);
-    --accent-glow-xl: 0 0 0 1px var(--accent-border), 0 20px 60px -12px rgba(79, 110, 247, 0.5);
+
+    --accent-glow: 0 0 0 1px var(--accent-border), 0 4px 20px -4px color-mix(in srgb, var(--accent) 32%, transparent);
+    --accent-glow-lg: 0 0 0 1px var(--accent-border), 0 12px 40px -8px color-mix(in srgb, var(--accent) 42%, transparent);
+    --accent-glow-xl: 0 0 0 1px var(--accent-border), 0 20px 60px -12px color-mix(in srgb, var(--accent) 55%, transparent);
     --focus-ring: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent);
     --focus-ring-inset: inset 0 0 0 2px var(--accent);
-    --glass-bg: rgba(255, 255, 255, 0.75);
-    --glass-border: rgba(0, 0, 0, 0.06);
+
+    /* Frosted glass, more saturated for a richer premium blur */
+    --glass-saturate: 1.6;
+    --glass-bg: rgba(255, 253, 250, 0.7);
+    --glass-border: rgba(60, 40, 30, 0.07);
     --glass-blur: 20px;
-    --glass-bg-strong: rgba(255, 255, 255, 0.85);
-    --mesh-1: rgba(79, 110, 247, 0.06);
-    --mesh-2: rgba(168, 85, 247, 0.05);
-    --mesh-3: rgba(16, 185, 129, 0.04);
-    --mesh-4: rgba(245, 158, 11, 0.03);
-    --noise-opacity: 0.015;
-    --surface-gradient-1: linear-gradient(180deg, rgba(79, 110, 247, 0.03) 0%, transparent 50%);
-    --surface-gradient-2: linear-gradient(135deg, rgba(16, 185, 129, 0.04) 0%, rgba(79, 110, 247, 0.02) 100%);
+    --glass-bg-strong: rgba(255, 253, 250, 0.88);
+
+    /* ── Dawn mesh: sunrise bloom, richer & more saturated ── */
+    --mesh-1: rgba(242, 114, 74, 0.1);
+    --mesh-2: rgba(245, 166, 35, 0.08);
+    --mesh-3: rgba(62, 157, 111, 0.05);
+    --mesh-4: rgba(76, 65, 119, 0.06);
+    --noise-opacity: 0.018;
+    --surface-gradient-1: linear-gradient(180deg, rgba(242, 114, 74, 0.06) 0%, transparent 50%);
+    --surface-gradient-2: linear-gradient(135deg, rgba(245, 166, 35, 0.06) 0%, rgba(209, 71, 122, 0.03) 100%);
+
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+    /* ── Aliases (unchanged names, resolve through Dawn palette) ── */
     --color-border-subtle: var(--border-subtle);
     --color-border-default: var(--border-default);
     --color-border-strong: var(--border-strong);
     --text-muted: var(--text-tertiary);
-    --accent-cyan: var(--accent);
-    --accent-cyan-hover: var(--accent-hover);
-    --accent-violet: var(--accent);
+    --accent-cyan: var(--info);
+    --accent-cyan-hover: #4576D6;
+    --accent-violet: var(--accent-secondary);
     --accent-green: var(--success);
     --accent-red: var(--danger);
     --error: var(--danger);
     --color-accent-red: var(--danger);
     --color-accent-emerald: var(--success);
-    --color-accent-blue: var(--accent);
+    --color-accent-blue: var(--info);
     --color-completed: var(--success);
     --color-added: var(--success);
     --color-bg-base: var(--bg-base);
@@ -123,95 +156,151 @@
     --radius-panel: var(--radius-xl);
     --color-desktop: var(--accent);
     --color-mobile: var(--success);
+
     --task-completed: var(--success);
     --task-completed-soft: var(--success-soft);
-    --task-completed-bg: rgba(16, 185, 129, 0.08);
+    --task-completed-bg: rgba(62, 157, 111, 0.08);
     --goal-achieved: var(--success);
     --goal-achieved-soft: var(--success-soft);
-    --goal-achieved-glow: rgba(16, 185, 129, 0.12);
+    --goal-achieved-glow: rgba(62, 157, 111, 0.12);
     --announcement-pinned: var(--accent);
     --announcement-pinned-soft: var(--accent-soft);
     --project-at-risk: var(--warning);
     --project-at-risk-soft: var(--warning-soft);
-    --project-at-risk-bg: rgba(245, 158, 11, 0.08);
+    --project-at-risk-bg: rgba(245, 166, 35, 0.08);
     --review-pending: var(--warning);
     --review-pending-soft: var(--warning-soft);
     --task-blocked: var(--danger);
     --task-blocked-soft: var(--danger-soft);
-    --member-online: #22c55e;
-    --member-online-glow: rgba(34, 197, 94, 0.12);
-    --member-away: #eab308;
+
+    --member-online: #3E9D6F;
+    --member-online-glow: rgba(62, 157, 111, 0.12);
+    --member-away: #F5A623;
     --member-offline: var(--text-tertiary);
-    --crew-active: #a855f7;
-    --crew-active-soft: rgba(168, 85, 247, 0.12);
-    --ai-insight: #8b5cf6;
-    --ai-insight-soft: rgba(139, 92, 246, 0.1);
+    --crew-active: #6C4FA1;
+    --crew-active-soft: rgba(108, 79, 161, 0.12);
+    --ai-insight: #6C4FA1;
+    --ai-insight-soft: rgba(108, 79, 161, 0.1);
+    --accent-2: #F5A623;
+    --star-color: #F5A623;
+
+    /* ── entity-card system (Star Registry) — Dawn ── */
+    --ec-glass: rgba(120, 70, 20, 0.05);
+    --ec-glass-strong: rgba(255, 255, 255, 0.9);
+    --ec-line: rgba(120, 70, 20, 0.14);
+    --ec-t1: var(--text-primary);
+    --ec-t2: var(--text-secondary);
+    --ec-t3: var(--text-tertiary);
+    --ec-cyan: #2E6BB8; --ec-cyan-soft: rgba(46, 107, 184, 0.1);
+    --ec-amber: #D9860F; --ec-amber-soft: rgba(217, 134, 15, 0.12);
+    --ec-emerald: #2E8B62; --ec-emerald-soft: rgba(46, 139, 98, 0.12);
+    --ec-rose: #D1445B; --ec-rose-soft: rgba(209, 68, 91, 0.08);
+    --ec-member: var(--accent); --ec-member-soft: var(--accent-soft);
+    --ec-progress: linear-gradient(90deg, var(--ec-cyan), var(--accent-2));
+
+    /* ── Cosmic-motif tokens, Dawn (daylight) state — enriched to 3 stops ── */
+    --star-op: 0.25;
+    --pulsar-disk-a: #F5C453;
+    --pulsar-disk-b: #F2724A;
+    --pulsar-disk-c: #D1477A;
+    --nebula-1: rgba(242, 114, 74, 0.35);
+    --nebula-2: rgba(245, 166, 35, 0.24);
+    --nebula-3: rgba(108, 79, 161, 0.16);
+    --nebula-4: rgba(209, 71, 122, 0.14);
+    --vignette: radial-gradient(900px 700px at 50% 42%, transparent 55%, rgba(210, 150, 110, 0.1));
   }
 
   .dark {
-    --bg-base: #09090B;
-    --bg-subtle: #131417;
-    --bg-sidebar: #0A0A0C;
-    --bg-elevated: #18191C;
+    /* ── Cosmic: surfaces ── */
+    --bg-base: #05030D;
+    --bg-subtle: #0D0A1C;
+    --bg-sidebar: #08061A;
+    --bg-elevated: #130F24;
     --bg-card: var(--bg-elevated);
-    --bg-overlay: rgba(0, 0, 0, 0.8);
-    --bg-hover: #222328;
-    --bg-hover-strong: #2E3038;
-    --text-primary: #FAFAFA;
-    --text-secondary: #A1A1AA;
-    --text-tertiary: #71717A;
-    --text-on-accent: #FFFFFF;
-    --border-subtle: rgba(255, 255, 255, 0.06);
-    --border-default: rgba(255, 255, 255, 0.1);
-    --border-strong: rgba(255, 255, 255, 0.18);
-    --accent: #6B8AFF;
-    --accent-hover: #5477F5;
-    --accent-active: #4169E1;
-    --accent-soft: rgba(107, 138, 255, 0.15);
-    --accent-border: rgba(107, 138, 255, 0.3);
-    --accent-gradient: linear-gradient(135deg, #6B8AFF 0%, #8B7CFF 50%, #A78BFA 100%);
-    --accent-gradient-hover: linear-gradient(135deg, #5477F5 0%, #7B6CF6 50%, #9B7BED 100%);
-    --accent-secondary: #E5E7EB;
-    --accent-secondary-soft: #27272A;
-    --success: #34D399;
-    --success-soft: rgba(52, 211, 153, 0.15);
-    --success-border: rgba(52, 211, 153, 0.25);
-    --success-gradient: linear-gradient(135deg, #34D399 0%, #6EE7B7 100%);
+    --bg-overlay: rgba(2, 1, 8, 0.84);
+    --bg-hover: #1C1633;
+    --bg-hover-strong: #292045;
+
+    /* ── Cosmic: text ── */
+    --text-primary: #F5F3FF;
+    --text-secondary: #C4B9DA;
+    --text-tertiary: #6E6389;
+    --text-on-accent: #17102B;
+
+    /* ── Cosmic: borders (violet-tinted, not neutral gray) ── */
+    --border-subtle: rgba(167, 139, 250, 0.08);
+    --border-default: rgba(167, 139, 250, 0.15);
+    --border-strong: rgba(167, 139, 250, 0.26);
+
+    /* ── Cosmic: accent = Nebula Violet ── */
+    --accent: #A78BFA;
+    --accent-hover: #C4B5FD;
+    --accent-active: #DDD6FE;
+    --accent-soft: rgba(167, 139, 250, 0.14);
+    --accent-border: rgba(167, 139, 250, 0.32);
+    /* Galaxy gradient: violet -> cyan -> magenta, real nebula colors */
+    --accent-gradient: linear-gradient(135deg, #A78BFA 0%, #7DD3FC 55%, #F472B6 100%);
+    --accent-gradient-hover: linear-gradient(135deg, #C4B5FD 0%, #A5E6FF 55%, #FBB6CE 100%);
+    --accent-secondary: #7DD3FC;
+    --accent-secondary-soft: #17233A;
+
+    /* ── Cosmic: Luxe signature — Starlight Gold, used sparingly ── */
+    --accent-luxe: #E8C468;
+    --accent-luxe-hover: #F0D68A;
+    --accent-luxe-soft: rgba(232, 196, 104, 0.15);
+    --accent-luxe-border: rgba(232, 196, 104, 0.36);
+    --luxe-gradient: linear-gradient(120deg, #C6952F 0%, #F0D68A 40%, #FFFFFF 55%, #E8C468 100%);
+    --luxe-glow: 0 0 0 1px var(--accent-luxe-border), 0 8px 32px -6px rgba(232, 196, 104, 0.42);
+
+    /* ── Cosmic: semantic ── */
+    --success: #2DD4BF;
+    --success-soft: rgba(45, 212, 191, 0.15);
+    --success-border: rgba(45, 212, 191, 0.25);
+    --success-gradient: linear-gradient(135deg, #2DD4BF 0%, #67E8DD 100%);
     --warning: #FBBF24;
     --warning-soft: rgba(251, 191, 36, 0.15);
     --warning-border: rgba(251, 191, 36, 0.25);
     --warning-gradient: linear-gradient(135deg, #FBBF24 0%, #FDE68A 100%);
-    --danger: #F87171;
-    --danger-soft: rgba(248, 113, 113, 0.15);
-    --danger-border: rgba(248, 113, 113, 0.25);
-    --danger-gradient: linear-gradient(135deg, #F87171 0%, #FCA5A5 100%);
-    --info: #60A5FA;
-    --info-soft: rgba(96, 165, 250, 0.15);
-    --info-border: rgba(96, 165, 250, 0.25);
-    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.6), 0 4px 8px -2px rgba(0, 0, 0, 0.5);
-    --shadow-xl: 0 20px 40px -6px rgba(0, 0, 0, 0.7), 0 8px 16px -4px rgba(0, 0, 0, 0.5);
-    --shadow-2xl: 0 32px 64px -8px rgba(0, 0, 0, 0.8);
+    --danger: #FB7185;
+    --danger-soft: rgba(251, 113, 133, 0.15);
+    --danger-border: rgba(251, 113, 133, 0.25);
+    --danger-gradient: linear-gradient(135deg, #FB7185 0%, #FCA5B4 100%);
+    --info: #7DD3FC;
+    --info-soft: rgba(125, 211, 252, 0.15);
+    --info-border: rgba(125, 211, 252, 0.25);
+
+    /* ── Shadows: deep + carry a whisper of violet ambient glow ── */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 6px 14px -2px rgba(0, 0, 0, 0.6), 0 2px 6px -2px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 18px 36px -6px rgba(0, 0, 0, 0.7), 0 6px 14px -4px rgba(0, 0, 0, 0.55), 0 0 40px -20px rgba(167, 139, 250, 0.25);
+    --shadow-xl: 0 30px 60px -10px rgba(0, 0, 0, 0.8), 0 10px 22px -6px rgba(0, 0, 0, 0.6), 0 0 60px -20px rgba(167, 139, 250, 0.3);
+    --shadow-2xl: 0 45px 90px -14px rgba(0, 0, 0, 0.88), 0 0 90px -24px rgba(167, 139, 250, 0.32);
+    --shadow-3xl: 0 70px 140px -18px rgba(0, 0, 0, 0.92), 0 0 120px -20px rgba(167, 139, 250, 0.35);
     --inset-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
     --inset-highlight-soft: inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
-    --glass-bg: rgba(24, 25, 28, 0.65);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-bg-strong: rgba(24, 25, 28, 0.85);
-    --mesh-1: rgba(107, 138, 255, 0.04);
-    --mesh-2: rgba(168, 85, 247, 0.03);
-    --mesh-3: rgba(52, 211, 153, 0.03);
-    --mesh-4: rgba(251, 191, 36, 0.02);
-    --noise-opacity: 0.025;
-    --surface-gradient-1: linear-gradient(180deg, rgba(107, 138, 255, 0.04) 0%, transparent 50%);
-    --surface-gradient-2: linear-gradient(135deg, rgba(52, 211, 153, 0.04) 0%, rgba(107, 138, 255, 0.02) 100%);
+
+    /* Frosted glass, deeper saturation for jewel-tone richness */
+    --glass-saturate: 2.0;
+    --glass-bg: rgba(19, 15, 36, 0.55);
+    --glass-border: rgba(167, 139, 250, 0.12);
+    --glass-bg-strong: rgba(19, 15, 36, 0.82);
+
+    /* ── Cosmic mesh: nebula bloom, violet/cyan/magenta ── */
+    --mesh-1: rgba(167, 139, 250, 0.1);
+    --mesh-2: rgba(125, 211, 252, 0.07);
+    --mesh-3: rgba(244, 114, 182, 0.06);
+    --mesh-4: rgba(232, 196, 104, 0.04);
+    --noise-opacity: 0.032;
+    --surface-gradient-1: linear-gradient(180deg, rgba(167, 139, 250, 0.07) 0%, transparent 50%);
+    --surface-gradient-2: linear-gradient(135deg, rgba(125, 211, 252, 0.06) 0%, rgba(244, 114, 182, 0.03) 100%);
+
     --task-completed: var(--success);
     --task-completed-soft: var(--success-soft);
-    --task-completed-bg: rgba(52, 211, 153, 0.08);
+    --task-completed-bg: rgba(45, 212, 191, 0.08);
     --goal-achieved: var(--success);
     --goal-achieved-soft: var(--success-soft);
-    --goal-achieved-glow: rgba(52, 211, 153, 0.12);
+    --goal-achieved-glow: rgba(45, 212, 191, 0.12);
     --announcement-pinned: var(--accent);
     --announcement-pinned-soft: var(--accent-soft);
     --project-at-risk: var(--warning);
@@ -221,14 +310,41 @@
     --review-pending-soft: var(--warning-soft);
     --task-blocked: var(--danger);
     --task-blocked-soft: var(--danger-soft);
-    --member-online: #22c55e;
-    --member-online-glow: rgba(34, 197, 94, 0.12);
-    --member-away: #eab308;
+
+    --member-online: #2DD4BF;
+    --member-online-glow: rgba(45, 212, 191, 0.14);
+    --member-away: #FBBF24;
     --member-offline: var(--text-tertiary);
-    --crew-active: #a855f7;
-    --crew-active-soft: rgba(168, 85, 247, 0.12);
-    --ai-insight: #a78bfa;
-    --ai-insight-soft: rgba(167, 139, 250, 0.1);
+    --crew-active: #C4B5FD;
+    --crew-active-soft: rgba(196, 181, 253, 0.14);
+    --ai-insight: #C4B5FD;
+    --ai-insight-soft: rgba(196, 181, 253, 0.12);
+    --accent-2: #7DD3FC;
+    --star-color: #F5F3FF;
+
+    /* ── entity-card system (Star Registry) — Cosmic ── */
+    --ec-glass: rgba(148, 130, 255, 0.07);
+    --ec-glass-strong: rgba(148, 130, 255, 0.12);
+    --ec-line: rgba(148, 130, 255, 0.15);
+    --ec-t1: var(--text-primary);
+    --ec-t2: var(--text-secondary);
+    --ec-t3: var(--text-tertiary);
+    --ec-cyan: #7DD3FC;  --ec-cyan-soft: rgba(125, 211, 252, 0.14);
+    --ec-amber: #FBBF24; --ec-amber-soft: rgba(251, 191, 36, 0.14);
+    --ec-emerald: #2DD4BF; --ec-emerald-soft: rgba(45, 212, 191, 0.14);
+    --ec-rose: #FB7185; --ec-rose-soft: rgba(251, 113, 133, 0.14);
+    --ec-member: var(--accent); --ec-member-soft: rgba(167, 139, 250, 0.1);
+    --ec-progress: linear-gradient(90deg, var(--ec-cyan), var(--accent-2));
+
+    --star-op: 0.92;
+    --pulsar-disk-a: #F5F3FF;
+    --pulsar-disk-b: #7DD3FC;
+    --pulsar-disk-c: #E8C468;
+    --nebula-1: rgba(167, 139, 250, 0.55);
+    --nebula-2: rgba(125, 211, 252, 0.3);
+    --nebula-3: rgba(244, 114, 182, 0.22);
+    --nebula-4: rgba(232, 196, 104, 0.14);
+    --vignette: radial-gradient(900px 700px at 50% 42%, transparent 40%, rgba(2, 1, 10, 0.6));
   }
 
   body {

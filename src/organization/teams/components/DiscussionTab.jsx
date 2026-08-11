@@ -4,7 +4,7 @@ import { MessageSquare, Send, Trash2, Paperclip, Search, FileText, Download, Ima
 import { Button } from '@/shared/ui/Button'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { Skeleton } from '@/shared/ui/Skeleton'
-import { SegmentedToggle } from '@/shared/ui/SegmentedToggle'
+import { PillNav } from '@/shared/ui/PillNav'
 import { Input } from '@/shared/ui/Input'
 import { Text } from '@/shared/ui/Typography'
 import { cn } from '@/shared/lib/cn'
@@ -138,7 +138,7 @@ export function DiscussionTab({
   return (
     <div className="pt-4 max-w-3xl">
       <div className="flex items-center gap-2 flex-wrap mb-4">
-        <SegmentedToggle
+        <PillNav
           options={[{ value: 'conv', label: 'Conversations' }, { value: 'files', label: 'Files' }]}
           value={view}
           onChange={setView}

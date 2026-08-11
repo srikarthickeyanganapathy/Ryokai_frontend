@@ -1,5 +1,5 @@
-import { ArrowUpDown } from '@/shared/ui/Icons';
-import { FilterTabs } from '@/shared/ui/FilterTabs';
+﻿import { ArrowUpDown } from '@/shared/ui/Icons';
+import { PillNav } from '@/shared/ui/PillNav';
 import {
   Select,
   SelectTrigger,
@@ -28,7 +28,7 @@ export function GoalControls({ filter, setFilter, sortBy, setSortBy, counts }) {
   return (
     <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
       {/* Filter tabs */}
-      <FilterTabs filters={FILTERS} value={filter} onChange={setFilter} counts={counts} />
+      <PillNav filters={FILTERS} value={filter} onChange={setFilter} counts={counts} />
 
       {/* Sort dropdown via Premium Select */}
       <div className="flex items-center gap-2">

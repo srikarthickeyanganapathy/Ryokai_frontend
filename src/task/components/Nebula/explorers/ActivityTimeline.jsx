@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useTaskHistory } from '../../../entities/hooks/useTasks';
 import ActivityTimelineItem from './ActivityTimelineItem';
 import { Loader2 } from '@/shared/ui/Icons';
+import { PageState } from '@/shared/ui/PageState';
+import { Activity } from 'lucide-react';
 
 export default function ActivityTimeline({ taskId }) {
   const [page, setPage] = useState(0);
@@ -24,7 +26,18 @@ export default function ActivityTimeline({ taskId }) {
   const events = pageData?.content || [];
 
   if (events.length === 0) {
-    return <div className="text-xs text-[var(--text-muted)] italic p-4">No activity recorded yet.</div>;
+    return (
+      <div className="py-12">
+        <PageState 
+          state="empty" 
+          stateProps={{ 
+            icon: Activity, 
+            title: 'No Activity Yet', 
+            message: 'Activity history will appear here once updates are made to this task.' 
+          }} 
+        />
+      </div>
+    );
   }
 
   return (

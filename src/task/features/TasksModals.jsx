@@ -1,33 +1,18 @@
-﻿import React from "react";
+import React from "react";
 import { Modal, ModalContent } from "@/shared/ui/Modal";
-import { Heading } from "@/shared/ui/Typography";
 import { TaskForm } from "./manage-task/TaskForm";
+import { Heading } from "@/shared/ui/Typography";
 
 export function TasksModals({
-  createOpen, setCreateOpen,
   reassignData, setReassignData,
   isBulkAssignOpen, setIsBulkAssignOpen,
   allUsers,
-  createTaskMutation,
   updateTaskMutation,
   onReassignSubmit,
-  onCreateTask,
   onBulkAssign,
 }) {
   return (
     <>
-      {/* Create Task Modal */}
-      <Modal open={createOpen} onOpenChange={setCreateOpen}>
-        <ModalContent className="sm:max-w-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-xl rounded-lg p-0">
-          <div className="px-6 pt-6 pb-4 border-b border-[var(--border-subtle)]">
-            <Heading level={3} className="text-[15px] font-bold text-[var(--text-primary)]">New Task</Heading>
-          </div>
-          <div className="p-6">
-            <TaskForm onSubmit={onCreateTask} isLoading={createTaskMutation.isPending} />
-          </div>
-        </ModalContent>
-      </Modal>
-
       {/* Reassign Modal */}
       <Modal open={!!reassignData} onOpenChange={(o) => !o && setReassignData(null)}>
         <ModalContent className="sm:max-w-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6 rounded-lg">
