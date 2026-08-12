@@ -87,6 +87,24 @@ export const ROLE_PURPOSES = {
 };
 export const rolePurpose = (name) => ROLE_PURPOSES[name] || 'Custom role — configure its access below.';
 
+/* ── Permission labels — human action names instead of backend codes (demo rows) ── */
+export function permissionLabel(perm) {
+  const raw = (perm?.name || perm?.code || '').trim();
+  if (!raw) return '';
+  // Already human-readable (mixed case or spaced words) → keep as-is
+  if (/[a-z]/.test(raw) && raw !== raw.toUpperCase()) return raw;
+  // Backend code (ORG_SETTINGS_UPDATE) → sentence case (Org Settings Update)
+  return raw.replace(/_+/g, ' ').toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
+}
+
+/* ── Resource chip hue — deterministic color per resource id ── */
+export const resourceHue = (id) => {
+  let h = 0;
+  const s = String(id || '');
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return ROLE_HUES[h % ROLE_HUES.length];
+};
+
 export const CONSOLE = {
   cardShadow: '0 1px 2px rgba(15, 23, 42, 0.04), 0 0 0 1px var(--border-subtle)',
   raisedShadow: '0 4px 12px -4px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--border-subtle)',

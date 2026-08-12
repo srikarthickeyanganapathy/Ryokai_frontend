@@ -1,14 +1,13 @@
 import React from 'react';
 import { Checkbox } from '@/shared/ui/Checkbox';
 import { cn } from '@/shared/lib/cn';
-import { ChevronRight, Check } from '@/shared/ui/Icons';
-import { getRiskConfig, SCOPE_LABELS } from '../entities/constants';
+import { Check } from '@/shared/ui/Icons';
+import { getRiskConfig, SCOPE_LABELS, permissionLabel, resourceHue } from '../entities/constants';
 
 const RESOURCE_SCOPES = ['PROJECT', 'TEAM', 'CREW'];
 
-export function PermissionRow({ perm, isEnabled, isActive, isAdmin, onToggle, onSelect, currentScope, currentAssignments = [], onScopeChange, onResourceAssignmentChange, resourcesByType = {} }) {
+export function PermissionRow({ perm, isEnabled, isAdmin, onToggle, currentScope, currentAssignments = [], onScopeChange, onResourceAssignmentChange, resourcesByType = {} }) {
   const risk = getRiskConfig(perm.riskLevel);
-  const isElevated = perm.riskLevel === 'CRITICAL' || perm.riskLevel === 'HIGH';
   const supportedScopes = perm.supportedScopes?.length > 0 ? perm.supportedScopes : ['ORGANIZATION'];
   const showScope = perm.scopeRequired !== false && supportedScopes.length > 1;
   const scope = currentScope || supportedScopes[0];
@@ -33,20 +32,24 @@ export function PermissionRow({ perm, isEnabled, isActive, isAdmin, onToggle, on
   };
 
   return (
-    <div role="button" tabIndex={0} onClick={() => onSelect(perm)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(perm); } }} className={cn('group relative flex items-start gap-3 pl-3 pr-2.5 py-2 ml-0.5 rounded-md cursor-pointer transition-colors select-none', isActive ? 'bg-[var(--accent-soft)]' : 'hover:bg-[var(--bg-hover)]')}>
-      {isElevated && <span className="absolute left-0 top-1.5 bottom-1.5 w-[2.5px] rounded-full" style={{ backgroundColor: risk.dot }} />}
-      <div onClick={(e) => e.stopPropagation()} className="shrink-0 mt-0.5">
+    <div className={cn('flex items-center gap-3.5 px-3.5 py-2.5 border-b border-[var(--border-subtle)] last:border-b-0 transition-colors hover:bg-[var(--bg-hover)]')}>
+      <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
         <Checkbox checked={isEnabled} disabled={isAdmin} onCheckedChange={() => onToggle(perm)} />
       </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          <span className={cn('text-[13px] truncate', isEnabled ? 'font-medium text-[var(--text-primary)]' : 'font-normal text-[var(--text-muted)]')}>{perm.name}</span>
-          <span className="hidden md:inline text-[10px] font-mono text-[var(--text-muted)]/70 truncate">{perm.code}</span>
-        </div>
-        {perm.description && <p className="text-[11px] text-[var(--text-muted)] truncate leading-tight mt-0.5">{perm.description}</p>}
 
+      <div className="w-[150px] shrink-0 min-w-0">
+        <div className={cn('text-[12.5px] truncate leading-tight', isEnabled ? 'font-semibold text-[var(--text-primary)]' : 'font-normal text-[var(--text-muted)]')}>
+          {permissionLabel(perm)}
+        </div>
+        <div className="flex items-center gap-1 mt-0.5">
+          <span className="w-[7px] h-[7px] rounded-full shrink-0" style={{ backgroundColor: risk.dot }} />
+          <span className="text-[8.5px] font-mono font-bold uppercase tracking-[0.08em]" style={{ color: risk.text }}>{risk.label}</span>
+        </div>
+      </div>
+
+      <div className="flex-1 flex items-center gap-1.5 flex-wrap min-w-0">
         {isEnabled && showScope && (
-          <div className="flex items-center gap-1 mt-1.5 flex-wrap" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
             {supportedScopes.map((s) => (
               <button
                 key={s}
@@ -61,7 +64,7 @@ export function PermissionRow({ perm, isEnabled, isActive, isAdmin, onToggle, on
         )}
 
         {showResources && (
-          <div className="flex items-center gap-1 mt-1.5 flex-wrap" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
             <span className="text-[9px] font-mono font-semibold uppercase tracking-wide text-[var(--text-muted)] mr-0.5">{SCOPE_LABELS[scope]}s</span>
             {resourceList.length > 0 && (
               <button onClick={handleAllResources} className="text-[10px] font-semibold text-[var(--accent)] hover:underline px-1">
@@ -75,8 +78,9 @@ export function PermissionRow({ perm, isEnabled, isActive, isAdmin, onToggle, on
                   key={res.id}
                   disabled={isAdmin}
                   onClick={() => handleToggleResource(res)}
-                  className={cn('inline-flex items-center gap-1 text-[10.5px] font-medium px-2 py-0.5 rounded-full border transition-colors', on ? 'bg-[var(--accent-soft)] border-[var(--accent)] text-[var(--text-primary)]' : 'border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)]')}
+                  className={cn('inline-flex items-center gap-1.5 text-[10.5px] font-medium px-2 py-0.5 rounded-full border transition-colors', on ? 'bg-[var(--accent-soft)] border-[var(--accent)] text-[var(--text-primary)]' : 'border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)]')}
                 >
+                  <span className="w-[7px] h-[7px] rounded-full shrink-0" style={{ backgroundColor: on ? (res.hue || res.color || resourceHue(res.id)) : 'var(--text-muted)' }} />
                   {res.name}
                   {on && <Check className="w-2.5 h-2.5 text-[var(--accent)]" />}
                 </button>
@@ -85,7 +89,6 @@ export function PermissionRow({ perm, isEnabled, isActive, isAdmin, onToggle, on
           </div>
         )}
       </div>
-      <ChevronRight className={cn('w-3.5 h-3.5 shrink-0 mt-0.5 transition-opacity', isActive ? 'text-[var(--accent)] opacity-100' : 'text-[var(--text-muted)] opacity-0 group-hover:opacity-100')} />
     </div>
   );
 }

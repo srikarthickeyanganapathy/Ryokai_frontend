@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { PageShell, PageContent } from '@/shared/ui/PageShell';
+import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
 import { useOrgRoles } from '../../features/hooks/useOrganizations';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { usePermissions } from '@/identity';
@@ -56,27 +56,15 @@ export function RolesPermissionsPage() {
 
   return (
     <PageShell maxWidth="default">
-      <div className="flex flex-col gap-4 pb-5 border-b border-[var(--border-subtle)]">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <div className="eyebrow flex items-center gap-2 mb-2.5">
-              <span className="w-[18px] h-px bg-[var(--accent)] opacity-60" />
-              <span className="text-[10px] font-mono font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Security &amp; Access Control</span>
-            </div>
-            <div className="w-[60px] h-[3px] rounded-full bg-[var(--accent)] mb-3.5" />
-            <h1 className="font-mono font-bold text-[24px] sm:text-[26px] leading-tight tracking-tight text-[var(--text-primary)]">
-              {isDetail ? selected?.name : 'COMMAND CHAIN'}
-            </h1>
-            <p className="text-[13px] text-[var(--text-secondary)] mt-1.5 max-w-[620px]">
-              {isDetail
-                ? 'Pick a module, set its level, then assign resources.'
-                : 'Every role ranked by authority — pick a link in the chain to open its passport.'}
-            </p>
-          </div>
-        </div>
-        {canManageRoles && !studio.rolesLoading && <PostureStrip posture={posture} />}
-      </div>
-
+      <PageHero
+        eyebrow="Security & Access Control"
+        title={isDetail ? selected?.name : 'Command Chain'}
+        subtitle={isDetail
+          ? 'Pick a module, set its level, then assign resources.'
+          : 'Every role ranked by authority — pick a link in the chain to open its passport.'}
+      >
+        {canManageRoles && !studio.rolesLoading && !isDetail && <PostureStrip posture={posture} />}
+      </PageHero>
       <PageContent className="pt-5">
         {!canManageRoles ? (
           <EmptyState icon={<Icons.shieldAlert className="w-4 h-4 text-[var(--danger)]" />} iconBg="bg-[var(--danger-soft)]" title="Access Denied" description="You do not have permission to view or manage roles and permissions. Please contact an administrator if you believe this is a mistake." />
@@ -88,7 +76,7 @@ export function RolesPermissionsPage() {
         ) : (
           <>
             {isDetail ? (
-              <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-4">
                 <RoleHeader
                   role={selected}
                   isAdmin={studio.isAdminRole}
@@ -132,13 +120,9 @@ export function RolesPermissionsPage() {
                           riskFilter={studio.riskFilter}
                           onRiskFilterChange={studio.setRiskFilter}
                           onToggle={studio.togglePermission}
-                          onSelect={studio.setActivePermission}
-                          activePermission={studio.activePermission}
                           onEnableAll={studio.handleEnableAll}
                           onDisableAll={studio.handleDisableAll}
                           onReset={studio.handleResetModule}
-                          collapsedGroups={studio.collapsedGroups}
-                          onToggleGroupCollapsed={studio.toggleGroupCollapsed}
                           onScopeChange={studio.handleScopeChange}
                           onResourceAssignmentChange={studio.handleResourceAssignmentChange}
                           onSetModuleLevel={studio.handleSetModuleLevel}
