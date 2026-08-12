@@ -3,7 +3,7 @@ import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Search, Plus, ChevronRight, Crown, Lock, ShieldAlert, ShieldCheck } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
-import { roleHue } from '../entities/constants';
+import { roleHue, rolePurpose } from '../entities/constants';
 
 export function CommandChain({ roles = [], selectedRole, onSelect, onCreateClick, searchQuery = '', onSearchChange, permissionMap = null }) {
   const sorted = useMemo(() => [...roles].sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100)), [roles]);
@@ -58,10 +58,11 @@ export function CommandChain({ roles = [], selectedRole, onSelect, onCreateClick
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="font-mono font-bold text-[13px] tracking-wide text-[var(--text-primary)] truncate">{role.name}</span>
+                    <span className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)] truncate">{role.name}</span>
                     {role.name === 'ADMIN' && <Lock className="w-3 h-3 text-[var(--text-muted)] shrink-0" />}
                   </span>
-                  <span className="block text-[11px] text-[var(--text-muted)] mt-0.5">{grantCount} grants · priority {role.priority ?? 100}</span>
+                  <span className="block text-[13px] font-semibold text-[var(--text-primary)] mt-0.5 truncate">{rolePurpose(role.name)}</span>
+                  <span className="block text-[10.5px] text-[var(--text-muted)] mt-0.5">{grantCount} grants · priority {role.priority ?? 100}</span>
                 </span>
                 <span className="flex items-center gap-2 shrink-0">
                   {role.name === 'ADMIN' ? (

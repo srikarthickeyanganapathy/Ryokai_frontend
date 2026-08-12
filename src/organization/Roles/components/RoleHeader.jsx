@@ -2,10 +2,10 @@ import React, { useMemo } from 'react';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { DropdownMenu } from '@/shared/ui/DropdownMenu';
-import { MoreHorizontal, Copy, Trash2, CheckCircle2, ShieldAlert, PanelRight, PanelRightClose, ArrowLeft } from '@/shared/ui/Icons';
+import { MoreHorizontal, Copy, Trash2, CheckCircle2, ShieldAlert, ArrowLeft } from '@/shared/ui/Icons';
 import { roleHue } from '../entities/constants';
 
-export function RoleHeader({ role, isAdmin, permissionCount, isDirty, changeCount, supervisionNames, onDiscard, onSave, onReview, onClone, onDelete, permissionMap, localScopedPerms, inspectorOpen = true, onToggleInspector, onBack }) {
+export function RoleHeader({ role, isAdmin, permissionCount, isDirty, changeCount, supervisionNames, onDiscard, onSave, onReview, onClone, onDelete, permissionMap, localScopedPerms, onBack }) {
   const stats = useMemo(() => {
     if (!permissionMap || !localScopedPerms) return { read: 0, write: 0, workflow: 0, critical: 0 };
     let read = 0, write = 0, workflow = 0, critical = 0;
@@ -72,9 +72,6 @@ export function RoleHeader({ role, isAdmin, permissionCount, isDirty, changeCoun
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Button variant="ghost" size="sm" onClick={onToggleInspector} className="hidden lg:flex h-8 w-8 p-0 text-[var(--text-muted)] hover:text-[var(--text-primary)]" title={inspectorOpen ? 'Hide role overview panel' : 'Show role overview panel'}>
-            {inspectorOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRight className="w-4 h-4" />}
-          </Button>
           {!isAdmin && (
             <DropdownMenu
               trigger={<Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-[var(--text-muted)] hover:text-[var(--text-primary)]"><MoreHorizontal className="w-4 h-4" /></Button>}

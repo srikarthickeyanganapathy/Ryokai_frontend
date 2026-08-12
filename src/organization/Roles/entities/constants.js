@@ -74,6 +74,19 @@ export const roleHue = (name) => {
   return ROLE_HUES[h % ROLE_HUES.length];
 };
 
+/* ── Role purposes — human-readable intent for each backend role ── */
+export const ROLE_PURPOSES = {
+  ADMIN: 'Full control over the organization and its members.',
+  ENGINEER: 'Builds and ships tasks across projects.',
+  PRODUCT: 'Owns product direction and approvals.',
+  DESIGN: 'Creates and refines design work.',
+  ANALYST: 'Reads data and exports reports.',
+  MARKETING: 'Publishes announcements and campaigns.',
+  OPERATIONS: 'Keeps the organization running smoothly.',
+  GUEST: 'Limited read-only access.',
+};
+export const rolePurpose = (name) => ROLE_PURPOSES[name] || 'Custom role — configure its access below.';
+
 export const CONSOLE = {
   cardShadow: '0 1px 2px rgba(15, 23, 42, 0.04), 0 0 0 1px var(--border-subtle)',
   raisedShadow: '0 4px 12px -4px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--border-subtle)',

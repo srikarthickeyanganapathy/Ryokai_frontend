@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@/shared/lib/cn';
 import { ShieldAlert } from '@/shared/ui/Icons';
-import { roleHue } from '../entities/constants';
+import { roleHue, rolePurpose } from '../entities/constants';
 
 export function RolePassport({ role, isAdmin = false, stats = { read: 0, write: 0, workflow: 0, critical: 0 }, enabledCount = 0, totalCount = 0, supervisionNames = [] }) {
   if (!role) return null;
@@ -37,6 +37,7 @@ export function RolePassport({ role, isAdmin = false, stats = { read: 0, write: 
 
       <div className="text-center">
         <div className="font-mono font-bold text-[15px] tracking-wide text-[var(--text-primary)]">{role.name}</div>
+        <p className="text-[11.5px] leading-relaxed text-[var(--text-secondary)] mt-1.5">{rolePurpose(role.name)}</p>
         <div className="text-[11px] text-[var(--text-muted)] mt-1.5">
           Priority <strong className="text-[var(--text-secondary)] font-semibold font-mono">{role.priority ?? 100}</strong>
           {isAdmin && <span className="ml-2 text-[var(--warning)] font-semibold">· System</span>}

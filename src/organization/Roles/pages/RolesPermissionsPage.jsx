@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
+import { PageShell, PageContent } from '@/shared/ui/PageShell';
 import { useOrgRoles } from '../../features/hooks/useOrganizations';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { usePermissions } from '@/identity';
@@ -14,8 +14,6 @@ import { RoleHeader } from '../components/RoleHeader';
 import { ModuleSidebar } from '../components/ModuleSidebar';
 import { PermissionBrowser } from '../components/PermissionBrowser';
 import { RolePassport } from '../widgets/RolePassport';
-import { PermissionInspectorContent } from '../widgets/PermissionInspectorContent';
-import { InspectorDrawer } from '../widgets/InspectorDrawer';
 import { ReviewDrawer } from '../widgets/ReviewDrawer';
 import { CreateRoleDrawer } from '../widgets/CreateRoleDrawer';
 
@@ -56,16 +54,27 @@ export function RolesPermissionsPage() {
 
   return (
     <PageShell maxWidth="default">
-      <PageHero
-        eyebrow="Security & Access Control"
-        title={isDetail ? selected?.name : 'Command Chain'}
-        subtitle={isDetail
-          ? 'Pick a module, set its level, then assign resources.'
-          : 'Every role ranked by authority — pick a link in the chain to open its passport.'}
-      >
-        {canManageRoles && !studio.rolesLoading && <PostureStrip posture={posture} />}
-      </PageHero>
-      <PageContent>
+      <div className="flex flex-col gap-4 pb-5 border-b border-[var(--border-subtle)]">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-4 h-px bg-[var(--accent)]" />
+              <span className="text-[10px] font-mono font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Security &amp; Access Control</span>
+            </div>
+            <h1 className="font-mono font-bold text-[24px] sm:text-[26px] leading-tight tracking-tight text-[var(--text-primary)]">
+              {isDetail ? selected?.name : 'COMMAND CHAIN'}
+            </h1>
+            <p className="text-[12.5px] text-[var(--text-secondary)] mt-1.5 max-w-xl">
+              {isDetail
+                ? 'Pick a module, set its level, then assign resources.'
+                : 'Every role ranked by authority — pick a link in the chain to open its passport.'}
+            </p>
+          </div>
+        </div>
+        {canManageRoles && !studio.rolesLoading && !isDetail && <PostureStrip posture={posture} />}
+      </div>
+
+      <PageContent className="pt-5">
         {!canManageRoles ? (
           <EmptyState icon={<Icons.shieldAlert className="w-4 h-4 text-[var(--danger)]" />} iconBg="bg-[var(--danger-soft)]" title="Access Denied" description="You do not have permission to view or manage roles and permissions. Please contact an administrator if you believe this is a mistake." />
         ) : studio.rolesLoading ? (
@@ -91,8 +100,6 @@ export function RolesPermissionsPage() {
                   onDelete={studio.handleDeleteRole}
                   permissionMap={studio.PERMISSION_MAP}
                   localScopedPerms={studio.localScopedPerms}
-                  inspectorOpen={studio.inspectorOpen}
-                  onToggleInspector={studio.toggleInspector}
                   onBack={() => setShowDirectory(true)}
                 />
                 <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
@@ -104,7 +111,7 @@ export function RolesPermissionsPage() {
                     totalCount={studio.PERMISSION_MAP?.size || 0}
                     supervisionNames={studio.supervisionRank.can}
                   />
-                  <div className="flex flex-col lg:flex-row rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden h-[calc(100vh-320px)] min-h-[540px]">
+                  <div className="flex flex-col lg:flex-row rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden h-[calc(100vh-340px)] min-h-[540px]">
                     <ModuleSidebar
                       modules={studio.filteredModules}
                       activeModule={studio.activeModuleCode}
@@ -135,24 +142,6 @@ export function RolesPermissionsPage() {
                         onResourceAssignmentChange={studio.handleResourceAssignmentChange}
                         onSetModuleLevel={studio.handleSetModuleLevel}
                       />
-                      {studio.inspectorOpen && (
-                        <aside className="hidden lg:block w-[320px] shrink-0 min-h-0 overflow-y-auto bg-[var(--bg-subtle)]/40 backdrop-blur-md border-l border-[var(--border-subtle)]">
-                          <PermissionInspectorContent
-                            role={selected}
-                            permission={studio.activePermission}
-                            isEnabled={studio.activePermission ? Boolean(studio.localScopedPerms?.[studio.activePermission.code]) : false}
-                            currentScope={studio.activePermission ? studio.localScopedPerms?.[studio.activePermission.code]?.scopeCode : null}
-                            currentAssignments={studio.activePermission ? studio.localScopedPerms?.[studio.activePermission.code]?.resourceAssignments || [] : []}
-                            isAdmin={studio.isAdminRole}
-                            onScopeChange={studio.handleScopeChange}
-                            onResourceAssignmentChange={studio.handleResourceAssignmentChange}
-                            onToggle={studio.togglePermission}
-                            permissionMap={studio.PERMISSION_MAP}
-                            localScopedPerms={studio.localScopedPerms}
-                            supervisionNames={studio.supervisionRank.can}
-                          />
-                        </aside>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -168,25 +157,6 @@ export function RolesPermissionsPage() {
                 permissionMap={studio.PERMISSION_MAP}
               />
             )}
-
-            <div className="block lg:hidden">
-              <InspectorDrawer
-                role={selected}
-                permission={studio.activePermission}
-                open={!!studio.activePermission}
-                onOpenChange={(open) => { if (!open) studio.setActivePermission(null); }}
-                isEnabled={studio.activePermission ? Boolean(studio.localScopedPerms?.[studio.activePermission.code]) : false}
-                currentScope={studio.activePermission ? studio.localScopedPerms?.[studio.activePermission.code]?.scopeCode : null}
-                currentAssignments={studio.activePermission ? studio.localScopedPerms?.[studio.activePermission.code]?.resourceAssignments || [] : []}
-                isAdmin={studio.isAdminRole}
-                onScopeChange={studio.handleScopeChange}
-                onResourceAssignmentChange={studio.handleResourceAssignmentChange}
-                onToggle={studio.togglePermission}
-                permissionMap={studio.PERMISSION_MAP}
-                localScopedPerms={studio.localScopedPerms}
-                supervisionNames={studio.supervisionRank.can}
-              />
-            </div>
 
             <ReviewDrawer
               open={studio.showReview}

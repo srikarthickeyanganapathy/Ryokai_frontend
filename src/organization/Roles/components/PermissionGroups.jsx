@@ -16,7 +16,7 @@ export function PermissionGroups({ groupedPermissions, localScopedPerms, isAdmin
   }
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto px-2.5 py-2.5">
+    <div className="flex-1 min-h-0 overflow-y-auto px-2.5 py-2.5 custom-scrollbar">
       {GROUP_ORDER.map((groupKey) => (
         <PermissionGroup
           key={groupKey}

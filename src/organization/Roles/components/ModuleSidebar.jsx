@@ -12,7 +12,7 @@ const DOTS = [
 export function ModuleSidebar({ modules = [], activeModule, onModuleChange, localScopedPerms = {}, permissionMap = null }) {
   const enabledCodes = Object.keys(localScopedPerms);
   return (
-    <div className="w-[188px] shrink-0 border-r border-[var(--border-subtle)] bg-[var(--bg-subtle)]/30 overflow-y-auto">
+    <div className="w-[188px] shrink-0 border-r border-[var(--border-subtle)] bg-[var(--bg-subtle)]/30 overflow-y-auto custom-scrollbar">
       <div className="px-3 pt-3 pb-1.5">
         <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">Modules</span>
       </div>
