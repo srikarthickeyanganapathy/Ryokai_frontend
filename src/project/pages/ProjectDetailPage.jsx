@@ -367,7 +367,6 @@ export function ProjectDetailPage() {
         </ModalContent>
       </Modal>
       {project && <CrewProjectShareModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} project={project} />}
-        // Task detail opens in full page via /app/tasks/:taskId
 
       {/* Mobile FAB */}
       <AnimatePresence>

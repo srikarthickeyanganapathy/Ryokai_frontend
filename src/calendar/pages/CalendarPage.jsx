@@ -85,8 +85,6 @@ export function CalendarPage() {
           />
         </div>
 
-          // Task detail opens in full page via /app/tasks/:taskId
-
         <Modal open={!!selectedEvent || !!editingEvent} onOpenChange={(open) => !open && closeEventModal()}>
           <ModalContent className="sm:max-w-sm !bg-[var(--bg-card)] !backdrop-blur-none border border-[var(--border-subtle)] shadow-xl rounded-xl p-6">
             {editingEvent ? (

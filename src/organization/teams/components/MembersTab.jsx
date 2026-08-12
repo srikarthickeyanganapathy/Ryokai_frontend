@@ -1,9 +1,10 @@
-﻿import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Users, Crown, Star, UserPlus } from 'lucide-react'
+import { Users, Crown, Star, UserPlus, Mail, Briefcase, CalendarDays, ChevronRight, ShieldCheck, UserCheck } from 'lucide-react'
 import { Button } from '@/shared/ui/Button'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { PillNav } from '@/shared/ui/PillNav'
+import { Badge } from '@/shared/ui/Badge'
 import { cn } from '@/shared/lib/cn'
 
 /* ============================================================
@@ -30,8 +31,75 @@ function timeAgo(dateInput) {
   if (s < 3600) return `${Math.floor(s / 60)}m ago`
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`
   if (s < 604800) return `${Math.floor(s / 86400)}d ago`
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
 }
+
+function RoleBadge({ m, lead }) {
+  if (lead) {
+    return (
+      <Badge variant="warning" size="xs" className="gap-1 font-mono uppercase tracking-wider">
+        <Crown className="w-3 h-3" />
+        Lead
+      </Badge>
+    );
+  }
+  if (m.role === 'ADMIN') {
+    return (
+      <Badge variant="primary" size="xs" className="gap-1 font-mono uppercase tracking-wider">
+        <ShieldCheck className="w-3 h-3" />
+        Admin
+      </Badge>
+    );
+  }
+  return (
+    <Badge variant="outline" size="xs" className="gap-1 font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+      <UserCheck className="w-3 h-3" />
+      Member
+    </Badge>
+  );
+}
+
+function PresenceChip({ away }) {
+  if (away) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-[var(--warning)]">
+        <span className="w-2 h-2 rounded-full bg-[var(--warning)]" />
+        Away
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-[var(--text-secondary)]">
+      <span className="w-2 h-2 rounded-full bg-[var(--success)]" />
+      Online
+    </span>
+  );
+}
+
+function getWorkloadStats(tasks, username) {
+  let active = 0;
+  let completed = 0;
+  let total = 0;
+  tasks.forEach(t => {
+    if (t.assignedTo === username) {
+      total++;
+      if (t.status === 'Done') {
+        completed++;
+      } else if (!t.archived) {
+        active++;
+      }
+    }
+  });
+  return { active, completed, total };
+}
+
+function getWorkloadStyle(active) {
+  if (active >= 6) return { level: 'High', badgeClass: 'text-[var(--danger)] border-[var(--danger)]/30 bg-[var(--danger-soft)]', colorClass: 'bg-[var(--danger)]' };
+  if (active >= 3) return { level: 'Medium', badgeClass: 'text-[var(--warning)] border-[var(--warning)]/30 bg-[var(--warning-soft)]', colorClass: 'bg-[var(--warning)]' };
+  if (active > 0) return { level: 'Low', badgeClass: 'text-[var(--success)] border-[var(--success)]/30 bg-[var(--success-soft)]', colorClass: 'bg-[var(--success)]' };
+  return { level: 'Idle', badgeClass: 'text-[var(--text-muted)] border-[var(--border-subtle)] bg-[var(--bg-subtle)]', colorClass: 'bg-[var(--bg-subtle)]' };
+}
+
 
 export function MembersTab({ team, workload = {}, teamTasks = [], hasProjectIdOnTasks, hasTaskTimestamps, canManage, user, onManageMembers }) {
   const [filter, setFilter] = useState('all')
@@ -72,57 +140,92 @@ export function MembersTab({ team, workload = {}, teamTasks = [], hasProjectIdOn
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
           {visible.map((m, i) => {
             const name = m.username || m.name || 'Member'
-            const load = workload[name] || 0
-            const pct = maxWorkload ? Math.round(load / maxWorkload * 100) : 0
-            const barCls = pct >= 100 ? 'red' : pct >= 80 ? 'amber' : ''
             const lead = isLead(m)
             const lastActive = timeAgo(m.lastActive || m.last_active || m.activeAt || m.updatedAt)
             const away = m.away || m.status === 'away' || m.availability === 'away'
             const h = hashHue(name)
-            return (
-              <motion.div key={m.id || name} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i * 0.03, 0.2) }}
-                className={cn('relative overflow-hidden bg-[var(--bg-card)] border rounded-2xl shadow-[var(--shadow-xs)] p-3.5 transition-all', lead ? 'border-[var(--accent-border)]' : 'border-[var(--border-subtle)] hover:border-[var(--accent-border)]')}>
-                {/* aura */}
-                <span className="absolute inset-0 pointer-events-none opacity-[0.16]"
-                  style={{ background: `radial-gradient(circle at 90% 0%, hsl(${h} 72% 55%) 0%, transparent 60%)` }} />
+            
+            const stats = getWorkloadStats(teamTasks, name)
+            const style = getWorkloadStyle(stats.active)
 
-                {/* header */}
-                <div className="relative flex items-center gap-2.5">
-                  <span className="relative shrink-0">
-                    <span className="block w-10 h-10 rounded-xl font-bold text-white flex items-center justify-center text-[14px] shadow-sm"
-                      style={{ backgroundImage: `linear-gradient(135deg, hsl(${h} 65% 48%), hsl(${(h + 35) % 360} 62% 34%))` }}>
-                      {name.charAt(0).toUpperCase()}
-                    </span>
-                    {lead && (
-                      <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[var(--accent)] text-white flex items-center justify-center border-2 border-[var(--bg-card)]">
-                        <Crown className="w-2 h-2" />
+            return (
+              <motion.div key={m.id || name} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i * 0.03, 0.2), duration: 0.2 }}
+                className="group bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-4 hover:border-[var(--accent-border)] hover:shadow-sm transition-all duration-200 cursor-pointer flex flex-col justify-between">
+                <div>
+                  {/* Card Header: Role Badge & Presence Status */}
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <RoleBadge m={m} lead={lead} />
+                    <PresenceChip away={away} />
+                  </div>
+
+                  {/* Member Identity */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="relative shrink-0">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-sm border border-white/10 text-sm"
+                        style={{ background: `linear-gradient(135deg, hsl(${h} 65% 48%), hsl(${(h + 35) % 360} 62% 34%))` }}>
+                        {name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className={cn('absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-[var(--bg-card)] w-3 h-3', away ? 'bg-[var(--warning)]' : 'bg-[var(--success)]')} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight truncate">{name}</div>
+                      <div className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] font-medium mt-0.5 truncate">
+                        <Mail className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{m.email || 'No email registered'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Workload Progress Bar */}
+                  <div className="space-y-1.5 mb-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold flex items-center gap-1">
+                        <Briefcase className="w-3 h-3 text-[var(--accent)]" />
+                        Active Workload
                       </span>
-                    )}
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-[13.5px] font-semibold truncate">{name.split(' ')[0]}</span>
-                    <span className="block text-[11px] text-[var(--text-muted)] truncate">{name}</span>
-                  </span>
-                  {lead && (
-                    <span className="ml-auto inline-flex items-center gap-1 text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] shrink-0">
-                      <Star className="w-2.5 h-2.5" /> Lead
-                    </span>
-                  )}
+                      <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0 font-semibold', style.badgeClass)}>
+                        {style.level}
+                      </Badge>
+                    </div>
+                    <div className="w-full h-1.5 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
+                      <div
+                        className={cn('h-full rounded-full transition-all duration-500', style.colorClass)}
+                        style={{ width: `${Math.min(100, Math.max(10, (stats.active / 6) * 100))}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Workload Stat Cells */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="text-center bg-[var(--bg-subtle)] rounded-lg py-1.5">
+                      <div className="text-sm font-bold text-[var(--text-primary)] tabular-nums">{stats.total}</div>
+                      <div className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider">Total</div>
+                    </div>
+                    <div className="text-center bg-[var(--bg-subtle)] rounded-lg py-1.5">
+                      <div className="text-sm font-bold text-[var(--accent)] tabular-nums">{stats.active}</div>
+                      <div className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider">Active</div>
+                    </div>
+                    <div className="text-center bg-[var(--bg-subtle)] rounded-lg py-1.5">
+                      <div className="text-sm font-bold text-[var(--success)] tabular-nums">{stats.completed}</div>
+                      <div className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider">Done</div>
+                    </div>
+                  </div>
                 </div>
 
-                {/* body */}
-                <div className="relative mt-3 pt-2.5 border-t border-[var(--border-subtle)]">
-                  <div className="flex items-center gap-2 text-[11px] text-[var(--text-secondary)]">
-                    <span className="font-medium shrink-0">Workload</span>
-                    <div className="flex-1 h-[5px] rounded-full bg-[var(--bg-subtle)] overflow-hidden">
-                      <div className={cn('h-full rounded-full transition-all', barCls === 'red' ? 'bg-gradient-to-r from-[#f2555c] to-[#dc3d43]' : barCls === 'amber' ? 'bg-gradient-to-r from-[#f0a03a] to-[#e08a00]' : 'bg-[var(--accent)]')}
-                        style={{ width: `${Math.min(pct, 100)}%` }} />
-                    </div>
-                    <b className="font-mono text-[11px] tabular-nums">{load}</b>
-                  </div>
-                  <div className="flex items-center justify-between mt-2 text-[10.5px] text-[var(--text-muted)]">
-                    <span>{lastActive ? `Last active ${lastActive}` : 'No activity yet'}</span>
-                    {!lead && away && <span className="opacity-60">away</span>}
+                {/* Card Footer: Metadata & Actions */}
+                <div className="pt-3 mt-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-1.5 text-[11px] text-[var(--text-muted)] font-medium">
+                    <CalendarDays className="w-3 h-3" />
+                    {lastActive ? (
+                       m.joinedAt ? `Joined ${timeAgo(m.joinedAt)}` : `Active ${lastActive}`
+                    ) : 'Joined recently'}
+                  </span>
+
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="sm" className="h-8 text-[12px] px-2 font-medium text-[var(--accent)] hover:bg-[var(--accent-soft)]">
+                      Profile
+                      <ChevronRight className="w-3 h-3 ml-0.5" />
+                    </Button>
                   </div>
                 </div>
               </motion.div>
