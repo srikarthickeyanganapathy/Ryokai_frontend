@@ -385,7 +385,7 @@ export function CrewDetailPage() {
               <div className="mt-5 mb-2">
                 <CrewTabs activeTab={activeTab} setActiveTab={setActiveTab} tabCounts={tabCounts} sticky={false} />
               </div>
-              <div className="flex flex-col lg:flex-row gap-6 lg:gap-0">
+              <div className="relative flex flex-col lg:flex-row gap-6 lg:gap-0">
                 {/* Main Content */}
                 <div className="flex-1 min-w-0">
                   <AnimatePresence mode="wait">
@@ -439,18 +439,18 @@ export function CrewDetailPage() {
                   </AnimatePresence>
                 </div>
 
-                {/* Sidebar: Activity Feed */}
+                {/* Sidebar: Activity Feed — floating overlay, does not steal content width */}
                 <AnimatePresence>
                   {showSidebar && (
                     <motion.aside
-                      initial={{ width: 0, opacity: 0 }}
-                      animate={{ width: 280, opacity: 1 }}
-                      exit={{ width: 0, opacity: 0 }}
+                      initial={{ x: 320, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{ x: 320, opacity: 0 }}
                       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                      className="hidden lg:block overflow-hidden shrink-0 border-l border-[var(--border-subtle)]"
+                      className="hidden lg:block absolute right-0 top-0 bottom-0 z-30 w-[300px] bg-[var(--bg-card)] border-l border-[var(--border-subtle)] shadow-[0_8px_40px_rgba(0,0,0,0.18)] overflow-y-auto scrollbar-thin"
                     >
-                      <div className="w-[280px] pl-5 pr-3 pt-3 h-full max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-thin">
-                        <div className="flex items-center justify-between mb-3 sticky top-0 bg-[var(--bg-base)] z-10 pb-2">
+                      <div className="pl-5 pr-3 pt-3 pb-4">
+                        <div className="flex items-center justify-between mb-3 sticky top-0 bg-[var(--bg-card)] z-10 pb-2">
                           <div className="flex items-center gap-1.5">
                             <Icons.activity className="w-4 h-4 text-[var(--accent)]" />
                             <Heading level={4} className="text-[12px] font-semibold tracking-tight mb-0">
