@@ -539,7 +539,7 @@ export function OverviewTab({
           }
         >
 
-          <div className="grid grid-cols-2 gap-4 items-center py-1">
+          <div className="grid grid-cols-[80px_1fr] gap-3 sm:grid-cols-[96px_1fr] sm:gap-4 items-center py-1">
             {/* Health Gauge Meter */}
             <div className="flex flex-col items-center border-r border-[var(--border-subtle)] pr-2">
               <CrewHealthGauge healthScore={healthScore} />

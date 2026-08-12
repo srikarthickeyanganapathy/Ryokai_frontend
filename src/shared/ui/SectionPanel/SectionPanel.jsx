@@ -43,18 +43,18 @@ export function SectionPanel({
       )}
     >
       <div className="flex items-center justify-between p-4 sm:p-5 border-b border-[var(--color-border-subtle)]">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           {Icon && (
             <div className="w-8 h-8 rounded-lg bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] flex items-center justify-center shrink-0">
               <Icon className="w-4 h-4 text-[var(--text-muted)]" aria-hidden="true" />
             </div>
           )}
-          <div>
-            <Heading level={3} className="text-[15px] font-semibold text-[var(--text-primary)] tracking-tight">
+          <div className="min-w-0">
+            <Heading level={3} className="text-[15px] font-semibold text-[var(--text-primary)] tracking-tight truncate">
               {title}
             </Heading>
             {subtitle && (
-              <Text variant="muted" className="text-[12px] mt-0.5">
+              <Text variant="muted" className="text-[12px] mt-0.5 truncate">
                 {subtitle}
               </Text>
             )}
