@@ -457,7 +457,7 @@ export function MemberDetailDrawer({
           {/* ───────── Permission Groups ───────── */}
           <div className="space-y-3">
             <Text className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-              Access &amp; Permissions
+              Access & Permissions
             </Text>
             {Object.keys(permissionGroups).length === 0 ? (
               <div className="text-xs text-[var(--text-muted)] italic p-3 border border-dashed border-[var(--border-subtle)] rounded-md text-center">

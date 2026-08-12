@@ -20,10 +20,11 @@ export function EntityStatStrip({ stats, className }) {
     <div className={cn('ec-stats', className)}>
       {stats.map((s) => {
         const tone = TONE_STYLE[s.tone] || TONE_STYLE.accent
+        const Icon = s.icon
         return (
           <div key={s.key} className="ec-stat">
             <div className="ec-stat__tile" style={tone}>
-              {s.icon && <s.icon />}
+              {React.isValidElement(s.icon) ? s.icon : Icon ? <Icon /> : null}
             </div>
             <div className="ec-stat__body">
               <div className="ec-stat__k">{s.label}</div>

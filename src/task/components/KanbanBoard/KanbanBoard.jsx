@@ -86,7 +86,7 @@ export function KanbanBoard({ tasks, mode, isLoading, emptyState, responsive = f
     }))
 
     const onError = (error) => {
-      toast.error(error?.response?.data?.message || 'Action failed â€” reverting task position')
+      toast.error(error?.response?.data?.message || 'Action failed — reverting task position')
       rollbackTask(task.id)
     }
 
@@ -153,7 +153,7 @@ export function KanbanBoard({ tasks, mode, isLoading, emptyState, responsive = f
       if (taskAssignee && taskAssignee === user?.username) { toast.error('You cannot reject your own task'); rollbackTask(task.id); return; }
       const reason = await confirm({
         title: 'Send back for rework', description: 'Let them know what needs to change before it can be approved.',
-        requireInput: true, inputPlaceholder: 'e.g. Missing acceptance criteria for edge casesâ€¦', confirmLabel: 'Send back', danger: true,
+        requireInput: true, inputPlaceholder: 'e.g. Missing acceptance criteria for edge cases…', confirmLabel: 'Send back', danger: true,
       });
       if (reason === false) { rollbackTask(task.id); return; }
       rejectMutation.mutate({ id: task.id, reason: reason || 'Moved to Needs Work on Kanban' }, { onError });

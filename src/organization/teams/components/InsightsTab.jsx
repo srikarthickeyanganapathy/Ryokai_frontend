@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { BarChart3, Download, TrendingUp, Timer, Target, Users, FolderKanban, PieChart } from 'lucide-react'
 import { Heading } from '@/shared/ui/Typography'
@@ -8,7 +8,7 @@ import { PillNav } from '@/shared/ui/PillNav'
 import { cn } from '@/shared/lib/cn'
 
 /* ============================================================
-   components/InsightsTab.jsx â€” derived analytics (demo layout)
+   components/InsightsTab.jsx — derived analytics (demo layout)
    + rich fragments (throughput / cycle time / forecast).
    Every number is computed from the real teamTasks / teamProjects
    inside a 14d / 30d / quarter window. No mocked metrics.
@@ -21,7 +21,10 @@ const RANGES = [
   { value: 'quarter', label: 'Quarter' },
 ]
 
-const isDone = t => (t.currentStatus || t.status || '').toUpperCase() === 'DONE'
+const isDone = t => {
+  const s = (t.currentStatus || t.status || '').toUpperCase()
+  return s === 'DONE' || s === 'COMPLETED'
+}
 
 function statusOf(t) {
   const s = (t.currentStatus || t.status || 'TODO').toUpperCase()
@@ -114,10 +117,12 @@ export function InsightsTab({ teamTasks = [], teamProjects = [], insights }) {
     return base
   }, [windowTasks])
 
-  /* ---- trend: tasks completed per day, last 14 days ---- */
+  /* ---- trend: tasks completed per day ---- */
   const trend = useMemo(() => {
-    const days = Array.from({ length: 14 }, (_, i) => {
-      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (13 - i))
+    const numDays = range === '14d' ? 14 : range === '30d' ? 30 : Math.floor(windowMs / 86400000)
+    const displayDays = Math.min(numDays, 30) // Cap at 30 days for layout
+    const days = Array.from({ length: displayDays }, (_, i) => {
+      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (displayDays - 1 - i))
       return { day: d, count: 0 }
     })
     const dayIndex = new Map(days.map((d, i) => [d.day.toDateString(), i]))
@@ -129,8 +134,8 @@ export function InsightsTab({ teamTasks = [], teamProjects = [], insights }) {
       const idx = dayIndex.get(d.toDateString())
       if (idx != null) days[idx].count += 1
     })
-    return days
-  }, [windowTasks])
+    return { days, displayDays }
+  }, [windowTasks, range, windowMs])
 
   /* ---- member workload (top 6) ---- */
   const memberLoad = useMemo(() => {
@@ -175,7 +180,7 @@ export function InsightsTab({ teamTasks = [], teamProjects = [], insights }) {
   }, [windowTasks, windowMs])
 
   const totalStatus = Object.values(statusDist).reduce((a, b) => a + b, 0)
-  const maxTrend = Math.max(...trend.map(d => d.count), 1)
+  const maxTrend = Math.max(...trend.days.map(d => d.count), 1)
   const maxLoad = memberLoad.length ? memberLoad[0][1] : 0
 
   const exportCsv = () => {
@@ -188,7 +193,7 @@ export function InsightsTab({ teamTasks = [], teamProjects = [], insights }) {
       ['avg_cycle_time_days', velocity.cycleTime != null ? velocity.cycleTime.toFixed(1) : 'n/a'],
       ['forecast_days_to_done', velocity.forecastDays ?? 'n/a'],
       ...Object.entries(statusDist).map(([k, v]) => [`status_${k}`, v]),
-      ...trend.map(d => [`completed_${d.day.toISOString().slice(0, 10)}`, d.count]),
+      ...trend.days.map(d => [`completed_${d.day.toISOString().slice(0, 10)}`, d.count]),
       ...memberLoad.map(([name, count]) => [`member_${name}`, count]),
       ...projectProgress.map(p => [`project_${p.name}`, `${p.progress}%`]),
     ]
@@ -208,14 +213,14 @@ export function InsightsTab({ teamTasks = [], teamProjects = [], insights }) {
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="pt-4">
       <div className="flex items-center gap-2 flex-wrap mb-4">
         <PillNav options={RANGES} value={range} onChange={setRange} />
-        <span className="text-[11px] text-[var(--text-secondary)]">Derived live from team tasks &amp; projects â€” no mocked metrics.</span>
+        <span className="text-[11px] text-[var(--text-secondary)]">Derived live from team tasks & projects — no mocked metrics.</span>
         <span className="flex-1" />
         <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1.5" onClick={exportCsv}>
           <Download className="w-3.5 h-3.5" /> Export CSV
         </Button>
       </div>
 
-      {windowTasks.length === 0 && teamProjects.length === 0 ? (
+      {teamTasks.length === 0 && teamProjects.length === 0 ? (
         <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-[var(--shadow-xs)]">
           <EmptyState icon={BarChart3} title="Nothing to analyze yet" description="Task and project data will appear here as work happens." className="min-h-[200px]" />
         </div>
@@ -224,8 +229,8 @@ export function InsightsTab({ teamTasks = [], teamProjects = [], insights }) {
           {/* Rich fragments: velocity strip */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
             <StatTile icon={TrendingUp} label="Throughput" value={velocity.throughput.toFixed(1)} hint={`${velocity.done} tasks done in window`} />
-            <StatTile icon={Timer} label="Avg cycle time" value={velocity.cycleTime != null ? `${velocity.cycleTime.toFixed(1)}d` : 'â€”'} hint={velocity.cycleTime != null ? 'created â†’ done' : 'not enough data yet'} tone={velocity.cycleTime != null && velocity.cycleTime > 7 ? 'warning' : 'accent'} />
-            <StatTile icon={Target} label="Forecast" value={velocity.forecastDays != null ? `${velocity.forecastDays}d` : 'â€”'} hint={velocity.forecastDays != null ? `${velocity.remaining} tasks left at current pace` : 'not enough data yet'} tone={velocity.forecastDays != null && velocity.forecastDays > 14 ? 'warning' : 'success'} />
+            <StatTile icon={Timer} label="Avg cycle time" value={velocity.cycleTime != null ? `${velocity.cycleTime.toFixed(1)}d` : '—'} hint={velocity.cycleTime != null ? 'created → done' : 'not enough data yet'} tone={velocity.cycleTime != null && velocity.cycleTime > 7 ? 'warning' : 'accent'} />
+            <StatTile icon={Target} label="Forecast" value={velocity.forecastDays != null ? `${velocity.forecastDays}d` : '—'} hint={velocity.forecastDays != null ? `${velocity.remaining} tasks left at current pace` : 'not enough data yet'} tone={velocity.forecastDays != null && velocity.forecastDays > 14 ? 'warning' : 'success'} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -241,7 +246,7 @@ export function InsightsTab({ teamTasks = [], teamProjects = [], insights }) {
             {/* Completion trend */}
             <Card icon={BarChart3} title="Completion trend">
               <div className="flex items-end gap-1 h-[84px]">
-                {trend.map((d, i) => (
+                {trend.days.map((d, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
                     <div className="w-full rounded-[3px] transition-all"
                       style={{ height: `${Math.max(d.count / maxTrend * 100, d.count > 0 ? 4 : 1.5)}%`,
@@ -250,7 +255,7 @@ export function InsightsTab({ teamTasks = [], teamProjects = [], insights }) {
                   </div>
                 ))}
               </div>
-              <p className="text-[10px] text-[var(--text-muted)] mt-1">{maxTrend} completed in one day Â· last 14 days</p>
+              <p className="text-[10px] text-[var(--text-muted)] mt-1">{maxTrend} completed in one day · last {trend.displayDays} days</p>
             </Card>
 
             {/* Member workload */}

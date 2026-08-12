@@ -51,7 +51,7 @@
 .ec-card:hover .ec-name{color:var(--accent)}
 .ec-name--arrow svg{width:14px;height:14px;opacity:0;transform:translateX(-4px);transition:all .2s ease;color:var(--accent);flex-shrink:0}
 .ec-card:hover .ec-name--arrow svg{opacity:1;transform:none}
-.ec-tagline{font-size:12px;color:var(--text-secondary);margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5}
+.ec-tagline{font-size:12px;color:var(--text-secondary);margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5;min-height:36px}
 .ec-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
 .ec-meta-item{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono,ui-monospace,'JetBrains Mono',SFMono-Regular,Menlo,Consolas,monospace);font-size:10px;color:var(--text-tertiary)}
 .ec-meta-item svg{width:11px;height:11px}

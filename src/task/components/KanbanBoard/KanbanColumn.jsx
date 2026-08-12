@@ -10,7 +10,7 @@ import { useCreateTask } from '../../entities/hooks/useTasks'
 import { cn } from '@/shared/lib/cn'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
-/* â”€â”€â”€ Column accent styles â”€â”€â”€ */
+/* ─── Column accent styles ─── */
 const COLUMN_STYLES = {
   'To Do':       { accent: '#3B82F6', bg: 'rgba(59,130,246,0.025)', border: 'rgba(59,130,246,0.10)', dot: '#3B82F6' },
   'In Progress': { accent: '#F59E0B', bg: 'rgba(245,158,11,0.025)', border: 'rgba(245,158,11,0.10)', dot: '#F59E0B' },

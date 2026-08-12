@@ -67,6 +67,7 @@ import {
   Gauge,
   GitBranch,
   GitCommitHorizontal,
+  GitCompare,
   Globe,
   Grid,
   Hash,
@@ -312,6 +313,7 @@ export const Icons = {
   thumbsUp: ThumbsUp,
   thumbsDown: ThumbsDown,
   trash: Trash,
+  trash2: Trash2,
   link: Link,
   messageSquare: MessageSquare,
   maximize2: Maximize2,
@@ -342,5 +344,5 @@ export const Icons = {
   cornerDownRight: CornerDownRight,
   send: Send,
   rotateCcw: RotateCcw,
-  
+  gitCompare: GitCompare
 }

@@ -8,7 +8,8 @@ import { Textarea } from '@/shared/ui/Textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/Select';
 import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { ImmersiveEmptyState } from '@/shared/ui/Immersive';
-import { useCreateTask, useCompleteCrewTask, useClaimTask, TaskPanel, KanbanBoard } from '@/task';
+import { useCreateTask, useCompleteCrewTask, useClaimTask, KanbanBoard } from '@/task';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/identity';
 import { cn } from '@/shared/lib/cn';
 import { PRIORITY_COLORS, normalizePriority } from '@/shared/lib/priority';
@@ -179,7 +180,6 @@ function CrewTaskCard({ task, isSelected, isBulkMode, onToggleSelect, onClaim, o
 export function TasksTab({ crewId, tasks }) {
   const { user } = useAuth()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [selectedTask, setSelectedTask] = useState(null)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState('MEDIUM')
@@ -192,6 +192,7 @@ export function TasksTab({ crewId, tasks }) {
   const [bulkMode, setBulkMode] = useState(false)
   const [selectedTasks, setSelectedTasks] = useState(new Set())
   const [showFilters, setShowFilters] = useState(false)
+  const navigate = useNavigate()
 
   // FIX: reuse the shared useTasks hook — useCreateTask routes to POST /tasks/crew
   // in CREWS workspace mode (same backend contract, single mutation source of truth).
@@ -357,9 +358,7 @@ export function TasksTab({ crewId, tasks }) {
           </ModalContent>
         </Modal>
 
-        {selectedTask && (
-          <TaskPanel task={selectedTask} isOpen={!!selectedTask} onClose={() => setSelectedTask(null)} />
-        )}
+
       </>
     )
   }
@@ -520,7 +519,7 @@ export function TasksTab({ crewId, tasks }) {
       <KanbanBoard
         tasks={filterTasks(tasks)}
         mode="CREWS"
-        onTaskClick={setSelectedTask}
+        onTaskClick={(task) => navigate(`/app/tasks/${task.id || task.taskId}`)}
         responsive={true}
       />
 

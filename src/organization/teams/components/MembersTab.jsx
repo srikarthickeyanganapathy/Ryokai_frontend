@@ -8,7 +8,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { cn } from '@/shared/lib/cn'
 
 /* ============================================================
-   components/MembersTab.jsx â€” People grid (demo-faithful).
+   components/MembersTab.jsx — People grid (demo-faithful).
    Compact member cards: aura avatar, lead crown + Lead chip,
    workload bar (red at the busiest / amber from 80%), and a
    last-active footer. All / Leads / Me filter. Workload and

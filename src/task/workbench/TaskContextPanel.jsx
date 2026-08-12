@@ -65,7 +65,7 @@ export function TaskContextPanel({
     [width, onWidthChange, isMobile],
   )
 
-  /* â”€â”€ Mobile: full-screen overlay â”€â”€ */
+  /* ── Mobile: full-screen overlay ── */
   if (isMobile) {
     return (
       <AnimatePresence>
@@ -101,7 +101,7 @@ export function TaskContextPanel({
     )
   }
 
-  /* â”€â”€ Desktop: TaskPanel handles its own animation â”€â”€ */
+  /* ── Desktop: TaskPanel handles its own animation ── */
   if (!isOpen) return null
 
   return (
@@ -128,7 +128,7 @@ export function TaskContextPanel({
   )
 }
 
-/* â”€â”€ Panel loading skeleton â”€â”€ */
+/* ── Panel loading skeleton ── */
 function PanelSkeleton() {
   return (
     <div className="h-full flex flex-col animate-pulse border-l border-[var(--color-border-subtle)] bg-[var(--bg-card)]" style={{ width: 420 }}>
@@ -157,7 +157,7 @@ function PanelSkeleton() {
   )
 }
 
-/* â”€â”€ Panel error â”€â”€ */
+/* ── Panel error ── */
 function PanelError({ onRetry }) {
   return (
     <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6" style={{ width: 420 }}>

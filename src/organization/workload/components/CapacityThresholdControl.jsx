@@ -1,56 +1,53 @@
-import { Settings2, RefreshCw } from '@/shared/ui/Icons';
-import { Button } from '@/shared/ui/Button';
-import { Input } from '@/shared/ui/Input';
+import { RefreshCw, Minus, Plus } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 
+/**
+ * Stepper-style capacity threshold control matching V1 demo.
+ * − / value / + / unit label + ghost refresh button.
+ */
 export function CapacityThresholdControl({
   threshold,
-  showThresholdInput,
-  tempThreshold,
   isLoading,
-  onOpenThresholdInput,
-  onTempThresholdChange,
-  onSaveThreshold,
+  onDecrement,
+  onIncrement,
   onRefresh,
 }) {
   return (
-    <div className="flex items-center gap-2">
-      {showThresholdInput ? (
-        <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border-subtle)] p-1 rounded-lg shadow-sm">
-          <Input
-            type="number"
-            value={tempThreshold}
-            onChange={(e) => onTempThresholdChange(Number(e.target.value))}
-            className="w-16 h-7 text-sm border-none focus-visible:ring-0 font-mono"
-            min={1}
-            max={20}
-          />
-          <Button
-            size="sm"
-            className="h-7 text-xs"
-            onClick={onSaveThreshold}
-          >
-            Set
-          </Button>
-        </div>
-      ) : (
+    <div className="flex items-center gap-2.5">
+      {/* Stepper */}
+      <div
+        className="flex items-center bg-[var(--bg-card)] border border-[var(--border-default)] rounded-[var(--radius-sm)] shadow-[var(--shadow-xs)] overflow-hidden"
+        title="Capacity threshold — tasks per member"
+      >
         <button
-          onClick={onOpenThresholdInput}
-          className="inline-flex items-center gap-2 h-9 px-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-card)] shadow-sm text-[12px] font-semibold text-[var(--text-primary)] hover:border-[var(--accent-border)] transition-colors"
-          title="Capacity threshold — tasks per member"
+          onClick={onDecrement}
+          disabled={isLoading}
+          aria-label="Decrease threshold"
+          className="w-[34px] h-[38px] border-0 bg-transparent text-[15px] font-mono text-[var(--text-secondary)] cursor-pointer transition-colors hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] disabled:opacity-50"
         >
-          <Settings2 className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-          <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
-            Capacity
-          </span>
-          <span className="font-mono font-bold text-[var(--accent)]">{threshold}</span>
-          <span className="font-mono text-[10px] text-[var(--text-muted)]">/ member</span>
+          <Minus className="w-3.5 h-3.5 mx-auto" />
         </button>
-      )}
+        <div className="min-w-[46px] text-center font-mono font-bold text-[14px] border-l border-r border-[var(--border-subtle)] h-[38px] flex items-center justify-center text-[var(--text-primary)]">
+          {threshold}
+        </div>
+        <button
+          onClick={onIncrement}
+          disabled={isLoading}
+          aria-label="Increase threshold"
+          className="w-[34px] h-[38px] border-0 bg-transparent text-[15px] font-mono text-[var(--text-secondary)] cursor-pointer transition-colors hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] disabled:opacity-50"
+        >
+          <Plus className="w-3.5 h-3.5 mx-auto" />
+        </button>
+        <span className="pr-2.5 text-[11px] text-[var(--text-tertiary)] font-mono uppercase tracking-[0.06em]">
+          tasks / member
+        </span>
+      </div>
+
+      {/* Refresh — ghost style */}
       <button
         onClick={onRefresh}
         disabled={isLoading}
-        className="inline-flex items-center gap-2 h-9 px-3 rounded-lg border border-transparent text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-colors disabled:opacity-60"
+        className="inline-flex items-center gap-2 h-[38px] px-3 rounded-[var(--radius-sm)] border border-transparent text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-50"
       >
         <RefreshCw className={cn('w-3.5 h-3.5', isLoading && 'animate-spin')} />
         Refresh

@@ -20,7 +20,6 @@ import {
   AIInsightsPanel,
   TeamHealthCard,
   DistributionChart,
-  LeaderboardPanel,
   RebalanceSimulator,
 } from '@/organization/workload/features/components';
 import {
@@ -28,6 +27,7 @@ import {
   ensureHistory,
 } from '../features/utils/workloadHistoryStorage';
 import { CapacityThresholdControl } from '../components/CapacityThresholdControl';
+import { SectionDivider } from '../components/SectionDivider';
 import { HeatmapMatrix } from '../components/HeatmapMatrix';
 import { WorkloadFilters } from '../components/WorkloadFilters';
 import { MemberUtilizationGrid } from '../components/MemberUtilizationGrid';
@@ -52,8 +52,6 @@ export function WorkloadPage() {
     return saved ? parseInt(saved, 10) : 8;
   });
   const [history, setHistory] = useState({});
-  const [showThresholdInput, setShowThresholdInput] = useState(false);
-  const [tempThreshold, setTempThreshold] = useState(threshold);
   const [filter, setFilter] = useState('all');
   const [expandedCards, setExpandedCards] = useState({});
 
@@ -64,12 +62,18 @@ export function WorkloadPage() {
     }
   }, [orgId, rows]);
 
-  const handleSaveThreshold = () => {
-    if (orgId)
-      localStorage.setItem(getThresholdKey(orgId), String(tempThreshold));
-    setThreshold(tempThreshold);
-    setShowThresholdInput(false);
-    toast.success(`Capacity threshold updated to ${tempThreshold}`);
+  /* ── Stepper handlers ── */
+  const handleDecrement = () => {
+    if (threshold <= 2) return;
+    const next = threshold - 1;
+    setThreshold(next);
+    if (orgId) localStorage.setItem(getThresholdKey(orgId), String(next));
+  };
+  const handleIncrement = () => {
+    if (threshold >= 20) return;
+    const next = threshold + 1;
+    setThreshold(next);
+    if (orgId) localStorage.setItem(getThresholdKey(orgId), String(next));
   };
 
   const stats = useMemo(
@@ -128,20 +132,18 @@ export function WorkloadPage() {
 
   return (
     <PageShell maxWidth="default">
+      {/* ═══ Header ═══ */}
       <PageHero
         eyebrow="Resource Capacity"
         title="Team Capacity & Utilization"
-        subtitle="Monitor team load balance and task allocation bottlenecks."
+        subtitle="Monitor team load balance and task allocation bottlenecks across the organization."
         icon={Gauge}
       >
         <CapacityThresholdControl
           threshold={threshold}
-          showThresholdInput={showThresholdInput}
-          tempThreshold={tempThreshold}
           isLoading={isLoading}
-          onOpenThresholdInput={() => setShowThresholdInput(true)}
-          onTempThresholdChange={setTempThreshold}
-          onSaveThreshold={handleSaveThreshold}
+          onDecrement={handleDecrement}
+          onIncrement={handleIncrement}
           onRefresh={() => refetch()}
         />
       </PageHero>
@@ -159,32 +161,46 @@ export function WorkloadPage() {
           }}
         >
           <div className="flex flex-col gap-6">
-            <OrgSnapshotBanner stats={stats} />
+            {/* ═══ KPI Strip ═══ */}
+            <OrgSnapshotBanner stats={stats} threshold={threshold} />
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* ═══ Team Pulse ═══ */}
+            <SectionDivider title="Team pulse" tag="Live" hint="updated 2 min ago" />
+            <div className="grid grid-cols-1 md:grid-cols-[2fr_1.3fr] gap-3.5">
               <TeamHealthCard score={healthScore} stats={stats} />
-              <div className="md:col-span-2">
-                <AIInsightsPanel stats={stats} />
-              </div>
+              <AIInsightsPanel stats={stats} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* ═══ Load Shape ═══ */}
+            <SectionDivider title="Load shape" tag="Analytics" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               <DistributionChart rows={rows} threshold={threshold} />
               <RebalanceSimulator rows={rows} threshold={threshold} />
             </div>
 
-            <LeaderboardPanel rows={rows} threshold={threshold} />
-
+            {/* ═══ 14-Day Heatmap ═══ */}
+            <SectionDivider
+              title="14-day capacity heatmap"
+              tag="History"
+              hint="hover cells for detail"
+            />
             <HeatmapMatrix
               rows={rows}
               threshold={threshold}
               history={history}
             />
 
-            {/* Quick Filters */}
-            <WorkloadFilters value={filter} onChange={setFilter} />
-
-            {/* Utilization Cards Grid */}
+            {/* ═══ Member Capacity (Roster) ═══ */}
+            <SectionDivider title="Member capacity" tag="Roster" />
+            <div className="flex items-center gap-3 flex-wrap">
+              <WorkloadFilters value={filter} onChange={setFilter} />
+              <span className="ml-auto font-mono text-[11px] text-[var(--text-tertiary)]">
+                showing{' '}
+                <b className="text-[var(--text-primary)]">{filteredRows.length}</b>{' '}
+                of <b className="text-[var(--text-primary)]">{rows.length}</b>{' '}
+                members
+              </span>
+            </div>
             <MemberUtilizationGrid
               rows={filteredRows}
               threshold={threshold}
@@ -193,13 +209,19 @@ export function WorkloadPage() {
               onToggleCard={toggleCard}
             />
 
-            {/* Workload Matrix Table */}
+            {/* ═══ Workload Matrix Table ═══ */}
+            <SectionDivider title="Workload matrix" tag="Table" />
             <WorkloadMatrixTable
               rows={filteredRows}
               threshold={threshold}
               history={history}
               isLoading={isLoading}
             />
+
+            {/* ═══ Footer Note ═══ */}
+            <div className="mt-4 text-center font-mono text-[10.5px] text-[var(--text-tertiary)] tracking-[0.06em]">
+              V1 · Capacity Command · workload view
+            </div>
           </div>
         </PageState>
       </PageContent>

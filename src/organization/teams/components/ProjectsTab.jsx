@@ -11,7 +11,7 @@ import { ProjectCard } from '@/project/components/ProjectCard'
 import { cn } from '@/shared/lib/cn'
 
 /* ============================================================
-   components/ProjectsTab.jsx â€” Work segment (projects side).
+   components/ProjectsTab.jsx — Work segment (projects side).
    Uses the project's own shared ProjectCard for each card
    (health ring, progress, due, navigation), wrapped with a
    status menu (real onStatusChange) and the team member stack.
@@ -59,7 +59,7 @@ export function ProjectsTab({ teamProjects, members, hasProjectIdOnTasks, tasksF
   return (
     <div className="pt-4">
       <div className="flex items-center gap-2 flex-wrap mb-3">
-        <SearchInput value={query} onChange={setQuery} placeholder="Search projectsâ€¦" debounceMs={0} className="w-[200px] sm:w-[240px]" />
+        <SearchInput value={query} onChange={setQuery} placeholder="Search projects…" debounceMs={0} className="w-[200px] sm:w-[240px]" />
         <PillNav filters={STATUS_TABS} value={statusTab} onChange={setStatusTab} counts={counts} />
         <span className="flex-1" />
         {canCreateProject && !isReadOnly && (

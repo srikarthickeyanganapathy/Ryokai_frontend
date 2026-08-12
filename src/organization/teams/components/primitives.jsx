@@ -61,7 +61,7 @@ export function AnimatedCounter({ value, duration = 0.8 }) {
   const springValue = useSpring(0, { stiffness: 80, damping: 20, duration: duration * 1000 })
   const display = useTransform(springValue, v => Math.round(v))
 
-  useEffect(() => { springValue.set(value) }, [value, springValue])
+  useEffect(() => { springValue.set(value || 0) }, [value, springValue])
 
   return (
     <motion.span className="tabular-nums font-bold">

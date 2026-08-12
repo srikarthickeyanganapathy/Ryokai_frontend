@@ -94,8 +94,8 @@ export function TeamTile({ team, stats, isMember, orgId, canManage, canManageTea
           </div>
         }
         meta={[
-          { icon: <Icons.checkSquare style={{ width: 11, height: 11 }} />, text: `${stats.activeTaskCount} tasks` },
-          { icon: <Icons.folder style={{ width: 11, height: 11 }} />, text: `${stats.projectCount} projects` },
+          { icon: <Icons.checkSquare style={{ width: 11, height: 11 }} />, text: `${stats.activeTaskCount} ${stats.activeTaskCount === 1 ? 'task' : 'tasks'}` },
+          { icon: <Icons.folder style={{ width: 11, height: 11 }} />, text: `${stats.projectCount} ${stats.projectCount === 1 ? 'project' : 'projects'}` },
           ...(lastActive ? [{ icon: <Icons.clock style={{ width: 11, height: 11 }} />, text: `Active ${lastActive}` }] : []),
         ]}
         avatars={memberAvatars}

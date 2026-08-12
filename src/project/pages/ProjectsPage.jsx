@@ -283,6 +283,9 @@ export function ProjectsPage() {
           <ProjectForm
             onSubmit={handleCreateProject}
             isLoading={createProjectMutation.isPending}
+            workspaceMode={workspaceMode}
+            useOrgTeamsHook={useOrgTeams}
+            defaultValues={workspaceMode === 'ORG' && activeOrganization?.id ? { organizationId: String(activeOrganization.id) } : undefined}
             />
         </ModalContent>
       </Modal>

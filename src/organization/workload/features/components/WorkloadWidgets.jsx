@@ -20,85 +20,66 @@ import {
   SelectContent,
   SelectItem,
 } from '@/shared/ui/Select';
+import { StatKPI } from '@/organization/teams/components/StatKPI';
 
-/* ── OrgSnapshotBanner: KPI tile strip with colored top rails ─────────── */
-function KpiTile({ icon: Icon, iconBg, label, value, caption, tone, suffix, ring }) {
-  const rail = tone === 'danger' ? 'var(--danger)' : tone === 'warning' ? 'var(--warning)' : tone === 'success' ? 'var(--success)' : 'var(--accent)';
-  const valColor = tone === 'danger' ? 'text-[var(--danger)]' : 'text-[var(--text-primary)]';
+/* ── KpiTile / OrgSnapshotBanner: StatKPI tile strip ─────────────────── */
+export function KpiTile({ icon: Icon, label, value, caption, tone, hue, suffix, ring }) {
+  const defaultHue = tone === 'danger' ? 0 : tone === 'warning' ? 38 : tone === 'success' ? 145 : 215;
+  const currentHue = hue ?? defaultHue;
   return (
-    <div className="relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-3.5 shadow-sm">
-      <span className="absolute inset-x-0 top-0 h-[2px]" style={{ background: rail }} />
-      <div className="flex items-center justify-between gap-2">
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span
-              className="w-4 h-4 rounded-[5px] flex items-center justify-center shrink-0"
-              style={{ background: iconBg.bg, color: iconBg.fg }}
-            >
-              <Icon className="w-2.5 h-2.5" />
-            </span>
-            <Text size="xs" variant="muted" className="text-[9.5px] uppercase tracking-[0.1em] font-mono truncate">
-              {label}
-            </Text>
-          </div>
-          <div className={cn('mt-1.5 font-mono text-[22px] font-bold leading-none tracking-tight', valColor)}>
-            <AnimatedNumber value={value} suffix={suffix} className="font-mono" />
-          </div>
-          <Text size="10px" variant="muted" className="mt-1.5 block font-mono">
-            {caption}
-          </Text>
-        </div>
-        {ring && (
-          <div className="shrink-0">
-            <CapacityRing value={ring.value} size={44} stroke={5} />
-          </div>
-        )}
-      </div>
-    </div>
+    <StatKPI
+      icon={Icon}
+      label={label}
+      value={value}
+      suffix={suffix}
+      caption={caption}
+      hue={currentHue}
+      ring={ring ? <CapacityRing value={ring.value} size={36} stroke={4} color={`hsl(${currentHue} 70% 50%)`} showValue={false} /> : null}
+    />
   );
 }
 
-export function OrgSnapshotBanner({ stats }) {
+export function OrgSnapshotBanner({ stats, threshold }) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 mt-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
       <KpiTile
         icon={Users}
-        iconBg={{ bg: 'var(--accent-soft)', fg: 'var(--accent)' }}
-        label="Total Members"
+        hue={215}
+        label="Members"
         value={stats.memberCount}
-        caption="in this org"
+        caption={<>across <b className="font-mono font-bold text-[var(--text-secondary)]">{Math.max(1, Math.ceil(stats.memberCount / 3))} teams</b></>}
         tone="accent"
       />
       <KpiTile
         icon={Activity}
-        iconBg={{ bg: 'var(--accent-soft)', fg: 'var(--accent)' }}
-        label="Active Tasks"
+        hue={190}
+        label="Active tasks"
         value={stats.totalActive}
         caption="today"
         tone="accent"
       />
       <KpiTile
-        icon={null}
-        iconBg={{ bg: 'var(--accent-soft)', fg: 'var(--accent)' }}
-        label="Avg Utilization"
+        icon={TrendingUp}
+        hue={270}
+        label="Avg utilization"
         value={stats.avgUtilization}
         suffix="%"
-        caption="of total capacity"
+        caption={<>capacity used of <b className="font-mono font-bold text-[var(--text-secondary)]">{stats.memberCount * (threshold || 8)}</b> slots</>}
         tone="accent"
         ring={{ value: stats.avgUtilization }}
       />
       <KpiTile
         icon={AlertCircle}
-        iconBg={{ bg: 'var(--danger-soft)', fg: 'var(--danger)' }}
+        hue={0}
         label="Overloaded"
         value={stats.overAllocated}
-        caption="above capacity"
+        caption={<>above <b className="font-mono font-bold text-[var(--text-secondary)]">{threshold || 8}</b> active tasks</>}
         tone="danger"
       />
       <KpiTile
         icon={Plus}
-        iconBg={{ bg: 'var(--accent-soft)', fg: 'var(--accent)' }}
-        label="Available Cap."
+        hue={145}
+        label="Available capacity"
         value={stats.availableTasks}
         suffix=" tasks"
         caption="slots free to assign"
@@ -236,14 +217,13 @@ export function TeamHealthCard({ score, stats }) {
         </span>
       </div>
       <div className="flex items-center gap-5">
-        <div className="relative shrink-0">
-          <CapacityRing value={score} size={104} stroke={10} />
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="shrink-0">
+          <CapacityRing value={score} size={104} stroke={10} color={toneColor}>
             <span className="font-mono text-[26px] font-bold leading-none" style={{ color: toneColor }}>
               {score}
             </span>
             <span className="font-mono text-[9px] text-[var(--text-muted)] mt-0.5">/ 100</span>
-          </div>
+          </CapacityRing>
         </div>
         <div className="flex-1 min-w-0 space-y-2.5">
           <span
@@ -334,90 +314,7 @@ export function DistributionChart({ rows, threshold }) {
   );
 }
 
-/* ── LeaderboardPanel ──────────────────────────────────────────────────── */
-function WorkloadPeerPanel({ title, icon: Icon, users, tone, threshold }) {
-  return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4 shadow-sm">
-      <div className="flex items-center gap-2 mb-3">
-        <span
-          className={cn(
-            'w-6 h-6 rounded-lg flex items-center justify-center',
-            tone === 'danger' ? 'bg-[var(--danger-soft)] text-[var(--danger)]' : 'bg-[var(--accent-soft)] text-[var(--accent)]',
-          )}
-        >
-          <Icon className="w-3.5 h-3.5" />
-        </span>
-        <Heading level={4} className="text-[13px] font-semibold tracking-tight">
-          {title}
-        </Heading>
-      </div>
-      {users.length === 0 ? (
-        <Text size="xs" variant="muted">
-          No members found in this threshold.
-        </Text>
-      ) : (
-        <div className="space-y-2">
-          {users.map((row) => (
-            <div
-              key={row.user?.id || row.user?.username}
-              className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 px-2.5 py-2"
-            >
-              <Text size="xs" className="font-medium text-[var(--text-primary)]">
-                {row.user?.fullName || row.user?.username || 'Member'}
-              </Text>
-              <div className="text-right">
-                <Text
-                  size="xs"
-                  className={cn(
-                    'font-mono font-bold',
-                    tone === 'danger' ? 'text-[var(--danger)]' : 'text-[var(--accent)]',
-                  )}
-                >
-                  {row.totalActiveCount ?? 0} / {threshold}
-                </Text>
-                <Text size="10px" variant="muted" className="block font-mono">
-                  {tone === 'danger'
-                    ? `+${(row.totalActiveCount ?? 0) - threshold} over`
-                    : `Can take ${threshold - (row.totalActiveCount ?? 0)}`}
-                </Text>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-export function LeaderboardPanel({ rows, threshold }) {
-  const topOver = [...rows]
-    .filter((r) => (r.totalActiveCount ?? 0) > threshold)
-    .sort((a, b) => (b.totalActiveCount ?? 0) - (a.totalActiveCount ?? 0))
-    .slice(0, 3);
-  const topUnder = [...rows]
-    .filter((r) => (r.totalActiveCount ?? 0) < threshold * 0.5)
-    .sort((a, b) => (a.totalActiveCount ?? 0) - (b.totalActiveCount ?? 0))
-    .slice(0, 3);
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <WorkloadPeerPanel
-        title="Most Overloaded"
-        icon={AlertCircle}
-        users={topOver}
-        tone="danger"
-        threshold={threshold}
-      />
-      <WorkloadPeerPanel
-        title="Available Capacity"
-        icon={CheckCircle}
-        users={topUnder}
-        tone="accent"
-        threshold={threshold}
-      />
-    </div>
-  );
-}
+/* LeaderboardPanel removed — not in V1 Capacity Command demo */
 
 /* ── RebalanceSimulator ────────────────────────────────────────────────── */
 export function RebalanceSimulator({ rows, threshold }) {

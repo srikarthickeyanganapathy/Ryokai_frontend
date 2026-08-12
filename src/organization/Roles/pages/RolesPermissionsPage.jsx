@@ -100,7 +100,7 @@ export function RolesPermissionsPage() {
                   />
                   <div className="flex flex-col gap-4 min-w-0">
                     <RiskBanner roleName={selected?.name} critical={crit} />
-                    <div className="flex flex-col lg:flex-row rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden h-[calc(100vh-340px)] min-h-[540px]">
+                    <div className="grid grid-cols-1 lg:grid-cols-[192px_1fr] gap-3.5 items-start">
                       <ModuleSidebar
                         modules={studio.filteredModules}
                         activeModule={studio.activeModuleCode}
@@ -108,29 +108,27 @@ export function RolesPermissionsPage() {
                         localScopedPerms={studio.localScopedPerms}
                         permissionMap={studio.PERMISSION_MAP}
                       />
-                      <div className="flex-1 flex min-h-0 min-w-0">
-                        <PermissionBrowser
-                          module={studio.activeModuleData}
-                          groupedPermissions={studio.groupedPermissions}
-                          localScopedPerms={studio.localScopedPerms}
-                          permissionMap={studio.PERMISSION_MAP}
-                          isAdmin={studio.isAdminRole}
-                          searchQuery={studio.permSearchQuery}
-                          onSearchChange={studio.setPermSearchQuery}
-                          riskFilter={studio.riskFilter}
-                          onRiskFilterChange={studio.setRiskFilter}
-                          onToggle={studio.togglePermission}
-                          onEnableAll={studio.handleEnableAll}
-                          onDisableAll={studio.handleDisableAll}
-                          onReset={studio.handleResetModule}
-                          onScopeChange={studio.handleScopeChange}
-                          onResourceAssignmentChange={studio.handleResourceAssignmentChange}
-                          onSetModuleLevel={studio.handleSetModuleLevel}
-                        />
-                      </div>
-                    </div>
+                      <PermissionBrowser
+                        module={studio.activeModuleData}
+                        groupedPermissions={studio.groupedPermissions}
+                        localScopedPerms={studio.localScopedPerms}
+                        permissionMap={studio.PERMISSION_MAP}
+                        isAdmin={studio.isAdminRole}
+                        searchQuery={studio.permSearchQuery}
+                        onSearchChange={studio.setPermSearchQuery}
+                        riskFilter={studio.riskFilter}
+                        onRiskFilterChange={studio.setRiskFilter}
+                        onToggle={studio.togglePermission}
+                        onEnableAll={studio.handleEnableAll}
+                        onDisableAll={studio.handleDisableAll}
+                        onReset={studio.handleResetModule}
+                        onScopeChange={studio.handleScopeChange}
+                        onResourceAssignmentChange={studio.handleResourceAssignmentChange}
+                        onSetModuleLevel={studio.handleSetModuleLevel}
+                      />
                   </div>
                 </div>
+              </div>
               </div>
             ) : (
               <CommandChain

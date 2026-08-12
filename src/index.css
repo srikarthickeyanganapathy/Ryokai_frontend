@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 @import './shared/styles/tokens.css';
 
 /* Ryokai Premium Design System
@@ -37,7 +37,22 @@
   --shadow-lg: var(--shadow-lg);
 }
 
+@layer base {
+  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
+  *::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+}
+
 @layer utilities {
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
   .custom-scrollbar {
     &::-webkit-scrollbar { width: 6px; height: 6px; }
     &::-webkit-scrollbar-track { background: transparent; }

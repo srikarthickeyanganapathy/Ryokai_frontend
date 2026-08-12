@@ -10,9 +10,10 @@ import { StatusBadge } from '@/shared/ui/StatusBadge'
 import { PriorityBadge } from '@/shared/ui/PriorityBadge'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { cn } from '@/shared/lib/cn'
+import { TeamIdentity } from './TeamIdentity'
 
 /* ============================================================
-   components/OverviewTab.jsx â€” team command center.
+   components/OverviewTab.jsx — team command center.
    Health strip (ring + status + overdue / in progress / due this
    week) that routes into Work, open-task triage, project
    progress, a member strip and a Recents + Upcoming rail.
@@ -282,6 +283,13 @@ export function OverviewTab({
           </section>
         </aside>
       </div>
+
+      <hr className="border-[var(--border-subtle)] my-8" />
+      
+      {/* ---------- Team Identity ---------- */}
+      <section>
+        <TeamIdentity team={team} />
+      </section>
     </motion.div>
   )
 }

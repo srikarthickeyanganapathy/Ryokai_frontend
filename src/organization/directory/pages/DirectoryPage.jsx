@@ -34,7 +34,6 @@ import { MemberDetailDrawer } from '../components/MemberDetailDrawer';
 import { DirectoryOrgChart } from '../components/DirectoryOrgChart';
 import { DirectoryTableView } from '../components/DirectoryTableView';
 import { DirectoryBulkActionsBar } from '../components/DirectoryFilterAndBulkBar';
-import { MemberCardGrid } from '../components/MemberCardGrid';
 import { MemberCompareModal } from '../components/MemberCompareModal';
 import { RecentActivityFeed } from '../components/RecentActivityFeed';
 import { formatLastActive, hasRecentActivity } from '../components/directoryUtils';
@@ -64,8 +63,7 @@ export function DirectoryPage() {
     return () => clearTimeout(searchDebounceRef.current)
   }, [searchQuery])
 
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table' | 'orgchart'
-  const [groupByRole, setGroupByRole] = useState(false);
+  const [viewMode, setViewMode] = useState('table'); // 'table' | 'orgchart'
   const [selectedRoleFilter, setSelectedRoleFilter] = useState('ALL');
   const [selectedTeamFilter, setSelectedTeamFilter] = useState('ALL');
   const [selectedIds, setSelectedIds] = useState([]);
@@ -197,26 +195,7 @@ export function DirectoryPage() {
     });
   }, [members, debouncedSearchQuery, selectedRoleFilter, selectedTeamFilter, memberTeamsMap, memberTasksMap, quickView]);
 
-  // Role grouping cluster calculations for Grid mode
-  const groupedMembers = useMemo(() => {
-    if (!groupByRole || viewMode !== 'grid') return null;
 
-    const groups = {};
-    filteredMembers.forEach((member) => {
-      const roleName = member.orgRole || 'MEMBER';
-      if (!groups[roleName]) {
-        groups[roleName] = { roleName, items: [], totalPriority: 0 };
-      }
-      groups[roleName].items.push(member);
-      groups[roleName].totalPriority += (member.rolePriority ?? 99);
-    });
-
-    return Object.values(groups).sort((a, b) => {
-      const avgA = a.totalPriority / a.items.length;
-      const avgB = b.totalPriority / b.items.length;
-      return avgA - avgB;
-    });
-  }, [filteredMembers, groupByRole, viewMode]);
 
   // ───────── Recently Joined & Activity Feed ─────────
 
@@ -403,28 +382,12 @@ export function DirectoryPage() {
         >
                     <PillNav
             items={[
-              { value: 'grid', label: 'Cards' },
               { value: 'table', label: 'Table' },
               { value: 'orgchart', label: 'Chart' },
             ]}
             value={viewMode}
             onChange={setViewMode}
           />
-          {viewMode === 'grid' && (
-            <Button
-              variant="ghost"
-              onClick={() => setGroupByRole(prev => !prev)}
-              className={cn(
-                'px-2.5 py-1 text-[11px] font-medium rounded-sm transition-colors h-auto gap-1.5',
-                groupByRole
-                  ? 'bg-[var(--bg-card)] shadow-sm text-[var(--text-primary)]'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              )}
-            >
-              <Layers className="w-3 h-3" />
-              Grouped
-            </Button>
-          )}
           {selectedIds.length === 2 && (
             <Button
               variant="primary"
@@ -439,7 +402,7 @@ export function DirectoryPage() {
         </EntityFilterBar>
 
       <PageContent>
-                {pageState === 'ready' && members.length > 0 && (
+        {pageState === 'ready' && members.length > 0 && (
           <EntityStatStrip
             stats={[
               { key: 'total', label: 'Total Members', value: analytics.totalMembers, sublabel: analytics.newThisMonth > 0 ? `${analytics.newThisMonth} new this month` : 'Members', icon: Users, tone: 'cyan' },
@@ -450,11 +413,11 @@ export function DirectoryPage() {
           />
         )}
 
-        {/* ───────── Page State & Member Grid ───────── */}
+        {/* ───────── Page State & Views ───────── */}
         <PageState
           state={pageState}
           stateProps={{skeleton: <DirectorySkeleton />, 
-            loadingVariant: 'cards',
+            loadingVariant: 'table',
             icon: UserIcon,
             title: 'No organization members found',
             description: 'Try adjusting your filter parameters or inviting new teammates.',
@@ -488,82 +451,12 @@ export function DirectoryPage() {
               <div className="p-3 bg-[var(--info-soft)]/40 border border-[var(--info-border)]/40 rounded-xl flex items-start gap-3 text-xs">
                 <Icons.info className="w-4 h-4 text-[var(--text-muted)] shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-medium text-[var(--text-secondary)]">Pro Tip: Click any member card or table row to open the inspect drawer.</span>
+                  <span className="font-medium text-[var(--text-secondary)]">Pro Tip: Click any table row to open the inspect drawer.</span>
                   <span className="text-[var(--text-muted)] ml-1">
                     Use checkboxes to trigger batch governance commands or instantly generate CSV roster reports.
                   </span>
                 </div>
               </div>
-
-              {/* VIEW 1: GRID CARDS (Enhanced) */}
-              {viewMode === 'grid' && (
-                <div className="space-y-8">
-                  {groupByRole ? (
-                    // Grouped By Role Render Matrix
-                    groupedMembers.map((group) => {
-                      const avgPriority = Math.round((group.totalPriority / group.items.length) * 10) / 10;
-                      return (
-                        <div key={group.roleName} className="space-y-3">
-                          <div className="flex items-center justify-between py-2 px-4 rounded-lg bg-[var(--bg-subtle)] border-l-4 border-l-[var(--accent)] border-y border-r border-[var(--border-subtle)] shadow-2xs">
-                            <div className="flex items-center gap-2.5">
-                              <span className="font-bold text-sm text-[var(--text-primary)] uppercase tracking-tight font-mono">
-                                {group.roleName}
-                              </span>
-                              <Badge variant="outline" className="text-[10px] bg-[var(--bg-elevated)]">
-                                {group.items.length} {group.items.length === 1 ? 'Member' : 'Members'}
-                              </Badge>
-                            </div>
-                            <span className="text-xs text-[var(--text-muted)] font-medium flex items-center gap-1">
-                              <Shield className="w-3 h-3 text-[var(--accent)]" />
-                              Avg Authority Rank: #{isNaN(avgPriority) ? 'N/A' : avgPriority}
-                            </span>
-                          </div>
-                          <MemberCardGrid
-                            membersList={group.items}
-                            selectedIds={selectedIds}
-                            onToggleSelect={handleToggleSelect}
-                            onSelectMember={setDrawerMember}
-                            memberTeamsMap={memberTeamsMap}
-                            memberTasksMap={memberTasksMap}
-                            roles={roles}
-                            updateRoleMutation={updateRoleMutation}
-                            removeMemberMutation={removeMemberMutation}
-                            canManageRoles={canManageRoles}
-                            canRemoveMembers={canRemoveMembers}
-                            user={user}
-                            confirm={confirm}
-                            adminCount={adminCount}
-                            allVisibleIds={group.items.map(i => i.userId)}
-                            onToggleAll={handleToggleAll}
-                            avgTasksPerMember={avgTasksPerMember}
-                          />
-                        </div>
-                      );
-                    })
-                  ) : (
-                    // Standard Grid Render Matrix
-                    <MemberCardGrid
-                      membersList={filteredMembers}
-                      selectedIds={selectedIds}
-                      onToggleSelect={handleToggleSelect}
-                      onSelectMember={setDrawerMember}
-                      memberTeamsMap={memberTeamsMap}
-                      memberTasksMap={memberTasksMap}
-                      roles={roles}
-                      updateRoleMutation={updateRoleMutation}
-                      removeMemberMutation={removeMemberMutation}
-                      canManageRoles={canManageRoles}
-                      canRemoveMembers={canRemoveMembers}
-                      user={user}
-                      confirm={confirm}
-                      adminCount={adminCount}
-                      allVisibleIds={filteredMembers.map(i => i.userId)}
-                      onToggleAll={handleToggleAll}
-                      avgTasksPerMember={avgTasksPerMember}
-                    />
-                  )}
-                </div>
-              )}
 
               {/* VIEW 2: COMPACT SORTABLE TABLE */}
               {viewMode === 'table' && (
@@ -670,15 +563,20 @@ export function DirectoryPage() {
 
 function DirectorySkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5 space-y-3">
-          <div className="flex items-center gap-3">
-            <Skeleton className="w-11 h-11 rounded-full shrink-0" />
-            <div className="flex-1 space-y-1.5"><Skeleton className="h-4 w-28" /><Skeleton className="h-3 w-20" /></div>
+    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
+      <div className="h-10 bg-[var(--bg-subtle)] border-b border-[var(--border-subtle)] px-4 flex items-center justify-between">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-4 w-24" />
+      </div>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="h-14 px-4 border-b border-[var(--border-subtle)] flex items-center gap-4">
+          <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+          <div className="flex-1 space-y-1">
+            <Skeleton className="h-3.5 w-36" />
+            <Skeleton className="h-3 w-24" />
           </div>
-          <Skeleton className="h-3 w-3/4" />
-          <div className="flex gap-2 pt-1"><Skeleton className="h-6 w-16 rounded-full" /><Skeleton className="h-6 w-16 rounded-full" /></div>
+          <Skeleton className="h-6 w-20 rounded-full" />
+          <Skeleton className="h-6 w-24 rounded-full" />
         </div>
       ))}
     </div>

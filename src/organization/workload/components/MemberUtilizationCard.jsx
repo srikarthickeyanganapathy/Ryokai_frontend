@@ -66,6 +66,11 @@ export function MemberUtilizationCard({
             <Text className="font-semibold text-[13px] truncate text-[var(--text-primary)]">
               {name}
             </Text>
+            {(user.role || user.jobTitle) && (
+              <Text className="text-[10.5px] text-[var(--text-tertiary)] font-mono truncate">
+                {user.role || user.jobTitle}
+              </Text>
+            )}
             <div className="flex items-center gap-2">
               <span
                 className={cn(

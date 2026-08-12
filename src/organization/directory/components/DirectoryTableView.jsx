@@ -630,7 +630,7 @@ export function DirectoryTableView({
       <DataTable
         columns={columns}
         data={sortedMembers}
-        getRowId={(row) => row.id}
+        getRowId={(row) => row.userId ?? row.id}
         isLoading={isLoading}
         emptyStateTitle="No organization members found"
         emptyStateDescription="Try adjusting your search query or role filters."

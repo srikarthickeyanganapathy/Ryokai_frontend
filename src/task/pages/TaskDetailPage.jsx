@@ -391,7 +391,7 @@ export default function TaskDetailPage() {
   if (!task) {
     return (
       <PageShell maxWidth="full">
-        <PageState state="empty" stateProps={{ icon: FileQuestion, title: 'Task not found', message: 'This task may have been deleted or moved.', action: { label: 'Back to Tasks', onClick: () => navigate('/app/tasks') } }} />
+        <PageState state="empty" stateProps={{ icon: FileQuestion, title: 'Task not found', message: 'This task may have been deleted or moved.', actionLabel: 'Back to Tasks', onAction: () => navigate('/app/tasks') }} />
       </PageShell>
     )
   }

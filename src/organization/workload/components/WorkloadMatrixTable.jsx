@@ -1,4 +1,3 @@
-import { Heading } from '@/shared/ui/Typography';
 import { cn } from '@/shared/lib/cn';
 import { DataTable } from '@/shared/ui/data-table/DataTable';
 import { getTrendDirection } from '@/organization/workload/features/utils/workloadCalculations';
@@ -7,13 +6,7 @@ import { TrendIcon } from './TrendIcon';
 
 export function WorkloadMatrixTable({ rows, threshold, history, isLoading }) {
   return (
-    <div className="space-y-3">
-      <Heading
-        level={2}
-        className="text-[15px] font-semibold tracking-tight text-[var(--text-primary)]"
-      >
-        Workload Matrix Table
-      </Heading>
+    <div>
       <DataTable
         columns={[
           {
