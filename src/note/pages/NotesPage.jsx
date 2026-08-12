@@ -9,7 +9,7 @@ import {
 } from '@/shared/ui/Icons'
 import { Button, IconButton } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
-import { Input } from '@/shared/ui/Input'
+import { SearchInput } from '@/shared/ui/SearchInput'
 import { Badge } from '@/shared/ui/Badge'
 import { cn } from '@/shared/lib/cn'
 import { useNotes, useDeleteNote, useUpdateNote, useCreateNote } from '@/note'
@@ -130,10 +130,10 @@ function MiniMarkdownPreview({ content, maxLines = 4 }) {
               <span className={cn("w-3 h-3 rounded border shrink-0 flex items-center justify-center", line.done ? "bg-[var(--success)] border-[var(--success)]" : "border-[var(--border-subtle)]")}>
                 {line.done && <Check className="w-2.5 h-2.5 text-white" />}
               </span>
-              <span className="truncate">{formatInline(line.text)}</span>
+              <span className="truncate min-w-0">{formatInline(line.text)}</span>
             </div>
           )
-          case 'bullet': return <div key={i} className="text-[11px] text-[var(--text-secondary)] flex gap-1.5 truncate"><span className="text-[var(--accent)]">-</span><span className="truncate">{formatInline(line.text)}</span></div>
+          case 'bullet': return <div key={i} className="text-[11px] text-[var(--text-secondary)] flex gap-1.5 truncate"><span className="text-[var(--accent)] shrink-0">-</span><span className="truncate min-w-0">{formatInline(line.text)}</span></div>
           default: return <div key={i} className="text-[11px] text-[var(--text-secondary)] truncate">{formatInline(line.text)}</div>
         }
       })}
@@ -212,7 +212,7 @@ function CaptureStrip({ onCreate, isCreating }) {
         rows={3}
         className="w-full px-4 py-3 bg-transparent text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none resize-none leading-relaxed"
       />
-      <div className="flex items-center gap-2 px-4 py-2.5 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40 flex-wrap">
         <span
           className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold font-mono transition-colors"
           style={{ backgroundColor: `${typeMeta.color}15`, color: typeMeta.color }}
@@ -258,8 +258,7 @@ function NoteCard({ note, onOpen, onDelete, onTogglePin, isPinnedSection }) {
   return (
     <InteractiveCard
       onClick={() => onOpen(note)}
-      className={cn('h-full p-4 group relative')}
-      className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)]"
+      className={cn('h-full p-4 group relative rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)]')}
     >
       <div
         className="absolute top-3 right-3 w-2 h-2 rounded-full opacity-80"
@@ -651,25 +650,18 @@ export function NotesPage() {
 
   return (
     <PageShell maxWidth="default" workspaceMode={workspaceModeLabel}>
-      {/* Editorial Hero */}
-      <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-6">
-        <div className="max-w-[1200px] mx-auto">
-          <div className="text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-[0.15em] mb-3" style={{fontFamily: "'JetBrains Mono', monospace", fontSize: '10px'}}>
-            {eyebrow}
-          </div>
-          <div className="w-[60px] h-[3px] bg-[var(--accent)] rounded-[2px] mb-4" />
-          <h1 className="text-[28px] leading-[34px] font-bold text-[var(--text-primary)] tracking-[-0.02em] mb-1.5" style={{fontFamily: "'Cormorant Garamond', 'Georgia', serif"}}>
-            Notes
-          </h1>
-          <div className="flex items-center gap-4 flex-wrap">
-            <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed" style={{fontFamily: "'DM Sans', sans-serif"}}>{subtitle}</p>
-            <Button onClick={openNew} size="sm" className="gap-1.5 h-8 text-[12px] shrink-0 font-semibold shadow-xs">
-              <Plus className="w-3.5 h-3.5" />
-              New Note
-            </Button>
-          </div>
-        </div>
-      </div>
+      {/* Page hero — workspace-framework PageHero contract */}
+      <PageHero
+        eyebrow={eyebrow}
+        title="Notes"
+        subtitle={subtitle}
+        actions={
+          <Button onClick={openNew} size="sm" className="gap-1.5 h-8 text-[12px] shrink-0 font-semibold shadow-xs">
+            <Plus className="w-3.5 h-3.5" />
+            New Note
+          </Button>
+        }
+      />
 
       <div className="px-4 sm:px-6">
         <CaptureStrip onCreate={handleCreate} isCreating={createNote.isPending} />
@@ -677,21 +669,13 @@ export function NotesPage() {
 
       <PageToolbar>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <Input
-              type="text"
-              placeholder="Search notes by title, content, or tags..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-8 text-[12px]"
-            />
-            {searchQuery && (
-              <IconButton variant="ghost" size="sm" className="absolute right-2.5 top-1/2 -translate-y-1/2" onClick={() => setSearchQuery('')} title="Clear search">
-                <span className="text-[14px]">x</span>
-              </IconButton>
-            )}
-          </div>
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search notes by title, content, or tags..."
+            debounceMs={0}
+            className="flex-1 max-w-md"
+          />
 
           <div className="flex items-center bg-[var(--bg-subtle)] rounded-lg p-0.5 border border-[var(--border-subtle)]">
             <button

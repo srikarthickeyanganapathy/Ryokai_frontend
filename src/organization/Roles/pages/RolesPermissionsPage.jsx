@@ -44,7 +44,7 @@ export function RolesPermissionsPage() {
   if (!orgId) return null;
 
   return (
-    <PageShell maxWidth="wide">
+    <PageShell maxWidth="default">
       <PageHero
         eyebrow="Security · Access Control"
         title="Roles & Permissions"

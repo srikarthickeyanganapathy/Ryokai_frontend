@@ -19,7 +19,7 @@ export function WhiteboardPage() {
         <Button variant="ghost" onClick={() => navigate(`/app/crews/${crewId}`)}>
           <ArrowLeft className="w-5 h-5 text-[var(--text-primary)]" />
         </Button>
-        <Text className="font-medium text-[var(--text-primary)]">{board?.title || 'Whiteboard'}</Text>
+        <Text className="flex-1 min-w-0 truncate font-medium text-[var(--text-primary)]">{board?.title || 'Whiteboard'}</Text>
       </div>
       <div className="flex-1 overflow-hidden relative">
         <WhiteboardCanvas crewId={crewId} boardId={boardId} initialSnapshot={board?.snapshotDataUrl} />

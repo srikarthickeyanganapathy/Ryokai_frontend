@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { ChevronLeft, Plus, Settings2, AlertTriangle, CalendarClock, ListTodo, LayoutDashboard } from 'lucide-react'
+import { Plus, Settings2, AlertTriangle, CalendarClock, ListTodo } from 'lucide-react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'
+import { Icons } from '@/shared/ui/Icons'
 import { ProgressRing } from '@/shared/ui/Progress'
 import { PillNav } from '@/shared/ui/PillNav'
 import { PageShell } from '@/shared/ui/PageShell'
@@ -306,7 +307,7 @@ export function TeamDetailPage() {
                     className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors shrink-0"
                     title="Back to organization"
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <Icons.chevronLeft className="w-4 h-4" />
                   </button>
 
                   <div
@@ -321,12 +322,12 @@ export function TeamDetailPage() {
                       {team.name}
                     </Heading>
                     {isReadOnly && (
-                      <Badge variant="outline" className="bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20 text-[9px] uppercase shrink-0">
+                      <Badge variant="outline" className="bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20 text-[9px] uppercase tracking-wider font-mono shrink-0">
                         Observer
                       </Badge>
                     )}
                     {team.description && (
-                      <Text variant="muted" size="xs" className="line-clamp-1 ml-1 hidden lg:inline">
+                      <Text variant="muted" size="sm" className="line-clamp-1 ml-1 hidden lg:inline">
                         {team.description}
                       </Text>
                     )}

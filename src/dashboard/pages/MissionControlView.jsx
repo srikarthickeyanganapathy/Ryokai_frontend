@@ -616,18 +616,18 @@ export function MissionControlV2({ vm }) {
       animate="show"
       className="space-y-6 max-w-6xl mx-auto px-2 pb-8"
     >
-      {/* ── Dynamic Header ── */}
-      <motion.div variants={itemVariants} className="flex flex-col gap-1 w-full justify-between sm:flex-row sm:items-end">
-        <div className="flex flex-col gap-1">
+      {/* ── Dynamic Header (workspace-framework PageHero contract) ── */}
+      <motion.div variants={itemVariants} className="flex flex-col gap-3 w-full justify-between sm:flex-row sm:items-start pb-5 border-b border-[var(--border-subtle)]">
+        <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold text-[var(--accent)] uppercase tracking-wider">{headerConfig.eyebrow}</span>
+            <span className="text-[11px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">{headerConfig.eyebrow}</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
             {headerConfig.title}
           </h1>
-          <p className="text-[13px] text-[var(--text-secondary)]">{headerConfig.subtitle}</p>
+          <p className="text-[13px] text-[var(--text-secondary)] mt-1.5">{headerConfig.subtitle}</p>
         </div>
-        <div className="mt-4 sm:mt-0">
+        <div className="mt-2 sm:mt-0">
           <ModeSelector />
         </div>
       </motion.div>

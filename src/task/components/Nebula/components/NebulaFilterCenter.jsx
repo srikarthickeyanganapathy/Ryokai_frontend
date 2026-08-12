@@ -32,7 +32,7 @@ export default function NebulaFilterCenter({
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="absolute top-5 left-5 z-40 w-72 select-none"
+      className="absolute top-5 left-5 z-40 w-72 max-w-[calc(100vw-2.5rem)] select-none"
     >
       <div className="bg-black/40 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-300">
         

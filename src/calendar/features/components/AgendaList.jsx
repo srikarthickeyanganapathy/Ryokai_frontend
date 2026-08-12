@@ -38,7 +38,7 @@ function AgendaItem({ item, onClick }) {
       </div>
       
       <div className="flex-1 min-w-0">
-        <div className="text-[13.5px] font-semibold tracking-tight text-[var(--text-primary)] leading-[1.4]">
+        <div className="text-[13.5px] font-semibold tracking-tight text-[var(--text-primary)] leading-[1.4] truncate">
           {item.title}
         </div>
         {item.description && (

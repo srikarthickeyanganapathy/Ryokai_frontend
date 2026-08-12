@@ -1,10 +1,10 @@
 import React, { useMemo, useState, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Plus, Search, ListTodo, X, AlertTriangle, CalendarClock, Activity } from 'lucide-react'
+import { Plus, ListTodo, X, AlertTriangle, CalendarClock, Activity } from 'lucide-react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
+import { SearchInput } from '@/shared/ui/SearchInput'
 import { Badge } from '@/shared/ui/Badge'
-import { Input } from '@/shared/ui/Input'
 import { ProgressRing } from '@/shared/ui/Progress'
 import { PillNav } from '@/shared/ui/PillNav'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
@@ -178,7 +178,7 @@ export function TasksPage() {
         </div>
       </div>
     ) : (
-      <PageShell maxWidth="full">
+      <PageShell maxWidth="default">
       <PageHero
       eyebrow={logic.workspaceMode === 'PERSONAL' ? 'Personal' : logic.workspaceMode === 'CREWS' ? 'Crew' : 'Organization'}
       title="Tasks"
@@ -248,16 +248,13 @@ export function TasksPage() {
           </SelectContent>
         </Select>
       </div>
-      <div className="relative w-[180px] sm:w-[230px]">
-        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-        <Input
-          value={logic.globalFilter}
-          onChange={e => logic.setGlobalFilter(e.target.value)}
-          placeholder="Search tasks…"
-          size="sm"
-          className="pl-8"
-        />
-      </div>
+      <SearchInput
+        value={logic.globalFilter}
+        onChange={logic.setGlobalFilter}
+        placeholder="Search tasks…"
+        debounceMs={0}
+        className="w-[180px] sm:w-[230px]"
+      />
       <div className="w-[150px]">
         <Select value={logic.sortBy} onValueChange={logic.setSortBy}>
           <SelectTrigger className="h-7 text-[11px]"><SelectValue /></SelectTrigger>
@@ -315,7 +312,9 @@ export function TasksPage() {
         </div>
 
         {/* Status chips */}
-        <PillNav filters={STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} counts={counts} />
+        <div className="overflow-x-auto no-scrollbar">
+          <PillNav filters={STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} counts={counts} />
+        </div>
 
         {/* Views */}
         {viewIsBoard ? (
@@ -369,7 +368,7 @@ export function TasksPage() {
         {hasSelection && (
           <motion.div
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-2.5 rounded-full bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-[var(--shadow-lg)]"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center gap-3 flex-wrap px-5 py-2.5 rounded-full bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-[var(--shadow-lg)]"
           >
             <Text size="sm" className="text-[13px] font-medium">{logic.selectedIds.length} selected</Text>
             <div className="h-4 w-px bg-[var(--border-subtle)]" />

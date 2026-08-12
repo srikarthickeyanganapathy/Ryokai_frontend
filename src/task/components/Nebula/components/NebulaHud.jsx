@@ -71,7 +71,7 @@ export default function NebulaHud({
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -10 }}
-            className="absolute bottom-5 left-5 z-30 flex items-center gap-2.5 bg-black/40 backdrop-blur-3xl border border-white/10 px-3.5 py-1.5 rounded-xl text-xs text-white/70 font-mono select-none shadow-xl"
+            className="absolute bottom-5 left-5 z-30 flex items-center gap-2.5 flex-wrap max-w-[calc(100vw-2.5rem)] bg-black/40 backdrop-blur-3xl border border-white/10 px-3.5 py-1.5 rounded-xl text-xs text-white/70 font-mono select-none shadow-xl"
           >
             <Compass size={13} className="text-cyan-400" />
             <span className="text-white/40">Constellation</span>

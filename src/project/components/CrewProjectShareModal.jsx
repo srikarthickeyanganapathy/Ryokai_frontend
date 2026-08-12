@@ -190,8 +190,8 @@ export function CrewProjectShareModal({ isOpen, onClose, project }) {
                                 const currentPerm = collaboratorPermissions[member.userId] || defaultAccessLevel
 
                                 return (
-                                  <div key={member.userId} className="flex items-center justify-between p-2 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--bg-subtle)]">
-                                    <div className="flex items-center gap-2.5">
+                                  <div key={member.userId} className="flex items-center justify-between gap-2 p-2 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--bg-subtle)]">
+                                    <div className="flex items-center gap-2.5 min-w-0">
                                       <FormControl>
                                         <Checkbox
                                           checked={isChecked}
@@ -206,14 +206,14 @@ export function CrewProjectShareModal({ isOpen, onClose, project }) {
                                           }}
                                         />
                                       </FormControl>
-                                      <div>
-                                        <span className="text-xs font-semibold text-[var(--text-primary)]">{member.username}</span>
-                                        {member.role && <span className="text-[10px] text-[var(--text-muted)] ml-2">({member.role})</span>}
+                                      <div className="flex items-center gap-1 min-w-0">
+                                        <span className="text-xs font-semibold text-[var(--text-primary)] truncate">{member.username}</span>
+                                        {member.role && <span className="text-[10px] text-[var(--text-muted)] shrink-0">({member.role})</span>}
                                       </div>
                                     </div>
 
                                     {isChecked && (
-                                      <div className="flex items-center gap-2">
+                                      <div className="flex items-center gap-2 shrink-0">
                                         <Badge variant="outline" className="text-[10px] uppercase font-bold text-[var(--accent)] border-[var(--accent-border)]">
                                           {currentPerm}
                                         </Badge>

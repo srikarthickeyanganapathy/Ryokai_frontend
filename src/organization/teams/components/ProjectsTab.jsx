@@ -1,10 +1,10 @@
 ﻿import React, { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Search, Plus, FolderKanban, MoreVertical, CheckCircle2 } from 'lucide-react'
+import { Plus, FolderKanban, MoreVertical, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/shared/ui/Button'
+import { SearchInput } from '@/shared/ui/SearchInput'
 import { Avatar, AvatarFallback } from '@/shared/ui/Avatar'
 import { EmptyState } from '@/shared/ui/EmptyState'
-import { Input } from '@/shared/ui/Input'
 import { PillNav } from '@/shared/ui/PillNav'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { ProjectCard } from '@/project/components/ProjectCard'
@@ -59,10 +59,7 @@ export function ProjectsTab({ teamProjects, members, hasProjectIdOnTasks, tasksF
   return (
     <div className="pt-4">
       <div className="flex items-center gap-2 flex-wrap mb-3">
-        <div className="relative w-[200px] sm:w-[240px]">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-          <Input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search projectsâ€¦" size="sm" className="pl-8" />
-        </div>
+        <SearchInput value={query} onChange={setQuery} placeholder="Search projectsâ€¦" debounceMs={0} className="w-[200px] sm:w-[240px]" />
         <PillNav filters={STATUS_TABS} value={statusTab} onChange={setStatusTab} counts={counts} />
         <span className="flex-1" />
         {canCreateProject && !isReadOnly && (

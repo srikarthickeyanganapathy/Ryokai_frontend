@@ -3,8 +3,7 @@ import { useParams, Navigate } from 'react-router-dom';
 import { Building2, Home, Settings, ShieldAlert, Key } from '@/shared/ui/Icons';
 import { useOrganization, useOrgMembers, useOrgTeams, useLeaveRequests } from '../features/hooks/useOrganizations';
 import { usePermissions } from '@/identity';
-import { PageHeader } from '@/shared/ui/PageHeader';
-import { PageShell } from '@/shared/ui/PageShell';
+import { PageShell, PageHero } from '@/shared/ui/PageShell';
 import {
   ConfigurationLayout,
   PageStateContainer,
@@ -73,7 +72,7 @@ export function OrganizationAdministrationPage() {
       >
         <ConfigurationLayout
           header={
-            <PageHeader
+            <PageHero
               eyebrow="Workspace Command Center"
               title={`${org?.name || 'Organization'} Administration`}
               subtitle="Manage operational health, configure identity, and administer teams and resources."

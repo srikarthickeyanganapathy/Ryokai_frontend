@@ -1,3 +1,3 @@
-export * from './types';
-export * from './normalizer';
-export * from './queryKeys';
+export * from './model/types';
+export * from './model/normalizer';
+export * from './model/querykeys';

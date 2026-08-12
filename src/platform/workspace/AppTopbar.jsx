@@ -4,7 +4,7 @@ import { Icons } from '@/shared/ui/Icons'
 import { IconButton, Button } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
-import { Separator } from '@/shared/ui/Separator'
+import { DropdownMenu } from '@/shared/ui/DropdownMenu'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { RyokaiLogo } from '@/shared/ui/Logo/RyokaiLogo'
 import { useAuth } from '@/identity'
@@ -107,37 +107,15 @@ export function AppTopbar({ onMenuClick }) {
         <FocusTimerIndicator />
 
         {/* Quick Actions */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <IconButton
-              variant="ghost"
-              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-              title="Quick Actions"
-              aria-label="Quick actions"
-            >
-              <Icons.plus className="w-5 h-5" />
-            </IconButton>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-48 bg-[var(--bg-elevated)]/95 backdrop-blur-xl border-[var(--color-border-subtle)] rounded-2xl p-2 shadow-xl flex flex-col">
-            <Button variant="ghost" size="sm" className="w-full justify-start rounded-xl" onClick={() => navigate('/app/tasks')}>
-              <Icons.listTodo className="w-4 h-4 text-[var(--text-muted)]" />
-              <span>Create Task</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="w-full justify-start rounded-xl" onClick={() => navigate('/app/projects')}>
-              <Icons.folderClosed className="w-4 h-4 text-[var(--text-muted)]" />
-              <span>Create Project</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="w-full justify-start rounded-xl" onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true, bubbles: true }))}>
-              <Icons.pencil className="w-4 h-4 text-[var(--text-muted)]" />
-              <span>Capture Idea</span>
-            </Button>
-            <Separator className="my-1 bg-[var(--color-border-subtle)]" />
-            <Button variant="ghost" size="sm" className="w-full justify-start rounded-xl" onClick={() => navigate('/app/organizations')}>
-              <Icons.userPlus className="w-4 h-4 text-[var(--text-muted)]" />
-              <span>Invite User</span>
-            </Button>
-          </PopoverContent>
-        </Popover>
+        <DropdownMenu
+          trigger={<IconButton variant="ghost" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors" title="Quick Actions" aria-label="Quick actions"><Icons.plus className="w-5 h-5" /></IconButton>}
+          items={[
+            { label: 'Create Task', icon: Icons.listTodo, onClick: () => navigate('/app/tasks') },
+            { label: 'Create Project', icon: Icons.folderClosed, onClick: () => navigate('/app/projects') },
+            { label: 'Capture Idea', icon: Icons.pencil, onClick: () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true, bubbles: true })) },
+            { label: 'Invite User', icon: Icons.userPlus, onClick: () => navigate('/app/organizations'), separator: 'before' },
+          ]}
+        />
 
         {/* Theme Toggle */}
         <IconButton

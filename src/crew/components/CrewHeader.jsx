@@ -90,24 +90,31 @@ export function CrewHeader({
   const resolvedSocketStatus = socketStatus || (isConnected ? 'connected' : 'disconnected')
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-[var(--shadow-sm)] transition-all duration-200 hover:border-[var(--accent-border)] hover:shadow-[var(--shadow-md)]">
-      {/* Main Content Bar */}
-      <div className="relative px-6 py-5 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-        
-        {/* Left Column: Brand Identity & Metadata */}
-        <div className="min-w-0 flex items-start gap-4 flex-1">
+    <div className="bg-[var(--bg-base)] border-b border-[var(--border-subtle)]">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Primary Identity Row */}
+        <div className="flex items-center gap-3 py-3.5">
+          {/* Back Navigation */}
+          <button
+            onClick={() => navigate('/app/crews')}
+            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors shrink-0"
+            title="Back to Crews"
+          >
+            <Icons.chevronLeft className="w-4 h-4" />
+          </button>
+
           {/* Avatar */}
           <div
-            className="relative w-11 h-11 rounded-xl text-white flex items-center justify-center font-bold text-lg shadow-[var(--shadow-sm)] shrink-0"
+            className="relative w-9 h-9 rounded-xl text-white flex items-center justify-center font-bold shrink-0 border border-white/10"
             style={{
-              background: `linear-gradient(135deg, hsl(${hue} 75% 52%), hsl(${(hue + 40) % 360} 70% 40%))`,
+              background: `linear-gradient(135deg, hsl(${hue} 72% 52%), hsl(${(hue + 35) % 360} 68% 38%))`,
             }}
           >
             {crew.name.charAt(0).toUpperCase()}
             {/* Live Socket Status Dot Overlay */}
             <span
               className={cn(
-                'absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-[var(--bg-card)] shadow-xs',
+                'absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-[var(--bg-base)] shadow-xs',
                 resolvedSocketStatus === 'connected' && 'bg-[var(--success)]',
                 resolvedSocketStatus === 'reconnecting' && 'bg-[var(--warning)]',
                 resolvedSocketStatus === 'disconnected' && 'bg-[var(--text-tertiary)]'
@@ -120,175 +127,164 @@ export function CrewHeader({
             </span>
           </div>
 
-          <div className="min-w-0 flex-1">
-            {/* Title & Status Badges Bar */}
-            <div className="flex flex-wrap items-center gap-2 mb-1.5">
-              <Heading level={2} className="tracking-tight text-[20px] font-bold mb-0 text-[var(--text-primary)] truncate">
-                {crew.name}
-              </Heading>
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            {/* Name & Status Badges */}
+            <Heading level={3} className="font-semibold truncate mb-0 text-[15px]">
+              {crew.name}
+            </Heading>
 
-              {/* Crew Type Badge */}
-              <Badge variant="primary" size="xs" className="font-mono uppercase text-[9px] tracking-wider">
-                Crew Workspace
+            {/* Crew Type Badge */}
+            <Badge variant="primary" size="xs" className="font-mono uppercase text-[9px] tracking-wider shrink-0">
+              Crew Workspace
+            </Badge>
+
+            {/* Visibility Badge */}
+            {crew.visibility && (
+              <Badge variant="outline" size="xs" className="bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)] font-mono uppercase text-[9px] tracking-wider shrink-0">
+                {crew.visibility.replace('_', ' ')}
               </Badge>
+            )}
 
-              {/* Visibility Badge */}
-              {crew.visibility && (
-                <Badge variant="outline" size="xs" className="bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)] font-mono uppercase text-[9px]">
-                  {crew.visibility.replace('_', ' ')}
-                </Badge>
-              )}
+            {/* Owner / Creator Badge */}
+            {isCreator && (
+              <Badge variant="warning" size="xs" className="font-mono uppercase text-[9px] tracking-wider gap-1 shrink-0">
+                <Shield className="w-2.5 h-2.5" /> Owner
+              </Badge>
+            )}
 
-              {/* Owner / Creator Badge */}
-              {isCreator && (
-                <Badge variant="warning" size="xs" className="font-mono uppercase text-[9px] gap-1">
-                  <Shield className="w-2.5 h-2.5" /> Owner
-                </Badge>
-              )}
+            {/* Crew Health Indicator Pill */}
+            <CrewStatusPill completionRate={completionRate} crewTasks={crewTasks} members={members} size="sm" />
 
-              {/* Crew Health Indicator Pill */}
-              <CrewStatusPill completionRate={completionRate} crewTasks={crewTasks} members={members} size="sm" />
-
-              {/* WebSocket Pulse Indicator */}
-              <TooltipProvider>
-                <Tooltip delayDuration={150}>
-                  <TooltipTrigger asChild>
-                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[10px] font-mono text-[var(--text-secondary)] cursor-default">
-                      <span className="relative flex h-2 w-2">
-                        {resolvedSocketStatus === 'connected' && (
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--success)] opacity-75" />
+            {/* WebSocket Pulse Indicator */}
+            <TooltipProvider>
+              <Tooltip delayDuration={150}>
+                <TooltipTrigger asChild>
+                  <div className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[10px] font-mono text-[var(--text-secondary)] cursor-default">
+                    <span className="relative flex h-2 w-2">
+                      {resolvedSocketStatus === 'connected' && (
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--success)] opacity-75" />
+                      )}
+                      <span
+                        className={cn(
+                          'relative inline-flex rounded-full h-2 w-2',
+                          resolvedSocketStatus === 'connected' && 'bg-[var(--success)]',
+                          resolvedSocketStatus === 'reconnecting' && 'bg-[var(--warning)]',
+                          resolvedSocketStatus === 'disconnected' && 'bg-[var(--text-tertiary)]'
                         )}
-                        <span
-                          className={cn(
-                            'relative inline-flex rounded-full h-2 w-2',
-                            resolvedSocketStatus === 'connected' && 'bg-[var(--success)]',
-                            resolvedSocketStatus === 'reconnecting' && 'bg-[var(--warning)]',
-                            resolvedSocketStatus === 'disconnected' && 'bg-[var(--text-tertiary)]'
-                          )}
-                        />
-                      </span>
-                      <span className="capitalize">{resolvedSocketStatus === 'connected' ? 'Live Pulse' : resolvedSocketStatus}</span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="text-[11px]">
-                    WebSocket Real-time Synchronization: <strong className="capitalize">{resolvedSocketStatus}</strong>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                      />
+                    </span>
+                    <span className="capitalize">{resolvedSocketStatus === 'connected' ? 'Live Pulse' : resolvedSocketStatus}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-[11px]">
+                  WebSocket Real-time Synchronization: <strong className="capitalize">{resolvedSocketStatus}</strong>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-              {/* Save / Favorite Toggle */}
-              <SaveToggle entityType={ENTITY_TYPES?.CREW || 'crew'} entityId={crew.id} className="ml-1" />
-            </div>
+            {/* Save / Favorite Toggle */}
+            <SaveToggle entityType={ENTITY_TYPES?.CREW || 'crew'} entityId={crew.id} className="ml-1" />
 
-            {/* Description */}
-            {crew.description && (
-              <Text variant="muted" className="text-[13px] max-w-2xl mb-3 line-clamp-2 leading-relaxed">
-                {crew.description}
-              </Text>
-            )}
-
-            {/* Key Telemetry Stats Row */}
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Member Presence Halos Stack */}
-              <div className="flex items-center gap-2 pr-2 border-r border-[var(--border-subtle)]">
-                <span className="text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Crew:</span>
-                <PresenceHalo members={members} maxDisplay={4} size="xs" />
-              </div>
-
-              {/* Metric Badges */}
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
-                <FolderIcon className="w-3.5 h-3.5 text-[var(--accent)]" />
-                <span>{sharedProjects?.length || 0} Projects</span>
-              </span>
-
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
-                <ChecklistIcon className="w-3.5 h-3.5 text-[var(--accent)]" />
-                <span>{crewTasks?.length || 0} Tasks</span>
-              </span>
-
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
-                <ChatIcon className="w-3.5 h-3.5 text-[var(--accent)]" />
-                <span>{channels?.length || 0} Channels</span>
-              </span>
-
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
-                <CheckIcon className="w-3.5 h-3.5 text-[var(--success)]" />
-                <span className="font-mono">{completionRate || 0}% Done</span>
-              </span>
-            </div>
           </div>
-        </div>
 
-        {/* Right Column: Mission Control Action Toolbar (9 Interaction States Enforced) */}
-        <div className="flex flex-wrap items-center gap-2 shrink-0 pt-3 xl:pt-0 border-t xl:border-t-0 border-[var(--border-subtle)]">
-          {/* Primary Action: Add Task */}
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={onOpenTasks}
-            className="gap-1.5 text-[12px] h-8 font-medium shadow-[var(--shadow-sm)] transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-            title="Create or assign a new crew task"
-          >
-            <Icons.plus className="w-3.5 h-3.5" />
-            <span>Add Task</span>
-          </Button>
+          {/* Right Column: Actions */}
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {/* Primary Action: Add Task */}
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onOpenTasks}
+              className="gap-1 text-[11px] h-7 font-medium shadow-[var(--shadow-sm)] transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+              title="Create or assign a new crew task"
+            >
+              <Icons.plus className="w-3 h-3" />
+              <span>Add Task</span>
+            </Button>
 
-          {/* Secondary Action: New Whiteboard */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onNewBoard}
-            className="gap-1.5 text-[12px] h-8 font-medium border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] transition-all duration-200 active:scale-95"
-            title="Open a new collaborative whiteboard"
-          >
-            <Pencil className="w-3.5 h-3.5" />
-            <span>New Board</span>
-          </Button>
-
-          {/* Discussion Action */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onOpenChat}
-            className="gap-1.5 text-[12px] h-8 font-medium hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-200 active:scale-95"
-            title="Open crew discussions channel"
-          >
-            <ChatIcon className="w-3.5 h-3.5" />
-            <span>Discussion</span>
-            {channels?.length > 0 && (
-              <span className="ml-0.5 rounded-full bg-[var(--accent-soft)] px-1.5 py-0.2 text-[10px] font-mono text-[var(--accent)] font-semibold">
-                {channels.length}
-              </span>
-            )}
-          </Button>
-
-          {/* Leave Crew Danger Soft Action */}
-          {onLeave && (
+            {/* Secondary Action: New Whiteboard */}
             <Button
               variant="outline"
               size="sm"
-              onClick={onLeave}
-              className="gap-1.5 text-[12px] h-8 font-medium text-[var(--danger)] bg-transparent hover:bg-[var(--danger-soft)] border-[var(--danger-soft)] hover:border-[var(--danger)]/40 transition-all duration-200 active:scale-95"
-              title="Leave this crew"
+              onClick={onNewBoard}
+              className="gap-1 text-[11px] h-7 font-medium border-[var(--border-default)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] transition-all duration-200 active:scale-95"
+              title="Open a new collaborative whiteboard"
             >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Leave</span>
+              <Pencil className="w-3 h-3" />
+              <span>New Board</span>
             </Button>
+
+            {/* Discussion Action */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onOpenChat}
+              className="gap-1 text-[11px] h-7 font-medium hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-200 active:scale-95"
+              title="Open crew discussions channel"
+            >
+              <ChatIcon className="w-3 h-3" />
+              <span>Discussion</span>
+              {channels?.length > 0 && (
+                <span className="ml-0.5 rounded-full bg-[var(--accent-soft)] px-1.5 py-0.2 text-[10px] font-mono text-[var(--accent)] font-semibold">
+                  {channels.length}
+                </span>
+              )}
+            </Button>
+
+            {/* Leave Crew Danger Soft Action */}
+            {onLeave && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onLeave}
+                className="gap-1 text-[11px] h-7 font-medium text-[var(--danger)] bg-transparent hover:bg-[var(--danger-soft)] border-[var(--danger-soft)] hover:border-[var(--danger)]/40 transition-all duration-200 active:scale-95"
+                title="Leave this crew"
+              >
+                <LogOut className="w-3 h-3" />
+                <span>Leave</span>
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Secondary Meta Row: description + telemetry */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pb-3.5">
+          {crew.description && (
+            <Text variant="muted" size="sm" className="text-[13px] max-w-xl line-clamp-2 leading-relaxed min-w-0">
+              {crew.description}
+            </Text>
           )}
 
-          {/* Back Navigation */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/app/crews')}
-            className="gap-1 text-[12px] h-8 font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all duration-200"
-            title="Navigate back to Crews overview"
-          >
-            <Icons.chevronLeft className="w-4 h-4" />
-            <span>Back</span>
-          </Button>
+          <div className="flex flex-wrap items-center gap-3 min-w-0">
+            {/* Member Presence Halos Stack */}
+            <div className="flex items-center gap-2 pr-2 border-r border-[var(--border-subtle)]">
+              <span className="text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Crew:</span>
+              <PresenceHalo members={members} maxDisplay={4} size="xs" />
+            </div>
+
+            {/* Metric Badges */}
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
+              <FolderIcon className="w-3.5 h-3.5 text-[var(--accent)]" />
+              <span>{sharedProjects?.length || 0} Projects</span>
+            </span>
+
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
+              <ChecklistIcon className="w-3.5 h-3.5 text-[var(--accent)]" />
+              <span>{crewTasks?.length || 0} Tasks</span>
+            </span>
+
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
+              <ChatIcon className="w-3.5 h-3.5 text-[var(--accent)]" />
+              <span>{channels?.length || 0} Channels</span>
+            </span>
+
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] font-medium">
+              <CheckIcon className="w-3.5 h-3.5 text-[var(--success)]" />
+              <span className="font-mono">{completionRate || 0}% Done</span>
+            </span>
+          </div>
         </div>
       </div>
     </div>
+
   )
 }

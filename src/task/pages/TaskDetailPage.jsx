@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Loader2, AlertTriangle, FileQuestion, Info, MessageSquare, Paperclip, Activity } from 'lucide-react'
+import { Loader2, FileQuestion, Info, MessageSquare, Paperclip, Activity } from 'lucide-react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
 import { Button, IconButton } from '@/shared/ui/Button'
@@ -11,6 +11,7 @@ import { normalizePriority } from '@/shared/lib/priority'
 import { PageShell } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
+import { DropdownMenu } from '@/shared/ui/DropdownMenu'
 import { DetailTabs } from '@/shared/ui/DetailTabs'
 import { usePermissions } from '@/identity'
 import { useAuth } from '@/identity'
@@ -400,13 +401,13 @@ export default function TaskDetailPage() {
       {/* ── Header ── */}
       <div className="shrink-0 bg-[var(--bg-base)] border-b border-[var(--border-subtle)]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3 py-3.5">
+          <div className="flex items-center gap-3 py-3.5 flex-wrap">
             <button
               onClick={() => navigate('/app/tasks')}
               className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors shrink-0"
               title="Back to Tasks"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <Icons.chevronLeft className="w-4 h-4" />
             </button>
 
             <div
@@ -422,7 +423,7 @@ export default function TaskDetailPage() {
               </Heading>
               <StatusBadge status={currentStatus} />
               {task.priority && (
-                <Badge variant="outline" className="text-[11px] border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent)]">
+                <Badge variant="outline" className="text-[10px] uppercase tracking-wider border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent)]">
                   {normalizePriority(task.priority)}
                 </Badge>
               )}
@@ -434,22 +435,16 @@ export default function TaskDetailPage() {
             <div className="flex items-center gap-2 shrink-0">
               {renderStateActions("sm")}
               <SaveToggle entityType={ENTITY_TYPES.TASK} entityId={task.id} />
-              <Popover>
-                <PopoverTrigger asChild>
+              <DropdownMenu
+                trigger={
                   <IconButton variant="ghost" size="sm"><Icons.moreHorizontal className="w-4 h-4" /></IconButton>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-44 p-1.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-[var(--shadow-lg)] rounded-lg">
-                  <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/app/tasks?openTaskId=${task.id}`); toast.success('Link copied') }}>
-                    <Icons.link className="w-3.5 h-3.5" /> Copy Link
-                  </Button>
-                  {hasArchivePerm && (
-                    <Button variant="ghost" size="sm" className="w-full justify-start" onClick={handleArchive}><Icons.archive className="w-3.5 h-3.5" /> Archive</Button>
-                  )}
-                  {hasDeletePerm && (
-                    <Button variant="ghost" size="sm" className="w-full justify-start text-[var(--danger)]" onClick={handleDelete}><Icons.trash2 className="w-3.5 h-3.5" /> Delete</Button>
-                  )}
-                </PopoverContent>
-              </Popover>
+                }
+                items={[
+                  { label: 'Copy Link', icon: Icons.link, onClick: () => { navigator.clipboard.writeText(`${window.location.origin}/app/tasks?openTaskId=${task.id}`); toast.success('Link copied') } },
+                  ...(hasArchivePerm ? [{ label: 'Archive', icon: Icons.archive, onClick: handleArchive }] : []),
+                  ...(hasDeletePerm ? [{ label: 'Delete', icon: Icons.trash2, onClick: handleDelete, danger: true }] : []),
+                ]}
+              />
             </div>
           </div>
         </div>
@@ -614,7 +609,7 @@ export default function TaskDetailPage() {
       </div>
 
       {/* ── Footer ── */}
-      <div className="shrink-0 px-5 py-3 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 flex items-center justify-between gap-3">
+      <div className="shrink-0 px-5 py-3 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 flex items-center justify-between gap-3 flex-wrap">
         <span className="text-[11px] text-[var(--text-muted)]">
           Created {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '—'}
           {task.updatedAt && task.updatedAt !== task.createdAt && <> · Updated {new Date(task.updatedAt).toLocaleDateString()}</>}

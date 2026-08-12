@@ -151,7 +151,7 @@ function BacklinksPanel({ currentNote, allNotes, onNavigate }) {
             className="w-full text-left px-2 py-1.5 rounded-md text-[11px] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer group flex items-center gap-2"
           >
             <span className="w-1 h-4 rounded-full shrink-0" style={{ backgroundColor: 'var(--accent)' }} />
-            <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] truncate font-medium transition-colors">
+            <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] truncate min-w-0 font-medium transition-colors">
               {n.title || 'Untitled'}
             </span>
             {n.tags?.length > 0 && (

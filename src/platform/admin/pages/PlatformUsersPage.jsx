@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react'
-import { PageHeader } from '@/shared/ui/PageHeader'
+import { PageShell, PageHero } from '@/shared/ui/PageShell'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { DataTable } from '@/shared/ui/data-table/DataTable'
 import { useUsersList } from '@/identity'
@@ -88,8 +88,8 @@ export function PlatformUsersPage() {
   }, [roles, assignRolesMutation.isPending, handleRoleChange])
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-      <PageHeader
+    <PageShell maxWidth="default" className="min-h-[calc(100vh-8rem)]">
+      <PageHero
         title="Platform Users"
         subtitle="Manage global identities and assign platform-level roles."
         actions={activeTab === 'users' ? (
@@ -127,6 +127,6 @@ export function PlatformUsersPage() {
           <RolesTab />
         )}
       </div>
-    </div>
+    </PageShell>
   )
 }

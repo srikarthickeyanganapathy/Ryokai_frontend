@@ -20,6 +20,7 @@ import {
 import { useCrewMembers } from '@/crew'
 import { useUsersList } from '@/identity'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
+import { DropdownMenu } from '@/shared/ui/DropdownMenu'
 import { usePermissions } from '@/identity'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { useAuth } from '@/identity'
@@ -167,7 +168,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
     }
 
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         {isCrewTask && isUnclaimed && currentStatus !== 'COMPLETED' && currentStatus !== 'APPROVED' && currentStatus !== 'DONE' && (
           <Button size={size} variant="outline" className="gap-1.5 rounded-lg font-medium"
             onClick={() => claimTaskMutation.mutate(task.id)} isLoading={claimTaskMutation.isPending}>
@@ -286,28 +287,18 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
 
               <div className="flex items-center gap-0.5">
                 <SaveToggle entityType={ENTITY_TYPES.TASK} entityId={task.id} className="mr-1" />
-                <Popover>
-                  <PopoverTrigger asChild>
+                <DropdownMenu
+                  trigger={
                     <IconButton variant="ghost" size="sm" title="More actions" aria-label="More actions">
                       <Icons.moreHorizontal className="w-4 h-4" />
                     </IconButton>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" className="w-44 p-1.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-[var(--shadow-lg)] rounded-lg">
-                    <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/app/tasks?openTaskId=${task.id}`); toast.success('Link copied') }}>
-                      <Icons.link className="w-3.5 h-3.5" /> Copy Link
-                    </Button>
-                    {hasArchivePerm && (
-                      <Button variant="ghost" size="sm" className="w-full justify-start" onClick={handleArchive}>
-                        <Icons.archive className="w-3.5 h-3.5" /> Archive
-                      </Button>
-                    )}
-                    {hasDeletePerm && (
-                      <Button variant="ghost" size="sm" className="w-full justify-start text-[var(--danger)]" onClick={handleDelete}>
-                        <Icons.trash2 className="w-3.5 h-3.5" /> Delete
-                      </Button>
-                    )}
-                  </PopoverContent>
-                </Popover>
+                  }
+                  items={[
+                    { label: 'Copy Link', icon: Icons.link, onClick: () => { navigator.clipboard.writeText(`${window.location.origin}/app/tasks?openTaskId=${task.id}`); toast.success('Link copied') } },
+                    ...(hasArchivePerm ? [{ label: 'Archive', icon: Icons.archive, onClick: handleArchive }] : []),
+                    ...(hasDeletePerm ? [{ label: 'Delete', icon: Icons.trash2, onClick: handleDelete, danger: true }] : []),
+                  ]}
+                />
                 <IconButton variant="ghost" size="sm" onClick={onClose} aria-label="Close task panel">
                   <Icons.x className="w-4 h-4" />
                 </IconButton>
@@ -332,7 +323,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
             </div>
 
             {/* â”€â”€ Tabs â”€â”€ */}
-            <div className="px-5 shrink-0 border-b border-[var(--border-subtle)] flex gap-1">
+            <div className="px-5 shrink-0 border-b border-[var(--border-subtle)] flex gap-1 overflow-x-auto no-scrollbar">
               {TABS.map(tab => (
                 <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
                   className={cn(
@@ -533,11 +524,11 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
             )}
 
             {/* â”€â”€ Footer â”€â”€ */}
-            <div className="px-5 py-3.5 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 backdrop-blur-sm flex items-center justify-between gap-3 shrink-0">
+            <div className="px-5 py-3.5 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 backdrop-blur-sm flex items-center justify-between gap-3 flex-wrap shrink-0">
               <span className="text-[11px] text-[var(--text-muted)]">
                 Created {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '—'}
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 {renderStateActions("sm")}
                 <Button size="sm" disabled={!isDirty || updateTask.isPending} isLoading={updateTask.isPending}
                   onClick={() => { updateTask.mutate({ id: task.id, payload: localEdits }, { onSuccess: () => setIsDirty(false) }); onUpdate?.(localEdits) }}

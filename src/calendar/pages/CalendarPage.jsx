@@ -68,7 +68,7 @@ export function CalendarPage() {
   const handleRetry = () => { refetchTasks(); refetchEvents(); };
 
   return (
-    <PageShell maxWidth="wide" workspaceMode={workspaceModeLabel}>
+    <PageShell maxWidth="default" workspaceMode={workspaceModeLabel}>
       <PageContent className="pt-6">
         <PageState state={pageState} stateProps={{ onRetry: handleRetry, loadingVariant: 'dashboard' }}>
         <div className="flex-1 min-h-0">

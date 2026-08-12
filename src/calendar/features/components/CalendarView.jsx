@@ -71,22 +71,23 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
 
   return (
     <div className="flex flex-col h-full min-h-0 pb-12">
-      {/* Topbar equivalent (header inside view) */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+      {/* Topbar equivalent (header inside view) — PageHero contract */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between pb-5 border-b border-[var(--border-subtle)] mb-5">
         <div className="flex flex-col min-w-0">
-          <div className="flex items-center gap-2 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-[var(--text-tertiary)] mb-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)] shrink-0" />
-            {eyebrow} · {mode === 'month' ? 'Month' : `Week of ${format(startOfWeek(currentDate), 'EEE d')}`}
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
+              {eyebrow} · {mode === 'month' ? 'Month' : `Week of ${format(startOfWeek(currentDate), 'EEE d')}`}
+            </span>
           </div>
-          <h2 className="text-[44px] font-extrabold tracking-[-0.035em] text-[var(--text-primary)] leading-none flex items-baseline">
-            {format(currentDate, 'MMMM')} <span className="text-[15px] font-semibold text-[var(--text-tertiary)] tracking-[0.06em] ml-2.5">{format(currentDate, 'yyyy')}</span>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] leading-none flex items-baseline">
+            {format(currentDate, 'MMMM')} <span className="text-[13px] font-semibold text-[var(--text-tertiary)] tracking-[0.06em] ml-2">{format(currentDate, 'yyyy')}</span>
           </h2>
-          <p className="mt-2 text-[11px] font-mono text-[var(--text-tertiary)]">
+          <p className="mt-1.5 text-[13px] text-[var(--text-secondary)]">
             <span className="font-semibold text-[var(--text-secondary)]">{rangeCounts.events}</span> events · <span className="font-semibold text-[var(--text-secondary)]">{rangeCounts.tasks}</span> tasks this period
           </p>
         </div>
         
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
           <div className="flex items-center gap-1.5 mr-2">
             <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]" onClick={prev}><ChevronLeft className="w-4 h-4" /></Button>
             <Button variant="outline" className="h-8 px-3.5 rounded-lg text-[12px] font-semibold text-[var(--accent)] border-[var(--accent-border)] bg-[var(--accent-soft)] hover:bg-[var(--accent-border)]" onClick={today}>Today</Button>

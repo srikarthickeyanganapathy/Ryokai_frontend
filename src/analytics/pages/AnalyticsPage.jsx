@@ -86,7 +86,7 @@ export function AnalyticsPage() {
               variants={containerVariants}
               initial="hidden"
               animate="show"
-              className="grid grid-cols-1 sm:grid-cols-2 gap-5"
+              className="grid grid-cols-1 sm:grid-cols-2 gap-5 col-span-full min-w-0"
             >
               <motion.div variants={itemVariants}>
                 <StatCard size="lg" title="Completion rate" value={`${stats?.completionRate}%`} icon={CheckCircle2} />
@@ -103,9 +103,9 @@ export function AnalyticsPage() {
               variants={containerVariants}
               initial="hidden"
               animate="show"
-              className="grid grid-cols-1 lg:grid-cols-3 gap-5"
+              className="grid grid-cols-1 lg:grid-cols-3 gap-5 col-span-full min-w-0"
             >
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-1 min-w-0">
                 <Text size="xs" className="mb-2 font-medium text-[var(--text-muted)] uppercase tracking-wider text-[11px]">
                   Needs attention
                 </Text>
@@ -130,7 +130,7 @@ export function AnalyticsPage() {
                 </div>
               </div>
 
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2 min-w-0">
                 <Text size="xs" className="mb-2 font-medium text-[var(--text-muted)] uppercase tracking-wider text-[11px]">
                   Workload breakdown
                 </Text>
@@ -158,12 +158,12 @@ export function AnalyticsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2, type: 'spring', stiffness: 200, damping: 20 }}
-              className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+              className="grid grid-cols-1 lg:grid-cols-3 gap-6 col-span-full min-w-0"
             >
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2 min-w-0">
                 <CompletionChart data={stats?.historicalData} />
               </div>
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-1 min-w-0">
                 <PriorityChart data={stats?.priorityData} />
               </div>
             </motion.div>

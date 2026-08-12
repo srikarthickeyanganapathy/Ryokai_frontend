@@ -199,7 +199,7 @@ export function FocusPage() {
   const pageState = isLoading ? 'loading' : 'ready'
 
   return (
-    <PageShell maxWidth="wide">
+    <PageShell maxWidth="default">
       <PageState state={pageState} stateProps={{ loadingVariant: 'dashboard' }}>
         <div
           ref={zenContainerRef}

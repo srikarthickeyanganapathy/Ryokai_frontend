@@ -4,11 +4,11 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { cn } from '@/shared/lib/cn'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
+import { DropdownMenu } from '@/shared/ui/DropdownMenu'
 import { Badge } from '@/shared/ui/Badge'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { ProgressRing } from '@/shared/ui/Progress'
-import { PageShell, PageHero } from '@/shared/ui/PageShell'
+import { PageShell } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
 import { useProject, useUpdateProject, useDeleteProject, useUnshareProjectFromCrew, useProjectActivities } from '../features/hooks/useProjects'
 import { useTeam, useOrgMembers, useOrgTeams } from '@/organization'
@@ -23,7 +23,8 @@ import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
 import { PROJECT_STATUS_COLORS } from '@/shared/lib/status'
 import { usePermissions, useAuth } from '@/identity'
 import { calculateHealthScore, getHealthStatus, getTaskAnalytics, getTeamContributions } from '../features/utils/projectUtils'
-import { ChevronLeft, Plus, Share2, Edit3, Trash2, Archive, MoreHorizontal, AlertTriangle, CalendarClock, ListTodo, CheckCircle2 } from 'lucide-react'
+import { Plus, Share2, Edit3, Trash2, Archive, MoreHorizontal, AlertTriangle, CalendarClock, ListTodo, CheckCircle2 } from 'lucide-react'
+import { Icons } from '@/shared/ui/Icons'
 import { ProjectTabs } from '../components/ProjectTabs'
 import { OverviewTab } from '../components/OverviewTab'
 import { BoardTab } from '../components/BoardTab'
@@ -74,7 +75,6 @@ export function ProjectDetailPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [assigningTaskId, setAssigningTaskId] = useState(null)
   const [selectedTaskId, setSelectedTaskId] = useState(null)
 
@@ -156,65 +156,90 @@ export function ProjectDetailPage() {
   }), [project, userCrews])
 
   return (
-    <PageShell maxWidth="6xl">
-      <PageHero eyebrow={project?.status || 'ACTIVE'} title={project?.name || 'Project'} subtitle={project?.description}>
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)]">
-            <ProgressRing value={healthScore} size={32} strokeWidth={3} />
-            <div className="flex flex-col">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] leading-none">Health</span>
-              <span className={cn('text-xs font-bold leading-none mt-0.5', healthStatus.tone === 'success' && 'text-[var(--success)]', healthStatus.tone === 'accent' && 'text-[var(--accent)]', healthStatus.tone === 'warning' && 'text-[var(--warning)]', healthStatus.tone === 'danger' && 'text-[var(--danger)]')}>
-                {healthStatus.label}
-              </span>
+    <PageShell maxWidth="full" className="!px-0 !py-0">
+      <div className="flex flex-col h-full">
+        {/* ---------- Header: identity + actions ---------- */}
+        <div className="bg-[var(--bg-base)] border-b border-[var(--border-subtle)]">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-3 py-3.5 flex-wrap">
+              <button
+                onClick={() => navigate('/app/projects')}
+                className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors shrink-0"
+                title="Back to projects"
+              >
+                <Icons.chevronLeft className="w-4 h-4" />
+              </button>
+
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white shrink-0 border border-white/10"
+                style={{ background: `linear-gradient(135deg, hsl(${hue} 72% 52%), hsl(${(hue + 35) % 360} 68% 38%))` }}
+              >
+                {(project?.name || 'P').charAt(0).toUpperCase()}
+              </div>
+
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <Heading level={3} className="font-semibold truncate mb-0 text-[15px]">
+                  {project?.name || 'Project'}
+                </Heading>
+                <Badge variant="outline" size="xs" className={cn('uppercase tracking-wider font-mono shrink-0', PROJECT_STATUS_COLORS[project?.status] || defaultStatusColor)}>
+                  {project?.status || 'ACTIVE'}
+                </Badge>
+                {project?.description && (
+                  <Text variant="muted" size="sm" className="line-clamp-1 ml-1 hidden lg:inline">
+                    {project.description}
+                  </Text>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)]">
+                  <ProgressRing value={healthScore} size={28} strokeWidth={3} />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-semibold text-[var(--text-secondary)] leading-none">Health</span>
+                    <span className={cn('text-[11px] font-bold leading-none mt-0.5', healthStatus.tone === 'success' && 'text-[var(--success)]', healthStatus.tone === 'accent' && 'text-[var(--accent)]', healthStatus.tone === 'warning' && 'text-[var(--warning)]', healthStatus.tone === 'danger' && 'text-[var(--danger)]')}>
+                      {healthStatus.label}
+                    </span>
+                  </div>
+                </div>
+                {project && (
+                  <>
+                    <SaveToggle entityType={ENTITY_TYPES.PROJECT} entityId={project.id} />
+                    <div className="h-6 w-px bg-[var(--border-subtle)]" />
+                    <Button size="sm" onClick={() => setIsAddTaskOpen(true)} className="gap-1 text-[11px] h-7 shadow-sm font-medium">
+                      <Plus className="w-3 h-3" /> Add Task
+                    </Button>
+                    {canManageProject && (
+                      <>
+                        <Button variant="outline" size="sm" onClick={() => setIsShareModalOpen(true)} className="gap-1 text-[11px] h-7">
+                          <Share2 className="w-3 h-3" />{isSharedToCrew ? 'Crew Access' : 'Share'}
+                        </Button>
+                        <DropdownMenu
+                          trigger={
+                            <Button variant="outline" size="sm" className="px-2 h-7">
+                              <MoreHorizontal className="w-3.5 h-3.5" />
+                            </Button>
+                          }
+                          items={[
+                            { label: 'Edit', icon: Edit3, onClick: () => setIsEditModalOpen(true) },
+                            { label: 'Archive', icon: Archive, onClick: handleArchiveProject },
+                            { label: 'Delete', icon: Trash2, onClick: () => setIsDeleteModalOpen(true), danger: true },
+                          ]}
+                        />
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
-          <Badge variant="outline" className={cn('text-xs uppercase font-semibold px-2.5 py-1', PROJECT_STATUS_COLORS[project?.status] || defaultStatusColor)}>
-            {project?.status || 'ACTIVE'}
-          </Badge>
-          {project && (
-            <div className="flex items-center gap-2 flex-wrap shrink-0">
-              <SaveToggle entityType={ENTITY_TYPES.PROJECT} entityId={project.id} className="mr-1" />
-              <div className="h-6 w-px bg-[var(--border-subtle)]" />
-              <Button size="sm" className="gap-1.5 shadow-sm font-medium" onClick={() => setIsAddTaskOpen(true)}>
-                <Plus className="w-4 h-4" /> Add Task
-              </Button>
-              {canManageProject && (
-                <>
-                  <Button variant="outline" size="sm" onClick={() => setIsShareModalOpen(true)} className="gap-1.5">
-                    <Share2 className="w-3.5 h-3.5" />{isSharedToCrew ? 'Crew Access' : 'Share'}
-                  </Button>
-                  <div className="relative">
-                    <Popover open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="px-2">
-                          <MoreHorizontal className="w-3.5 h-3.5" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[150px] p-1.5" align="end">
-                        <button onClick={() => { setIsMenuOpen(false); setIsEditModalOpen(true) }} className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-[12px] font-medium hover:bg-[var(--bg-subtle)] cursor-pointer">
-                          <Edit3 className="w-3.5 h-3.5" /> Edit
-                        </button>
-                        <button onClick={() => { setIsMenuOpen(false); handleArchiveProject() }} className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-[12px] font-medium hover:bg-[var(--bg-subtle)] cursor-pointer">
-                          <Archive className="w-3.5 h-3.5" /> Archive
-                        </button>
-                        <button onClick={() => { setIsMenuOpen(false); setIsDeleteModalOpen(true) }} className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-[var(--danger)] hover:bg-[var(--danger-soft)] cursor-pointer">
-                          <Trash2 className="w-3.5 h-3.5" /> Delete
-                        </button>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
         </div>
-      </PageHero>
 
-      <PageState state={pageState} stateProps={{ loadingVariant: 'dashboard', title: 'Project not found', description: "The project you're looking for doesn't exist or has been deleted." }}>
+        <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-12">
+          <PageState state={pageState} stateProps={{ loadingVariant: 'dashboard', title: 'Project not found', description: "The project you're looking for doesn't exist or has been deleted." }}>
         {project && (
           <>
             {/* Attention tiles (approved demo) */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5">
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5">
               <div className="flex items-center gap-3 rounded-2xl border border-[var(--success)]/25 bg-[var(--success)]/5 px-3.5 py-3">
                 <ProgressRing value={band.completionRate} size={40} strokeWidth={3.5}>
                   <span className="text-[10.5px] font-bold tabular-nums">{band.completionRate}%</span>
@@ -300,8 +325,10 @@ export function ProjectDetailPage() {
               </motion.div>
             </AnimatePresence>
           </>
-        )}
-      </PageState>
+          )}
+          </PageState>
+        </div>
+      </div>
 
       {/* Modals */}
       <Modal open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>

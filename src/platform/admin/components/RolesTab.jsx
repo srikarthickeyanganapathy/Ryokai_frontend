@@ -54,8 +54,8 @@ export function RolesTab() {
 
   if (rolesLoading) {
     return (
-      <div className="flex gap-6 mt-6 h-full">
-        <div className="w-1/3 border-r border-[var(--color-border-subtle)] pr-6">
+      <div className="flex flex-col lg:flex-row gap-6 mt-6 h-full">
+        <div className="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-[var(--color-border-subtle)] lg:pr-6 pb-6 lg:pb-0">
           <Skeleton className="h-10 w-full mb-4" />
           <Skeleton className="h-20 w-full mb-2" />
           <Skeleton className="h-20 w-full mb-2" />
@@ -68,10 +68,10 @@ export function RolesTab() {
   }
 
   return (
-    <div className="flex gap-6 mt-6 h-full min-h-[500px]">
+    <div className="flex flex-col lg:flex-row gap-6 mt-6 h-full min-h-[500px]">
       {confirmDialog}
       {/* Roles List Sidebar */}
-      <div className="w-1/3 border-r border-[var(--color-border-subtle)] pr-6 flex flex-col">
+      <div className="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-[var(--color-border-subtle)] lg:pr-6 pb-6 lg:pb-0 flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <Heading level={4}>Roles</Heading>
           <Button size="sm" variant="outline" onClick={() => setIsCreateModalOpen(true)}>

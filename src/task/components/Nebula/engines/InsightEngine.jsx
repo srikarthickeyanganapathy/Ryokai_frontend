@@ -37,7 +37,7 @@ export default function InsightEngine({ insights = [], onInsightClick }) {
   if (insights.length === 0) return null
 
   return (
-    <div className="fixed bottom-6 left-6 z-30 pointer-events-auto max-w-sm">
+    <div className="fixed bottom-6 left-6 z-30 pointer-events-auto max-w-[min(24rem,calc(100vw-3rem))]">
       <div className="bg-zinc-950/80 backdrop-blur-xl border border-white/10 rounded-2xl p-3 shadow-2xl shadow-black/50">
         {/* Header */}
         <div className="flex items-center gap-2 mb-2.5 px-1">

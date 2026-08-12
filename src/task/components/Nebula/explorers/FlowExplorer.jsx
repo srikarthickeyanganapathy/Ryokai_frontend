@@ -68,7 +68,7 @@ export default function FlowExplorer({ context, navigator, analysis, onCenterOnG
       <ExplorerNavBar navigator={navigator} onCenterOnGraph={onCenterOnGraph} />
 
       {/* Flow Overview */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <div className="bg-white/5 border border-white/10 rounded-lg p-3 text-center">
           <div className="text-lg font-bold text-white">{totalTasks}</div>
           <div className="text-[10px] text-white/40 uppercase tracking-wider">Total</div>

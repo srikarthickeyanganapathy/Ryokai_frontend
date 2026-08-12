@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import {
   useOrgMembers,
@@ -9,97 +8,36 @@ import {
   useOrgTeams,
 } from '@/organization';
 import { useTaskList } from '@/task';
+import { toast } from 'sonner';
 import { Heading, Text } from '@/shared/ui/Typography';
 import {
-  Mail,
   Shield,
   User as UserIcon,
-  LayoutGrid,
-  Table as TableIcon,
-  Network,
   Users,
-  FolderKanban,
   Layers,
-  Sparkles,
-  Download,
-  TrendingUp,
   PieChart,
   Activity,
-  Clock,
   BarChart3,
-  GitCompare,
-  ChevronDown,
-  ChevronUp,
-  UserPlus,
-  Check,
-  X,
 } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 import { Badge } from '@/shared/ui/Badge';
-import { Button, IconButton } from '@/shared/ui/Button';
+import { Button } from '@/shared/ui/Button';
 import { Icons } from '@/shared/ui/Icons';
-import { Checkbox } from '@/shared/ui/Checkbox';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/Select';
-import { PageShell, PageHero, PageContent, PageToolbar } from '@/shared/ui/PageShell';
+import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
 import { usePermissions, useAuth } from '@/identity';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
 import { InviteMemberModal } from '../../components/Invites/InviteMemberModal';
 import { PageState } from '@/shared/ui/PageState';
-import { EntityCard, EntityStatStrip, EntityFilterBar } from '@/shared/ui/entity-card';
+import { EntityStatStrip, EntityFilterBar } from '@/shared/ui/entity-card';
 import { PillNav } from '@/shared/ui/PillNav';
 import { MemberDetailDrawer } from '../components/MemberDetailDrawer';
 import { DirectoryOrgChart } from '../components/DirectoryOrgChart';
 import { DirectoryTableView } from '../components/DirectoryTableView';
 import { DirectoryBulkActionsBar } from '../components/DirectoryFilterAndBulkBar';
-
-// ───────── Utility Helpers ─────────
-
-function hashHue(str = '') {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  return Math.abs(hash) % 360;
-}
-
-function timeAgo(date) {
-  if (!date) return null;
-  const d = date instanceof Date ? date : new Date(date);
-  if (isNaN(d.getTime())) return null;
-  const seconds = Math.floor((Date.now() - d.getTime()) / 1000);
-  if (seconds < 0) return 'just now';
-  if (seconds < 60) return 'just now';
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  const weeks = Math.floor(days / 7);
-  if (weeks < 4) return `${weeks}w ago`;
-  const months = Math.floor(days / 30);
-  return `${months}mo ago`;
-}
-
-function formatLastActive(memberTasksMap, userId) {
-  const tasks = memberTasksMap[userId] || [];
-  if (tasks.length === 0) return null;
-  const sorted = [...tasks]
-    .filter(t => t.updatedAt)
-    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-  if (sorted.length === 0) return null;
-  return timeAgo(new Date(sorted[0].updatedAt));
-}
-
-function hasRecentActivity(memberTasksMap, userId, hours = 24) {
-  const tasks = memberTasksMap[userId] || [];
-  const threshold = Date.now() - hours * 60 * 60 * 1000;
-  return tasks.some(t => t.updatedAt && new Date(t.updatedAt).getTime() >= threshold);
-}
+import { MemberCardGrid } from '../components/MemberCardGrid';
+import { MemberCompareModal } from '../components/MemberCompareModal';
+import { RecentActivityFeed } from '../components/RecentActivityFeed';
+import { formatLastActive, hasRecentActivity } from '../components/directoryUtils';
 
 // ───────── Main Page Component ─────────
 
@@ -667,234 +605,21 @@ export function DirectoryPage() {
 
         {/* ───────── Recent Activity Feed ───────── */}
         {pageState === 'ready' && members.length > 0 && (
-          <div className="mt-8 border border-[var(--border-subtle)] rounded-xl bg-[var(--bg-elevated)] overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setActivityFeedExpanded(prev => !prev)}
-              className="w-full flex items-center justify-between p-4 hover:bg-[var(--bg-subtle)]/50 transition-colors"
-            >
-              <div className="flex items-center gap-2.5">
-                <TrendingUp className="w-4 h-4 text-[var(--accent)]" />
-                <span className="text-sm font-semibold text-[var(--text-primary)]">Recent Activity</span>
-                <Badge variant="outline" className="text-[10px]">
-                  {recentlyJoined.length > 0 ? `${recentlyJoined.length} joined` : 'All caught up'}
-                </Badge>
-              </div>
-              {activityFeedExpanded
-                ? <ChevronUp className="w-4 h-4 text-[var(--text-muted)]" />
-                : <ChevronDown className="w-4 h-4 text-[var(--text-muted)]" />
-              }
-            </button>
-
-            <AnimatePresence>
-              {activityFeedExpanded && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className="overflow-hidden"
-                >
-                  <div className="px-4 pb-4 space-y-4">
-                    {/* Recently Joined */}
-                    <div className="space-y-2">
-                      <Text className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                        Recently Joined (last 30 days)
-                      </Text>
-                      {recentlyJoined.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                          {recentlyJoined.slice(0, 6).map(member => {
-                            const joinedDate = member.joinedAt || member.createdAt;
-                            return (
-                              <div
-                                key={member.userId}
-                                className="flex items-center gap-3 p-2.5 rounded-lg bg-[var(--bg-subtle)]/50 border border-[var(--border-subtle)] cursor-pointer hover:border-[var(--accent-border)] transition-colors"
-                                onClick={() => setDrawerMember(member)}
-                              >
-                                <div
-                                  className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-xs shadow-sm shrink-0"
-                                  style={{ background: `linear-gradient(135deg, hsl(${hashHue(member.username || '?')} 60% 46%), hsl(${(hashHue(member.username || '?') + 45) % 360} 65% 36%))` }}
-                                >
-                                  {member.username?.charAt(0).toUpperCase() || '?'}
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <div className="text-xs font-semibold text-[var(--text-primary)] truncate">{member.username}</div>
-                                  <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)]">
-                                    <Badge variant="outline" className="text-[9px] px-1.5 py-0">{member.orgRole}</Badge>
-                                    {joinedDate && <span>{timeAgo(new Date(joinedDate))}</span>}
-                                  </div>
-                                </div>
-                                <UserPlus className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <div className="text-xs text-[var(--text-muted)] italic p-3 border border-dashed border-[var(--border-subtle)] rounded-md text-center">
-                          No new members joined in the last 30 days
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Role Changes */}
-                    <div className="space-y-2">
-                      <Text className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                        Role Changes (this week)
-                      </Text>
-                      <div className="text-xs text-[var(--text-muted)] italic p-3 border border-dashed border-[var(--border-subtle)] rounded-md text-center">
-                        No role changes recorded this week
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <RecentActivityFeed
+            recentlyJoined={recentlyJoined}
+            expanded={activityFeedExpanded}
+            onToggleExpanded={() => setActivityFeedExpanded(prev => !prev)}
+            onSelectMember={setDrawerMember}
+          />
         )}
       </PageContent>
 
       {/* ───────── Member Compare Modal ───────── */}
-      <AnimatePresence>
-        {compareModalOpen && compareMembers && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Compare team members"
-            onClick={() => setCompareModalOpen(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              className="w-full max-w-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl shadow-2xl overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Modal header */}
-              <div className="flex items-center justify-between p-5 border-b border-[var(--border-subtle)]">
-                <div className="flex items-center gap-2.5">
-                  <GitCompare className="w-5 h-5 text-[var(--accent)]" />
-                  <Heading level={2} className="text-[15px] font-semibold text-[var(--text-primary)]">
-                    Member Comparison
-                  </Heading>
-                </div>
-                <IconButton
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setCompareModalOpen(false)}
-                  className="h-8 w-8"
-                  aria-label="Close comparison"
-                >
-                  <X className="w-4 h-4" />
-                </IconButton>
-              </div>
-
-              {/* Modal body — side-by-side comparison */}
-              <div className="p-5 space-y-5">
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Member A */}
-                  {[compareMembers.memberA, compareMembers.memberB].map((m, idx) => {
-                    const hue = hashHue(m.username || '?');
-                    return (
-                      <div key={m.userId} className="space-y-3 p-4 rounded-xl bg-[var(--bg-subtle)]/50 border border-[var(--border-subtle)]">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-sm shrink-0 relative"
-                            style={{ background: `linear-gradient(135deg, hsl(${hue} 60% 46%), hsl(${(hue + 45) % 360} 65% 36%))` }}
-                          >
-                            {m.username?.charAt(0).toUpperCase() || '?'}
-                            {m.isActiveNow && (
-                              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[var(--success)] border-2 border-[var(--bg-elevated)] rounded-full" title="Active now" />
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="text-sm font-semibold text-[var(--text-primary)] truncate">{m.username}</div>
-                            <Badge variant="outline" className="text-[9px]">{m.orgRole}</Badge>
-                          </div>
-                        </div>
-
-                        <div className="space-y-1.5 text-xs">
-                          <div className="flex justify-between">
-                            <span className="text-[var(--text-muted)]">Teams</span>
-                            <span className="font-semibold text-[var(--text-primary)]">{m.teamsCount}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-[var(--text-muted)]">Tasks</span>
-                            <span className="font-semibold text-[var(--text-primary)]">{m.tasksCount}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-[var(--text-muted)]">Priority</span>
-                            <span className="font-semibold text-[var(--text-primary)]">#{m.rolePriority ?? 'N/A'}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-[var(--text-muted)]">Last active</span>
-                            <span className="font-semibold text-[var(--text-primary)]">{m.lastActive || 'No activity'}</span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Task count bar comparison */}
-                <div className="space-y-2">
-                  <Text className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                    Task Workload Comparison
-                  </Text>
-                  <div className="space-y-2">
-                    {[
-                      { label: compareMembers.memberA.username, count: compareMembers.memberA.tasksCount, color: 'bg-[var(--accent)]' },
-                      { label: compareMembers.memberB.username, count: compareMembers.memberB.tasksCount, color: 'bg-[var(--accent)]' },
-                    ].map(item => {
-                      const maxTasks = Math.max(compareMembers.memberA.tasksCount, compareMembers.memberB.tasksCount, 1);
-                      const pct = Math.round((item.count / maxTasks) * 100);
-                      return (
-                        <div key={item.label} className="flex items-center gap-3">
-                          <span className="text-[11px] text-[var(--text-secondary)] w-24 truncate">{item.label}</span>
-                          <div className="flex-1 h-2 bg-[var(--bg-subtle)] rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${pct}%` }}
-                              transition={{ duration: 0.5, ease: 'easeOut' }}
-                              className={cn("h-full rounded-full", item.color)}
-                            />
-                          </div>
-                          <span className="text-[11px] font-mono font-semibold text-[var(--text-primary)] w-6 text-right">{item.count}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Team overlap */}
-                <div className="space-y-2">
-                  <Text className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                    Shared Teams ({compareMembers.sharedTeams.length})
-                  </Text>
-                  {compareMembers.sharedTeams.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
-                      {compareMembers.sharedTeams.map(team => (
-                        <Badge key={team.id || team.name} variant="outline" className="text-[10px] bg-[var(--bg-card)]">
-                          <Users className="w-2.5 h-2.5 mr-1 text-[var(--accent)]" />
-                          {team.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-xs text-[var(--text-muted)] italic p-2 border border-dashed border-[var(--border-subtle)] rounded-md text-center">
-                      These members don't share any teams
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <MemberCompareModal
+        open={compareModalOpen && !!compareMembers}
+        onOpenChange={(open) => !open && setCompareModalOpen(false)}
+        compareMembers={compareMembers}
+      />
 
       {/* Slide-over Detail Drawer */}
       <MemberDetailDrawer
@@ -939,172 +664,5 @@ export function DirectoryPage() {
       />
       {confirmDialog}
     </PageShell>
-  );
-}
-
-// ───────── Sub-component: Enhanced Member Card Grid ─────────
-
-function MemberCardGrid({
-  membersList,
-  selectedIds,
-  onToggleSelect,
-  onSelectMember,
-  memberTeamsMap,
-  memberTasksMap,
-  roles,
-  updateRoleMutation,
-  removeMemberMutation,
-  canManageRoles,
-  canRemoveMembers,
-  user,
-  confirm,
-  adminCount,
-  allVisibleIds,
-  onToggleAll,
-  avgTasksPerMember = 0,
-}) {
-  const isAllSelected = allVisibleIds.length > 0 && allVisibleIds.every(id => selectedIds.includes(id));
-
-  return (
-    <div className="space-y-2.5">
-      {/* Quick check-all row for grid mode */}
-      <div className="flex items-center justify-between text-xs text-[var(--text-muted)] px-1">
-        <div className="inline-flex items-center gap-2">
-          <Checkbox
-            checked={isAllSelected}
-            onCheckedChange={() => onToggleAll(allVisibleIds)}
-            aria-label="Select all displayed cards"
-          />
-          <span className="font-medium cursor-pointer" onClick={() => onToggleAll(allVisibleIds)}>
-            {isAllSelected ? 'Unselect all cards in group' : 'Select all cards in group'}
-          </span>
-        </div>
-      </div>
-
-      <div className="ec-grid">
-        {membersList.map((member) => {
-          const currentRole = roles.find((r) => r.name === member.orgRole);
-          const isSelf = member.userId === user?.id;
-          const isLastAdmin = adminCount <= 1 && member.rolePriority === 0;
-          const isSuspended = member.status === 'SUSPENDED';
-          const isSelected = selectedIds.includes(member.userId);
-          const disabledSelect = isSelf || isLastAdmin;
-          const teams = memberTeamsMap[member.userId] || [];
-          const tasks = memberTasksMap[member.userId] || [];
-          const hue = hashHue(member.username || '?');
-          const isActiveNow = hasRecentActivity(memberTasksMap, member.userId, 24);
-          const lastActive = formatLastActive(memberTasksMap, member.userId);
-          const maxWorkload = Math.max(avgTasksPerMember, tasks.length, 1);
-
-          return (
-            <EntityCard
-              key={member.userId}
-              type="member"
-              name={member.username + (isSelf ? '  (You)' : '')}
-              tagline={member.email || 'No email provided'}
-              selected={isSelected}
-              disabled={isSuspended}
-              onClick={() => onSelectMember(member)}
-              glyph={
-                <div className="relative">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-sm"
-                    style={{ background: `linear-gradient(135deg, hsl(${hue} 60% 46%), hsl(${(hue + 45) % 360} 65% 36%))` }}
-                  >
-                    {member.username?.charAt(0).toUpperCase() || '?'}
-                  </div>
-                  {isActiveNow && (
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[var(--success)] border-2 border-[var(--bg-elevated)] rounded-full" title="Active in last 24h">
-                      <span className="absolute inset-0 rounded-full bg-[var(--success)] animate-ping opacity-75" />
-                    </div>
-                  )}
-                  {isSuspended && (
-                    <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[var(--danger)] border-2 border-[var(--bg-elevated)] rounded-full" title="Suspended" />
-                  )}
-                </div>
-              }
-              badges={[
-                <span key="role" className="ec-badge ec-badge--ghost">{member.orgRole}</span>,
-                ...(isSuspended ? [<span key="susp" className="ec-badge ec-badge--rose">Suspended</span>] : []),
-              ]}
-              actions={
-                <div className="ec-actions" onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    checked={isSelected}
-                    onCheckedChange={() => !disabledSelect && onToggleSelect(member.userId)}
-                    disabled={disabledSelect}
-                    aria-label={`Select ${member.username}`}
-                  />
-                </div>
-              }
-              meta={[
-                { icon: <Clock style={{ width: 11, height: 11 }} />, text: lastActive ? `Active ${lastActive}` : 'No recent activity' },
-                { icon: <Users style={{ width: 11, height: 11 }} />, text: teams.length > 0 ? teams.slice(0, 2).map(t => t.name).join(', ') + (teams.length > 2 ? ` +${teams.length - 2}` : '') : 'No team assigned' },
-                { icon: <FolderKanban style={{ width: 11, height: 11 }} />, text: `${tasks.length} ${tasks.length === 1 ? 'Task' : 'Tasks'}` },
-              ]}
-              progress={maxWorkload > 0 ? Math.round((tasks.length / maxWorkload) * 100) : 0}
-              progressLabel={`Workload · avg ${avgTasksPerMember > 0 ? avgTasksPerMember : '—'}`}
-              footer={
-                <div className="ec-card-foot">
-                  <span className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] font-medium">
-                    <Shield className="h-3 w-3 text-[var(--accent)]" />
-                    <span>Rank #{member.rolePriority ?? 'N/A'}</span>
-                  </span>
-                  {(canManageRoles || canRemoveMembers) && (
-                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                      {canManageRoles && (
-                        <Select
-                          value={currentRole?.id?.toString() ?? ''}
-                          onValueChange={(val) =>
-                            updateRoleMutation.mutate({
-                              userId: member.userId,
-                              roleId: parseInt(val, 10),
-                            })
-                          }
-                          disabled={updateRoleMutation.isPending || isSelf || isLastAdmin}
-                        >
-                          <SelectTrigger className="w-[105px] h-7 text-[11px] font-medium bg-[var(--bg-card)] hover:bg-[var(--bg-hover)]">
-                            <SelectValue placeholder={member.orgRole || 'Role'} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {roles.map((role) => (
-                              <SelectItem key={role.id} value={role.id.toString()}>
-                                {role.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                      {canRemoveMembers && !isSelf && !isLastAdmin && (
-                        <IconButton
-                          variant="danger"
-                          size="sm"
-                          className="h-7 w-7 opacity-80 hover:opacity-100 transition-opacity"
-                          title="Remove Member"
-                          aria-label="Remove member"
-                          onClick={async () => {
-                            if (
-                              await confirm({
-                                title: `Remove ${member.username} from organization?`,
-                                danger: true,
-                              })
-                            ) {
-                              removeMemberMutation.mutate(member.userId);
-                            }
-                          }}
-                          disabled={removeMemberMutation.isPending}
-                        >
-                          <Icons.trash2 className="w-3.5 h-3.5" />
-                        </IconButton>
-                      )}
-                    </div>
-                  )}
-                </div>
-              }
-            />
-          );
-        })}
-      </div>
-    </div>
   );
 }

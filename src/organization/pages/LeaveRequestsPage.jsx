@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { PageHeader } from '@/shared/ui/PageHeader';
 import { RequestsProvider, useRequests, RequestCard } from '@/organization';
 import { Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';

@@ -1,5 +1,5 @@
 import React from 'react'
-import { PageHeader } from '@/shared/ui/PageHeader'
+import { PageShell, PageHero } from '@/shared/ui/PageShell'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card'
 import { Icons } from '@/shared/ui/Icons'
@@ -14,8 +14,8 @@ export function PlatformDashboardPage() {
   const userCount = users?.length || 0
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-      <PageHeader 
+    <PageShell maxWidth="default" className="min-h-[calc(100vh-8rem)]">
+      <PageHero 
         title="Platform Dashboard" 
         subtitle="Overview of platform health and status." 
         className="mb-6" 
@@ -99,6 +99,6 @@ export function PlatformDashboardPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </PageShell>
   )
 }

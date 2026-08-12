@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Plus, Target, Building2 } from '@/shared/ui/Icons';
 import { Button } from '@/shared/ui/Button';
-import { PageHeader } from '@/shared/ui/PageHeader';
 import { usePermissions } from '@/identity';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import {

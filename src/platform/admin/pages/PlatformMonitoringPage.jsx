@@ -1,14 +1,14 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { PageHeader } from '@/shared/ui/PageHeader'
+import { PageShell, PageHero } from '@/shared/ui/PageShell'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card'
 import { Icons } from '@/shared/ui/Icons'
 
 export function PlatformMonitoringPage() {
   return (
-    <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-      <PageHeader
+    <PageShell maxWidth="default" className="min-h-[calc(100vh-8rem)]">
+      <PageHero
         title="Platform Monitoring"
         subtitle="Infrastructure observability and metrics."
         className="mb-6"
@@ -57,6 +57,6 @@ export function PlatformMonitoringPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </PageShell>
   )
 }

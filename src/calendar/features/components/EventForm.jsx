@@ -52,7 +52,7 @@ export function EventForm({ onSubmit, onCancel, onDelete, isLoading, isDeleting,
       </div>
 
       {!form.isAllDay && (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label className="text-[11px] font-medium uppercase tracking-wider">Start Time</Label>
             <Input type="datetime-local" value={form.startTime} onChange={(e) => { setForm({ ...form, startTime: e.target.value }); setError(null) }} required className="h-9 text-[13px]" />

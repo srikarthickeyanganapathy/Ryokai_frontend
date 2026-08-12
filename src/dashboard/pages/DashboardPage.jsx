@@ -8,7 +8,7 @@ export function DashboardPage() {
   const vm = useMissionControlViewModel();
 
   return (
-    <PageShell maxWidth="wide">
+    <PageShell maxWidth="default">
       <PageState state={vm.pageState || "ready"} moduleId="tasks">
         <MissionControlV2 vm={vm} />
       </PageState>

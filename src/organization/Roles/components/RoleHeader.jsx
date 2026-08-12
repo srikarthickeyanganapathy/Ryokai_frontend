@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
-import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover';
+import { DropdownMenu } from '@/shared/ui/DropdownMenu';
 import { MoreHorizontal, Copy, Trash2, CheckCircle2, ShieldAlert, PanelRight, PanelRightClose, Shield } from '@/shared/ui/Icons';
 
 export function RoleHeader({ role, isAdmin, permissionCount, isDirty, changeCount, supervisionNames, onDiscard, onSave, onReview, onClone, onDelete, permissionMap, localScopedPerms, inspectorOpen = true, onToggleInspector }) {
@@ -57,16 +57,13 @@ export function RoleHeader({ role, isAdmin, permissionCount, isDirty, changeCoun
             {inspectorOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRight className="w-4 h-4" />}
           </Button>
           {!isAdmin && (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-[var(--text-muted)] hover:text-[var(--text-primary)]"><MoreHorizontal className="w-4 h-4" /></Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-38 p-1">
-                <button onClick={onClone} className="w-full text-left px-2.5 py-1.5 text-[12px] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] rounded-md flex items-center gap-2 transition-colors"><Copy className="w-3.5 h-3.5" /> Clone Role</button>
-                <div className="my-1 h-px bg-[var(--border-subtle)]" />
-                <button onClick={onDelete} className="w-full text-left px-2.5 py-1.5 text-[12px] text-[var(--danger)] hover:bg-[var(--danger-soft)] rounded-md flex items-center gap-2 transition-colors"><Trash2 className="w-3.5 h-3.5" /> Delete Role</button>
-              </PopoverContent>
-            </Popover>
+            <DropdownMenu
+              trigger={<Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-[var(--text-muted)] hover:text-[var(--text-primary)]"><MoreHorizontal className="w-4 h-4" /></Button>}
+              items={[
+                { label: 'Clone Role', icon: Copy, onClick: onClone },
+                { label: 'Delete Role', icon: Trash2, onClick: onDelete, danger: true, separator: 'before' },
+              ]}
+            />
           )}
           {!isAdmin && (
             isDirty ? (

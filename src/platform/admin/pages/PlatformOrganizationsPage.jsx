@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { PageHeader } from '@/shared/ui/PageHeader'
+import { PageShell, PageHero } from '@/shared/ui/PageShell'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { DataTable } from '@/shared/ui/data-table/DataTable'
 import { useAdminOrganizations, useSuspendOrganization, useActivateOrganization } from '@/platform/admin/features/hooks/useAdmin'
@@ -92,8 +92,8 @@ export function PlatformOrganizationsPage() {
   ], [activateOrg, suspendOrg, confirm])
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-      <PageHeader
+    <PageShell maxWidth="default" className="min-h-[calc(100vh-8rem)]">
+      <PageHero
         title="Organizations"
         subtitle="Oversight and governance of all platform tenants."
         actions={
@@ -118,6 +118,6 @@ export function PlatformOrganizationsPage() {
         />
       </div>
       {dialog}
-    </div>
+    </PageShell>
   )
 }

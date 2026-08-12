@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageSquare, Send, Trash2, Paperclip, Search, FileText, Download, Image as ImageIcon, Sheet, CornerDownRight } from 'lucide-react'
+import { MessageSquare, Send, Trash2, Paperclip, FileText, Download, Image as ImageIcon, Sheet, CornerDownRight } from 'lucide-react'
 import { Button } from '@/shared/ui/Button'
+import { SearchInput } from '@/shared/ui/SearchInput'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { PillNav } from '@/shared/ui/PillNav'
-import { Input } from '@/shared/ui/Input'
 import { Text } from '@/shared/ui/Typography'
 import { cn } from '@/shared/lib/cn'
 
@@ -143,10 +143,7 @@ export function DiscussionTab({
           value={view}
           onChange={setView}
         />
-        <div className="relative w-[170px] sm:w-[220px] ml-auto">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-          <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search…" size="sm" className="pl-8" />
-        </div>
+        <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="Search…" debounceMs={0} className="w-[170px] sm:w-[220px] ml-auto" />
       </div>
 
       {view === 'conv' && (

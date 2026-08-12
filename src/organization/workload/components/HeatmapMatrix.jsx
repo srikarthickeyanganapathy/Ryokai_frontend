@@ -1,0 +1,94 @@
+import { Heading, Text } from '@/shared/ui/Typography';
+import { cn } from '@/shared/lib/cn';
+
+export function HeatmapMatrix({ rows, threshold, history }) {
+  const days = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (13 - i));
+    return d;
+  });
+
+  const getCellColor = (value) => {
+    if (value === 0) return 'bg-[var(--bg-subtle)]';
+    if (value <= threshold * 0.5) return 'bg-emerald-500/40';
+    if (value <= threshold * 0.8) return 'bg-amber-500/40';
+    if (value <= threshold) return 'bg-orange-500/50';
+    return 'bg-red-500/60';
+  };
+
+  return (
+    <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-6 overflow-x-auto">
+      <div className="flex items-center justify-between mb-4">
+        <Heading level={3} className="text-[14px] font-semibold tracking-tight">
+          14-Day Capacity Heatmap
+        </Heading>
+        <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)]">
+          <span className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-sm bg-emerald-500/40"></div>Low
+          </span>
+          <span className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-sm bg-amber-500/40"></div>Normal
+          </span>
+          <span className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-sm bg-red-500/60"></div>Over
+          </span>
+        </div>
+      </div>
+
+      <div className="min-w-[600px]">
+        <div className="grid grid-cols-[200px_1fr] gap-2 mb-2">
+          <div></div>
+          <div className="grid grid-cols-14 gap-1">
+            {days.map((d, i) => (
+              <div
+                key={i}
+                className="text-[9px] text-[var(--text-muted)] text-center font-mono"
+              >
+                {d.getDate()}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          {rows.map((row) => {
+            const userId = row.user?.id || row.user?.username;
+            const userHistory = history[userId] || [];
+            return (
+              <div
+                key={userId}
+                className="grid grid-cols-[200px_1fr] gap-2 items-center hover:bg-[var(--bg-subtle)]/50 p-1 rounded-md transition-colors"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-6 h-6 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center font-bold text-[10px] shrink-0 border border-[var(--accent-border)]">
+                    {(row.user?.username || '?').charAt(0).toUpperCase()}
+                  </div>
+                  <Text className="font-medium text-[12px] truncate">
+                    {row.user?.fullName || row.user?.username || 'Unknown'}
+                  </Text>
+                </div>
+                <div className="grid grid-cols-14 gap-1">
+                  {userHistory.map((val, i) => {
+                    const prevVal = userHistory[i - 1] || 0;
+                    const diff = val - prevVal;
+                    const tooltip = `${val} active tasks on ${days[i].toLocaleDateString()}\n${diff > 0 ? '+' : ''}${diff} from yesterday`;
+                    return (
+                      <div
+                        key={i}
+                        className={cn(
+                          'h-6 rounded-sm transition-all hover:scale-110 hover:ring-1 hover:ring-[var(--accent)] cursor-pointer',
+                          getCellColor(val),
+                        )}
+                        title={tooltip}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}

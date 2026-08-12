@@ -100,7 +100,7 @@ export function TasksWorkspace({
       )}
 
       {/* Scope tabs — horizontal pills */}
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-0.5 min-w-0 flex-wrap">
         {SCOPES.map(s => (
           <button
             key={s.id}
@@ -258,7 +258,7 @@ export function TasksWorkspace({
 function LoadingSkeleton({ activeView }) {
   if (activeView === "kanban") {
     return (
-      <div className="flex gap-4 p-4 h-full overflow-hidden">
+      <div className="flex gap-4 p-4 h-full overflow-x-auto custom-scrollbar">
         {[1, 2, 3].map(i => (
           <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="flex flex-col rounded-2xl bg-[var(--bg-subtle)]/60 border border-[var(--border-subtle)] w-[85vw] max-w-[320px] sm:w-[320px] shrink-0 p-3 gap-2.5 animate-pulse">
             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[var(--bg-hover)]" /><div className="h-4 w-20 bg-[var(--bg-hover)] rounded-md" /></div>

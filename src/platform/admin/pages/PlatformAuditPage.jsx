@@ -1,14 +1,14 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { PageHeader } from '@/shared/ui/PageHeader'
+import { PageShell, PageHero } from '@/shared/ui/PageShell'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Card, CardContent } from '@/shared/ui/Card'
 import { Icons } from '@/shared/ui/Icons'
 
 export function PlatformAuditPage() {
   return (
-    <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-      <PageHeader
+    <PageShell maxWidth="default" className="min-h-[calc(100vh-8rem)]">
+      <PageHero
         title="Global Audit Logs"
         subtitle="Platform-wide security and compliance auditing."
         className="mb-6"
@@ -23,6 +23,6 @@ export function PlatformAuditPage() {
           </Text>
         </CardContent>
       </Card>
-    </div>
+    </PageShell>
   )
 }

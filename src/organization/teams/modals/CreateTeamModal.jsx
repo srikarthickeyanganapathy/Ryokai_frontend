@@ -358,9 +358,9 @@ export function CreateTeamModal({ isOpen, onClose, orgId }) {
 
                   {/* Category Tags */}
                   <div>
-                    <FormLabel className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)] mb-2 block">
+                    <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)] mb-2 block">
                       Category
-                    </FormLabel>
+                    </label>
                     <div className="flex flex-wrap gap-1.5">
                       {CATEGORIES.map(cat => {
                         const isSelected = selectedCategory === cat.id

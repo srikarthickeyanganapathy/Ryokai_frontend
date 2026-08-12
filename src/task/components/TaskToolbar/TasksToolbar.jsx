@@ -51,7 +51,7 @@ export function TasksToolbar({
     <>
       <div className="flex flex-col bg-[var(--bg-base)]/70 backdrop-blur-md">
         {/* Row 1: Search + Actions */}
-        <div className="flex items-center gap-3 px-4 py-2.5">
+        <div className="flex items-center gap-3 px-4 py-2.5 flex-wrap">
           {/* Search */}
           <div className="relative flex-1 max-w-sm">
             <Icons.search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-tertiary)]" />
@@ -145,7 +145,7 @@ export function TasksToolbar({
           <div className="flex-1" />
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {toolbarExtras}
             {!isPersonal && (
               <Button variant="outline" size="sm" className="h-8 rounded-xl gap-1.5 text-[12px] font-medium" onClick={() => setBulkOpen(true)}>

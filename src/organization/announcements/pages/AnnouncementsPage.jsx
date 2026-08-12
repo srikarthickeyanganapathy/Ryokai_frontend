@@ -7,7 +7,6 @@ import { Heading, Text } from '@/shared/ui/Typography';
 import { Icons } from '@/shared/ui/Icons';
 import { formatRelative, isToday, isYesterday } from 'date-fns';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
-import { PageHeader } from '@/shared/ui/PageHeader';
 import { SearchPlugin } from '@/shared/workspace-framework';
 import { Button } from '@/shared/ui/Button';
 import { cn } from '@/shared/lib/cn';
