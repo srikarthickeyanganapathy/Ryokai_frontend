@@ -2,9 +2,10 @@ import React, { useMemo } from 'react';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { DropdownMenu } from '@/shared/ui/DropdownMenu';
-import { MoreHorizontal, Copy, Trash2, CheckCircle2, ShieldAlert, PanelRight, PanelRightClose, Shield } from '@/shared/ui/Icons';
+import { MoreHorizontal, Copy, Trash2, CheckCircle2, ShieldAlert, PanelRight, PanelRightClose, ArrowLeft } from '@/shared/ui/Icons';
+import { roleHue } from '../entities/constants';
 
-export function RoleHeader({ role, isAdmin, permissionCount, isDirty, changeCount, supervisionNames, onDiscard, onSave, onReview, onClone, onDelete, permissionMap, localScopedPerms, inspectorOpen = true, onToggleInspector }) {
+export function RoleHeader({ role, isAdmin, permissionCount, isDirty, changeCount, supervisionNames, onDiscard, onSave, onReview, onClone, onDelete, permissionMap, localScopedPerms, inspectorOpen = true, onToggleInspector, onBack }) {
   const stats = useMemo(() => {
     if (!permissionMap || !localScopedPerms) return { read: 0, write: 0, workflow: 0, critical: 0 };
     let read = 0, write = 0, workflow = 0, critical = 0;
@@ -20,12 +21,23 @@ export function RoleHeader({ role, isAdmin, permissionCount, isDirty, changeCoun
 
   if (!role) return null;
 
+  const hue = roleHue(role.name);
+  const monogram = role.name.slice(0, 2);
+  const riskPct = permissionCount > 0 ? Math.min(100, Math.round((stats.critical / permissionCount) * 100)) : 0;
+
   return (
     <div className="px-6 py-3.5 bg-[var(--bg-card)]/80 backdrop-blur-md border-b border-[var(--border-subtle)]">
+      {onBack && (
+        <div className="mb-3 flex items-center gap-1.5">
+          <button onClick={onBack} className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" /> Command chain
+          </button>
+        </div>
+      )}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex items-start gap-3">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: isAdmin ? 'var(--warning-soft)' : 'var(--accent-soft)' }}>
-            <Shield className="w-4.5 h-4.5" style={{ color: isAdmin ? 'var(--warning)' : 'var(--accent)' }} />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 font-mono font-bold text-[13px] tracking-wide" style={{ backgroundColor: isAdmin ? 'var(--warning-soft)' : hue + '1c', color: isAdmin ? 'var(--warning)' : hue }}>
+            {monogram}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2.5 mb-1.5">
@@ -49,6 +61,13 @@ export function RoleHeader({ role, isAdmin, permissionCount, isDirty, changeCoun
               <span className="text-[var(--accent)] font-medium">{stats.workflow} workflow</span>
               {stats.critical > 0 && (<><Dot /><span className="text-[var(--danger)] font-semibold flex items-center gap-1"><ShieldAlert className="w-3 h-3" /> {stats.critical} critical</span></>)}
               {supervisionNames.length > 0 && (<><Dot /><span>Manages <strong className="text-[var(--text-secondary)] font-medium">{supervisionNames.join(', ')}</strong></span></>)}
+            </div>
+            {/* Risk exposure gauge */}
+            <div className="flex items-center gap-2 mt-2 max-w-[260px]">
+              <div className="flex-1 h-[5px] rounded-full bg-[var(--bg-subtle)] overflow-hidden">
+                <div className="h-full rounded-full transition-all" style={{ width: `${riskPct}%`, background: riskPct > 50 ? 'var(--danger)' : riskPct > 0 ? 'var(--warning)' : 'var(--success)', opacity: riskPct > 0 ? 1 : 0.35 }} />
+              </div>
+              <span className="text-[9px] font-mono uppercase tracking-wide text-[var(--text-muted)] shrink-0">{riskPct}% elevated</span>
             </div>
           </div>
         </div>

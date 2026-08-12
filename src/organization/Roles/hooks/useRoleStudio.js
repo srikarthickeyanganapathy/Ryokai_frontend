@@ -8,6 +8,7 @@ import {
   usePermissionCatalog,
 } from '@/organization';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
+import { LEVEL_TIERS } from '../entities/constants';
 
 const PIN_STORAGE_KEY = 'ryokai.roles.pinned';
 const RECENT_STORAGE_KEY = 'ryokai.roles.recent';
@@ -385,6 +386,27 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     });
   };
 
+  const handleSetModuleLevel = (lvl) => {
+    if (isAdminRole || !activeModuleData) return;
+    const wanted = new Set(lvl > 0 && LEVEL_TIERS[lvl - 1] ? LEVEL_TIERS[lvl - 1].groups : []);
+    setLocalScopedPerms((prev) => {
+      const next = { ...prev };
+      activeModuleData.permissions.forEach((p) => {
+        const g = p.group || 'GENERAL';
+        if (wanted.has(g)) {
+          if (!next[p.code]) {
+            const supported = p.supportedScopes?.length > 0 ? p.supportedScopes : ['ORGANIZATION'];
+            const sc = supported.includes('OWN') ? 'OWN' : p.recommendedScope || supported[0];
+            next[p.code] = { scopeCode: sc, resourceAssignments: [] };
+          }
+        } else {
+          delete next[p.code];
+        }
+      });
+      return next;
+    });
+  };
+
   const handleResetModule = () => {
     if (isAdminRole || !activeModuleData) return;
     const codes = activeModuleData.permissions.map((p) => p.code);
@@ -540,6 +562,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     handleEnableAll,
     handleDisableAll,
     handleResetModule,
+    handleSetModuleLevel,
     addedPerms,
     removedPerms,
     scopeChangedPerms,

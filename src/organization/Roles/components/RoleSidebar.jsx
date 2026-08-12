@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { cn } from '@/shared/lib/cn';
 import { Input } from '@/shared/ui/Input';
 import { Button } from '@/shared/ui/Button';
-import { Lock, Plus, Search, Shield, Pin, Clock, ShieldAlert } from '@/shared/ui/Icons';
+import { Lock, Plus, Search, Pin, Clock, ShieldAlert } from '@/shared/ui/Icons';
+import { roleHue } from '../entities/constants';
 
 const MIN_WIDTH = 180;
 const MAX_WIDTH = 320;
@@ -33,6 +34,14 @@ export function RoleSidebar({ roles, selectedRole, onSelectRole, onCreateClick, 
   const rest = filtered.filter((r) => !pinnedRoleIds.has(r.id) && !recentIds.has(r.id));
   const maxPermCount = useMemo(() => Math.max(1, ...roles.map((r) => r.permissions?.length ?? 0)), [roles]);
 
+  // Rank by priority (lower number = higher authority), 01-based
+  const rankMap = useMemo(() => {
+    const sorted = [...roles].sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
+    const map = {};
+    sorted.forEach((r, i) => { map[r.id] = i + 1; });
+    return map;
+  }, [roles]);
+
   return (
     <div className="relative flex h-full shrink-0 w-full" style={resizable ? { width } : undefined}>
       <div className="flex flex-col h-full w-full bg-[var(--bg-card)] text-left select-none overflow-hidden min-h-0">
@@ -47,10 +56,10 @@ export function RoleSidebar({ roles, selectedRole, onSelectRole, onCreateClick, 
           </div>
         </div>
         <div className="flex-1 overflow-y-auto px-1.5 min-h-0">
-          {pinned.length > 0 && <RoleGroup label="Pinned" icon={Pin}>{pinned.map((role, i) => <RoleItem key={role.id} role={role} isSelected={selectedRole?.id === role.id} isPinned onSelect={() => onSelectRole(role)} onTogglePin={() => onTogglePin(role.id)} delay={i} permissionMap={permissionMap} maxPermCount={maxPermCount} />)}</RoleGroup>}
-          {recent.length > 0 && <RoleGroup label="Recent" icon={Clock}>{recent.map((role, i) => <RoleItem key={role.id} role={role} isSelected={selectedRole?.id === role.id} isPinned={false} onSelect={() => onSelectRole(role)} onTogglePin={() => onTogglePin(role.id)} delay={i} permissionMap={permissionMap} maxPermCount={maxPermCount} />)}</RoleGroup>}
+          {pinned.length > 0 && <RoleGroup label="Pinned" icon={Pin}>{pinned.map((role, i) => <RoleItem key={role.id} role={role} isSelected={selectedRole?.id === role.id} isPinned onSelect={() => onSelectRole(role)} onTogglePin={() => onTogglePin(role.id)} delay={i} permissionMap={permissionMap} maxPermCount={maxPermCount} rank={rankMap[role.id]} />)}</RoleGroup>}
+          {recent.length > 0 && <RoleGroup label="Recent" icon={Clock}>{recent.map((role, i) => <RoleItem key={role.id} role={role} isSelected={selectedRole?.id === role.id} isPinned={false} onSelect={() => onSelectRole(role)} onTogglePin={() => onTogglePin(role.id)} delay={i} permissionMap={permissionMap} maxPermCount={maxPermCount} rank={rankMap[role.id]} />)}</RoleGroup>}
           <RoleGroup label={pinned.length || recent.length ? 'All Roles' : null}>
-            {rest.map((role, i) => <RoleItem key={role.id} role={role} isSelected={selectedRole?.id === role.id} isPinned={false} onSelect={() => onSelectRole(role)} onTogglePin={() => onTogglePin(role.id)} delay={i} permissionMap={permissionMap} maxPermCount={maxPermCount} />)}
+            {rest.map((role, i) => <RoleItem key={role.id} role={role} isSelected={selectedRole?.id === role.id} isPinned={false} onSelect={() => onSelectRole(role)} onTogglePin={() => onTogglePin(role.id)} delay={i} permissionMap={permissionMap} maxPermCount={maxPermCount} rank={rankMap[role.id]} />)}
           </RoleGroup>
           {filtered.length === 0 && <div className="p-4 text-center text-[12px] text-[var(--text-muted)]">No roles match.</div>}
         </div>
@@ -73,7 +82,7 @@ function RoleGroup({ label, icon: Icon, children }) {
   );
 }
 
-function RoleItem({ role, isSelected, isPinned, onSelect, onTogglePin, delay = 0, permissionMap, maxPermCount = 1 }) {
+function RoleItem({ role, isSelected, isPinned, onSelect, onTogglePin, delay = 0, permissionMap, maxPermCount = 1, rank }) {
   const permCount = role.permissions?.length ?? 0;
   const coverage = Math.min(100, Math.round((permCount / maxPermCount) * 100));
   const criticalCount = useMemo(() => {
@@ -83,13 +92,20 @@ function RoleItem({ role, isSelected, isPinned, onSelect, onTogglePin, delay = 0
     return n;
   }, [role.permissions, permissionMap]);
 
+  const hue = roleHue(role.name);
+  const monogram = role.name.slice(0, 2);
+  const rankLabel = rank ? String(rank).padStart(2, '0') : '--';
+
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: delay * 0.02, duration: 0.12 }} className={cn('group w-full text-left px-2.5 py-2 rounded-md transition-colors cursor-pointer', isSelected ? 'bg-[var(--accent-soft)] text-[var(--accent)]' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]')} onClick={onSelect}>
-      <div className="flex items-center justify-between gap-2">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: delay * 0.02, duration: 0.12 }} className={cn('group w-full text-left px-2.5 py-2 rounded-md transition-colors cursor-pointer', isSelected ? 'bg-[var(--accent-soft)]' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]')} onClick={onSelect}>
+      <div className="flex items-center gap-2">
+        <span className="w-4 text-right font-mono text-[9px] font-bold text-[var(--text-muted)] shrink-0">{rankLabel}</span>
+        <span className="w-6 h-6 rounded-md flex items-center justify-center font-mono text-[9px] font-bold shrink-0" style={{ backgroundColor: hue + '1c', color: hue }}>
+          {monogram}
+        </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 min-w-0">
-            <Shield className={cn('w-3.5 h-3.5 shrink-0', isSelected ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]')} />
-            <span className={cn('text-[13px] truncate', isSelected && 'font-semibold')}>{role.name}</span>
+            <span className={cn('text-[13px] truncate', isSelected ? 'font-semibold text-[var(--text-primary)]' : '')}>{role.name}</span>
             {criticalCount > 0 && <ShieldAlert className="w-3 h-3 shrink-0 text-[var(--danger)]" aria-label={`${criticalCount} elevated permissions`} />}
           </div>
         </div>
@@ -101,7 +117,7 @@ function RoleItem({ role, isSelected, isPinned, onSelect, onTogglePin, delay = 0
           )}
         </div>
       </div>
-      <div className="flex items-center gap-2 pl-5 mt-1.5">
+      <div className="flex items-center gap-2 pl-10 mt-1.5">
         <div className="flex-1 h-1 rounded-full bg-[var(--bg-subtle)] overflow-hidden">
           <div className="h-full rounded-full transition-all" style={{ width: `${coverage}%`, backgroundColor: isSelected ? 'var(--accent)' : 'var(--text-muted)', opacity: isSelected ? 1 : 0.5 }} />
         </div>

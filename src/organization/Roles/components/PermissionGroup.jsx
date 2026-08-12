@@ -4,7 +4,7 @@ import { cn } from '@/shared/lib/cn';
 import { PermissionRow } from './PermissionRow';
 import { GROUP_LABELS, getGroupConfig } from '../entities/constants';
 
-export function PermissionGroup({ groupKey, permissions = [], localScopedPerms = {}, isAdmin, onToggle, onSelect, activePermission, collapsed = false, onToggleCollapsed }) {
+export function PermissionGroup({ groupKey, permissions = [], localScopedPerms = {}, isAdmin, onToggle, onSelect, activePermission, collapsed = false, onToggleCollapsed, onScopeChange, onResourceAssignmentChange, resourcesByType = {} }) {
   if (!permissions || permissions.length === 0) return null;
 
   const enabledCount = permissions.filter((p) => Boolean(localScopedPerms?.[p.code])).length;
@@ -26,7 +26,20 @@ export function PermissionGroup({ groupKey, permissions = [], localScopedPerms =
       {!collapsed && (
         <div className="space-y-0.5 mt-1 pl-1">
           {permissions.map((perm) => (
-            <PermissionRow key={perm.code} perm={perm} isEnabled={Boolean(localScopedPerms?.[perm.code])} isActive={activePermission?.code === perm.code} isAdmin={isAdmin} onToggle={onToggle} onSelect={onSelect} />
+            <PermissionRow
+              key={perm.code}
+              perm={perm}
+              isEnabled={Boolean(localScopedPerms?.[perm.code])}
+              isActive={activePermission?.code === perm.code}
+              isAdmin={isAdmin}
+              onToggle={onToggle}
+              onSelect={onSelect}
+              currentScope={localScopedPerms?.[perm.code]?.scopeCode}
+              currentAssignments={localScopedPerms?.[perm.code]?.resourceAssignments || []}
+              onScopeChange={onScopeChange}
+              onResourceAssignmentChange={onResourceAssignmentChange}
+              resourcesByType={resourcesByType}
+            />
           ))}
         </div>
       )}

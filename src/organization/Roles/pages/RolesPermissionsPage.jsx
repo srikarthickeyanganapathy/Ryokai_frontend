@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
 import { useOrgRoles } from '../../features/hooks/useOrganizations';
@@ -9,10 +9,11 @@ import { Icons } from '@/shared/ui/Icons';
 import { ShieldCheck, ShieldAlert, KeyRound, Users2 } from '@/shared/ui/Icons';
 
 import { useRoleStudio } from '../hooks/useRoleStudio';
-import { RoleSidebar } from '../components/RoleSidebar';
+import { CommandChain } from '../components/CommandChain';
 import { RoleHeader } from '../components/RoleHeader';
 import { ModuleSidebar } from '../components/ModuleSidebar';
 import { PermissionBrowser } from '../components/PermissionBrowser';
+import { RolePassport } from '../widgets/RolePassport';
 import { PermissionInspectorContent } from '../widgets/PermissionInspectorContent';
 import { InspectorDrawer } from '../widgets/InspectorDrawer';
 import { ReviewDrawer } from '../widgets/ReviewDrawer';
@@ -24,6 +25,13 @@ export function RolesPermissionsPage() {
   const { data: roles = [], isLoading: rolesLoading } = useOrgRoles(orgId);
   const studio = useRoleStudio({ orgId, roles, rolesLoading });
   const { canManageRoles } = usePermissions();
+
+  const [showDirectory, setShowDirectory] = useState(true);
+
+  const openRole = (role) => {
+    studio.handleSelectRole(role);
+    setShowDirectory(false);
+  };
 
   const posture = useMemo(() => {
     if (!studio.roles?.length) return { totalRoles: 0, adminRoles: 0, criticalGrants: 0, avgPerms: 0 };
@@ -43,12 +51,17 @@ export function RolesPermissionsPage() {
 
   if (!orgId) return null;
 
+  const selected = studio.selectedRole;
+  const isDetail = !showDirectory && Boolean(selected);
+
   return (
     <PageShell maxWidth="default">
       <PageHero
-        eyebrow="Security · Access Control"
-        title="Roles & Permissions"
-        subtitle="Configure the permission surface for every role in this organization."
+        eyebrow="Security & Access Control"
+        title={isDetail ? selected?.name : 'Command Chain'}
+        subtitle={isDetail
+          ? 'Pick a module, set its level, then assign resources.'
+          : 'Every role ranked by authority — pick a link in the chain to open its passport.'}
       >
         {canManageRoles && !studio.rolesLoading && <PostureStrip posture={posture} />}
       </PageHero>
@@ -62,43 +75,136 @@ export function RolesPermissionsPage() {
           </div>
         ) : (
           <>
-            <div className="flex flex-col lg:flex-row rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden h-[calc(100vh-220px)] min-h-[560px] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-              <div className="hidden lg:flex border-b lg:border-b-0 lg:border-r border-[var(--border-subtle)] min-h-0">
-                <RoleSidebar {...studio} roles={studio.roles} selectedRole={studio.selectedRole} onSelectRole={studio.handleSelectRole} onCreateClick={() => studio.setShowCreateRole(true)} searchQuery={studio.roleSearchQuery} onSearchChange={studio.setRoleSearchQuery} pinnedRoleIds={studio.pinnedRoleIds} onTogglePin={studio.togglePinRole} recentRoleIds={studio.recentRoleIds} permissionMap={studio.PERMISSION_MAP} resizable />
-              </div>
-              <aside className="lg:hidden w-full shrink-0 border-b border-[var(--border-subtle)] max-h-[280px] min-h-0">
-                <RoleSidebar {...studio} roles={studio.roles} selectedRole={studio.selectedRole} onSelectRole={studio.handleSelectRole} onCreateClick={() => studio.setShowCreateRole(true)} searchQuery={studio.roleSearchQuery} onSearchChange={studio.setRoleSearchQuery} pinnedRoleIds={studio.pinnedRoleIds} onTogglePin={studio.togglePinRole} recentRoleIds={studio.recentRoleIds} permissionMap={studio.PERMISSION_MAP} resizable={false} />
-              </aside>
-
-              {studio.selectedRole ? (
-                <div className="flex-1 flex flex-col min-w-0 min-h-0">
-                  <RoleHeader role={studio.selectedRole} isAdmin={studio.isAdminRole} permissionCount={Object.keys(studio.localScopedPerms).length} isDirty={studio.isDirty} changeCount={studio.changeCount} supervisionNames={studio.supervisionRank.can} onDiscard={studio.handleDiscardChanges} onSave={studio.handleSaveChanges} onReview={() => studio.setShowReview(true)} onClone={studio.handleCloneRole} onDelete={studio.handleDeleteRole} permissionMap={studio.PERMISSION_MAP} localScopedPerms={studio.localScopedPerms} inspectorOpen={studio.inspectorOpen} onToggleInspector={studio.toggleInspector} />
-                  <div className="flex-1 flex min-h-0 min-w-0 overflow-hidden">
-                    <ModuleSidebar modules={studio.filteredModules} activeModule={studio.activeModuleCode} onModuleChange={studio.setActiveModuleCode} localScopedPerms={studio.localScopedPerms} />
-                    <div className="flex-1 flex flex-col min-h-0 min-w-0 border-r-0 lg:border-r border-[var(--border-subtle)]">
-                      {studio.activeModuleData ? (
-                        <PermissionBrowser groupedPermissions={studio.groupedPermissions} localScopedPerms={studio.localScopedPerms} permissionMap={studio.PERMISSION_MAP} isAdmin={studio.isAdminRole} searchQuery={studio.permSearchQuery} onSearchChange={studio.setPermSearchQuery} riskFilter={studio.riskFilter} onRiskFilterChange={studio.setRiskFilter} onToggle={studio.togglePermission} onSelect={studio.setActivePermission} activePermission={studio.activePermission} onEnableAll={studio.handleEnableAll} onDisableAll={studio.handleDisableAll} onReset={studio.handleResetModule} collapsedGroups={studio.collapsedGroups} onToggleGroupCollapsed={studio.toggleGroupCollapsed} />
-                      ) : (
-                        <EmptyBrowserState filtered={studio.permSearchQuery || studio.riskFilter === 'ELEVATED'} />
+            {isDetail ? (
+              <div className="flex flex-col gap-4">
+                <RoleHeader
+                  role={selected}
+                  isAdmin={studio.isAdminRole}
+                  permissionCount={Object.keys(studio.localScopedPerms).length}
+                  isDirty={studio.isDirty}
+                  changeCount={studio.changeCount}
+                  supervisionNames={studio.supervisionRank.can}
+                  onDiscard={studio.handleDiscardChanges}
+                  onSave={studio.handleSaveChanges}
+                  onReview={() => studio.setShowReview(true)}
+                  onClone={studio.handleCloneRole}
+                  onDelete={studio.handleDeleteRole}
+                  permissionMap={studio.PERMISSION_MAP}
+                  localScopedPerms={studio.localScopedPerms}
+                  inspectorOpen={studio.inspectorOpen}
+                  onToggleInspector={studio.toggleInspector}
+                  onBack={() => setShowDirectory(true)}
+                />
+                <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
+                  <RolePassport
+                    role={selected}
+                    isAdmin={studio.isAdminRole}
+                    stats={{ read: headerStats(studio).read, write: headerStats(studio).write, workflow: headerStats(studio).workflow, critical: headerStats(studio).critical }}
+                    enabledCount={Object.keys(studio.localScopedPerms).length}
+                    totalCount={studio.PERMISSION_MAP?.size || 0}
+                    supervisionNames={studio.supervisionRank.can}
+                  />
+                  <div className="flex flex-col lg:flex-row rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden h-[calc(100vh-320px)] min-h-[540px]">
+                    <ModuleSidebar
+                      modules={studio.filteredModules}
+                      activeModule={studio.activeModuleCode}
+                      onModuleChange={studio.setActiveModuleCode}
+                      localScopedPerms={studio.localScopedPerms}
+                      permissionMap={studio.PERMISSION_MAP}
+                    />
+                    <div className="flex-1 flex min-h-0 min-w-0">
+                      <PermissionBrowser
+                        module={studio.activeModuleData}
+                        groupedPermissions={studio.groupedPermissions}
+                        localScopedPerms={studio.localScopedPerms}
+                        permissionMap={studio.PERMISSION_MAP}
+                        isAdmin={studio.isAdminRole}
+                        searchQuery={studio.permSearchQuery}
+                        onSearchChange={studio.setPermSearchQuery}
+                        riskFilter={studio.riskFilter}
+                        onRiskFilterChange={studio.setRiskFilter}
+                        onToggle={studio.togglePermission}
+                        onSelect={studio.setActivePermission}
+                        activePermission={studio.activePermission}
+                        onEnableAll={studio.handleEnableAll}
+                        onDisableAll={studio.handleDisableAll}
+                        onReset={studio.handleResetModule}
+                        collapsedGroups={studio.collapsedGroups}
+                        onToggleGroupCollapsed={studio.toggleGroupCollapsed}
+                        onScopeChange={studio.handleScopeChange}
+                        onResourceAssignmentChange={studio.handleResourceAssignmentChange}
+                        onSetModuleLevel={studio.handleSetModuleLevel}
+                      />
+                      {studio.inspectorOpen && (
+                        <aside className="hidden lg:block w-[320px] shrink-0 min-h-0 overflow-y-auto bg-[var(--bg-subtle)]/40 backdrop-blur-md border-l border-[var(--border-subtle)]">
+                          <PermissionInspectorContent
+                            role={selected}
+                            permission={studio.activePermission}
+                            isEnabled={studio.activePermission ? Boolean(studio.localScopedPerms?.[studio.activePermission.code]) : false}
+                            currentScope={studio.activePermission ? studio.localScopedPerms?.[studio.activePermission.code]?.scopeCode : null}
+                            currentAssignments={studio.activePermission ? studio.localScopedPerms?.[studio.activePermission.code]?.resourceAssignments || [] : []}
+                            isAdmin={studio.isAdminRole}
+                            onScopeChange={studio.handleScopeChange}
+                            onResourceAssignmentChange={studio.handleResourceAssignmentChange}
+                            onToggle={studio.togglePermission}
+                            permissionMap={studio.PERMISSION_MAP}
+                            localScopedPerms={studio.localScopedPerms}
+                            supervisionNames={studio.supervisionRank.can}
+                          />
+                        </aside>
                       )}
                     </div>
-                    {studio.inspectorOpen && (
-                      <aside className="hidden lg:block w-[320px] shrink-0 min-h-0 overflow-y-auto bg-[var(--bg-subtle)]/40 backdrop-blur-md border-l border-[var(--border-subtle)]">
-                        <PermissionInspectorContent role={studio.selectedRole} permission={studio.activePermission} isEnabled={studio.activePermission ? Boolean(studio.localScopedPerms?.[studio.activePermission.code]) : false} currentScope={studio.activePermission ? studio.localScopedPerms?.[studio.activePermission.code]?.scopeCode : null} currentAssignments={studio.activePermission ? studio.localScopedPerms?.[studio.activePermission.code]?.resourceAssignments || [] : []} isAdmin={studio.isAdminRole} onScopeChange={studio.handleScopeChange} onResourceAssignmentChange={studio.handleResourceAssignmentChange} onToggle={studio.togglePermission} permissionMap={studio.PERMISSION_MAP} localScopedPerms={studio.localScopedPerms} supervisionNames={studio.supervisionRank.can} />
-                      </aside>
-                    )}
                   </div>
                 </div>
-              ) : (
-                <div className="flex-1 flex items-center justify-center text-[13px] text-[var(--text-muted)] font-medium">Select a role to configure permissions.</div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <CommandChain
+                roles={studio.roles}
+                selectedRole={selected}
+                onSelect={openRole}
+                onCreateClick={() => studio.setShowCreateRole(true)}
+                searchQuery={studio.roleSearchQuery}
+                onSearchChange={studio.setRoleSearchQuery}
+                permissionMap={studio.PERMISSION_MAP}
+              />
+            )}
 
             <div className="block lg:hidden">
-              <InspectorDrawer role={studio.selectedRole} permission={studio.activePermission} open={!!studio.activePermission} onOpenChange={(open) => !open && studio.setActivePermission(null)} isEnabled={studio.activePermission ? Boolean(studio.localScopedPerms?.[studio.activePermission.code]) : false} currentScope={studio.activePermission ? studio.localScopedPerms?.[studio.activePermission.code]?.scopeCode : null} currentAssignments={studio.activePermission ? studio.localScopedPerms?.[studio.activePermission.code]?.resourceAssignments || [] : []} isAdmin={studio.isAdminRole} onScopeChange={studio.handleScopeChange} onResourceAssignmentChange={studio.handleResourceAssignmentChange} onToggle={studio.togglePermission} permissionMap={studio.PERMISSION_MAP} localScopedPerms={studio.localScopedPerms} supervisionNames={studio.supervisionRank.can} />
+              <InspectorDrawer
+                role={selected}
+                permission={studio.activePermission}
+                open={!!studio.activePermission}
+                onOpenChange={(open) => { if (!open) studio.setActivePermission(null); }}
+                isEnabled={studio.activePermission ? Boolean(studio.localScopedPerms?.[studio.activePermission.code]) : false}
+                currentScope={studio.activePermission ? studio.localScopedPerms?.[studio.activePermission.code]?.scopeCode : null}
+                currentAssignments={studio.activePermission ? studio.localScopedPerms?.[studio.activePermission.code]?.resourceAssignments || [] : []}
+                isAdmin={studio.isAdminRole}
+                onScopeChange={studio.handleScopeChange}
+                onResourceAssignmentChange={studio.handleResourceAssignmentChange}
+                onToggle={studio.togglePermission}
+                permissionMap={studio.PERMISSION_MAP}
+                localScopedPerms={studio.localScopedPerms}
+                supervisionNames={studio.supervisionRank.can}
+              />
             </div>
 
-            <ReviewDrawer open={studio.showReview} onOpenChange={studio.setShowReview} roleName={studio.selectedRole?.name} addedPerms={studio.addedPerms} removedPerms={studio.removedPerms} scopeChangedPerms={studio.scopeChangedPerms} priorityChanged={studio.priorityChanged} originalPriority={studio.selectedRole?.priority ?? 100} newPriority={studio.localPriority} changeRisk={studio.changeRisk} permissionMap={studio.PERMISSION_MAP} localScopedPerms={studio.localScopedPerms} originalMap={studio.originalMap} onSave={studio.handleSaveChanges} onDiscard={studio.handleDiscardChanges} />
+            <ReviewDrawer
+              open={studio.showReview}
+              onOpenChange={studio.setShowReview}
+              roleName={selected?.name}
+              addedPerms={studio.addedPerms}
+              removedPerms={studio.removedPerms}
+              scopeChangedPerms={studio.scopeChangedPerms}
+              priorityChanged={studio.priorityChanged}
+              originalPriority={selected?.priority ?? 100}
+              newPriority={studio.localPriority}
+              changeRisk={studio.changeRisk}
+              permissionMap={studio.PERMISSION_MAP}
+              localScopedPerms={studio.localScopedPerms}
+              originalMap={studio.originalMap}
+              onSave={studio.handleSaveChanges}
+              onDiscard={studio.handleDiscardChanges}
+            />
             <CreateRoleDrawer roles={studio.roles} open={studio.showCreateRole} onOpenChange={studio.setShowCreateRole} onCreate={studio.handleCreateRole} isLoading={false} />
             {studio.confirmDialog}
           </>
@@ -108,14 +214,26 @@ export function RolesPermissionsPage() {
   );
 }
 
+function headerStats(studio) {
+  let read = 0, write = 0, workflow = 0, critical = 0;
+  Object.keys(studio.localScopedPerms || {}).forEach((code) => {
+    const p = studio.PERMISSION_MAP?.get(code);
+    if (!p) return;
+    const g = p.group || 'GENERAL';
+    if (g === 'READ') read++; else if (g === 'WRITE') write++; else if (g === 'WORKFLOW') workflow++;
+    if (p.riskLevel === 'CRITICAL' || p.riskLevel === 'HIGH') critical++;
+  });
+  return { read, write, workflow, critical };
+}
+
 function PostureStrip({ posture }) {
   return (
     <div className="flex items-stretch gap-0 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
-      <PostureMetric icon={<Users2 className="w-3.5 h-3.5" />} label="Roles defined" value={posture.totalRoles} tone="var(--text-primary)" />
+      <PostureMetric icon={<Users2 className="w-3.5 h-3.5" />} label="Links in chain" value={posture.totalRoles} tone="var(--text-primary)" />
       <Divider />
       <PostureMetric icon={<ShieldCheck className="w-3.5 h-3.5" />} label="System roles" value={posture.adminRoles} tone="var(--accent)" />
       <Divider />
-      <PostureMetric icon={<KeyRound className="w-3.5 h-3.5" />} label="Avg. grants / role" value={posture.avgPerms} tone="var(--text-primary)" />
+      <PostureMetric icon={<KeyRound className="w-3.5 h-3.5" />} label="Grants / role" value={posture.avgPerms} tone="var(--text-primary)" />
       <Divider />
       <PostureMetric icon={<ShieldAlert className="w-3.5 h-3.5" />} label="Elevated grants" value={posture.criticalGrants} tone={posture.criticalGrants > 0 ? 'var(--danger)' : 'var(--success)'} emphasize={posture.criticalGrants > 0} />
     </div>
@@ -125,25 +243,18 @@ function PostureStrip({ posture }) {
 function PostureMetric({ icon, label, value, tone, emphasize }) {
   return (
     <div className="flex-1 flex items-center gap-2.5 px-4 py-2.5 min-w-0 transition-colors hover:bg-[var(--bg-hover)]">
-      <span className="w-7 h-7 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: emphasize ? 'var(--danger-soft)' : 'var(--bg-subtle)', color: tone }}>{icon}</span>
+      <span className="w-7 h-7 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: emphasize ? 'var(--danger-soft)' : 'var(--bg-subtle)', color: tone }}>
+        {icon}
+      </span>
       <div className="min-w-0">
         <div className="text-[14px] font-bold font-mono leading-none tracking-tight" style={{ color: tone }}>{value}</div>
-        <div className="text-[10px] text-[var(--text-muted)] mt-1 truncate uppercase tracking-wider font-medium">{label}</div>
+        <div className="text-[9.5px] text-[var(--text-muted)] mt-1 uppercase tracking-wider font-medium">{label}</div>
       </div>
     </div>
   );
 }
 
 function Divider() { return <div className="w-px bg-[var(--border-subtle)] shrink-0" />; }
-
-function EmptyBrowserState({ filtered }) {
-  return (
-    <div className="flex-1 flex flex-col items-center justify-center gap-1.5 text-center px-6 py-20">
-      <span className="text-[13px] font-medium text-[var(--text-secondary)]">{filtered ? 'No permissions match the current filters.' : 'Select a module to browse permissions.'}</span>
-      {filtered && <span className="text-[11px] text-[var(--text-muted)]">Try clearing the search or the elevated-only filter.</span>}
-    </div>
-  );
-}
 
 function EmptyState({ icon, iconBg, title, description }) {
   return (
