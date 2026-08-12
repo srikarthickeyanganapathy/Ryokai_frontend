@@ -42,7 +42,7 @@ export function SectionPanel({
         className
       )}
     >
-      <div className="flex items-center justify-between p-4 sm:p-5 border-b border-[var(--color-border-subtle)]">
+      <div className="flex items-center justify-between flex-wrap gap-x-3 gap-y-1.5 p-4 sm:p-5 border-b border-[var(--color-border-subtle)]">
         <div className="flex items-center gap-3 min-w-0">
           {Icon && (
             <div className="w-8 h-8 rounded-lg bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] flex items-center justify-center shrink-0">
