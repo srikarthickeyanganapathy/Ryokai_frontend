@@ -31,7 +31,7 @@ function FocusTimerIndicator() {
   if (isLoading || !focusData?.isActive) return null;
 
   return (
-    <div className="flex items-center gap-2 bg-[var(--accent-soft)] text-[var(--accent)] px-3 py-1.5 rounded-full text-xs font-semibold mr-2 border border-[var(--accent-border)]">
+    <div className="hidden sm:flex items-center gap-2 bg-[var(--accent-soft)] text-[var(--accent)] px-3 py-1.5 rounded-full text-xs font-semibold mr-2 border border-[var(--accent-border)]">
       <Play className="w-3.5 h-3.5" />
       <span>{focusData.timeRemaining || '24:59'}</span>
     </div>
@@ -49,7 +49,7 @@ function SyncStatusIndicator() {
       {syncState === 'syncing' && <Icons.refresh className="w-3.5 h-3.5 animate-spin" />}
       {syncState === 'offline' && <Icons.wifiOff className="w-3.5 h-3.5" />}
       {syncState === 'conflict' && <Icons.alert className="w-3.5 h-3.5 text-[var(--danger)]" />}
-      <span className="capitalize">{syncState}</span>
+      <span className="hidden sm:inline capitalize">{syncState}</span>
     </div>
   );
 }
@@ -84,7 +84,7 @@ export function AppTopbar({ onMenuClick }) {
   return (
     <header className="h-12 flex items-center justify-between px-3 md:px-4 border-b border-[var(--color-border-subtle)] bg-[var(--bg-base)]/70 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-10 shadow-[var(--inset-highlight-soft)]">
 
-      <div className="flex items-center gap-4 flex-1 sm:min-w-[200px]">
+      <div className="flex items-center gap-4 flex-1 min-w-0">
         <IconButton
           variant="ghost"
           className="lg:hidden"
@@ -95,11 +95,11 @@ export function AppTopbar({ onMenuClick }) {
         </IconButton>
       </div>
 
-      <div className="flex-1 flex justify-center px-4 max-w-2xl min-w-0">
+      <div className="flex-1 flex justify-center px-2 sm:px-4 max-w-2xl min-w-0">
         <CommandMenu />
       </div>
 
-      <div className="flex items-center justify-end gap-1 sm:gap-3 flex-1 sm:min-w-[200px]">
+      <div className="flex items-center justify-end gap-1 sm:gap-3 flex-1 min-w-0">
 
         <LensStatusIndicator />
 
@@ -277,7 +277,7 @@ export function AppTopbar({ onMenuClick }) {
         </Popover>
 
         {/* New Ryokai Gradient Logo */}
-        <div className="cursor-pointer ml-2" onClick={() => navigate('/app')}>
+        <div className="hidden sm:block cursor-pointer ml-2" onClick={() => navigate('/app')}>
           <RyokaiLogo size="sm" />
         </div>
 

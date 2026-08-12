@@ -31,7 +31,8 @@ import {
   UserCheck
 } from '@/shared/ui/Icons';
 
-// Helper function to format relative timestamps
+// Helper function to format relative timestamps
+
 import { formatTimeAgo } from '@/shared/ui/OverviewWidgets';
 
 
@@ -115,7 +116,7 @@ function CrewHealthGauge({ healthScore = 94 }) {
 
   return (
     <div className="relative flex flex-col items-center justify-center">
-      <div className="relative w-24 h-24 flex items-center justify-center">
+      <div className="relative w-full max-w-[96px] aspect-square flex items-center justify-center">
         <svg className="w-full h-full transform -rotate-90" viewBox="0 0 96 96">
           <circle
             cx="48"
@@ -548,7 +549,7 @@ export function OverviewTab({
             </div>
 
             {/* Velocity Metrics */}
-            <div className="space-y-3">
+            <div className="space-y-3 min-w-0">
               <div>
                 <div className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">
                   Completed Tasks

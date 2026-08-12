@@ -46,7 +46,7 @@ export function SprintProgressRing({ tasks }) {
 
   return (
     <div className="flex flex-col items-center justify-center py-1">
-      <div className="relative w-24 h-24 flex items-center justify-center">
+      <div className="relative w-full max-w-[96px] aspect-square flex items-center justify-center">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 88 88">
           <circle cx="44" cy="44" r={radius} stroke="var(--bg-subtle)" strokeWidth={strokeW} fill="none" />
           <motion.circle
