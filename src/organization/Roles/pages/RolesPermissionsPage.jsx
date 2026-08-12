@@ -1,12 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
+import { PageShell, PageContent } from '@/shared/ui/PageShell';
 import { useOrgRoles } from '../../features/hooks/useOrganizations';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { usePermissions } from '@/identity';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Icons } from '@/shared/ui/Icons';
-import { ShieldCheck, ShieldAlert, KeyRound, Users2 } from '@/shared/ui/Icons';
+import { ShieldCheck, ShieldAlert, KeyRound, Users2, CheckCircle2 } from '@/shared/ui/Icons';
+import { cn } from '@/shared/lib/cn';
 
 import { useRoleStudio } from '../hooks/useRoleStudio';
 import { CommandChain } from '../components/CommandChain';
@@ -51,19 +52,32 @@ export function RolesPermissionsPage() {
 
   const selected = studio.selectedRole;
   const isDetail = !showDirectory && Boolean(selected);
+  const crit = headerStats(studio).critical;
 
   return (
     <PageShell maxWidth="default">
-      <PageHero
-        eyebrow="Security & Access Control"
-        title={isDetail ? selected?.name : 'Command Chain'}
-        subtitle={isDetail
-          ? 'Pick a module, set its level, then assign resources.'
-          : 'Every role ranked by authority — pick a link in the chain to open its passport.'}
-      >
-        {canManageRoles && !studio.rolesLoading && !isDetail && <PostureStrip posture={posture} />}
-      </PageHero>
-      <PageContent>
+      <div className="flex flex-col gap-4 pb-5 border-b border-[var(--border-subtle)]">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="eyebrow flex items-center gap-2 mb-2.5">
+              <span className="w-[18px] h-px bg-[var(--accent)] opacity-60" />
+              <span className="text-[10px] font-mono font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Security &amp; Access Control</span>
+            </div>
+            <div className="w-[60px] h-[3px] rounded-full bg-[var(--accent)] mb-3.5" />
+            <h1 className="font-mono font-bold text-[24px] sm:text-[26px] leading-tight tracking-tight text-[var(--text-primary)]">
+              {isDetail ? selected?.name : 'COMMAND CHAIN'}
+            </h1>
+            <p className="text-[13px] text-[var(--text-secondary)] mt-1.5 max-w-[620px]">
+              {isDetail
+                ? 'Pick a module, set its level, then assign resources.'
+                : 'Every role ranked by authority — pick a link in the chain to open its passport.'}
+            </p>
+          </div>
+        </div>
+        {canManageRoles && !studio.rolesLoading && <PostureStrip posture={posture} />}
+      </div>
+
+      <PageContent className="pt-5">
         {!canManageRoles ? (
           <EmptyState icon={<Icons.shieldAlert className="w-4 h-4 text-[var(--danger)]" />} iconBg="bg-[var(--danger-soft)]" title="Access Denied" description="You do not have permission to view or manage roles and permissions. Please contact an administrator if you believe this is a mistake." />
         ) : studio.rolesLoading ? (
@@ -74,63 +88,62 @@ export function RolesPermissionsPage() {
         ) : (
           <>
             {isDetail ? (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-5">
                 <RoleHeader
                   role={selected}
                   isAdmin={studio.isAdminRole}
-                  permissionCount={Object.keys(studio.localScopedPerms).length}
                   isDirty={studio.isDirty}
                   changeCount={studio.changeCount}
-                  supervisionNames={studio.supervisionRank.can}
+                  onReview={() => studio.setShowReview(true)}
                   onDiscard={studio.handleDiscardChanges}
                   onSave={studio.handleSaveChanges}
-                  onReview={() => studio.setShowReview(true)}
                   onClone={studio.handleCloneRole}
                   onDelete={studio.handleDeleteRole}
-                  permissionMap={studio.PERMISSION_MAP}
-                  localScopedPerms={studio.localScopedPerms}
                   onBack={() => setShowDirectory(true)}
                 />
-                <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-5 items-start">
                   <RolePassport
                     role={selected}
                     isAdmin={studio.isAdminRole}
-                    stats={{ read: headerStats(studio).read, write: headerStats(studio).write, workflow: headerStats(studio).workflow, critical: headerStats(studio).critical }}
+                    stats={headerStats(studio)}
                     enabledCount={Object.keys(studio.localScopedPerms).length}
                     totalCount={studio.PERMISSION_MAP?.size || 0}
                     supervisionNames={studio.supervisionRank.can}
                   />
-                  <div className="flex flex-col lg:flex-row rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden h-[calc(100vh-320px)] min-h-[540px]">
-                    <ModuleSidebar
-                      modules={studio.filteredModules}
-                      activeModule={studio.activeModuleCode}
-                      onModuleChange={studio.setActiveModuleCode}
-                      localScopedPerms={studio.localScopedPerms}
-                      permissionMap={studio.PERMISSION_MAP}
-                    />
-                    <div className="flex-1 flex min-h-0 min-w-0">
-                      <PermissionBrowser
-                        module={studio.activeModuleData}
-                        groupedPermissions={studio.groupedPermissions}
+                  <div className="flex flex-col gap-4 min-w-0">
+                    <RiskBanner roleName={selected?.name} critical={crit} />
+                    <div className="flex flex-col lg:flex-row rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden h-[calc(100vh-340px)] min-h-[540px]">
+                      <ModuleSidebar
+                        modules={studio.filteredModules}
+                        activeModule={studio.activeModuleCode}
+                        onModuleChange={studio.setActiveModuleCode}
                         localScopedPerms={studio.localScopedPerms}
                         permissionMap={studio.PERMISSION_MAP}
-                        isAdmin={studio.isAdminRole}
-                        searchQuery={studio.permSearchQuery}
-                        onSearchChange={studio.setPermSearchQuery}
-                        riskFilter={studio.riskFilter}
-                        onRiskFilterChange={studio.setRiskFilter}
-                        onToggle={studio.togglePermission}
-                        onSelect={studio.setActivePermission}
-                        activePermission={studio.activePermission}
-                        onEnableAll={studio.handleEnableAll}
-                        onDisableAll={studio.handleDisableAll}
-                        onReset={studio.handleResetModule}
-                        collapsedGroups={studio.collapsedGroups}
-                        onToggleGroupCollapsed={studio.toggleGroupCollapsed}
-                        onScopeChange={studio.handleScopeChange}
-                        onResourceAssignmentChange={studio.handleResourceAssignmentChange}
-                        onSetModuleLevel={studio.handleSetModuleLevel}
                       />
+                      <div className="flex-1 flex min-h-0 min-w-0">
+                        <PermissionBrowser
+                          module={studio.activeModuleData}
+                          groupedPermissions={studio.groupedPermissions}
+                          localScopedPerms={studio.localScopedPerms}
+                          permissionMap={studio.PERMISSION_MAP}
+                          isAdmin={studio.isAdminRole}
+                          searchQuery={studio.permSearchQuery}
+                          onSearchChange={studio.setPermSearchQuery}
+                          riskFilter={studio.riskFilter}
+                          onRiskFilterChange={studio.setRiskFilter}
+                          onToggle={studio.togglePermission}
+                          onSelect={studio.setActivePermission}
+                          activePermission={studio.activePermission}
+                          onEnableAll={studio.handleEnableAll}
+                          onDisableAll={studio.handleDisableAll}
+                          onReset={studio.handleResetModule}
+                          collapsedGroups={studio.collapsedGroups}
+                          onToggleGroupCollapsed={studio.toggleGroupCollapsed}
+                          onScopeChange={studio.handleScopeChange}
+                          onResourceAssignmentChange={studio.handleResourceAssignmentChange}
+                          onSetModuleLevel={studio.handleSetModuleLevel}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -185,9 +198,26 @@ function headerStats(studio) {
   return { read, write, workflow, critical };
 }
 
+function RiskBanner({ roleName, critical }) {
+  if (critical > 0) {
+    return (
+      <div className="flex items-center gap-2.5 rounded-xl border border-[var(--danger)]/35 bg-[var(--danger-soft)] px-4 py-3">
+        <ShieldAlert className="w-4 h-4 text-[var(--danger)] shrink-0" />
+        <span className="text-[12px] font-medium text-[var(--text-primary)]">{roleName} holds {critical} elevated permission{critical === 1 ? '' : 's'} — watch the red levels below.</span>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl border border-[var(--success)]/30 bg-[var(--success-soft)] px-4 py-3">
+      <CheckCircle2 className="w-4 h-4 text-[var(--success)] shrink-0" />
+      <span className="text-[12px] font-medium text-[var(--text-primary)]">No elevated permissions — this role stays within safe limits.</span>
+    </div>
+  );
+}
+
 function PostureStrip({ posture }) {
   return (
-    <div className="flex items-stretch gap-0 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
+    <div className="flex items-stretch gap-0 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
       <PostureMetric icon={<Users2 className="w-3.5 h-3.5" />} label="Links in chain" value={posture.totalRoles} tone="var(--text-primary)" />
       <Divider />
       <PostureMetric icon={<ShieldCheck className="w-3.5 h-3.5" />} label="System roles" value={posture.adminRoles} tone="var(--accent)" />
@@ -201,7 +231,7 @@ function PostureStrip({ posture }) {
 
 function PostureMetric({ icon, label, value, tone, emphasize }) {
   return (
-    <div className="flex-1 flex items-center gap-2.5 px-4 py-2.5 min-w-0 transition-colors hover:bg-[var(--bg-hover)]">
+    <div className={cn('flex-1 flex items-center gap-2.5 px-4 py-2.5 min-w-0 transition-colors hover:bg-[var(--bg-hover)]')}>
       <span className="w-7 h-7 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: emphasize ? 'var(--danger-soft)' : 'var(--bg-subtle)', color: tone }}>
         {icon}
       </span>

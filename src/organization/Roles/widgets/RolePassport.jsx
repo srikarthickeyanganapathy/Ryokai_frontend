@@ -1,6 +1,5 @@
 import React from 'react';
 import { cn } from '@/shared/lib/cn';
-import { ShieldAlert } from '@/shared/ui/Icons';
 import { roleHue, rolePurpose } from '../entities/constants';
 
 export function RolePassport({ role, isAdmin = false, stats = { read: 0, write: 0, workflow: 0, critical: 0 }, enabledCount = 0, totalCount = 0, supervisionNames = [] }) {
@@ -82,13 +81,6 @@ export function RolePassport({ role, isAdmin = false, stats = { read: 0, write: 
           )}
         </div>
       </div>
-
-      {stats.critical > 0 && (
-        <div className="mt-4 flex items-center gap-2 rounded-lg bg-[var(--danger-soft)] px-3 py-2.5">
-          <ShieldAlert className="w-3.5 h-3.5 text-[var(--danger)] shrink-0" />
-          <span className="text-[10.5px] font-medium text-[var(--danger)]">Holds {stats.critical} elevated permission{stats.critical === 1 ? '' : 's'} — watch the red levels.</span>
-        </div>
-      )}
     </aside>
   );
 }
