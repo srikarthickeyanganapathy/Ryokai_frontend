@@ -26,7 +26,7 @@ export function RoleHeader({ role, isAdmin, permissionCount, isDirty, changeCoun
   const riskPct = permissionCount > 0 ? Math.min(100, Math.round((stats.critical / permissionCount) * 100)) : 0;
 
   return (
-    <div className="px-6 py-3.5 bg-[var(--bg-card)]/80 backdrop-blur-md border-b border-[var(--border-subtle)]">
+    <div className="px-6 py-3.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl">
       {onBack && (
         <div className="mb-3 flex items-center gap-1.5">
           <button onClick={onBack} className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
@@ -62,7 +62,6 @@ export function RoleHeader({ role, isAdmin, permissionCount, isDirty, changeCoun
               {stats.critical > 0 && (<><Dot /><span className="text-[var(--danger)] font-semibold flex items-center gap-1"><ShieldAlert className="w-3 h-3" /> {stats.critical} critical</span></>)}
               {supervisionNames.length > 0 && (<><Dot /><span>Manages <strong className="text-[var(--text-secondary)] font-medium">{supervisionNames.join(', ')}</strong></span></>)}
             </div>
-            {/* Risk exposure gauge */}
             <div className="flex items-center gap-2 mt-2 max-w-[260px]">
               <div className="flex-1 h-[5px] rounded-full bg-[var(--bg-subtle)] overflow-hidden">
                 <div className="h-full rounded-full transition-all" style={{ width: `${riskPct}%`, background: riskPct > 50 ? 'var(--danger)' : riskPct > 0 ? 'var(--warning)' : 'var(--success)', opacity: riskPct > 0 ? 1 : 0.35 }} />
