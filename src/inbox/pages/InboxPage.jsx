@@ -14,6 +14,7 @@ import { NotificationPanel } from '@/platform/notifications'
 import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 const typeIcons = {
   TASK_IN_PROGRESS: Icons.tasks,
@@ -105,7 +106,7 @@ export function InboxPage() {
       </div>
 
       <PageContent>
-        <PageState state={notifLoading ? 'loading' : 'ready'} stateProps={{ loadingVariant: 'table' }}>
+        <PageState state={notifLoading ? 'loading' : 'ready'} stateProps={{skeleton: <InboxSkeleton />,  loadingVariant: 'table' }}>
           <div className="flex-1 bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] shadow-sm overflow-hidden flex flex-col min-h-0">
             {isEmpty ? (
               <div className="py-24 flex flex-col items-center justify-center text-center">
@@ -217,4 +218,20 @@ export function InboxPage() {
       />
     </PageShell>
   )
+}
+
+function InboxSkeleton() {
+  return (
+    <div className="flex-1 bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] shadow-sm overflow-hidden flex flex-col min-h-0">
+      <div className="divide-y divide-[var(--border-subtle)]">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="flex items-start gap-3 px-4 py-3.5">
+            <Skeleton className="w-9 h-9 rounded-lg shrink-0" />
+            <div className="flex-1 space-y-1.5"><Skeleton className="h-3.5 w-1/2" /><Skeleton className="h-3 w-2/3" /></div>
+            <Skeleton className="w-4 h-4 rounded" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }

@@ -22,6 +22,7 @@ import { PRIORITY_OPTIONS } from '@/shared/lib/priority'
 import { TaskListSection } from '../components/TaskListSection'
 import { TaskBoardSection } from '../components/TaskBoardSection'
 import { TasksRail } from '../components/TasksRail'
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 /* ============================================================
    pages/TasksPage.jsx — org-wide tasks, triage first.
@@ -190,7 +191,7 @@ export function TasksPage() {
       </Button>
       </PageHero>
 
-      <PageState state={logic.isLoading ? 'loading' : logic.isError ? 'error' : 'ready'} stateProps={{ loadingVariant: 'cards', onRetry: logic.refetch }} moduleId="tasks">
+      <PageState state={logic.isLoading ? 'loading' : logic.isError ? 'error' : 'ready'} stateProps={{skeleton: <TasksPageSkeleton />,  loadingVariant: 'cards', onRetry: logic.refetch }} moduleId="tasks">
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_270px] gap-4 items-start">
       <div className="min-w-0 space-y-4">
         {/* Attention band */}
@@ -401,3 +402,39 @@ export function TasksPage() {
 }
 
 export default TasksPage
+
+function TasksPageSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-3">
+            <Skeleton className="w-9 h-9 rounded-xl shrink-0" />
+            <div className="space-y-1.5"><Skeleton className="h-4 w-12" /><Skeleton className="h-3 w-16" /></div>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_270px] gap-4 items-start">
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-7 w-32 rounded-lg" />
+            <Skeleton className="h-7 w-[135px] rounded-lg" />
+          </div>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-3">
+              <Skeleton className="h-4 w-4 rounded" />
+              <div className="flex-1 space-y-1.5"><Skeleton className="h-3.5 w-2/3" /><Skeleton className="h-3 w-1/3" /></div>
+              <Skeleton className="h-5 w-14 rounded-full" />
+              <Skeleton className="h-5 w-14 rounded-full" />
+            </div>
+          ))}
+        </div>
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4 space-y-3">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-24 w-full rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+}

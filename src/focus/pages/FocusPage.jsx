@@ -12,6 +12,7 @@ import { FocusTimer, useActiveFocus } from '@/focus'
 import { PageShell } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
 import './focus-stage.css'
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 const fmtDur = (m) => `${Math.floor(m / 60)}h ${m % 60}m`
 
@@ -200,7 +201,7 @@ export function FocusPage() {
 
   return (
     <PageShell maxWidth="default">
-      <PageState state={pageState} stateProps={{ loadingVariant: 'dashboard' }}>
+      <PageState state={pageState} stateProps={{skeleton: <FocusSkeleton />,  loadingVariant: 'dashboard' }}>
         <div
           ref={zenContainerRef}
           className={cn(
@@ -371,4 +372,38 @@ export function FocusPage() {
       </PageState>
     </PageShell>
   )
+}
+
+function FocusSkeleton() {
+  return (
+    <div className="fz-stage relative w-full min-w-0 overflow-hidden py-2">
+      <div className="fz-hud">
+        <div className="fz-hud-brand font-mono">
+          <span className="fz-hud-divider" />
+          <Skeleton className="h-3 w-24 rounded" />
+        </div>
+        <div className="fz-hud-actions">
+          <Skeleton className="h-8 w-28 rounded-full" />
+          <Skeleton className="h-9 w-9 rounded-full" />
+        </div>
+      </div>
+      <div className="fz-center">
+        <div className="fz-plaque items-center text-center">
+          <Skeleton className="h-4 w-28 rounded-full mx-auto" />
+          <Skeleton className="h-6 w-64 rounded-lg mx-auto mt-2" />
+          <Skeleton className="h-3 w-40 rounded mx-auto mt-2" />
+          <Skeleton className="w-36 h-36 rounded-full mx-auto mt-6" />
+        </div>
+      </div>
+      <aside className="fz-rail">
+        <div className="fz-rail-head"><Skeleton className="h-4 w-28 rounded" /></div>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-2 px-3 py-2">
+            <Skeleton className="w-6 h-6 rounded-md shrink-0" />
+            <div className="flex-1 space-y-1"><Skeleton className="h-3 w-3/4" /><Skeleton className="h-2.5 w-1/2" /></div>
+          </div>
+        ))}
+      </aside>
+    </div>
+  );
 }

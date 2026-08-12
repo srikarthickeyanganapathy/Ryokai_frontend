@@ -12,7 +12,7 @@ import { PageShell } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { useTeam, useTeamMessages, useSendTeamMessage, useDeleteTeamMessage, useOrgTeams, useOrgMembers } from '../../features/hooks/useOrganizations'
-import { useTaskList, useCreateTask, useReassignTask, useTaskStatusChange, TaskForm, TaskPanel } from '@/task'
+import { useTaskList, useCreateTask, useReassignTask, useTaskStatusChange, TaskForm } from '@/task'
 import { useProjects, useCreateProject, useUpdateProject, ProjectForm } from '@/project'
 import { useAuth, usePermissions } from '@/identity'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog'
@@ -27,6 +27,7 @@ import { InsightsTab } from '../components/InsightsTab'
 import { cn } from '@/shared/lib/cn'
 import { toast } from 'sonner'
 import { normalizePriority } from '@/shared/lib/priority'
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 const INACTIVE_STATUSES = new Set(['completed', 'done', 'archived', 'cancelled', 'closed'])
 const isActiveStatus = (status) => !INACTIVE_STATUSES.has((status || '').toLowerCase())
@@ -57,7 +58,7 @@ export function TeamDetailPage() {
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false)
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false)
   const [isManageMembersOpen, setIsManageMembersOpen] = useState(false)
-  const [selectedTask, setSelectedTask] = useState(null)
+
 
   const { data: team, isLoading: teamLoading, isError: teamError } = useTeam(teamId)
   const { data: messages = [], isLoading: messagesLoading } = useTeamMessages(teamId)
@@ -283,7 +284,7 @@ export function TeamDetailPage() {
     <PageShell maxWidth="full" className="!px-0 !py-0">
       <PageState
         state={pageState}
-        stateProps={{
+        stateProps={{skeleton: <TeamDetailSkeleton />, 
           loadingVariant: 'cards',
           onRetry: () => navigate(0),
           error: {
@@ -465,7 +466,7 @@ export function TeamDetailPage() {
                       canEditTask={canEditTask}
                       canDeleteTask={canDeleteTask}
                       canReviewTask={canReviewTask}
-                      onOpenTask={setSelectedTask}
+                      onOpenTask={(task) => navigate(`/app/tasks/${task.id || task.taskId}`)}
                       isReadOnly={isReadOnly}
                       assigningTaskId={assigningTaskId}
                       setAssigningTaskId={setAssigningTaskId}
@@ -569,7 +570,6 @@ export function TeamDetailPage() {
           orgMembers={orgMembers}
         />
         {confirmDialog}
-      <TaskPanel task={selectedTask} isOpen={!!selectedTask} onClose={() => setSelectedTask(null)} />
       </PageState>
 
       {/* Mobile FAB — new task (demo parity) */}
@@ -596,3 +596,20 @@ function hashHue(str = '') {
 }
 
 export default TeamDetailPage
+
+function TeamDetailSkeleton() {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <Skeleton className="w-8 h-8 rounded-lg" />
+        <Skeleton className="w-10 h-10 rounded-xl" />
+        <div className="space-y-1.5 flex-1 min-w-0"><Skeleton className="h-4 w-44" /><Skeleton className="h-3 w-56" /></div>
+        <Skeleton className="h-8 w-24 rounded-lg" />
+      </div>
+      <div className="flex items-center gap-2">
+        {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-7 w-20 rounded-lg" />)}
+      </div>
+      <Skeleton className="h-[340px] w-full rounded-2xl" />
+    </div>
+  );
+}

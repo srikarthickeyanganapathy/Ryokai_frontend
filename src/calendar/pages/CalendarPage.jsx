@@ -70,7 +70,7 @@ export function CalendarPage() {
   return (
     <PageShell maxWidth="default" workspaceMode={workspaceModeLabel}>
       <PageContent className="pt-6">
-        <PageState state={pageState} stateProps={{ onRetry: handleRetry, loadingVariant: 'dashboard' }}>
+        <PageState state={pageState} stateProps={{ onRetry: handleRetry, loadingVariant: 'calendar' }}>
         <div className="flex-1 min-h-0">
           <CalendarView
             tasks={tasks}

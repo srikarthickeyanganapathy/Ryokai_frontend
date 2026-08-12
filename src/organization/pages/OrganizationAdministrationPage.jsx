@@ -15,6 +15,7 @@ import { useGoals } from '@/organization/goals/features/hooks/useGoals';
 import { OrganizationOverview } from '../components/Administration/OrganizationOverview';
 import { OrganizationAdministrationHub } from '../components/Administration/OrganizationAdministrationHub';
 import { DangerZone } from '../components/Administration/DangerZone';
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 export function OrganizationAdministrationPage() {
   const { orgId } = useParams();
@@ -59,7 +60,7 @@ export function OrganizationAdministrationPage() {
     <PageShell maxWidth="narrow">
       <PageStateContainer
         state={pageState}
-        loadingConfig={{ variant: 'default' }}
+        loadingConfig={{ variant: 'default', skeleton: <AdminDetailSkeleton /> }}
         errorConfig={{
           title: 'Failed to load organization',
           description: error?.message || 'An unexpected error occurred.',
@@ -96,5 +97,20 @@ export function OrganizationAdministrationPage() {
         </ConfigurationLayout>
       </PageStateContainer>
     </PageShell>
+  );
+}
+function AdminDetailSkeleton() {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <Skeleton className="w-10 h-10 rounded-xl" />
+        <div className="space-y-1.5 flex-1 min-w-0"><Skeleton className="h-4 w-56" /><Skeleton className="h-3 w-72" /></div>
+        <Skeleton className="h-8 w-24 rounded-lg" />
+      </div>
+      <div className="flex items-center gap-2">
+        {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-7 w-20 rounded-lg" />)}
+      </div>
+      <Skeleton className="h-[360px] w-full rounded-2xl" />
+    </div>
   );
 }

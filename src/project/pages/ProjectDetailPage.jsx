@@ -16,7 +16,7 @@ import { useCrewMembers, useCrews } from '@/crew'
 import { ProjectForm } from '../components/ProjectForm'
 import { CrewProjectShareModal } from '../components/CrewProjectShareModal'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
-import { useTaskList, useCreateTask, useReassignTask, useTaskStatusChange, TaskForm, TaskPanel } from '@/task'
+import { useTaskList, useCreateTask, useReassignTask, useTaskStatusChange, TaskForm } from '@/task'
 import { toast } from 'sonner'
 import { SaveToggle } from '@/saved/features/components/SaveToggle'
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
@@ -29,6 +29,7 @@ import { ProjectTabs } from '../components/ProjectTabs'
 import { OverviewTab } from '../components/OverviewTab'
 import { BoardTab } from '../components/BoardTab'
 import { ActivityTab } from '../components/ActivityTab'
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 /* ============================================================
    pages/ProjectDetailPage.jsx — project HQ (approved demo).
@@ -76,7 +77,7 @@ export function ProjectDetailPage() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false)
   const [assigningTaskId, setAssigningTaskId] = useState(null)
-  const [selectedTaskId, setSelectedTaskId] = useState(null)
+
 
   const { data: project, isLoading: projectLoading, isError: projectError } = useProject(Number(projectId))
   const { data: rawActivities } = useProjectActivities(Number(projectId))
@@ -235,7 +236,7 @@ export function ProjectDetailPage() {
         </div>
 
         <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-12">
-          <PageState state={pageState} stateProps={{ loadingVariant: 'dashboard', title: 'Project not found', description: "The project you're looking for doesn't exist or has been deleted." }}>
+          <PageState state={pageState} stateProps={{skeleton: <ProjectDetailSkeleton />,  loadingVariant: 'dashboard', title: 'Project not found', description: "The project you're looking for doesn't exist or has been deleted." }}>
         {project && (
           <>
             {/* Attention tiles (approved demo) */}
@@ -384,3 +385,26 @@ export function ProjectDetailPage() {
 }
 
 export default ProjectDetailPage
+
+function ProjectDetailSkeleton() {
+  return (
+    <div className="flex flex-col h-full">
+      <div className="bg-[var(--bg-base)] border-b border-[var(--border-subtle)]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3 py-3.5 flex-wrap">
+            <Skeleton className="w-8 h-8 rounded-lg" />
+            <Skeleton className="w-9 h-9 rounded-xl" />
+            <div className="min-w-0 flex-1 space-y-1.5"><Skeleton className="h-4 w-48" /><Skeleton className="h-3 w-72" /></div>
+            <div className="flex items-center gap-2"><Skeleton className="h-8 w-20 rounded-lg" /><Skeleton className="h-8 w-20 rounded-lg" /></div>
+          </div>
+          <div className="flex items-center gap-2 pb-2.5">
+            {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-7 w-20 rounded-lg" />)}
+          </div>
+        </div>
+      </div>
+      <div className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-5">
+        <Skeleton className="h-[360px] w-full rounded-2xl" />
+      </div>
+    </div>
+  );
+}

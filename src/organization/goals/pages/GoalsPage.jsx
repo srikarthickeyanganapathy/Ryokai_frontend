@@ -23,6 +23,7 @@ import {
   sortGoals,
 } from '@/organization/goals/features/utils/goalCalculations';
 import { Text } from '@/shared/ui/Typography';
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 export function GoalsPage() {
   const { workspaceMode } = useWorkspace();
@@ -149,7 +150,7 @@ export function GoalsPage() {
         <PageState
           state={pageState}
           moduleId="goals"
-          stateProps={{ loadingVariant: 'cards', onAction: canManageGoals ? openNew : undefined }}
+          stateProps={{skeleton: <GoalsSkeleton />,  loadingVariant: 'cards', onAction: canManageGoals ? openNew : undefined }}
         >
           {goals.length > 0 && (
             <>
@@ -205,5 +206,34 @@ export function GoalsPage() {
         isPending={createGoal.isPending || updateGoal.isPending}
       />
     </PageShell>
+  );
+}
+function GoalsSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}
+      </div>
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-8 w-32 rounded-lg" />
+        <Skeleton className="h-8 w-24 rounded-lg" />
+        <div className="flex-1" />
+        <Skeleton className="h-8 w-28 rounded-lg" />
+      </div>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-1/3" />
+            <Skeleton className="h-5 w-16 rounded-full" />
+          </div>
+          <Skeleton className="h-2 w-full rounded-full" />
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            {Array.from({ length: 2 }).map((_, j) => (
+              <div key={j} className="space-y-1.5"><Skeleton className="h-3 w-3/4" /><Skeleton className="h-1.5 w-full rounded-full" /></div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

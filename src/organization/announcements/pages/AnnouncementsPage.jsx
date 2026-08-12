@@ -15,6 +15,7 @@ import { AnnouncementDrawer } from '../components/AnnouncementDrawer';
 import { CreateAnnouncementModal } from '../components/CreateAnnouncementModal';
 import { PageShell, PageHero, PageToolbar, PageContent } from '@/shared/ui/PageShell';
 import { PageState } from '@/shared/ui/PageState';
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 export function AnnouncementsPage() {
   const { activeOrganization } = useWorkspace();
@@ -123,7 +124,7 @@ export function AnnouncementsPage() {
         <PageState
           state={pageState}
           moduleId="announcements"
-          stateProps={{ loadingVariant: 'cards', onAction: canManageAnnouncements ? () => setIsCreateOpen(true) : undefined }}
+          stateProps={{skeleton: <AnnouncementsSkeleton />,  loadingVariant: 'cards', onAction: canManageAnnouncements ? () => setIsCreateOpen(true) : undefined }}
         >
           {filteredAnnouncements.length === 0 && !isLoading && announcements.length > 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -164,5 +165,26 @@ export function AnnouncementsPage() {
       />
       {confirmDialog}
     </PageShell>
+  );
+}
+function AnnouncementsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-5 w-20 rounded-full" />
+            <Skeleton className="w-5 h-5 rounded" />
+          </div>
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-2/3" />
+          <div className="flex items-center justify-between pt-2">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-6 w-16 rounded-lg" />
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

@@ -446,7 +446,7 @@ export function CrewsPage() {
       </div>
     ) : (
       <PageContent>
-        <PageState state={pageState} moduleId="crews" stateProps={{ loadingVariant: 'cards' }}>
+        <PageState state={pageState} moduleId="crews" stateProps={{skeleton: (<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">{Array.from({ length: 6 }).map((_, i) => <CrewCardSkeleton key={i} />)}</div>),  loadingVariant: 'cards' }}>
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">
               {Array.from({ length: 6 }).map((_, i) => <CrewCardSkeleton key={i} />)}

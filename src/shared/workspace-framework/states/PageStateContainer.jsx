@@ -13,7 +13,8 @@ import { FrameworkEmptyState } from './FrameworkEmptyState'
  * Lifecycle: Loading → Ready → Refreshing → Empty | Error | Offline | Unauthorized
  *
  * @param {'loading'|'ready'|'empty'|'error'|'offline'|'unauthorized'} state
- * @param {Object} [loadingConfig] — Skeleton shape config { variant, rows, columns }
+ * @param {Object} [loadingConfig] — Skeleton config. Pass `skeleton` (React node) for a
+ *                  structure-matched skeleton, or { variant, rows, columns } for generic.
  * @param {Object} [emptyConfig] — Zero-state config { icon, title, description, actionLabel, onAction }
  * @param {Object} [errorConfig] — Error config { title, description, onRetry }
  * @param {React.ReactNode} children — Rendered when state === 'ready'
@@ -28,6 +29,10 @@ export function PageStateContainer({
 }) {
   switch (state) {
     case 'loading':
+      // Custom structure-matched skeleton wins over the generic variant
+      if (loadingConfig?.skeleton) {
+        return <>{loadingConfig.skeleton}</>
+      }
       return (
         <FrameworkLoadingState
           variant={loadingConfig?.variant || 'default'}

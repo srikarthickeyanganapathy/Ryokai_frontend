@@ -8,6 +8,7 @@ import {
   FolderKanban, Plus, RefreshCw
 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 /**
  * PageState — Unified page lifecycle renderer.
@@ -23,7 +24,9 @@ import { Button } from '@/shared/ui/Button';
  *   </PageShell>
  *
  * Supported states:
- *   loading      — Skeleton loader with configurable variant
+ *   loading      — Skeleton loader; pass `stateProps.skeleton` for a
+ *                  structure-matched skeleton, or pick `loadingVariant`
+ *                  from table | cards | dashboard | list | insight | calendar
  *   empty        — Module-aware empty state with CTA
  *   error        — Error with retry
  *   offline      — Offline indicator
@@ -97,6 +100,10 @@ export function PageState({
 
   // ── LOADING ──
   if (state === 'loading') {
+    // Custom structure-matched skeleton wins over generic variants
+    if (stateProps.skeleton) {
+      return <>{stateProps.skeleton}</>;
+    }
     return <PageStateSkeleton variant={stateProps.loadingVariant || 'table'} className={className} />;
   }
 
@@ -213,6 +220,70 @@ function PageStateSkeleton({ variant = 'table', className }) {
           ))}
         </div>
         <div className="h-40 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)] animate-pulse" />
+      </div>
+    );
+  }
+
+  if (variant === 'list') {
+    return (
+      <div className={cn('space-y-3', className)}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4">
+            <Skeleton className="h-10 w-10 rounded-xl shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-4 w-16 rounded-full" />
+              </div>
+              <Skeleton className="h-3 w-2/3" />
+            </div>
+            <Skeleton className="h-8 w-20 rounded-lg shrink-0" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (variant === 'insight') {
+    return (
+      <div className={cn('space-y-6', className)}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-6 space-y-3">
+              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-20 w-full rounded-xl" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="lg:col-span-1 grid grid-cols-2 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-24 rounded-xl" />
+            ))}
+          </div>
+          <div className="lg:col-span-2 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-6 space-y-3">
+            <Skeleton className="h-3 w-32" />
+            <Skeleton className="h-44 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === 'calendar') {
+    return (
+      <div className={cn('flex flex-col gap-2 h-full min-h-[520px]', className)}>
+        <div className="grid grid-cols-7 gap-2">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <Skeleton key={i} className="h-5 w-full" />
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-2 flex-1 auto-rows-fr">
+          {Array.from({ length: 35 }).map((_, i) => (
+            <Skeleton key={i} className="min-h-[72px] w-full rounded-md" />
+          ))}
+        </div>
       </div>
     );
   }

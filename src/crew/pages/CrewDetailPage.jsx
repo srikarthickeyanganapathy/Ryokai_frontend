@@ -25,6 +25,7 @@ import { CrewStatusPill } from '../components/CrewStatusPill';
 import { cn } from '@/shared/lib/cn';
 import { SPRINGS } from '@/shared/lib/uxTokens';
 import { toast } from 'sonner';
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 const CREW_TABS = ['overview', 'tasks', 'channels', 'projects', 'whiteboards', 'members']
 
@@ -289,7 +290,7 @@ export function CrewDetailPage() {
     <PageShell maxWidth="full" className="!px-0 !py-0">
       <PageState
         state={pageState}
-        stateProps={{
+        stateProps={{skeleton: <CrewDetailSkeleton />, 
           loadingVariant: 'cards',
           onRetry: () => navigate(0),
           empty: {
@@ -502,5 +503,28 @@ export function CrewDetailPage() {
       {/* Quick Jump FAB */}
       <QuickJumpFab visible={showFab} />
     </PageShell>
+  );
+}
+
+function CrewDetailSkeleton() {
+  return (
+    <div className="flex flex-col h-full">
+      <div className="border-b border-[var(--border-subtle)]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3 py-3.5 flex-wrap">
+            <Skeleton className="w-8 h-8 rounded-lg" />
+            <Skeleton className="w-10 h-10 rounded-lg" />
+            <div className="space-y-1.5 flex-1 min-w-0"><Skeleton className="h-4 w-48" /><Skeleton className="h-3 w-64" /></div>
+            <Skeleton className="h-8 w-24 rounded-lg" />
+          </div>
+          <div className="flex items-center gap-2 pb-2.5">
+            {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-7 w-20 rounded-lg" />)}
+          </div>
+        </div>
+      </div>
+      <div className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-5">
+        <Skeleton className="h-[340px] w-full rounded-2xl" />
+      </div>
+    </div>
   );
 }

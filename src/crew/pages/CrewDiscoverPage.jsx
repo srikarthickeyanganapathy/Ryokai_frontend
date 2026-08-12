@@ -17,6 +17,7 @@ import {
   ArrowUpRight, Lock, Globe, Link2, Activity, Eye, RefreshCw, WifiOff, Layers, Rocket, Filter, X, Target
 } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 const categories = ['All Missions', 'Engineering', 'Design', 'Product', 'Marketing', 'Operations', 'Growth', 'Research'];
 
@@ -258,7 +259,7 @@ export function CrewDiscoverPage() {
       </div>
 
       <PageContent>
-        <PageState state={pageState} moduleId="discover" stateProps={{ loadingVariant: 'cards' }}>
+        <PageState state={pageState} moduleId="discover" stateProps={{skeleton: <CrewDiscoverSkeleton />,  loadingVariant: 'cards' }}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               {isError ? (
@@ -316,3 +317,32 @@ export function CrewDiscoverPage() {
   );
 }
 export default CrewDiscoverPage;
+
+function CrewDiscoverSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-4 py-3">
+            <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
+            <div className="space-y-1.5"><Skeleton className="h-4 w-14" /><Skeleton className="h-3 w-20" /></div>
+          </div>
+        ))}
+      </div>
+      <Skeleton className="h-40 w-full rounded-2xl" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5 space-y-3">
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-10 h-10 rounded-xl shrink-0" />
+              <div className="flex-1 space-y-1.5"><Skeleton className="h-4 w-28" /><Skeleton className="h-3 w-20" /></div>
+            </div>
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-2/3" />
+            <Skeleton className="h-7 w-24 rounded-lg" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

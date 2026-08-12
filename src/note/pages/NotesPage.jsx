@@ -724,7 +724,7 @@ export function NotesPage() {
       </PageToolbar>
 
       <PageContent>
-        <PageState state={pageState} stateProps={{ loadingVariant: 'cards', onAction: openNew, actionLabel: 'New Note' }}>
+        <PageState state={pageState} stateProps={{skeleton: <NoteSkeleton />,  loadingVariant: 'cards', onAction: openNew, actionLabel: 'New Note' }}>
           {isLoading ? (
             <NoteSkeleton />
           ) : filteredNotes.length === 0 ? (

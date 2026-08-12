@@ -15,6 +15,7 @@ import {
 import { SearchPlugin } from '@/shared/workspace-framework';
 import { PageShell, PageHero, PageContent, PageToolbar } from '@/shared/ui/PageShell';
 import { PageState } from '@/shared/ui/PageState';
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 export function LeaveRequestsPage() {
   const { activeOrganization } = useWorkspace();
@@ -120,7 +121,7 @@ function RequestsInboxContent() {
       <PageContent>
         <PageState
           state={pageState}
-          stateProps={{
+          stateProps={{skeleton: <LeaveRequestsSkeleton />, 
             loading: { variant: 'cards' },
             empty: {
               icon: Inbox,
@@ -318,5 +319,23 @@ function RequestLeaveModal({ isOpen, onClose }) {
         </form>
       </ModalContent>
     </Modal>
+  );
+}
+
+function LeaveRequestsSkeleton() {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4">
+          <Skeleton className="w-10 h-10 rounded-xl shrink-0" />
+          <div className="flex-1 space-y-1.5 min-w-0">
+            <Skeleton className="h-4 w-44" />
+            <Skeleton className="h-3 w-64" />
+          </div>
+          <Skeleton className="h-6 w-20 rounded-full shrink-0" />
+          <Skeleton className="h-8 w-20 rounded-lg shrink-0" />
+        </div>
+      ))}
+    </div>
   );
 }

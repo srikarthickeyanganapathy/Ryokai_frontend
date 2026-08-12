@@ -9,6 +9,7 @@ import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
 import { InteractiveCard } from '@/shared/ui/InteractiveCard'
 import { cn } from '@/shared/lib/cn'
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 const typeConfig = {
   PROJECT: { label: 'Project', accent: 'text-[var(--accent)]', bg: 'bg-[var(--accent-soft)]' },
@@ -49,7 +50,7 @@ export function SavedPage() {
         <PageState
           state={pageState}
           moduleId="saved"
-          stateProps={{ loadingVariant: 'cards' }}
+          stateProps={{skeleton: <SavedSkeleton />,  loadingVariant: 'cards' }}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {items.map((item, i) => {
@@ -108,4 +109,20 @@ export function SavedPage() {
       </PageContent>
     </PageShell>
   )
+}
+
+function SavedSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="flex items-center justify-between p-4 gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)]">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <Skeleton className="w-9 h-9 rounded-xl shrink-0" />
+            <div className="flex-1 space-y-1.5"><Skeleton className="h-3.5 w-2/3" /><Skeleton className="h-3 w-1/2" /></div>
+          </div>
+          <Skeleton className="w-6 h-6 rounded-lg" />
+        </div>
+      ))}
+    </div>
+  );
 }

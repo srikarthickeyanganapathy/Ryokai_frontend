@@ -24,6 +24,7 @@ import { ActivitySidebar } from '../components/ActivitySidebar'
 import { ComparePanel } from '../components/ComparePanel'
 import { QuickCreateModal } from '../components/QuickCreateModal'
 import { detectTeamCategory, hashHue } from '../components/utils'
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 /* ══════════════════════════════════════════════════════
  * MAIN COMPONENT — TeamsPage
@@ -266,7 +267,7 @@ export const TeamsPage = () => {
 
       {/* ── Page Content ── */}
       <PageContent>
-        <PageState state={pageState} moduleId="teams" stateProps={{ loadingVariant: 'cards', onAction: canCreateTeam ? () => setQuickCreateOpen(true) : undefined }}>
+        <PageState state={pageState} moduleId="teams" stateProps={{skeleton: (<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] items-start">{<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">{Array.from({ length: 6 }).map((_, i) => <TeamTileSkeleton key={i} />)}</div>}<Skeleton className="h-96 rounded-2xl" /></div>),  loadingVariant: 'cards', onAction: canCreateTeam ? () => setQuickCreateOpen(true) : undefined }}>
           {/* ── Loading State ── */}
           {pageState === 'loading' && (
             <motion.div

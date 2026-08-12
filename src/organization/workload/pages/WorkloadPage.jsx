@@ -32,6 +32,7 @@ import { HeatmapMatrix } from '../components/HeatmapMatrix';
 import { WorkloadFilters } from '../components/WorkloadFilters';
 import { MemberUtilizationGrid } from '../components/MemberUtilizationGrid';
 import { WorkloadMatrixTable } from '../components/WorkloadMatrixTable';
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 export function WorkloadPage() {
   const { activeOrganization } = useWorkspace();
@@ -148,7 +149,7 @@ export function WorkloadPage() {
       <PageContent>
         <PageState
           state={pageState}
-          stateProps={{
+          stateProps={{skeleton: <WorkloadSkeleton />, 
             loadingVariant: 'dashboard',
             onAction: () => refetch(),
             actionLabel: 'Refresh Workload',
@@ -203,5 +204,21 @@ export function WorkloadPage() {
         </PageState>
       </PageContent>
     </PageShell>
+  );
+}
+
+function WorkloadSkeleton() {
+  return (
+    <div className="flex flex-col gap-6">
+      <Skeleton className="h-24 w-full rounded-2xl" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Skeleton className="h-52 rounded-2xl" />
+        <div className="md:col-span-2 space-y-3"><Skeleton className="h-52 rounded-2xl" /></div>
+      </div>
+      <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-hidden">
+        <div className="h-10 bg-[var(--bg-subtle)]" />
+        {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-none border-b border-[var(--border-subtle)]" />)}
+      </div>
+    </div>
   );
 }
