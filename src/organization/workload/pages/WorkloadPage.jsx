@@ -162,7 +162,7 @@ export function WorkloadPage() {
             <OrgSnapshotBanner stats={stats} />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <TeamHealthCard score={healthScore} />
+              <TeamHealthCard score={healthScore} stats={stats} />
               <div className="md:col-span-2">
                 <AIInsightsPanel stats={stats} />
               </div>

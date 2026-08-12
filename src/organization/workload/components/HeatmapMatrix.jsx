@@ -16,8 +16,10 @@ export function HeatmapMatrix({ rows, threshold, history }) {
     return 'bg-red-500/60';
   };
 
+  const dowLabel = (d) => ['S', 'M', 'T', 'W', 'T', 'F', 'S'][d.getDay()];
+
   return (
-    <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-6 overflow-x-auto">
+    <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-6 overflow-x-auto shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <Heading level={3} className="text-[14px] font-semibold tracking-tight">
           14-Day Capacity Heatmap
@@ -35,16 +37,21 @@ export function HeatmapMatrix({ rows, threshold, history }) {
         </div>
       </div>
 
-      <div className="min-w-[600px]">
+      <div className="min-w-[640px]">
         <div className="grid grid-cols-[200px_1fr] gap-2 mb-2">
           <div></div>
           <div className="grid grid-cols-14 gap-1">
             {days.map((d, i) => (
               <div
                 key={i}
-                className="text-[9px] text-[var(--text-muted)] text-center font-mono"
+                className="text-center font-mono leading-tight"
               >
-                {d.getDate()}
+                <div className="text-[8px] text-[var(--text-muted)] opacity-70">
+                  {dowLabel(d)}
+                </div>
+                <div className="text-[9px] text-[var(--text-muted)]">
+                  {d.getDate()}
+                </div>
               </div>
             ))}
           </div>
@@ -60,12 +67,22 @@ export function HeatmapMatrix({ rows, threshold, history }) {
                 className="grid grid-cols-[200px_1fr] gap-2 items-center hover:bg-[var(--bg-subtle)]/50 p-1 rounded-md transition-colors"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center font-bold text-[10px] shrink-0 border border-[var(--accent-border)]">
+                  <div
+                    className={cn(
+                      'w-6 h-6 rounded-[7px] flex items-center justify-center font-bold text-[10px] shrink-0',
+                      (row.totalActiveCount ?? 0) > threshold
+                        ? 'bg-[var(--danger-soft)] text-[var(--danger)]'
+                        : 'bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)]',
+                    )}
+                  >
                     {(row.user?.username || '?').charAt(0).toUpperCase()}
                   </div>
-                  <Text className="font-medium text-[12px] truncate">
+                  <Text className="font-medium text-[12px] truncate text-[var(--text-primary)]">
                     {row.user?.fullName || row.user?.username || 'Unknown'}
                   </Text>
+                  <span className="ml-auto font-mono text-[9px] text-[var(--text-muted)] shrink-0">
+                    now <b className="text-[var(--text-secondary)]">{row.totalActiveCount ?? 0}</b>
+                  </span>
                 </div>
                 <div className="grid grid-cols-14 gap-1">
                   {userHistory.map((val, i) => {
@@ -76,7 +93,7 @@ export function HeatmapMatrix({ rows, threshold, history }) {
                       <div
                         key={i}
                         className={cn(
-                          'h-6 rounded-sm transition-all hover:scale-110 hover:ring-1 hover:ring-[var(--accent)] cursor-pointer',
+                          'h-6 rounded-[5px] transition-all hover:scale-110 hover:ring-1 hover:ring-[var(--accent)] cursor-pointer',
                           getCellColor(val),
                         )}
                         title={tooltip}

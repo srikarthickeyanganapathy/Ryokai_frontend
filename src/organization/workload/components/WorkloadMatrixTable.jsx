@@ -21,11 +21,18 @@ export function WorkloadMatrixTable({ rows, threshold, history, isLoading }) {
             header: 'Team Member',
             cell: ({ row }) => {
               const user = row.original.user || {};
-              const name =
-                user.fullName || user.username || 'Unknown Member';
+              const name = user.fullName || user.username || 'Unknown Member';
+              const isOver = (row.original.totalActiveCount ?? 0) > threshold;
               return (
                 <div className="flex items-center gap-3 py-1">
-                  <div className="w-8 h-8 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center font-bold text-xs shrink-0 border border-[var(--accent-border)]">
+                  <div
+                    className={cn(
+                      'w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0',
+                      isOver
+                        ? 'bg-[var(--danger-soft)] text-[var(--danger)]'
+                        : 'bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)]',
+                    )}
+                  >
                     {name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
@@ -46,7 +53,7 @@ export function WorkloadMatrixTable({ rows, threshold, history, isLoading }) {
             accessorKey: 'todoCount',
             header: () => <div className="text-center">To Do</div>,
             cell: ({ getValue }) => (
-              <div className="text-center font-mono text-xs">
+              <div className="text-center font-mono text-xs text-[var(--text-secondary)]">
                 {getValue() ?? 0}
               </div>
             ),
@@ -57,7 +64,7 @@ export function WorkloadMatrixTable({ rows, threshold, history, isLoading }) {
               <div className="text-center">In Progress</div>
             ),
             cell: ({ getValue }) => (
-              <div className="text-center font-mono text-xs text-[var(--accent)]">
+              <div className="text-center font-mono text-xs font-bold text-[var(--accent)]">
                 {getValue() ?? 0}
               </div>
             ),
@@ -66,7 +73,7 @@ export function WorkloadMatrixTable({ rows, threshold, history, isLoading }) {
             accessorKey: 'submittedCount',
             header: () => <div className="text-center">Submitted</div>,
             cell: ({ getValue }) => (
-              <div className="text-center font-mono text-xs">
+              <div className="text-center font-mono text-xs text-[var(--text-secondary)]">
                 {getValue() ?? 0}
               </div>
             ),
@@ -75,7 +82,7 @@ export function WorkloadMatrixTable({ rows, threshold, history, isLoading }) {
             accessorKey: 'approvedCount',
             header: () => <div className="text-center">Approved</div>,
             cell: ({ getValue }) => (
-              <div className="text-center font-mono text-xs text-[var(--success)]">
+              <div className="text-center font-mono text-xs font-bold text-[var(--success)]">
                 {getValue() ?? 0}
               </div>
             ),
@@ -86,20 +93,28 @@ export function WorkloadMatrixTable({ rows, threshold, history, isLoading }) {
             cell: ({ row }) => {
               const count = row.original.totalActiveCount ?? 0;
               const isOver = count > threshold;
+              const pct = Math.min(100, Math.round((count / threshold) * 100));
               return (
-                <div className="flex items-center justify-center gap-1.5">
+                <div className="flex items-center justify-center gap-2">
                   <span
                     className={cn(
                       'font-bold text-sm font-mono',
-                      isOver
-                        ? 'text-[var(--danger)]'
-                        : 'text-[var(--text-primary)]',
+                      isOver ? 'text-[var(--danger)]' : 'text-[var(--text-primary)]',
                     )}
                   >
                     {count}
                   </span>
                   <span className="text-[10px] text-[var(--text-muted)] font-mono">
                     / {threshold}
+                  </span>
+                  <span className="w-12 h-1.5 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-full overflow-hidden">
+                    <span
+                      className={cn(
+                        'block h-full rounded-full',
+                        isOver ? 'bg-[var(--danger)]' : pct > 75 ? 'bg-[var(--warning)]' : 'bg-[var(--accent)]',
+                      )}
+                      style={{ width: `${pct}%` }}
+                    />
                   </span>
                 </div>
               );
