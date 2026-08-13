@@ -29,6 +29,7 @@ const ForgotPasswordPage = Loadable(lazy(() => import("@/identity/pages/ForgotPa
 const ResetPasswordPage = Loadable(lazy(() => import("@/identity/pages/ResetPasswordPage").then(m => ({ default: m.ResetPasswordPage }))));
 const VerifyEmailPage = Loadable(lazy(() => import("@/identity/pages/VerifyEmailPage").then(m => ({ default: m.VerifyEmailPage }))));
 const SessionExpiredPage = Loadable(lazy(() => import("@/identity/pages/SessionExpiredPage").then(m => ({ default: m.SessionExpiredPage }))));
+const OAuthCallbackPage = Loadable(lazy(() => import("@/identity/pages/OAuthCallbackPage").then(m => ({ default: m.OAuthCallbackPage }))));
 const DashboardPage = Loadable(lazy(() => import("@/dashboard/pages/DashboardPage").then(m => ({ default: m.DashboardPage }))));
 const TasksPage = Loadable(lazy(() => import("@/task/pages/TasksPage").then(m => ({ default: m.TasksPage }))));
 const TaskDetailPage = Loadable(lazy(() => import("@/task/pages/TaskDetailPage").then(m => ({ default: m.default }))));
@@ -80,6 +81,9 @@ export default function App() {
             <Routes>
               {/* Core Resolver */}
               <Route path="/" element={<RouteResolver />} />
+
+              {/* OAuth redirect target — outside PublicRoute so it runs for both anonymous and authenticated sessions */}
+              <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
 
               {/* Public Auth Routes */}
               <Route element={<PublicRoute />}>

@@ -69,5 +69,14 @@ export const authAPI = {
   resetPassword: async (token, newPassword) => {
     const { data } = await api.post('/auth/reset-password', { token, newPassword })
     return data
-  }
+  },
+
+  /** OAuth: which providers have credentials configured on the backend. */
+  getOAuthConfig: async () => {
+    const { data } = await api.get('/auth/oauth2/config')
+    return data
+  },
+
+  /** OAuth: full backend URL that starts the provider flow (browser must navigate there). */
+  getOAuthStartUrl: (provider) => `${api.defaults.baseURL}/auth/oauth2/${provider}`,
 }
