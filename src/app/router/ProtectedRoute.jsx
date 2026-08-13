@@ -32,7 +32,6 @@ export function ProtectedRoute() {
  */
 export function PlatformRoute() {
   const { user } = useAuth()
-  const location = useLocation()
 
   if (!isPlatformUser(user)) {
     // If a tenant user tries to access platform, send them back to the resolver
@@ -48,7 +47,6 @@ export function PlatformRoute() {
  */
 export function TenantRoute() {
   const { user } = useAuth()
-  const location = useLocation()
 
   if (isPlatformUser(user)) {
     // If a platform user tries to access tenant features, send them back to the resolver

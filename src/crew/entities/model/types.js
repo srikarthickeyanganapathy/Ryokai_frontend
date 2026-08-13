@@ -39,4 +39,3 @@
  * @property {string} [createdAt] - Creation timestamp
  */
 
-export const CrewTypes = {};

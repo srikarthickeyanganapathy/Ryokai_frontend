@@ -13,4 +13,3 @@
  * @property {string} [updatedAt] - Last update ISO timestamp
  */
 
-export const CalendarEventTypes = {};

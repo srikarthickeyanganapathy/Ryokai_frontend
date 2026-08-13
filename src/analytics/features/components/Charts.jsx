@@ -1,8 +1,7 @@
 import React from 'react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
-  BarChart, Bar
+  PieChart, Pie, Cell, Legend
 } from 'recharts'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/Card'
 import { motion } from 'framer-motion'
@@ -119,28 +118,4 @@ export function PriorityChart({ data }) {
   )
 }
 
-export function WorkloadMatrix({ data }) {
-  const finalData = data && data.length > 0 ? data : [
-    { name: 'Today', workload: 0 }, { name: 'Tomorrow', workload: 0 }
-  ]
-
-  return (
-    <Card className="h-full bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)]/50 backdrop-blur-xl shadow-sm overflow-hidden">
-      <CardHeader className="border-b border-[var(--color-border-subtle)]/30 pb-4">
-        <CardTitle className="text-[15px] font-semibold tracking-tight text-[var(--text-primary)]">Upcoming Workload</CardTitle>
-      </CardHeader>
-      <CardContent className="h-[230px] pt-6 pl-0">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={finalData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="var(--color-border-subtle)" strokeOpacity={0.4} />
-            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: 500 }} dy={15} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: 500 }} dx={-10} allowDecimals={false} />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-border-subtle)', opacity: 0.15 }} />
-            <Bar dataKey="workload" fill="var(--warning)" radius={[6, 6, 0, 0]} maxBarSize={40} />
-          </BarChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
-  )
-}
 

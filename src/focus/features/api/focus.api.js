@@ -9,5 +9,3 @@ export const stopFocusSession = (sessionId) =>
 export const getActiveFocusSession = () =>
   api.get('/focus/active').then(r => (r.status === 204 ? null : r.data));
 
-export const getFocusHistory = (params = {}) =>
-  api.get('/focus/history', { params }).then(r => r.data);

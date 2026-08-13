@@ -4,10 +4,10 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover'
 import { Switch } from '@/shared/ui/Switch'
-import { useTaskList, useUpdateTask, useCompletePersonalTask, useCompleteCrewTask, useSubmitTask, useClaimTask } from '@/task'
-import { Check, Calendar, Clock, Settings, Maximize2, Minimize2 } from '@/shared/ui/Icons'
+import { useTaskList, useCompletePersonalTask, useCompleteCrewTask, useSubmitTask } from '@/task'
+import { Check, Settings, Maximize2, Minimize2 } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
-import { normalizeStatus, isDoneStatus, toBackendStatus } from '@/shared/lib/status'
+import { normalizeStatus, isDoneStatus } from '@/shared/lib/status'
 import { FocusTimer, useActiveFocus } from '@/focus'
 import { PageShell } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
@@ -19,23 +19,6 @@ const fmtDur = (m) => `${Math.floor(m / 60)}h ${m % 60}m`
 const StarGlyph = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
     <path d="m12 2 2.9 6.3 6.9.8-5.1 4.7 1.4 6.8-6.1-3.5-6.1 3.5 1.4-6.8L2.2 9.1l6.9-.8z" />
-  </svg>
-)
-
-const PulsarMark = () => (
-  <svg viewBox="0 0 100 100">
-    <rect width="100" height="100" rx="28" fill="#030712" />
-    <ellipse cx="50" cy="50" rx="44" ry="24" stroke="#00F0FF" strokeWidth="7" transform="rotate(-22 50 50)" fill="none" opacity=".9" />
-    <line x1="22" y1="2" x2="78" y2="98" stroke="#38BDF8" strokeWidth="4.5" strokeLinecap="round" />
-    <line x1="22" y1="2" x2="78" y2="98" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" />
-    <circle cx="50" cy="50" r="21" fill="url(#fzMarkCore)" />
-    <defs>
-      <radialGradient id="fzMarkCore" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stopColor="#FFFFFF" />
-        <stop offset="70%" stopColor="#E0F2FE" />
-        <stop offset="100%" stopColor="#0284C7" stopOpacity="0" />
-      </radialGradient>
-    </defs>
   </svg>
 )
 

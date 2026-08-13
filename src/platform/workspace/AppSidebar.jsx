@@ -17,7 +17,7 @@ import {
   Network, Clock, Megaphone, Shield, ShieldAlert, Settings,
   Rocket, Compass, Target, Scale, ChevronLeft, ChevronRight,
   Search, Moon, Sun, Plus, LogOut, User, MoreHorizontal,
-  Star
+  Star, Github
 } from 'lucide-react';
 
 /* ─── Icon map — Linear-style stroke-consistent icon set (1.5px) ─── */
@@ -28,7 +28,7 @@ const ICONS = {
   teams: Users, directory: Network, leave: Clock,
   announcements: Megaphone, roles: Shield, admin: ShieldAlert,
   settings: Settings, crews: Rocket, discover: Compass,
-  goals: Target, workload: Scale, org: Building2,
+  goals: Target, workload: Scale, org: Building2, github: Github,
   back: ChevronLeft, search: Search, plus: Plus,
   star: Star
 };
@@ -246,18 +246,21 @@ export function AppSidebar({ isOpen, onClose }) {
       { to: '/app/inbox', icon: ICONS.inbox, label: 'Inbox' },
       { to: '/app/tasks', icon: ICONS.tasks, label: 'My Tasks' },
       { to: '/app/projects', icon: ICONS.projects, label: 'Projects' },
+      { to: '/app/github', icon: ICONS.github, label: 'GitHub', section: 'Code' },
       { to: '/app/focus', icon: ICONS.focus, label: 'Focus' },
     ],
     CREWS: [
       { to: '/app', icon: ICONS.dashboard, label: 'Home', end: true },
       { to: '/app/crews', icon: ICONS.crews, label: 'My Crews' },
       { to: '/app/crews/discover', icon: ICONS.discover, label: 'Discover' },
-      { to: '/app/projects', icon: ICONS.projects, label: 'Projects' }
+      { to: '/app/projects', icon: ICONS.projects, label: 'Projects' },
+      { to: '/app/github', icon: ICONS.github, label: 'GitHub', section: 'Code' }
     ],
     ORG: [
       { to: '/app', icon: ICONS.dashboard, label: 'Home', end: true },
       { to: '/app/tasks', icon: ICONS.tasks, label: 'Tasks' },
       { to: '/app/projects', icon: ICONS.projects, label: 'Projects' },
+      { to: '/app/github', icon: ICONS.github, label: 'GitHub', section: 'Code' },
       { to: '/app/teams', icon: ICONS.teams, label: 'Teams' },
       { to: '/app/directory', icon: ICONS.directory, label: 'Directory' },
     ],
@@ -335,7 +338,10 @@ export function AppSidebar({ isOpen, onClose }) {
             {/* Workspace navigation */}
             <SectionDivider isExpanded={isExpanded} label={workspaceMode === 'CREWS' ? 'Crews' : workspaceMode === 'ORG' ? 'Workspace' : undefined} />
             {(workspaceNav[workspaceMode] || workspaceNav.PERSONAL).map(item => (
-              <SidebarNavItem key={item.to} {...item} isExpanded={isExpanded} />
+              <React.Fragment key={item.to}>
+                {item.section && <SectionDivider isExpanded={isExpanded} label={item.section} />}
+                <SidebarNavItem {...item} isExpanded={isExpanded} />
+              </React.Fragment>
             ))}
 
             {/* Dynamic Teams (ORG Mode) */}
@@ -415,7 +421,10 @@ export function AppSidebar({ isOpen, onClose }) {
                 </div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar py-2 space-y-0.5">
                   {(workspaceNav[workspaceMode] || workspaceNav.PERSONAL).map(item => (
-                    <SidebarNavItem key={item.to} {...item} isExpanded onButtonClick={onClose} />
+                    <React.Fragment key={item.to}>
+                      {item.section && <SectionDivider isExpanded label={item.section} />}
+                      <SidebarNavItem {...item} isExpanded onButtonClick={onClose} />
+                    </React.Fragment>
                   ))}
 
                   {workspaceMode === 'ORG' && activeOrganization && teams.length > 0 && (

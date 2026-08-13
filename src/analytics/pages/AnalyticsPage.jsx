@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Heading, Text } from '@/shared/ui/Typography'
+import { Text } from '@/shared/ui/Typography'
 import { useDashboardStats } from '@/analytics'
 import { StatCard } from '@/analytics'
 import { CompletionChart, PriorityChart } from '@/analytics'
 import {
   CheckCircle2, TrendingUp, PlusCircle, AlertCircle, Clock,
-  ShieldAlert, Timer, BarChart3, LayoutDashboard
+  ShieldAlert, Timer, BarChart3
 } from '@/shared/ui/Icons'
 import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'

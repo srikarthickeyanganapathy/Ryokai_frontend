@@ -6,6 +6,7 @@ import { useProjects, useCreateProject } from '../features/hooks/useProjects';
 import { usePermissions } from '@/identity';
 import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { ProjectForm } from '../components/ProjectForm';
+import { CreateFromGithubModal } from '../components/CreateFromGithubModal';
 import { useOrgTeams } from '@/organization';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { PageShell, PageHero, PageContent, PageEmptyState, FloatingActions } from '@/shared/ui/PageShell';
@@ -13,7 +14,7 @@ import { SearchPlugin } from '@/shared/workspace-framework';
 import { getPortfolioMetrics, calculateHealthScore, getHealthStatus, formatRelativeDate } from '../features/utils/projectUtils';
 import { cn } from '@/shared/lib/cn';
 import { EntityCard, EntityStatStrip, EntityFilterBar } from '@/shared/ui/entity-card';
-import { CheckSquare, CalendarClock, ExternalLink, FolderKanban, Plus, TrendingUp, AlertTriangle, Folder, Activity } from 'lucide-react';
+import { CheckSquare, CalendarClock, ExternalLink, FolderKanban, Plus, TrendingUp, AlertTriangle, Folder, Activity, Github } from 'lucide-react';
 
 function AnimatedCounter({ value, duration = 0.8 }) {
   const [display, setDisplay] = useState(0)
@@ -52,6 +53,7 @@ export function ProjectsPage() {
   const [debouncedFilter, setDebouncedFilter] = useState('');
   const [activeTab, setActiveTab] = useState('ALL');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isGithubCreateOpen, setIsGithubCreateOpen] = useState(false);
   const navigate = useNavigate();
 
   const { workspaceMode, activeOrganization } = useWorkspace();
@@ -129,10 +131,16 @@ export function ProjectsPage() {
         icon={FolderKanban}
       >
         {canCreate && (
-          <Button size="sm" className="shrink-0 gap-1.5 shadow-sm" onClick={() => setIsCreateOpen(true)}>
-            <Plus size={14} strokeWidth={1.5} />
-            New Project
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" className="shrink-0 gap-1.5" onClick={() => setIsGithubCreateOpen(true)}>
+              <Github size={14} strokeWidth={1.5} />
+              From GitHub
+            </Button>
+            <Button size="sm" className="shrink-0 gap-1.5 shadow-sm" onClick={() => setIsCreateOpen(true)}>
+              <Plus size={14} strokeWidth={1.5} />
+              New Project
+            </Button>
+          </div>
         )}
       </PageHero>
 
@@ -289,6 +297,7 @@ export function ProjectsPage() {
             />
         </ModalContent>
       </Modal>
+      <CreateFromGithubModal open={isGithubCreateOpen} onOpenChange={setIsGithubCreateOpen} />
       <FloatingActions show={canCreate && projects.length > 3}>
         <Button
           size="lg"

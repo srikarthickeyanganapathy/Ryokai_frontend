@@ -29,6 +29,7 @@ import { ProjectTabs } from '../components/ProjectTabs'
 import { OverviewTab } from '../components/OverviewTab'
 import { BoardTab } from '../components/BoardTab'
 import { ActivityTab } from '../components/ActivityTab'
+import { RepositoriesTab } from '../components/RepositoriesTab'
 import { Skeleton } from '@/shared/ui/Skeleton';
 
 /* ============================================================
@@ -42,7 +43,6 @@ import { Skeleton } from '@/shared/ui/Skeleton';
 const defaultStatusColor = 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]'
 
 function hashHue(str = '') {
-  const navigate = useNavigate();
   let hash = 0
   for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash)
   return Math.abs(hash) % 360
@@ -59,14 +59,14 @@ function daysUntil(dateInput) {
 
 export function ProjectDetailPage() {
   const { projectId } = useParams()
-  // navigate already present
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { workspaceMode } = useWorkspace()
   const { canManageProject, canAssignTask, canEditTask, canReview, canReviewTask, isSuperAdmin } = usePermissions()
   const { user } = useAuth()
 
   const initialTab = searchParams.get('tab')
-  const [activeTab, setActiveTab] = useState(initialTab && ['overview', 'tasks', 'activity'].includes(initialTab) ? initialTab : 'overview')
+  const [activeTab, setActiveTab] = useState(initialTab && ['overview', 'tasks', 'repos', 'activity'].includes(initialTab) ? initialTab : 'overview')
   const handleTabChange = (id) => {
     setActiveTab(id)
     setSearchParams(params => { if (id === 'overview') params.delete('tab'); else params.set('tab', id); return params }, { replace: true })
@@ -322,6 +322,9 @@ export function ProjectDetailPage() {
                 )}
                 {activeTab === 'activity' && (
                   <ActivityTab projectActivities={projectActivities} />
+                )}
+                {activeTab === 'repos' && (
+                  <RepositoriesTab project={project} canManage={canManageProject} />
                 )}
               </motion.div>
             </AnimatePresence>

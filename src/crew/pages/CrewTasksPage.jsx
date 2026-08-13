@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heading, Text } from '@/shared/ui/Typography';
+import { Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
-import { PageShell, PageHero, PageStats, PageContent } from '@/shared/ui/PageShell';
+import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
 import { InteractiveCard } from '@/shared/ui/InteractiveCard';
 import { useTaskList, useCompleteCrewTask, useDeleteTask } from '@/task';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
@@ -13,12 +13,9 @@ import {
   ListTodo, 
   CheckCircle2, 
   AlertTriangle, 
-  Activity, 
   Trash2, 
   CheckCheck, 
-  X,
-  Layers,
-  Clock
+  X
 } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 
@@ -50,7 +47,6 @@ export function CrewTasksPage() {
   const tasks = useMemo(() => (Array.isArray(rawTasks) ? rawTasks : []), [rawTasks]);
   
   const [rowSelection, setRowSelection] = useState({});
-  const [selectedTask, setSelectedTask] = useState(null);
   
   const completeCrewTaskMutation = useCompleteCrewTask();
   const deleteTaskMutation = useDeleteTask();

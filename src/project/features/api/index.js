@@ -27,6 +27,16 @@ export const projectsApi = {
     await api.delete(`/projects/${id}`);
   },
 
+  linkGithubRepo: async (id, repoFullName) => {
+    const { data } = await api.put(`/projects/${id}/github-repos`, { repoFullName });
+    return data;
+  },
+
+  unlinkGithubRepo: async (id, repoFullName) => {
+    const { data } = await api.delete(`/projects/${id}/github-repos/${repoFullName}`);
+    return data;
+  },
+
   shareToCrew: async (id, payload) => {
     const { data } = await api.post(`/projects/${id}/share/crew`, payload);
     return data;

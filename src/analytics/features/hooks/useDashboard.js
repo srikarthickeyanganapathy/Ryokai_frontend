@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import * as dashboardApi from '../api/dashboard.api';
 import { queryKeys } from '@/shared/api/queryKeys';
 
@@ -17,30 +17,4 @@ export const useDashboardStats = (customParams = {}) => {
   });
 };
 
-export const useDashboardActivity = (params = { page: 1, size: 10 }) => {
-  const apiParams = { ...params, page: params.page ? Math.max(0, params.page - 1) : 0 };
-  return useQuery({
-    queryKey: queryKeys.dashboard.activity(params),
-    queryFn: () => dashboardApi.getDashboardActivity(apiParams),
-    select: (data) => data?.content || data || [],
-    staleTime: 15000,
-  });
-};
-
-export const useTaskActivity = (taskId, params = { page: 1, size: 10 }) => {
-  const apiParams = { ...params, page: params.page ? Math.max(0, params.page - 1) : 0 };
-  return useQuery({
-    queryKey: [...queryKeys.dashboard.all, 'activity', 'task', taskId, { params }],
-    queryFn: () => dashboardApi.getTaskActivity(taskId, apiParams),
-    select: (data) => data?.content || data || [],
-    enabled: !!taskId,
-    staleTime: 15000,
-  });
-};
-
-export const useExportActivity = () => {
-  return useMutation({
-    mutationFn: (params) => dashboardApi.exportActivity(params),
-  });
-};
 

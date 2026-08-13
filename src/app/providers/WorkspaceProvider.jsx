@@ -165,25 +165,6 @@ export const WorkspaceProvider = ({ children }) => {
     }
   }, [workspaceMode, crews, activeCrew]);
 
-  // Allow users to switch to ORG or CREWS mode even if they have no orgs or crews yet
-  // so they can access the 'Discover & Join' or 'Create' pages.
-  /*
-  useEffect(() => {
-    if (workspaceMode === 'ORG' && organizations.length === 0) {
-      queueMicrotask(() => {
-        setWorkspaceMode('PERSONAL');
-      });
-    }
-  }, [workspaceMode, organizations]);
-
-  useEffect(() => {
-    if (workspaceMode === 'CREWS' && crews.length === 0) {
-      queueMicrotask(() => {
-        setWorkspaceMode('PERSONAL');
-      });
-    }
-  }, [workspaceMode, crews]);
-  */
 
   const value = useMemo(() => ({
     workspaceMode,

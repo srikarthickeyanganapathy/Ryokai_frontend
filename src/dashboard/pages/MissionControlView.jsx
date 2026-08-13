@@ -14,7 +14,6 @@ import {
   FolderKanban, ListTodo, Users, Calendar, BarChart3
 } from 'lucide-react';
 import { ModeSelector } from '../features/ModeSelector';
-import { WIDGET_REGISTRY } from '../config/WidgetRegistry';
 import { PersonalContextRail } from '../features/PersonalContextRail';
 import { CrewContextRail } from '../features/CrewContextRail';
 import { OrgContextRail } from '../features/OrgContextRail';
@@ -437,6 +436,81 @@ function StatsGrid({ activeTaskCount, completedTaskCount, dueSoonCount, teamSize
   );
 }
 
+const DEFAULT_WIDGET_REGISTRY = [
+  {
+    id: 'signal_strip',
+    component: 'SignalStrip',
+    placement: 'header',
+    order: 1,
+    workspaceModes: ['PERSONAL', 'CREWS', 'ORG'],
+    requiredPermissions: [],
+    visible: true
+  },
+  {
+    id: 'execution_queue',
+    component: 'ExecutionQueue',
+    placement: 'primary',
+    order: 1,
+    workspaceModes: ['PERSONAL', 'CREWS', 'ORG'],
+    requiredPermissions: [],
+    visible: true
+  },
+  {
+    id: 'workload_brief',
+    component: 'WorkloadBrief',
+    placement: 'primary',
+    order: 1,
+    workspaceModes: ['ORG'],
+    requiredPermissions: ['DASHBOARD_VIEW'],
+    visible: true
+  },
+  {
+    id: 'focus_panel',
+    component: 'FocusPanel',
+    placement: 'primary',
+    order: 2,
+    workspaceModes: ['PERSONAL', 'CREWS', 'ORG'],
+    requiredPermissions: [],
+    visible: true
+  },
+  {
+    id: 'ai_copilot',
+    component: 'AICopilotPanel',
+    placement: 'context',
+    order: 0,
+    workspaceModes: ['PERSONAL', 'CREWS', 'ORG'],
+    requiredPermissions: [],
+    visible: true
+  },
+  {
+    id: 'personal_context_rail',
+    component: 'PersonalContextRail',
+    placement: 'context',
+    order: 1,
+    workspaceModes: ['PERSONAL'],
+    requiredPermissions: [],
+    visible: true
+  },
+  {
+    id: 'crew_context_rail',
+    component: 'CrewContextRail',
+    placement: 'context',
+    order: 1,
+    workspaceModes: ['CREWS'],
+    requiredPermissions: [],
+    visible: true
+  },
+  {
+    id: 'org_context_rail',
+    component: 'OrgContextRail',
+    placement: 'context',
+    order: 1,
+    workspaceModes: ['ORG'],
+    requiredPermissions: [],
+    visible: true
+  }
+];
+
 /* ─── V2 Widget Map ─── */
 const V2_WIDGET_COMPONENTS = {
   SignalStrip: QuickActionBar,
@@ -446,7 +520,6 @@ const V2_WIDGET_COMPONENTS = {
   PersonalContextRail: PersonalContextRail,
   CrewContextRail: CollectiveCrewContextRail,
   OrgContextRail: OrgContextRail,
-  DailyBriefWidget: () => null,
   AICopilotPanel: AICopilotBlock
 };
 
@@ -590,7 +663,7 @@ export function MissionControlV2({ vm }) {
     context,
   };
 
-  const activeRegistry = WIDGET_REGISTRY.filter(widget => 
+  const activeRegistry = DEFAULT_WIDGET_REGISTRY.filter(widget => 
     widget.workspaceModes.includes(workspaceMode) && widget.visible
   );
 

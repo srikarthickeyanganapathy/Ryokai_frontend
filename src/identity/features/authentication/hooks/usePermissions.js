@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useAuth } from './useAuth';
 import { useOrganizations, useOrgMembers } from '@/organization';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
-import { usePermissionStore, resolvePermission, resolveRole } from '../store/permissionStore';
+import { usePermissionStore, resolvePermission } from '../store/permissionStore';
 import { useEffect } from 'react';
 
 const EMPTY_PERMISSIONS = [];

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, format, isWithinInterval, parseISO } from 'date-fns'
+import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, format, parseISO } from 'date-fns'
 import { useTaskList } from '@/task'
 import { useCalendarEvents, useUpdateEvent, useDeleteEvent, CalendarView, EventForm } from '@/calendar'
 import { useNavigate } from 'react-router-dom'
@@ -37,7 +37,6 @@ export function CalendarPage() {
   const deleteEvent = useDeleteEvent()
   const { confirm, dialog } = useConfirmDialog()
 
-  const [selectedTask, setSelectedTask] = useState(null)
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [editingEvent, setEditingEvent] = useState(null)
 

@@ -11,13 +11,6 @@ export function useActiveFocus() {
   });
 }
 
-export function useFocusHistory(params = {}) {
-  const apiParams = { ...params, page: params.page ? Math.max(0, params.page - 1) : 0 };
-  return useQuery({
-    queryKey: queryKeys.focus.history(params),
-    queryFn: () => focusApi.getFocusHistory(apiParams),
-  });
-}
 
 export function useStartFocus() {
   const queryClient = useQueryClient();

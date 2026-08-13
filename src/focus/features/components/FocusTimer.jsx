@@ -19,7 +19,7 @@ const POMODORO_MODES = [
  * accretion nodes (pomodoro counter). Presentation-only rewrite:
  * state, hooks and API contracts are unchanged.
  */
-export function FocusTimer({ task, onTaskComplete }) {
+export function FocusTimer({ task }) {
   const { data: activeSession, isLoading: activeLoading } = useActiveFocus()
   const startMutation = useStartFocus()
   const stopMutation = useStopFocus()

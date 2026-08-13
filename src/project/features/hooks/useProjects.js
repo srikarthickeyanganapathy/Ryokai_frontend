@@ -89,3 +89,33 @@ export function useProjectActivities(projectId) {
     enabled: !!projectId,
   })
 }
+
+export function useLinkGithubRepo() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, repoFullName }) => projectsApi.linkGithubRepo(id, repoFullName),
+    onSuccess: (project) => {
+      toast.success('GitHub repository linked')
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.detail(project.id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all })
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || 'Failed to link repository')
+    },
+  })
+}
+
+export function useUnlinkGithubRepo() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, repoFullName }) => projectsApi.unlinkGithubRepo(id, repoFullName),
+    onSuccess: (project) => {
+      toast.success('Repository unlinked')
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.detail(project.id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all })
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || error.message || 'Failed to unlink repository')
+    },
+  })
+}

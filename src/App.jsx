@@ -34,6 +34,7 @@ const DashboardPage = Loadable(lazy(() => import("@/dashboard/pages/DashboardPag
 const TasksPage = Loadable(lazy(() => import("@/task/pages/TasksPage").then(m => ({ default: m.TasksPage }))));
 const TaskDetailPage = Loadable(lazy(() => import("@/task/pages/TaskDetailPage").then(m => ({ default: m.default }))));
 const NebulaSpacePage = Loadable(lazy(() => import("@/task/pages/NebulaSpacePage").then(m => ({ default: m.NebulaSpacePage }))));
+const GithubPage = Loadable(lazy(() => import("@/github").then(m => ({ default: m.GithubPage }))));
 const ProjectsPage = Loadable(lazy(() => import("@/project/pages/ProjectsPage").then(m => ({ default: m.ProjectsPage }))));
 const ProjectDetailPage = Loadable(lazy(() => import("@/project/pages/ProjectDetailPage").then(m => ({ default: m.ProjectDetailPage }))));
 const OrganizationsPage = Loadable(lazy(() => import("@/organization/pages/OrganizationsPage").then(m => ({ default: m.OrganizationsPage }))));
@@ -142,6 +143,7 @@ export default function App() {
                     <Route path="sessions" element={<Navigate to="/app/settings/sessions" replace />} />
                     <Route path="notes" element={<NotesPage />} />
                     <Route path="calendar" element={<CalendarPage />} />
+<Route path="github" element={<GithubPage />} />
                     <Route path="saved" element={<SavedPage />} />
                     <Route path="goals" element={<GoalsPage />} />
                     <Route path="directory" element={<DirectoryPage />} />

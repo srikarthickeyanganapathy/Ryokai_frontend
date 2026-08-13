@@ -1,15 +1,16 @@
 import React from 'react'
-import { LayoutDashboard, KanbanSquare, Activity } from 'lucide-react'
+import { LayoutDashboard, KanbanSquare, Activity, Github } from 'lucide-react'
 import { DetailTabs } from '@/shared/ui/DetailTabs'
 
 /* ============================================================
    components/ProjectTabs.jsx — project tab bar on shared
-   DetailTabs: Overview / Task Board / Activity.
+   DetailTabs: Overview / Task Board / Repositories / Activity.
    ============================================================ */
 
 export const PROJECT_TABS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'tasks', label: 'Task Board', icon: KanbanSquare },
+  { id: 'repos', label: 'Repositories', icon: Github },
   { id: 'activity', label: 'Activity', icon: Activity },
 ]
 
