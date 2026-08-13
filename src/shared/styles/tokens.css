@@ -222,27 +222,27 @@
     --bg-hover-strong: #292045;
 
     /* ── Cosmic: text ── */
-    --text-primary: #F5F3FF;
-    --text-secondary: #C4B9DA;
-    --text-tertiary: #6E6389;
-    --text-on-accent: #17102B;
+    --text-primary: #F8FAFC;
+    --text-secondary: #CBD5E1;
+    --text-tertiary: #94A3B8;
+    --text-on-accent: #0F172A;
 
-    /* ── Cosmic: borders (violet-tinted, not neutral gray) ── */
-    --border-subtle: rgba(167, 139, 250, 0.08);
-    --border-default: rgba(167, 139, 250, 0.15);
-    --border-strong: rgba(167, 139, 250, 0.26);
+    /* ── Cosmic: borders (starry-white tinted) ── */
+    --border-subtle: rgba(248, 250, 252, 0.08);
+    --border-default: rgba(248, 250, 252, 0.15);
+    --border-strong: rgba(248, 250, 252, 0.28);
 
-    /* ── Cosmic: accent = Nebula Violet ── */
-    --accent: #A78BFA;
-    --accent-hover: #C4B5FD;
-    --accent-active: #DDD6FE;
-    --accent-soft: rgba(167, 139, 250, 0.14);
-    --accent-border: rgba(167, 139, 250, 0.32);
-    /* Galaxy gradient: violet -> cyan -> magenta, real nebula colors */
-    --accent-gradient: linear-gradient(135deg, #A78BFA 0%, #7DD3FC 55%, #F472B6 100%);
-    --accent-gradient-hover: linear-gradient(135deg, #C4B5FD 0%, #A5E6FF 55%, #FBB6CE 100%);
-    --accent-secondary: #7DD3FC;
-    --accent-secondary-soft: #17233A;
+    /* ── Cosmic: accent = Starry White ── */
+    --accent: #F8FAFC;
+    --accent-hover: #FFFFFF;
+    --accent-active: #E2E8F0;
+    --accent-soft: rgba(248, 250, 252, 0.14);
+    --accent-border: rgba(248, 250, 252, 0.32);
+    /* Starlight gradient: luminous starry white -> crystalline silver -> soft starlight */
+    --accent-gradient: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 55%, #CBD5E1 100%);
+    --accent-gradient-hover: linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 55%, #E2E8F0 100%);
+    --accent-secondary: #E2E8F0;
+    --accent-secondary-soft: rgba(248, 250, 252, 0.1);
 
     /* ── Cosmic: Luxe signature — Starlight Gold, used sparingly ── */
     --accent-luxe: #E8C468;
@@ -269,31 +269,31 @@
     --info-soft: rgba(125, 211, 252, 0.15);
     --info-border: rgba(125, 211, 252, 0.25);
 
-    /* ── Shadows: deep + carry a whisper of violet ambient glow ── */
+    /* ── Shadows: deep + carry a whisper of starry white ambient glow ── */
     --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 6px 14px -2px rgba(0, 0, 0, 0.6), 0 2px 6px -2px rgba(0, 0, 0, 0.45);
-    --shadow-lg: 0 18px 36px -6px rgba(0, 0, 0, 0.7), 0 6px 14px -4px rgba(0, 0, 0, 0.55), 0 0 40px -20px rgba(167, 139, 250, 0.25);
-    --shadow-xl: 0 30px 60px -10px rgba(0, 0, 0, 0.8), 0 10px 22px -6px rgba(0, 0, 0, 0.6), 0 0 60px -20px rgba(167, 139, 250, 0.3);
-    --shadow-2xl: 0 45px 90px -14px rgba(0, 0, 0, 0.88), 0 0 90px -24px rgba(167, 139, 250, 0.32);
-    --shadow-3xl: 0 70px 140px -18px rgba(0, 0, 0, 0.92), 0 0 120px -20px rgba(167, 139, 250, 0.35);
-    --inset-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
-    --inset-highlight-soft: inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
+    --shadow-lg: 0 18px 36px -6px rgba(0, 0, 0, 0.7), 0 6px 14px -4px rgba(0, 0, 0, 0.55), 0 0 40px -20px rgba(248, 250, 252, 0.2);
+    --shadow-xl: 0 30px 60px -10px rgba(0, 0, 0, 0.8), 0 10px 22px -6px rgba(0, 0, 0, 0.6), 0 0 60px -20px rgba(248, 250, 252, 0.25);
+    --shadow-2xl: 0 45px 90px -14px rgba(0, 0, 0, 0.88), 0 0 90px -24px rgba(248, 250, 252, 0.28);
+    --shadow-3xl: 0 70px 140px -18px rgba(0, 0, 0, 0.92), 0 0 120px -20px rgba(248, 250, 252, 0.3);
+    --inset-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+    --inset-highlight-soft: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
 
-    /* Frosted glass, deeper saturation for jewel-tone richness */
+    /* Frosted glass */
     --glass-saturate: 2.0;
-    --glass-bg: rgba(19, 15, 36, 0.55);
-    --glass-border: rgba(167, 139, 250, 0.12);
-    --glass-bg-strong: rgba(19, 15, 36, 0.82);
+    --glass-bg: rgba(15, 23, 42, 0.65);
+    --glass-border: rgba(248, 250, 252, 0.15);
+    --glass-bg-strong: rgba(15, 23, 42, 0.88);
 
-    /* ── Cosmic mesh: nebula bloom, violet/cyan/magenta ── */
-    --mesh-1: rgba(167, 139, 250, 0.1);
-    --mesh-2: rgba(125, 211, 252, 0.07);
-    --mesh-3: rgba(244, 114, 182, 0.06);
+    /* ── Cosmic mesh: nebula bloom, starry white starlight ── */
+    --mesh-1: rgba(248, 250, 252, 0.12);
+    --mesh-2: rgba(226, 232, 240, 0.08);
+    --mesh-3: rgba(203, 213, 225, 0.06);
     --mesh-4: rgba(232, 196, 104, 0.04);
     --noise-opacity: 0.032;
-    --surface-gradient-1: linear-gradient(180deg, rgba(167, 139, 250, 0.07) 0%, transparent 50%);
-    --surface-gradient-2: linear-gradient(135deg, rgba(125, 211, 252, 0.06) 0%, rgba(244, 114, 182, 0.03) 100%);
+    --surface-gradient-1: linear-gradient(180deg, rgba(248, 250, 252, 0.08) 0%, transparent 50%);
+    --surface-gradient-2: linear-gradient(135deg, rgba(226, 232, 240, 0.06) 0%, rgba(203, 213, 225, 0.03) 100%);
 
     --task-completed: var(--success);
     --task-completed-soft: var(--success-soft);
@@ -315,17 +315,17 @@
     --member-online-glow: rgba(45, 212, 191, 0.14);
     --member-away: #FBBF24;
     --member-offline: var(--text-tertiary);
-    --crew-active: #C4B5FD;
-    --crew-active-soft: rgba(196, 181, 253, 0.14);
-    --ai-insight: #C4B5FD;
-    --ai-insight-soft: rgba(196, 181, 253, 0.12);
-    --accent-2: #7DD3FC;
-    --star-color: #F5F3FF;
+    --crew-active: #F8FAFC;
+    --crew-active-soft: rgba(248, 250, 252, 0.14);
+    --ai-insight: #F8FAFC;
+    --ai-insight-soft: rgba(248, 250, 252, 0.12);
+    --accent-2: #E2E8F0;
+    --star-color: #FFFFFF;
 
     /* ── entity-card system (Star Registry) — Cosmic ── */
-    --ec-glass: rgba(148, 130, 255, 0.07);
-    --ec-glass-strong: rgba(148, 130, 255, 0.12);
-    --ec-line: rgba(148, 130, 255, 0.15);
+    --ec-glass: rgba(248, 250, 252, 0.07);
+    --ec-glass-strong: rgba(248, 250, 252, 0.12);
+    --ec-line: rgba(248, 250, 252, 0.15);
     --ec-t1: var(--text-primary);
     --ec-t2: var(--text-secondary);
     --ec-t3: var(--text-tertiary);
@@ -333,14 +333,14 @@
     --ec-amber: #FBBF24; --ec-amber-soft: rgba(251, 191, 36, 0.14);
     --ec-emerald: #2DD4BF; --ec-emerald-soft: rgba(45, 212, 191, 0.14);
     --ec-rose: #FB7185; --ec-rose-soft: rgba(251, 113, 133, 0.14);
-    --ec-member: var(--accent); --ec-member-soft: rgba(167, 139, 250, 0.1);
-    --ec-progress: linear-gradient(90deg, var(--ec-cyan), var(--accent-2));
+    --ec-member: var(--accent); --ec-member-soft: rgba(248, 250, 252, 0.1);
+    --ec-progress: linear-gradient(90deg, #FFFFFF, var(--accent-2));
 
-    --star-op: 0.92;
-    --pulsar-disk-a: #F5F3FF;
-    --pulsar-disk-b: #7DD3FC;
-    --pulsar-disk-c: #E8C468;
-    --nebula-1: rgba(167, 139, 250, 0.55);
+    --star-op: 0.95;
+    --pulsar-disk-a: #FFFFFF;
+    --pulsar-disk-b: #F8FAFC;
+    --pulsar-disk-c: #E2E8F0;
+    --nebula-1: rgba(248, 250, 252, 0.45);
     --nebula-2: rgba(125, 211, 252, 0.3);
     --nebula-3: rgba(244, 114, 182, 0.22);
     --nebula-4: rgba(232, 196, 104, 0.14);

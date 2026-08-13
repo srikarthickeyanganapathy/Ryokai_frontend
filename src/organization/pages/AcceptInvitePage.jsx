@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAcceptInviteByToken } from '@/organization'
 import { Spinner } from '@/shared/ui/Spinner'
@@ -13,18 +13,28 @@ export function AcceptInvitePage() {
   const acceptMutation = useAcceptInviteByToken()
   const attemptedRef = useRef(false)
 
+  // 1. Trigger the invitation acceptance once token is present
   useEffect(() => {
-    if (token && !attemptedRef.current && !acceptMutation.isPending) {
+    if (token && !attemptedRef.current) {
       attemptedRef.current = true
-      acceptMutation.mutate(token, {
-        onSuccess: () => {
-          setTimeout(() => {
-            navigate('/app/organizations', { replace: true })
-          }, 1500)
-        }
-      })
+      acceptMutation.mutate(token)
     }
-  }, [token, acceptMutation, navigate])
+  }, [token])
+
+  // 2. Automatically navigate to organization page as soon as mutation succeeds
+  useEffect(() => {
+    if (acceptMutation.isSuccess) {
+      const orgId = acceptMutation.data?.organizationId || acceptMutation.data?.organization?.id
+      const targetPath = orgId ? `/app/organizations/${orgId}` : '/app/organizations'
+
+      const timer = setTimeout(() => {
+        navigate(targetPath, { replace: true })
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [acceptMutation.isSuccess, acceptMutation.data, navigate])
+
+  const isLoading = acceptMutation.isPending || acceptMutation.isIdle
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)] p-4">
@@ -35,7 +45,7 @@ export function AcceptInvitePage() {
 
         <Heading level={3}>Organization invitation</Heading>
 
-        {acceptMutation.isPending && (
+        {isLoading && !acceptMutation.isError && (
           <div className="space-y-3 py-4">
             <Spinner size="lg" className="mx-auto" />
             <Text variant="muted">Accepting invitation and joining organization...</Text>
@@ -45,7 +55,7 @@ export function AcceptInvitePage() {
         {acceptMutation.isSuccess && (
           <div className="space-y-3 py-4 text-[var(--success)]">
             <Text className="font-medium text-base">You have successfully joined the organization!</Text>
-            <Text variant="muted" className="text-sm">Redirecting to organizations workspace...</Text>
+            <Text variant="muted" className="text-sm">Redirecting to organization page...</Text>
           </div>
         )}
 
