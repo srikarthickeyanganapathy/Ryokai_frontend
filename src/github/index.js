@@ -6,6 +6,7 @@ export {
   useGithubPulls,
   useGithubCommits,
   useSyncGithubInstallation,
+  useSyncAllGithub,
   useRefreshGithubPullRequest,
   useGithubConnect,
 } from './features/hooks/useGithub';

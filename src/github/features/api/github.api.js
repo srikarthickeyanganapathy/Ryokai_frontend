@@ -7,7 +7,9 @@ export const connectGithub = () => api.post('/github/connect').then((r) => r.dat
 export const getGithubInstallations = () => api.get('/github/installations').then((r) => r.data);
 
 export const syncGithubInstallation = (installationId) =>
-  api.post(`/github/installations/${installationId}/sync`).then((r) => r.data);
+  api.post(`/github/installations/${installationId}/sync`, null, { timeout: 0 }).then((r) => r.data);
+
+export const syncAllGithub = () => api.post('/github/repos/sync', null, { timeout: 0 }).then((r) => r.data);
 
 export const getGithubRepos = () => api.get('/github/repos').then((r) => r.data);
 

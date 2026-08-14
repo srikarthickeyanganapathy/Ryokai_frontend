@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { GitBranch, GitPullRequest, GitCommitHorizontal, ExternalLink, Link2, Unlink, Github, Search, Loader2, UserPlus } from 'lucide-react'
+import { GitBranch, GitPullRequest, GitCommitHorizontal, ExternalLink, Link2, Unlink, Github, Search, Loader2, UserPlus, RefreshCw } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
 import { Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'
 import { Input } from '@/shared/ui/Input'
-import { useGithubRepos, useGithubConfig, useGithubConnect } from '@/github'
+import { useGithubRepos, useGithubConfig, useGithubConnect, useSyncAllGithub } from '@/github'
 import { useLinkGithubRepo, useUnlinkGithubRepo } from '../features/hooks/useProjects'
 
 /* ============================================================
@@ -89,8 +89,14 @@ function RepoChip({ fullName, repo, onUnlink, canManage }) {
 export function RepositoriesTab({ project, canManage }) {
   const linked = useMemo(() => Array.isArray(project?.linkedGithubRepos) ? project.linkedGithubRepos : [], [project])
   const { data: config } = useGithubConfig()
-  const { data: reposData = {}, isLoading: reposLoading } = useGithubRepos()
+  const {
+    data: reposData = {},
+    isLoading: reposLoading,
+    error: reposError,
+    refetch: refetchRepos,
+  } = useGithubRepos()
   const connect = useGithubConnect()
+  const syncAll = useSyncAllGithub()
   const linkMutation = useLinkGithubRepo()
   const unlinkMutation = useUnlinkGithubRepo()
 
@@ -134,6 +140,44 @@ export function RepositoriesTab({ project, canManage }) {
         <Text variant="muted" size="sm" className="max-w-sm mt-1">
           Connect your GitHub App first to link repositories to this project.
         </Text>
+      </div>
+    )
+  }
+
+  if (reposError) {
+    const isSso = reposError?.response?.data?.error === 'github_sso_required'
+    const isAppConfig = reposError?.response?.data?.error === 'github_app_config_invalid'
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="w-14 h-14 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)] flex items-center justify-center mb-4">
+          <Github className="w-6 h-6 text-[var(--danger)]" strokeWidth={1.5} />
+        </div>
+        <Text className="font-semibold text-[14px]">{isAppConfig ? 'GitHub App not configured' : 'GitHub repositories unavailable'}</Text>
+        <Text variant="muted" size="sm" className="max-w-sm mt-1">
+          {reposError?.response?.data?.message || 'Failed to load repositories from GitHub.'}
+        </Text>
+        {isSso ? (
+          <a
+            href="https://github.com/settings/connections/applications"
+            target="_blank"
+            rel="noreferrer"
+            className="mt-4 inline-flex"
+          >
+            <Button size="sm" className="gap-1.5 h-8 text-[12px]">
+              <ExternalLink className="w-3.5 h-3.5" /> Authorize in GitHub settings
+            </Button>
+          </a>
+        ) : isAppConfig ? (
+          <a href="https://github.com/settings/apps" target="_blank" rel="noreferrer" className="mt-4 inline-flex">
+            <Button size="sm" variant="outline" className="gap-1.5 h-8 text-[12px]">
+              <ExternalLink className="w-3.5 h-3.5" /> Fix app credentials on GitHub
+            </Button>
+          </a>
+        ) : (
+          <Button size="sm" variant="outline" className="mt-4 gap-1.5 h-8 text-[12px]" onClick={() => refetchRepos()}>
+            <RefreshCw className="w-3.5 h-3.5" /> Retry
+          </Button>
+        )}
       </div>
     )
   }
@@ -209,10 +253,23 @@ export function RepositoriesTab({ project, canManage }) {
                   </div>
                 )}
                 {!reposLoading && candidates.length === 0 && (
-                  <div className="text-center text-[12px] text-[var(--text-muted)] py-3">
-                    {repos.length === 0
-                      ? 'No connected repositories yet — sync from the GitHub hub first.'
-                      : 'All connected repositories are already linked.'}
+                  <div className="text-center text-[12px] text-[var(--text-muted)] py-3 space-y-2.5">
+                    {repos.length === 0 ? (
+                      <>
+                        <p>No repositories mirrored yet.</p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5 h-7 text-[11px] mx-auto"
+                          onClick={() => syncAll.mutate()}
+                          isLoading={syncAll.isPending}
+                        >
+                          <RefreshCw className="w-3 h-3" /> Sync repositories from GitHub
+                        </Button>
+                      </>
+                    ) : (
+                      <p>All connected repositories are already linked.</p>
+                    )}
                   </div>
                 )}
                 {candidates.map(name => (
@@ -258,6 +315,11 @@ export function RepositoriesTab({ project, canManage }) {
           {canManage && repos.length > 0 && (
             <Button size="sm" className="mt-4 gap-1.5 h-8 text-[12px]" onClick={() => setShowPicker(true)}>
               <Link2 className="w-3.5 h-3.5" /> Link first repository
+            </Button>
+          )}
+          {canManage && repos.length === 0 && (
+            <Button size="sm" className="mt-4 gap-1.5 h-8 text-[12px]" onClick={() => syncAll.mutate()} isLoading={syncAll.isPending}>
+              <RefreshCw className="w-3.5 h-3.5" /> Sync repositories from GitHub
             </Button>
           )}
         </div>

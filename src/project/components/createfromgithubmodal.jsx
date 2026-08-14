@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Github, Search, ArrowRight, Loader2, Check, ExternalLink } from 'lucide-react'
+import { Github, Search, ArrowRight, Loader2, Check, ExternalLink, RefreshCw } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Input } from '@/shared/ui/Input'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
-import { useGithubRepos, useGithubConfig, useGithubConnect } from '@/github'
+import { useGithubRepos, useGithubConfig, useGithubConnect, useSyncAllGithub } from '@/github'
 import { useCreateProject } from '../features/hooks/useProjects'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -22,6 +22,7 @@ export function CreateFromGithubModal({ open, onOpenChange }) {
   const { data: config } = useGithubConfig()
   const { data: reposData = {}, isLoading: reposLoading } = useGithubRepos()
   const connect = useGithubConnect()
+  const syncAll = useSyncAllGithub()
   const createMutation = useCreateProject()
 
   const [selected, setSelected] = useState(null)
@@ -131,10 +132,23 @@ export function CreateFromGithubModal({ open, onOpenChange }) {
                   </div>
                 )}
                 {!reposLoading && filtered.length === 0 && (
-                  <div className="py-8 text-center text-[12.5px] text-[var(--text-muted)]">
-                    {repos.length === 0
-                      ? 'No connected repositories — sync from the GitHub hub first.'
-                      : 'No repositories match your search.'}
+                  <div className="py-8 text-center text-[12.5px] text-[var(--text-muted)] space-y-3">
+                    {repos.length === 0 ? (
+                      <>
+                        <p>No repositories mirrored yet — sync from GitHub first.</p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5 h-8 text-[12px] mx-auto"
+                          onClick={() => syncAll.mutate()}
+                          isLoading={syncAll.isPending}
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" /> Sync repositories from GitHub
+                        </Button>
+                      </>
+                    ) : (
+                      <p>No repositories match your search.</p>
+                    )}
                   </div>
                 )}
                 {filtered.map(repo => {

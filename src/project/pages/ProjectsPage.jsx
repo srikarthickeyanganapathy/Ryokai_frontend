@@ -297,7 +297,7 @@ export function ProjectsPage() {
             />
         </ModalContent>
       </Modal>
-      <CreateFromGithubModal open={isGithubCreateOpen} onOpenChange={setIsGithubCreateOpen} />
+      {isGithubCreateOpen && <CreateFromGithubModal open={isGithubCreateOpen} onOpenChange={setIsGithubCreateOpen} />}
       <FloatingActions show={canCreate && projects.length > 3}>
         <Button
           size="lg"

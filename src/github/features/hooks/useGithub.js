@@ -7,6 +7,7 @@ import {
   getGithubPulls,
   getGithubCommits,
   syncGithubInstallation,
+  syncAllGithub,
   refreshGithubPullRequest,
   connectGithub,
 } from '../api/github.api';
@@ -15,8 +16,12 @@ import { githubQueryKeys } from '../../entities/model/querykeys';
 const errorMessage = (e, fallback) => e?.response?.data?.message || e?.message || fallback;
 
 // Backend signals a revoked GitHub connection (token invalid) with this code and
-// deletes the connection row — the UI must flip back to the Connect CTA.
+// deletes the connection row - the UI must flip back to the Connect CTA.
 const isReconnectRequired = (e) => e?.response?.data?.error === 'github_reconnect_required';
+
+// Backend keeps the connection but the token lacks SAML SSO authorization for an
+// org the user belongs to - surface an actionable message, do NOT flip to Connect.
+const isSsoRequired = (e) => e?.response?.data?.error === 'github_sso_required';
 
 const reconnectQueryClient = (queryClient) => {
   queryClient.invalidateQueries({ queryKey: githubQueryKeys.config });
@@ -32,6 +37,7 @@ export const useGithubConfig = () =>
     // revoked connection immediately — a stale `connected:true` would render
     // the wrong state (e.g. "Sync Repositories Now" after the user revokes
     // the OAuth grant on GitHub).
+    retry: 1, // avoid 4x15s pile-ups when the backend is slow or failing
   });
 
 /**
@@ -62,6 +68,7 @@ export const useGithubInstallations = () =>
   useQuery({
     queryKey: githubQueryKeys.installations,
     queryFn: getGithubInstallations,
+    retry: 1,
   });
 
 export const useGithubRepos = () => {
@@ -69,8 +76,10 @@ export const useGithubRepos = () => {
   return useQuery({
     queryKey: githubQueryKeys.repos,
     queryFn: getGithubRepos,
+    retry: 1,
     onError: (e) => {
       if (isReconnectRequired(e)) reconnectQueryClient(queryClient);
+      else if (isSsoRequired(e)) toast.error(errorMessage(e, 'GitHub authorization needed'));
     },
   });
 };
@@ -83,6 +92,7 @@ export const useGithubPulls = (fullName) => {
     queryFn: () => getGithubPulls(owner, repo, { refresh: true }),
     enabled: Boolean(fullName),
     staleTime: 30 * 1000,
+    retry: 1,
     onError: (e) => {
       if (isReconnectRequired(e)) reconnectQueryClient(queryClient);
     },
@@ -97,6 +107,7 @@ export const useGithubCommits = (fullName) => {
     queryFn: () => getGithubCommits(owner, repo, { refresh: true }),
     enabled: Boolean(fullName),
     staleTime: 30 * 1000,
+    retry: 1,
     onError: (e) => {
       if (isReconnectRequired(e)) reconnectQueryClient(queryClient);
     },
@@ -117,6 +128,36 @@ export const useSyncGithubInstallation = () => {
     onError: (e) => {
       if (isReconnectRequired(e)) {
         reconnectQueryClient(queryClient);
+        toast.error(errorMessage(e, 'GitHub sync failed'));
+        return;
+      }
+      if (isSsoRequired(e)) {
+        toast.error(errorMessage(e, 'GitHub sync failed'));
+        return;
+      }
+      toast.error(errorMessage(e, 'GitHub sync failed'));
+    },
+  });
+};
+
+export const useSyncAllGithub = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: syncAllGithub,
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: githubQueryKeys.repos });
+      queryClient.invalidateQueries({ queryKey: githubQueryKeys.installations });
+      toast.success(
+        `Synced ${result.repositories} repos · ${result.pullRequests} PRs · ${result.commits} commits`
+      );
+    },
+    onError: (e) => {
+      if (isReconnectRequired(e)) {
+        reconnectQueryClient(queryClient);
+        toast.error(errorMessage(e, 'GitHub sync failed'));
+        return;
+      }
+      if (isSsoRequired(e)) {
         toast.error(errorMessage(e, 'GitHub sync failed'));
         return;
       }
