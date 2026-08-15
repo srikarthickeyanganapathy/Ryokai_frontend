@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as notificationApi from '../api/notification.api';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { toast } from 'sonner';
@@ -12,21 +12,6 @@ export const useNotificationList = (params = { page: 1, size: 20 }) => {
     queryKey: queryKeys.notifications.list(params),
     queryFn: () => notificationApi.getNotifications(apiParams),
     select: (data) => data?.content || data || [],
-  });
-};
-
-export const useNotificationInfiniteList = () => {
-  return useInfiniteQuery({
-    queryKey: queryKeys.notifications.list('infinite'),
-    queryFn: async ({ pageParam = 0 }) => {
-      return await notificationApi.getNotifications({ page: pageParam, size: 20 });
-    },
-    getNextPageParam: (lastPage) => {
-      if (lastPage.number < lastPage.totalPages - 1) {
-        return lastPage.number + 1;
-      }
-      return undefined;
-    },
   });
 };
 

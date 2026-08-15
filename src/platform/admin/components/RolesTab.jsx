@@ -55,7 +55,7 @@ export function RolesTab() {
   if (rolesLoading) {
     return (
       <div className="flex flex-col lg:flex-row gap-6 mt-6 h-full">
-        <div className="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-[var(--color-border-subtle)] lg:pr-6 pb-6 lg:pb-0">
+        <div className="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-[var(--border-subtle)] lg:pr-6 pb-6 lg:pb-0">
           <Skeleton className="h-10 w-full mb-4" />
           <Skeleton className="h-20 w-full mb-2" />
           <Skeleton className="h-20 w-full mb-2" />
@@ -71,7 +71,7 @@ export function RolesTab() {
     <div className="flex flex-col lg:flex-row gap-6 mt-6 h-full min-h-[500px]">
       {confirmDialog}
       {/* Roles List Sidebar */}
-      <div className="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-[var(--color-border-subtle)] lg:pr-6 pb-6 lg:pb-0 flex flex-col">
+      <div className="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-[var(--border-subtle)] lg:pr-6 pb-6 lg:pb-0 flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <Heading level={4}>Roles</Heading>
           <Button size="sm" variant="outline" onClick={() => setIsCreateModalOpen(true)}>
@@ -87,7 +87,7 @@ export function RolesTab() {
                 "p-3 rounded-[var(--radius-md)] border cursor-pointer transition-all duration-[var(--duration-base)]",
                 selectedRole?.id === role.id 
                   ? "bg-[var(--accent-soft)] border-[var(--accent-border)] text-[var(--text-primary)]" 
-                  : "bg-[var(--bg-elevated)] border-[var(--color-border-subtle)] hover:border-[var(--color-border-default)]"
+                  : "bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:border-[var(--color-border-default)]"
               )}
             >
               <div className="flex justify-between items-center mb-1">
@@ -117,7 +117,7 @@ export function RolesTab() {
             onEdit={() => setIsUpdateModalOpen(true)}
           />
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-muted)] border border-dashed border-[var(--color-border-subtle)] rounded-[var(--radius-lg)]">
+          <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-muted)] border border-dashed border-[var(--border-subtle)] rounded-[var(--radius-lg)]">
             <Text>Select a role to view governance details</Text>
           </div>
         )}
@@ -142,7 +142,7 @@ export function RolesTab() {
 function RoleDetailsPanel({ role, onEdit }) {
   return (
     <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center mb-6 border-b border-[var(--color-border-subtle)] pb-4">
+      <div className="flex justify-between items-center mb-6 border-b border-[var(--border-subtle)] pb-4">
         <div>
           <div className="flex items-center gap-2">
             <Heading level={3} className="mb-0">{role.name.replace('ROLE_', '')}</Heading>
@@ -160,7 +160,7 @@ function RoleDetailsPanel({ role, onEdit }) {
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar space-y-6">
-        <div className="p-6 rounded-[var(--radius-lg)] border border-[var(--color-border-subtle)] bg-[var(--bg-card)] shadow-sm space-y-5">
+        <div className="p-6 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-sm space-y-5">
           <div>
             <Label className="text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1 block">
               Governance Scope
@@ -173,7 +173,7 @@ function RoleDetailsPanel({ role, onEdit }) {
             </Text>
           </div>
 
-          <div className="border-t border-[var(--color-border-subtle)] pt-4">
+          <div className="border-t border-[var(--border-subtle)] pt-4">
             <Label className="text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1 block">
               Permission Strategy
             </Label>

@@ -158,6 +158,22 @@ export const useProvisionRepoInvite = (crewId, projectId) => {
   });
 };
 
+export const useRemoveCrewCollaborator = (crewId, projectId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ repoFullName, inviteeUserId }) =>
+      crewApi.removeCollaborator(crewId, projectId, repoFullName, inviteeUserId),
+    onSuccess: () => {
+      toast.success('Collaborator removed from repository');
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.repoShares(crewId, projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.repoInvitations(crewId, projectId) });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to remove collaborator');
+    },
+  });
+};
+
 export const useInviteCrewMember = (crewId) => {
   const queryClient = useQueryClient();
   return useMutation({

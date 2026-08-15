@@ -33,7 +33,10 @@ export const projectsApi = {
   },
 
   unlinkGithubRepo: async (id, repoFullName) => {
-    const { data } = await api.delete(`/projects/${id}/github-repos/${repoFullName}`);
+    // Split owner/repo into separate path segments - matches the backend mapping
+    // {owner}/{repo} and survives any URL encoding of the slash.
+    const [owner, repo] = String(repoFullName).split('/');
+    const { data } = await api.delete(`/projects/${id}/github-repos/${owner}/${repo}`);
     return data;
   },
 
@@ -48,11 +51,6 @@ export const projectsApi = {
     } else {
       await api.delete(`/projects/${projectId}/share/crew`);
     }
-  },
-
-  unshareProjectFromCrew: async (id) => {
-    const { data } = await api.delete(`/projects/${id}/share/crew`);
-    return data;
   },
 
   getProjectActivities: async (id, params = {}) => {

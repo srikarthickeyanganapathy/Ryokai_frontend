@@ -7,6 +7,8 @@ export {
   useGithubConfig,
   useGithubInstallations,
   useGithubRepos,
+  useGithubRepo,
+  useRefreshGithubRepo,
   useGithubPulls,
   useGithubCommits,
   useGithubContents,

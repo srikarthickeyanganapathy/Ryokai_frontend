@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   GitBranch, GitPullRequest, GitCommitHorizontal, ExternalLink, Link2, Unlink, Github,
-  Search, Loader2, UserPlus, RefreshCw, FolderTree, Radio,
+  Search, Loader2, UserPlus, RefreshCw, FolderTree, Radio
 } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
 import { Text } from '@/shared/ui/Typography'
@@ -10,8 +10,8 @@ import { Button } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'
 import { Input } from '@/shared/ui/Input'
 import {
-  useGithubRepos, useGithubConfig, useGithubConnect, useSyncAllGithub, useGithubLiveEvents,
-  useGithubPulls, useGithubCommits, PullRequestList, CommitList, FileTree,
+  useGithubRepos, useGithubConfig, useGithubConnect, useSyncAllGithub,
+  PullRequestList, CommitList, FileTree, useGithubLiveEvents, useGithubPulls, useGithubCommits
 } from '@/github'
 import { useLinkGithubRepo, useUnlinkGithubRepo } from '../features/hooks/useProjects'
 import CrewRepoSharingPanel from '@/crew/components/CrewRepoSharingPanel'
@@ -106,6 +106,27 @@ export function RepositoriesTab({ project, canManage }) {
   const connect = useGithubConnect()
   const syncAll = useSyncAllGithub()
 
+  // Federated read: in a crew-shared project a member WITHOUT their own GitHub
+  // connection can still VIEW crew-shared repos (backend requireRepoViewAccess).
+  // Linking/syncing/editing are actions and need a connection.
+  const isConnected = config?.connected === true && reposData?.connected !== false
+  const viewOnlyCrewMember = isCrewShared && !isConnected
+  const viewOnlyBanner = viewOnlyCrewMember ? (
+    <div className="flex items-start gap-2.5 rounded-xl border border-[var(--accent-border)]/50 bg-[var(--accent-soft)]/30 px-3.5 py-2.5">
+      <UserPlus className="w-3.5 h-3.5 text-[var(--accent)] shrink-0 mt-0.5" />
+      <div className="min-w-0">
+        <p className="text-[12px] font-semibold text-[var(--text-primary)]">View-only crew access</p>
+        <p className="text-[11.5px] text-[var(--text-muted)] leading-relaxed">
+          You can browse repositories shared with your crew. Connect your GitHub account to link
+          repos, sync and edit files.
+        </p>
+      </div>
+      <Button size="sm" className="ml-auto shrink-0 gap-1.5 h-7 text-[11px]" onClick={() => connect.mutate()} isLoading={connect.isPending}>
+        <UserPlus className="w-3 h-3" /> Connect
+      </Button>
+    </div>
+  ) : null
+
   // Live updates: backend broadcasts PR/commit events on /topic/github/{repo}.
   useGithubLiveEvents(linked)
   const linkMutation = useLinkGithubRepo()
@@ -196,7 +217,7 @@ export function RepositoriesTab({ project, canManage }) {
     )
   }
 
-  if (config?.connected !== true || reposData?.connected === false) {
+  if (!isConnected && !isCrewShared) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="w-14 h-14 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)] flex items-center justify-center mb-4">
@@ -213,10 +234,75 @@ export function RepositoriesTab({ project, canManage }) {
     )
   }
 
+  /* Link picker — rendered in BOTH the empty and workspace states so
+     "Link first repository" actually opens the picker */
+  const linkPicker = (
+    <AnimatePresence>
+      {showPicker && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.16, ease: 'easeOut' }}
+          className="overflow-hidden"
+        >
+          <div className="rounded-xl border border-[var(--accent-border)]/60 bg-[var(--accent-soft)]/30 p-3 space-y-2.5">
+            <div className="flex items-center gap-2">
+              <Search className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
+              <Input
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search connected repositories..."
+                className="h-8 text-[12.5px] bg-[var(--bg-base)]"
+              />
+            </div>
+            <div className="max-h-52 overflow-y-auto custom-scrollbar space-y-1 pr-1">
+              {reposLoading && (
+                <div className="flex items-center justify-center py-4 text-[var(--text-muted)]">
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" /> Syncing repository list…
+                </div>
+              )}
+              {!reposLoading && candidates.length === 0 && (
+                <div className="text-center text-[12px] text-[var(--text-muted)] py-3 space-y-2.5">
+                  {repos.length === 0 ? (
+                    <>
+                      <p>No repositories mirrored yet.</p>
+                      <Button size="sm" variant="outline" className="gap-1.5 h-7 text-[11px] mx-auto" onClick={() => syncAll.mutate()} isLoading={syncAll.isPending}>
+                        <RefreshCw className="w-3 h-3" /> Sync repositories from GitHub
+                      </Button>
+                    </>
+                  ) : (
+                    <p>All connected repositories are already linked.</p>
+                  )}
+                </div>
+              )}
+              {candidates.map((name) => (
+                <button
+                  key={name}
+                  onClick={() => handleLink(name)}
+                  disabled={busy}
+                  className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left hover:bg-[var(--bg-hover)] disabled:opacity-60 transition-colors"
+                >
+                  <Github className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" strokeWidth={1.5} />
+                  <span className="text-[12.5px] font-medium text-[var(--text-primary)] truncate">{name}</span>
+                  <span className="ml-auto text-[10.5px] font-mono text-[var(--text-muted)] shrink-0">
+                    {REPO_META(mirrorByFullName[name]).defaultBranch}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+
   /* ------------------------- empty state ------------------------- */
   if (linked.length === 0) {
     return (
       <div className="space-y-4">
+        {viewOnlyBanner}
         <div className="flex flex-col items-center justify-center py-14 text-center border border-dashed border-[var(--border-subtle)] rounded-2xl bg-[var(--bg-subtle)]/20">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -235,17 +321,18 @@ export function RepositoriesTab({ project, canManage }) {
               ? 'Link a connected GitHub repository to browse files, review pull requests and commit right here.'
               : 'A project member can link GitHub repositories here.'}
           </Text>
-          {canLinkRepos && repos.length > 0 && (
+          {canLinkRepos && isConnected && repos.length > 0 && (
             <Button size="sm" className="mt-4 gap-1.5 h-8 text-[12px]" onClick={() => setShowPicker(true)}>
               <Link2 className="w-3.5 h-3.5" /> Link first repository
             </Button>
           )}
-          {canLinkRepos && repos.length === 0 && (
+          {canLinkRepos && isConnected && repos.length === 0 && (
             <Button size="sm" className="mt-4 gap-1.5 h-8 text-[12px]" onClick={() => syncAll.mutate()} isLoading={syncAll.isPending}>
               <RefreshCw className="w-3.5 h-3.5" /> Sync repositories from GitHub
             </Button>
           )}
         </div>
+        {linkPicker}
         {Array.isArray(project?.sharedCrewIds) && project.sharedCrewIds.length > 0 && (
           <CrewRepoSharingPanel crewId={project.sharedCrewIds[0]} projectId={project.id} linkedRepos={linked} canManage={canManage} />
         )}
@@ -256,6 +343,7 @@ export function RepositoriesTab({ project, canManage }) {
   /* ------------------------- workspace ------------------------- */
   return (
     <div className="space-y-4">
+      {viewOnlyBanner}
       {/* Header */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 text-[12.5px] text-[var(--text-secondary)]">
@@ -266,10 +354,12 @@ export function RepositoriesTab({ project, canManage }) {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" className="gap-1.5 h-7 text-[11px]" onClick={() => syncAll.mutate()} isLoading={syncAll.isPending}>
-            <RefreshCw className="w-3 h-3" /> Sync
-          </Button>
-          {canLinkRepos && (
+          {isConnected && (
+            <Button size="sm" variant="outline" className="gap-1.5 h-7 text-[11px]" onClick={() => syncAll.mutate()} isLoading={syncAll.isPending}>
+              <RefreshCw className="w-3 h-3" /> Sync
+            </Button>
+          )}
+          {canLinkRepos && isConnected && (
             <Button size="sm" variant="outline" className="gap-1.5 h-7 text-[11px]" onClick={() => setShowPicker((v) => !v)}>
               <Link2 className="w-3 h-3" /> Link Repository
             </Button>
@@ -278,65 +368,7 @@ export function RepositoriesTab({ project, canManage }) {
       </div>
 
       {/* Link picker */}
-      <AnimatePresence>
-        {showPicker && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="overflow-hidden"
-          >
-            <div className="rounded-xl border border-[var(--accent-border)]/60 bg-[var(--accent-soft)]/30 p-3 space-y-2.5">
-              <div className="flex items-center gap-2">
-                <Search className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
-                <Input
-                  autoFocus
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search connected repositories..."
-                  className="h-8 text-[12.5px] bg-[var(--bg-base)]"
-                />
-              </div>
-              <div className="max-h-52 overflow-y-auto custom-scrollbar space-y-1 pr-1">
-                {reposLoading && (
-                  <div className="flex items-center justify-center py-4 text-[var(--text-muted)]">
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" /> Syncing repository list…
-                  </div>
-                )}
-                {!reposLoading && candidates.length === 0 && (
-                  <div className="text-center text-[12px] text-[var(--text-muted)] py-3 space-y-2.5">
-                    {repos.length === 0 ? (
-                      <>
-                        <p>No repositories mirrored yet.</p>
-                        <Button size="sm" variant="outline" className="gap-1.5 h-7 text-[11px] mx-auto" onClick={() => syncAll.mutate()} isLoading={syncAll.isPending}>
-                          <RefreshCw className="w-3 h-3" /> Sync repositories from GitHub
-                        </Button>
-                      </>
-                    ) : (
-                      <p>All connected repositories are already linked.</p>
-                    )}
-                  </div>
-                )}
-                {candidates.map((name) => (
-                  <button
-                    key={name}
-                    onClick={() => handleLink(name)}
-                    disabled={busy}
-                    className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left hover:bg-[var(--bg-hover)] disabled:opacity-60 transition-colors"
-                  >
-                    <Github className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" strokeWidth={1.5} />
-                    <span className="text-[12.5px] font-medium text-[var(--text-primary)] truncate">{name}</span>
-                    <span className="ml-auto text-[10.5px] font-mono text-[var(--text-muted)] shrink-0">
-                      {REPO_META(mirrorByFullName[name]).defaultBranch}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {linkPicker}
 
       {/* Embedded workspace: repo rail + content pane */}
       <div className="grid grid-cols-1 lg:grid-cols-[264px_1fr] gap-4">

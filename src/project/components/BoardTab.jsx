@@ -20,14 +20,16 @@ import { toast } from 'sonner'
    status mapping; delete is permission-gated + confirmed.
    ============================================================ */
 
-export function BoardTab({ projectTasks, onUpdateStatus, onTaskDrop, onTaskClick, onNewTask }) {
+export function BoardTab({ projectTasks, onUpdateStatus, onTaskDrop, onTaskClick, onNewTask, canAct = false, isCrewProject = false }) {
   const { workspaceMode } = useWorkspace()
   const { canDeleteTask } = usePermissions()
   const { confirm, dialog } = useConfirmDialog()
   const deleteMutation = useDeleteTask()
 
-  // Crew tasks use the crew workflow; otherwise follow the active mode.
-  const isCrew = (projectTasks || []).some(t => t.crewId || t.crew)
+  // Crew tasks use the crew workflow; the project's crew-ness comes from the
+  // page (not the tasks) so an EMPTY crew project board still renders the 3
+  // crew columns (Unclaimed/Claimed/Completed) instead of the org board.
+  const isCrew = isCrewProject || (projectTasks || []).some(t => t.crewId || t.crew)
   const mode = isCrew ? 'CREWS' : workspaceMode === 'PERSONAL' ? 'PERSONAL' : 'ORG'
 
   const handleQuickDelete = async (taskId) => {
@@ -51,9 +53,11 @@ export function BoardTab({ projectTasks, onUpdateStatus, onTaskDrop, onTaskClick
         <span className="text-[13px] font-semibold text-[var(--text-primary)]">Task Board</span>
         <span className="text-[11px] text-[var(--text-muted)] tabular-nums">({(projectTasks || []).length} {(projectTasks || []).length === 1 ? 'task' : 'tasks'})</span>
         <span className="flex-1" />
-        <Button size="xs" variant="outline" className="gap-1.5" onClick={onNewTask}>
-          <Plus className="w-3 h-3" /> New Task
-        </Button>
+        {canAct && (
+          <Button size="xs" variant="outline" className="gap-1.5" onClick={onNewTask}>
+            <Plus className="w-3 h-3" /> New Task
+          </Button>
+        )}
       </div>
 
       {dialog}
@@ -61,6 +65,7 @@ export function BoardTab({ projectTasks, onUpdateStatus, onTaskDrop, onTaskClick
         tasks={projectTasks}
         mode={mode}
         responsive
+        canAct={canAct}
         onTaskClick={onTaskClick}
         onTaskStatusChange={onTaskDrop}
         onQuickComplete={onUpdateStatus}

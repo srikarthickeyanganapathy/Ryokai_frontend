@@ -115,6 +115,14 @@ export const crewApi = {
     return data;
   },
 
+  removeCollaborator: async (crewId, projectId, repoFullName, inviteeUserId) => {
+    const [owner, repo] = repoFullName.split('/');
+    const { data } = await api.delete(
+      `/crew/${crewId}/projects/${projectId}/repo-invitations/${owner}/${repo}/${inviteeUserId}`
+    );
+    return data;
+  },
+
   // --- Channels ---
   getChannels: async (crewId) => {
     const { data } = await api.get(`/crews/${crewId}/channels`);

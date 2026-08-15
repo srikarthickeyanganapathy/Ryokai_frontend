@@ -1,14 +1,11 @@
 import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
-import { Card, CardContent, CardFooter } from '@/shared/ui/Card'
-import { InteractiveCard } from '@/shared/ui/InteractiveCard'
 import { Button } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Input } from '@/shared/ui/Input'
 import { Textarea } from '@/shared/ui/Textarea'
 import { Form, FormField, FormItem, FormControl, FormMessage } from '@/shared/forms/Form'
-import { Switch } from '@/shared/ui/Switch'
 import { SettingsRow } from '@/shared/ui/SettingsRow'
 import { useProfile, useUpdateProfile, useUploadAvatar } from '@/identity'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar'
@@ -87,7 +84,7 @@ export function ProfilePage() {
                 className="overflow-hidden"
                 padding={false}
               >
-                <div className="h-28 bg-gradient-to-r from-blue-600/20 via-indigo-500/15 to-purple-600/20 relative border-b border-[var(--color-border-subtle)]">
+                <div className="h-28 bg-gradient-to-r from-blue-600/20 via-indigo-500/15 to-purple-600/20 relative border-b border-[var(--border-subtle)]">
                   <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
                 </div>
 
@@ -124,7 +121,7 @@ export function ProfilePage() {
                       <Heading level={2} className="text-lg font-bold text-[var(--text-primary)] truncate mb-0">
                         {user?.name || user?.username || 'Ryokai User'}
                       </Heading>
-                      <span className="px-2.5 py-0.5 rounded-full bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--color-border-subtle)] font-mono text-[11px] font-semibold w-fit mx-auto sm:mx-0">
+                      <span className="px-2.5 py-0.5 rounded-full bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)] font-mono text-[11px] font-semibold w-fit mx-auto sm:mx-0">
                         @{user?.username || 'user'}
                       </span>
                     </div>
@@ -145,7 +142,7 @@ export function ProfilePage() {
 
                 {user?.bio && (
                   <div className="px-6 pb-6 pt-0">
-                    <div className="p-3.5 bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] rounded-2xl text-xs text-[var(--text-secondary)] italic">
+                    <div className="p-3.5 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-2xl text-xs text-[var(--text-secondary)] italic">
                       "{user.bio}"
                     </div>
                   </div>
@@ -170,7 +167,7 @@ export function ProfilePage() {
                     </Heading>
 
                     <InteractiveCard padding={false} className="overflow-hidden">
-                      <div className="px-6 divide-y divide-[var(--color-border-subtle)]">
+                      <div className="px-6 divide-y divide-[var(--border-subtle)]">
                         
                         <FormField
                           control={form.control}
@@ -228,7 +225,7 @@ export function ProfilePage() {
                         />
                       </div>
 
-                      <div className="border-t border-[var(--color-border-subtle)] px-6 py-4 flex justify-end bg-[var(--bg-subtle)]">
+                      <div className="border-t border-[var(--border-subtle)] px-6 py-4 flex justify-end bg-[var(--bg-subtle)]">
                         <Button 
                           type="submit" 
                           size="sm"

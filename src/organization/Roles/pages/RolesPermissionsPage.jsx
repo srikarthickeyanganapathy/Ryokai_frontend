@@ -4,11 +4,6 @@ import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
 import { useOrgRoles } from '../../features/hooks/useOrganizations';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { usePermissions } from '@/identity';
-import { Heading, Text } from '@/shared/ui/Typography';
-import { Icons } from '@/shared/ui/Icons';
-import { ShieldCheck, ShieldAlert, KeyRound, Users2, CheckCircle2 } from '@/shared/ui/Icons';
-import { cn } from '@/shared/lib/cn';
-
 import { useRoleStudio } from '../hooks/useRoleStudio';
 import { CommandChain } from '../components/CommandChain';
 import { RoleHeader } from '../components/RoleHeader';
@@ -17,6 +12,9 @@ import { PermissionBrowser } from '../components/PermissionBrowser';
 import { RolePassport } from '../widgets/RolePassport';
 import { ReviewDrawer } from '../widgets/ReviewDrawer';
 import { CreateRoleDrawer } from '../widgets/CreateRoleDrawer';
+import { User2 } from 'lucide-react';
+import { Icons } from '@/shared/ui/Icons';
+import { Heading, Text } from '@/shared/ui/Typography';
 
 export function RolesPermissionsPage() {
   const { activeOrganization } = useWorkspace();

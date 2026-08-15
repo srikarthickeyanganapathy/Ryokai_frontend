@@ -49,10 +49,20 @@ export function ProjectForm({ onSubmit, defaultValues, isLoading, workspaceMode,
   const { data: crews = [] } = useCrews()
   const { data: crewMembers = [] } = useCrewMembers(watchCrewId ? parseInt(watchCrewId, 10) : null)
 
+  // Members who ALREADY have explicit access (current collaborators).
+  const currentCollaboratorIds = useMemo(
+    () => new Set(parsedCollaboratorIds.map(Number)),
+    [parsedCollaboratorIds]
+  )
+  const currentCollaborators = useMemo(
+    () => crewMembers.filter((m) => currentCollaboratorIds.has(m.userId)),
+    [crewMembers, currentCollaboratorIds]
+  )
+  // Picker shows ONLY members without access yet.
   const assignableCollaborators = useMemo(() => {
     if (!user || !crewMembers.length) return []
-    return crewMembers.filter(m => m.userId !== user.id)
-  }, [user, crewMembers])
+    return crewMembers.filter((m) => m.userId !== user.id && !currentCollaboratorIds.has(m.userId))
+  }, [user, crewMembers, currentCollaboratorIds])
 
   const handleSubmit = (data) => {
     const payload = {
@@ -168,9 +178,28 @@ export function ProjectForm({ onSubmit, defaultValues, isLoading, workspaceMode,
             name="collaboratorIds"
             render={() => (
               <FormItem>
-                <FormLabel className="text-[11px] font-medium text-[var(--text-secondary)] uppercase tracking-wider">Collaborators</FormLabel>
+                <FormLabel className="text-[11px] font-medium text-[var(--text-secondary)] uppercase tracking-wider">Collaborators & Access</FormLabel>
+
+                {/* Who already has access */}
+                <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40 p-3 space-y-1.5">
+                  <p className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Has access</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--accent-soft)] border border-[var(--accent-border)]/60 text-[11px] font-medium text-[var(--text-primary)]">
+                      {crews.find((c) => c.id.toString() === watchCrewId)?.name || 'Crew'} — everyone
+                    </span>
+                    {currentCollaborators.map((m) => (
+                      <span key={m.userId} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)]">
+                        {m.username}
+                      </span>
+                    ))}
+                    {currentCollaborators.length === 0 && (
+                      <span className="text-[11px] text-[var(--text-muted)]">No explicit collaborators added yet.</span>
+                    )}
+                  </div>
+                </div>
+
                 <FormDescription className="text-[11px] text-[var(--text-muted)]">
-                  Select crew members who can see and work on this project.
+                  Everyone in the crew sees this project. Add explicit collaborators below — only members without access are listed.
                 </FormDescription>
                 {assignableCollaborators.length === 0 ? (
                   <div className="text-[12px] text-[var(--text-muted)] p-3 border border-dashed border-[var(--border-subtle)] rounded-md text-center">

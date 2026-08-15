@@ -1,8 +1,8 @@
-﻿import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { format, isToday, isSameDay } from 'date-fns'
 import {
-  Pin, Plus, Trash2, Search, StickyNote, Calendar, FileText, Clock,
+  Pin, Plus, Trash2, Search, Calendar, FileText, Clock,
   Sparkles, Hash, ArrowUpDown, Layers, CheckCircle2,
   Lightbulb, BookOpen, Archive, LayoutGrid, List as ListIcon,
   PenLine, Check, Timer, CornerDownLeft
@@ -12,8 +12,7 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { SearchInput } from '@/shared/ui/SearchInput'
 import { Badge } from '@/shared/ui/Badge'
 import { cn } from '@/shared/lib/cn'
-import { useNotes, useDeleteNote, useUpdateNote, useCreateNote } from '@/note'
-import { NotePanel } from '@/note'
+import { useNotes, useDeleteNote, useUpdateNote, useCreateNote, NotePanel } from '@/note'
 import { noteDna } from '../entities/model/dna'
 import { PageShell, PageHero, PageToolbar, PageContent } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'

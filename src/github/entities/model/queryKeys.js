@@ -6,6 +6,7 @@ export const githubQueryKeys = {
   config: ['github', 'config'],
   installations: ['github', 'installations'],
   repos: ['github', 'repos'],
+  repo: (fullName) => ['github', 'repo', fullName],
   pulls: (fullName, state) => ['github', 'pulls', fullName, state ?? 'all'],
   commits: (fullName, branch) => ['github', 'commits', fullName, branch ?? 'all'],
   contents: (fullName, path) => ['github', 'contents', fullName, path ?? ''],

@@ -1,9 +1,4 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import {
-  Gauge,
-  Building2,
-} from '@/shared/ui/Icons';
-import { toast } from 'sonner';
 import { usePermissions } from '@/identity';
 import { useWorkload } from '@/organization/workload/features/hooks/useWorkload';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
@@ -33,6 +28,7 @@ import { WorkloadFilters } from '../components/WorkloadFilters';
 import { MemberUtilizationGrid } from '../components/MemberUtilizationGrid';
 import { WorkloadMatrixTable } from '../components/WorkloadMatrixTable';
 import { Skeleton } from '@/shared/ui/Skeleton';
+import { Gauge, Building2 } from 'lucide-react';
 
 export function WorkloadPage() {
   const { activeOrganization } = useWorkspace();

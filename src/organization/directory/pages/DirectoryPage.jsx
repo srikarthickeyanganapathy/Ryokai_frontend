@@ -12,23 +12,18 @@ import { toast } from 'sonner';
 import { Heading, Text } from '@/shared/ui/Typography';
 import {
   Shield,
-  User as UserIcon,
   Users,
   Layers,
-  PieChart,
-  Activity,
-  BarChart3,
 } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Icons } from '@/shared/ui/Icons';
 import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
-import { usePermissions, useAuth } from '@/identity';
+import { usePermissions } from '@/identity';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog';
 import { InviteMemberModal } from '../../components/Invites/InviteMemberModal';
 import { PageState } from '@/shared/ui/PageState';
-import { EntityStatStrip, EntityFilterBar } from '@/shared/ui/entity-card';
 import { PillNav } from '@/shared/ui/PillNav';
 import { MemberDetailDrawer } from '../components/MemberDetailDrawer';
 import { DirectoryOrgChart } from '../components/DirectoryOrgChart';
@@ -38,6 +33,7 @@ import { MemberCompareModal } from '../components/MemberCompareModal';
 import { RecentActivityFeed } from '../components/RecentActivityFeed';
 import { formatLastActive, hasRecentActivity } from '../components/directoryUtils';
 import { Skeleton } from '@/shared/ui/Skeleton';
+import { useAuth } from '@/identity';
 
 // ───────── Main Page Component ─────────
 

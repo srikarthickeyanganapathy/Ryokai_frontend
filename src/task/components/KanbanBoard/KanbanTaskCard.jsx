@@ -29,7 +29,7 @@ function getDueInfo(dueDate) {
   return null
 }
 
-export function KanbanTaskCard({ task, onClick, onQuickComplete, onQuickDelete }) {
+export function KanbanTaskCard({ task, onClick, onQuickComplete, onQuickDelete, canAct = false }) {
   const { user } = useAuth()
   const { canEditTask, isSuperAdmin } = usePermissions()
   const { workspaceMode } = useWorkspace()
@@ -38,7 +38,7 @@ export function KanbanTaskCard({ task, onClick, onQuickComplete, onQuickDelete }
   const creatorUsername = typeof task.creator === 'object' ? task.creator?.username : task.creator
   const isAssignee = assigneeUsername === user?.username || assigneeUsername === user?.id || (typeof task.assignee === 'object' && task.assignee?.id === user?.id)
   const isCreator = creatorUsername === user?.username || (typeof task.creator === 'object' && task.creator?.id === user?.id) || task.createdBy === user?.id
-  const isAuthorized = workspaceMode === 'PERSONAL' || isSuperAdmin || canEditTask || isAssignee || isCreator
+  const isAuthorized = workspaceMode === 'PERSONAL' || isSuperAdmin || canEditTask || canAct || isAssignee || isCreator
 
   const {
     attributes, listeners, setNodeRef, transform, transition, isDragging,

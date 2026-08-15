@@ -24,7 +24,11 @@ function useWorkspaceScope() {
 export const useTaskList = (filters) => {
   const wsScope = useWorkspaceScope();
   const { page = 0, size = 50, sort, ...restFilters } = filters || {};
-  const effectiveFilters = { ...wsScope, ...restFilters, page, size, ...(sort ? { sort } : {}) };
+  // A project board is the most specific scope — the backend resolves access per
+  // project. Never stack the workspace scope (crewId/orgId) on top of an explicit
+  // projectId, or the crew branch would swallow the project filter and show every
+  // task in the crew instead of only this project's tasks.
+  const effectiveFilters = { ...(restFilters.projectId ? {} : wsScope), ...restFilters, page, size, ...(sort ? { sort } : {}) };
   return useQuery({
     queryKey: [...queryKeys.tasks.list(effectiveFilters)],
     queryFn: () => taskApi.getTasks(effectiveFilters),
@@ -102,6 +106,11 @@ export const useCreateTask = () => {
       } else if (workspaceMode === 'CREWS') {
         const crewId = payload.crewId || activeCrew?.id || null; 
         taskPayload.crewId = crewId;
+        // Crew tasks must NEVER carry org/team context - the DTO auth gate
+        // classifies the workspace from orgId/crewId, and a leaked orgId turns
+        // a crew create into an org-RBAC evaluation (403 ACCESS_DENIED).
+        delete taskPayload.orgId;
+        delete taskPayload.teamId;
         // FIX: crew tasks are claim-based — the backend maps a provided
         // assigneeUsername to IN_PROGRESS (claimed). Never auto-assign the
         // creator; crew tasks must start unclaimed (TODO) so members can claim.

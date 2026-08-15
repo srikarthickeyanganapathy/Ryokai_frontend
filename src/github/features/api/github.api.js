@@ -13,6 +13,11 @@ export const syncAllGithub = () => api.post('/github/repos/sync', null, { timeou
 
 export const getGithubRepos = () => api.get('/github/repos').then((r) => r.data);
 
+export const getGithubRepo = (owner, repo) => api.get(`/github/repos/${owner}/${repo}`).then((r) => r.data);
+
+export const refreshGithubRepo = (owner, repo) =>
+  api.post(`/github/repos/${owner}/${repo}/refresh`, null, { timeout: 0 }).then((r) => r.data);
+
 export const getGithubPulls = (owner, repo, { state, refresh = false } = {}) =>
   api
     .get(`/github/repos/${owner}/${repo}/pulls`, { params: { state, refresh } })

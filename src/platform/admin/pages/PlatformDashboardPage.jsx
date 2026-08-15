@@ -1,6 +1,6 @@
 import React from 'react'
 import { PageShell, PageHero } from '@/shared/ui/PageShell'
-import { Heading, Text } from '@/shared/ui/Typography'
+import { Text } from '@/shared/ui/Typography'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card'
 import { Icons } from '@/shared/ui/Icons'
 import { useAdminOrganizations } from '@/platform/admin/features/hooks/useAdmin'

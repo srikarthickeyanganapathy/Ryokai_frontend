@@ -7,6 +7,7 @@ import { Button } from '@/shared/ui/Button'
 import { DropdownMenu } from '@/shared/ui/DropdownMenu'
 import { Badge } from '@/shared/ui/Badge'
 import { Modal, ModalContent } from '@/shared/ui/Modal'
+import { Skeleton } from '@/shared/ui/Skeleton'
 import { ProgressRing } from '@/shared/ui/Progress'
 import { PageShell } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
@@ -15,22 +16,21 @@ import { useTeam, useOrgMembers, useOrgTeams } from '@/organization'
 import { useCrewMembers, useCrews } from '@/crew'
 import { ProjectForm } from '../components/ProjectForm'
 import { CrewProjectShareModal } from '../components/CrewProjectShareModal'
-import { useWorkspace } from '@/app/providers/WorkspaceProvider'
-import { useTaskList, useCreateTask, useReassignTask, useTaskStatusChange, TaskForm } from '@/task'
+import { useTaskList, useCreateTask, TaskForm, useReassignTask, useTaskStatusChange } from '@/task'
 import { toast } from 'sonner'
 import { SaveToggle } from '@/saved/features/components/SaveToggle'
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
 import { PROJECT_STATUS_COLORS } from '@/shared/lib/status'
-import { usePermissions, useAuth } from '@/identity'
+import { useAuth, usePermissions } from '@/identity'
 import { calculateHealthScore, getHealthStatus, getTaskAnalytics, getTeamContributions } from '../features/utils/projectUtils'
-import { Plus, Share2, Edit3, Trash2, Archive, MoreHorizontal, AlertTriangle, CalendarClock, ListTodo, CheckCircle2 } from 'lucide-react'
+import { Plus, Share2, Edit3, Trash2, Archive, MoreHorizontal, AlertTriangle, CalendarClock, ListTodo } from 'lucide-react'
 import { Icons } from '@/shared/ui/Icons'
 import { ProjectTabs } from '../components/ProjectTabs'
 import { OverviewTab } from '../components/OverviewTab'
 import { BoardTab } from '../components/BoardTab'
 import { ActivityTab } from '../components/ActivityTab'
 import { RepositoriesTab } from '../components/RepositoriesTab'
-import { Skeleton } from '@/shared/ui/Skeleton';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
 /* ============================================================
    pages/ProjectDetailPage.jsx — project HQ (approved demo).
@@ -40,7 +40,7 @@ import { Skeleton } from '@/shared/ui/Skeleton';
    UI components throughout.
    ============================================================ */
 
-const defaultStatusColor = 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--color-border-subtle)]'
+const defaultStatusColor = 'bg-[var(--bg-subtle)] text-[var(--text-muted)] border-[var(--border-subtle)]'
 
 function hashHue(str = '') {
   let hash = 0
@@ -90,6 +90,15 @@ export function ProjectDetailPage() {
   // Creator ownership of personal/crew projects (see comment above).
   const isProjectCreator = !!user && project?.createdBy === user?.username
   const canManageThisProject = canManageProject || isProjectCreator
+  // Crew model: EXPLICIT collaborators act on the project board (claim / work /
+  // complete); other crew members are view-only. Org RBAC flags don't apply in
+  // crew mode, so derive act-access from the project's collaborator list.
+  const isProjectCollaborator = !!user && (
+    isProjectCreator ||
+    (Array.isArray(project?.collaboratorIds) && project.collaboratorIds.map(Number).includes(Number(user.id))) ||
+    (Array.isArray(project?.collaborators) && project.collaborators.some((c) => Number(c.id || c.userId) === Number(user.id)))
+  )
+  const canActOnProjectTasks = workspaceMode === 'PERSONAL' ? canManageThisProject : (isProjectCollaborator || isSuperAdmin)
   const { data: rawActivities } = useProjectActivities(Number(projectId))
   const projectActivities = Array.isArray(rawActivities) ? rawActivities : rawActivities?.content || []
   const { data: team } = useTeam(project?.teamId)
@@ -133,7 +142,7 @@ export function ProjectDetailPage() {
   const handleEditProject = (p) => updateProjectMutation.mutate({ id: Number(projectId), updates: p }, { onSuccess: () => { setIsEditModalOpen(false); toast.success('Project updated') } })
   const handleDeleteProject = () => deleteProjectMutation.mutate(Number(projectId), { onSuccess: () => { setIsDeleteModalOpen(false); toast.success('Project deleted'); navigate('/app/projects') } })
   const handleArchiveProject = () => updateProjectMutation.mutate({ id: Number(projectId), updates: { status: 'ARCHIVED' } }, { onSuccess: () => { toast.success('Project archived'); navigate('/app/projects') } })
-  const handleAddTaskSubmit = (p) => createTaskMutation.mutate({ ...p, projectId: Number(projectId), teamId: project?.teamId || null, organizationId: project?.organizationId || null, crewId: crewId || null }, { onSuccess: () => { setIsAddTaskOpen(false); toast.success('Task created') } })
+  const handleAddTaskSubmit = (p) => createTaskMutation.mutate({ ...p, projectId: Number(projectId), teamId: project?.teamId || null, crewId: crewId || null }, { onSuccess: () => { setIsAddTaskOpen(false); toast.success('Task created') } })
   const handleAssignTask = (taskId, memberId, username) => reassignTaskMutation.mutate({ taskId, newAssigneeId: memberId }, { onSuccess: () => { toast.success('Task assigned to ' + username); setAssigningTaskId(null) } })
 
   const handleTaskDrop = (taskId, colKey) => {
@@ -219,11 +228,13 @@ export function ProjectDetailPage() {
                     <Button size="sm" onClick={() => setIsAddTaskOpen(true)} className="gap-1 text-[11px] h-7 shadow-sm font-medium">
                       <Plus className="w-3 h-3" /> Add Task
                     </Button>
+                    {workspaceMode === 'PERSONAL' && canManageThisProject && (
+                      <Button variant="outline" size="sm" onClick={() => setIsShareModalOpen(true)} className="gap-1 text-[11px] h-7">
+                        <Share2 className="w-3 h-3" />{isSharedToCrew ? 'Crew Access' : 'Share'}
+                      </Button>
+                    )}
                     {canManageThisProject && (
                       <>
-                        <Button variant="outline" size="sm" onClick={() => setIsShareModalOpen(true)} className="gap-1 text-[11px] h-7">
-                          <Share2 className="w-3 h-3" />{isSharedToCrew ? 'Crew Access' : 'Share'}
-                        </Button>
                         <DropdownMenu
                           trigger={
                             <Button variant="outline" size="sm" className="px-2 h-7">
@@ -318,6 +329,8 @@ export function ProjectDetailPage() {
                 {activeTab === 'tasks' && (
                   <BoardTab
                     projectTasks={projectTasks}
+                    canAct={canActOnProjectTasks}
+                    isCrewProject={isSharedToCrew}
                     canAssignTask={canAssignTask}
                     canDragTask={canDragTask}
                     assigningTaskId={assigningTaskId}

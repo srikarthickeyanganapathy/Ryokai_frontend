@@ -1,7 +1,6 @@
 import React from 'react'
-import { motion } from 'framer-motion'
 import { PageShell, PageHero } from '@/shared/ui/PageShell'
-import { Heading, Text } from '@/shared/ui/Typography'
+import { Text } from '@/shared/ui/Typography'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card'
 import { Icons } from '@/shared/ui/Icons'
 
@@ -17,8 +16,8 @@ export function PlatformSettingsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* Environment Info (Real) */}
-        <Card className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] shadow-sm">
-          <CardHeader className="pb-3 border-b border-[var(--color-border-subtle)]">
+        <Card className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-sm">
+          <CardHeader className="pb-3 border-b border-[var(--border-subtle)]">
             <CardTitle className="text-[15px] font-semibold">Environment Information</CardTitle>
           </CardHeader>
           <CardContent className="pt-4 space-y-4">
@@ -42,11 +41,11 @@ export function PlatformSettingsPage() {
         </Card>
 
         {/* Maintenance Mode Placeholder */}
-        <Card className="border-dashed bg-[var(--bg-elevated)] border-[var(--color-border-subtle)] opacity-70">
-          <CardHeader className="pb-3 border-b border-[var(--color-border-subtle)]">
+        <Card className="border-dashed bg-[var(--bg-elevated)] border-[var(--border-subtle)] opacity-70">
+          <CardHeader className="pb-3 border-b border-[var(--border-subtle)]">
             <div className="flex justify-between items-center">
               <CardTitle className="text-[15px] font-semibold">Maintenance Mode</CardTitle>
-              <span className="px-2 py-1 bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] text-[10px] font-mono rounded text-[var(--text-secondary)] uppercase">Future</span>
+              <span className="px-2 py-1 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[10px] font-mono rounded text-[var(--text-secondary)] uppercase">Future</span>
             </div>
           </CardHeader>
           <CardContent className="pt-4 flex flex-col items-center justify-center text-center h-[160px]">
@@ -56,11 +55,11 @@ export function PlatformSettingsPage() {
         </Card>
 
         {/* Feature Flags Placeholder */}
-        <Card className="border-dashed bg-[var(--bg-elevated)] border-[var(--color-border-subtle)] opacity-70">
-          <CardHeader className="pb-3 border-b border-[var(--color-border-subtle)]">
+        <Card className="border-dashed bg-[var(--bg-elevated)] border-[var(--border-subtle)] opacity-70">
+          <CardHeader className="pb-3 border-b border-[var(--border-subtle)]">
             <div className="flex justify-between items-center">
               <CardTitle className="text-[15px] font-semibold">Feature Flags</CardTitle>
-              <span className="px-2 py-1 bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] text-[10px] font-mono rounded text-[var(--text-secondary)] uppercase">Future</span>
+              <span className="px-2 py-1 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[10px] font-mono rounded text-[var(--text-secondary)] uppercase">Future</span>
             </div>
           </CardHeader>
           <CardContent className="pt-4 flex flex-col items-center justify-center text-center h-[160px]">
@@ -70,11 +69,11 @@ export function PlatformSettingsPage() {
         </Card>
 
         {/* License Placeholder */}
-        <Card className="border-dashed bg-[var(--bg-elevated)] border-[var(--color-border-subtle)] opacity-70">
-          <CardHeader className="pb-3 border-b border-[var(--color-border-subtle)]">
+        <Card className="border-dashed bg-[var(--bg-elevated)] border-[var(--border-subtle)] opacity-70">
+          <CardHeader className="pb-3 border-b border-[var(--border-subtle)]">
             <div className="flex justify-between items-center">
               <CardTitle className="text-[15px] font-semibold">License Configuration</CardTitle>
-              <span className="px-2 py-1 bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] text-[10px] font-mono rounded text-[var(--text-secondary)] uppercase">Future</span>
+              <span className="px-2 py-1 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[10px] font-mono rounded text-[var(--text-secondary)] uppercase">Future</span>
             </div>
           </CardHeader>
           <CardContent className="pt-4 flex flex-col items-center justify-center text-center h-[160px]">

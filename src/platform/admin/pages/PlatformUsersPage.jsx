@@ -1,14 +1,11 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import { PageShell, PageHero } from '@/shared/ui/PageShell'
-import { Heading, Text } from '@/shared/ui/Typography'
 import { DataTable } from '@/shared/ui/data-table/DataTable'
 import { useUsersList } from '@/identity'
 import { useRoles, useAssignUserRoles } from '@/platform/admin/features/hooks/useAdmin'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
 import { SearchInput } from '@/shared/ui/SearchInput'
-import { Icons } from '@/shared/ui/Icons'
 import { RolesTab } from '@/platform/admin/components/RolesTab'
-import { cn } from '@/shared/lib/cn'
 import { DetailTabs } from '@/shared/ui/DetailTabs'
 
 export function PlatformUsersPage() {
@@ -112,7 +109,7 @@ export function PlatformUsersPage() {
         className="mb-6 bg-transparent border-0 border-b"
       />
 
-      <div className="flex-1 min-h-0 bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] shadow-sm overflow-hidden p-4 transition-colors duration-[var(--duration-base)]">
+      <div className="flex-1 min-h-0 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] shadow-sm overflow-hidden p-4 transition-colors duration-[var(--duration-base)]">
         {activeTab === 'users' && (
           <DataTable 
             columns={columns}

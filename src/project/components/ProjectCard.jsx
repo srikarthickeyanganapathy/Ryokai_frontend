@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Heading, Text } from '@/shared/ui/Typography'
+import { Text } from '@/shared/ui/Typography'
 import { Badge } from '@/shared/ui/Badge'
 import { InteractiveCard } from '@/shared/ui/InteractiveCard'
 import { calculateHealthScore, getHealthStatus, formatRelativeDate } from '../features/utils/projectUtils'

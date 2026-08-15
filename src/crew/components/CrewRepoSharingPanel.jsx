@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
 import {
   Share2, UserPlus, Github, Inbox, Clock3, CheckCircle2, XCircle,
-  RotateCcw, Loader2, Unplug, RefreshCw, Link2, AlertCircle,
+  RotateCcw, Loader2, Unplug, RefreshCw, Link2, AlertCircle, UserMinus,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
 import { Button } from '@/shared/ui/Button'
@@ -12,8 +13,9 @@ import { useRealtime } from '@/app/providers/RealTimeProvider'
 import {
   useCrewRepoShares, useShareCrewRepo, useUnshareCrewRepo,
   useCrewRepoInvitations, useProvisionRepoInvite, useCrewMembers,
+  useRemoveCrewCollaborator,
 } from '@/crew'
-import { useGithubConfig, useSyncAllGithub, useGithubConnect } from '@/github'
+import { useGithubConfig, useRefreshGithubRepo, useGithubConnect } from '@/github'
 
 /* ============================================================
    CrewRepoSharingPanel — federated GitHub sharing for crew
@@ -31,6 +33,7 @@ const INVITE_CHIP = {
   PENDING: { label: 'Invite sent', icon: Clock3, className: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
   ACCEPTED: { label: 'Joined', icon: CheckCircle2, className: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
   FAILED: { label: 'Failed', icon: XCircle, className: 'bg-red-500/10 text-red-500 border-red-500/20' },
+  REMOVED: { label: 'Removed', icon: XCircle, className: 'bg-red-500/10 text-red-500 border-red-500/20' },
 }
 
 function InviteStatusChip({ status }) {
@@ -46,7 +49,7 @@ function InviteStatusChip({ status }) {
   )
 }
 
-function MemberRow({ member, share, invite, myGithubLogin, canManage, invitePending, onInvite }) {
+function MemberRow({ member, share, invite, myGithubLogin, canManage, invitePending, removePending, onInvite, onRemove }) {
   const isOwner = share && myGithubLogin && share.ownerGithubLogin === myGithubLogin
   const mayInvite = (isOwner || canManage) && member.githubLogin
   const isRepoOwner = share && member.userId === share.ownerUserId
@@ -76,7 +79,7 @@ function MemberRow({ member, share, invite, myGithubLogin, canManage, invitePend
       ) : (
         <span className="text-[10.5px] text-[var(--text-muted)] px-1">Not invited</span>
       )}
-      {mayInvite && !isRepoOwner && (
+      {mayInvite && !isRepoOwner && invite?.status !== 'ACCEPTED' && (
         <Button
           variant="outline"
           size="sm"
@@ -85,14 +88,27 @@ function MemberRow({ member, share, invite, myGithubLogin, canManage, invitePend
           onClick={() => onInvite(share.repoFullName, member.userId)}
         >
           {invitePending ? <Loader2 className="w-3 h-3 animate-spin" /> : invite?.status === 'FAILED' ? <RotateCcw className="w-3 h-3 mr-1" /> : <UserPlus className="w-3 h-3 mr-1" />}
-          {invite?.status === 'PENDING' ? 'Invited' : invite?.status === 'ACCEPTED' ? 'Joined' : invite?.status === 'FAILED' ? 'Retry' : 'Invite'}
+          {invite?.status === 'PENDING' ? 'Invited' : invite?.status === 'FAILED' ? 'Retry' : 'Invite'}
+        </Button>
+      )}
+      {/* The repo owner (the member who shared it) can revoke an accepted collaborator. */}
+      {isOwner && invite?.status === 'ACCEPTED' && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="shrink-0 text-[var(--text-muted)] hover:text-red-500 hover:bg-[var(--danger)]/10"
+          disabled={removePending}
+          onClick={() => onRemove(share.repoFullName, member.userId)}
+        >
+          {removePending ? <Loader2 className="w-3 h-3 animate-spin" /> : <UserMinus className="w-3 h-3 mr-1" />}
+          Remove
         </Button>
       )}
     </div>
   )
 }
 
-function ShareCard({ share, members, invitationsByRepo, myGithubLogin, canManage, onUnshare, onInvite, invitePending }) {
+function ShareCard({ share, members, invitationsByRepo, myGithubLogin, canManage, onUnshare, onInvite, onRemove, invitePending, removePending }) {
   const [owner, repo] = share.repoFullName.split('/')
   const isOwner = myGithubLogin && share.ownerGithubLogin === myGithubLogin
   const repoInvites = invitationsByRepo.get(share.repoFullName) || new Map()
@@ -122,7 +138,7 @@ function ShareCard({ share, members, invitationsByRepo, myGithubLogin, canManage
             {owner} · shared {new Date(share.sharedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
           </div>
         </div>
-        {isOwner && (
+        {(isOwner || canManage) && (
           <Button
             variant="ghost"
             size="sm"
@@ -153,7 +169,9 @@ function ShareCard({ share, members, invitationsByRepo, myGithubLogin, canManage
             myGithubLogin={myGithubLogin}
             canManage={canManage}
             invitePending={invitePending}
+            removePending={removePending}
             onInvite={onInvite}
+            onRemove={onRemove}
           />
         ))}
       </div>
@@ -172,14 +190,31 @@ export default function CrewRepoSharingPanel({ crewId, projectId, linkedRepos = 
   const shareMutation = useShareCrewRepo(crewId, projectId)
   const unshareMutation = useUnshareCrewRepo(crewId, projectId)
   const inviteMutation = useProvisionRepoInvite(crewId, projectId)
-  const syncAll = useSyncAllGithub()
+  const removeMutation = useRemoveCrewCollaborator(crewId, projectId)
+  const refreshRepo = useRefreshGithubRepo()
   const connect = useGithubConnect()
 
+  // Scope: ONLY the project's linked repos (the rail above). Ownership follows the
+  // backend rule (isRepoOwner): the repo lives on an installation of the user's own
+  // GitHub account - i.e. the repo's owner segment IS the user's login. We do NOT
+  // use the mirror's permissionsJson here: that reflects the APP's permissions on
+  // the repo (fine-grained grants), which can be false even for the owner.
   const [pickRepo, setPickRepo] = useState('')
   const shares = sharesQuery.data || []
   const members = membersQuery.data || []
   const sharedSet = useMemo(() => new Set(shares.map((s) => s.repoFullName)), [shares])
-  const shareable = linkedRepos.filter((fullName) => !sharedSet.has(fullName))
+  const ownedSet = useMemo(() => {
+    const owned = new Set()
+    if (!myGithubLogin) return owned
+    for (const fullName of linkedRepos) {
+      const owner = fullName.split('/')[0]
+      if (owner && owner.toLowerCase() === myGithubLogin.toLowerCase()) {
+        owned.add(fullName.toLowerCase())
+      }
+    }
+    return owned
+  }, [linkedRepos, myGithubLogin])
+  const shareable = linkedRepos.filter((fullName) => !sharedSet.has(fullName) && ownedSet.has(fullName.toLowerCase()))
 
   const invitationsByRepo = useMemo(() => {
     const map = new Map()
@@ -193,6 +228,13 @@ export default function CrewRepoSharingPanel({ crewId, projectId, linkedRepos = 
   const loading = sharesQuery.isLoading || membersQuery.isLoading
   const busy = shareMutation.isPending || unshareMutation.isPending
   const invitedCount = (invitesQuery.data || []).filter((i) => i.status === 'ACCEPTED').length
+
+  const refreshLinked = () => {
+    if (!linkedRepos.length) return
+    Promise.all(linkedRepos.map((fullName) => refreshRepo.mutateAsync(fullName)))
+      .then(() => toast.success('Linked repositories refreshed'))
+      .catch(() => toast.error('Failed to refresh linked repositories'))
+  }
 
   return (
     <motion.section
@@ -208,7 +250,7 @@ export default function CrewRepoSharingPanel({ crewId, projectId, linkedRepos = 
         <div className="min-w-0 flex-1">
           <h3 className="text-[13.5px] font-semibold text-[var(--text-primary)]">Crew sharing</h3>
           <p className="text-[12px] text-[var(--text-muted)] mt-0.5 leading-relaxed">
-            Federated access — each member shares their <em className="not-italic text-[var(--text-secondary)]">own</em> repos, and the owner invites the rest as GitHub collaborators.
+            Federated access — each member shares their <em className="not-italic text-[var(--text-secondary)]">own</em> repos and invites the rest as GitHub collaborators.
           </p>
         </div>
         {connected && (
@@ -245,8 +287,8 @@ export default function CrewRepoSharingPanel({ crewId, projectId, linkedRepos = 
             <Github className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
             Connected as <span className="font-mono font-semibold text-[var(--text-primary)] truncate">@{myGithubLogin}</span>
           </span>
-          <Button variant="ghost" size="sm" className="shrink-0 gap-1.5 text-[var(--text-muted)]" onClick={() => syncAll.mutate()} isLoading={syncAll.isPending}>
-            <RefreshCw className="w-3.5 h-3.5" /> Sync repositories
+          <Button variant="ghost" size="sm" className="shrink-0 gap-1.5 text-[var(--text-muted)]" onClick={refreshLinked} isLoading={refreshRepo.isPending}>
+            <RefreshCw className="w-3.5 h-3.5" /> Refresh linked repos
           </Button>
         </div>
       )}
@@ -287,6 +329,8 @@ export default function CrewRepoSharingPanel({ crewId, projectId, linkedRepos = 
               invitePending={inviteMutation.isPending}
               onUnshare={(fullName) => unshareMutation.mutate(fullName)}
               onInvite={(repoFullName, inviteeUserId) => inviteMutation.mutate({ repoFullName, inviteeUserId })}
+              onRemove={(repoFullName, inviteeUserId) => removeMutation.mutate({ repoFullName, inviteeUserId })}
+              removePending={removeMutation.isPending}
             />
           ))}
         </AnimatePresence>
@@ -297,14 +341,14 @@ export default function CrewRepoSharingPanel({ crewId, projectId, linkedRepos = 
         )}
       </div>
 
-      {/* share picker — real linked repos, project Select component */}
-      {canManage && shareable.length > 0 && (
+      {/* share picker — ANY connected member shares their OWN repos */}
+      {config?.connected && shareable.length > 0 && (
         <div className="mt-3.5 flex flex-wrap items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40 px-3 py-2.5">
           <Link2 className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
           <div className="flex-1 min-w-[180px]">
             <Select value={pickRepo} onValueChange={setPickRepo}>
               <SelectTrigger className="h-8 w-full">
-                <SelectValue placeholder="Share a linked repo with the crew…" />
+                <SelectValue placeholder="Share a repo you own with the crew…" />
               </SelectTrigger>
               <SelectContent>
                 {shareable.map((fullName) => (
@@ -324,19 +368,24 @@ export default function CrewRepoSharingPanel({ crewId, projectId, linkedRepos = 
           </Button>
         </div>
       )}
-      {canManage && shareable.length === 0 && shares.length > 0 && (
+      {config?.connected && shareable.length === 0 && shares.length > 0 && (
         <p className="mt-3 text-[11.5px] text-[var(--text-muted)] flex items-center gap-1.5">
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> All linked repos are shared with the crew.
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> All repos you own are shared with the crew.
         </p>
       )}
-      {canManage && shareable.length === 0 && shares.length === 0 && (
+      {config?.connected && shareable.length === 0 && shares.length === 0 && linkedRepos.length === 0 && (
         <p className="mt-3 text-[11.5px] text-[var(--text-muted)]">
           Link a repository first, then it becomes shareable here.
         </p>
       )}
-      {!canManage && (
+      {config?.connected && shareable.length === 0 && shares.length === 0 && linkedRepos.length > 0 && (
         <p className="mt-3 text-[11.5px] text-[var(--text-muted)]">
-          Only the project owner can share repos and invite collaborators.
+          You don't own any of the linked repos — only the owner of a repo can share it.
+        </p>
+      )}
+      {!config?.connected && (
+        <p className="mt-3 text-[11.5px] text-[var(--text-muted)]">
+          Connect your GitHub account to share repos you own with the crew.
         </p>
       )}
 

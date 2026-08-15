@@ -344,5 +344,11 @@ export const Icons = {
   cornerDownRight: CornerDownRight,
   send: Send,
   rotateCcw: RotateCcw,
-  gitCompare: GitCompare
+  gitCompare: GitCompare,
+  doorOpen: DoorOpen,
+  plusCircle: PlusCircle,
+  checkCheck: CheckCheck,
+  CheckCheck: CheckCheck,
+  code: Code,
+  userCheck: UserCheck
 }

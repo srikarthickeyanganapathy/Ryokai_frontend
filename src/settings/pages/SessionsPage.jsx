@@ -2,7 +2,7 @@ import React from 'react'
 import { InteractiveCard } from '@/shared/ui/InteractiveCard'
 import { Badge } from '@/shared/ui/Badge'
 import { Button } from '@/shared/ui/Button'
-import { Heading, Text } from '@/shared/ui/Typography'
+import { Heading } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
 import { motion } from 'framer-motion'
 import { useSessions, useRevokeSession } from '@/identity'
@@ -72,7 +72,7 @@ export function SessionsPage() {
                     <div className="p-4 sm:p-5 flex items-center justify-between gap-4">
                       
                       <div className="flex items-start gap-4 min-w-0 flex-1">
-                        <div className="w-10 h-10 rounded-xl bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] flex items-center justify-center shrink-0 text-[var(--text-primary)]">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)] flex items-center justify-center shrink-0 text-[var(--text-primary)]">
                           <DeviceIcon className="w-5 h-5" />
                         </div>
 

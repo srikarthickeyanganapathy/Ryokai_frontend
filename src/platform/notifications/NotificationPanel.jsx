@@ -7,7 +7,6 @@ import { cn } from '@/shared/lib/cn'
 import { useMarkRead, useDeleteNotification } from './hooks/useNotifications'
 import { useAcceptInvite, useDeclineInvite } from '@/organization'
 import { useNavigate } from 'react-router-dom'
-import { useTaskList } from '@/task'
 
 export function NotificationPanel({
  notification, isOpen, onClose }) {
@@ -16,9 +15,6 @@ export function NotificationPanel({
   const deleteNotification = useDeleteNotification()
   const acceptInviteMutation = useAcceptInvite()
   const declineInviteMutation = useDeclineInvite()
-
-  const { data: { tasks = [] } = {} } = useTaskList()
-  const [selectedTask, setSelectedTask] = useState(null)
 
   const [panelWidth, setPanelWidth] = useState(() => {
     const saved = localStorage.getItem('ryokai_notifpanel_width')
@@ -97,7 +93,7 @@ export function NotificationPanel({
               transition={{ type: 'spring', damping: 25, stiffness: 280 }}
               style={{ width: `${panelWidth}px` }}
               className={cn(
-                "relative bg-[var(--bg-base)] border-l border-[var(--color-border-subtle)] shadow-2xl h-full flex flex-col z-10 select-text",
+                "relative bg-[var(--bg-base)] border-l border-[var(--border-subtle)] shadow-2xl h-full flex flex-col z-10 select-text",
                 isResizing && "select-none transition-none"
               )}
             >
@@ -114,7 +110,7 @@ export function NotificationPanel({
               </div>
 
               {/* PANEL TOP TOOLBAR */}
-              <div className="p-4 border-b border-[var(--color-border-subtle)] flex items-center justify-between bg-[var(--bg-elevated)]/50">
+              <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-elevated)]/50">
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] font-mono text-[10px] uppercase font-semibold border border-[var(--accent-border)] flex items-center gap-1">
                     <Mail className="w-3 h-3" />
@@ -163,7 +159,7 @@ export function NotificationPanel({
                 </div>
 
                 {/* MESSAGE CARD */}
-                <div className="p-5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] space-y-3 shadow-xs">
+                <div className="p-5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] space-y-3 shadow-xs">
                   <Text className="text-sm text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">
                     {notification.message || 'No additional message details provided.'}
                   </Text>
@@ -205,7 +201,7 @@ export function NotificationPanel({
                 )}
 
                 {linkedTask && (
-                  <div className="p-5 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] space-y-3">
+                  <div className="p-5 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)] space-y-3">
                     <div className="flex items-center justify-between">
                       <Text className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Associated Task</Text>
                       <Button
@@ -225,7 +221,7 @@ export function NotificationPanel({
               </div>
 
               {/* PANEL FOOTER */}
-              <div className="p-4 border-t border-[var(--color-border-subtle)] bg-[var(--bg-elevated)]/50 flex items-center justify-end">
+              <div className="p-4 border-t border-[var(--border-subtle)] bg-[var(--bg-elevated)]/50 flex items-center justify-end">
                 <Button variant="ghost" onClick={onClose} className="text-xs">
                   Done
                 </Button>

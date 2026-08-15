@@ -7,8 +7,7 @@ import { Button } from '@/shared/ui/Button';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/shared/ui/Modal';
 import { Textarea } from '@/shared/ui/Textarea';
 import { Label } from '@/shared/ui/Typography/Label';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/Select';
-import { Plus, Inbox, Calendar, Clock, Sparkles, AlertCircle } from '@/shared/ui/Icons';
+import { Plus, Inbox, Sparkles, AlertCircle } from '@/shared/ui/Icons';
 import {
   ModularToolbar,
 } from '@/shared/workspace-framework';
@@ -16,6 +15,7 @@ import { SearchPlugin } from '@/shared/workspace-framework';
 import { PageShell, PageHero, PageContent, PageToolbar } from '@/shared/ui/PageShell';
 import { PageState } from '@/shared/ui/PageState';
 import { Skeleton } from '@/shared/ui/Skeleton';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/ui/Select';
 
 export function LeaveRequestsPage() {
   const { activeOrganization } = useWorkspace();

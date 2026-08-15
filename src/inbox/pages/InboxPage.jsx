@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'

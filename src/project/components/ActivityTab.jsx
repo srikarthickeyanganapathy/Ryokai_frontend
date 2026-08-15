@@ -1,6 +1,6 @@
 import React from 'react'
 import { Activity as ActivityIcon } from 'lucide-react'
-import { Heading, Text } from '@/shared/ui/Typography'
+import { Heading } from '@/shared/ui/Typography'
 import { EmptyState } from '@/shared/ui/EmptyState'
 
 /* ============================================================

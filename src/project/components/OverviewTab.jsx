@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { CheckCircle2, ListTodo, Users, FolderKanban, ArrowRight, CalendarClock, Share2, Activity } from 'lucide-react'
+import { CheckCircle2, ListTodo, Users, FolderKanban, ArrowRight, CalendarClock, Activity, Share2 } from 'lucide-react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'
 import { Avatar, AvatarFallback } from '@/shared/ui/Avatar'
-import { ProgressRing, ProgressBar } from '@/shared/ui/Progress'
+import { ProgressBar, ProgressRing } from '@/shared/ui/Progress'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { normalizePriority, PRIORITY_HEX } from '@/shared/lib/priority'
 

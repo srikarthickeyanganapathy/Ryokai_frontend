@@ -10,14 +10,13 @@ import { useOrgTeams } from '@/organization';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar';
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover';
 import { Separator } from '@/shared/ui/Separator';
-import { Button } from '@/shared/ui/Button';
 import {
   LayoutDashboard, Inbox, CheckSquare, FolderClosed, Zap,
   Calendar, Pencil, BarChart2, Bookmark, Users, Building2,
   Network, Clock, Megaphone, Shield, ShieldAlert, Settings,
-  Rocket, Compass, Target, Scale, ChevronLeft, ChevronRight,
-  Search, Moon, Sun, Plus, LogOut, User, MoreHorizontal,
-  Star, Github
+  Rocket, Compass, Target, Scale, ChevronLeft,
+  Search, Plus, LogOut, User,
+  Star, Github , ChevronRight
 } from 'lucide-react';
 
 /* ─── Icon map — Linear-style stroke-consistent icon set (1.5px) ─── */

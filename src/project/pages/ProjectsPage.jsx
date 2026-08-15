@@ -3,18 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { useProjects, useCreateProject } from '../features/hooks/useProjects';
-import { usePermissions } from '@/identity';
+import { useOrgTeams } from '@/organization';
 import { Modal, ModalContent } from '@/shared/ui/Modal';
 import { ProjectForm } from '../components/ProjectForm';
 import { CreateFromGithubModal } from '../components/CreateFromGithubModal';
-import { useOrgTeams } from '@/organization';
-import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { PageShell, PageHero, PageContent, PageEmptyState, FloatingActions } from '@/shared/ui/PageShell';
 import { SearchPlugin } from '@/shared/workspace-framework';
 import { getPortfolioMetrics, calculateHealthScore, getHealthStatus, formatRelativeDate } from '../features/utils/projectUtils';
 import { cn } from '@/shared/lib/cn';
 import { EntityCard, EntityStatStrip, EntityFilterBar } from '@/shared/ui/entity-card';
-import { CheckSquare, CalendarClock, ExternalLink, FolderKanban, Plus, TrendingUp, AlertTriangle, Folder, Activity, Github } from 'lucide-react';
+import { CheckSquare, CalendarClock, FolderKanban, Plus, TrendingUp, AlertTriangle, Activity, Github, Folder, ExternalLink } from 'lucide-react';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
+import { usePermissions } from '@/identity';
 
 function AnimatedCounter({ value, duration = 0.8 }) {
   const [display, setDisplay] = useState(0)

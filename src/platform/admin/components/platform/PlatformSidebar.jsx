@@ -18,11 +18,11 @@ const platformNav = [
 export function PlatformSidebar({ className }) {
   return (
     <aside className={cn(
-      "w-64 border-r border-[var(--color-border-subtle)] bg-[var(--bg-elevated)] flex flex-col h-full",
+      "w-64 border-r border-[var(--border-subtle)] bg-[var(--bg-elevated)] flex flex-col h-full",
       className
     )}>
       {/* Brand */}
-      <div className="h-14 px-4 flex items-center border-b border-[var(--color-border-subtle)]">
+      <div className="h-14 px-4 flex items-center border-b border-[var(--border-subtle)]">
         <RyokaiLogo size="sm" />
       </div>
 
@@ -51,7 +51,7 @@ export function PlatformSidebar({ className }) {
       </nav>
 
       {/* Footer / User Area Placeholder */}
-      <div className="p-4 border-t border-[var(--color-border-subtle)]">
+      <div className="p-4 border-t border-[var(--border-subtle)]">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center">
             <Icons.shield className="w-4 h-4" />

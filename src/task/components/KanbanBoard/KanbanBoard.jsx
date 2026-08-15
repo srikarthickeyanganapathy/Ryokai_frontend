@@ -24,7 +24,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { getFeedbackForAction } from '@/shared/lib/statusRegistry';
 
-export function KanbanBoard({ tasks, mode, isLoading, emptyState, responsive = false, onTaskClick, onTaskStatusChange, onQuickComplete, onQuickDelete }) {
+export function KanbanBoard({ tasks, mode, isLoading, emptyState, responsive = false, onTaskClick, onTaskStatusChange, onQuickComplete, onQuickDelete, canAct = false }) {
   const [activeTask, setActiveTask] = useState(null)
   const [reassignModalTask, setReassignModalTask] = useState(null)
   const { user } = useAuth()
@@ -257,6 +257,7 @@ export function KanbanBoard({ tasks, mode, isLoading, emptyState, responsive = f
               onQuickComplete={onQuickComplete}
               onQuickDelete={onQuickDelete}
               responsive={responsive}
+              canAct={canAct}
             />
           </motion.div>
         ))}

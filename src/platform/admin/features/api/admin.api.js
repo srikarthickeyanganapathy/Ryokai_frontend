@@ -53,11 +53,6 @@ export const getAdminOrganizations = async () => {
   return data;
 };
 
-export const getAdminOrganization = async (orgId) => {
-  const { data } = await api.get(`/platform/organizations/${orgId}`);
-  return data;
-};
-
 export const suspendOrganization = async (orgId) => {
   const { data } = await api.post(`/platform/organizations/${orgId}/suspend`);
   return data;

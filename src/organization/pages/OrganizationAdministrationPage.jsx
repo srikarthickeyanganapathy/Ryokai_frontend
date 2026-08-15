@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
-import { Building2, Home, Settings, ShieldAlert, Key } from '@/shared/ui/Icons';
+import { useParams } from 'react-router-dom';
+import { Building2, Home, Settings, ShieldAlert } from '@/shared/ui/Icons';
 import { useOrganization, useOrgMembers, useOrgTeams, useLeaveRequests } from '../features/hooks/useOrganizations';
 import { usePermissions } from '@/identity';
 import { PageShell, PageHero } from '@/shared/ui/PageShell';
@@ -29,7 +29,7 @@ export function OrganizationAdministrationPage() {
   const { data: { tasks = [] } = {}, isLoading: tasksLoading } = useTaskList({ organizationId: orgId });
   const { data: goals = [], isLoading: goalsLoading } = useGoals(orgId);
   
-  const { isOrgAdmin, can } = usePermissions();
+  const { isOrgAdmin } = usePermissions();
 
   const [activeTab, setActiveTab] = useState('overview');
 

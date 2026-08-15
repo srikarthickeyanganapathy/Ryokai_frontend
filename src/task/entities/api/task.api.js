@@ -46,7 +46,7 @@ export const assignTask = async (payload) => {
 
 export const createCrewTask = async (payload) => {
   const { crewId, ...rest } = payload;
-  const { data } = await api.post('/tasks/crew', { ...rest, tags: toBackendTags(rest.tags) }, {
+  const { data } = await api.post('/tasks/crew', { ...rest, crewId, tags: toBackendTags(rest.tags) }, {
     params: { crewId }
   });
   return normalizeTask(data);

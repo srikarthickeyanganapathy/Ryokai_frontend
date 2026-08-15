@@ -1,5 +1,4 @@
 import React from 'react'
-import { motion } from 'framer-motion'
 import { PageShell, PageHero } from '@/shared/ui/PageShell'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Card, CardContent } from '@/shared/ui/Card'
@@ -14,7 +13,7 @@ export function PlatformAuditPage() {
         className="mb-6"
       />
 
-      <Card className="border-dashed bg-[var(--bg-elevated)] border-[var(--color-border-subtle)] flex-1 min-h-[300px] flex items-center justify-center opacity-70">
+      <Card className="border-dashed bg-[var(--bg-elevated)] border-[var(--border-subtle)] flex-1 min-h-[300px] flex items-center justify-center opacity-70">
         <CardContent className="flex flex-col items-center justify-center text-center p-12">
           <Icons.shieldAlert className="w-12 h-12 text-[var(--text-tertiary)] mb-4" />
           <Heading level={4} className="text-[16px] font-semibold mb-2">No Audit Provider Configured</Heading>

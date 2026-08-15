@@ -18,7 +18,7 @@ const COLUMN_STYLES = {
   'Done':        { accent: '#10B981', bg: 'rgba(16,185,129,0.025)', border: 'rgba(16,185,129,0.10)', dot: '#10B981' },
 }
 
-export function KanbanColumn({ column, tasks, onTaskClick, onQuickComplete, onQuickDelete, responsive = false }) {
+export function KanbanColumn({ column, tasks, onTaskClick, onQuickComplete, onQuickDelete, responsive = false, canAct = false }) {
   const [isQuickAdding, setIsQuickAdding] = useState(false)
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [collapsed, setCollapsed] = useState(false)
@@ -117,7 +117,7 @@ export function KanbanColumn({ column, tasks, onTaskClick, onQuickComplete, onQu
               >
                 <AnimatePresence mode="popLayout">
                   {tasks.map(task => (
-                    <KanbanTaskCard key={task.id} task={task} onClick={onTaskClick} onQuickComplete={onQuickComplete} onQuickDelete={onQuickDelete} />
+                    <KanbanTaskCard key={task.id} task={task} onClick={onTaskClick} onQuickComplete={onQuickComplete} onQuickDelete={onQuickDelete} canAct={canAct} />
                   ))}
                 </AnimatePresence>
 

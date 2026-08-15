@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
-import { InteractiveCard } from '@/shared/ui/InteractiveCard'
 import { Button } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Input } from '@/shared/ui/Input'
@@ -94,7 +93,7 @@ export function SecurityPage() {
                     Password & Credentials
                   </Heading>
                   <InteractiveCard padding={false} className="overflow-hidden">
-                    <div className="px-6 divide-y divide-[var(--color-border-subtle)]">
+                    <div className="px-6 divide-y divide-[var(--border-subtle)]">
                       
                       <FormField
                         control={form.control}
@@ -171,7 +170,7 @@ export function SecurityPage() {
                       />
                     </div>
 
-                    <div className="border-t border-[var(--color-border-subtle)] px-6 py-3.5 flex justify-end bg-[var(--bg-subtle)]">
+                    <div className="border-t border-[var(--border-subtle)] px-6 py-3.5 flex justify-end bg-[var(--bg-subtle)]">
                       <Button 
                         type="submit" 
                         size="sm"

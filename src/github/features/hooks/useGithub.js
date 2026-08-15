@@ -6,6 +6,8 @@ import {
   getGithubConfig,
   getGithubInstallations,
   getGithubRepos,
+  getGithubRepo,
+  refreshGithubRepo,
   getGithubPulls,
   getGithubCommits,
   getGithubContents,
@@ -92,6 +94,41 @@ export const useGithubRepos = (options = {}) => {
       if (isReconnectRequired(e)) reconnectQueryClient(queryClient);
       else if (isSsoRequired(e)) toast.error(errorMessage(e, 'GitHub authorization needed'));
       options.onError?.(e);
+    },
+  });
+};
+
+/**
+ * Metadata for ONE repo (permissions/default branch). Used by crew sharing so the
+ * panel only loads the project's LINKED repos - never the user's full repo list.
+ */
+export const useGithubRepo = (fullName, options = {}) => {
+  const queryClient = useQueryClient();
+  const [owner, repo] = (fullName || '').split('/');
+  return useQuery({
+    queryKey: githubQueryKeys.repo(fullName),
+    queryFn: () => getGithubRepo(owner, repo),
+    enabled: Boolean(fullName) && Boolean(owner) && Boolean(repo),
+    retry: 1,
+    staleTime: 30 * 1000,
+    ...options,
+    onError: (e) => {
+      if (isReconnectRequired(e)) reconnectQueryClient(queryClient);
+      options.onError?.(e);
+    },
+  });
+};
+
+/** Refreshes ONE repo's metadata from GitHub (scoped sync - only the repos shown). */
+export const useRefreshGithubRepo = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (fullName) => {
+      const [owner, repo] = fullName.split('/');
+      return refreshGithubRepo(owner, repo);
+    },
+    onSuccess: (data, fullName) => {
+      queryClient.setQueryData(githubQueryKeys.repo(fullName), data);
     },
   });
 };

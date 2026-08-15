@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Target, Building2 } from '@/shared/ui/Icons';
+import { Plus } from '@/shared/ui/Icons';
 import { Button } from '@/shared/ui/Button';
 import { usePermissions } from '@/identity';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
@@ -22,8 +22,8 @@ import {
   filterGoalsByStatus,
   sortGoals,
 } from '@/organization/goals/features/utils/goalCalculations';
-import { Text } from '@/shared/ui/Typography';
 import { Skeleton } from '@/shared/ui/Skeleton';
+import { Building2, Target } from 'lucide-react';
 
 export function GoalsPage() {
   const { workspaceMode } = useWorkspace();

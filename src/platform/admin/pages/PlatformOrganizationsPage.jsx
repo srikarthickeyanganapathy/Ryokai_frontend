@@ -1,7 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { motion } from 'framer-motion'
 import { PageShell, PageHero } from '@/shared/ui/PageShell'
-import { Heading, Text } from '@/shared/ui/Typography'
 import { DataTable } from '@/shared/ui/data-table/DataTable'
 import { useAdminOrganizations, useSuspendOrganization, useActivateOrganization } from '@/platform/admin/features/hooks/useAdmin'
 import { Button } from '@/shared/ui/Button'
@@ -108,7 +106,7 @@ export function PlatformOrganizationsPage() {
         className="mb-6"
       />
 
-      <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl overflow-hidden shadow-sm">
         <DataTable
           columns={columns}
           data={filteredOrgs}

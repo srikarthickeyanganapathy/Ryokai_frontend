@@ -65,9 +65,9 @@ export function OrganizationsPage() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center max-w-md bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-10"
+          className="text-center max-w-md bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] p-10"
         >
-          <div className="w-14 h-14 rounded-[var(--radius-lg)] bg-[var(--accent-soft)] border border-[var(--color-border-subtle)] flex items-center justify-center mx-auto mb-5">
+          <div className="w-14 h-14 rounded-[var(--radius-lg)] bg-[var(--accent-soft)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto mb-5">
             <Icons.workspace className="w-6 h-6 text-[var(--accent)]" />
           </div>
           <Heading level={3}>Create your organization</Heading>
