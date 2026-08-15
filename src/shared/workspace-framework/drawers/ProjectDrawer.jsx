@@ -5,7 +5,7 @@ import { Button } from '@/shared/ui/Button'
 import { Progress } from '@/shared/ui/Progress'
 import { cn } from '@/shared/lib/cn'
 import { Calendar, Users, FolderKanban, ExternalLink, Clock } from '@/shared/ui/Icons'
-import { resolveStatus } from '@/shared/lib/statusregistry'
+import { resolveStatus } from '@/shared/lib/statusRegistry'
 
 const STATUS_CONFIG = {
   ACTIVE: { label: 'Active', color: 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success-border)]' },

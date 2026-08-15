@@ -56,7 +56,7 @@ export function ProjectsPage() {
   const [isGithubCreateOpen, setIsGithubCreateOpen] = useState(false);
   const navigate = useNavigate();
 
-  const { workspaceMode, activeOrganization } = useWorkspace();
+  const { workspaceMode, activeOrganization, activeCrew } = useWorkspace();
   const { canCreateProject } = usePermissions();
   const canCreate = workspaceMode === 'PERSONAL' || workspaceMode === 'CREWS' || canCreateProject;
 
@@ -66,7 +66,16 @@ export function ProjectsPage() {
     return () => clearTimeout(timer);
   }, [globalFilter]);
 
-  const { data: allProjects = [], isLoading, isError, error, refetch } = useProjects({ search: debouncedFilter });
+  // Scope the backend query to the active workspace (the backend no longer
+  // mixes personal + org + crew projects into one response).
+  const scopeParams = React.useMemo(() => {
+    if (workspaceMode === 'ORG' && activeOrganization?.id) return { orgId: activeOrganization.id };
+    if (workspaceMode === 'CREWS' && activeCrew?.id) return { crewId: activeCrew.id };
+    if (workspaceMode === 'CREWS') return { scope: 'CREWS' };
+    return {};
+  }, [workspaceMode, activeOrganization, activeCrew]);
+
+  const { data: allProjects = [], isLoading, isError, error, refetch } = useProjects({ search: debouncedFilter, ...scopeParams });
   const createProjectMutation = useCreateProject();
 
   const projects = useMemo(() => {

@@ -7,7 +7,7 @@ import React, { useMemo } from 'react'
 import ExplorerNavBar from './ExplorerNavBar'
 import { AlertTriangle, ArrowDown, ArrowUp, Route, ShieldAlert } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
-import { resolveStatus } from '@/shared/lib/statusregistry'
+import { resolveStatus } from '@/shared/lib/statusRegistry'
 function TaskRow({ task, onClick, depth = 0, isActive }) {
   const status = task.status || task.currentStatus || 'OPEN'
   const statusColor = resolveStatus(status).colorClass || resolveStatus('TODO').colorClass

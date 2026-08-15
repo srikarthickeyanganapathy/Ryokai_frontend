@@ -10,6 +10,8 @@ import { cn } from '@/shared/lib/cn'
 import { normalizePriority } from '@/shared/lib/priority'
 import { ChecklistForm } from './ChecklistForm'
 import { TaskComments, TaskDependencies, TaskEvidence } from './TaskPanelExtras'
+import { TaskPullLinks } from '@/github/features/components/TaskPullLinks'
+import { taskTabsFor } from '@/task'
 import ActivityTimeline from '../Nebula/explorers/ActivityTimeline'
 import {
   useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, useReorderChecklistItems,
@@ -29,21 +31,15 @@ import { toast } from 'sonner'
 import { SaveToggle } from '@/saved/features/components/SaveToggle'
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
 import { toBackendStatus } from '@/shared/lib/status'
-import { resolveStatus } from '@/shared/lib/statusregistry'
+import { resolveStatus } from '@/shared/lib/statusRegistry'
 import { StatusBadge } from '@/shared/ui/StatusBadge'
 
-/* Status colors handled by StatusBadge component via statusregistry */
-
-const TABS = [
-  { id: 'details', label: 'Details' },
-  { id: 'comments', label: 'Comments' },
-  { id: 'evidence', label: 'Evidence' },
-  { id: 'activity', label: 'Activity' },
-]
+/* Status colors handled by StatusBadge component via statusRegistry */
 
 export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default', isDocked = false }) {
   const { workspaceMode } = useWorkspace()
   const isPersonal = workspaceMode === 'PERSONAL'
+  const TABS = taskTabsFor(workspaceMode)
   const { user } = useAuth()
   const {
     canArchiveTask, canEditTask, canDeleteTask, canAssignTask,
@@ -331,6 +327,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                     activeTab === tab.id ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                   )}>
                   {tab.label}
+                  {tab.icon && <tab.icon className="w-3.5 h-3.5" />}
                   {activeTab === tab.id && (
                     <motion.div layoutId="task-panel-tab-bar" className="absolute left-1 right-1 bottom-0 h-[2px] bg-[var(--accent)] rounded-full"
                       transition={{ type: 'spring', stiffness: 500, damping: 30 }} />
@@ -514,6 +511,12 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
             {activeTab === 'evidence' && (
               <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
                 <TaskEvidence taskId={task.id} hasEditPerm={isAssignee || (isPersonal && isCreator)} />
+              </div>
+            )}
+
+            {activeTab === 'prs' && (
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
+                <TaskPullLinks taskId={task.id} projectId={task.projectId} crewId={task.crewId} hasEditPerm={hasEditPerm} />
               </div>
             )}
 

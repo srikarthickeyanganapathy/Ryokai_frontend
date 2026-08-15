@@ -1,17 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { useRealtime } from '@/app/providers/RealTimeProvider';
 import {
   getGithubConfig,
   getGithubInstallations,
   getGithubRepos,
   getGithubPulls,
   getGithubCommits,
+  getGithubContents,
+  getTaskLinkedPulls,
+  linkTaskPull,
+  unlinkTaskPull,
+  getGithubFile,
+  writeGithubFile,
+  createGithubBranch,
+  openGithubPullRequest,
   syncGithubInstallation,
   syncAllGithub,
   refreshGithubPullRequest,
   connectGithub,
 } from '../api/github.api';
-import { githubQueryKeys } from '../../entities/model/querykeys';
+import { githubQueryKeys } from '../../entities/model/queryKeys';
 
 const errorMessage = (e, fallback) => e?.response?.data?.message || e?.message || fallback;
 
@@ -71,30 +81,35 @@ export const useGithubInstallations = () =>
     retry: 1,
   });
 
-export const useGithubRepos = () => {
+export const useGithubRepos = (options = {}) => {
   const queryClient = useQueryClient();
   return useQuery({
     queryKey: githubQueryKeys.repos,
     queryFn: getGithubRepos,
     retry: 1,
+    ...options,
     onError: (e) => {
       if (isReconnectRequired(e)) reconnectQueryClient(queryClient);
       else if (isSsoRequired(e)) toast.error(errorMessage(e, 'GitHub authorization needed'));
+      options.onError?.(e);
     },
   });
 };
 
-export const useGithubPulls = (fullName) => {
+export const useGithubPulls = (fullName, options = {}) => {
   const queryClient = useQueryClient();
   const [owner, repo] = (fullName || '').split('/');
+  const refresh = options.refresh ?? true;
   return useQuery({
     queryKey: githubQueryKeys.pulls(fullName),
-    queryFn: () => getGithubPulls(owner, repo, { refresh: true }),
+    queryFn: () => getGithubPulls(owner, repo, { refresh }),
     enabled: Boolean(fullName),
     staleTime: 30 * 1000,
     retry: 1,
+    ...options,
     onError: (e) => {
       if (isReconnectRequired(e)) reconnectQueryClient(queryClient);
+      options.onError?.(e);
     },
   });
 };
@@ -113,6 +128,137 @@ export const useGithubCommits = (fullName) => {
     },
   });
 };
+
+export const useGithubContents = (fullName, path) => {
+  const [owner, repo] = (fullName || '').split('/');
+  return useQuery({
+    queryKey: githubQueryKeys.contents(fullName, path),
+    queryFn: () => getGithubContents(owner, repo, path),
+    enabled: Boolean(fullName),
+    staleTime: 30 * 1000,
+    retry: 1,
+  });
+};
+
+export const useTaskLinkedPulls = (taskId) => {
+  return useQuery({
+    queryKey: githubQueryKeys.taskPulls(taskId),
+    queryFn: () => getTaskLinkedPulls(taskId),
+    enabled: Boolean(taskId),
+    retry: 1,
+  });
+};
+
+export const useLinkTaskPull = (taskId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ repoFullName, prNumber }) => linkTaskPull(taskId, repoFullName, prNumber),
+    onSuccess: () => {
+      toast.success('Pull request linked to task');
+      queryClient.invalidateQueries({ queryKey: githubQueryKeys.taskPulls(taskId) });
+    },
+    onError: (e) => toast.error(errorMessage(e, 'Could not link pull request')),
+  });
+};
+
+export const useUnlinkTaskPull = (taskId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ repoFullName, prNumber }) => {
+      const [owner, repo] = repoFullName.split('/');
+      return unlinkTaskPull(taskId, owner, repo, prNumber);
+    },
+    onSuccess: () => {
+      toast.success('Pull request unlinked');
+      queryClient.invalidateQueries({ queryKey: githubQueryKeys.taskPulls(taskId) });
+    },
+    onError: (e) => toast.error(errorMessage(e, 'Could not unlink pull request')),
+  });
+};
+
+export const useGithubFile = (fullName, path, ref) => {
+  const [owner, repo] = (fullName || '').split('/');
+  return useQuery({
+    queryKey: githubQueryKeys.file(fullName, path, ref),
+    queryFn: () => getGithubFile(owner, repo, path, ref),
+    enabled: Boolean(fullName && path),
+    staleTime: 30 * 1000,
+    retry: 1,
+  });
+};
+
+export const useWriteGithubFile = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ fullName, payload }) => {
+      const [owner, repo] = fullName.split('/');
+      return writeGithubFile(owner, repo, payload);
+    },
+    onSuccess: () => {
+      toast.success('Committed to GitHub');
+      queryClient.invalidateQueries({ queryKey: githubQueryKeys.repos });
+    },
+    onError: (e) => toast.error(errorMessage(e, 'Could not commit the file')),
+  });
+};
+
+export const useCreateGithubBranch = () => {
+  return useMutation({
+    mutationFn: ({ fullName, name, base }) => {
+      const [owner, repo] = fullName.split('/');
+      return createGithubBranch(owner, repo, name, base);
+    },
+    onError: (e) => toast.error(errorMessage(e, 'Could not create the branch')),
+  });
+};
+
+export const useOpenGithubPullRequest = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ fullName, payload }) => {
+      const [owner, repo] = fullName.split('/');
+      return openGithubPullRequest(owner, repo, payload);
+    },
+    onSuccess: (data) => {
+      toast.success(`Pull request #${data?.number || ''} opened`);
+      queryClient.invalidateQueries({ queryKey: githubQueryKeys.repos });
+    },
+    onError: (e) => toast.error(errorMessage(e, 'Could not open the pull request')),
+  });
+};
+
+export const useGithubLiveEvents = (repoFullNames) => {
+  const { subscribeToTopic } = useRealtime()
+  const queryClient = useQueryClient()
+  const names = Array.isArray(repoFullNames)
+    ? repoFullNames.filter(Boolean)
+    : repoFullNames
+      ? [repoFullNames]
+      : []
+  const key = names.join(',')
+  // Coalesce bursts (multi-repo syncs, webhook fan-out) into one refetch per repo -
+  // prevents a storm of invalidations from hammering the backend.
+  const timers = useRef({})
+  useEffect(() => {
+    if (names.length === 0) return undefined
+    const unsubs = names.map((fullName) =>
+      subscribeToTopic(`/topic/github/${fullName}`, () => {
+        clearTimeout(timers.current[fullName])
+        timers.current[fullName] = setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: githubQueryKeys.pulls(fullName) })
+          queryClient.invalidateQueries({ queryKey: githubQueryKeys.commits(fullName) })
+          queryClient.invalidateQueries({ queryKey: githubQueryKeys.repos })
+        }, 800)
+      })
+    )
+    return () => {
+      unsubs.forEach((unsub) => unsub?.())
+      Object.values(timers.current).forEach(clearTimeout)
+      timers.current = {}
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, subscribeToTopic, queryClient])
+}
 
 export const useSyncGithubInstallation = () => {
   const queryClient = useQueryClient();

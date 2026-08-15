@@ -78,7 +78,7 @@ export const useAssignTask = () => {
 export const useCreateTask = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { workspaceMode, activeCrew } = useWorkspace();
+  const { workspaceMode, activeCrew, activeOrganization } = useWorkspace();
   return useMutation({
     mutationFn: async (payload) => {
       // Ensure required fields: assigneeUsername defaults to current user, priority defaults to MEDIUM
@@ -93,6 +93,11 @@ export const useCreateTask = () => {
 
       if (workspaceMode === 'PERSONAL') {
         taskPayload.isPersonal = true;
+        // Personal tasks must never carry org/team/crew scope ids - the
+        // backend auth gate would otherwise classify them as org/crew creates.
+        delete taskPayload.orgId;
+        delete taskPayload.teamId;
+        delete taskPayload.crewId;
         return await taskApi.createPersonalTask(taskPayload);
       } else if (workspaceMode === 'CREWS') {
         const crewId = payload.crewId || activeCrew?.id || null; 
@@ -103,6 +108,11 @@ export const useCreateTask = () => {
         delete taskPayload.assigneeUsername;
         return await taskApi.createCrewTask(taskPayload);
       } else {
+        // Org task: send orgId explicitly (from the caller payload or the
+        // active org) so the backend never has to guess the org from an
+        // arbitrary membership.
+        const orgId = payload.orgId || activeOrganization?.id || null;
+        if (orgId) taskPayload.orgId = Number(orgId);
         taskPayload.isPersonal = false;
         return await taskApi.assignTask(taskPayload);
       }

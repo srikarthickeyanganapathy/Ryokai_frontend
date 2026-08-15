@@ -1,8 +1,8 @@
 /**
  * Ryokai — Status Language System
- * @deprecated Use `@/shared/lib/statusregistry` instead.
+ * @deprecated Use `@/shared/lib/statusRegistry` instead.
  * The STATUS_MAP and MOTION_PRIORITY here are kept only for backward compat.
- * New code should import { resolveStatus, getSemanticColor, getMotion } from '@/shared/lib/statusregistry'.
+ * New code should import { resolveStatus, getSemanticColor, getMotion } from '@/shared/lib/statusRegistry'.
  */
 
 import React from 'react';

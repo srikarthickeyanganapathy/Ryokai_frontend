@@ -1,6 +1,6 @@
 import React from 'react'
 import { cn } from '@/shared/lib/cn'
-import { resolveStatus } from '@/shared/lib/statusregistry'
+import { resolveStatus } from '@/shared/lib/statusRegistry'
 
 /**
  * StatusBadge — canonical status badge using the single-source status registry.

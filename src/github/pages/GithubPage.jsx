@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Github, GitPullRequest, GitCommitHorizontal, RefreshCw, PlugZap } from 'lucide-react';
+import { Github, GitPullRequest, GitCommitHorizontal, RefreshCw, PlugZap, FolderTree } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { PageShell, PageHero, PageStats, PageToolbar, PageContent } from '@/shared/ui/PageShell';
 import { PageState } from '@/shared/ui/PageState';
@@ -13,12 +13,15 @@ import {
   useGithubPulls,
   useGithubCommits,
   useSyncGithubInstallation,
+  useSyncAllGithub,
   useGithubConnect,
+  useGithubLiveEvents,
 } from '@/github';
 import { GithubOnboarding } from '@/github/features/components/GithubOnboarding';
 import { RepoList } from '@/github/features/components/RepoList';
 import { PullRequestList } from '@/github/features/components/PullRequestList';
 import { CommitList } from '@/github/features/components/CommitList';
+import { FileTree } from '@/github/features/components/FileTree';
 
 function StatCard({ label, value, accent }) {
   return (
@@ -42,6 +45,7 @@ export function GithubPage() {
   const { data: installations = [] } = useGithubInstallations();
   const { data: reposData, isLoading: reposLoading, isError, error, refetch } = useGithubRepos();
   const syncInstallation = useSyncGithubInstallation();
+  const syncAll = useSyncAllGithub();
   const connect = useGithubConnect();
 
   const [selectedFullName, setSelectedFullName] = useState(null);
@@ -60,6 +64,9 @@ export function GithubPage() {
   const commitsQuery = useGithubCommits(selectedFullName);
   const pullRequests = pullsQuery.data?.pullRequests || [];
   const commits = commitsQuery.data?.commits || [];
+
+  // Live PR/commit updates via STOMP for the currently selected repository.
+  useGithubLiveEvents(selectedFullName);
 
   const stats = useMemo(() => {
     const open = repos.reduce((sum, r) => sum + (r.openPullRequests || 0), 0);
@@ -110,6 +117,15 @@ export function GithubPage() {
     }
   };
 
+  const handleSyncAll = async () => {
+    setSyncingInstallation('all');
+    try {
+      await syncAll.mutateAsync();
+    } finally {
+      setSyncingInstallation(null);
+    }
+  };
+
   const handleConnect = async () => {
     try {
       await connect.mutateAsync();
@@ -126,8 +142,8 @@ export function GithubPage() {
             <Button
               variant="secondary"
               size="sm"
-              isLoading={syncInstallation.isPending}
-              onClick={() => installations.length > 0 && handleSyncInstallation(installations[0].installationId)}
+              isLoading={syncingInstallation === 'all'}
+              onClick={handleSyncAll}
             >
               <RefreshCw className="mr-1.5 h-3.5 w-3.5" strokeWidth={1.5} />
               Sync all
@@ -175,8 +191,8 @@ export function GithubPage() {
           <GithubOnboarding
             installUrl={config?.installUrl || null}
             installationId={installations[0]?.installationId || null}
-            onSync={() => installations.length > 0 && handleSyncInstallation(installations[0].installationId)}
-            isSyncing={syncInstallation.isPending}
+            onSync={handleSyncAll}
+            isSyncing={syncingInstallation === 'all'}
           />
         </PageContent>
       ) : (
@@ -210,6 +226,16 @@ export function GithubPage() {
                 <GitCommitHorizontal className="h-3.5 w-3.5" strokeWidth={1.5} />
                 Commits
               </button>
+              <button
+                onClick={() => setTab('files')}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors duration-150',
+                  tab === 'files' ? 'bg-[var(--accent-soft)] text-[var(--accent)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
+                )}
+              >
+                <FolderTree className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Files
+              </button>
             </div>
           </PageToolbar>
 
@@ -237,13 +263,15 @@ export function GithubPage() {
                     onRefreshAll={() => pullsQuery.refetch()}
                     isRefreshing={pullsQuery.isFetching && !pullsQuery.isLoading}
                   />
-                ) : (
+                ) : tab === 'commits' ? (
                   <CommitList
                     commits={commits}
                     isLoading={commitsQuery.isLoading || commitsQuery.isFetching}
                     onRefreshAll={() => commitsQuery.refetch()}
                     isRefreshing={commitsQuery.isFetching && !commitsQuery.isLoading}
                   />
+                ) : (
+                  <FileTree key={selectedFullName} fullName={selectedFullName} />
                 )}
               </div>
             </div>

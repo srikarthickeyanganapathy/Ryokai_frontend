@@ -1,7 +1,7 @@
 /**
  * Status normalization between frontend display values and backend enum values.
  * Backend TaskStatus enum: TODO, ASSIGNED, SUBMITTED, APPROVED, REJECTED, COMPLETED.
- * Canonical status definitions in statusregistry.js — this module provides
+ * Canonical status definitions in statusRegistry.js — this module provides
  * normalization/conversion utilities only.
  * 
  * - TODO / COMPLETED are used for personal tasks (isPersonal = true)
@@ -10,7 +10,7 @@
  * Frontend display: To Do, In Progress, In Review, Approved, Rejected, Done
  */
 
-// Backend enum -> Frontend display (labels aligned with statusregistry.js)
+// Backend enum -> Frontend display (labels aligned with statusRegistry.js)
 const BACKEND_TO_FRONTEND = {
   TODO:        'To Do',        // personal task, not yet started
   IN_PROGRESS: 'In Progress',   // task is sitting with the assignee

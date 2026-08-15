@@ -5,7 +5,7 @@ import { Button } from '@/shared/ui/Button'
 import { cn } from '@/shared/lib/cn'
 import { Calendar, Flag, User, Clock, ExternalLink, CheckCircle2 } from '@/shared/ui/Icons'
 import { PRIORITY_COLORS } from '@/shared/lib/priority'
-import { resolveStatus } from '@/shared/lib/statusregistry'
+import { resolveStatus } from '@/shared/lib/statusRegistry'
 
 /**
  * TaskDrawer

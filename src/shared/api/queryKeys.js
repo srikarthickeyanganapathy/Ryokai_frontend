@@ -21,6 +21,8 @@ export const queryKeys = {
     messages: (crewId, channelId) => [...queryKeys.crews.detail(crewId), 'channels', channelId, 'messages'],
     projects: (id) => [...queryKeys.crews.detail(id), 'projects'],
     whiteboards: (id) => [...queryKeys.crews.detail(id), 'whiteboards'],
+    repoShares: (crewId, projectId) => [...queryKeys.crews.detail(crewId), 'projects', projectId, 'repo-shares'],
+    repoInvitations: (crewId, projectId) => [...queryKeys.crews.detail(crewId), 'projects', projectId, 'repo-invitations'],
   },
   users: {
     all: ['users'],

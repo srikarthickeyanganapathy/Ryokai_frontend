@@ -96,6 +96,68 @@ export const useCrewMembers = (crewId) => {
   });
 };
 
+// --- Federated GitHub repo sharing (crew mode) ---
+
+export const useCrewRepoShares = (crewId, projectId) => {
+  return useQuery({
+    queryKey: queryKeys.crews.repoShares(crewId, projectId),
+    queryFn: () => crewApi.getRepoShares(crewId, projectId),
+    enabled: !!crewId && !!projectId,
+  });
+};
+
+export const useShareCrewRepo = (crewId, projectId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (repoFullName) => crewApi.shareRepo(crewId, projectId, repoFullName),
+    onSuccess: () => {
+      toast.success('Repository shared with the crew');
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.repoShares(crewId, projectId) });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to share repository');
+    },
+  });
+};
+
+export const useUnshareCrewRepo = (crewId, projectId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (repoFullName) => crewApi.unshareRepo(crewId, projectId, repoFullName),
+    onSuccess: () => {
+      toast.success('Repository unshared');
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.repoShares(crewId, projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.repoInvitations(crewId, projectId) });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to unshare repository');
+    },
+  });
+};
+
+export const useCrewRepoInvitations = (crewId, projectId) => {
+  return useQuery({
+    queryKey: queryKeys.crews.repoInvitations(crewId, projectId),
+    queryFn: () => crewApi.getRepoInvitations(crewId, projectId),
+    enabled: !!crewId && !!projectId,
+  });
+};
+
+export const useProvisionRepoInvite = (crewId, projectId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ repoFullName, inviteeUserId }) =>
+      crewApi.provisionRepoInvite(crewId, projectId, repoFullName, inviteeUserId),
+    onSuccess: () => {
+      toast.success('GitHub collaborator invite sent');
+      queryClient.invalidateQueries({ queryKey: queryKeys.crews.repoInvitations(crewId, projectId) });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to send GitHub invite');
+    },
+  });
+};
+
 export const useInviteCrewMember = (crewId) => {
   const queryClient = useQueryClient();
   return useMutation({

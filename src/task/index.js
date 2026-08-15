@@ -7,3 +7,4 @@ export { KanbanBoard } from './components/KanbanBoard/KanbanBoard';
 export * from './entities/hooks/useTasks';
 export * from './entities/model/types';
 export * from './entities/model/normalizer';
+export * from './entities/model/taskTabs';

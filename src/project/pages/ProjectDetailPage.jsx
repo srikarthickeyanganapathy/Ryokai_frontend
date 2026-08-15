@@ -65,6 +65,12 @@ export function ProjectDetailPage() {
   const { canManageProject, canAssignTask, canEditTask, canReview, canReviewTask, isSuperAdmin } = usePermissions()
   const { user } = useAuth()
 
+  // Org permission rules apply ONLY to organization projects. Personal and crew
+  // projects are owned by their creator: the backend grants the creator
+  // PROJECT_UPDATE (OwnershipActionRegistry), so mirror that here instead of
+  // gating personal/crew management behind org-derived flags (which are always
+  // false outside an org).
+
   const initialTab = searchParams.get('tab')
   const [activeTab, setActiveTab] = useState(initialTab && ['overview', 'tasks', 'repos', 'activity'].includes(initialTab) ? initialTab : 'overview')
   const handleTabChange = (id) => {
@@ -80,6 +86,10 @@ export function ProjectDetailPage() {
 
 
   const { data: project, isLoading: projectLoading, isError: projectError } = useProject(Number(projectId))
+
+  // Creator ownership of personal/crew projects (see comment above).
+  const isProjectCreator = !!user && project?.createdBy === user?.username
+  const canManageThisProject = canManageProject || isProjectCreator
   const { data: rawActivities } = useProjectActivities(Number(projectId))
   const projectActivities = Array.isArray(rawActivities) ? rawActivities : rawActivities?.content || []
   const { data: team } = useTeam(project?.teamId)
@@ -209,7 +219,7 @@ export function ProjectDetailPage() {
                     <Button size="sm" onClick={() => setIsAddTaskOpen(true)} className="gap-1 text-[11px] h-7 shadow-sm font-medium">
                       <Plus className="w-3 h-3" /> Add Task
                     </Button>
-                    {canManageProject && (
+                    {canManageThisProject && (
                       <>
                         <Button variant="outline" size="sm" onClick={() => setIsShareModalOpen(true)} className="gap-1 text-[11px] h-7">
                           <Share2 className="w-3 h-3" />{isSharedToCrew ? 'Crew Access' : 'Share'}
@@ -298,7 +308,7 @@ export function ProjectDetailPage() {
                     teamContributions={teamContributions}
                     crewAccess={{
                       list: crewAccessList,
-                      canManage: canManageProject,
+                      canManage: canManageThisProject,
                       onRemove: (cid) => unshareMutation.mutate({ projectId: Number(project.id), crewId: Number(cid) }),
                     }}
                     activities={projectActivities}
@@ -324,7 +334,7 @@ export function ProjectDetailPage() {
                   <ActivityTab projectActivities={projectActivities} />
                 )}
                 {activeTab === 'repos' && (
-                  <RepositoriesTab project={project} canManage={canManageProject} />
+                  <RepositoriesTab project={project} canManage={canManageThisProject} />
                 )}
               </motion.div>
             </AnimatePresence>

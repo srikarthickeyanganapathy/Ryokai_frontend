@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, FileQuestion, Info, MessageSquare, Paperclip, Activity } from 'lucide-react'
+import { Loader2, FileQuestion } from 'lucide-react'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Icons } from '@/shared/ui/Icons'
 import { Button, IconButton } from '@/shared/ui/Button'
@@ -20,28 +20,24 @@ import { toast } from 'sonner'
 import { SaveToggle } from '@/saved/features/components/SaveToggle'
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
 import { toBackendStatus } from '@/shared/lib/status'
-import { resolveStatus } from '@/shared/lib/statusregistry'
+import { resolveStatus } from '@/shared/lib/statusRegistry'
 import { StatusBadge } from '@/shared/ui/StatusBadge'
 import { ChecklistForm } from '@/task/components/TaskPanel/ChecklistForm'
 import { TaskComments, TaskDependencies, TaskEvidence } from '@/task/components/TaskPanel/TaskPanelExtras'
 import ActivityTimeline from '@/task/components/Nebula/explorers/ActivityTimeline'
-import { useTaskList } from '@/task/entities/hooks/useTasks'
+import { TaskPullLinks } from '@/github/features/components/TaskPullLinks'
+import { taskTabsFor, useTaskList } from '@/task'
 import {
   useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, useReorderChecklistItems,
   useUpdateTask, useArchiveTask, useDeleteTask, useReassignTask,
   useSubmitTask, useApproveTask, useRejectTask, useRecallTask, useClaimTask,
   useCompletePersonalTask, useCompleteCrewTask
-} from '@/task/entities/hooks/useTasks'
+} from '@/task'
 import { useCrewMembers } from '@/crew'
 import { useUsersList } from '@/identity'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
-const TABS = [
-  { id: 'details', label: 'Details', icon: Info },
-  { id: 'comments', label: 'Comments', icon: MessageSquare },
-  { id: 'evidence', label: 'Evidence', icon: Paperclip },
-  { id: 'activity', label: 'Activity', icon: Activity },
-]
+
 
 /* ── Custom Premium Checklist ── */
 function PremiumChecklist({ items, hasPerm, onToggle, onDelete, onAdd, onMoveUp, onMoveDown, addLoading }) {
@@ -162,6 +158,7 @@ export default function TaskDetailPage() {
   const location = useLocation()
   const { workspaceMode } = useWorkspace()
   const isPersonal = workspaceMode === 'PERSONAL'
+  const TABS = taskTabsFor(workspaceMode)
   const { user } = useAuth()
 
   const {
@@ -602,6 +599,9 @@ export default function TaskDetailPage() {
 
               {activeTab === 'comments' && <TaskComments taskId={task.id} hasCommentPerm={hasCommentPerm} />}
               {activeTab === 'evidence' && <TaskEvidence taskId={task.id} hasEditPerm={isAssignee || (isPersonal && isCreator)} />}
+              {activeTab === 'prs' && (
+                <TaskPullLinks taskId={task.id} projectId={task.projectId} crewId={task.crewId} hasEditPerm={hasEditPerm} />
+              )}
               {activeTab === 'activity' && <ActivityTimeline taskId={task.id} />}
             </motion.div>
           </AnimatePresence>

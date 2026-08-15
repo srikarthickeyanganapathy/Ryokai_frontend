@@ -1,6 +1,6 @@
 import React from 'react'
 import { cn } from '@/shared/lib/cn'
-import { resolveStatus } from '@/shared/lib/statusregistry'
+import { resolveStatus } from '@/shared/lib/statusRegistry'
 
 /**
  * PriorityBadge — canonical priority badge using the status registry.

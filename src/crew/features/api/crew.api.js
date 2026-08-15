@@ -86,6 +86,35 @@ export const crewApi = {
     await api.delete(`/crews/${crewId}/projects/${projectId}`);
   },
 
+  // --- GitHub federated repo sharing (owner shares their own repo into the crew project) ---
+  getRepoShares: async (crewId, projectId) => {
+    const { data } = await api.get(`/crew/${crewId}/projects/${projectId}/repo-shares`);
+    return data;
+  },
+
+  shareRepo: async (crewId, projectId, repoFullName) => {
+    const { data } = await api.post(`/crew/${crewId}/projects/${projectId}/repo-shares`, { repoFullName });
+    return data;
+  },
+
+  unshareRepo: async (crewId, projectId, repoFullName) => {
+    const [owner, repo] = repoFullName.split('/');
+    await api.delete(`/crew/${crewId}/projects/${projectId}/repo-shares/${owner}/${repo}`);
+  },
+
+  getRepoInvitations: async (crewId, projectId) => {
+    const { data } = await api.get(`/crew/${crewId}/projects/${projectId}/repo-invitations`);
+    return data;
+  },
+
+  provisionRepoInvite: async (crewId, projectId, repoFullName, inviteeUserId) => {
+    const { data } = await api.post(`/crew/${crewId}/projects/${projectId}/repo-invitations`, {
+      repoFullName,
+      inviteeUserId,
+    });
+    return data;
+  },
+
   // --- Channels ---
   getChannels: async (crewId) => {
     const { data } = await api.get(`/crews/${crewId}/channels`);
