@@ -10,6 +10,7 @@ import { ProtectedRoute, PlatformRoute, TenantRoute } from "@/app/router/Protect
 import { PublicRoute } from "@/app/router/PublicRoute";
 import { RouteResolver } from "@/app/router/RouteResolver";
 import { SessionExpiredListener } from "@/app/router/SessionExpiredListener";
+import { RouteAnnouncer } from "@/app/router/RouteAnnouncer";
 import { MainLayout } from "@/app/layouts/MainLayout";
 import { PlatformLayout } from "@/app/layouts/PlatformLayout";
 import { PlatformPageGuard } from "@/platform/admin/components/PlatformGuard";
@@ -162,6 +163,7 @@ export default function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <SessionExpiredListener />
+            <RouteAnnouncer />
           </Router>
         </AppProvider>
       </InspectorProvider>

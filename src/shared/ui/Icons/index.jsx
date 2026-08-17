@@ -313,7 +313,6 @@ export const Icons = {
   thumbsUp: ThumbsUp,
   thumbsDown: ThumbsDown,
   trash: Trash,
-  trash2: Trash2,
   link: Link,
   messageSquare: MessageSquare,
   maximize2: Maximize2,
@@ -348,7 +347,6 @@ export const Icons = {
   doorOpen: DoorOpen,
   plusCircle: PlusCircle,
   checkCheck: CheckCheck,
-  CheckCheck: CheckCheck,
   code: Code,
   userCheck: UserCheck
 }

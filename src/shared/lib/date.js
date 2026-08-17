@@ -16,3 +16,15 @@ export function getSmartDate(dateString) {
   
   return format(date, 'MMM d, yyyy')
 }
+
+export function formatTimeAgo(dateString) {
+  if (!dateString) return null
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return 'Recently'
+  const diff = Math.floor((Date.now() - date) / 1000)
+  if (diff < 60) return 'Just now'
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}

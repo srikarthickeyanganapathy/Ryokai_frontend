@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* ═══════════════════════════════════════════════════════════════
    Ryokai Dawn / Cosmic Design Tokens v4 — Premium Pass
    Light mode = Dawn (sunrise warmth)   Dark mode = Cosmic (deep space)
@@ -25,7 +21,7 @@
     /* ── Dawn: text ── */
     --text-primary: #2B2438;
     --text-secondary: #6B5F72;
-    --text-tertiary: #A79AAE;
+    --text-tertiary: #857A8E;
     --text-on-accent: #FFFFFF;
 
     /* ── Dawn: borders ── */
@@ -124,36 +120,10 @@
     /* ── Aliases (unchanged names, resolve through Dawn palette) ── */
     --color-border-subtle: var(--border-subtle);
     --color-border-default: var(--border-default);
-    --color-border-strong: var(--border-strong);
     --text-muted: var(--text-tertiary);
     --accent-cyan: var(--info);
-    --accent-cyan-hover: #4576D6;
     --accent-violet: var(--accent-secondary);
-    --accent-green: var(--success);
-    --accent-red: var(--danger);
     --error: var(--danger);
-    --color-accent-red: var(--danger);
-    --color-accent-emerald: var(--success);
-    --color-accent-blue: var(--info);
-    --color-completed: var(--success);
-    --color-added: var(--success);
-    --color-bg-base: var(--bg-base);
-    --color-bg-subtle: var(--bg-subtle);
-    --color-bg-elevated: var(--bg-elevated);
-    --color-text-primary: var(--text-primary);
-    --color-text-secondary: var(--text-secondary);
-    --color-text-muted: var(--text-tertiary);
-    --color-surface-card: var(--bg-elevated);
-    --color-surface-hover: var(--bg-hover);
-    --bg-glass: var(--bg-elevated);
-    --bg-default: var(--bg-base);
-    --shadow-subtle: var(--shadow-sm);
-    --shadow-card: var(--shadow-md);
-    --shadow-level-1: var(--shadow-sm);
-    --shadow-level-2: var(--shadow-md);
-    --radius-input: var(--radius-md);
-    --radius-card: var(--radius-lg);
-    --radius-panel: var(--radius-xl);
     --color-desktop: var(--accent);
     --color-mobile: var(--success);
 

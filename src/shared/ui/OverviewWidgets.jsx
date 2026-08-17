@@ -6,22 +6,10 @@ import { Icons } from '@/shared/ui/Icons'
 import { cn } from '@/shared/lib/cn'
 import { SPRINGS } from '@/shared/lib/uxTokens'
 import { normalizePriority } from '@/shared/lib/priority'
+import { formatTimeAgo } from '@/shared/lib/date'
+import { hashHue } from '@/shared/lib/hash'
 
-export function formatTimeAgo(dateString) {
-  if (!dateString) return null
-  const date = new Date(dateString)
-  if (isNaN(date.getTime())) return 'Recently'
-  const diff = Math.floor((Date.now() - date) / 1000)
-  if (diff < 60) return 'Just now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
-  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-}
 
-export function hashHue(str) {
-  return Math.abs((str || '').split('').reduce((acc, c) => c.charCodeAt(0) + ((acc << 5) - acc), 0)) % 360
-}
 
 /* ══════════════════════════════════════════════════════
    Sprint Progress Ring — SVG donut with animated arc

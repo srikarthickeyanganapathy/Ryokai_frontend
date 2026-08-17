@@ -33,6 +33,14 @@ export function MainLayout() {
 
   return (
     <div className="flex h-screen w-full bg-[var(--bg-subtle)] text-[var(--text-primary)] overflow-hidden font-sans relative">
+      {/* Skip link for keyboard / screen-reader users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[300] focus:px-4 focus:py-2.5 focus:rounded-lg focus:text-sm focus:font-semibold focus:bg-[var(--accent)] focus:text-white focus:shadow-lg focus:outline-none"
+      >
+        Skip to content
+      </a>
+
       
       {/* Cosmic ambient particles — Ryokai signature atmosphere */}
       <CosmicBackground variant="full" opacity={0.25} />
@@ -52,7 +60,7 @@ export function MainLayout() {
 
           {/* Dynamic Page Content */}
           <DrawerProvider>
-            <main className="flex-1 overflow-y-auto overflow-x-hidden relative custom-scrollbar">
+            <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto overflow-x-hidden relative custom-scrollbar">
               <AnimatePresence mode="popLayout">
                 <motion.div
                   key={location.pathname}
