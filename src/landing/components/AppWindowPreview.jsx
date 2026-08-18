@@ -53,7 +53,7 @@ const MODES = {
       { sec: 'Code', items: [['github', 'GitHub', Github]] },
       { sec: 'Workspace', items: [['teams', 'Teams', Users], ['directory', 'Directory', Network]] },
       { sec: 'Tools', items: [['calendar', 'Calendar', Calendar], ['notes', 'Notes', Pencil], ['goals', 'Goals', Target], ['workload', 'Workload', Activity], ['leave', 'Leaves', Clock], ['announce', 'Announce', Megaphone]] },
-      { sec: 'Admin', items: [['roles', 'Roles', ShieldCheck], ['org', 'Org Admin', Building2]] },
+      { sec: 'Admin', items: [['roles', 'Roles', ShieldCheck]] },
     ],
     stats: [['list', 'Active Tasks', '48', 'accent'], ['check', 'Completed', '132', 'success'], ['alert', 'Due Soon', '9', 'warning'], ['users', 'Team', '24', 'default']],
   },
@@ -128,7 +128,7 @@ function Home({ mode }) {
     <>
       <div className="flex gap-1.5 flex-wrap mb-3.5">
         {quick.map(([label, Icon, kb]) => (
-          <span key={label} className="inline-flex items-center gap-1.5 text-[11.5px] text-[var(--text-secondary)] border border-[var(--border-subtle)] rounded-lg px-2.5 py-1.5 bg-[var(--bg-subtle)]/40 transition hover:border-[var(--accent-border)]"><Icon size={13} strokeWidth={1.6} className="text-[var(--text-tertiary)]" />{label}<span className="mono text-[9px] border border-[var(--border-subtle)] rounded px-1">{kb}</span></span>
+          <span key={label} className="inline-flex items-center gap-1.5 text-[11.5px] text-[var(--text-secondary)] border border-[var(--border-subtle)] rounded-lg px-2.5 py-1.5 bg-[var(--bg-subtle)]/40"><Icon size={13} strokeWidth={1.6} className="text-[var(--text-tertiary)]" />{label}<span className="mono text-[9px] border border-[var(--border-subtle)] rounded px-1">{kb}</span></span>
         ))}
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mb-3.5">
@@ -614,7 +614,6 @@ export default function AppWindowPreview() {
               </div>
             ))}
             <div className="sb-spacer" />
-            <div className="sb-collapse">◂</div>
           </div>
 
           {/* Main */}
@@ -624,9 +623,9 @@ export default function AppWindowPreview() {
                 <div className="tb-left" />
                 <div className="tb-search"><Search size={13} /> Search or jump to… <span className="kb">⌘K</span></div>
                 <div className="tb-right">
-                  <motion.span className="tb-ic" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} title="Quick actions"><Plus size={15} /></motion.span>
-                  <motion.span className="tb-ic" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} title="Theme"><Sun size={15} /></motion.span>
-                  <motion.span className="tb-ic" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} title="Notifications"><Bell size={15} /><span className="bdot">2</span></motion.span>
+                  <motion.span className="tb-ic" whileHover={{ scale: 1.1 }} title="Quick actions"><Plus size={15} /></motion.span>
+                  <motion.span className="tb-ic" whileHover={{ scale: 1.1 }} title="Theme"><Sun size={15} /></motion.span>
+                  <motion.span className="tb-ic" whileHover={{ scale: 1.1 }} title="Notifications"><Bell size={15} /><span className="bdot">2</span></motion.span>
                   <span className="tb-logo">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 15, height: 15 }}><path d="M4 8h3M4 12h3M4 16h3M10 8h6M10 12h4M10 16h7" /></svg>
                   </span>

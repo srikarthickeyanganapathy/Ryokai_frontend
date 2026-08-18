@@ -43,23 +43,6 @@
 .landing-page .wrap { max-width: 1120px; margin: 0 auto; padding: 0 28px; }
 .landing-page .mono { font-family: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace; }
 
-/* ---------- Motion (Kept what's needed) ---------- */
-@keyframes caretBlink { 0%,49% { opacity: 1; } 50%,99% { opacity: 0; } 100% { opacity: 1; } }
-.landing-page .caret::after {
-  content: "";
-  display: inline-block;
-  width: 1px;
-  height: 13px;
-  margin-left: 3px;
-  vertical-align: -2px;
-  background: var(--accent);
-  animation: caretBlink 1.2s steps(1) infinite;
-}
-@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(calc(-100% - 28px)); } }
-@media (prefers-reduced-motion: reduce) {
-  .landing-page .marquee { animation: none; }
-}
-
 /* ---------- Starfield ---------- */
 .landing-page #stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 .landing-page .glow { position: absolute; border-radius: 50%; filter: blur(120px); pointer-events: none; }
@@ -204,8 +187,7 @@
 
 /* Marquee */
 .landing-page .trust { border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); padding: 0; overflow: hidden; }
-.landing-page .marquee { display: flex; width: max-content; animation: marquee 34s linear infinite; }
-@media (prefers-reduced-motion: no-preference) { .landing-page .trust:hover .marquee { animation-play-state: paused; } }
+.landing-page .marquee { display: flex; width: max-content; }
 .landing-page .marquee .mg { flex: none; display: flex; align-items: center; }
 .landing-page .marquee .mi { display: flex; align-items: center; gap: 9px; color: var(--text-tertiary); font-size: 13px; padding: 22px 28px; white-space: nowrap; }
 .landing-page .marquee .mi svg { width: 15px; height: 15px; color: var(--accent); flex: none; }

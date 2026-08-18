@@ -12,7 +12,7 @@ export function CTASection() {
   const isInView = useInView(ref, { once: true, margin: "-10%" });
 
   return (
-    <section className="cta" ref={ref}>
+    <section id="get-started" className="cta" ref={ref}>
       <div className="wrap">
         <motion.div
           initial="hidden"

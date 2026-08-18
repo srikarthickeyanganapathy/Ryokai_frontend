@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Info, Layers, Users, Check, Play, Square, UserPlus, UserMinus, Monitor, FileText, Calendar } from 'lucide-react';
+import { Info, Layers, Users, Check, Play, Square, UserPlus, UserMinus } from 'lucide-react';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -149,6 +149,14 @@ const CrewsDemo = () => {
 export default function WorkspaceSection() {
   const [expandedCard, setExpandedCard] = useState(null);
 
+  const toggleCard = (key) => setExpandedCard(expandedCard === key ? null : key);
+  const handleCardKeyDown = (e, key) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleCard(key);
+    }
+  };
+
   return (
     <section id="workspace" className="py-24 relative overflow-hidden">
       <div className="wrap max-w-[1200px] mx-auto px-6">
@@ -193,7 +201,11 @@ export default function WorkspaceSection() {
           <motion.div 
             layout
             variants={itemVariants}
-            onClick={() => setExpandedCard(expandedCard === 'personal' ? null : 'personal')}
+            onClick={() => toggleCard('personal')}
+            role="button"
+            tabIndex={0}
+            aria-expanded={expandedCard === 'personal'}
+            onKeyDown={(e) => handleCardKeyDown(e, 'personal')}
             className={`tri-card p-6 rounded-2xl bg-[var(--bg-base)] border transition-all cursor-pointer overflow-hidden ${
               expandedCard === 'personal' 
                 ? 'border-[var(--accent)] shadow-[0_8px_30px_rgba(0,112,243,0.12)] -translate-y-1' 
@@ -227,7 +239,11 @@ export default function WorkspaceSection() {
           <motion.div 
             layout
             variants={itemVariants}
-            onClick={() => setExpandedCard(expandedCard === 'org' ? null : 'org')}
+            onClick={() => toggleCard('org')}
+            role="button"
+            tabIndex={0}
+            aria-expanded={expandedCard === 'org'}
+            onKeyDown={(e) => handleCardKeyDown(e, 'org')}
             className={`tri-card p-6 rounded-2xl bg-[var(--bg-base)] border transition-all cursor-pointer overflow-hidden ${
               expandedCard === 'org' 
                 ? 'border-[var(--accent)] shadow-[0_8px_30px_rgba(0,112,243,0.12)] -translate-y-1' 
@@ -261,7 +277,11 @@ export default function WorkspaceSection() {
           <motion.div 
             layout
             variants={itemVariants}
-            onClick={() => setExpandedCard(expandedCard === 'crews' ? null : 'crews')}
+            onClick={() => toggleCard('crews')}
+            role="button"
+            tabIndex={0}
+            aria-expanded={expandedCard === 'crews'}
+            onKeyDown={(e) => handleCardKeyDown(e, 'crews')}
             className={`tri-card p-6 rounded-2xl bg-[var(--bg-base)] border transition-all cursor-pointer overflow-hidden ${
               expandedCard === 'crews' 
                 ? 'border-[var(--accent)] shadow-[0_8px_30px_rgba(0,112,243,0.12)] -translate-y-1' 

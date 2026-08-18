@@ -68,7 +68,7 @@ const STEPS = [
 
 export default function HowItWorksSection() {
   return (
-    <section id="how" className="py-24 relative overflow-hidden">
+    <section id="how-it-works" className="py-24 relative overflow-hidden">
       <div className="wrap max-w-[1200px] mx-auto px-6">
         <motion.div variants={itemVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }} className="sec-label reveal text-[var(--accent)] text-sm font-semibold tracking-wider uppercase mb-4">
           How it works

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Link as LinkIcon, ShieldCheck, Activity, KeyRound, CheckCircle } from 'lucide-react';
+import { Search, Link as LinkIcon, ShieldCheck, KeyRound, CheckCircle } from 'lucide-react';
 
 const roleData = {
   admin: {
@@ -16,7 +16,7 @@ const roleData = {
     passport: {
       pp: 'Full platform control',
       pr: 'Priority 0 · 16 of 16 enabled',
-      chips: { on: '16/16', read: 4, write: 8, flow: 4, risk: 4 },
+      chips: { on: '16/16', onCount: 16, read: 4, write: 8, flow: 4, risk: 4 },
       risk: { label: 'High', value: 80, color: 'var(--danger)' },
       outranks: ['Org Manager', 'Crew Lead', 'Member']
     }
@@ -34,7 +34,7 @@ const roleData = {
     passport: {
       pp: 'Owns team goals, workload, and leave',
       pr: 'Priority 10 · 12 of 16 enabled',
-      chips: { on: '12/16', read: 4, write: 5, flow: 3, risk: 0 },
+      chips: { on: '12/16', onCount: 12, read: 4, write: 5, flow: 3, risk: 0 },
       risk: { label: 'Low', value: 8, color: 'var(--success)' },
       outranks: ['Crew Lead', 'Member']
     }
@@ -52,7 +52,7 @@ const roleData = {
     passport: {
       pp: 'Runs a crew and its shared tasks',
       pr: 'Priority 20 · 6 of 16 enabled',
-      chips: { on: '6/16', read: 3, write: 2, flow: 1, risk: 0 },
+      chips: { on: '6/16', onCount: 6, read: 3, write: 2, flow: 1, risk: 0 },
       risk: { label: 'Low', value: 5, color: 'var(--success)' },
       outranks: ['Member']
     }
@@ -70,7 +70,7 @@ const roleData = {
     passport: {
       pp: 'Default read-only baseline',
       pr: 'Priority 30 · 3 of 16 enabled',
-      chips: { on: '3/16', read: 3, write: 0, flow: 0, risk: 0 },
+      chips: { on: '3/16', onCount: 3, read: 3, write: 0, flow: 0, risk: 0 },
       risk: { label: 'Minimal', value: 2, color: 'var(--success)' },
       outranks: []
     }
@@ -130,7 +130,7 @@ export default function GovernanceSection() {
           <div className="appwin max-w-[960px] mx-auto rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-base)] shadow-2xl overflow-hidden flex flex-col h-[600px]">
             
             {/* Topbar */}
-            <div className="topbar h-12 border-b border-[var(--border-subtle)] flex items-center justify-between px-4 bg-[var(--bg-subtle)]">
+            <div className="topbar h-12 border-b border-[var(--border-subtle)] flex items-center justify-between px-4 bg-[var(--bg-subtle)]" aria-hidden="true">
               <div className="flex gap-2">
                 <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
                 <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
@@ -178,7 +178,16 @@ export default function GovernanceSection() {
                   {Object.values(roleData).map((role) => (
                     <div 
                       key={role.id} 
+                      role="button"
+                      tabIndex={0}
+                      aria-pressed={selectedRole === role.id}
                       onClick={() => setSelectedRole(role.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setSelectedRole(role.id);
+                        }
+                      }}
                       className="relative flex items-center gap-4 cursor-pointer group"
                     >
                       <div className="absolute -left-6 text-xs text-[var(--text-tertiary)] font-mono">{role.rank}</div>
@@ -217,7 +226,7 @@ export default function GovernanceSection() {
                         <motion.circle 
                           cx="48" cy="48" r="40" fill="none" stroke="var(--accent)" strokeWidth="5" strokeLinecap="round" 
                           initial={{ strokeDasharray: "0 251" }}
-                          animate={{ strokeDasharray: `${(parseInt(activeRole.passport.chips.on) / 16) * 251} 251` }}
+                          animate={{ strokeDasharray: `${(activeRole.passport.chips.onCount / 16) * 251} 251` }}
                           transition={{ duration: 1, delay: 0.2 }}
                         />
                       </svg>

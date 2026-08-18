@@ -29,13 +29,13 @@ export default function TrustMarquee() {
   }, [shouldReduceMotion, controls]);
 
   const marqueeContent = (
-    <div className="mg flex items-center shrink-0">
+    <div className="mg">
       {marqueeItems.map((item, idx) => {
         const Icon = item.icon;
         return (
-          <span key={idx} className="mi flex items-center">
+          <span key={idx} className="mi">
             <Icon size={18} className="mr-2" /> {item.text}
-            <span className="mi dot mx-4 opacity-50">·</span>
+            <span className="dot mx-4 opacity-50">·</span>
           </span>
         );
       })}
@@ -45,7 +45,7 @@ export default function TrustMarquee() {
   return (
     <div className="trust overflow-hidden whitespace-nowrap">
       <div 
-        className="marquee flex w-fit"
+        className="marquee"
         onMouseEnter={() => !shouldReduceMotion && controls.stop()}
         onMouseLeave={() => !shouldReduceMotion && controls.start({
           x: ["0%", "-50%"],

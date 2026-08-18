@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Pin, Trash2, X, Check, Save, Bold, Italic, Heading as HeadingIcon, Code, Quote, List, CheckSquare, Link as LinkIcon, Eye, Edit3, FileText, Maximize2, Minimize2, ListTree, Timer } from '@/shared/ui/Icons'
+import { Pin, Trash2, X, Check, Save, Bold, Italic, Heading as HeadingIcon, Code, Quote, List, CheckSquare, Link as LinkIcon, Eye, Edit3, FileText, Maximize2, Minimize2, ListTree, Timer, StickyNote } from '@/shared/ui/Icons'
 import { Button, IconButton } from '@/shared/ui/Button'
 import { cn } from '@/shared/lib/cn'
 import { useUpdateNote, useDeleteNote, useCreateNote } from '@/note'
@@ -9,6 +9,7 @@ import { SaveToggle } from '@/saved/features/components/SaveToggle'
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes'
 import { MarkdownPreviewer } from '@/shared/ui/MarkdownPreviewer'
 import { noteDna } from '../entities/model/dna'
+import { Label } from '@/shared/ui/Typography'
 
 const COLORS = [
   { id: 'default', label: 'Default', bg: 'var(--bg-subtle)', border: 'var(--border-subtle)' },

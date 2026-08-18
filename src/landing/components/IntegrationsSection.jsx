@@ -47,11 +47,11 @@ export default function IntegrationsSection() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="flex items-center justify-center gap-6"
         >
-          <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)] font-medium text-[var(--text-primary)] shadow-sm hover:border-[var(--border-hover)] transition-colors cursor-pointer">
+          <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)] font-medium text-[var(--text-primary)] shadow-sm">
             <Github size={24} /> GitHub
           </div>
           <span className="text-2xl text-[var(--text-tertiary)] font-light">+</span>
-          <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)] font-medium text-[var(--text-primary)] shadow-sm hover:border-[var(--border-hover)] transition-colors cursor-pointer">
+          <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)] font-medium text-[var(--text-primary)] shadow-sm">
             <Key size={24} /> OAuth / SSO
           </div>
         </motion.div>

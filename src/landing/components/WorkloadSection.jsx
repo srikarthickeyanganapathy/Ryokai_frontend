@@ -302,7 +302,7 @@ export default function WorkloadSection() {
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5 mb-8">
                 <div className="grid grid-cols-14 gap-1">
                   {HEATMAP.flat().map((level, i) => (
-                    <div key={i} className={`relative aspect-square rounded-[4px] transition-transform hover:scale-110 cursor-pointer ${HEAT_CLS[level]}`} title={`${HEAT_LABELS[level]} load`} />
+                    <div key={i} className={`relative aspect-square rounded-[4px] ${HEAT_CLS[level]}`} title={`${HEAT_LABELS[level]} load`} />
                   ))}
                 </div>
                 <div className="flex justify-end items-center gap-3 mt-3 text-[8px] uppercase tracking-wider font-mono text-[var(--text-tertiary)]">

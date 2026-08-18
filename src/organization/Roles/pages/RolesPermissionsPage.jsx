@@ -12,9 +12,10 @@ import { PermissionBrowser } from '../components/PermissionBrowser';
 import { RolePassport } from '../widgets/RolePassport';
 import { ReviewDrawer } from '../widgets/ReviewDrawer';
 import { CreateRoleDrawer } from '../widgets/CreateRoleDrawer';
-import { User2 } from 'lucide-react';
+import { User2, Users2, ShieldCheck, KeyRound, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { Icons } from '@/shared/ui/Icons';
 import { Heading, Text } from '@/shared/ui/Typography';
+import { cn } from '@/shared/lib/cn';
 
 export function RolesPermissionsPage() {
   const { activeOrganization } = useWorkspace();
