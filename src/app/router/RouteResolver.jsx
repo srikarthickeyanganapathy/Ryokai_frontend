@@ -38,7 +38,7 @@ export function RouteResolver() {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/landing" replace />
   }
 
   // Resolve the application shell based on user context

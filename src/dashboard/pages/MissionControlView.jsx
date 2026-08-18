@@ -438,6 +438,15 @@ function StatsGrid({ activeTaskCount, completedTaskCount, dueSoonCount, teamSize
 
 const DEFAULT_WIDGET_REGISTRY = [
   {
+    id: 'focus_panel',
+    component: 'FocusPanel',
+    placement: 'primary',
+    order: 1,
+    workspaceModes: ['PERSONAL', 'CREWS', 'ORG'],
+    requiredPermissions: [],
+    visible: true
+  },
+  {
     id: 'signal_strip',
     component: 'SignalStrip',
     placement: 'header',
@@ -462,15 +471,6 @@ const DEFAULT_WIDGET_REGISTRY = [
     order: 1,
     workspaceModes: ['ORG'],
     requiredPermissions: ['DASHBOARD_VIEW'],
-    visible: true
-  },
-  {
-    id: 'focus_panel',
-    component: 'FocusPanel',
-    placement: 'primary',
-    order: 2,
-    workspaceModes: ['PERSONAL', 'CREWS', 'ORG'],
-    requiredPermissions: [],
     visible: true
   },
   {

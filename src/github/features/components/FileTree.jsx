@@ -120,7 +120,6 @@ export function FileTree({ fullName }) {
           <li key={entry.path} role="treeitem" aria-expanded={entry.type === 'dir' ? false : undefined}>
             <button
               type="button"
-              disabled={entry.type !== 'dir'}
               onClick={() => entry.type === 'dir' ? openDir(entry.path) : setOpenFile(entry.path)}
               className={cn(
                 'w-full flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-colors',

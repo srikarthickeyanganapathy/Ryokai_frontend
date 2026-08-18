@@ -37,7 +37,7 @@ export function AnnouncementCard({ announcement, onRead, onOpen, onPin, onDelete
       <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-[var(--bg-elevated)]/80 backdrop-blur-sm p-1 rounded-lg border border-[var(--border-subtle)] z-10">
         {!announcement.isRead && (
           <button onClick={(e) => { e.stopPropagation(); onRead(); }} className="p-1.5 hover:bg-[var(--bg-hover)] rounded text-[var(--text-secondary)] hover:text-[var(--accent)]" title="Mark as read">
-            <Icons.CheckCheck className="w-3.5 h-3.5" />
+            <Icons.checkCheck className="w-3.5 h-3.5" />
           </button>
         )}
         {canManage && (
