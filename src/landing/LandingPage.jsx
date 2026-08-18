@@ -7,6 +7,7 @@ import { LandingNav } from './components/LandingNav';
 import { StarfieldCanvas } from './components/StarfieldCanvas';
 import HeroSection from './components/HeroSection';
 import TrustMarquee from './components/TrustMarquee';
+import HowItWorksSection from './components/HowItWorksSection';
 import WorkspaceSection from './components/WorkspaceSection';
 import GovernanceSection from './components/GovernanceSection';
 import WorkloadSection from './components/WorkloadSection';
@@ -46,6 +47,7 @@ export function LandingPage() {
       <LandingNav isDark={isDark} toggleTheme={toggleTheme} />
       <HeroSection />
       <TrustMarquee />
+      <HowItWorksSection />
       <WorkspaceSection />
       <GovernanceSection />
       <WorkloadSection />
