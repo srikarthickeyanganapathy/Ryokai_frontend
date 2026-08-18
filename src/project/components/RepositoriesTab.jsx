@@ -9,6 +9,7 @@ import { Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Badge } from '@/shared/ui/Badge'
 import { Input } from '@/shared/ui/Input'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import {
   useGithubRepos, useGithubConfig, useGithubConnect, useSyncAllGithub,
   PullRequestList, CommitList, FileTree, useGithubLiveEvents, useGithubPulls, useGithubCommits
@@ -96,10 +97,13 @@ function RepoRailItem({ fullName, repo, active, onClick }) {
 }
 
 export function RepositoriesTab({ project, canManage }) {
+  const { workspaceMode } = useWorkspace()
   const linked = useMemo(() => Array.isArray(project?.linkedGithubRepos) ? project.linkedGithubRepos : [], [project])
   // Workspace separation: in a crew project ANY crew member can link their own
   // repos (federated model); unlink stays structural (creator only).
-  const isCrewShared = Array.isArray(project?.sharedCrewIds) && project.sharedCrewIds.length > 0
+  // In personal mode the owner is directly the user — no sharing needed.
+  // In ORG mode this tab is never rendered (guarded by ProjectTabs + ProjectDetailPage).
+  const isCrewShared = workspaceMode === 'CREWS' && Array.isArray(project?.sharedCrewIds) && project.sharedCrewIds.length > 0
   const canLinkRepos = canManage || isCrewShared
   const { data: config } = useGithubConfig()
   const { data: reposData = {}, isLoading: reposLoading, error: reposError, refetch: refetchRepos } = useGithubRepos()
@@ -333,7 +337,7 @@ export function RepositoriesTab({ project, canManage }) {
           )}
         </div>
         {linkPicker}
-        {Array.isArray(project?.sharedCrewIds) && project.sharedCrewIds.length > 0 && (
+        {workspaceMode === 'CREWS' && Array.isArray(project?.sharedCrewIds) && project.sharedCrewIds.length > 0 && (
           <CrewRepoSharingPanel crewId={project.sharedCrewIds[0]} projectId={project.id} linkedRepos={linked} canManage={canManage} />
         )}
       </div>
@@ -468,8 +472,8 @@ export function RepositoriesTab({ project, canManage }) {
         </div>
       </div>
 
-      {/* Federated crew sharing — only when this project is shared with a crew */}
-      {Array.isArray(project?.sharedCrewIds) && project.sharedCrewIds.length > 0 && (
+      {/* Federated crew sharing — only in CREWS workspace mode when this project is shared with a crew */}
+      {workspaceMode === 'CREWS' && Array.isArray(project?.sharedCrewIds) && project.sharedCrewIds.length > 0 && (
         <CrewRepoSharingPanel
           crewId={project.sharedCrewIds[0]}
           projectId={project.id}

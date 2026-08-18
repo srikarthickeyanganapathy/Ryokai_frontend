@@ -81,7 +81,7 @@ export function PullRequestList({ pullRequests, isLoading, onRefreshAll, isRefre
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="mb-3 flex flex-wrap items-center gap-2">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/40 p-1">
           {FILTERS.map((f) => (
             <button

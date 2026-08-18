@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Github, GitPullRequest, GitCommitHorizontal, RefreshCw, PlugZap, FolderTree } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
@@ -73,6 +74,11 @@ export function GithubPage() {
     const merged = repos.reduce((sum, r) => sum + (r.mergedPullRequests || 0), 0);
     return { repos: repos.length, open, merged, installations: installations.length };
   }, [repos, installations]);
+
+  // GitHub is a personal workspace surface only — not available in Crews or Org.
+  if (workspaceMode === 'CREWS' || workspaceMode === 'ORG') {
+    return <Navigate to="/app" replace />;
+  }
 
   if (configLoading || reposLoading) {
     return (
@@ -247,15 +253,16 @@ export function GithubPage() {
                 onSelect={setSelectedFullName}
                 isLoading={false}
               />
-              <div className="min-h-[420px] rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-base)]/40 p-4">
+              <div className="flex min-h-[420px] flex-col rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-base)]/40">
                 {selectedFullName && (
-                  <div className="mb-3 flex items-center justify-between gap-2">
+                  <div className="flex items-center justify-between gap-2 border-b border-[var(--border-subtle)] px-4 py-3">
                     <div className="flex min-w-0 items-center gap-2">
                       <PlugZap className="h-4 w-4 shrink-0 text-[var(--accent)]" strokeWidth={1.5} />
                       <span className="truncate text-[13px] font-semibold text-[var(--text-primary)]">{selectedFullName}</span>
                     </div>
                   </div>
                 )}
+                <div className="flex-1 p-4">
                 {tab === 'pulls' ? (
                   <PullRequestList
                     pullRequests={pullRequests}
@@ -273,6 +280,7 @@ export function GithubPage() {
                 ) : (
                   <FileTree key={selectedFullName} fullName={selectedFullName} />
                 )}
+                </div>
               </div>
             </div>
           </PageContent>

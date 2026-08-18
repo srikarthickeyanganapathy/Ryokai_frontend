@@ -47,7 +47,7 @@ export function CommitList({ commits, isLoading, onRefreshAll, isRefreshing }) {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="mb-3 flex flex-wrap items-center gap-2">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         {branches.length > 1 && (
           <div className="flex items-center gap-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/40 p-1">
             {['all', ...branches].map((b) => (

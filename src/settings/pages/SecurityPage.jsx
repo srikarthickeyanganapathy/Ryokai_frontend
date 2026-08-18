@@ -10,6 +10,8 @@ import { Switch } from '@/shared/ui/Switch'
 import { useChangePassword } from '@/identity'
 import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
 import { toast } from 'sonner'
+import { InteractiveCard } from '@/shared/ui/InteractiveCard'
+
 
 export function SecurityPage() {
   const changePassword = useChangePassword()

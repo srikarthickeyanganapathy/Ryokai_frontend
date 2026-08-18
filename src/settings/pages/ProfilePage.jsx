@@ -13,6 +13,8 @@ import { Icons } from '@/shared/ui/Icons'
 import { Spinner } from '@/shared/ui/Spinner'
 import { cn } from '@/shared/lib/cn'
 import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
+import { InteractiveCard } from '@/shared/ui/InteractiveCard'
+import { Switch } from '@radix-ui/react-switch'
 
 export function ProfilePage() {
   const { data: user, isLoading } = useProfile()

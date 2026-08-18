@@ -189,14 +189,12 @@ export function AppSidebar({ isOpen, onClose }) {
       { to: '/app', icon: ICONS.dashboard, label: 'Home', end: true },
       { to: '/app/crews', icon: ICONS.crews, label: 'My Crews' },
       { to: '/app/crews/discover', icon: ICONS.discover, label: 'Discover' },
-      { to: '/app/projects', icon: ICONS.projects, label: 'Projects' },
-      { to: '/app/github', icon: ICONS.github, label: 'GitHub', section: 'Code' }
+      { to: '/app/projects', icon: ICONS.projects, label: 'Projects' }
     ],
     ORG: [
       { to: '/app', icon: ICONS.dashboard, label: 'Home', end: true },
       { to: '/app/tasks', icon: ICONS.tasks, label: 'Tasks' },
       { to: '/app/projects', icon: ICONS.projects, label: 'Projects' },
-      { to: '/app/github', icon: ICONS.github, label: 'GitHub', section: 'Code' },
       { to: '/app/teams', icon: ICONS.teams, label: 'Teams' },
       { to: '/app/directory', icon: ICONS.directory, label: 'Directory' },
     ],

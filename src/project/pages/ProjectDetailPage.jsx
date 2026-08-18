@@ -72,7 +72,8 @@ export function ProjectDetailPage() {
   // false outside an org).
 
   const initialTab = searchParams.get('tab')
-  const [activeTab, setActiveTab] = useState(initialTab && ['overview', 'tasks', 'repos', 'activity'].includes(initialTab) ? initialTab : 'overview')
+  const validTabs = ['overview', 'tasks', 'activity', workspaceMode !== 'ORG' ? 'repos' : null].filter(Boolean)
+  const [activeTab, setActiveTab] = useState(initialTab && validTabs.includes(initialTab) ? initialTab : 'overview')
   const handleTabChange = (id) => {
     setActiveTab(id)
     setSearchParams(params => { if (id === 'overview') params.delete('tab'); else params.set('tab', id); return params }, { replace: true })
@@ -233,6 +234,11 @@ export function ProjectDetailPage() {
                         <Share2 className="w-3 h-3" />{isSharedToCrew ? 'Crew Access' : 'Share'}
                       </Button>
                     )}
+                    {workspaceMode === 'CREWS' && canManageThisProject && isSharedToCrew && (
+                      <Button variant="outline" size="sm" onClick={() => setIsShareModalOpen(true)} className="gap-1 text-[11px] h-7">
+                        <Share2 className="w-3 h-3" /> Crew Access
+                      </Button>
+                    )}
                     {canManageThisProject && (
                       <>
                         <DropdownMenu
@@ -317,7 +323,7 @@ export function ProjectDetailPage() {
                     daysRemaining={daysRemaining}
                     projectTasks={projectTasks}
                     teamContributions={teamContributions}
-                    crewAccess={{
+                    crewAccess={workspaceMode === 'ORG' ? null : {
                       list: crewAccessList,
                       canManage: canManageThisProject,
                       onRemove: (cid) => unshareMutation.mutate({ projectId: Number(project.id), crewId: Number(cid) }),
@@ -346,7 +352,7 @@ export function ProjectDetailPage() {
                 {activeTab === 'activity' && (
                   <ActivityTab projectActivities={projectActivities} />
                 )}
-                {activeTab === 'repos' && (
+                {activeTab === 'repos' && workspaceMode !== 'ORG' && (
                   <RepositoriesTab project={project} canManage={canManageThisProject} />
                 )}
               </motion.div>
