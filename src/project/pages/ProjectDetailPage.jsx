@@ -234,11 +234,6 @@ export function ProjectDetailPage() {
                         <Share2 className="w-3 h-3" />{isSharedToCrew ? 'Crew Access' : 'Share'}
                       </Button>
                     )}
-                    {workspaceMode === 'CREWS' && canManageThisProject && isSharedToCrew && (
-                      <Button variant="outline" size="sm" onClick={() => setIsShareModalOpen(true)} className="gap-1 text-[11px] h-7">
-                        <Share2 className="w-3 h-3" /> Crew Access
-                      </Button>
-                    )}
                     {canManageThisProject && (
                       <>
                         <DropdownMenu

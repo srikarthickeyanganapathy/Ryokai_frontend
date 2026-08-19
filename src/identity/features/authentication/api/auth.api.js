@@ -15,14 +15,10 @@ export const authAPI = {
   },
 
   register: async (userData) => {
-    const { data: tokens } = await api.post('/auth/register', userData)
-    setAccessToken(tokens.accessToken)
-    setRefreshToken(tokens.refreshToken)
-    return {
-      user: normalizeUser(tokens.user),
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    }
+    // Registration does NOT create a session — the user must verify their email
+    // first, then sign in. Returns { message, email }.
+    const { data } = await api.post('/auth/register', userData)
+    return data
   },
 
   logout: async () => {

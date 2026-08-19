@@ -4,14 +4,14 @@ export const getGithubConfig = () => api.get('/github/config').then((r) => r.dat
 
 export const connectGithub = () => api.post('/github/connect').then((r) => r.data);
 
-export const getGithubInstallations = () => api.get('/github/installations').then((r) => r.data);
+export const getGithubInstallations = () => api.get('/github/installations', { timeout: 60000 }).then((r) => r.data);
 
 export const syncGithubInstallation = (installationId) =>
   api.post(`/github/installations/${installationId}/sync`, null, { timeout: 0 }).then((r) => r.data);
 
 export const syncAllGithub = () => api.post('/github/repos/sync', null, { timeout: 0 }).then((r) => r.data);
 
-export const getGithubRepos = () => api.get('/github/repos').then((r) => r.data);
+export const getGithubRepos = () => api.get('/github/repos', { timeout: 60000 }).then((r) => r.data);
 
 export const getGithubRepo = (owner, repo) => api.get(`/github/repos/${owner}/${repo}`).then((r) => r.data);
 

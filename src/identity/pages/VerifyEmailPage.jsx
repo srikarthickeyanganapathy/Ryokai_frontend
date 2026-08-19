@@ -1,13 +1,12 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Mail } from '@/shared/ui/Icons'
-import { useSearchParams } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import { authAPI } from '@/identity'
+import { authAPI, useAuth } from '@/identity'
 import { toast } from 'sonner'
-import { useAuth } from '@/identity'
+
+const PENDING_EMAIL_KEY = 'pending_verify_email'
 
 export function VerifyEmailPage() {
   const [searchParams] = useSearchParams()
@@ -15,6 +14,9 @@ export function VerifyEmailPage() {
   const [status, setStatus] = useState('idle') // idle, loading, success, invalid, expired, already
   const { user } = useAuth()
   const [isResending, setIsResending] = useState(false)
+
+  // Resolve the email to resend to: query param → logged-in user → stored pending email.
+  const email = searchParams.get('email') || user?.email || localStorage.getItem(PENDING_EMAIL_KEY) || ''
 
   useEffect(() => {
     if (!token) return
@@ -34,18 +36,22 @@ export function VerifyEmailPage() {
     verify()
   }, [token])
 
+  useEffect(() => {
+    if (status === 'success' || status === 'already') {
+      localStorage.removeItem(PENDING_EMAIL_KEY)
+    }
+  }, [status])
+
   const handleResend = async () => {
-    // If we have a logged in user, use their email. Otherwise we might prompt for it, 
-    // but typically they are redirected here after registration so user is present.
-    if (!user?.email) {
-      toast.error('Please log in to resend the verification email.')
+    if (!email) {
+      toast.error('Please sign in or provide your email to resend the verification email.')
       return
     }
 
     setIsResending(true)
     try {
-      const res = await authAPI.resendVerification(user.email)
-      toast.success(res.message)
+      const res = await authAPI.resendVerification(email)
+      toast.success(res.message || 'Verification email sent.')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to resend email')
     } finally {
@@ -58,24 +64,26 @@ export function VerifyEmailPage() {
       <div className="w-16 h-16 rounded-full bg-[var(--accent-soft)] flex items-center justify-center mb-2">
         <Mail className="w-8 h-8 text-[var(--accent)]" />
       </div>
-      
+
       <Heading level={3} className="tracking-tight text-[22px]">
-        {status === 'loading' ? 'Verifying...' : 
-         status === 'success' ? 'Email verified!' : 
-         status === 'already' ? 'Already verified' : 
-         status === 'expired' ? 'Link expired' : 
-         status === 'invalid' ? 'Invalid link' : 
+        {status === 'loading' ? 'Verifying...' :
+         status === 'success' ? 'Email verified!' :
+         status === 'already' ? 'Already verified' :
+         status === 'expired' ? 'Link expired' :
+         status === 'invalid' ? 'Invalid link' :
          'Check your email'}
       </Heading>
-      
+
       <Text variant="muted" className="max-w-xs text-[13px]">
-        {status === 'success' || status === 'already' 
-          ? 'Your email address has been successfully verified. You can now access all features.' 
-          : status === 'expired' 
-          ? 'This verification link has expired. Please request a new one.' 
+        {status === 'success' || status === 'already'
+          ? 'Your email address has been verified. You can now sign in.'
+          : status === 'expired'
+          ? 'This verification link has expired. Please request a new one.'
           : status === 'invalid'
           ? 'This verification link is invalid or corrupted. Please request a new one.'
-          : 'We\'ve sent a verification link to your email address. Please verify to continue.'}
+          : email
+          ? `We've sent a verification link to ${email}. Please verify to continue.`
+          : "We've sent a verification link to your email address. Please verify to continue."}
       </Text>
 
       {(status === 'success' || status === 'already') && (
@@ -89,10 +97,10 @@ export function VerifyEmailPage() {
 
       {status !== 'success' && status !== 'already' && (
         <div className="w-full pt-4">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="lg"
-            className="w-full" 
+            className="w-full"
             onClick={handleResend}
             isLoading={isResending}
             disabled={status === 'loading'}
@@ -103,12 +111,12 @@ export function VerifyEmailPage() {
       )}
 
       <p className="mt-8 px-8 text-center text-[13px] text-[var(--text-secondary)]">
-        Return to{' '}
-        <Link 
-          to="/app" 
+        {status === 'success' || status === 'already' ? 'Ready to continue?' : 'Already verified?'}{' '}
+        <Link
+          to="/login"
           className="font-medium text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
         >
-          Dashboard
+          Sign In
         </Link>
       </p>
     </div>

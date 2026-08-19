@@ -34,7 +34,8 @@ import { RecentActivityFeed } from '../components/RecentActivityFeed';
 import { formatLastActive, hasRecentActivity } from '../components/directoryUtils';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { useAuth } from '@/identity';
-
+import { EntityFilterBar, EntityStatStrip } from '@/shared/ui/entity-card';
+import { UserIcon, PieChart, BarChart3, Activity } from 'lucide-react';
 // ───────── Main Page Component ─────────
 
 export function DirectoryPage() {

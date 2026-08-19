@@ -141,10 +141,12 @@ export function ProjectsPage() {
       >
         {canCreate && (
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" className="shrink-0 gap-1.5" onClick={() => setIsGithubCreateOpen(true)}>
-              <Github size={14} strokeWidth={1.5} />
-              From GitHub
-            </Button>
+            {workspaceMode !== 'ORG' && (
+              <Button size="sm" variant="outline" className="shrink-0 gap-1.5" onClick={() => setIsGithubCreateOpen(true)}>
+                <Github size={14} strokeWidth={1.5} />
+                From GitHub
+              </Button>
+            )}
             <Button size="sm" className="shrink-0 gap-1.5 shadow-sm" onClick={() => setIsCreateOpen(true)}>
               <Plus size={14} strokeWidth={1.5} />
               New Project

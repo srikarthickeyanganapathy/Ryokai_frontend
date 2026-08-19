@@ -156,8 +156,12 @@ api.interceptors.response.use(
       }
 
       if (error.response.status === 403) {
-        toast.error("You don't have permission to do that");
-        window.dispatchEvent(new Event('auth-forbidden'));
+        if (error.response.data?.code === 'EMAIL_NOT_VERIFIED') {
+          // Auth-flow specific: handled by the login form (redirect to verify-email).
+        } else {
+          toast.error("You don't have permission to do that");
+          window.dispatchEvent(new Event('auth-forbidden'));
+        }
       } else if (error.response.status === 409) {
         const code = error.response.data?.code;
         if (code === 'OPTIMISTIC_LOCK_CONFLICT') {

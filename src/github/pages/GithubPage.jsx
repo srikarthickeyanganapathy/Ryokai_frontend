@@ -13,7 +13,6 @@ import {
   useGithubRepos,
   useGithubPulls,
   useGithubCommits,
-  useSyncGithubInstallation,
   useSyncAllGithub,
   useGithubConnect,
   useGithubLiveEvents,
@@ -45,7 +44,6 @@ export function GithubPage() {
   const { data: config, isLoading: configLoading } = useGithubConfig();
   const { data: installations = [] } = useGithubInstallations();
   const { data: reposData, isLoading: reposLoading, isError, error, refetch } = useGithubRepos();
-  const syncInstallation = useSyncGithubInstallation();
   const syncAll = useSyncAllGithub();
   const connect = useGithubConnect();
 
@@ -89,6 +87,17 @@ export function GithubPage() {
   }
 
   if (isError && error?.response?.data?.error !== 'github_reconnect_required') {
+    const code = error?.response?.data?.error;
+    const message = error?.response?.data?.message;
+    const isSso = code === 'github_sso_required';
+    const isAppConfig = code === 'github_app_config_invalid';
+    const description =
+      message ||
+      (isSso
+        ? 'Your GitHub organization requires this app to be authorized (SAML SSO).'
+        : isAppConfig
+          ? 'The GitHub App credentials on the backend are invalid or missing.'
+          : undefined);
     return (
       <PageShell workspaceMode={workspaceMode}>
         <PageHero
@@ -99,8 +108,24 @@ export function GithubPage() {
         />
         <PageState
           state="error"
-          action={<Button variant="secondary" size="sm" onClick={() => refetch()}>Try again</Button>}
+          stateProps={{
+            description,
+            onRetry: isSso || isAppConfig ? undefined : () => refetch(),
+          }}
         />
+        {(isSso || isAppConfig) && (
+          <div className="mt-4 flex justify-center">
+            <Button asChild variant="outline" size="sm" className="gap-1.5">
+              <a
+                href={isSso ? 'https://github.com/settings/connections/applications' : 'https://github.com/settings/apps'}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {isSso ? 'Authorize in GitHub settings' : 'Fix app credentials on GitHub'}
+              </a>
+            </Button>
+          </div>
+        )}
       </PageShell>
     );
   }
@@ -113,15 +138,6 @@ export function GithubPage() {
   const needsConnect =
     appConfigured &&
     (config?.connected !== true || reposData?.connected === false || reconnectRequired);
-
-  const handleSyncInstallation = async (installationId) => {
-    setSyncingInstallation(installationId);
-    try {
-      await syncInstallation.mutateAsync(installationId);
-    } finally {
-      setSyncingInstallation(null);
-    }
-  };
 
   const handleSyncAll = async () => {
     setSyncingInstallation('all');

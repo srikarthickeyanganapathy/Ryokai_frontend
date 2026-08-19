@@ -15,34 +15,40 @@ export const useLoginMutation = () => {
   return useMutation({
     mutationFn: (credentials) => authAPI.login(credentials),
     onSuccess: ({ user }) => {
+      localStorage.removeItem('pending_verify_email')
       login(user)
       toast.success('Welcome back!', { description: "You've successfully logged in." })
       navigate(from, { replace: true })
     },
     onError: (error) => {
-      const description = error.response?.data?.message || error.message || 'Invalid credentials'
+      const data = error.response?.data
+      if (data?.code === 'EMAIL_NOT_VERIFIED') {
+        const email = data?.email
+        if (email) {
+          localStorage.setItem('pending_verify_email', email)
+        }
+        toast.error('Email not verified', { description: 'Please verify your email before signing in.' })
+        navigate(email ? `/verify-email?email=${encodeURIComponent(email)}` : '/verify-email', { replace: true })
+        return
+      }
+      const description = data?.message || error.message || 'Invalid credentials'
       toast.error('Login Failed', { description })
     },
   })
 }
 
 export const useRegisterMutation = () => {
-  const { login } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
-  const from = location.state?.from 
-    ? `${location.state.from.pathname}${location.state.from.search || ''}`
-    : '/' // Redirect to RouteResolver
 
   return useMutation({
     mutationFn: (userData) => authAPI.register(userData),
-    onSuccess: ({ user }) => {
-      // Auto-login after registration — the backend already returns tokens
-      // in the JwtResponseDTO, so we use them directly instead of forcing
-      // the user to re-enter credentials on the login page.
-      login(user)
-      toast.success('Account Created!', { description: 'Welcome to Ryokai!' })
-      navigate(from, { replace: true })
+    onSuccess: (data) => {
+      const email = data?.email
+      if (email) {
+        localStorage.setItem('pending_verify_email', email)
+      }
+      toast.success('Account created!', { description: 'Please check your email to verify your account.' })
+      navigate(email ? `/verify-email?email=${encodeURIComponent(email)}` : '/verify-email', { replace: true })
     },
     onError: (error) => {
       const description = error.response?.data?.message || error.message || 'Could not create account'
