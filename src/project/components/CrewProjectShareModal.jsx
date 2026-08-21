@@ -65,20 +65,25 @@ export function CrewProjectShareModal({ isOpen, onClose, project }) {
   })
 
   const unshareMutation = useMutation({
-    mutationFn: () =>
-      projectsApi.unshareFromCrew(
-        project.id,
+    mutationFn: () => {
+      const crewId =
         project?.crewId ||
-          project?.crew?.id ||
-          (Array.isArray(project?.sharedCrewIds) ? project.sharedCrewIds[0] : null)
-      ),
+        project?.crew?.id ||
+        (Array.isArray(project?.sharedCrewIds) ? project.sharedCrewIds[0] : null)
+      if (!crewId) {
+        throw new Error(
+          'Cannot resolve which crew this project is shared with. Refresh and unshare from the crew page.'
+        )
+      }
+      return projectsApi.unshareFromCrew(project.id, crewId)
+    },
     onSuccess: () => {
       toast.success('Project unshared from crew successfully')
       queryClient.invalidateQueries(['projects'])
       onClose()
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to unshare project')
+      toast.error(error.response?.data?.message || error.message || 'Failed to unshare project')
     },
   })
 

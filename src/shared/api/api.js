@@ -69,20 +69,12 @@ const transformDates = (obj, seen = new WeakSet()) => {
         obj[key] = val + 'Z';
       }
     } else if (Array.isArray(val)) {
-      if (val.length >= 3 && val.length <= 7 && 
-          typeof val[0] === 'number' && val[0] > 2000 && val[0] < 2100 &&
-          typeof val[1] === 'number' && val[1] >= 1 && val[1] <= 12 &&
-          typeof val[2] === 'number' && val[2] >= 1 && val[2] <= 31) {
-        
-        const [year, month, day, hour = 0, minute = 0, second = 0] = val;
-        // Construct the date in UTC to prevent the browser from applying local timezone offsets
-        const dateObj = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
-        obj[key] = dateObj.toISOString();
-      } else {
-        // Only recursively transform if it's an array of objects to prevent accidental primitive corruption
-        if (val.length > 0 && typeof val[0] === 'object') {
-          transformDates(val, seen);
-        }
+      // Recursively transform only arrays of objects. Numeric arrays are left
+      // untouched (F-014): the backend serializes all dates as ISO strings, so a
+      // numeric [year, month, day, ...] array is user data (coordinates, chart
+      // series), never a date — converting it corrupts legitimate payloads.
+      if (val.length > 0 && typeof val[0] === 'object') {
+        transformDates(val, seen);
       }
     } else if (typeof val === 'object') {
       transformDates(val, seen);

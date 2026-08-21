@@ -1,13 +1,12 @@
 /**
  * Status normalization between frontend display values and backend enum values.
- * Backend TaskStatus enum: TODO, ASSIGNED, SUBMITTED, APPROVED, REJECTED, COMPLETED.
+ * Backend TaskStatus enum: TODO, IN_PROGRESS, SUBMITTED, APPROVED, REJECTED, COMPLETED.
  * Canonical status definitions in statusRegistry.js — this module provides
  * normalization/conversion utilities only.
- * 
- * - TODO / COMPLETED are used for personal tasks (isPersonal = true)
- * - ASSIGNED / SUBMITTED / APPROVED / REJECTED are used for org tasks
- * 
- * Frontend display: To Do, In Progress, In Review, Approved, Rejected, Done
+ *
+ * Frontend display: To Do, In Progress, In Review, Approved, Rejected, Done.
+ * The two maps below are EXACT inverses of each other (F-006): a backend status
+ * round-trips through the frontend label and back to the identical enum value.
  */
 
 // Backend enum -> Frontend display (labels aligned with statusRegistry.js)
@@ -17,40 +16,35 @@ const BACKEND_TO_FRONTEND = {
   SUBMITTED:   'In Review',    // assignee submitted for review
   APPROVED:    'Approved',      // reviewer approved
   REJECTED:    'Rejected',      // reviewer rejected, assignee must redo
-  COMPLETED:   'Done',         // personal task, marked complete
+  COMPLETED:   'Done',         // task marked complete
 };
 
-// Frontend display -> Backend enum
+// Frontend display -> Backend enum (exact inverse of BACKEND_TO_FRONTEND).
+// 'Needs Work' / 'Completed' are display aliases that still map to a real enum.
 const FRONTEND_TO_BACKEND = {
-  'To Do':       'IN_PROGRESS',
+  'To Do':       'TODO',
   'In Progress': 'IN_PROGRESS',
   'In Review':   'SUBMITTED',
   'Approved':    'APPROVED',
-  'Done':        'APPROVED',
   'Rejected':    'REJECTED',
+  'Done':        'COMPLETED',
   'Needs Work':  'REJECTED',
   'Completed':   'COMPLETED',
 };
 
-/** Normalize a backend status to frontend display value */
+/** Normalize a backend status to frontend display value (exact matches only). */
 export const normalizeStatus = (status) => {
   if (!status) return 'To Do';
-  // Try uppercase match first (backend enum)
   const upper = String(status).toUpperCase().replace(/\s+/g, '_');
   if (BACKEND_TO_FRONTEND[upper]) return BACKEND_TO_FRONTEND[upper];
   if (BACKEND_TO_FRONTEND[status]) return BACKEND_TO_FRONTEND[status];
-  // Try frontend match
   if (FRONTEND_TO_BACKEND[status]) return status;
-  // Try partial match
-  for (const [key, val] of Object.entries(BACKEND_TO_FRONTEND)) {
-    if (upper.includes(key) || key.includes(upper)) return val;
-  }
   return status;
 };
 
-/** Convert frontend status to backend enum value */
+/** Convert frontend status to backend enum value (exact matches only). */
 export const toBackendStatus = (status) => {
-  if (!status) return 'IN_PROGRESS';
+  if (!status) return 'TODO';
   const upper = String(status).toUpperCase().replace(/\s+/g, '_');
   if (BACKEND_TO_FRONTEND[upper]) return upper;
   if (FRONTEND_TO_BACKEND[status]) return FRONTEND_TO_BACKEND[status];

@@ -21,7 +21,7 @@ import { PageState } from '@/shared/ui/PageState';
 import { useAuth } from '@/identity';
 import { SaveToggle } from '@/saved/features/components/SaveToggle';
 import { ENTITY_TYPES } from '@/shared/constants/entityTypes';
-import { CrewStatusPill } from '../components/CrewStatusPill';
+import { CrewStatusPill } from '@/shared/ui/CrewStatusPill';
 import { cn } from '@/shared/lib/cn';
 import { SPRINGS } from '@/shared/lib/uxTokens';
 import { toast } from 'sonner';

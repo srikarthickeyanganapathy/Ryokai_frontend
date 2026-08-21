@@ -46,11 +46,10 @@ export const projectsApi = {
   },
 
   unshareFromCrew: async (projectId, crewId) => {
-    if (crewId) {
-      await api.delete(`/crews/${crewId}/projects/${projectId}`);
-    } else {
-      await api.delete(`/projects/${projectId}/share/crew`);
+    if (!crewId) {
+      throw new Error('crewId is required to unshare a project (use DELETE /crews/{crewId}/projects/{projectId})');
     }
+    await api.delete(`/crews/${crewId}/projects/${projectId}`);
   },
 
   getProjectActivities: async (id, params = {}) => {

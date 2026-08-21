@@ -11,7 +11,8 @@ export function OrgContextRail({ context }) {
 
   if (!context?.organizationContext) return null;
   const { organizationContext } = context;
-  const { memberCount = 0, teams = [], projects = [] } = organizationContext;
+  const { insights, teams = [], projects = [] } = organizationContext;
+  const memberCount = insights?.membersCount ?? 0;
 
   return (
     <div className="flex flex-col gap-5">

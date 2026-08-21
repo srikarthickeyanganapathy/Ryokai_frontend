@@ -110,9 +110,11 @@ export default function App() {
                 </Route>
               </Route>
 
-              <Route element={<ProtectedRoute />}>
-                <Route path="/ui" element={<UIDesignSystem />} />
-              </Route>
+              {import.meta.env.DEV && (
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/ui" element={<UIDesignSystem />} />
+                </Route>
+              )}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <SessionExpiredListener />

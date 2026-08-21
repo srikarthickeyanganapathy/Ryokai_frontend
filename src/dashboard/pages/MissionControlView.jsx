@@ -598,11 +598,10 @@ export function MissionControlV2({ vm }) {
     return s !== 'COMPLETED' && s !== 'DONE' && s !== 'RESOLVED' && s !== 'ARCHIVED';
   }).length;
 
-  const completedTaskCount = context?.dailyBrief?.focusTasksCount
-    ?? relevantTasks.filter(t => {
-      const s = (t.status || t.currentStatus || '').toUpperCase();
-      return s === 'COMPLETED' || s === 'DONE' || s === 'RESOLVED';
-    }).length;
+  const completedTaskCount = relevantTasks.filter(t => {
+    const s = (t.status || t.currentStatus || '').toUpperCase();
+    return s === 'COMPLETED' || s === 'DONE' || s === 'RESOLVED';
+  }).length;
 
   const dueSoonCount = relevantTasks.filter(t => {
     if (!t.dueDate) return false;
@@ -611,10 +610,10 @@ export function MissionControlV2({ vm }) {
   }).length;
 
   const teamSize = context?.organizationContext?.insights?.membersCount
-    || context?.organizationContext?.memberCount
-    || context?.crewContext?.memberCount
-    || crews.length
-    || 1;
+    ?? context?.organizationContext?.memberCount
+    ?? context?.crewContext?.memberCount
+    ?? crews.length
+    ?? 1;
 
   // Derive Focus Task (Psychology: Prioritize IN_PROGRESS, then high priority, then top task)
   const inProgressTask = relevantTasks.find(t => {
