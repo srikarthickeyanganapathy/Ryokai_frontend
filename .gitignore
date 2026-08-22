@@ -33,3 +33,4 @@ docs/implementation-prompt-2026-08-11.md
 # campaign verification artifacts
 dist-check-*/
 .openclaw-tmp-*
+scripts/verify-deploy.sh
