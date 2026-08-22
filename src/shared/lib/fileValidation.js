@@ -21,6 +21,11 @@ export function validateFile(file, { maxSize = MAX_SCREENSHOT_SIZE, accept = 'im
   if (accept) {
     const acceptedTypes = accept.split(',').map(t => t.trim());
     const isValidType = acceptedTypes.some(type => {
+      if (!file.type) {
+        // Some files (e.g. .md, .csv) report no MIME type in the browser.
+        // Let them through — the backend whitelist is the authoritative check.
+        return true;
+      }
       if (type.endsWith('/*')) {
         const baseType = type.split('/')[0];
         return file.type.startsWith(`${baseType}/`);

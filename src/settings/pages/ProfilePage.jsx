@@ -12,6 +12,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar'
 import { Icons } from '@/shared/ui/Icons'
 import { Spinner } from '@/shared/ui/Spinner'
 import { cn } from '@/shared/lib/cn'
+import { resizeImageFile } from '@/shared/lib/imageResize'
+import { toast } from 'sonner'
 import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
 import { InteractiveCard } from '@/shared/ui/InteractiveCard'
 import { Switch } from '@radix-ui/react-switch'
@@ -52,10 +54,22 @@ export function ProfilePage() {
     fileInputRef.current?.click()
   }
 
-  const handleAvatarChange = (e) => {
+  const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0]
-    if (file) {
-      uploadAvatar.mutate(file)
+    // Reset so picking the same file again still fires onChange
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please choose an image file')
+      return
+    }
+    try {
+      // Downscale first — raw phone photos are several MB and the backend
+      // stores avatars as base64 (2MB cap). 512px JPEG is plenty for avatars.
+      const resized = await resizeImageFile(file, 512)
+      uploadAvatar.mutate(resized)
+    } catch {
+      uploadAvatar.mutate(file) // let the backend surface the error
     }
   }
 
@@ -108,13 +122,12 @@ export function ProfilePage() {
                         <Icons.image className="w-6 h-6 text-white" />
                       )}
                     </div>
-                    <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-[var(--bg-elevated)] shadow-sm" title="Online" />
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      className="hidden" 
-                      accept="image/*" 
-                      onChange={handleAvatarChange} 
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
                     />
                   </motion.div>
 

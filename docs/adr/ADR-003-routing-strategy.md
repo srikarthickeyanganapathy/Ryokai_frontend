@@ -4,7 +4,7 @@
 **Date:** 2026-07-07
 
 ## Context
-Aura requires a routing system that supports layout shells (Main vs Auth), protected routes, and complex nested views without re-rendering the entire DOM tree.
+Ryokai requires a routing system that supports layout shells (Main vs Auth), protected routes, and complex nested views without re-rendering the entire DOM tree.
 
 ## Decision
 We will use React Router DOM.

@@ -39,16 +39,23 @@ function FocusTimerIndicator() {
 
 function SyncStatusIndicator() {
   const { connected } = useRealtime();
-  const syncState = connected ? 'synced' : 'offline'; 
-  
-  if (syncState === 'synced') return null;
 
   return (
-    <div className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)] mr-2">
-      {syncState === 'syncing' && <Icons.refresh className="w-3.5 h-3.5 animate-spin" />}
-      {syncState === 'offline' && <Icons.wifiOff className="w-3.5 h-3.5" />}
-      {syncState === 'conflict' && <Icons.alert className="w-3.5 h-3.5 text-[var(--danger)]" />}
-      <span className="hidden sm:inline capitalize">{syncState}</span>
+    <div
+      title={connected
+        ? 'Connected — live updates enabled'
+        : 'Offline — reconnecting… updates may be delayed'}
+      className={cn(
+        'flex items-center gap-1.5 px-2 py-1 rounded-full border text-[11px] font-medium mr-2',
+        connected
+          ? 'border-[var(--success)]/30 bg-[var(--success-soft)] text-[var(--success)]'
+          : 'border-[var(--warning)]/30 bg-[var(--warning-soft)] text-[var(--warning)]'
+      )}
+    >
+      {connected
+        ? <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]" />
+        : <Icons.wifiOff className="w-3 h-3" />}
+      <span className="hidden sm:inline">{connected ? 'Online' : 'Offline'}</span>
     </div>
   );
 }

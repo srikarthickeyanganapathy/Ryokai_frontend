@@ -11,7 +11,7 @@ export function FileUpload({
   className,
   title = "Click to upload",
   description = "or drag and drop",
-  hint = "SVG, PNG, JPG or GIF (max. 800x400px)"
+  hint = "Images, PDF, documents or archives (max 20MB)"
 }) {
   const [isDragging, setIsDragging] = useState(false)
   const inputRef = useRef(null)

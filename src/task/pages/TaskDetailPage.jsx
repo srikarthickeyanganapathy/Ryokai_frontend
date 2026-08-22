@@ -26,12 +26,12 @@ import { ChecklistForm } from '@/task/components/TaskPanel/ChecklistForm'
 import { TaskComments, TaskDependencies, TaskEvidence } from '@/task/components/TaskPanel/TaskPanelExtras'
 import ActivityTimeline from '@/task/components/Nebula/explorers/ActivityTimeline'
 import { TaskPullLinks } from '@/github/features/components/TaskPullLinks'
-import { taskTabsFor, useTaskList } from '@/task'
+import { taskTabsFor } from '@/task'
 import {
   useAddChecklistItem, useToggleChecklistItem, useDeleteChecklistItem, useReorderChecklistItems,
   useUpdateTask, useArchiveTask, useDeleteTask, useReassignTask,
   useSubmitTask, useApproveTask, useRejectTask, useRecallTask, useClaimTask,
-  useCompletePersonalTask, useCompleteCrewTask
+  useCompletePersonalTask, useCompleteCrewTask, useTask
 } from '@/task'
 import { useCrewMembers } from '@/crew'
 import { useUsersList } from '@/identity'
@@ -167,13 +167,22 @@ export default function TaskDetailPage() {
   } = usePermissions()
   const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
+  // Prefer the task passed via navigation state; otherwise fetch by ID so deep
+  // links and entries from other workspaces (crew/team tabs) resolve directly.
   const routedTask = location.state?.task
-  const { tasks, isLoading, isError, refetch } = useTaskList({})
+  const { data: fetchedTask, isLoading, isError, refetch } = useTask(taskId)
   const fallbackTask = useMemo(
-    () => (!routedTask && tasks ? tasks.find(t => t.id === taskId || t._id === taskId) : null),
-    [tasks, taskId, routedTask]
+    () => (!routedTask && fetchedTask ? fetchedTask : null),
+    [fetchedTask, routedTask]
   )
   const task = routedTask || fallbackTask
+
+  // Go back to wherever the user came from; only fall back to the task list
+  // when there is no in-app history (e.g. direct URL / new tab).
+  const handleBack = () => {
+    if (location.key && location.key !== 'default') navigate(-1)
+    else navigate('/app/tasks')
+  }
 
   const creatorUsername = typeof task?.creator === 'object' ? task?.creator?.username : task?.creator
   const assigneeUsername = typeof task?.assignee === 'object' ? task?.assignee?.username : (task?.assignee || task?.assignedTo)
@@ -388,7 +397,7 @@ export default function TaskDetailPage() {
   if (!task) {
     return (
       <PageShell maxWidth="full">
-        <PageState state="empty" stateProps={{ icon: FileQuestion, title: 'Task not found', message: 'This task may have been deleted or moved.', actionLabel: 'Back to Tasks', onAction: () => navigate('/app/tasks') }} />
+        <PageState state="empty" stateProps={{ icon: FileQuestion, title: 'Task not found', message: 'This task may have been deleted or moved.', actionLabel: 'Go Back', onAction: handleBack }} />
       </PageShell>
     )
   }
@@ -400,9 +409,9 @@ export default function TaskDetailPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 py-3.5 flex-wrap">
             <button
-              onClick={() => navigate('/app/tasks')}
+              onClick={handleBack}
               className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors shrink-0"
-              title="Back to Tasks"
+              title="Go back"
             >
               <Icons.chevronLeft className="w-4 h-4" />
             </button>

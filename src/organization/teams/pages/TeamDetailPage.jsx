@@ -304,9 +304,9 @@ export function TeamDetailPage() {
               <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center gap-3 py-3.5">
                   <button
-                    onClick={() => navigate(`/app/organizations/${orgId}`)}
+                    onClick={() => navigate('/app/teams')}
                     className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors shrink-0"
-                    title="Back to organization"
+                    title="Back to Teams"
                   >
                     <Icons.chevronLeft className="w-4 h-4" />
                   </button>
@@ -466,7 +466,7 @@ export function TeamDetailPage() {
                       canEditTask={canEditTask}
                       canDeleteTask={canDeleteTask}
                       canReviewTask={canReviewTask}
-                      onOpenTask={(task) => navigate(`/app/tasks/${task.id || task.taskId}`)}
+                      onOpenTask={(task) => navigate(`/app/tasks/${task.id || task.taskId}`, { state: { task } })}
                       isReadOnly={isReadOnly}
                       assigningTaskId={assigningTaskId}
                       setAssigningTaskId={setAssigningTaskId}

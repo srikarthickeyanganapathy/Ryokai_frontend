@@ -4,7 +4,7 @@
 **Date:** 2026-07-07
 
 ## Context
-Aura relies heavily on remote API data. Manually managing `isLoading`, `isError`, and caching via `useState` leads to race conditions, out-of-sync data, and massive boilerplate.
+Ryokai relies heavily on remote API data. Manually managing `isLoading`, `isError`, and caching via `useState` leads to race conditions, out-of-sync data, and massive boilerplate.
 
 ## Decision
 We are utilizing TanStack Query (React Query) as the exclusive manager of Server State.

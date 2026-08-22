@@ -5,7 +5,7 @@ const ThemeContext = createContext({
   setTheme: () => null,
 })
 
-export function ThemeProvider({ children, defaultTheme = 'dark', storageKey = 'aura-theme' }) {
+export function ThemeProvider({ children, defaultTheme = 'dark', storageKey = 'ryokai-theme' }) {
   const [theme, setTheme] = useState(
     () => localStorage.getItem(storageKey) || defaultTheme
   )

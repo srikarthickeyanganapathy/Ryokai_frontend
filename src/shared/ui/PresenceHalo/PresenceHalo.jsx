@@ -41,14 +41,17 @@ function getInitials(name = '') {
 }
 
 function resolveStatus(member) {
-  if (!member) return STATUS_CONFIG.offline
-  if (typeof member.status === 'string' && STATUS_CONFIG[member.status.toLowerCase()]) {
-    return STATUS_CONFIG[member.status.toLowerCase()]
+  if (!member) return null
+  // Presence must come from explicit data (a presence flag or a known
+  // presenceStatus). Account fields like member.status ("ACTIVE") are NOT
+  // presence — mapping them would fabricate an online state we can't know.
+  if (typeof member.presence === 'boolean') {
+    return member.presence ? STATUS_CONFIG.online : STATUS_CONFIG.offline
   }
-  if (member.isOnline || member.online || member.status === 'online') {
-    return STATUS_CONFIG.online
+  if (typeof member.presenceStatus === 'string' && STATUS_CONFIG[member.presenceStatus.toLowerCase()]) {
+    return STATUS_CONFIG[member.presenceStatus.toLowerCase()]
   }
-  return STATUS_CONFIG.offline
+  return null
 }
 
 export const MemberAvatarHalo = forwardRef(({ member, size = 'sm', className, showTooltip = true }, ref) => {
@@ -56,7 +59,7 @@ export const MemberAvatarHalo = forwardRef(({ member, size = 'sm', className, sh
   const name = member?.name || member?.username || member?.email || 'Crew Member'
   const initials = getInitials(name)
   const role = member?.role || member?.title || 'Member'
-  const statusMsg = member?.statusMessage || member?.activity || statusInfo.label
+  const statusMsg = member?.statusMessage || member?.activity
 
   const avatarSizes = {
     xs: 'h-6 w-6 text-[10px]',
@@ -81,16 +84,18 @@ export const MemberAvatarHalo = forwardRef(({ member, size = 'sm', className, sh
       )}
       tabIndex={0}
       role="img"
-      aria-label={`${name} (${statusInfo.label})`}
+      aria-label={statusInfo ? `${name} (${statusInfo.label})` : name}
     >
-      {/* Dynamic presence halo ring around avatar */}
-      <div
-        className={cn(
-          'absolute -inset-0.5 rounded-full transition-all duration-[var(--duration-base)] border opacity-90',
-          statusInfo.ringClass,
-          statusInfo.pulse && 'animate-pulse'
-        )}
-      />
+      {/* Dynamic presence halo ring around avatar — only when real presence data exists */}
+      {statusInfo && (
+        <div
+          className={cn(
+            'absolute -inset-0.5 rounded-full transition-all duration-[var(--duration-base)] border opacity-90',
+            statusInfo.ringClass,
+            statusInfo.pulse && 'animate-pulse'
+          )}
+        />
+      )}
       <Avatar size={size} className={cn('relative z-10 border-[var(--bg-card)]', avatarSizes[size])}>
         {member?.avatar && <AvatarImage src={member.avatar} alt={name} />}
         <AvatarFallback className="bg-[var(--bg-subtle)] text-[var(--text-primary)] font-semibold">
@@ -98,14 +103,16 @@ export const MemberAvatarHalo = forwardRef(({ member, size = 'sm', className, sh
         </AvatarFallback>
       </Avatar>
 
-      {/* Status dot */}
-      <span
-        className={cn(
-          'absolute z-20 rounded-full border-[var(--bg-card)] shadow-xs transition-colors duration-[var(--duration-fast)]',
-          statusInfo.colorClass,
-          dotSizes[size]
-        )}
-      />
+      {/* Status dot — only when real presence data exists */}
+      {statusInfo && (
+        <span
+          className={cn(
+            'absolute z-20 rounded-full border-[var(--bg-card)] shadow-xs transition-colors duration-[var(--duration-fast)]',
+            statusInfo.colorClass,
+            dotSizes[size]
+          )}
+        />
+      )}
     </div>
   )
 
@@ -122,10 +129,12 @@ export const MemberAvatarHalo = forwardRef(({ member, size = 'sm', className, sh
               {role}
             </Badge>
           </div>
-          <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
-            <span className={cn('h-1.5 w-1.5 rounded-full shrink-0', statusInfo.colorClass)} />
-            <span className="truncate">{statusMsg}</span>
-          </div>
+          {statusInfo && (
+            <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
+              <span className={cn('h-1.5 w-1.5 rounded-full shrink-0', statusInfo.colorClass)} />
+              <span className="truncate">{statusMsg || statusInfo.label}</span>
+            </div>
+          )}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

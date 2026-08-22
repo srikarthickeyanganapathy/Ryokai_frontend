@@ -57,6 +57,24 @@ export const useTaskSearch = (searchQuery) => {
   });
 };
 
+/**
+ * Fetch a single task by ID straight from the backend (permission-checked on
+ * the server). Used by the task detail page so deep links and cross-workspace
+ * navigation resolve even when the task isn't in any locally cached list.
+ */
+export const useTask = (taskId, options = {}) => {
+  return useQuery({
+    queryKey: queryKeys.tasks.detail(taskId),
+    queryFn: () => taskApi.getTaskById(taskId),
+    enabled: !!taskId && options.enabled !== false,
+    retry: (failureCount, error) => {
+      // 403/404 mean the task is gone or inaccessible — don't retry.
+      if (error?.response?.status === 403 || error?.response?.status === 404) return false;
+      return failureCount < 2;
+    },
+  });
+};
+
 export const useAssignTask = () => {
   const queryClient = useQueryClient();
   return useMutation({

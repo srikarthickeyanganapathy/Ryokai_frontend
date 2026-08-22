@@ -21,16 +21,16 @@ export function LandingPage() {
   
   // Initialize theme from localStorage, default to dark
   const [isDark, setIsDark] = useState(() => {
-    return (localStorage.getItem('aura-theme') || 'dark') !== 'light';
+    return (localStorage.getItem('ryokai-theme') || 'dark') !== 'light';
   });
 
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('aura-theme', 'dark');
+      localStorage.setItem('ryokai-theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('aura-theme', 'light');
+      localStorage.setItem('ryokai-theme', 'light');
     }
   }, [isDark]);
 

@@ -109,7 +109,7 @@ export default function UIDesignSystem() {
             {/* HEADER */}
             <header className="flex items-center justify-between pb-8">
               <div>
-                <Heading level={1} className="mb-2">Aura UI System</Heading>
+                <Heading level={1} className="mb-2">Ryokai UI System</Heading>
                 <Text variant="muted">Living documentation of components and infrastructure.</Text>
               </div>
               <div className="flex gap-4 items-center">

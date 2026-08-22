@@ -519,7 +519,7 @@ export function TasksTab({ crewId, tasks }) {
       <KanbanBoard
         tasks={filterTasks(tasks)}
         mode="CREWS"
-        onTaskClick={(task) => navigate(`/app/tasks/${task.id || task.taskId}`)}
+        onTaskClick={(task) => navigate(`/app/tasks/${task.id || task.taskId}`, { state: { task } })}
         responsive={true}
       />
 

@@ -20,9 +20,11 @@ import { TeamTile } from '../components/TeamTile'
 import { ActivitySidebar } from '../components/ActivitySidebar'
 import { ComparePanel } from '../components/ComparePanel'
 import { QuickCreateModal } from '../components/QuickCreateModal'
-import { detectTeamCategory } from '../components/utils'
+import { detectTeamCategory, hashHue } from '../components/utils'
+import { TeamAvatar } from '../components/TeamAvatar'
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { useAuth } from '@/identity'
+import { toast } from 'sonner'
 import { EntityStatStrip, EntityFilterBar } from '@/shared/ui/entity-card'
 
 
@@ -35,7 +37,7 @@ import { EntityStatStrip, EntityFilterBar } from '@/shared/ui/entity-card'
 export const TeamsPage = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { activeOrganization, workspaceMode } = useWorkspace()
+  const { activeOrganization, workspaceMode, loadingWorkspace } = useWorkspace()
   const orgId = activeOrganization?.id
   const { data: teams = [], isLoading: teamsLoading, isError: teamsError, error, refetch: refetchTeams } = useOrgTeams(orgId)
   const { data: members = [] } = useOrgMembers(orgId)
@@ -128,7 +130,6 @@ export const TeamsPage = () => {
   const myTeamsCount = useMemo(() =>
     teams.filter(t => t.members?.some(m => m.userId === user?.id || m.username?.toLowerCase() === user?.username?.toLowerCase())).length
   , [teams, user])
-  const membersOnline = useMemo(() => Math.max(1, Math.round(members.length * 0.35)), [members])
 
   // ── Toggle compare team ──
   const handleToggleCompare = useCallback((team) => {
@@ -157,8 +158,25 @@ export const TeamsPage = () => {
   const pageState = teamsError ? 'error' : teamsLoading ? 'loading' : 'ready'
   const isTeamEmpty = teams.length === 0
 
-  if (!activeOrganization || workspaceMode === 'PERSONAL') {
+  if (workspaceMode === 'PERSONAL') {
+    return <Navigate to="/app" replace />
+  }
 
+  // While organizations are still loading, activeOrganization is legitimately
+  // null — redirecting here would kick a reloading user out of the page
+  // (the "reload loses context" bug). Only bounce once loading is done.
+  if (!activeOrganization) {
+    if (loadingWorkspace) {
+      return (
+        <PageShell maxWidth="default">
+          <PageContent>
+            <div className="flex items-center justify-center py-24">
+              <Skeleton className="h-8 w-8 rounded-full" />
+            </div>
+          </PageContent>
+        </PageShell>
+      )
+    }
     return <Navigate to="/app" replace />
   }
 
@@ -205,10 +223,10 @@ export const TeamsPage = () => {
       {!isTeamEmpty && (
         <EntityStatStrip
           stats={[
-            { key: 'total', label: 'Total Teams', value: <AnimatedCounter value={teams.length} />, sublabel: '↑12% this week', icon: Icons.users, tone: 'cyan', trend: { label: '+12%', dir: 'up' } },
-            { key: 'projects', label: 'Active Projects', value: <AnimatedCounter value={totalProjects} />, sublabel: '↑8% this week', icon: Icons.folder, tone: 'amber', trend: { label: '+8%', dir: 'up' } },
-            { key: 'tasks', label: 'Open Tasks', value: <AnimatedCounter value={totalTasks} />, sublabel: '↓3% this week', icon: Icons.checkSquare, tone: 'rose', trend: { label: '-3%', dir: 'down' } },
-            { key: 'online', label: 'Members Online', value: <AnimatedCounter value={membersOnline} />, sublabel: '↑5% vs last week', icon: Icons.userCheck || Icons.users, tone: 'emerald', trend: { label: '+5%', dir: 'up' } },
+            { key: 'total', label: 'Total Teams', value: <AnimatedCounter value={teams.length} />, icon: Icons.users, tone: 'cyan' },
+            { key: 'projects', label: 'Active Projects', value: <AnimatedCounter value={totalProjects} />, icon: Icons.folder, tone: 'amber' },
+            { key: 'tasks', label: 'Open Tasks', value: <AnimatedCounter value={totalTasks} />, icon: Icons.checkSquare, tone: 'rose' },
+            { key: 'mine', label: 'My Teams', value: <AnimatedCounter value={myTeamsCount} />, icon: Icons.userCheck || Icons.users, tone: 'emerald' },
           ]}
         />
       )}

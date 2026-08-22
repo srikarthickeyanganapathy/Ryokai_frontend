@@ -7,7 +7,7 @@ export function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem('aura-theme') || 'dark') !== 'light';
+      return (localStorage.getItem('ryokai-theme') || 'dark') !== 'light';
     }
     return true;
   });
@@ -31,7 +31,7 @@ export function LandingNav() {
     } else {
       root.classList.remove('dark');
     }
-    localStorage.setItem('aura-theme', isDark ? 'dark' : 'light');
+    localStorage.setItem('ryokai-theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
   return (

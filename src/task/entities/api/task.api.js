@@ -38,6 +38,11 @@ export const getTasks = async (params) => {
   return data;
 };
 
+export const getTaskById = async (taskId) => {
+  const { data } = await api.get(`/tasks/${taskId}`);
+  return normalizeTask(data);
+};
+
 export const assignTask = async (payload) => {
   const { crewId, ...rest } = payload;
   const { data } = await api.post('/tasks/assign', { ...rest, tags: toBackendTags(rest.tags) });
@@ -194,29 +199,45 @@ export const getAttachments = async (taskId) => {
 
 export const uploadAttachment = async (taskId, file) => {
   if (!file) throw new Error('No file provided for upload');
-  
-  // 1. Upload the file to get the imageKey
+
+  // 1. Upload the file to get the storage key
   const formData = new FormData();
   formData.append('file', file);
-  
+
   const uploadRes = await api.post(`/tasks/${taskId}/evidence/upload`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
   });
-  
-  const imageKey = uploadRes.data.imageKey;
 
-  // 2. Submit the evidence record with the imageKey
+  const storageKey = uploadRes.data.imageKey;
+
+  // 2. Submit the evidence record — images stay SCREENSHOT, everything else FILE
+  const isImage = file.type?.startsWith('image/') || false;
   return addEvidence(taskId, {
-    type: 'SCREENSHOT',
-    imageKey: imageKey,
+    type: isImage ? 'SCREENSHOT' : 'FILE',
+    imageKey: storageKey,
     title: file.name || 'Attachment Evidence',
   });
 };
 
-export const downloadAttachment = async (_taskId, _attachmentId) => {
-  return true;
+export const downloadEvidenceFile = async (taskId, evidenceId) => {
+  const response = await api.get(`/tasks/${taskId}/evidence/${evidenceId}/file`, {
+    responseType: 'blob',
+  });
+
+  // Pull a friendly filename out of Content-Disposition when present
+  const disposition = response.headers?.['content-disposition'] || '';
+  const match = disposition.match(/filename="?([^";]+)"?/i)
+  return {
+    blob: response.data,
+    contentType: response.headers?.['content-type'] || 'application/octet-stream',
+    filename: match ? match[1] : `evidence-${evidenceId}`,
+  };
+};
+
+export const downloadAttachment = async (taskId, attachmentId) => {
+  return downloadEvidenceFile(taskId, attachmentId);
 };
 
 export const deleteAttachment = async (taskId, attachmentId) => {

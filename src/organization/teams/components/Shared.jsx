@@ -601,12 +601,14 @@ export function TeamIdentityBanner({
               <span>{initials || name.slice(0, 2).toUpperCase()}</span>
             )}
           </div>
-          {/* Online indicator */}
-          <LiveActivityDot
-            isActive={onlineCount > 0}
-            size="sm"
-            className="absolute -bottom-0.5 -right-0.5 ring-2 ring-[var(--bg-card)]"
-          />
+          {/* Online indicator — only when real presence data is passed in */}
+          {onlineCount > 0 && (
+            <LiveActivityDot
+              isActive
+              size="sm"
+              className="absolute -bottom-0.5 -right-0.5 ring-2 ring-[var(--bg-card)]"
+            />
+          )}
         </div>
 
         {/* Info */}
@@ -632,10 +634,12 @@ export function TeamIdentityBanner({
               <Users className="w-3 h-3" />
               <span className="font-semibold tabular-nums">{memberCount}</span> members
             </span>
-            <span className="inline-flex items-center gap-1 text-[12px] text-[var(--success)]/80">
-              <Zap className="w-3 h-3" />
-              <span className="font-semibold tabular-nums">{onlineCount}</span> online
-            </span>
+            {onlineCount > 0 && (
+              <span className="inline-flex items-center gap-1 text-[12px] text-[var(--success)]/80">
+                <Zap className="w-3 h-3" />
+                <span className="font-semibold tabular-nums">{onlineCount}</span> online
+              </span>
+            )}
           </div>
         </div>
 

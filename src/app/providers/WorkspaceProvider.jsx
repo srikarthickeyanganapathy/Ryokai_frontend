@@ -26,12 +26,35 @@ const DEFAULT_WORKSPACE = {
 
 const WorkspaceContext = createContext(DEFAULT_WORKSPACE);
 
+// ── Persistence ──────────────────────────────────────────────────────────────
+// The workspace lens (mode + active org/crew) survives reloads so the sidebar
+// and page content stay in sync with the URL. Cleared on logout.
+const WORKSPACE_STORAGE_KEY = 'ryokai_workspace_context';
+const VALID_MODES = ['PERSONAL', 'ORG', 'CREWS'];
+
+function readPersistedWorkspace() {
+  try {
+    const raw = localStorage.getItem(WORKSPACE_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return {
+      workspaceMode: VALID_MODES.includes(parsed.workspaceMode) ? parsed.workspaceMode : 'PERSONAL',
+      activeOrganizationId: parsed.activeOrganizationId ?? null,
+      activeCrewId: parsed.activeCrewId ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export const WorkspaceProvider = ({ children }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  
+
   // Workspace Mode (Lens)
-  const [workspaceMode, setWorkspaceMode] = useState('PERSONAL');
+  const [initialState] = useState(readPersistedWorkspace);
+  const [workspaceMode, setWorkspaceMode] = useState(initialState?.workspaceMode || 'PERSONAL');
   const [activeOrganization, setActiveOrganization] = useState(null);
   const [activeCrew, setActiveCrew] = useState(null);
   const prevWorkspaceMode = useRef(workspaceMode);
@@ -103,22 +126,36 @@ export const WorkspaceProvider = ({ children }) => {
     }
   }, [activeOrganization?.id, activeCrew?.id, queryClient]);
 
+  const prevUserRef = useRef(undefined);
+
   useEffect(() => {
-    // If the user logs out, clean up local state
+    // Clean up ONLY on a real logout transition (had a user, now none).
+    // During boot `user` is null while the session restores — treating that
+    // as logout wiped the persisted workspace and reset the lens to PERSONAL
+    // on every reload.
+    const hadUser = !!prevUserRef.current;
+    prevUserRef.current = user;
+
     if (!user) {
-      queueMicrotask(() => {
-        setWorkspaceMode('PERSONAL');
-        setActiveOrganization(null);
-        setActiveCrew(null);
-      });
+      if (hadUser) {
+        try { localStorage.removeItem(WORKSPACE_STORAGE_KEY); } catch { /* ignore */ }
+        queueMicrotask(() => {
+          setWorkspaceMode('PERSONAL');
+          setActiveOrganization(null);
+          setActiveCrew(null);
+        });
+      }
       return;
     }
 
     if (organizations.length > 0) {
-      // Auto-select on first load if we don't have an active org
+      // Restore the persisted org on load; fall back to the first org
       if (!activeOrganization) {
         queueMicrotask(() => {
-          setActiveOrganization(organizations[0]);
+          const persistedOrg = initialState?.activeOrganizationId
+            ? organizations.find(org => String(org.id) === String(initialState.activeOrganizationId))
+            : null;
+          setActiveOrganization(persistedOrg || organizations[0]);
         });
       } else {
         const stillExists = organizations.find(org => org.id === activeOrganization.id);
@@ -141,13 +178,16 @@ export const WorkspaceProvider = ({ children }) => {
         });
       }
     }
-  }, [organizations, activeOrganization, user]);
+  }, [organizations, activeOrganization, user, initialState]);
 
   // ═══ Auto-select first crew when switching to CREWS mode ═══
   useEffect(() => {
     if (workspaceMode === 'CREWS' && crews.length > 0 && !activeCrew) {
       queueMicrotask(() => {
-        setActiveCrew(crews[0]);
+        const persistedCrew = initialState?.activeCrewId
+          ? crews.find(c => String(c.id) === String(initialState.activeCrewId))
+          : null;
+        setActiveCrew(persistedCrew || crews[0]);
       });
     }
     // Validate activeCrew still exists
@@ -163,7 +203,22 @@ export const WorkspaceProvider = ({ children }) => {
     if (workspaceMode !== 'CREWS' && activeCrew) {
       queueMicrotask(() => setActiveCrew(null));
     }
-  }, [workspaceMode, crews, activeCrew]);
+  }, [workspaceMode, crews, activeCrew, initialState]);
+
+  // ═══ Persist the active lens so reloads land back in the same workspace ═══
+  useEffect(() => {
+    if (!user) return;
+    try {
+      // While orgs/crews are still loading, keep the last persisted ids
+      // instead of overwriting them with null.
+      const prev = readPersistedWorkspace() || {};
+      localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify({
+        workspaceMode,
+        activeOrganizationId: activeOrganization?.id ?? prev.activeOrganizationId ?? null,
+        activeCrewId: activeCrew?.id ?? prev.activeCrewId ?? null,
+      }));
+    } catch { /* localStorage unavailable */ }
+  }, [user, workspaceMode, activeOrganization?.id, activeCrew?.id]);
 
 
   const value = useMemo(() => ({

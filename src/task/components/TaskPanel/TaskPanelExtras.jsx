@@ -8,6 +8,7 @@ import { Input } from '@/shared/ui/Input'
 import { Badge } from '@/shared/ui/Badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
 import { useComments, useAddComment, useTaskHistory, useAddDependency, useRemoveDependency, useTaskList, useEvidence, useAddEvidence, useDeleteEvidence, useUploadAttachment } from '../../entities/hooks/useTasks'
+import { downloadEvidenceFile } from '../../entities/api/task.api'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 import { filterTasksByWorkspace } from '@/shared/lib/workspaceTaskFilter'
 import { cn } from '@/shared/lib/cn'
@@ -29,6 +30,74 @@ function getDomainFromUrl(url) {
 function isImageUrl(url) {
   if (!url) return false;
   return /\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(url) || url.includes('images.unsplash.com');
+}
+
+// Mirrors the backend upload whitelist (TaskEvidenceController)
+const EVIDENCE_FILE_ACCEPT = [
+  'image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml',
+  'application/pdf', 'text/plain', 'text/markdown', 'text/csv', 'application/json',
+  'application/zip', 'application/x-zip-compressed', 'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+].join(',');
+
+const isFileName = (key = '') => /\.(png|jpe?g|gif|webp)$/i.test(key);
+
+function filenameFromKey(key = '') {
+  const part = key.split('/').pop() || 'file';
+  // keys look like "uuid-original-name.ext" — strip the uuid prefix for display
+  return part.replace(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-/i, '');
+}
+
+/**
+ * Thumbnail for a stored evidence file. Images are fetched as an
+ * authenticated blob and object-URL'd (the API is Bearer-token protected, so
+ * raw <img src> links can't work); other files render a file tile.
+ */
+function EvidenceFileThumb({ taskId, evidence, onOpen }) {
+  const [objectUrl, setObjectUrl] = useState(null);
+  const isImage = isFileName(evidence.imageKey);
+
+  useEffect(() => {
+    if (!isImage) return undefined;
+    let url = null;
+    let cancelled = false;
+    downloadEvidenceFile(taskId, evidence.id)
+      .then(({ blob }) => {
+        if (cancelled) return;
+        url = URL.createObjectURL(blob);
+        setObjectUrl(url);
+      })
+      .catch(() => { if (!cancelled) setObjectUrl(null); });
+    return () => { cancelled = true; if (url) URL.revokeObjectURL(url); };
+  }, [taskId, evidence.id, isImage]);
+
+  if (isImage && objectUrl) {
+    return (
+      <div
+        onClick={() => onOpen?.(objectUrl)}
+        className="sm:w-32 h-28 sm:h-auto bg-[var(--bg-hover)] relative cursor-pointer overflow-hidden shrink-0 group/img"
+      >
+        <img
+          src={objectUrl}
+          alt={evidence.title || 'Evidence Preview'}
+          className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-300"
+        />
+        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity text-white">
+          <Icons.search className="w-5 h-5" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="sm:w-16 bg-[var(--accent-soft)] flex items-center justify-center p-3 text-[var(--accent)] shrink-0">
+      <Paperclip className="w-6 h-6" />
+    </div>
+  );
 }
 
 export function TaskComments({ taskId, hasCommentPerm }) {
@@ -381,9 +450,13 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
     if (validFiles && validFiles.length > 0) {
       const file = validFiles[0]
       setSelectedFile(file)
-      // Revoke old URL if it exists
+      // Preview only makes sense for images; other files get an icon tile
       if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl)
-      setFilePreviewUrl(URL.createObjectURL(file))
+      if (file.type?.startsWith('image/')) {
+        setFilePreviewUrl(URL.createObjectURL(file))
+      } else {
+        setFilePreviewUrl(null)
+      }
       setDescription(file.name)
     }
   }
@@ -401,6 +474,22 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
         }
       }
     })
+  }
+
+  const handleDownload = async (item) => {
+    try {
+      const { blob, filename } = await downloadEvidenceFile(taskId, item.id)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename || filenameFromKey(item.imageKey)
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 5000)
+    } catch {
+      toast.error('Failed to download file')
+    }
   }
 
   const cancelUpload = () => {
@@ -427,36 +516,43 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
         )}
         {!isLoading && evidence.length === 0 && (
           <div className="py-10">
-            <PageState 
-              state="empty" 
-              stateProps={{ 
-                icon: Paperclip, 
-                title: 'No Evidence Attached', 
-                message: 'Upload images or link resources to provide context.' 
-              }} 
+            <PageState
+              state="empty"
+              stateProps={{
+                icon: Paperclip,
+                title: 'No Evidence Attached',
+                message: 'Upload files or link resources to provide context.'
+              }}
             />
           </div>
         )}
         
-        {/* WhatsApp / Instagram Rich Cards */}
+        {/* Rich Cards */}
         {evidence.map(item => {
-          const isImg = isImageUrl(item.url) || item.type === 'SCREENSHOT'
-          const domain = getDomainFromUrl(item.url)
+          // Uploaded files carry imageKey (no url); links carry url. The two
+          // need different rendering — mixing them crashed on null urls before.
+          const isStoredFile = !!item.imageKey
+          const hasUrl = !!item.url
+          const isImg = !isStoredFile && isImageUrl(item.url)
+          const domain = hasUrl ? getDomainFromUrl(item.url) : 'uploaded file'
+          const displayName = item.title || (isStoredFile ? filenameFromKey(item.imageKey) : item.url)
 
           return (
-            <div 
-              key={item.id} 
+            <div
+              key={item.id}
               className="group relative flex flex-col sm:flex-row items-stretch overflow-hidden rounded-lg bg-[var(--bg-subtle)] border border-[var(--color-border-subtle)] hover:border-[var(--accent-border)] hover:shadow-md transition-all duration-200"
             >
-              {/* Left Side: Thumbnail Preview or Link Favicon Badge */}
-              {isImg ? (
-                <div 
+              {/* Left Side: Thumbnail Preview or File Badge */}
+              {isStoredFile ? (
+                <EvidenceFileThumb taskId={taskId} evidence={item} onOpen={setPreviewImage} />
+              ) : isImg ? (
+                <div
                   onClick={() => setPreviewImage(item.url)}
                   className="sm:w-32 h-28 sm:h-auto bg-[var(--bg-hover)] relative cursor-pointer overflow-hidden shrink-0 group/img"
                 >
-                  <img 
-                    src={item.url} 
-                    alt="Evidence Preview" 
+                  <img
+                    src={item.url}
+                    alt="Evidence Preview"
                     className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-300"
                     onError={(e) => { e.target.style.display = 'none'; }}
                   />
@@ -481,18 +577,29 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
                       {domain}
                     </span>
                   </div>
-                  
-                  <a 
-                    href={item.url.startsWith('http') ? item.url : `https://${item.url}`} 
-                    target="_blank" 
-                    rel="noreferrer" 
-                    className="font-medium text-sm text-[var(--text-primary)] hover:text-[var(--accent)] line-clamp-1 flex items-center gap-1 group/link"
-                  >
-                    <span className="truncate">{item.title || item.url}</span>
-                    <Icons.externalLink className="w-3.5 h-3.5 opacity-0 group-hover/link:opacity-100 transition-opacity shrink-0" />
-                  </a>
 
-                  {item.title && item.url !== item.title && (
+                  {hasUrl ? (
+                    <a
+                      href={item.url.startsWith('http') ? item.url : `https://${item.url}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-medium text-sm text-[var(--text-primary)] hover:text-[var(--accent)] line-clamp-1 flex items-center gap-1 group/link"
+                    >
+                      <span className="truncate">{displayName}</span>
+                      <Icons.externalLink className="w-3.5 h-3.5 opacity-0 group-hover/link:opacity-100 transition-opacity shrink-0" />
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => handleDownload(item)}
+                      className="font-medium text-sm text-[var(--text-primary)] hover:text-[var(--accent)] line-clamp-1 flex items-center gap-1 text-left"
+                      title="Download file"
+                    >
+                      <span className="truncate">{displayName}</span>
+                      <Icons.download className="w-3.5 h-3.5 opacity-60 shrink-0" />
+                    </button>
+                  )}
+
+                  {hasUrl && item.title && item.url !== item.title && (
                     <Text size="xs" variant="muted" className="line-clamp-1 mt-0.5">
                       {item.url}
                     </Text>
@@ -501,15 +608,29 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
 
                 {/* Card Action Controls */}
                 <div className="flex items-center justify-end gap-1.5 pt-2 mt-2 border-t border-[var(--color-border-subtle)]">
-                  <Button 
-                    size="xs" 
-                    variant="ghost" 
-                    onClick={() => handleCopy(item.id, item.url)}
-                    className="h-7 text-xs gap-1 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                  >
-                    {copiedId === item.id ? <Icons.check className="w-3 h-3 text-[var(--success)]" /> : <Icons.copy className="w-3 h-3" />}
-                    {copiedId === item.id ? 'Copied' : 'Copy'}
-                  </Button>
+                  {hasUrl && (
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      onClick={() => handleCopy(item.id, item.url)}
+                      className="h-7 text-xs gap-1 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    >
+                      {copiedId === item.id ? <Icons.check className="w-3 h-3 text-[var(--success)]" /> : <Icons.copy className="w-3 h-3" />}
+                      {copiedId === item.id ? 'Copied' : 'Copy'}
+                    </Button>
+                  )}
+
+                  {isStoredFile && (
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      onClick={() => handleDownload(item)}
+                      className="h-7 text-xs gap-1 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    >
+                      <Icons.download className="w-3 h-3" />
+                      Download
+                    </Button>
+                  )}
 
                   {hasEditPerm && (
                     <IconButton 
@@ -543,7 +664,7 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
               onClick={() => setActiveTab('UPLOAD')}
               className={cn("text-xs font-semibold uppercase tracking-wider pb-1 border-b-2 transition-colors", activeTab === 'UPLOAD' ? "border-[var(--accent)] text-[var(--accent)]" : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]")}
             >
-              Upload Image
+              Upload File
             </button>
           </div>
 
@@ -586,25 +707,29 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
           ) : (
             <form onSubmit={handleUploadSubmit} className="space-y-3">
               {!selectedFile ? (
-                <FileDropzone 
-                  onFilesDrop={handleFilesDrop} 
-                  accept="image/*"
+                <FileDropzone
+                  onFilesDrop={handleFilesDrop}
+                  accept={EVIDENCE_FILE_ACCEPT}
                   multiple={false}
                   disabled={uploadAttachment.isPending}
                 />
               ) : (
                 <div className="space-y-3 border border-[var(--color-border-subtle)] p-3 rounded-lg bg-[var(--bg-subtle)]">
                   <div className="flex items-start gap-4">
-                    <div className="w-24 h-24 shrink-0 rounded overflow-hidden bg-black/5">
-                      <img src={filePreviewUrl} alt="Preview" className="w-full h-full object-cover" />
+                    <div className="w-24 h-24 shrink-0 rounded overflow-hidden bg-black/5 flex items-center justify-center">
+                      {filePreviewUrl ? (
+                        <img src={filePreviewUrl} alt="Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <Paperclip className="w-8 h-8 text-[var(--text-muted)]" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0 space-y-2">
                       <Text className="text-sm font-medium truncate">{selectedFile.name}</Text>
                       <Text size="xs" variant="muted">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</Text>
-                      <Input 
+                      <Input
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Image description (optional)..."
+                        placeholder="File description (optional)..."
                         className="w-full h-8 text-xs mt-1"
                         disabled={uploadAttachment.isPending}
                       />
@@ -615,7 +740,7 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
                       Cancel
                     </Button>
                     <Button type="submit" size="sm" disabled={uploadAttachment.isPending}>
-                      {uploadAttachment.isPending ? 'Uploading...' : 'Upload Image'}
+                      {uploadAttachment.isPending ? 'Uploading...' : 'Upload File'}
                     </Button>
                   </div>
                 </div>

@@ -14,7 +14,7 @@ import { EntityCard, EntityStatStrip, EntityFilterBar } from '@/shared/ui/entity
 import { useDiscoverCrews, useJoinPublicCrew } from '../features/hooks/useCrews';
 import { 
   Search, Users, Compass, Flame, Sparkles, TrendingUp, CheckCircle2, Loader2, Hash,
-  ArrowUpRight, Lock, Globe, Link2, Activity, Eye, RefreshCw, WifiOff, Layers, Rocket, Filter, X, Target
+  ArrowUpRight, Lock, Globe, Link2, Eye, RefreshCw, WifiOff, Layers, Rocket, Filter, X, Target
 } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 import { Skeleton } from '@/shared/ui/Skeleton';
@@ -26,7 +26,6 @@ function DiscoverCrewCard({ crew, navigate, onJoin, isJoining, joined, onPreview
   const isFull = (crew.memberCount ?? 0) >= (crew.memberCap ?? 50);
   const isInviteOnly = crew.visibility === 'INVITE_ONLY';
   const activityScore = useMemo(() => Math.min(100, Math.round(((crew.memberCount || 1) / (crew.memberCap || 50)) * 100 + 15)), [crew]);
-  const onlineMembers = useMemo(() => Math.max(1, Math.round((crew.memberCount || 1) * 0.35)), [crew]);
   const categoryTag = useMemo(() => {
     if (crew.category) return crew.category;
     const lowerName = (crew.name + ' ' + (crew.description || '')).toLowerCase();
@@ -52,7 +51,6 @@ function DiscoverCrewCard({ crew, navigate, onJoin, isJoining, joined, onPreview
       ]}
       meta={[
         { icon: <Users style={{ width: 11, height: 11 }} />, text: `${crew.memberCount ?? 0}/${crew.memberCap ?? 50} members` },
-        { icon: <Activity style={{ width: 11, height: 11 }} />, text: `${onlineMembers} online` },
       ]}
       progress={activityScore}
       progressLabel={`${activityScore}%`}

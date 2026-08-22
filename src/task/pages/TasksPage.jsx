@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react'
+import React, { useMemo, useState, useCallback, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Plus, ListTodo, X, AlertTriangle, CalendarClock, Activity } from 'lucide-react'
 import { Heading, Text } from '@/shared/ui/Typography'
@@ -14,7 +14,7 @@ import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { useTasksPageLogic } from '../hooks/useTasksPageLogic'
 import { TasksModals } from '../features/TasksModals'
 import { TaskForm } from '../features/manage-task/TaskForm'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useRejectTask, useTaskStatusChange } from '../entities/hooks/useTasks'
 import { toast } from 'sonner'
 import { cn } from '@/shared/lib/cn'
@@ -68,7 +68,15 @@ export function TasksPage() {
   const navigate = useNavigate()
   const changeTaskStatus = useTaskStatusChange()
   const rejectTaskMutation = useRejectTask()
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [searchParams] = useSearchParams()
+  const urlStatus = searchParams.get('status')
+  const isValidStatus = (v) => STATUS_FILTERS.some(f => f.value === v)
+  const [statusFilter, setStatusFilter] = useState(isValidStatus(urlStatus) ? urlStatus : 'all')
+
+  // Keep the pill in sync when navigation changes ?status= (e.g. dashboard stat links)
+  useEffect(() => {
+    if (isValidStatus(urlStatus)) setStatusFilter(urlStatus)
+  }, [urlStatus])
 
   /* ----- presentation derivations over logic.tasks ----- */
   const counts = useMemo(() => {

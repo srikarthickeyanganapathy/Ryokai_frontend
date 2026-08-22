@@ -9,8 +9,8 @@ import { useDrawerManager } from '@/shared/workspace-framework';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
 import {
-  Sparkles, Zap, Target, Clock, ArrowRight, CheckCircle2,
-  AlertTriangle, TrendingUp, Lightbulb, Brain, RefreshCw,
+  Zap, Clock, ArrowRight, CheckCircle2,
+  AlertTriangle, TrendingUp, Brain,
   FolderKanban, ListTodo, Users, Calendar, BarChart3
 } from 'lucide-react';
 import { ModeSelector } from '../features/ModeSelector';
@@ -111,7 +111,8 @@ function FocusCardWidget({ focusTask, workspaceMode, activeCrew }) {
             {focusTask.dueDate && <span className="flex items-center gap-1"><Clock size={12} />Due {new Date(focusTask.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
           </div>
         </div>
-        <Button size="sm" className="rounded-full shrink-0 group-hover:shadow-[0_0_16px_var(--accent)] transition-shadow">
+        <Button size="sm" className="rounded-full shrink-0 group-hover:shadow-[0_0_16px_var(--accent)] transition-shadow"
+          onClick={(e) => { e.stopPropagation(); navigate('/app/focus'); }}>
           Resume Work <ArrowRight size={14} className="ml-1.5 group-hover:translate-x-0.5 transition-transform" />
         </Button>
       </div>
@@ -159,8 +160,8 @@ function QuickActionBar({ workspaceMode }) {
 }
 
 function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, setSelectedCrewFilter, crews = [] }) {
-  const { open } = useDrawerManager();
   const navigate = useNavigate();
+  const tasksHref = workspaceMode === 'CREWS' ? '/app/crews/tasks' : '/app/tasks';
 
   // Filter tasks if crew filter is active
   const filteredTasks = (workspaceMode === 'CREWS' && selectedCrewFilter && selectedCrewFilter !== 'ALL')
@@ -225,8 +226,14 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
         <div className="flex items-center gap-2">
           <ListTodo size={16} strokeWidth={1.5} className="text-[var(--accent)]" />
           <h3 className="text-[13px] font-semibold text-[var(--text-primary)]">Execution Queue</h3>
+          <Badge variant="secondary" className="text-[10px]">{filteredTasks.length} active</Badge>
         </div>
-        <Badge variant="secondary" className="text-[10px]">{filteredTasks.length} active</Badge>
+        <button
+          onClick={() => navigate(tasksHref)}
+          className="text-[11px] font-medium text-[var(--text-tertiary)] hover:text-[var(--accent)] flex items-center gap-1 transition-colors"
+        >
+          View all <ArrowRight className="h-3 w-3" />
+        </button>
       </div>
 
       {/* Collective Crew Filter Pills in CREWS mode */}
@@ -267,6 +274,7 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
           const rawStatus = task.status || task.currentStatus || 'OPEN';
           const isDone = ['COMPLETED', 'DONE', 'RESOLVED'].includes(rawStatus.toUpperCase());
           const displayStatus = rawStatus.replace(/_/g, ' ').toLowerCase();
+          const assignee = task.assignee || task.assignedTo;
 
           // Derive Workspace Origin Tag
           const crewLabel = task.crewName || (task.crewId ? `Crew #${task.crewId}` : null);
@@ -275,7 +283,7 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
           return (
             <div
               key={taskId}
-              onClick={() => open('task', { taskId })}
+              onClick={() => navigate(`/app/tasks/${taskId}`, { state: { task } })}
               className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-subtle)]/60 hover:bg-[var(--bg-hover)] border border-transparent hover:border-[var(--border-subtle)] transition-all cursor-pointer group"
             >
               <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -309,7 +317,27 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
                     )}
                   </div>
                   <div className="flex items-center gap-2 text-[10px] text-[var(--text-tertiary)] mt-0.5">
-                    {task.project?.name && <span>{task.project.name}</span>}
+                    {task.project?.name && (
+                      task.project?.id ? (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigate(`/app/projects/${task.project.id}`); }}
+                          className="hover:text-[var(--accent)] hover:underline transition-colors text-left"
+                        >
+                          {task.project.name}
+                        </button>
+                      ) : (
+                        <span>{task.project.name}</span>
+                      )
+                    )}
+                    {assignee && (
+                      <span className="flex items-center gap-1">
+                        {(task.project?.name) && <span>·</span>}
+                        <span className="w-3.5 h-3.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-[7px] font-bold shrink-0">
+                          {String(assignee).charAt(0).toUpperCase()}
+                        </span>
+                        <span className="truncate max-w-[90px]">{assignee}</span>
+                      </span>
+                    )}
                     {task.priority && (
                       <span className="font-semibold uppercase tracking-wider text-[9px]">· {task.priority}</span>
                     )}
@@ -336,28 +364,61 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
   );
 }
 
-function AICopilotBlock() {
+function AICopilotBlock({ relevantTasks = [], activeTaskCount = 0, completedTaskCount = 0, dueSoonCount = 0 }) {
+  // Derived from the live task set — no placeholder copy.
+  const now = new Date();
+  const overdueCount = relevantTasks.filter(t => {
+    if (!t.dueDate) return false;
+    const s = (t.status || t.currentStatus || '').toUpperCase();
+    return new Date(t.dueDate) < now && !['COMPLETED', 'DONE', 'RESOLVED'].includes(s);
+  }).length;
+
+  const inProgressCount = relevantTasks.filter(t => {
+    const s = (t.status || t.currentStatus || '').toUpperCase();
+    return s === 'IN_PROGRESS';
+  }).length;
+
+  const completionRate = (activeTaskCount + completedTaskCount) > 0
+    ? Math.round((completedTaskCount / (activeTaskCount + completedTaskCount)) * 100)
+    : 0;
+
+  const nextDue = relevantTasks
+    .filter(t => t.dueDate && new Date(t.dueDate) >= now)
+    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0];
+
+  const insights = [
+    overdueCount > 0
+      ? { icon: AlertTriangle, tone: 'text-[var(--danger)]', title: `${overdueCount} overdue`, body: 'Clear overdue work first to unblock the queue.' }
+      : dueSoonCount > 0
+        ? { icon: Clock, tone: 'text-[var(--warning)]', title: `${dueSoonCount} due soon`, body: 'Due within the next three days.' }
+        : { icon: CheckCircle2, tone: 'text-[var(--success)]', title: 'Nothing overdue', body: 'Deadlines are under control.' },
+    {
+      icon: inProgressCount > 0 ? Zap : TrendingUp,
+      tone: inProgressCount > 0 ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)]',
+      title: inProgressCount > 0 ? `${inProgressCount} in progress` : 'No active work',
+      body: inProgressCount > 0 ? 'Keep momentum — finish started work before picking up new tasks.' : 'Pick a task from the queue to get moving.',
+    },
+    nextDue
+      ? { icon: Calendar, tone: 'text-[var(--info)]', title: 'Next deadline', body: `${nextDue.title || 'Untitled task'} · ${new Date(nextDue.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` }
+      : { icon: BarChart3, tone: 'text-[var(--text-tertiary)]', title: 'Completion rate', body: `${completionRate}% of tracked work is complete.` },
+  ];
+
   return (
     <motion.div variants={itemVariants} className="w-full p-5 rounded-2xl border border-[var(--border-subtle)] bg-gradient-to-br from-[var(--bg-elevated)] to-[var(--accent-soft)]/5">
       <div className="flex items-center gap-2 mb-3">
         <Brain size={16} strokeWidth={1.5} className="text-[var(--accent)]" />
-        <h3 className="text-[13px] font-semibold">AI Insights</h3>
+        <h3 className="text-[13px] font-semibold">Insights</h3>
       </div>
       <div className="space-y-3">
-        <div className="flex items-start gap-2.5 p-2.5 rounded-lg bg-[var(--bg-subtle)]/50">
-          <Lightbulb size={14} strokeWidth={1.5} className="text-[var(--warning)] shrink-0 mt-0.5" />
-          <div>
-            <p className="text-[12px] font-medium text-[var(--text-primary)]">Suggested focus</p>
-            <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Focus on tasks currently in progress to maintain momentum.</p>
+        {insights.map((insight, i) => (
+          <div key={i} className="flex items-start gap-2.5 p-2.5 rounded-lg bg-[var(--bg-subtle)]/50">
+            <insight.icon size={14} strokeWidth={1.5} className={`${insight.tone} shrink-0 mt-0.5`} />
+            <div className="min-w-0">
+              <p className="text-[12px] font-medium text-[var(--text-primary)]">{insight.title}</p>
+              <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 truncate">{insight.body}</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-start gap-2.5 p-2.5 rounded-lg bg-[var(--bg-subtle)]/50">
-          <TrendingUp size={14} strokeWidth={1.5} className="text-[var(--success)] shrink-0 mt-0.5" />
-          <div>
-            <p className="text-[12px] font-medium text-[var(--text-primary)]">Productivity trend</p>
-            <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Your workspace tasks are synced and updated in real-time.</p>
-          </div>
-        </div>
+        ))}
       </div>
     </motion.div>
   );
@@ -428,9 +489,9 @@ function StatsGrid({ activeTaskCount, completedTaskCount, dueSoonCount, teamSize
   const navigate = useNavigate();
   return (
     <motion.div variants={itemVariants} className="w-full grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <StatMini icon={ListTodo} label="Active Tasks" value={activeTaskCount ?? 0} tone="accent" onClick={() => navigate('/app/tasks')} />
-      <StatMini icon={CheckCircle2} label="Completed" value={completedTaskCount ?? 0} tone="success" onClick={() => navigate('/app/tasks')} />
-      <StatMini icon={AlertTriangle} label="Due Soon" value={dueSoonCount ?? 0} tone="warning" />
+      <StatMini icon={ListTodo} label="Active Tasks" value={activeTaskCount ?? 0} tone="accent" onClick={() => navigate('/app/tasks?status=open')} />
+      <StatMini icon={CheckCircle2} label="Completed" value={completedTaskCount ?? 0} tone="success" onClick={() => navigate('/app/tasks?status=done')} />
+      <StatMini icon={AlertTriangle} label="Due Soon" value={dueSoonCount ?? 0} tone="warning" onClick={() => navigate('/app/calendar')} />
       <StatMini icon={Users} label="Team" value={teamSize ?? 0} tone="default" onClick={() => navigate('/app/teams')} />
     </motion.div>
   );

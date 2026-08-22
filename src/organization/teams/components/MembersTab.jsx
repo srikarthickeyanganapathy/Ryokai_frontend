@@ -9,7 +9,7 @@ import { cn } from '@/shared/lib/cn'
 
 /* ============================================================
    components/MembersTab.jsx — People grid (demo-faithful).
-   Compact member cards: aura avatar, lead crown + Lead chip,
+   Compact member cards: user avatar, lead crown + Lead chip,
    workload bar (red at the busiest / amber from 80%), and a
    last-active footer. All / Leads / Me filter. Workload and
    stats derive from the page's real workload map + team data.

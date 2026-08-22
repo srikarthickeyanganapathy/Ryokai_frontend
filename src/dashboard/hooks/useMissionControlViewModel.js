@@ -2,14 +2,23 @@ import { useEffect } from 'react';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/shared/api/api';
-import { useTaskList } from '@/task/entities/hooks/useTasks';
+import { useTaskList } from '@/task';
 
 export function useMissionControlViewModel() {
   const { workspaceMode, operatingMode, activeOrganization, activeCrew } = useWorkspace();
   const queryClient = useQueryClient();
 
+  // While an org/crew scope is still resolving (e.g. right after reload), the
+  // list hook would fall back to an unscoped query and leak tasks from other
+  // workspaces into Home. Suppress the fallback until the scope is ready.
+  const scopeReady = !!(
+    workspaceMode === 'PERSONAL' ||
+    (workspaceMode === 'ORG' && activeOrganization?.id) ||
+    (workspaceMode === 'CREWS' && activeCrew?.id)
+  );
+
   const { data: taskListData } = useTaskList();
-  const fallbackTasks = taskListData?.tasks || [];
+  const fallbackTasks = scopeReady ? (taskListData?.tasks || []) : [];
 
   const { data: context, isLoading: contextLoading, error: contextError } = useQuery({
     queryKey: [

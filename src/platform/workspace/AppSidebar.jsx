@@ -68,7 +68,8 @@ function WorkspaceSwitcher({ isExpanded, workspaceMode, setWorkspaceMode, active
 
           return (
             <React.Fragment key={isPersonal ? 'personal' : isCrew ? 'crews' : isCreateOrg ? 'create_org' : item.org?.id}>
-              {item === 'CREWS' && (
+              {/* Uniform divider between top-level sections: Personal | Orgs | Crews */}
+              {(i === 1 || isCrew) && (
                 <div className="my-1 border-t border-[var(--border-subtle)]" />
               )}
               <button
@@ -187,7 +188,7 @@ export function AppSidebar({ isOpen, onClose }) {
     ],
     CREWS: [
       { to: '/app', icon: ICONS.dashboard, label: 'Home', end: true },
-      { to: '/app/crews', icon: ICONS.crews, label: 'My Crews' },
+      { to: '/app/crews', icon: ICONS.crews, label: 'My Crews', end: true },
       { to: '/app/crews/discover', icon: ICONS.discover, label: 'Discover' },
       { to: '/app/projects', icon: ICONS.projects, label: 'Projects' }
     ],

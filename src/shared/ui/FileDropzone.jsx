@@ -116,7 +116,7 @@ export function FileDropzone({
       />
       <UploadCloud className={cn("w-8 h-8 mb-3 transition-colors", isDragActive ? "text-[var(--accent)]" : "text-[var(--text-muted)]")} />
       <Text className="text-sm font-medium text-center">
-        {isDragActive ? 'Drop file now' : 'Drag image here or click to browse'}
+        {isDragActive ? 'Drop file now' : 'Drag file here or click to browse'}
       </Text>
       <Text size="xs" variant="muted" className="mt-1 text-center">
         Maximum size: {maxSize / (1024 * 1024)}MB. 

@@ -10,7 +10,7 @@ import { TooltipProvider } from '@/shared/ui/Tooltip'
 
 export function AppProvider({ children }) {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="aura-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="ryokai-theme">
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <WorkspaceProvider>

@@ -4,7 +4,7 @@
 **Date:** 2026-07-07
 
 ## Context
-As Aura scales to an enterprise application, traditional flat or file-type based folder structures (e.g., all components in one folder, all hooks in another) will lead to tight coupling, spaghetti imports, and reduced maintainability. We need an architectural methodology that enforces strict boundaries and groups code by domain.
+As Ryokai scales to an enterprise application, traditional flat or file-type based folder structures (e.g., all components in one folder, all hooks in another) will lead to tight coupling, spaghetti imports, and reduced maintainability. We need an architectural methodology that enforces strict boundaries and groups code by domain.
 
 ## Decision
 We are adopting a strict Feature-Sliced Design (FSD) architecture. The `src` directory will be divided into the following layers (from lowest to highest dependency restriction):

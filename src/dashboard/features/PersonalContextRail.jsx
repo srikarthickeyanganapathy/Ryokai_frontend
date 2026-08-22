@@ -5,12 +5,19 @@ import { InboxWidget } from './InboxWidget';
 import { FolderOpen, ListTodo, ArrowRight } from '@/shared/ui/Icons';
 import { useNavigate } from 'react-router-dom';
 
-export function PersonalContextRail({ context }) {
+export function PersonalContextRail({ context, relevantTasks = [] }) {
   const navigate = useNavigate();
-  
-  if (!context?.personalContext) return null;
-  const { personalContext } = context;
-  const { activeTasks = [], projects = [] } = personalContext;
+
+  // personalContext may be absent while the context query loads or if it fails;
+  // fall back to the scoped task list so the rail is never an empty column.
+  const personalContext = context?.personalContext;
+  const activeTasks = personalContext?.activeTasks
+    ?? personalContext?.tasks
+    ?? relevantTasks.filter(t => {
+      const s = (t.status || t.currentStatus || '').toUpperCase();
+      return !['COMPLETED', 'DONE', 'RESOLVED', 'ARCHIVED'].includes(s);
+    });
+  const projects = personalContext?.projects ?? [];
 
   return (
     <div className="flex flex-col gap-5">
@@ -42,8 +49,9 @@ export function PersonalContextRail({ context }) {
           ) : (
             <div className="space-y-1.5">
               {activeTasks.slice(0, 5).map(task => (
-                <div 
-                  key={task.id} 
+                <div
+                  key={task.id}
+                  onClick={() => navigate(`/app/tasks/${task.id}`, { state: { task } })}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-[var(--bg-hover)] cursor-pointer transition-colors group/item"
                 >
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${

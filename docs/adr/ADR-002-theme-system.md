@@ -4,7 +4,7 @@
 **Date:** 2026-07-07
 
 ## Context
-Aura requires a strict, premium aesthetic supporting Dark mode (canonical) and Light mode, with potential future themes. Hardcoding HEX colors or Tailwind utility values (`text-gray-900`) across the application causes inconsistency and prevents dynamic theming.
+Ryokai requires a strict, premium aesthetic supporting Dark mode (canonical) and Light mode, with potential future themes. Hardcoding HEX colors or Tailwind utility values (`text-gray-900`) across the application causes inconsistency and prevents dynamic theming.
 
 ## Decision
 We will build a Token-Based Theme Engine using CSS Variables defined in `shared/styles/tokens.css`.

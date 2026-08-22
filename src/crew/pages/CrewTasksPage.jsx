@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Text } from '@/shared/ui/Typography';
+import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
-import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell';
+import { PageShell, PageHero, PageContent, PageStats } from '@/shared/ui/PageShell';
 import { InteractiveCard } from '@/shared/ui/InteractiveCard';
 import { useTaskList, useCompleteCrewTask, useDeleteTask } from '@/task';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
@@ -15,7 +15,9 @@ import {
   AlertTriangle, 
   Trash2, 
   CheckCheck, 
-  X
+  X,
+  Activity,
+  Layers
 } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 
