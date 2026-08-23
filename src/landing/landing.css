@@ -53,7 +53,7 @@
 .landing-page .nav-in { display: flex; align-items: center; justify-content: space-between; }
 .landing-page .brand { display: flex; align-items: center; gap: 10px; }
 .landing-page .brand-word { font-family: var(--font-brand, "Yusei Magic", "Inter", sans-serif); font-size: 19px; background: linear-gradient(92deg, var(--logo-word-1), var(--logo-word-2) 58%, var(--logo-word-3)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-.landing-page .mark { display: inline-flex; align-items: center; justify-content: center; flex: none; border-radius: 50%; filter: drop-shadow(0 0 10px var(--logo-glow)); }
+.landing-page .mark { display: inline-flex; align-items: center; justify-content: center; flex: none; border-radius: 50%; filter: drop-shadow(0 0 10px var(--mark-glow)); }
 .landing-page .nav-links { display: flex; align-items: center; gap: 28px; }
 .landing-page .nav-links a { font-size: 14px; color: var(--text-tertiary); transition: color .2s; }
 .landing-page .nav-links a:hover { color: var(--text-primary); }

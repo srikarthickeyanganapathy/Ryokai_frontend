@@ -19,10 +19,10 @@ export function RyokaiLogo({ className, iconOnly = false, size = "md" }) {
 
   return (
     <div className={cn("flex items-center gap-2.5 shrink-0 select-none", className)}>
-      {/* 🌌 HELIX GALAXY — a cluster of stars, no box, just a soft space glow */}
+      {/* 🌌 Galaxy badge — tilted spiral around a glowing core */}
       <HelixGalaxyMark
         className={cn("shrink-0", iconSizes[size] || iconSizes.md)}
-        style={{ filter: 'drop-shadow(0 0 12px var(--logo-glow))' }}
+        style={{ filter: 'drop-shadow(0 0 12px var(--mark-glow))' }}
       />
 
       {!iconOnly && (

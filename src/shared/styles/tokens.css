@@ -199,6 +199,31 @@
     --logo-word-1: #2B2438;
     --logo-word-2: #E15A32;
     --logo-word-3: #C6952F;
+
+    /* ── Galaxy badge mark — Dawn: cream ── */
+    --mark-bg-1: #fff2df;
+    --mark-bg-2: #e9c79a;
+    --mark-haze: #e2895a;
+    --mark-haze-op-1: 0.30;
+    --mark-haze-op-2: 0.10;
+    --mark-vignette-op: 0.22;
+    --mark-core-glow-1: #fff2dc;
+    --mark-core-glow-2: #ff9f4d;
+    --mark-core-hot-1: #fff2dc;
+    --mark-core-hot-2: #ff9f4d;
+    --mark-ring: #8a5a35;
+    --mark-ring-op-s: 0.32;
+    --mark-ring-op-m: 0.42;
+    --mark-star: #8a5a2e;
+    --mark-star-op-1: 0.33;
+    --mark-star-op-2: 0.39;
+    --mark-star-op-3: 0.49;
+    --mark-star-op-4: 0.32;
+    --mark-star-op-5: 0.33;
+    --mark-star-op-6: 0.33;
+    --mark-star-op-7: 0.30;
+    --mark-node: #d9642f;
+    --mark-glow: rgba(226, 137, 90, 0.35);
   }
 
   .dark {
@@ -357,6 +382,31 @@
     --logo-word-1: #F8FAFC;
     --logo-word-2: #7DD3FC;
     --logo-word-3: #5EEAD4;
+
+    /* ── Galaxy badge mark — Cosmic: deep space ── */
+    --mark-bg-1: #0a0a1c;
+    --mark-bg-2: #050510;
+    --mark-haze: #5b3a8f;
+    --mark-haze-op-1: 0.35;
+    --mark-haze-op-2: 0.12;
+    --mark-vignette-op: 0.55;
+    --mark-core-glow-1: #fffdf6;
+    --mark-core-glow-2: #fff3d6;
+    --mark-core-hot-1: #fffdf6;
+    --mark-core-hot-2: #fff3d6;
+    --mark-ring: #cfd8ff;
+    --mark-ring-op-s: 0.40;
+    --mark-ring-op-m: 0.52;
+    --mark-star: #ffffff;
+    --mark-star-op-1: 0.48;
+    --mark-star-op-2: 0.62;
+    --mark-star-op-3: 0.88;
+    --mark-star-op-4: 0.45;
+    --mark-star-op-5: 0.48;
+    --mark-star-op-6: 0.48;
+    --mark-star-op-7: 0.40;
+    --mark-node: #ffe9b8;
+    --mark-glow: rgba(91, 58, 143, 0.45);
   }
 
   body {
