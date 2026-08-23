@@ -8,6 +8,13 @@ const api = axios.create({
 });
 
 /**
+ * Fired when a request can't reach the server at all (no response — asleep or
+ * cold-starting Render instance, or local outage) or gets a gateway error
+ * (502/503/504). ServerStatusProvider listens for it and takes over the UX.
+ */
+export const SERVER_UNREACHABLE_EVENT = 'ryokai:server-unreachable';
+
+/**
  * Debounced error toast — prevents flooding when many queries fail simultaneously
  * (e.g. backend down triggers 10+ concurrent API calls).
  */
@@ -94,6 +101,14 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Server unreachable (no response: asleep/cold-starting instance, network
+    // cut) or gateway error — let ServerStatusProvider show the reconnect
+    // screen and poll until the instance answers.
+    const status = error.response?.status;
+    if (typeof window !== 'undefined' && (!error.response || status === 502 || status === 503 || status === 504)) {
+      window.dispatchEvent(new Event(SERVER_UNREACHABLE_EVENT));
+    }
+
     if (error.response) {
       if (error.response.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/login' && originalRequest.url !== '/session/refresh') {
         originalRequest._retry = true;
@@ -173,9 +188,9 @@ api.interceptors.response.use(
       } else if (error.response.status >= 500) {
         debouncedToast("Server error — try again");
       }
-    } else if (error.message === 'Network Error') {
-      debouncedToast("Network error — check your connection");
     }
+    // No-response failures are surfaced by ServerStatusProvider's overlay;
+    // a toast here would just repeat under it.
 
     return Promise.reject(error);
   }
