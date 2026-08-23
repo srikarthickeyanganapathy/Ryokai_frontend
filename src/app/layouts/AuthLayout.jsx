@@ -1,142 +1,112 @@
-import React from 'react'
-import { Outlet } from 'react-router-dom'
-import { Heading, Text } from '@/shared/ui/Typography'
+import React, { useState } from 'react'
+import { Link, Outlet } from 'react-router-dom'
+import { ArrowLeft, Sun, Moon } from 'lucide-react'
+import { Text } from '@/shared/ui/Typography'
 import { RyokaiLogo } from '@/shared/ui/Logo/RyokaiLogo'
 import { CosmicBackground } from '@/shared/ui/CosmicBackground'
-import CardFanCarousel from '@/shared/ui/CardFanCarousel/CardFanCarousel'
-import {
-  LayoutDashboard, Rocket, FileCheck2, Zap, Radio, Github, CalendarClock, TrendingUp,
-} from 'lucide-react'
+import { AuthDemoStage } from './AuthDemoStage'
+import { useTheme } from '@/app/providers/ThemeProvider'
 
-const AUTH_SPOTLIGHT_CARDS = [
-  {
-    icon: LayoutDashboard,
-    title: 'Mission Control, one home',
-    body: 'Personal, Crews, and Org work in a single calm dashboard. Switch lenses without losing context.',
-    footer: 'Dashboard',
-    gradient: 'linear-gradient(135deg, #38BDF8 0%, #0EA5E9 60%, #075985 100%)',
-    imgUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&h=700&fit=crop',
-    alt: 'Mountain landscape',
-  },
-  {
-    icon: Rocket,
-    title: 'Crews that ship together',
-    body: 'Spin up squads, claim open tasks from the board, and watch mission completion climb in real time.',
-    footer: 'Collaboration',
-    gradient: 'linear-gradient(135deg, #A78BFA 0%, #8B5CF6 60%, #5B21B6 100%)',
-    imgUrl: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=700&fit=crop',
-    alt: 'Sunlit forest path',
-  },
-  {
-    icon: FileCheck2,
-    title: 'Evidence-backed reviews',
-    body: 'Attach files and screenshots to finished work. Submit for review, get approvals — no chasing.',
-    footer: 'Workflow',
-    gradient: 'linear-gradient(135deg, #34D399 0%, #10B981 60%, #065F46 100%)',
-    imgUrl: 'https://images.unsplash.com/photo-1511765224389-37f0e77cf0eb?w=400&h=700&fit=crop',
-    alt: 'City at night',
-  },
-  {
-    icon: Zap,
-    title: 'Focus mode',
-    body: 'A deep-work timer that mutes the noise and keeps you on the one task that matters right now.',
-    footer: 'Deep work',
-    gradient: 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 60%, #B45309 100%)',
-    imgUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=700&fit=crop',
-    alt: 'Starry mountain night',
-  },
-  {
-    icon: Radio,
-    title: 'Live everywhere at once',
-    body: 'Comments, status changes, and evidence sync instantly across every device and every teammate.',
-    footer: 'Realtime',
-    gradient: 'linear-gradient(135deg, #5477F5 0%, #3B82F6 60%, #1E3A8A 100%)',
-    imgUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=700&fit=crop',
-    alt: 'Tropical beach waves',
-  },
-  {
-    icon: Github,
-    title: 'GitHub, wired in',
-    body: 'Pull requests and commits link straight to the tasks they close — proof arrives automatically.',
-    footer: 'Integrations',
-    gradient: 'linear-gradient(135deg, #64748B 0%, #475569 60%, #1E293B 100%)',
-    imgUrl: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=700&fit=crop',
-    alt: 'Foggy forest',
-  },
-  {
-    icon: CalendarClock,
-    title: 'Deadlines without dread',
-    body: 'Every due date in one view. Overdue work surfaces early, due-soon work never sneaks up.',
-    footer: 'Planning',
-    gradient: 'linear-gradient(135deg, #F472B6 0%, #EC4899 60%, #9D174D 100%)',
-    imgUrl: 'https://images.unsplash.com/photo-1476820865390-c52aeebb9891?w=400&h=700&fit=crop',
-    alt: 'Golden sunset',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Insights from real work',
-    body: 'Completion trends, overdue counts, and workload signals — computed from your actual tasks.',
-    footer: 'Analytics',
-    gradient: 'linear-gradient(135deg, #2DD4BF 0%, #14B8A6 60%, #134E4A 100%)',
-    imgUrl: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=400&h=700&fit=crop',
-    alt: 'Lake reflection',
-  },
-]
+function AuthThemeToggle() {
+  const { setTheme } = useTheme()
+  const [dark, setDark] = useState(
+    () => typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+  )
+
+  const toggle = () => {
+    const next = dark ? 'light' : 'dark'
+    setTheme(next)
+    setDark(!dark)
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label="Toggle theme"
+      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/60 text-[var(--text-tertiary)] backdrop-blur-sm transition-all duration-200 hover:border-[var(--border-default)] hover:text-[var(--text-primary)]"
+    >
+      {dark ? <Sun size={15} strokeWidth={1.75} /> : <Moon size={15} strokeWidth={1.75} />}
+    </button>
+  )
+}
 
 export function AuthLayout() {
   return (
-    <div className="flex min-h-screen w-full bg-[var(--bg-base)] text-[var(--text-primary)]">
+    <div className="flex h-screen w-full overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)]">
 
-      {/* LEFT SIDE — Brand + feature fan carousel */}
-      <div className="hidden lg:flex lg:w-[46%] relative bg-[var(--bg-subtle)] border-r border-[var(--border-subtle)] flex-col justify-between p-10 overflow-hidden mesh-bg shadow-[var(--inset-highlight-soft)]">
-        {/* Cosmic starfield particles in brand panel */}
+      {/* LEFT SIDE — brand stage: logo + live product demo over the nebula-eye galaxy */}
+      <aside className="relative hidden lg:flex lg:w-[46%] flex-col overflow-hidden border-r border-[var(--border-subtle)] bg-[var(--bg-subtle)] mesh-bg shadow-[var(--inset-highlight-soft)]">
         <CosmicBackground variant="hero" opacity={0.3} />
+        {/* Corner nebula glows */}
+        <div
+          className="pointer-events-none absolute -bottom-28 -left-28 z-0 h-80 w-80 rounded-full opacity-60 blur-3xl"
+          style={{ background: 'radial-gradient(circle, var(--nebula-2), transparent 70%)' }}
+        />
+        <div
+          className="pointer-events-none absolute -bottom-28 -right-28 z-0 h-80 w-80 rounded-full opacity-60 blur-3xl"
+          style={{ background: 'radial-gradient(circle, var(--nebula-4), transparent 70%)' }}
+        />
         {/* Quiet dot-grid texture */}
         <div
-          className="absolute inset-0 z-0 opacity-[0.35]"
+          className="absolute inset-0 z-0 opacity-[0.28]"
           style={{
             backgroundImage: 'radial-gradient(var(--border-strong) 1px, transparent 1px)',
             backgroundSize: '24px 24px',
-            maskImage: 'radial-gradient(ellipse 80% 60% at 30% 20%, black 0%, transparent 75%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 30% 20%, black 0%, transparent 75%)',
+            maskImage: 'radial-gradient(ellipse 75% 55% at 28% 18%, black 0%, transparent 75%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 75% 55% at 28% 18%, black 0%, transparent 75%)',
           }}
         />
 
-        <div className="relative z-10 shrink-0">
-          <div className="mb-6">
-            <RyokaiLogo size="lg" />
-          </div>
-          <Heading level={2} className="max-w-md mb-2">
-            Organize work, quietly.
-          </Heading>
-          <Text variant="muted" className="max-w-md text-[14px] leading-relaxed">
-            A fast, keyboard-first workspace for tasks and projects. No clutter — just what your team needs to ship.
-          </Text>
+        {/* Header — logo + brand line */}
+        <div className="relative z-10 flex shrink-0 items-center justify-between px-10 pt-8">
+          <RyokaiLogo size="lg" />
+          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-[var(--text-tertiary)]">
+            The quiet workspace
+          </span>
         </div>
 
-        {/* Feature fan carousel — hover a card to explore */}
-        <div className="relative z-10 flex-1 min-h-0 flex flex-col items-center justify-center py-4">
-          <CardFanCarousel cards={AUTH_SPOTLIGHT_CARDS} />
+        {/* Middle — the demo stage owns the space (scales itself to fit) */}
+        <div className="relative z-10 flex min-h-0 min-w-0 flex-1 items-stretch justify-stretch overflow-hidden p-4">
+          <AuthDemoStage />
         </div>
 
-        <div className="relative z-10 flex items-center gap-4 shrink-0">
+        {/* Footer */}
+        <div className="relative z-10 flex shrink-0 items-center justify-between px-10 pb-7">
           <Text size="xs" variant="muted">© 2026 Ryokai</Text>
+          <Text size="xs" variant="muted" className="font-mono tracking-wide">Made for teams that ship</Text>
         </div>
-      </div>
+      </aside>
 
-      {/* RIGHT SIDE — Forms */}
-      <div className="flex flex-1 flex-col items-center justify-center p-8 sm:p-12 lg:p-24 relative overflow-y-auto bg-[var(--bg-base)]">
+      {/* RIGHT SIDE — form stage */}
+      <main className="relative flex flex-1 flex-col overflow-hidden bg-[var(--bg-base)]">
+        {/* Faint starfield ties the form side to the brand panel */}
+        <CosmicBackground variant="hero" opacity={0.1} />
 
-        {/* Mobile brand mark */}
-        <div className="absolute top-8 left-8 flex lg:hidden items-center gap-2">
-          <RyokaiLogo size="sm" />
+        {/* Top chrome — back to landing + theme toggle */}
+        <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between p-5 sm:p-7">
+          <Link
+            to="/landing"
+            className="group inline-flex items-center gap-1.5 rounded-lg border border-transparent px-2.5 py-1.5 text-[12.5px] font-medium text-[var(--text-tertiary)] transition-all duration-200 hover:border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+          >
+            <ArrowLeft size={14} strokeWidth={2} className="transition-transform duration-200 group-hover:-translate-x-0.5" />
+            Home
+          </Link>
+          <AuthThemeToggle />
         </div>
 
-        <div className="w-full max-w-[360px] spring-in">
-          <Outlet />
+        <div className="no-scrollbar relative z-10 flex flex-1 items-center justify-center overflow-y-auto px-6 py-16 sm:px-10">
+          <div className="w-full max-w-[360px]">
+            {/* Mobile brand mark */}
+            <div className="mb-8 flex justify-center lg:hidden">
+              <RyokaiLogo size="md" />
+            </div>
+            <div className="spring-in">
+              <Outlet />
+            </div>
+          </div>
         </div>
-
-      </div>
+      </main>
     </div>
   )
 }

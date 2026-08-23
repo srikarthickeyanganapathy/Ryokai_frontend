@@ -38,7 +38,7 @@ export function LandingNav() {
     <nav className={scrolled ? 'scrolled' : ''}>
       <div className="wrap nav-in">
         <div className="brand">
-          <RyokaiMark size={24} />
+          <RyokaiMark size={28} />
           <span className="brand-word">Ryokai</span>
         </div>
         

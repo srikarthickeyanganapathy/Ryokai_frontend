@@ -178,6 +178,27 @@
     --nebula-3: rgba(108, 79, 161, 0.16);
     --nebula-4: rgba(209, 71, 122, 0.14);
     --vignette: radial-gradient(900px 700px at 50% 42%, transparent 55%, rgba(210, 150, 110, 0.1));
+
+    /* ── Helix Galaxy logo — Dawn: sunset iris ── */
+    --logo-bg: #FFFFFF;
+    --logo-bg-2: #FBF1E9;
+    --logo-border: rgba(209, 71, 122, 0.24);
+    --logo-glow: rgba(242, 114, 74, 0.32);
+    --logo-arm-1: #D1477A;
+    --logo-arm-2: #F2724A;
+    --logo-arm-3: #F5C453;
+    --logo-iris-outer: #D1477A;
+    --logo-iris-inner: #F2724A;
+    --logo-shell: #E15A32;
+    --logo-tick: #D1477A;
+    --logo-core: #2B2438;
+    --logo-core-glow: #F5C453;
+    --logo-glint: #FFFFFF;
+    --logo-star-1: #C6952F;
+    --logo-star-2: #D1477A;
+    --logo-word-1: #2B2438;
+    --logo-word-2: #E15A32;
+    --logo-word-3: #C6952F;
   }
 
   .dark {
@@ -315,6 +336,27 @@
     --nebula-3: rgba(244, 114, 182, 0.22);
     --nebula-4: rgba(232, 196, 104, 0.14);
     --vignette: radial-gradient(900px 700px at 50% 42%, transparent 40%, rgba(2, 1, 10, 0.6));
+
+    /* ── Helix Galaxy logo — Cosmic: eye of the nebula ── */
+    --logo-bg: #070518;
+    --logo-bg-2: #0B0920;
+    --logo-border: rgba(125, 211, 252, 0.3);
+    --logo-glow: rgba(125, 211, 252, 0.42);
+    --logo-arm-1: #A78BFA;
+    --logo-arm-2: #7DD3FC;
+    --logo-arm-3: #5EEAD4;
+    --logo-iris-outer: #38BDF8;
+    --logo-iris-inner: #818CF8;
+    --logo-shell: #7DD3FC;
+    --logo-tick: #7DD3FC;
+    --logo-core: #FFFFFF;
+    --logo-core-glow: #7DD3FC;
+    --logo-glint: #FFFFFF;
+    --logo-star-1: #E8C468;
+    --logo-star-2: #7DD3FC;
+    --logo-word-1: #F8FAFC;
+    --logo-word-2: #7DD3FC;
+    --logo-word-3: #5EEAD4;
   }
 
   body {

@@ -26,6 +26,8 @@
   --color-danger: var(--danger);
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  /* Brand wordmark only — hand-drawn Japanese brush face ("Japanoso" style) */
+  --font-brand: "Yusei Magic", "Inter", -apple-system, sans-serif;
 }
 
 @theme inline {
@@ -149,15 +151,15 @@
 
   /* ── Card Fan Carousel (auth brand panel) ── */
   .fan-layout {
-    min-height: 21rem; /* reserve vertical room for the arc */
+    min-height: 23.5rem; /* reserve vertical room for the arc */
   }
   .fan-card {
     position: absolute;
     top: 0;
     left: 50%;
-    width: 12rem;
-    height: 18.5rem;
-    margin-left: -6rem; /* keep cards centered under the fan origin */
+    width: 13.25rem;
+    height: 20.5rem;
+    margin-left: -6.625rem; /* keep cards centered under the fan origin */
     transform-origin: 50% 130%; /* rotate around a point below the card for the arc */
     will-change: transform, opacity;
     opacity: 0; /* gsap reveals visible cards */
@@ -166,6 +168,19 @@
   @media (max-width: 480px) {
     .fan-card { width: 9.5rem; height: 15rem; margin-left: -4.75rem; }
     .fan-layout { min-height: 17rem; }
+  }
+
+  /* ── Shooting stars (auth brand panel) ── */
+  .shooting-star {
+    position: absolute;
+    width: 90px;
+    height: 1.5px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, var(--logo-arm-2), transparent);
+    opacity: 0;
+    transform: rotate(-32deg);
+    animation: shooting-star 11s ease-in infinite;
+    pointer-events: none;
   }
 
   /* ── Card Hover Lift ── */
@@ -197,6 +212,14 @@
 @keyframes spring-in {
   0% { opacity: 0; transform: scale(0.94) translateY(4px); }
   100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes fan-orbit {
+  to { transform: rotate(360deg); }
+}
+@keyframes shooting-star {
+  0%, 90% { opacity: 0; transform: translate3d(0, 0, 0) rotate(-32deg); }
+  91% { opacity: 0.9; }
+  100% { opacity: 0; transform: translate3d(-240px, 160px, 0) rotate(-32deg); }
 }
 @keyframes rise-in {
   0% { opacity: 0; transform: translateY(8px); }

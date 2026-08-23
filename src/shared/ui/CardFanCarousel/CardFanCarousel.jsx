@@ -67,43 +67,112 @@ function getSlotConfig(totalCards, slot) {
 const ARROW_CLASSES =
   'relative flex items-center justify-center rounded-full border-[1.5px] border-[var(--border-subtle)] bg-[var(--bg-subtle)] text-[var(--text-tertiary)] cursor-pointer shrink-0 z-30 outline-none shadow-sm hover:border-[var(--accent-border)] hover:text-[var(--accent)] active:opacity-70 transition-colors duration-300'
 
-function CardFace({ card }) {
+function CardFace({ card, idx }) {
   const Icon = card.icon
+  const color = card.color || 'var(--accent)'
   return (
-    <div className="w-full h-full flex flex-col bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[var(--radius-lg,1rem)] shadow-[var(--shadow-lg)] overflow-hidden">
-      {/* Image band with gradient fallback so it still looks right offline */}
+    <div className="relative w-full h-full flex flex-col bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[var(--radius-lg,1rem)] shadow-[var(--shadow-lg)] overflow-hidden">
+      {/* Signature top edge in the card color */}
       <div
-        className="relative h-[46%] shrink-0 overflow-hidden"
-        style={{ background: card.gradient || 'linear-gradient(135deg, var(--accent-soft), var(--bg-subtle))' }}
+        className="absolute top-0 inset-x-0 h-[2.5px] z-10 pointer-events-none"
+        style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)`, opacity: 0.9 }}
+      />
+
+      {/* Visual band — a quiet nebula wash built from the card's theme color */}
+      <div
+        className="relative h-[50%] shrink-0 overflow-hidden flex items-center justify-center"
+        style={{
+          background: `linear-gradient(160deg, color-mix(in srgb, ${color} 17%, var(--bg-subtle)) 0%, color-mix(in srgb, ${color} 7%, var(--bg-base)) 55%, var(--bg-base) 100%)`,
+        }}
       >
-        {card.imgUrl && (
-          <img
-            src={card.imgUrl}
-            loading="lazy"
-            alt={card.alt || card.title || 'Card'}
-            className="absolute inset-0 w-full h-full object-cover opacity-90"
-            onError={(e) => { e.target.style.display = 'none' }}
+        {/* Soft corner bloom */}
+        <div
+          className="absolute -top-10 -right-10 h-32 w-32 rounded-full pointer-events-none"
+          style={{ background: `radial-gradient(circle, color-mix(in srgb, ${color} 30%, transparent), transparent 70%)` }}
+        />
+        {/* Star-dot texture */}
+        <div
+          className="absolute inset-0 opacity-40 pointer-events-none"
+          style={{
+            backgroundImage: 'radial-gradient(var(--border-strong) 0.8px, transparent 0.8px)',
+            backgroundSize: '14px 14px',
+          }}
+        />
+
+        {/* Orbiting rings + icon core */}
+        <div className="relative flex items-center justify-center">
+          <div
+            className="absolute h-[104px] w-[104px] rounded-full border pointer-events-none"
+            style={{
+              borderColor: `color-mix(in srgb, ${color} 22%, transparent)`,
+              borderStyle: 'dashed',
+              animation: 'fan-orbit 30s linear infinite',
+            }}
           />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-        {Icon && (
-          <div className="absolute bottom-2.5 left-2.5 w-8 h-8 rounded-lg bg-white/15 backdrop-blur-md border border-white/25 text-white flex items-center justify-center">
-            <Icon className="w-4 h-4" strokeWidth={1.75} />
+          <div
+            className="absolute h-[80px] w-[80px] rounded-full border pointer-events-none"
+            style={{ borderColor: `color-mix(in srgb, ${color} 18%, transparent)` }}
+          />
+          {/* Glowing satellite dot riding the outer ring */}
+          <div
+            className="absolute h-[104px] w-[104px] pointer-events-none"
+            style={{ animation: 'fan-orbit 16s linear infinite reverse' }}
+          >
+            <span
+              className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full"
+              style={{
+                background: color,
+                boxShadow: `0 0 8px 1px color-mix(in srgb, ${color} 60%, transparent)`,
+              }}
+            />
           </div>
+          {Icon && (
+            <div
+              className="relative flex w-12 h-12 items-center justify-center rounded-[14px] border backdrop-blur-md"
+              style={{
+                background: `color-mix(in srgb, ${color} 16%, transparent)`,
+                color,
+                borderColor: `color-mix(in srgb, ${color} 32%, transparent)`,
+                boxShadow: `0 10px 30px -10px color-mix(in srgb, ${color} 55%, transparent)`,
+              }}
+            >
+              <Icon className="w-[22px] h-[22px]" strokeWidth={1.75} />
+            </div>
+          )}
+        </div>
+
+        {/* Card index */}
+        {idx !== undefined && (
+          <span className="absolute top-2.5 right-3 font-mono text-[9px] tracking-[0.15em] text-[var(--text-tertiary)] opacity-70">
+            {String(idx).padStart(2, '0')}
+          </span>
         )}
+
+        {/* Fade into the info band */}
+        <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[var(--bg-card)] to-transparent pointer-events-none" />
       </div>
+
       {/* Info band — the valuable part */}
-      <div className="flex-1 min-h-0 p-4 flex flex-col gap-1.5 text-left">
+      <div className="flex-1 min-h-0 p-3.5 pt-1.5 flex flex-col gap-1.5 text-left">
         <p className="text-[13px] font-semibold text-[var(--text-primary)] leading-snug line-clamp-2">
           {card.title}
         </p>
-        <p className="text-[11px] text-[var(--text-tertiary)] leading-relaxed line-clamp-4">
+        <p className="text-[10.5px] text-[var(--text-tertiary)] leading-relaxed line-clamp-4">
           {card.body}
         </p>
         {card.footer && (
-          <p className="mt-auto pt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
-            {card.footer}
-          </p>
+          <span className="mt-auto pt-2">
+            <span
+              className="inline-flex items-center rounded-full border px-2 py-[3px] text-[8.5px] font-semibold uppercase tracking-[0.14em]"
+              style={{
+                color,
+                background: `color-mix(in srgb, ${color} 10%, transparent)`,
+                borderColor: `color-mix(in srgb, ${color} 26%, transparent)`,
+              }}
+            >
+              {card.footer}
+            </span>
+          </span>
         )}
       </div>
     </div>
@@ -324,11 +393,11 @@ export default function CardFanCarousel({ cards = [], autoPlay = true, autoPlayM
                 rel="noopener noreferrer"
                 className="fan-card block cursor-pointer"
               >
-                <CardFace card={card} />
+                <CardFace card={card} idx={index + 1} />
               </a>
             ) : (
               <div key={index} className="fan-card">
-                <CardFace card={card} />
+                <CardFace card={card} idx={index + 1} />
               </div>
             )
           ))}

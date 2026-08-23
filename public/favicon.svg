@@ -1,39 +1,77 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="28" fill="#030712"/>
+  <!-- Ryokai — Helix Galaxy (cluster of stars). Follows the OS color scheme. -->
   <defs>
-    <radialGradient id="c" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="30%" stop-color="#E0F2FE"/>
-      <stop offset="65%" stop-color="#0284C7" stop-opacity="0.8"/>
-      <stop offset="100%" stop-color="#030712" stop-opacity="0"/>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" class="g1" stop-opacity="0.85"/>
+      <stop offset="0.5" class="g1" stop-opacity="0.25"/>
+      <stop offset="1" class="g1" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="v" cx="50%" cy="50%" r="50%">
-      <stop offset="35%" stop-color="#00F0FF" stop-opacity="0"/>
-      <stop offset="70%" stop-color="#38BDF8" stop-opacity="0.95"/>
-      <stop offset="88%" stop-color="#0284C7" stop-opacity="0.7"/>
-      <stop offset="100%" stop-color="#030712" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="b" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#E0F2FE" stop-opacity="0.2"/>
-      <stop offset="50%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0.2"/>
+    <linearGradient id="badge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" class="b1"/>
+      <stop offset="1" class="b2"/>
     </linearGradient>
   </defs>
 
-  <!-- Swirling Accretion Disk -->
-  <ellipse cx="50" cy="50" rx="44" ry="24" stroke="url(#v)" stroke-width="8" transform="rotate(-22 50 50)" opacity="0.9"/>
-  <ellipse cx="50" cy="50" rx="38" ry="20" stroke="#00F0FF" stroke-width="2" stroke-dasharray="4 5" transform="rotate(-22 50 50)" opacity="0.7"/>
+  <style>
+    /* Cosmic (default) */
+    .f1 { fill: #A78BFA; } .f2 { fill: #7DD3FC; } .f3 { fill: #5EEAD4; }
+    .g1 { stop-color: #7DD3FC; }
+    .b1 { stop-color: #070518; } .b2 { stop-color: #0B0920; }
+    .bd { stroke: rgba(125,211,252,0.3); }
+    .tick { fill: #7DD3FC; } .core { fill: #FFFFFF; } .glint { fill: #FFFFFF; }
+    .st1 { fill: #E8C468; } .st2 { fill: #7DD3FC; }
+    @media (prefers-color-scheme: light) {
+      .f1 { fill: #D1477A; } .f2 { fill: #F2724A; } .f3 { fill: #F5C453; }
+      .g1 { stop-color: #F5C453; }
+      .b1 { stop-color: #FFFFFF; } .b2 { stop-color: #FBF1E9; }
+      .bd { stroke: rgba(209,71,122,0.24); }
+      .tick { fill: #D1477A; } .core { fill: #2B2438; } .glint { fill: #FFFFFF; }
+      .st1 { fill: #C6952F; } .st2 { fill: #D1477A; }
+    }
+  </style>
 
-  <!-- Starfield Accents -->
-  <circle cx="36" cy="68" r="2" fill="#FDE047"/>
-  <circle cx="84" cy="18" r="1.5" fill="#BAE6FD"/>
-  <circle cx="15" cy="20" r="1.2" fill="#FFFFFF"/>
+  <rect width="100" height="100" rx="28" fill="url(#badge)"/>
+  <rect x="0.5" y="0.5" width="99" height="99" rx="27.5" fill="none" class="bd" stroke-width="1"/>
 
-  <!-- Relativistic Jet Beam -->
-  <line x1="22" y1="2" x2="78" y2="98" stroke="url(#b)" stroke-width="4.5" stroke-linecap="round"/>
-  <line x1="22" y1="2" x2="78" y2="98" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Inner knot ring -->
+  <g class="tick" opacity="0.35">
+    <circle cx="50" cy="34.5" r="0.95"/><circle cx="59.11" cy="37.46" r="0.95"/>
+    <circle cx="64.74" cy="45.21" r="0.95"/><circle cx="64.74" cy="54.79" r="0.95"/>
+    <circle cx="59.11" cy="62.54" r="0.95"/><circle cx="50" cy="65.5" r="0.95"/>
+    <circle cx="40.89" cy="62.54" r="0.95"/><circle cx="35.26" cy="54.79" r="0.95"/>
+    <circle cx="35.26" cy="45.21" r="0.95"/><circle cx="40.89" cy="37.46" r="0.95"/>
+  </g>
 
-  <!-- Pulsar Core -->
-  <circle cx="50" cy="50" r="22" fill="url(#c)"/>
-  <circle cx="50" cy="50" r="6" fill="#FFFFFF"/>
+  <!-- Spiral arms — clusters of stars -->
+  <g>
+    <circle class="f1" cx="50" cy="43.5" r="2.6" opacity="0.95"/>
+    <circle class="f1" cx="47.05" cy="41.3" r="2.44" opacity="0.91"/>
+    <circle class="f1" cx="57.23" cy="40.57" r="2.28" opacity="0.88"/>
+    <circle class="f2" cx="62.11" cy="41.91" r="2.11" opacity="0.84"/>
+    <circle class="f2" cx="66.66" cy="45.53" r="1.95" opacity="0.8"/>
+    <circle class="f2" cx="69.9" cy="51.3" r="1.79" opacity="0.76"/>
+    <circle class="f3" cx="70.91" cy="58.66" r="1.63" opacity="0.73"/>
+    <circle class="f3" cx="69.03" cy="66.69" r="1.46" opacity="0.69"/>
+    <circle class="f3" cx="64" cy="74.25" r="1.3" opacity="0.65"/>
+    <circle class="f1" cx="50" cy="56.5" r="2.6" opacity="0.95"/>
+    <circle class="f1" cx="52.95" cy="58.7" r="2.44" opacity="0.91"/>
+    <circle class="f1" cx="42.77" cy="59.43" r="2.28" opacity="0.88"/>
+    <circle class="f2" cx="37.89" cy="58.09" r="2.11" opacity="0.84"/>
+    <circle class="f2" cx="33.34" cy="54.47" r="1.95" opacity="0.8"/>
+    <circle class="f2" cx="30.1" cy="48.7" r="1.79" opacity="0.76"/>
+    <circle class="f3" cx="29.09" cy="41.34" r="1.63" opacity="0.73"/>
+    <circle class="f3" cx="30.97" cy="33.31" r="1.46" opacity="0.69"/>
+    <circle class="f3" cx="36" cy="25.75" r="1.3" opacity="0.65"/>
+  </g>
+
+  <!-- Field stars -->
+  <circle class="glint" cx="76" cy="38" r="1.1" opacity="0.6"/>
+  <circle class="st2" cx="24" cy="60" r="1" opacity="0.55"/>
+  <circle class="st1" cx="63" cy="20" r="0.9" opacity="0.7"/>
+  <circle class="glint" cx="33" cy="80" r="0.8" opacity="0.5"/>
+
+  <!-- Glowing core -->
+  <circle cx="50" cy="50" r="13" fill="url(#glow)"/>
+  <circle cx="50" cy="50" r="4.4" class="core"/>
+  <circle cx="47.8" cy="47.6" r="1.5" class="glint" opacity="0.95"/>
 </svg>

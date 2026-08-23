@@ -8,7 +8,7 @@ export function Footer() {
         <div className="foot-grid">
           <div className="foot-brand">
             <div className="brand">
-              <RyokaiMark size={22} />
+              <RyokaiMark size={24} />
               <span className="brand-word">Ryokai</span>
             </div>
             <p>Multi-tenant work governance. Clarity at every scope of work.</p>
