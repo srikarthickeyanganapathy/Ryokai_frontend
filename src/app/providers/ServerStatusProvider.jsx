@@ -18,7 +18,7 @@ const PING_TIMEOUT_MS = 8000;
  */
 const healthUrl = () => {
   const base = api.defaults.baseURL || '';
-  return `${base.replace(/\/api\/v1\/?$/, '')}/actuator/health`;
+  return `${base.replace(/\/api\/v1\/?$/, '')}/actuator/health/ping`;
 };
 
 const pingServer = async () => {
@@ -75,7 +75,12 @@ export function ServerStatusProvider({ children }) {
       if (reachable) {
         setDown(false);
         setAttempts(0);
-        queryClient.invalidateQueries();
+        // Stagger re-fetches to avoid thundering herd on wake-up
+        const groups = ['users', 'notifications', 'tasks', 'organizations', 'crews'];
+        for (const key of groups) {
+          queryClient.invalidateQueries({ queryKey: [key] });
+          await new Promise(r => setTimeout(r, 500));
+        }
         return;
       }
       setAttempts((n) => n + 1);
