@@ -43,30 +43,30 @@ export default function HeroSection() {
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--success, #10B981)', marginRight: 8 }}
             /> 
-            Multi-tenant work governance
+            One system. Every level of work.
           </motion.div>
           
           <motion.h1 variants={fadeUp}>
-            Clarity at <span className="grad">every scope</span>
+            The system for turning <span className="grad">intent</span>
             <motion.span 
               animate={{ opacity: [1, 0] }} 
               transition={{ duration: 0.8, repeat: Infinity, ease: "steps(2)" }}
               style={{ display: 'inline-block', width: '0.1em', backgroundColor: 'currentColor', marginLeft: 4, transform: 'translateY(2px)' }}
             />
             <br />
-            of work.
+            into execution.
           </motion.h1>
           
           <motion.p variants={fadeUp} className="hero-sub">
-            Ryokai is the workspace where <b>personal focus</b>, <b>org alignment</b>, and <b>crew collaboration</b> live under one explicit permission model — so every person knows exactly what they can see and do.
+            From <b>personal focus</b> to <b>organizational execution</b>, Ryokai connects goals, projects, tasks, collaboration, and accountability in one system.
           </motion.p>
           
           <motion.div variants={fadeUp} className="hero-cta">
             <Link className="btn btn-primary" to="/register">
               Start free <span className="arr">→</span>
             </Link>
-            <a className="btn btn-ghost" href="mailto:sales@ryokai.dev">
-              Request a demo
+            <a className="btn btn-ghost" href="#how-it-works">
+              See how it works
             </a>
           </motion.div>
           

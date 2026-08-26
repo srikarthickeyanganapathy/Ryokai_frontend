@@ -23,7 +23,7 @@ export function CTASection() {
             Get started
           </motion.div>
           <motion.h2 className="sec-h" variants={itemVariants}>
-            Start free.<br />Scale when you grow.
+            Turn intent into execution.<br />Start free today.
           </motion.h2>
           <motion.p className="sec-sub" variants={itemVariants}>
             Free personal and crew workspaces. Bring your organization when you're ready.
@@ -39,7 +39,7 @@ export function CTASection() {
           </motion.div>
           
           <motion.div className="cta-note" variants={itemVariants}>
-            Governed, not gated. Your data stays yours.
+            Evidence-backed workflows. Your data stays yours.
           </motion.div>
         </motion.div>
       </div>

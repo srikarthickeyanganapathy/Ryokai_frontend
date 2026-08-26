@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/identity';
+import { useTheme } from '@/app/providers/ThemeProvider';
 
 import './landing.css';
 import { LandingNav } from './components/LandingNav';
@@ -18,23 +19,12 @@ import { Footer } from './components/Footer';
 
 export function LandingPage() {
   const { isAuthenticated, isInitializing } = useAuth();
-  
-  // Initialize theme from localStorage, default to dark
-  const [isDark, setIsDark] = useState(() => {
-    return (localStorage.getItem('ryokai-theme') || 'dark') !== 'light';
-  });
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('ryokai-theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('ryokai-theme', 'light');
-    }
-  }, [isDark]);
-
-  const toggleTheme = () => setIsDark(prev => !prev);
+  const { theme } = useTheme();
+  const isDark =
+    theme === 'dark' ||
+    (theme === 'system' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   // If user is logged in, redirect them to the app
   if (!isInitializing && isAuthenticated) {
@@ -44,17 +34,18 @@ export function LandingPage() {
   return (
     <div className="landing-page h-full w-full relative">
       <StarfieldCanvas isDark={isDark} />
-      <LandingNav isDark={isDark} toggleTheme={toggleTheme} />
+      <LandingNav />
       <HeroSection />
       <TrustMarquee />
       <HowItWorksSection />
       <WorkspaceSection />
+      <CapabilitiesSection />
       <GovernanceSection />
       <WorkloadSection />
-      <CapabilitiesSection />
       <IntegrationsSection />
       <CTASection />
       <Footer />
     </div>
   );
 }
+

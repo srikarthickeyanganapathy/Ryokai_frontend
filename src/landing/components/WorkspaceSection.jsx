@@ -50,6 +50,7 @@ const PersonalDemo = () => {
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
       exit={{ opacity: 0, height: 0 }}
+      onClick={(e) => e.stopPropagation()}
       className="mt-4 p-4 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)]"
     >
       <div className="text-sm text-[var(--text-secondary)] mb-2 font-medium">Focus Session</div>
@@ -76,6 +77,7 @@ const OrgDemo = () => {
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
       exit={{ opacity: 0, height: 0 }}
+      onClick={(e) => e.stopPropagation()}
       className="mt-4 p-4 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)] flex flex-col items-center gap-3"
     >
       <div className="text-sm text-[var(--text-secondary)] w-full font-medium mb-1">Org Chart (Engineering)</div>
@@ -119,6 +121,7 @@ const CrewsDemo = () => {
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
       exit={{ opacity: 0, height: 0 }}
+      onClick={(e) => e.stopPropagation()}
       className="mt-4 p-4 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)] flex flex-col gap-2"
     >
       <div className="text-sm text-[var(--text-secondary)] font-medium mb-1">Crew: Apollo Launch</div>
@@ -167,7 +170,7 @@ export default function WorkspaceSection() {
           variants={itemVariants}
           className="sec-label reveal text-[var(--accent)] text-sm font-semibold tracking-wider uppercase mb-4"
         >
-          One workspace · three scopes
+          Operational Scopes
         </motion.div>
         
         <motion.h2 
@@ -177,7 +180,7 @@ export default function WorkspaceSection() {
           variants={itemVariants}
           className="sec-h reveal text-4xl md:text-5xl font-bold text-[var(--text-primary)] tracking-tight leading-tight mb-6"
         >
-          Personal, Org, and Crews.<br/>One place, three boundaries.
+          One system. Every level of work.
         </motion.h2>
         
         <motion.p 
@@ -187,7 +190,7 @@ export default function WorkspaceSection() {
           variants={itemVariants}
           className="sec-sub reveal text-lg text-[var(--text-secondary)] max-w-2xl mb-16"
         >
-          Deep individual focus, cross-team alignment, and open collaboration — each with its own explicit access boundary.
+          Where intent becomes organized work across three distinct scopes — personal focus for deep work, crew coordination for agile teams, and organizational alignment for governed execution.
         </motion.p>
         
         <motion.div 
@@ -217,7 +220,7 @@ export default function WorkspaceSection() {
             </div>
             <motion.h3 layout className="text-xl font-semibold text-[var(--text-primary)] mb-3">Personal</motion.h3>
             <motion.p layout className="text-[var(--text-secondary)] mb-6 text-sm leading-relaxed">
-              Your private command deck — tasks, focus sessions, notes, and saved items. No team noise.
+              Your private command deck — tasks, focus timer, notes, and private priorities without team noise.
             </motion.p>
             <motion.ul layout className="space-y-3 mb-2">
               <li className="flex items-center text-sm text-[var(--text-secondary)]">
@@ -253,9 +256,9 @@ export default function WorkspaceSection() {
             <div className="ic ic-secondary w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-6">
               <Layers size={24} />
             </div>
-            <motion.h3 layout className="text-xl font-semibold text-[var(--text-primary)] mb-3">Org</motion.h3>
+            <motion.h3 layout className="text-xl font-semibold text-[var(--text-primary)] mb-3">Organization</motion.h3>
             <motion.p layout className="text-[var(--text-secondary)] mb-6 text-sm leading-relaxed">
-              Alignment at scale — projects, teams, directory, goals, roles, workload, and analytics, resolved per role.
+              Enterprise-wide alignment — projects, teams, directory, goals, workload balance, and role structures.
             </motion.p>
             <motion.ul layout className="space-y-3 mb-2">
               <li className="flex items-center text-sm text-[var(--text-secondary)]">
@@ -293,7 +296,7 @@ export default function WorkspaceSection() {
             </div>
             <motion.h3 layout className="text-xl font-semibold text-[var(--text-primary)] mb-3">Crews</motion.h3>
             <motion.p layout className="text-[var(--text-secondary)] mb-6 text-sm leading-relaxed">
-              Self-organizing crews with shared tasks and whiteboards — membership is the permission, leaving is always yours.
+              Dynamic cross-functional squads with shared tasks and real-time whiteboards — join or leave anytime.
             </motion.p>
             <motion.ul layout className="space-y-3 mb-2">
               <li className="flex items-center text-sm text-[var(--text-secondary)]">

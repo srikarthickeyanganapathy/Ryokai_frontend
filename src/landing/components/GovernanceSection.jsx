@@ -96,7 +96,7 @@ export default function GovernanceSection() {
           variants={itemVariants}
           className="sec-label reveal text-[var(--accent)] text-sm font-semibold tracking-wider uppercase mb-4"
         >
-          Governance
+          Trust &amp; Governance
         </motion.div>
         
         <motion.h2 
@@ -106,7 +106,7 @@ export default function GovernanceSection() {
           variants={itemVariants}
           className="sec-h reveal text-4xl md:text-5xl font-bold text-[var(--text-primary)] tracking-tight leading-tight mb-6"
         >
-          Every access decision,<br/>explicit and auditable.
+          Execution with accountability.
         </motion.h2>
         
         <motion.p 
@@ -116,7 +116,7 @@ export default function GovernanceSection() {
           variants={itemVariants}
           className="sec-sub reveal text-lg text-[var(--text-secondary)] max-w-2xl mb-16"
         >
-          One authorization engine resolves who can see and do what — from the first request to the final grant or deny.
+          Every action has context, every permission has scope, and every important transition has a clear owner — so teams move fast without losing control.
         </motion.p>
         
         <motion.div 
@@ -148,16 +148,16 @@ export default function GovernanceSection() {
               {/* Main Content */}
               <div className="flex-1 p-8 overflow-y-auto bg-[var(--bg-base)]">
                 <div className="mb-8">
-                  <div className="text-xs text-[var(--accent)] font-medium uppercase tracking-wider mb-2">Security & Access Control</div>
+                  <div className="text-xs text-[var(--accent)] font-medium uppercase tracking-wider mb-2">Authority &amp; Scope</div>
                   <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-1">Command Chain</h2>
-                  <div className="text-sm text-[var(--text-secondary)]">Every role ranked by authority — pick a link in the chain to open its passport.</div>
+                  <div className="text-sm text-[var(--text-secondary)]">Roles ranked by authority — select a role to inspect its permissions and scope boundaries.</div>
                 </div>
 
                 {/* Posture Bar */}
                 <div className="flex gap-4 mb-8">
                   <div className="flex-1 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-lg p-4 flex items-center gap-3">
                     <div className="w-8 h-8 rounded bg-blue-500/10 text-blue-500 flex items-center justify-center"><LinkIcon size={16} /></div>
-                    <div><div className="text-lg font-semibold text-[var(--text-primary)] leading-tight">4</div><div className="text-xs text-[var(--text-secondary)]">Links in chain</div></div>
+                    <div><div className="text-lg font-semibold text-[var(--text-primary)] leading-tight">4</div><div className="text-xs text-[var(--text-secondary)]">Authority tiers</div></div>
                   </div>
                   <div className="flex-1 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-lg p-4 flex items-center gap-3">
                     <div className="w-8 h-8 rounded bg-indigo-500/10 text-indigo-500 flex items-center justify-center"><ShieldCheck size={16} /></div>

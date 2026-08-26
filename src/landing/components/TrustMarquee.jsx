@@ -1,14 +1,14 @@
 import { motion, useReducedMotion, useAnimationControls } from 'framer-motion';
-import { Lock, Shield, FileText, Users, Clock } from 'lucide-react';
+import { Zap, Clock, Users, Layers, FileText, Shield } from 'lucide-react';
 import { useEffect } from 'react';
 
 const marqueeItems = [
-  { text: "Multi-tenant isolation", icon: Lock },
-  { text: "Role-based access", icon: Shield },
-  { text: "Full audit log", icon: FileText },
-  { text: "Personal · Org · Crews", icon: Users },
-  { text: "Request → Membership → Ownership → RBAC → Policies → GRANT / DENY", icon: Shield },
-  { text: "Focus & deep work", icon: Clock },
+  { text: "Intent → Execution", icon: Zap },
+  { text: "Personal Focus", icon: Clock },
+  { text: "Crew Collaboration", icon: Users },
+  { text: "Organizational Alignment", icon: Layers },
+  { text: "Evidence-backed Work", icon: FileText },
+  { text: "Scoped Accountability", icon: Shield },
 ];
 
 export default function TrustMarquee() {

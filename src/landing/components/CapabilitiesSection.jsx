@@ -17,46 +17,52 @@ const itemVariants = {
 export default function CapabilitiesSection() {
   const capabilities = [
     {
+      num: "01 / PLAN",
       icon: <LayoutList size={24} />,
       color: "text-blue-500",
       bg: "bg-blue-500/10",
-      title: "Missions & projects",
-      desc: "Plan and ship with the view that fits — Kanban, list, table, or the spatial Nebula graph."
+      title: "Missions & Projects",
+      desc: "Structure goals with the view that fits your workflow — Kanban boards, lists, tables, or the spatial Nebula graph."
     },
     {
+      num: "02 / FOCUS",
+      icon: <Focus size={24} />,
+      color: "text-amber-500",
+      bg: "bg-amber-500/10",
+      title: "Focus Mode",
+      desc: "Protected deep-work sessions with a dedicated timer and workspace views that minimize context switching."
+    },
+    {
+      num: "03 / COORDINATE",
+      icon: <LayoutDashboard size={24} />,
+      color: "text-purple-500",
+      bg: "bg-purple-500/10",
+      title: "Crews & Whiteboards",
+      desc: "Dynamic cross-functional squads and shared canvases for synchronous planning and rapid collaboration."
+    },
+    {
+      num: "04 / GOVERN",
       icon: <ShieldCheck size={24} />,
       color: "text-indigo-500",
       bg: "bg-indigo-500/10",
-      title: "Roles & permissions",
-      desc: "The four-stage authorization engine resolves every grant to an explicit, scoped level."
+      title: "Roles & Permissions",
+      desc: "Scoped role hierarchies and explicit permission grants that keep execution secure and authority clear."
     },
     {
+      num: "05 / MEASURE",
+      icon: <BarChart2 size={24} />,
+      color: "text-sky-400",
+      bg: "bg-sky-400/10",
+      title: "Analytics & Audit",
+      desc: "Cycle time metrics, throughput velocity, and an unalterable audit log of every state transition."
+    },
+    {
+      num: "06 / OPTIMIZE",
       icon: <Activity size={24} />,
       color: "text-emerald-500",
       bg: "bg-emerald-500/10",
-      title: "Workload & goals",
-      desc: "See who's overloaded and who has room. Track goals against real capacity."
-    },
-    {
-      icon: <BarChart2 size={24} />,
-      color: "text-blue-400",
-      bg: "bg-blue-400/10",
-      title: "Analytics & audit",
-      desc: "Insights you can act on, and an audit trail that shows exactly what happened."
-    },
-    {
-      icon: <Focus size={24} />,
-      color: "text-yellow-500",
-      bg: "bg-yellow-500/10",
-      title: "Focus",
-      desc: "Protected deep-work sessions with a timer that keeps the noise out."
-    },
-    {
-      icon: <LayoutDashboard size={24} />,
-      color: "text-emerald-400",
-      bg: "bg-emerald-400/10",
-      title: "Whiteboards",
-      desc: "Real-time shared canvases for crews to think and plan together."
+      title: "Workload & Goals",
+      desc: "Live capacity heatmaps, workload distribution models, and scenario simulation to prevent team burnout."
     }
   ];
 
@@ -70,7 +76,7 @@ export default function CapabilitiesSection() {
           variants={itemVariants}
           className="sec-label reveal text-[var(--accent)] text-sm font-semibold tracking-wider uppercase mb-4"
         >
-          Capabilities
+          Core Capabilities
         </motion.div>
         
         <motion.h2 
@@ -78,10 +84,20 @@ export default function CapabilitiesSection() {
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={itemVariants}
-          className="sec-h reveal text-4xl md:text-5xl font-bold text-[var(--text-primary)] tracking-tight leading-tight mb-16"
+          className="sec-h reveal text-4xl md:text-5xl font-bold text-[var(--text-primary)] tracking-tight leading-tight mb-6"
         >
-          Built for teams that need<br/>to know who can do what.
+          Built for teams that execute<br/>with clarity and control.
         </motion.h2>
+
+        <motion.p 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={itemVariants}
+          className="sec-sub reveal text-lg text-[var(--text-secondary)] max-w-2xl mb-16"
+        >
+          Every capability in Ryokai is engineered to bridge high-level strategy with day-to-day execution across every scope of work.
+        </motion.p>
 
         <motion.div 
           variants={containerVariants}
@@ -95,13 +111,18 @@ export default function CapabilitiesSection() {
               key={idx}
               variants={itemVariants}
               whileHover={{ y: -5, transition: { duration: 0.2 } }}
-              className="p-8 rounded-2xl bg-[var(--bg-base)] border border-[var(--border-subtle)] hover:border-[var(--border-hover)] hover:shadow-lg transition-all"
+              className="p-8 rounded-2xl bg-[var(--bg-base)] border border-[var(--border-subtle)] hover:border-[var(--border-hover)] hover:shadow-lg transition-all flex flex-col justify-between"
             >
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-6 ${cap.bg} ${cap.color}`}>
-                {cap.icon}
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${cap.bg} ${cap.color}`}>
+                    {cap.icon}
+                  </div>
+                  <span className="font-mono text-xs font-semibold text-[var(--text-tertiary)]">{cap.num}</span>
+                </div>
+                <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-3">{cap.title}</h3>
+                <p className="text-[var(--text-secondary)] text-sm leading-relaxed">{cap.desc}</p>
               </div>
-              <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-3">{cap.title}</h3>
-              <p className="text-[var(--text-secondary)] text-sm leading-relaxed">{cap.desc}</p>
             </motion.div>
           ))}
         </motion.div>

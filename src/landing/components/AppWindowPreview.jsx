@@ -166,7 +166,7 @@ function Home({ mode }) {
         </div>
         <div className="flex flex-col gap-3 min-w-0">
           <div className="rounded-[13px] border border-[var(--border-subtle)] p-3.5 bg-[var(--bg-subtle)]/30">
-            <div className="flex items-center gap-1.5 mb-2 text-[12px] font-semibold"><Lightbulb size={13} className="text-[var(--accent)]" /> AI Insights</div>
+            <div className="flex items-center gap-1.5 mb-2 text-[12px] font-semibold"><Lightbulb size={13} className="text-[var(--accent)]" /> Focus Recommendations</div>
             <div className="flex gap-2 p-2 rounded-lg bg-[var(--bg-subtle)]/60 mb-1.5"><Lightbulb size={14} className="text-amber-400 shrink-0 mt-0.5" /><div><div className="text-[11px] font-medium">Suggested focus</div><div className="text-[10px] text-[var(--text-tertiary)]">Focus on tasks currently in progress to maintain momentum.</div></div></div>
             <div className="flex gap-2 p-2 rounded-lg bg-[var(--bg-subtle)]/60"><TrendingUp size={14} className="text-emerald-400 shrink-0 mt-0.5" /><div><div className="text-[11px] font-medium">Productivity trend</div><div className="text-[10px] text-[var(--text-tertiary)]">Your workspace tasks are synced and updated in real-time.</div></div></div>
           </div>

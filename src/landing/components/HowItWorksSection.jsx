@@ -1,17 +1,20 @@
 import { motion } from 'framer-motion';
 import {
+  Sparkles,
+  Compass,
   Plus,
   Zap,
   Upload,
+  Eye,
   CheckCircle2,
-  RotateCcw,
+  Trophy,
   ImageIcon,
   CheckCheck,
 } from 'lucide-react';
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
 };
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -20,49 +23,76 @@ const itemVariants = {
 
 const STEPS = [
   {
-    icon: Plus,
-    title: 'Create',
-    desc: 'Capture a task, set priority and due date, and assign an owner — creator, assignee and reviewer are separate roles.',
-    state: 'Created → assigned',
-    tone: 'info',
+    icon: Sparkles,
+    num: '01',
+    title: 'Intent',
+    desc: 'Define what needs to be accomplished and establish clear target outcomes.',
+    state: '01 · Captured',
+    iconCls: 'bg-amber-500/10 text-amber-500',
+    stateCls: 'bg-amber-500/10 text-amber-500',
+  },
+  {
+    icon: Compass,
+    num: '02',
+    title: 'Plan',
+    desc: 'Turn goals into structured projects, sequenced milestones, and deliverables.',
+    state: '02 · Structured',
     iconCls: 'bg-blue-500/10 text-blue-500',
     stateCls: 'bg-blue-500/10 text-blue-500',
   },
   {
+    icon: Plus,
+    num: '03',
+    title: 'Create',
+    desc: 'Create tasks with clear ownership across creator, assignee, and reviewer roles.',
+    state: '03 · Assigned',
+    iconCls: 'bg-indigo-500/10 text-indigo-500',
+    stateCls: 'bg-indigo-500/10 text-indigo-500',
+  },
+  {
     icon: Zap,
+    num: '04',
     title: 'Work',
-    desc: 'The assignee owns the task, tracks progress, and attaches typed evidence — links, GitHub, screenshots, recordings, notes.',
-    state: 'In progress · assignee owns',
-    tone: 'warning',
+    desc: 'Execute with focused work sessions while tracking tangible task progress.',
+    state: '04 · In progress',
     iconCls: 'bg-yellow-500/10 text-yellow-500',
     stateCls: 'bg-yellow-500/10 text-yellow-500',
   },
   {
     icon: Upload,
+    num: '05',
     title: 'Submit',
-    desc: 'Submission is denied without evidence. The task enters review as a first-class state, not a comment thread.',
-    state: 'Submitted · evidence gate',
-    tone: 'violet',
+    desc: 'Attach tangible evidence — links, git commits, screenshots, or notes — before submitting.',
+    state: '05 · Evidence gate',
     iconCls: 'bg-purple-500/10 text-purple-500',
     stateCls: 'bg-purple-500/10 text-purple-500',
   },
   {
+    icon: Eye,
+    num: '06',
+    title: 'Review',
+    desc: 'Reviewers inspect the submitted evidence directly, not just a comment thread.',
+    state: '06 · In review',
+    iconCls: 'bg-sky-500/10 text-sky-500',
+    stateCls: 'bg-sky-500/10 text-sky-500',
+  },
+  {
     icon: CheckCircle2,
-    title: 'Approve',
-    desc: 'A reviewer who outranks the assignee decides. No self-review — approval is a recorded transition, and it is terminal.',
-    state: 'Approved · terminal',
-    tone: 'success',
+    num: '07',
+    title: 'Decide',
+    desc: 'Approve completed work or route it back for rework with clear, recorded feedback.',
+    state: '07 · Decided',
     iconCls: 'bg-emerald-500/10 text-emerald-500',
     stateCls: 'bg-emerald-500/10 text-emerald-500',
   },
   {
-    icon: RotateCcw,
-    title: 'Reject',
-    desc: 'Rejections require a reason and route work back for rework. Rework is part of the design — control stays with the worker.',
-    state: 'Rejected → rework',
-    tone: 'danger',
-    iconCls: 'bg-red-500/10 text-red-500',
-    stateCls: 'bg-red-500/10 text-red-500',
+    icon: Trophy,
+    num: '08',
+    title: 'Outcome',
+    desc: 'Track completed outcomes, update team progress, and free capacity for the next priority.',
+    state: '08 · Completed',
+    iconCls: 'bg-teal-500/10 text-teal-500',
+    stateCls: 'bg-teal-500/10 text-teal-500',
   },
 ];
 
@@ -71,24 +101,31 @@ export default function HowItWorksSection() {
     <section id="how-it-works" className="py-24 relative overflow-hidden">
       <div className="wrap max-w-[1200px] mx-auto px-6">
         <motion.div variants={itemVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }} className="sec-label reveal text-[var(--accent)] text-sm font-semibold tracking-wider uppercase mb-4">
-          How it works
+          The Execution Lifecycle
         </motion.div>
         <motion.h2 variants={itemVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }} className="sec-h reveal text-4xl md:text-5xl font-bold text-[var(--text-primary)] tracking-tight leading-tight mb-6">
-          One governed path for every task,<br />from idea to approved.
+          One path from intent to outcome.
         </motion.h2>
         <motion.p variants={itemVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }} className="sec-sub reveal text-lg text-[var(--text-secondary)] max-w-2xl mb-16">
-          Every piece of work follows the same explicit lifecycle. Nothing skips a step, nothing marks itself done, and every transition is a recorded decision by someone with the right to make it.
+          Every goal moves through a clear, evidence-backed lifecycle. Nothing gets lost, progress requires tangible proof, and every step has an accountable owner.
         </motion.p>
 
-        <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {STEPS.map((s) => (
-            <motion.div key={s.title} variants={itemVariants} className="relative text-center lg:text-left">
-              <div className={`w-12 h-12 rounded-xl mx-auto lg:mx-0 flex items-center justify-center mb-4 ${s.iconCls}`}>
-                <s.icon size={22} strokeWidth={1.7} />
+            <motion.div key={s.title} variants={itemVariants} className="p-6 rounded-2xl bg-[var(--bg-base)] border border-[var(--border-subtle)] hover:border-[var(--border-hover)] hover:shadow-md transition-all flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${s.iconCls}`}>
+                    <s.icon size={20} strokeWidth={1.8} />
+                  </div>
+                  <span className="font-mono text-xs font-bold text-[var(--text-tertiary)]">{s.num}</span>
+                </div>
+                <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">{s.title}</h3>
+                <p className="text-[13px] text-[var(--text-tertiary)] leading-relaxed mb-4">{s.desc}</p>
               </div>
-              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">{s.title}</h3>
-              <p className="text-[13px] text-[var(--text-tertiary)] leading-relaxed mb-3">{s.desc}</p>
-              <span className={`inline-block text-[10px] font-mono font-medium tracking-wide uppercase px-2 py-1 rounded-md ${s.stateCls}`}>{s.state}</span>
+              <div>
+                <span className={`inline-block text-[10px] font-mono font-medium tracking-wide uppercase px-2.5 py-1 rounded-md ${s.stateCls}`}>{s.state}</span>
+              </div>
             </motion.div>
           ))}
         </motion.div>
@@ -97,15 +134,15 @@ export default function HowItWorksSection() {
           <motion.div variants={itemVariants} className="flex gap-4 p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50">
             <span className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0"><ImageIcon size={18} strokeWidth={1.7} /></span>
             <div>
-              <h4 className="text-[15px] font-semibold mb-1">Evidence before approval</h4>
-              <p className="text-[13px] text-[var(--text-tertiary)] leading-relaxed">Six typed evidence kinds — LINK, GITHUB, SCREENSHOT, RECORDING, SNIPPET, NOTE — make the record machine-readable, not a wall of text.</p>
+              <h4 className="text-[15px] font-semibold mb-1">Evidence-backed execution</h4>
+              <p className="text-[13px] text-[var(--text-tertiary)] leading-relaxed">Six typed evidence kinds — LINK, GITHUB, SCREENSHOT, RECORDING, SNIPPET, NOTE — ensure decisions are backed by real work, not empty comments.</p>
             </div>
           </motion.div>
           <motion.div variants={itemVariants} className="flex gap-4 p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50">
             <span className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0"><CheckCheck size={18} strokeWidth={1.7} /></span>
             <div>
-              <h4 className="text-[15px] font-semibold mb-1">Approvals with rules</h4>
-              <p className="text-[13px] text-[var(--text-tertiary)] leading-relaxed">Reviewer must outrank the assignee, rejections need a reason, and policy predicates run on every decision. "Looks good" is not a review.</p>
+              <h4 className="text-[15px] font-semibold mb-1">Accountable approvals</h4>
+              <p className="text-[13px] text-[var(--text-tertiary)] leading-relaxed">Reviewers must have the authority to decide, rejections require a clear reason, and review transitions are formally recorded.</p>
             </div>
           </motion.div>
         </motion.div>

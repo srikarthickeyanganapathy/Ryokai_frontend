@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Sun, Moon } from 'lucide-react';
+import { useTheme } from '@/app/providers/ThemeProvider';
 import { RyokaiMark } from './RyokaiMark';
 
 export function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('ryokai-theme') || 'dark') !== 'light';
-    }
-    return true;
-  });
+  const { theme, setTheme } = useTheme();
+  const isDark =
+    theme === 'dark' ||
+    (theme === 'system' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,16 +25,6 @@ export function LandingNav() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    if (isDark) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('ryokai-theme', isDark ? 'dark' : 'light');
-  }, [isDark]);
-
   return (
     <nav className={scrolled ? 'scrolled' : ''}>
       <div className="wrap nav-in">
@@ -43,16 +34,17 @@ export function LandingNav() {
         </div>
         
         <div className="nav-links">
+          <a href="#how-it-works">How it works</a>
           <a href="#workspace">Workspace</a>
+          <a href="#capabilities">Capabilities</a>
           <a href="#governance">Governance</a>
           <a href="#workload">Workload</a>
-          <a href="#capabilities">Capabilities</a>
         </div>
         
         <div className="nav-right">
           <button 
             className="theme-toggle" 
-            onClick={() => setIsDark(!isDark)}
+            onClick={() => setTheme(isDark ? 'light' : 'dark')}
             aria-label="Toggle theme"
           >
             <Sun className="ic-sun" size={16} strokeWidth={2} />
@@ -71,3 +63,4 @@ export function LandingNav() {
     </nav>
   );
 }
+

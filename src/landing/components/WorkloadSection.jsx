@@ -1,6 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
 import {
   Users,
   AlertCircle,
@@ -8,7 +7,6 @@ import {
   Wand2,
   ArrowRight,
   Search,
-  Brain,
   Gauge,
   ListTodo,
   Plus,
@@ -19,7 +17,7 @@ const AnimatedCounter = ({ value, color, delay = 0 }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
 
-  useMemo(() => {
+  useEffect(() => {
     if (isInView) {
       const duration = 1.2;
       const steps = 24;
@@ -119,13 +117,13 @@ export default function WorkloadSection() {
     <section id="workload" className="py-24 relative overflow-hidden">
       <div className="wrap max-w-[1200px] mx-auto px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-100px' }} className="sec-label reveal text-[var(--accent)] text-sm font-semibold tracking-wider uppercase mb-4">
-          Workload
+          Execution Ground Truth
         </motion.div>
         <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-100px' }} className="sec-h reveal text-4xl md:text-5xl font-bold text-[var(--text-primary)] tracking-tight leading-tight mb-6">
-          See who's overloaded,<br />before it becomes a bottleneck.
+          Know what execution looks like.<br />See the work behind the goals.
         </motion.h2>
         <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-100px' }} className="sec-sub reveal text-lg text-[var(--text-secondary)] max-w-2xl mb-16">
-          Real capacity per member, a live team-health score, the load distribution, and a heatmap that shows the fortnight at a glance.
+          Connect strategy to actual team capacity. Model workload scenarios, spot bottlenecks before they delay delivery, and ensure commitments stay realistic.
         </motion.p>
 
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-100px' }} transition={{ duration: 0.7, ease: 'easeOut' }} className="app-stage mt-11 relative">
@@ -147,9 +145,9 @@ export default function WorkloadSection() {
             <div className="p-8">
               <div className="flex justify-between items-start mb-8 flex-wrap gap-4">
                 <div>
-                  <div className="flex items-center gap-2 text-xs text-[var(--accent)] font-medium uppercase tracking-wider mb-2"><Gauge size={13} /> Resource Capacity</div>
-                  <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-1">Team Capacity &amp; Utilization</h2>
-                  <div className="text-sm text-[var(--text-secondary)]">Monitor team load balance and task allocation bottlenecks across the organization.</div>
+                  <div className="flex items-center gap-2 text-xs text-[var(--accent)] font-medium uppercase tracking-wider mb-2"><Gauge size={13} /> Capacity &amp; Utilization</div>
+                  <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-1">Team Capacity &amp; Workload Balance</h2>
+                  <div className="text-sm text-[var(--text-secondary)]">Monitor team load balance and task allocation bottlenecks across projects and teams.</div>
                 </div>
                 <div className="flex items-center gap-2 border border-[var(--border-subtle)] rounded-lg bg-[var(--bg-subtle)] px-2 py-1.5">
                   <span className="text-[10px] uppercase tracking-wide text-[var(--text-tertiary)] font-mono mr-1">Threshold</span>
@@ -212,17 +210,17 @@ export default function WorkloadSection() {
                     </div>
                   </div>
                 </div>
-                {/* AI Insights */}
+                {/* Capacity Observations */}
                 <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5">
-                  <div className="flex items-center gap-2 font-semibold text-sm mb-3"><Brain size={16} className="text-[var(--accent)]" /> AI Insights</div>
+                  <div className="flex items-center gap-2 font-semibold text-sm mb-3"><TrendingUp size={16} className="text-[var(--accent)]" /> Capacity Observations</div>
                   <div className="space-y-2">
                     {overAllocated > 0 && (
-                      <div className="flex items-center gap-2 p-2.5 bg-[var(--bg-subtle)] rounded-lg text-xs"><span className="w-2 h-2 rounded-full bg-[var(--danger)] flex-none" /><span className="flex-1 text-[var(--text-secondary)]">{overAllocated} members are overloaded.</span></div>
+                      <div className="flex items-center gap-2 p-2.5 bg-[var(--bg-subtle)] rounded-lg text-xs"><span className="w-2 h-2 rounded-full bg-[var(--danger)] flex-none" /><span className="flex-1 text-[var(--text-secondary)]">{overAllocated} members are currently above threshold.</span></div>
                     )}
                     {available > 0 && overAllocated > 0 && (
-                      <div className="flex items-center gap-2 p-2.5 bg-[var(--bg-subtle)] rounded-lg text-xs"><span className="w-2 h-2 rounded-full bg-[var(--success)] flex-none" /><span className="flex-1 text-[var(--text-secondary)]">{available} members can absorb rebalanced tasks.</span></div>
+                      <div className="flex items-center gap-2 p-2.5 bg-[var(--bg-subtle)] rounded-lg text-xs"><span className="w-2 h-2 rounded-full bg-[var(--success)] flex-none" /><span className="flex-1 text-[var(--text-secondary)]">{available} members have available capacity to absorb tasks.</span></div>
                     )}
-                    <div className="flex items-center gap-2 p-2.5 bg-[var(--bg-subtle)] rounded-lg text-xs"><span className="w-2 h-2 rounded-full bg-[var(--success)] flex-none" /><span className="flex-1 text-[var(--text-secondary)]">Average utilization is {avgUtil}%.</span></div>
+                    <div className="flex items-center gap-2 p-2.5 bg-[var(--bg-subtle)] rounded-lg text-xs"><span className="w-2 h-2 rounded-full bg-[var(--success)] flex-none" /><span className="flex-1 text-[var(--text-secondary)]">Average team utilization is {avgUtil}%.</span></div>
                   </div>
                 </div>
               </div>
@@ -255,7 +253,7 @@ export default function WorkloadSection() {
                 <div className="rounded-xl border border-[var(--accent-border)] bg-[var(--accent-soft)]/10 p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <Wand2 size={14} className="text-[var(--accent)]" />
-                    <span className="text-xs font-semibold">Rebalance Simulator</span>
+                    <span className="text-xs font-semibold">Load Rebalancing Simulator</span>
                     <span className="ml-auto font-mono text-[9px] uppercase tracking-widest text-[var(--text-tertiary)]">what-if</span>
                   </div>
                   <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center mb-4">
@@ -300,7 +298,7 @@ export default function WorkloadSection() {
                 <span className="ml-auto text-[10px] text-[var(--text-tertiary)]">hover cells for detail</span>
               </div>
               <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5 mb-8">
-                <div className="grid grid-cols-14 gap-1">
+                <div className="grid grid-cols-14 gap-1" style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))' }}>
                   {HEATMAP.flat().map((level, i) => (
                     <div key={i} className={`relative aspect-square rounded-[4px] ${HEAT_CLS[level]}`} title={`${HEAT_LABELS[level]} load`} />
                   ))}
