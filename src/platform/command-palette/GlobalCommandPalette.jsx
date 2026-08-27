@@ -81,7 +81,7 @@ export function GlobalCommandPalette() {
             <Icons.folderClosed className="mr-2 h-4 w-4" />
             <span>Projects</span>
           </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => navigate('/app/members'))}>
+          <CommandItem onSelect={() => runCommand(() => navigate('/app/directory'))}>
             <Icons.users className="mr-2 h-4 w-4" />
             <span>Members & Directory</span>
           </CommandItem>
@@ -101,7 +101,7 @@ export function GlobalCommandPalette() {
             <Icons.megaphone className="mr-2 h-4 w-4" />
             <span>Announcements</span>
           </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => navigate('/app/roles'))}>
+          <CommandItem onSelect={() => runCommand(() => navigate('/app/roles-permissions'))}>
             <Icons.shield className="mr-2 h-4 w-4" />
             <span>Roles & Permissions</span>
           </CommandItem>

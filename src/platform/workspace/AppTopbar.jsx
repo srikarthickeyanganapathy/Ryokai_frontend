@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { Icons } from '@/shared/ui/Icons'
 import { IconButton, Button } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
@@ -18,46 +19,51 @@ import {
 } from '@/platform/notifications'
 import { useAcceptInvite, useDeclineInvite } from '@/organization'
 import { cn } from '@/shared/lib/cn'
-import { Play } from '@/shared/ui/Icons'
+import { Play, CheckCircle2, XCircle } from '@/shared/ui/Icons'
 import { CommandMenu } from '../command-palette'
 import { LensStatusIndicator } from '@/shared/ui/LensStatusIndicator'
 import { useRealtime } from '@/app/providers/RealTimeProvider'
 import { useActiveFocus } from './useActiveFocus'
 
 function FocusTimerIndicator() {
-  const { data: focusData, isLoading } = useActiveFocus();
-  
-  if (isLoading || !focusData?.isActive) return null;
+  const { data: focusData, isLoading } = useActiveFocus()
+
+  if (isLoading || !focusData?.isActive) return null
 
   return (
-    <div className="hidden sm:flex items-center gap-2 bg-[var(--accent-soft)] text-[var(--accent)] px-3 py-1.5 rounded-full text-xs font-semibold mr-2 border border-[var(--accent-border)]">
-      <Play className="w-3.5 h-3.5" />
-      <span>{focusData.timeRemaining || '24:59'}</span>
+    <div
+      title="Focus session running"
+      className="flex items-center h-7 gap-1.5 bg-[var(--accent-soft)] text-[var(--accent)] px-2 sm:px-2.5 rounded-full text-[11px] font-semibold border border-[var(--accent-border)] transition-colors"
+    >
+      <Play className="w-3 h-3 fill-current" aria-hidden="true" />
+      <span className="tabular-nums">{focusData.timeRemaining || '24:59'}</span>
     </div>
-  );
+  )
 }
 
 function SyncStatusIndicator() {
-  const { connected } = useRealtime();
+  const { connected } = useRealtime()
 
   return (
     <div
       title={connected
         ? 'Connected — live updates enabled'
         : 'Offline — reconnecting… updates may be delayed'}
+      role="status"
+      aria-label={connected ? 'Online' : 'Offline'}
       className={cn(
-        'flex items-center gap-1.5 px-2 py-1 rounded-full border text-[11px] font-medium mr-2',
+        'flex items-center h-7 px-1.5 sm:px-2.5 rounded-full border text-[11px] font-medium transition-colors',
         connected
           ? 'border-[var(--success)]/30 bg-[var(--success-soft)] text-[var(--success)]'
           : 'border-[var(--warning)]/30 bg-[var(--warning-soft)] text-[var(--warning)]'
       )}
     >
       {connected
-        ? <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]" />
-        : <Icons.wifiOff className="w-3 h-3" />}
-      <span className="hidden sm:inline">{connected ? 'Online' : 'Offline'}</span>
+        ? <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)] shrink-0" aria-hidden="true" />
+        : <Icons.wifiOff className="w-3 h-3 shrink-0" aria-hidden="true" />}
+      <span className="hidden sm:inline ml-1.5">{connected ? 'Online' : 'Offline'}</span>
     </div>
-  );
+  )
 }
 
 const typeIcons = {
@@ -71,11 +77,16 @@ const typeIcons = {
   ORG_INVITE_RECEIVED: Icons.users,
 }
 
+function TopbarDivider() {
+  return <div className="hidden sm:block h-5 w-px bg-[var(--border-subtle)] mx-0.5" aria-hidden="true" />
+}
+
 export function AppTopbar({ onMenuClick }) {
   const { user, logout } = useAuth()
   const { theme, setTheme } = useTheme()
   const navigate = useNavigate()
   const [notifOpen, setNotifOpen] = useState(false)
+  const [inviteDecisions, setInviteDecisions] = useState({}) // notifId → 'accepted' | 'declined'
   const { data: unreadCount = 0 } = useUnreadCount()
   const { data: notifications = [], isLoading: notifLoading } = useNotificationList({ size: 20 })
   const markRead = useMarkRead()
@@ -88,29 +99,22 @@ export function AppTopbar({ onMenuClick }) {
   const unread = typeof unreadCount === 'number' ? unreadCount : 0
 
   return (
-    <header className="h-12 flex items-center justify-between px-3 md:px-4 border-b border-[var(--border-subtle)] bg-[var(--bg-base)]/70 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-10 shadow-[var(--inset-highlight-soft)]">
+    <header className="h-12 flex items-center px-3 sm:px-4 border-b border-[var(--border-subtle)] bg-[var(--bg-base)]/70 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-10 shadow-[var(--inset-highlight-soft)]">
 
-      <div className="flex items-center gap-4 flex-1 min-w-0">
-        <IconButton
-          variant="ghost"
-          className="lg:hidden"
-          onClick={onMenuClick}
-          aria-label="Open navigation menu"
-        >
-          <Icons.menu className="w-5 h-5 text-[var(--text-secondary)]" />
-        </IconButton>
+      <div className="flex-1 flex justify-center min-w-0 px-2 sm:px-4">
+        <div className="w-full max-w-xl min-w-0">
+          <CommandMenu />
+        </div>
       </div>
 
-      <div className="flex-1 flex justify-center px-2 sm:px-4 max-w-2xl min-w-0">
-        <CommandMenu />
-      </div>
-
-      <div className="flex items-center justify-end gap-1 sm:gap-3 flex-1 min-w-0">
+      {/* RIGHT — status context → divider → actions */}
+      <div className="flex items-center gap-1 shrink-0 min-w-0">
 
         <LensStatusIndicator />
-
         <SyncStatusIndicator />
         <FocusTimerIndicator />
+
+        <TopbarDivider />
 
         {/* Quick Actions */}
         <DropdownMenu
@@ -141,8 +145,8 @@ export function AppTopbar({ onMenuClick }) {
               <IconButton
                 variant="ghost"
                 className="relative text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-              title="Notifications"
-              aria-label="Notifications"
+                title="Notifications"
+                aria-label={`Notifications${unread > 0 ? `, ${unread} unread` : ''}`}
               >
                 <Icons.bell className="w-5 h-5" />
                 {unread > 0 && (
@@ -153,7 +157,7 @@ export function AppTopbar({ onMenuClick }) {
               </IconButton>
             </div>
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-80 p-0 max-h-[420px] flex flex-col">
+          <PopoverContent align="end" className="w-[min(20rem,calc(100vw-1.5rem))] p-0 max-h-[420px] flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2.5 border-b border-[var(--border-subtle)]">
               <Heading level={4} className="text-[13px]">Notifications</Heading>
@@ -195,6 +199,9 @@ export function AppTopbar({ onMenuClick }) {
               {!notifLoading && notifications.slice(0, 5).map((n) => {
                 const IconComponent = typeIcons[n.type] || Icons.alert
                 const isRead = n.isRead !== false
+                const isInvite = n.type === 'ORG_INVITE_RECEIVED' && n.deduplicationKey
+                const inviteId = isInvite ? n.deduplicationKey.replace('org-invite:', '') : null
+                const decision = inviteDecisions[n.id]
                 return (
                   <div
                     key={n.id}
@@ -241,30 +248,51 @@ export function AppTopbar({ onMenuClick }) {
                       <Text variant="muted" size="xs" className="mt-1">
                         {n.relativeTime || 'Just now'}
                       </Text>
-                      {n.type === 'ORG_INVITE_RECEIVED' && n.deduplicationKey && (
+
+                      {isInvite && decision === 'accepted' && (
+                        <div className="flex items-center gap-1.5 mt-2 text-[11px] font-semibold text-[var(--success)]">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          Invitation accepted
+                        </div>
+                      )}
+                      {isInvite && decision === 'declined' && (
+                        <div className="flex items-center gap-1.5 mt-2 text-[11px] font-semibold text-[var(--text-secondary)]">
+                          <XCircle className="w-3.5 h-3.5" />
+                          Invitation declined
+                        </div>
+                      )}
+                      {isInvite && !decision && (
                         <div className="flex items-center gap-2 mt-2">
-                          <Button 
-                            size="sm" 
-                            variant="primary" 
+                          <Button
+                            size="sm"
+                            variant="primary"
                             className="h-7 text-xs px-2"
                             disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending}
                             onClick={(e) => {
-                              e.stopPropagation();
-                              const inviteId = n.deduplicationKey.replace('org-invite:', '');
-                              if (inviteId) acceptInviteMutation.mutate(inviteId);
+                              e.stopPropagation()
+                              if (inviteId) {
+                                acceptInviteMutation.mutate(inviteId, {
+                                  onSuccess: () => setInviteDecisions((prev) => ({ ...prev, [n.id]: 'accepted' })),
+                                  onError: (err) => toast.error(err?.response?.data?.message || 'Failed to accept invitation'),
+                                })
+                              }
                             }}
                           >
                             Accept
                           </Button>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
+                          <Button
+                            size="sm"
+                            variant="ghost"
                             className="h-7 text-xs px-2 text-[var(--text-secondary)]"
                             disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending}
                             onClick={(e) => {
-                              e.stopPropagation();
-                              const inviteId = n.deduplicationKey.replace('org-invite:', '');
-                              if (inviteId) declineInviteMutation.mutate(inviteId);
+                              e.stopPropagation()
+                              if (inviteId) {
+                                declineInviteMutation.mutate(inviteId, {
+                                  onSuccess: () => setInviteDecisions((prev) => ({ ...prev, [n.id]: 'declined' })),
+                                  onError: (err) => toast.error(err?.response?.data?.message || 'Failed to decline invitation'),
+                                })
+                              }
                             }}
                           >
                             Decline
@@ -279,12 +307,26 @@ export function AppTopbar({ onMenuClick }) {
                 )
               })}
             </div>
+            
           </PopoverContent>
         </Popover>
-
-        {/* New Ryokai Gradient Logo */}
-        <div className="hidden sm:block cursor-pointer ml-2" onClick={() => navigate('/app')}>
-          <RyokaiLogo size="sm" />
+        <div className="flex items-center gap-1 shrink-0 min-w-0">
+          <IconButton
+            variant="ghost"
+            className="lg:hidden -ml-1.5"
+            onClick={onMenuClick}
+            aria-label="Open navigation menu"
+          >
+            <Icons.menu className="w-5 h-5 text-[var(--text-secondary)]" />
+          </IconButton>
+          <button
+            type="button"
+            onClick={() => navigate('/app')}
+            className="flex items-center h-8 px-1 rounded-md hover:bg-[var(--bg-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] transition-colors"
+            aria-label="Ryokai home"
+          >
+            <RyokaiLogo size="sm" />
+          </button>
         </div>
 
       </div>

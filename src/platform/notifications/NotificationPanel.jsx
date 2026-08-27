@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Bell, Trash2, X, Check, ExternalLink, Mail, UserCheck, UserX, ShieldAlert } from '@/shared/ui/Icons'
+import { Bell, Trash2, X, Check, CheckCircle2, ExternalLink, Mail, UserCheck, UserX, ShieldAlert, XCircle } from '@/shared/ui/Icons'
+import { toast } from 'sonner'
 import { Button, IconButton } from '@/shared/ui/Button'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { cn } from '@/shared/lib/cn'
@@ -21,12 +22,28 @@ export function NotificationPanel({
     return saved ? parseInt(saved, 10) : 560
   })
   const [isResizing, setIsResizing] = useState(false)
+  const dragStartRef = useRef(null)
+
+  // Invite decision taken inside this panel ('accepted' | 'declined') — the
+  // card must reflect the outcome instead of showing action buttons forever.
+  // Reset when a different notification is opened.
+  const [inviteDecision, setInviteDecision] = useState(null)
+  useEffect(() => {
+    setInviteDecision(null)
+  }, [notification?.id])
 
   const startResizing = useCallback((e) => {
     e.preventDefault()
+    dragStartRef.current = { startX: e.clientX, startWidth: panelWidth }
     setIsResizing(true)
-    const startX = e.clientX
-    const startWidth = panelWidth
+  }, [panelWidth])
+
+  // Window listeners live in an effect bound to isResizing so they are ALWAYS
+  // cleaned up — on mouseup AND on unmount-mid-drag (route change / panel close
+  // used to leak the listeners and keep mutating a removed component).
+  useEffect(() => {
+    if (!isResizing) return
+    const { startX, startWidth } = dragStartRef.current || { startX: 0, startWidth: panelWidth }
 
     const handleMouseMove = (moveEvent) => {
       const deltaX = startX - moveEvent.clientX
@@ -36,13 +53,15 @@ export function NotificationPanel({
 
     const handleMouseUp = () => {
       setIsResizing(false)
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleMouseUp)
     }
 
     window.addEventListener('mousemove', handleMouseMove)
     window.addEventListener('mouseup', handleMouseUp)
-  }, [panelWidth])
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isResizing, panelWidth])
 
   useEffect(() => {
     if (panelWidth) {
@@ -59,10 +78,15 @@ export function NotificationPanel({
 
   if (!isOpen || !notification) return null
 
-  // Extract linked taskId if deduplicationKey or target payload contains task ID
-  const taskIdMatch = notification.deduplicationKey?.match(/task:(\d+)/) || notification.message?.match(/task #(\d+)/i)
-  const linkedTaskId = taskIdMatch ? taskIdMatch[1] : null
-  const linkedTask = linkedTaskId ? tasks.find(t => String(t.id) === String(linkedTaskId)) : null
+  // Extract linked taskId: prefer the DTO's own taskId/taskTitleSnapshot — the
+  // old tasks.find(...) searched an array that was never defined or passed in,
+  // crashing with ReferenceError on every task-linked notification.
+  const taskIdMatch = notification.taskId
+    ? String(notification.taskId)
+    : (notification.deduplicationKey?.match(/task:(\d+)/) || notification.message?.match(/task #(\d+)/i) || [])[1] || null
+  const linkedTask = taskIdMatch
+    ? { id: Number(taskIdMatch), title: notification.taskTitleSnapshot || `Task #${taskIdMatch}` }
+    : null
 
   const handleDelete = () => {
     deleteNotification.mutate(notification.id, { onSuccess: onClose })
@@ -166,7 +190,41 @@ export function NotificationPanel({
                 </div>
 
                 {/* DYNAMIC ACTION TRIGGER CARDS */}
-                {isInvite && inviteId && (
+                {isInvite && inviteId && inviteDecision === 'accepted' && (
+                  <div className="p-5 rounded-2xl bg-[var(--success-soft)]/30 border border-[var(--success)]/30 space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-[var(--success)]">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Invitation accepted</span>
+                    </div>
+                    <Text variant="muted" className="text-xs">
+                      You have joined the organization workspace.
+                    </Text>
+                    <div className="pt-1">
+                      <Button size="sm" variant="outline" onClick={onClose} className="text-xs">
+                        Done
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {isInvite && inviteId && inviteDecision === 'declined' && (
+                  <div className="p-5 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)] space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)]">
+                      <XCircle className="w-4 h-4" />
+                      <span>Invitation declined</span>
+                    </div>
+                    <Text variant="muted" className="text-xs">
+                      This invitation was rejected. The organization can re-invite you later.
+                    </Text>
+                    <div className="pt-1">
+                      <Button size="sm" variant="outline" onClick={onClose} className="text-xs">
+                        Done
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {isInvite && inviteId && !inviteDecision && (
                   <div className="p-5 rounded-2xl bg-[var(--accent-soft)]/20 border border-[var(--accent-border)] space-y-3">
                     <div className="flex items-center gap-2 text-sm font-semibold text-[var(--accent)]">
                       <ShieldAlert className="w-4 h-4" />
@@ -180,7 +238,10 @@ export function NotificationPanel({
                         size="sm"
                         variant="primary"
                         disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending}
-                        onClick={() => acceptInviteMutation.mutate(inviteId, { onSuccess: onClose })}
+                        onClick={() => acceptInviteMutation.mutate(inviteId, {
+                          onSuccess: () => setInviteDecision('accepted'),
+                          onError: (err) => toast.error(err?.response?.data?.message || 'Failed to accept invitation'),
+                        })}
                         className="gap-1.5 text-xs"
                       >
                         <UserCheck className="w-3.5 h-3.5" />
@@ -190,7 +251,10 @@ export function NotificationPanel({
                         size="sm"
                         variant="outline"
                         disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending}
-                        onClick={() => declineInviteMutation.mutate(inviteId, { onSuccess: onClose })}
+                        onClick={() => declineInviteMutation.mutate(inviteId, {
+                          onSuccess: () => setInviteDecision('declined'),
+                          onError: (err) => toast.error(err?.response?.data?.message || 'Failed to decline invitation'),
+                        })}
                         className="gap-1.5 text-xs"
                       >
                         <UserX className="w-3.5 h-3.5" />

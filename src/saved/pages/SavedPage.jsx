@@ -22,7 +22,7 @@ const routeFor = (item) => {
   switch (item.entityType) {
     case 'PROJECT': return `/app/projects/${item.entityId}`
     case 'ORGANIZATION': return `/app/organizations/${item.entityId}`
-    case 'TEAM': return `/app/organizations/teams/${item.entityId}`
+    case 'TEAM': return '/app/teams'
     case 'TASK': return `/app/tasks?openTaskId=${item.entityId}`
     case 'NOTE': return `/app/notes?openNoteId=${item.entityId}`
     default: return null

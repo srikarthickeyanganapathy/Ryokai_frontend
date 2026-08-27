@@ -782,7 +782,7 @@ export function NotesPage() {
         </PageState>
       </PageContent>
 
-      <NotePanel note={activeNote} isOpen={isPanelOpen} onClose={closePanel} notes={notes} />
+      <NotePanel note={activeNote} isOpen={isPanelOpen} onClose={closePanel} notes={notes} scope={scope} />
       {dialog}
     </PageShell>
   )

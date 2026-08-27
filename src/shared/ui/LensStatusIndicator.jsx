@@ -31,7 +31,7 @@ export function LensStatusIndicator({ className }) {
 
   return (
     <div
-      className={cn('hidden md:flex items-center gap-1.5 mr-2 px-2 py-1 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-subtle)]', className)}
+      className={cn('hidden md:flex items-center h-7 gap-1.5 px-2.5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-subtle)]', className)}
       title={`Workspace: ${name}`}
     >
       <span

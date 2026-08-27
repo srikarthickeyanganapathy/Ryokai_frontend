@@ -122,7 +122,10 @@ export const useCreateTask = () => {
         delete taskPayload.crewId;
         return await taskApi.createPersonalTask(taskPayload);
       } else if (workspaceMode === 'CREWS') {
-        const crewId = payload.crewId || activeCrew?.id || null; 
+        const crewId = payload.crewId || activeCrew?.id || null;
+        if (!crewId) {
+          throw new Error('A crew must be selected to create a crew task');
+        }
         taskPayload.crewId = crewId;
         // Crew tasks must NEVER carry org/team context - the DTO auth gate
         // classifies the workspace from orgId/crewId, and a leaked orgId turns

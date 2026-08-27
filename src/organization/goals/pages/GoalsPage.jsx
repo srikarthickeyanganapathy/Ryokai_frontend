@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Plus } from '@/shared/ui/Icons';
 import { Button } from '@/shared/ui/Button';
+import { Heading, Text } from '@/shared/ui/Typography';
 import { usePermissions } from '@/identity';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import {

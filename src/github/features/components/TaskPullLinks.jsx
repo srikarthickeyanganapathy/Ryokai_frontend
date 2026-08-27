@@ -207,9 +207,11 @@ export function TaskPullLinks({ taskId, projectId, crewId, hasEditPerm = false }
                     <SelectValue placeholder="Repository…" />
                   </SelectTrigger>
                   <SelectContent>
-                    {repos.map((r) => (
-                      <SelectItem key={r.fullName} value={r.fullName}>{r.fullName}</SelectItem>
-                    ))}
+                    {repos.map((r) => {
+                      const repoName = typeof r === 'string' ? r : r?.fullName;
+                      if (!repoName) return null;
+                      return <SelectItem key={repoName} value={repoName}>{repoName}</SelectItem>;
+                    })}
                   </SelectContent>
                 </Select>
               </div>

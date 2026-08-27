@@ -21,7 +21,8 @@ import {
   Loader2,
   AlertCircle,
   WifiOff,
-  Rocket
+  Rocket,
+  Radio
 } from '@/shared/ui/Icons';
 import { cn } from '@/shared/lib/cn';
 

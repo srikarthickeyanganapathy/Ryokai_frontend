@@ -98,8 +98,10 @@ export function FocusTimer({ task }) {
   }, [isRunning, mode, playChime])
 
   const toggleStartPause = () => {
-    if (!isRunning && mode === 'focus' && task?.id) {
-      startMutation.mutate(task.id)
+    if (!isRunning && mode === 'focus') {
+      // Bug fix: persist focus sessions even when no task is pinned — the
+      // backend accepts taskId=null and the API already sends {} in that case.
+      startMutation.mutate(task?.id || null)
     } else if (isRunning && activeSession?.id) {
       stopMutation.mutate(activeSession.id)
     }
@@ -110,6 +112,19 @@ export function FocusTimer({ task }) {
     setIsRunning(false)
     setTimeLeft(totalSeconds)
   }
+
+  // Resume an in-flight focus session after a page refresh (Bug fix): the
+  // timer used to reset to a stopped 25:00 even when the backend had an active
+  // session, silently desyncing the UI from the persisted session.
+  useEffect(() => {
+    if (activeLoading) return
+    if (activeSession?.startedAt && !activeSession.endedAt) {
+      const elapsed = Math.floor((Date.now() - new Date(activeSession.startedAt).getTime()) / 1000)
+      setMode('focus')
+      setTimeLeft(Math.max(0, 25 * 60 - elapsed))
+      setIsRunning(true)
+    }
+  }, [activeSession, activeLoading])
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60)

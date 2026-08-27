@@ -401,6 +401,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
               <FormField
                 control={form.control}
                 name="crewId"
+                rules={{ required: 'Crew is required' }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Crew</FormLabel>

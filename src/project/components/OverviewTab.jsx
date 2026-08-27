@@ -241,15 +241,19 @@ export function OverviewTab({
             <p className="text-[11.5px] text-[var(--text-muted)] py-1">No activity yet — actions will stream in here.</p>
           ) : (
             <div className="space-y-2">
-              {activities.slice(0, 4).map((act, idx) => (
+              {activities.slice(0, 4).map((act, idx) => {
+                // Backend sends actor as a {id, username} object — calling
+                // .charAt() on it crashed the whole Overview tab.
+                const actorName = act.actor?.username || act.username || 'System';
+                return (
                 <div key={act.id || idx} className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white shrink-0 mt-0.5"
-                    style={{ background: `hsl(${(hashHue(act.actor || act.username || 'System') + 20) % 360} 65% 48%)` }}>
-                    {(act.actor || act.username || 'S').charAt(0).toUpperCase()}
+                    style={{ background: `hsl(${(hashHue(actorName) + 20) % 360} 65% 48%)` }}>
+                    {actorName.charAt(0).toUpperCase()}
                   </span>
                   <div className="min-w-0">
                     <p className="text-[11.5px] text-[var(--text-secondary)] leading-snug">
-                      <span className="font-semibold text-[var(--text-primary)]">{act.actor || act.username || 'System'}</span>{' '}
+                      <span className="font-semibold text-[var(--text-primary)]">{actorName}</span>{' '}
                       {act.action || act.description || 'performed an action'}
                     </p>
                     <span className="text-[10px] text-[var(--text-muted)] font-mono">
@@ -257,7 +261,8 @@ export function OverviewTab({
                     </span>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

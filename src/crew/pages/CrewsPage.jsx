@@ -305,6 +305,7 @@ export function CrewsPage() {
     createCrewMutation.mutate({
       name: crewName.trim(), description: crewDesc.trim(), visibility,
       memberCap: Number(memberCap), avatarUrl: `color:${selectedColor.id}`,
+      inviteEmails,
     }, { onSuccess: () => { setIsCreateOpen(false); setCrewName(''); setCrewDesc(''); setSelectedColor(PRESET_COLORS[0]); setMemberCap(10); setVisibility('PUBLIC_LINK'); setInviteEmails([]); setInviteInput(''); } });
   };
 

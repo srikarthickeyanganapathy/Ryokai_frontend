@@ -6,6 +6,7 @@ import { useTaskList, useUpdateTask, useDeleteTask, useSubmitTask, useApproveTas
 import { useProjects } from "@/project";
 import { useOrgTeams } from "@/organization";
 import { filterTasksByWorkspace } from "@/shared/lib/workspaceTaskFilter";
+import { isDoneStatus } from "@/shared/lib/status";
 import { PRIORITY_OPTIONS } from "@/shared/lib/priority";
 import { toast } from "sonner";
 
@@ -67,7 +68,7 @@ export function useTasksPageLogic() {
     if (projectFilter !== "ALL") result = result.filter(t => String(t.projectId) === String(projectFilter) || String(t.projectName) === String(projectFilter));
     if (teamFilter !== "ALL") result = result.filter(t => String(t.teamId) === String(teamFilter) || String(t.team?.id) === String(teamFilter));
     if (taskScope === "archived") result = result.filter(t => t.archived);
-    else { result = result.filter(t => !t.archived); if (taskScope === "assigned") result = result.filter(t => t.assignedTo === user?.username); else if (taskScope === "completed") result = result.filter(t => t.status === "Done"); else if (taskScope === "today") { const today = new Date().toDateString(); result = result.filter(t => t.dueDate && new Date(t.dueDate).toDateString() === today); } else if (taskScope === "upcoming") { const today = new Date(); result = result.filter(t => t.dueDate && new Date(t.dueDate) > today); } }
+    else { result = result.filter(t => !t.archived); if (taskScope === "assigned") result = result.filter(t => t.assignedTo === user?.username); else if (taskScope === "completed") result = result.filter(t => isDoneStatus(t.currentStatus || t.status)); else if (taskScope === "today") { const today = new Date().toDateString(); result = result.filter(t => t.dueDate && new Date(t.dueDate).toDateString() === today); } else if (taskScope === "upcoming") { const today = new Date(); result = result.filter(t => t.dueDate && new Date(t.dueDate) > today); } }
     if (priorityFilter.length > 0) result = result.filter(t => priorityFilter.includes(String(t.priority).toUpperCase()));
     const priorityRank = Object.fromEntries(PRIORITY_OPTIONS.map((o, i) => [o.value, i]));
     return [...result].sort((a, b) => { if (sortBy === "priority") return (priorityRank[String(a.priority).toUpperCase()] ?? 99) - (priorityRank[String(b.priority).toUpperCase()] ?? 99); if (sortBy === "title") return (a.title || "").localeCompare(b.title || ""); if (sortBy === "updated") return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0); if (!a.dueDate && !b.dueDate) return 0; if (!a.dueDate) return 1; if (!b.dueDate) return -1; return new Date(a.dueDate) - new Date(b.dueDate); });

@@ -30,11 +30,11 @@ export function ActivityTab({ projectActivities = [] }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] text-[var(--text-primary)] leading-relaxed">
-                    <span className="font-semibold text-[var(--accent)]">{act.actor || act.username || 'System'}</span>{' '}
-                    {act.action || act.description || 'performed an action'}
+                    <span className="font-semibold text-[var(--accent)]">{act.actor?.username || act.username || 'System'}</span>{' '}
+                    {act.actionType || act.action || 'performed an action'}
                   </p>
                   <span className="text-[11px] text-[var(--text-muted)] mt-0.5 block font-mono">
-                    {act.timestamp ? new Date(act.timestamp).toLocaleString() : 'Recently'}
+                    {(act.createdAt || act.timestamp) ? new Date(act.createdAt || act.timestamp).toLocaleString() : 'Recently'}
                   </span>
                 </div>
               </div>

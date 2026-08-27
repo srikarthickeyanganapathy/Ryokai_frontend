@@ -16,7 +16,7 @@ import { resizeImageFile } from '@/shared/lib/imageResize'
 import { toast } from 'sonner'
 import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
 import { InteractiveCard } from '@/shared/ui/InteractiveCard'
-import { Switch } from '@radix-ui/react-switch'
+import { Switch } from '@/shared/ui/Switch'
 
 export function ProfilePage() {
   const { data: user, isLoading } = useProfile()

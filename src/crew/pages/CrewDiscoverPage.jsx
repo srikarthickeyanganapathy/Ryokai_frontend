@@ -86,7 +86,7 @@ function CrewQuickPreviewModal({ crew, isOpen, onClose, onJoin, isJoining, isMem
     <Modal open={isOpen} onOpenChange={onClose}>
       <ModalContent className="max-w-lg bg-[var(--bg-card)] border-[var(--border-subtle)] rounded-2xl p-6 shadow-2xl">
         <ModalHeader className="space-y-2">
-          <div className="flex items-center gap-2"><span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase font-bold tracking-wider">{crew.visibility || 'PUBLIC'}</span><span className="text-[11px] text-[var(--text-muted)] font-mono font-medium">Crew ID: {crew.id?.slice(0, 8)}</span></div>
+          <div className="flex items-center gap-2"><span className="px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-border)] font-mono text-[10px] uppercase font-bold tracking-wider">{crew.visibility || 'PUBLIC'}</span><span className="text-[11px] text-[var(--text-muted)] font-mono font-medium">Crew ID: {String(crew.id ?? '').slice(0, 8)}</span></div>
           <ModalTitle className="text-[20px] font-bold text-[var(--text-primary)] flex items-center gap-3"><div className="w-9 h-9 rounded-xl bg-[var(--accent-soft)] text-[var(--accent)] font-bold text-[14px] flex items-center justify-center border border-[var(--accent-border)] font-mono shrink-0">{crew.name.slice(0, 2).toUpperCase()}</div>{crew.name}</ModalTitle>
           <ModalDescription className="text-[13px] text-[var(--text-secondary)] leading-relaxed pt-1">{crew.description || 'No detailed mission description available for this public crew.'}</ModalDescription>
         </ModalHeader>
