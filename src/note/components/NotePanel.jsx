@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Pin, Trash2, X, Check, Save, Bold, Italic, Heading as HeadingIcon, Code, Quote, List, CheckSquare, Link as LinkIcon, Eye, Edit3, FileText, Maximize2, Minimize2, ListTree, Timer, StickyNote } from '@/shared/ui/Icons'
+import { Pin, Trash2, X, Check, Save, Bold, Italic, Heading as HeadingIcon, Code, Quote, List, CheckSquare, Link as LinkIcon, Eye, Edit3, FileText, Maximize2, Minimize2, ListTree, Timer, StickyNote, Link2 } from '@/shared/ui/Icons'
 import { Button, IconButton } from '@/shared/ui/Button'
 import { cn } from '@/shared/lib/cn'
 import { useUpdateNote, useDeleteNote, useCreateNote } from '@/note'
