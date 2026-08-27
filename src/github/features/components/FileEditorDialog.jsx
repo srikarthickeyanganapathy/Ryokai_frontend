@@ -11,13 +11,6 @@ import { Switch } from '@/shared/ui/Switch'
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription } from '@/shared/ui/Modal'
 import { useGithubFile, useWriteGithubFile, useCreateGithubBranch, useOpenGithubPullRequest } from '@/github/features/hooks/useGithub'
 
-/* ============================================================
-   FileEditorDialog — view a repository file, edit it, and commit
-   through the Contents write API. Supports committing to any
-   branch, creating a new branch first (branch-per-task), and
-   opening a pull request right after the commit.
-   ============================================================ */
-
 const EMPTY_STATES = ['', 'null', 'undefined']
 
 function isEmptyText(s) {
@@ -31,7 +24,7 @@ export function FileEditorDialog({ fullName, path, onClose }) {
   const branchMutation = useCreateGithubBranch()
   const prMutation = useOpenGithubPullRequest()
 
-  const [mode, setMode] = useState('view') // 'view' | 'edit'
+  const [mode, setMode] = useState('view')
   const [content, setContent] = useState('')
   const [message, setMessage] = useState('')
   const [branch, setBranch] = useState('')
@@ -48,13 +41,19 @@ export function FileEditorDialog({ fullName, path, onClose }) {
 
   const binary = useMemo(() => {
     if (!file?.encoding) return false
-    // Backend decodes base64 to UTF-8; NUL bytes / replacement chars mean binary.
     const c = file.content || ''
     return c.includes('\u0000')
   }, [file])
 
   const defaultBranch = file?.branch || 'main'
   const busy = commitMutation.isPending || branchMutation.isPending || prMutation.isPending
+
+  // Unsaved work: edited content, or a typed commit/PR message that would be lost
+  const isDirty =
+    mode === 'edit' &&
+    (content !== (file?.content ?? '') || message.trim() !== '' || prTitle.trim() !== '')
+
+  const canCommit = !busy && message.trim() !== '' && branch.trim() !== ''
 
   const handleCommit = () => {
     setErrorMsg('')
@@ -84,12 +83,19 @@ export function FileEditorDialog({ fullName, path, onClose }) {
       .catch((e) => setErrorMsg(e?.response?.data?.message || e?.message || 'Commit failed'))
   }
 
+  // Close guard: never mid-mutation; confirm before discarding unsaved edits
+  const requestClose = () => {
+    if (busy) return
+    if (isDirty && !window.confirm('Discard your changes to this file?')) return
+    onClose()
+  }
+
   return (
-    <Modal open onOpenChange={(open) => !open && onClose()}>
+    <Modal open onOpenChange={(o) => !o && requestClose()}>
       <ModalContent className="max-w-2xl">
         <ModalHeader>
           <ModalTitle className="flex items-center gap-2">
-            <FileCode2 className="w-[18px] h-[18px] text-[var(--accent)]" />
+            <FileCode2 className="w-[18px] h-[18px] text-[var(--accent)]" aria-hidden="true" />
             <span className="truncate font-mono text-[13.5px]">{path}</span>
           </ModalTitle>
           <ModalDescription>
@@ -99,29 +105,29 @@ export function FileEditorDialog({ fullName, path, onClose }) {
         </ModalHeader>
 
         {isLoading && (
-          <div className="py-10 flex items-center justify-center gap-2 text-[var(--text-muted)]">
-            <Loader2 className="w-4 h-4 animate-spin" /> Loading file…
+          <div role="status" className="py-10 flex items-center justify-center gap-2 text-[var(--text-muted)]">
+            <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" aria-hidden="true" /> Loading file…
           </div>
         )}
 
         {isError && (
           <div className="py-10 flex flex-col items-center gap-2 text-center">
-            <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
-              <FileX2 className="w-[18px] h-[18px] text-red-500" />
+            <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center" aria-hidden="true">
+              <FileX2 className="w-[18px] h-[18px] text-red-500" aria-hidden="true" />
             </div>
-            <p className="text-[12.5px] text-[var(--text-secondary)] max-w-[300px]">
+            <p role="alert" className="text-[12.5px] text-[var(--text-secondary)] max-w-[300px]">
               {error?.response?.data?.message || 'Could not load this file.'}
             </p>
             <Button variant="outline" size="sm" onClick={() => refetch()} isLoading={isFetching}>
-              <RefreshCw className="w-3.5 h-3.5 mr-1" /> Retry
+              <RefreshCw className="w-3.5 h-3.5 mr-1" aria-hidden="true" /> Retry
             </Button>
           </div>
         )}
 
         {!isLoading && !isError && binary && (
           <div className="py-10 flex flex-col items-center gap-2 text-center">
-            <div className="w-10 h-10 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center">
-              <Lock className="w-[18px] h-[18px] text-[var(--text-muted)]" />
+            <div className="w-10 h-10 rounded-full bg-[var(--bg-subtle)] flex items-center justify-center" aria-hidden="true">
+              <Lock className="w-[18px] h-[18px] text-[var(--text-muted)]" aria-hidden="true" />
             </div>
             <p className="text-[12.5px] text-[var(--text-secondary)]">
               Binary file — can be viewed in GitHub, not edited here.
@@ -130,9 +136,21 @@ export function FileEditorDialog({ fullName, path, onClose }) {
         )}
 
         {!isLoading && !isError && !binary && (
-          <div className="space-y-3">
+          <div
+            className="space-y-3"
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && mode === 'edit' && canCommit) {
+                e.preventDefault()
+                handleCommit()
+              }
+            }}
+          >
             {mode === 'view' ? (
-              <pre className="max-h-[46vh] overflow-auto custom-scrollbar rounded-xl border border-[var(--color-border-subtle)] bg-[var(--bg-base)] p-4 text-[12px] leading-[1.6] font-mono text-[var(--text-secondary)] whitespace-pre-wrap break-words">
+              <pre
+                tabIndex={0}
+                aria-label="File content (read only)"
+                className="max-h-[46vh] overflow-auto custom-scrollbar rounded-xl border border-[var(--color-border-subtle)] bg-[var(--bg-base)] p-4 text-[12px] leading-[1.6] font-mono text-[var(--text-secondary)] whitespace-pre-wrap break-words"
+              >
                 {isEmptyText(file?.content) ? (
                   <span className="text-[var(--text-tertiary)] italic">Empty file</span>
                 ) : (
@@ -148,21 +166,33 @@ export function FileEditorDialog({ fullName, path, onClose }) {
                   aria-label="File content"
                 />
                 <div className="grid gap-3">
-                  <Input
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Commit message (required)"
-                    maxLength={120}
-                  />
+                  <div>
+                    <Input
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Commit message (required)"
+                      maxLength={120}
+                      aria-label="Commit message (required)"
+                      aria-required="true"
+                    />
+                    {message.length > 0 && (
+                      <p aria-hidden="true" className="mt-1 text-right text-[10.5px] tabular-nums text-[var(--text-tertiary)]">
+                        {message.length}/120
+                      </p>
+                    )}
+                  </div>
                   <div className="flex items-center gap-3">
                     <div className="flex-1 relative">
-                      <GitBranch className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-tertiary)]" />
+                      <GitBranch className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-tertiary)]" aria-hidden="true" />
                       <Input
                         value={branch}
                         onChange={(e) => setBranch(e.target.value)}
                         placeholder={`Branch (default: ${defaultBranch})`}
                         className="pl-8 font-mono text-[12.5px]"
                         aria-label="Target branch"
+                        aria-describedby={createBranchFirst && branch === defaultBranch ? 'branch-name-warning' : undefined}
+                        spellCheck={false}
+                        autoComplete="off"
                       />
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
@@ -173,8 +203,8 @@ export function FileEditorDialog({ fullName, path, onClose }) {
                     </div>
                   </div>
                   {createBranchFirst && branch === defaultBranch && (
-                    <p className="text-[11.5px] text-amber-500 flex items-center gap-1.5">
-                      <AlertCircle className="w-3 h-3" /> Branch already exists — give it a different name to create it.
+                    <p id="branch-name-warning" role="alert" className="text-[11.5px] text-amber-500 flex items-center gap-1.5">
+                      <AlertCircle className="w-3 h-3" aria-hidden="true" /> Branch already exists — give it a different name to create it.
                     </p>
                   )}
                   <div className="flex items-center gap-3">
@@ -191,9 +221,15 @@ export function FileEditorDialog({ fullName, path, onClose }) {
                         placeholder="Pull request title (defaults to commit message)"
                         maxLength={120}
                         className="flex-1 text-[12.5px]"
+                        aria-label="Pull request title (defaults to commit message)"
                       />
                     )}
                   </div>
+                  {branch === defaultBranch && (
+                    <p className="text-[11px] text-[var(--text-tertiary)]">
+                      To open a pull request, target a branch other than <span className="font-mono">{defaultBranch}</span>.
+                    </p>
+                  )}
                 </div>
               </>
             )}
@@ -201,8 +237,8 @@ export function FileEditorDialog({ fullName, path, onClose }) {
         )}
 
         {errorMsg && (
-          <p className="text-[12px] text-red-500 flex items-center gap-1.5">
-            <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errorMsg}
+          <p role="alert" className="text-[12px] text-red-500 flex items-center gap-1.5">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" /> {errorMsg}
           </p>
         )}
 
@@ -215,18 +251,20 @@ export function FileEditorDialog({ fullName, path, onClose }) {
                 </span>
                 <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
                 <Button size="sm" onClick={() => { setMode('edit'); setErrorMsg('') }}>
-                  <PencilLine className="w-3.5 h-3.5 mr-1" /> Edit file
+                  <PencilLine className="w-3.5 h-3.5 mr-1" aria-hidden="true" /> Edit file
                 </Button>
               </>
             ) : (
               <>
+                {isDirty && (
+                  <span className="mr-auto flex items-center gap-1.5 text-[11px] font-medium text-amber-500">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden="true" />
+                    Unsaved changes
+                  </span>
+                )}
                 <Button variant="outline" size="sm" onClick={() => setMode('view')} disabled={busy}>Cancel</Button>
-                <Button
-                  size="sm"
-                  onClick={handleCommit}
-                  disabled={busy || !message.trim() || !branch.trim()}
-                >
-                  {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Save className="w-3.5 h-3.5 mr-1" />}
+                <Button size="sm" onClick={handleCommit} disabled={!canCommit} title="Ctrl/⌘ + Enter">
+                  {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" aria-hidden="true" /> : <Save className="w-3.5 h-3.5 mr-1" aria-hidden="true" />}
                   Commit{branch !== defaultBranch ? ` to ${branch}` : ''}
                 </Button>
               </>
@@ -236,14 +274,14 @@ export function FileEditorDialog({ fullName, path, onClose }) {
 
         {!isLoading && !isError && !binary && mode === 'edit' && openPr && !createBranchFirst && branch !== defaultBranch && (
           <p className="text-[11px] text-[var(--text-tertiary)] flex items-center gap-1.5 -mt-2">
-            <GitPullRequest className="w-3 h-3" /> The pull request will open from <span className="font-mono">{branch}</span> into{' '}
+            <GitPullRequest className="w-3 h-3" aria-hidden="true" /> The pull request will open from <span className="font-mono">{branch}</span> into{' '}
             <span className="font-mono">{defaultBranch}</span>. If the branch does not exist yet, enable “Create branch first”.
           </p>
         )}
 
         {commitMutation.isSuccess && (
-          <p className="text-[12px] text-emerald-500 flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5" /> Committed — closing…
+          <p role="status" className="text-[12px] text-emerald-500 flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" /> Committed — closing…
           </p>
         )}
       </ModalContent>

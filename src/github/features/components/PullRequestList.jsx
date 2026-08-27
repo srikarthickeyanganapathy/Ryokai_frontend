@@ -25,6 +25,7 @@ function AuthorAvatar({ login }) {
   const hue = HUES[(login || '?').charCodeAt(0) % HUES.length];
   return (
     <div
+      aria-hidden="true"
       className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ring-1 ring-black/10"
       style={{ background: hue }}
     >
@@ -37,16 +38,19 @@ function DiffBar({ additions, deletions }) {
   const add = additions || 0;
   const del = deletions || 0;
   const total = add + del;
-  if (total === 0) return <span className="text-[11px] tabular-nums text-[var(--text-tertiary)]">±0</span>;
+  if (total === 0) {
+    return <span className="text-[11px] tabular-nums text-[var(--text-tertiary)]" title="No line changes">±0</span>;
+  }
   const addPct = Math.round((add / total) * 100);
   return (
-    <div className="flex items-center gap-1.5">
-      <div className="flex h-1 w-14 overflow-hidden rounded-full bg-[var(--bg-subtle)]">
+    <div className="flex items-center gap-1.5" title={`${add} additions, ${del} deletions`}>
+      <div aria-hidden="true" className="flex h-1 w-14 overflow-hidden rounded-full bg-[var(--bg-subtle)]">
         <div className="bg-emerald-500/80 transition-all duration-300" style={{ width: `${addPct}%` }} />
         <div className="bg-rose-500/70 transition-all duration-300" style={{ width: `${100 - addPct}%` }} />
       </div>
-      <span className="text-[11px] tabular-nums text-emerald-600 dark:text-emerald-400">+{add}</span>
-      <span className="text-[11px] tabular-nums text-rose-500">−{del}</span>
+      <span aria-hidden="true" className="text-[11px] tabular-nums text-emerald-600 dark:text-emerald-400">+{add}</span>
+      <span aria-hidden="true" className="text-[11px] tabular-nums text-rose-500">−{del}</span>
+      <span className="sr-only">{add} additions and {del} deletions</span>
     </div>
   );
 }
@@ -57,6 +61,15 @@ function relativeTime(iso) {
     return formatDistanceToNow(new Date(iso), { addSuffix: true });
   } catch {
     return '';
+  }
+}
+
+function absoluteTime(iso) {
+  if (!iso) return undefined;
+  try {
+    return new Date(iso).toLocaleString();
+  } catch {
+    return undefined;
   }
 }
 
@@ -81,12 +94,26 @@ export function PullRequestList({ pullRequests, isLoading, onRefreshAll, isRefre
 
   return (
     <div className="flex h-full min-h-0 flex-col">
+      {/* Live region: announces loading, syncing, and filter results */}
+      <p className="sr-only" role="status">
+        {isRefreshing
+          ? 'Syncing pull requests…'
+          : isLoading
+          ? 'Loading pull requests…'
+          : `Showing ${filtered.length} of ${pullRequests.length} pull requests`}
+      </p>
+
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/40 p-1">
+        <div
+          role="group"
+          aria-label="Filter pull requests"
+          className="flex items-center gap-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/40 p-1"
+        >
           {FILTERS.map((f) => (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
+              aria-pressed={filter === f.key}
               className={cn(
                 'rounded-md px-2.5 py-1 text-[12px] font-medium transition-colors duration-150',
                 filter === f.key
@@ -106,12 +133,12 @@ export function PullRequestList({ pullRequests, isLoading, onRefreshAll, isRefre
           disabled={isRefreshing}
           className="ml-auto flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/40 px-2.5 py-1.5 text-[12px] font-medium text-[var(--text-secondary)] transition-colors duration-150 hover:text-[var(--text-primary)] disabled:opacity-45"
         >
-          <RefreshCw className={cn('h-3.5 w-3.5', isRefreshing && 'animate-spin')} strokeWidth={1.5} />
+          <RefreshCw className={cn('h-3.5 w-3.5 motion-reduce:animate-none', isRefreshing && 'animate-spin')} strokeWidth={1.5} aria-hidden="true" />
           {isRefreshing ? 'Syncing…' : 'Sync'}
         </button>
       </div>
 
-      <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
+      <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1" aria-busy={isLoading}>
         {isLoading ? (
           Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="rounded-xl border border-[var(--border-subtle)] p-3.5">
@@ -129,8 +156,8 @@ export function PullRequestList({ pullRequests, isLoading, onRefreshAll, isRefre
             className="flex flex-col items-center rounded-xl border border-dashed border-[var(--border-subtle)] px-6 py-14 text-center"
           >
             <div className="relative">
-              <div className="absolute inset-0 rounded-full bg-[var(--accent)]/15 blur-md" />
-              <GitPullRequest className="relative h-6 w-6 text-[var(--accent)]" strokeWidth={1.5} />
+              <div aria-hidden="true" className="absolute inset-0 rounded-full bg-[var(--accent)]/15 blur-md" />
+              <GitPullRequest className="relative h-6 w-6 text-[var(--accent)]" strokeWidth={1.5} aria-hidden="true" />
             </div>
             <p className="mt-3 text-[13px] font-semibold text-[var(--text-primary)]">
               {filter === 'all' ? 'No pull requests yet' : `No ${filter} pull requests`}
@@ -142,53 +169,59 @@ export function PullRequestList({ pullRequests, isLoading, onRefreshAll, isRefre
             </p>
           </motion.div>
         ) : (
-          filtered.map((pr, i) => {
-            const meta = STATE_META[pr.mergedAt ? 'merged' : pr.state] || STATE_META.closed;
-            return (
-              <motion.div
-                key={`${pr.number}-${pr.headSha}`}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(i * 0.03, 0.35), duration: 0.25 }}
-                className="group rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/40 p-3.5 transition-colors duration-150 hover:border-[var(--accent-border)]"
-              >
-                <div className="flex items-start gap-3">
-                  <div className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', meta.dot)} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate text-[13px] font-semibold text-[var(--text-primary)]">{pr.title || `PR #${pr.number}`}</span>
-                      {pr.draft && <Badge variant="secondary" size="xs">Draft</Badge>}
-                      <span className="shrink-0 font-mono text-[11px] text-[var(--text-tertiary)]">#{pr.number}</span>
-                    </div>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                      <Badge variant="outline" size="xs" className={cn('border', meta.chip)}>{meta.label}</Badge>
-                      <div className="flex items-center gap-1.5">
-                        <AuthorAvatar login={pr.authorLogin} />
-                        <span className="text-[11px] text-[var(--text-tertiary)]">{pr.authorLogin || 'unknown'}</span>
+          <ul className="space-y-1.5">
+            {filtered.map((pr, i) => {
+              const meta = STATE_META[pr.mergedAt ? 'merged' : pr.state] || STATE_META.closed;
+              return (
+                <motion.li
+                  key={`${pr.number}-${pr.headSha}`}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(i * 0.03, 0.35), duration: 0.25 }}
+                  className="group rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/40 p-3.5 transition-colors duration-150 hover:border-[var(--accent-border)]"
+                >
+                  <div className="flex items-start gap-3">
+                    <div aria-hidden="true" className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', meta.dot)} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate text-[13px] font-semibold text-[var(--text-primary)]" title={pr.title}>
+                          {pr.title || `PR #${pr.number}`}
+                        </span>
+                        {pr.draft && <Badge variant="secondary" size="xs">Draft</Badge>}
+                        <span className="shrink-0 font-mono text-[11px] text-[var(--text-tertiary)]">#{pr.number}</span>
                       </div>
-                      <DiffBar additions={pr.additions} deletions={pr.deletions} />
-                      {pr.updatedAt && (
-                        <span className="text-[11px] text-[var(--text-tertiary)]">{relativeTime(pr.updatedAt)}</span>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                        <Badge variant="outline" size="xs" className={cn('border', meta.chip)}>{meta.label}</Badge>
+                        <div className="flex items-center gap-1.5">
+                          <AuthorAvatar login={pr.authorLogin} />
+                          <span className="text-[11px] text-[var(--text-tertiary)]">{pr.authorLogin || 'unknown'}</span>
+                        </div>
+                        <DiffBar additions={pr.additions} deletions={pr.deletions} />
+                        {pr.updatedAt && (
+                          <time dateTime={pr.updatedAt} title={absoluteTime(pr.updatedAt)} className="text-[11px] text-[var(--text-tertiary)]">
+                            {relativeTime(pr.updatedAt)}
+                          </time>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                      {pr.htmlUrl && (
+                        <a
+                          href={pr.htmlUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-md p-1.5 text-[var(--text-tertiary)] transition-colors duration-150 hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                          aria-label={`Open pull request #${pr.number} on GitHub (opens in a new tab)`}
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />
+                        </a>
                       )}
                     </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                    {pr.htmlUrl && (
-                      <a
-                        href={pr.htmlUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="rounded-md p-1.5 text-[var(--text-tertiary)] transition-colors duration-150 hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
-                        aria-label="Open on GitHub"
-                      >
-                        <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })
+                </motion.li>
+              );
+            })}
+          </ul>
         )}
       </div>
     </div>

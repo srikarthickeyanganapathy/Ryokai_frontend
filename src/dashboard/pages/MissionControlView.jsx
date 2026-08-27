@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, MotionConfig } from 'framer-motion';
 import { cn } from '@/shared/lib/cn';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { useAuth } from '@/identity';
@@ -28,6 +28,18 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } }
 };
 
+/* ─── A11y helpers ─── */
+// Cards/rows are styled divs; this gives them real button keyboard behaviour (Enter/Space).
+const keyboardActivate = (handler) => (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    handler(e);
+  }
+};
+
+// One consistent, always-visible focus indicator for keyboard users.
+const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]';
+
 /* ─── V2 Beautiful UI Components ─── */
 
 function StatMini({ icon: Icon, label, value, tone = 'default', onClick }) {
@@ -48,14 +60,21 @@ function StatMini({ icon: Icon, label, value, tone = 'default', onClick }) {
   return (
     <motion.button
       variants={itemVariants}
+      type="button"
       onClick={onClick}
-      className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--accent-border)] hover:shadow-sm hover:-translate-y-[1px] transition-all duration-200 cursor-pointer text-left w-full"
+      aria-label={`${label}: ${value}`}
+      className={cn(
+        "flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)]",
+        "hover:border-[var(--accent-border)] hover:shadow-sm hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.99]",
+        "cursor-pointer text-left w-full transition-all duration-200 motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+        focusRing
+      )}
     >
       <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center shrink-0", bgMap[tone])}>
-        <Icon className={cn("w-4 h-4", toneMap[tone])} strokeWidth={1.5} />
+        <Icon className={cn("w-4 h-4", toneMap[tone])} strokeWidth={1.5} aria-hidden="true" />
       </div>
-      <div>
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">{label}</div>
+      <div className="min-w-0">
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)] truncate">{label}</div>
         <div className={cn("text-lg font-bold tabular-nums", toneMap[tone])}>{value}</div>
       </div>
     </motion.button>
@@ -68,7 +87,7 @@ function FocusCardWidget({ focusTask, workspaceMode, activeCrew }) {
 
   if (!focusTask) return (
     <motion.div variants={itemVariants} className="w-full p-6 rounded-2xl border border-dashed border-[var(--border-default)] bg-[var(--bg-subtle)]/50 text-center">
-      <CheckCircle2 className="w-8 h-8 mx-auto mb-3 text-[var(--text-tertiary)]" strokeWidth={1.5} />
+      <CheckCircle2 className="w-8 h-8 mx-auto mb-3 text-[var(--text-tertiary)]" strokeWidth={1.5} aria-hidden="true" />
       <p className="text-sm font-medium text-[var(--text-secondary)]">All clear. No focus items require attention.</p>
       <p className="text-xs text-[var(--text-tertiary)] mt-1">Take a moment, or create a new task to get started.</p>
       <Button size="sm" variant="secondary" onClick={() => navigate('/app/tasks')} className="mt-3 text-xs rounded-xl">
@@ -79,15 +98,27 @@ function FocusCardWidget({ focusTask, workspaceMode, activeCrew }) {
 
   const rawStatus = focusTask.status || focusTask.currentStatus || 'IN_PROGRESS';
   const displayStatus = rawStatus.replace(/_/g, ' ').toLowerCase();
+  const focusTitle = focusTask.title || focusTask.taskTitle || 'Current Task';
+  const openFocusTask = () => open('task', { taskId: focusTask.id || focusTask.taskId });
 
   return (
     <motion.div
       variants={itemVariants}
-      onClick={() => open('task', { taskId: focusTask.id || focusTask.taskId })}
-      className="w-full group relative p-6 rounded-2xl bg-gradient-to-br from-[var(--bg-elevated)] via-[var(--bg-elevated)] to-[var(--accent-soft)]/10 border border-[var(--accent-border)]/40 hover:border-[var(--accent)] shadow-md hover:shadow-xl cursor-pointer transition-all duration-300 overflow-hidden"
+      role="button"
+      tabIndex={0}
+      aria-label={`Primary focus: ${focusTitle}. Status: ${displayStatus}.`}
+      onClick={openFocusTask}
+      onKeyDown={keyboardActivate(openFocusTask)}
+      className={cn(
+        "w-full group relative p-6 rounded-2xl bg-gradient-to-br from-[var(--bg-elevated)] via-[var(--bg-elevated)] to-[var(--accent-soft)]/10",
+        "border border-[var(--accent-border)]/40 hover:border-[var(--accent)] shadow-md hover:shadow-xl cursor-pointer",
+        "transition-all duration-300 overflow-hidden",
+        focusRing
+      )}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent)]/5 via-transparent to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-[var(--accent)]/15 to-transparent rounded-bl-full opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+      {/* Decorative layers must never intercept pointer events */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[var(--accent)]/5 via-transparent to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+      <div aria-hidden="true" className="pointer-events-none absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-[var(--accent)]/15 to-transparent rounded-bl-full opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
       <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-2 min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
@@ -102,18 +133,25 @@ function FocusCardWidget({ focusTask, workspaceMode, activeCrew }) {
               <span className="text-[11px] font-medium text-[var(--text-tertiary)]">· Crew: {activeCrew.name}</span>
             )}
           </div>
-          <h3 className="text-xl font-bold text-[var(--text-primary)] line-clamp-1 group-hover:text-[var(--accent)] transition-colors">
-            {focusTask.title || focusTask.taskTitle || 'Current Task'}
+          <h3 title={focusTitle} className="text-xl font-bold text-[var(--text-primary)] line-clamp-1 group-hover:text-[var(--accent)] transition-colors">
+            {focusTitle}
           </h3>
           <div className="flex items-center gap-3 text-xs text-[var(--text-tertiary)] flex-wrap">
-            {focusTask.project?.name && <span>Project: {focusTask.project.name}</span>}
+            {focusTask.project?.name && (
+              <span className="truncate max-w-[220px]" title={focusTask.project.name}>Project: {focusTask.project.name}</span>
+            )}
             {focusTask.priority && <span className="uppercase font-semibold text-[10px]">· Priority: {focusTask.priority}</span>}
-            {focusTask.dueDate && <span className="flex items-center gap-1"><Clock size={12} />Due {new Date(focusTask.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+            {focusTask.dueDate && (
+              <span className="flex items-center gap-1">
+                <Clock size={12} aria-hidden="true" />
+                Due {new Date(focusTask.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </span>
+            )}
           </div>
         </div>
         <Button size="sm" className="rounded-full shrink-0 group-hover:shadow-[0_0_16px_var(--accent)] transition-shadow"
           onClick={(e) => { e.stopPropagation(); navigate('/app/focus'); }}>
-          Resume Work <ArrowRight size={14} className="ml-1.5 group-hover:translate-x-0.5 transition-transform" />
+          Resume Work <ArrowRight size={14} aria-hidden="true" className="ml-1.5 group-hover:translate-x-0.5 transition-transform" />
         </Button>
       </div>
     </motion.div>
@@ -148,14 +186,52 @@ function QuickActionBar({ workspaceMode }) {
           variant="secondary"
           size="sm"
           onClick={() => navigate(a.to)}
-          className="h-9 gap-2 text-[12px] rounded-xl border-[var(--border-subtle)] hover:border-[var(--accent-border)] hover:shadow-sm group"
+          title={`${a.label} (${a.shortcut})`}
+          className="h-9 gap-2 text-[12px] rounded-xl border-[var(--border-subtle)] hover:border-[var(--accent-border)] hover:shadow-sm active:scale-[0.98] transition-all group"
         >
-          <a.icon size={14} strokeWidth={1.5} className="text-[var(--text-tertiary)] group-hover:text-[var(--accent)] transition-colors" />
+          <a.icon size={14} strokeWidth={1.5} aria-hidden="true" className="text-[var(--text-tertiary)] group-hover:text-[var(--accent)] transition-colors" />
           {a.label}
-          <kbd className="ml-1 text-[10px] px-1.5 py-0.5 rounded-md bg-[var(--bg-subtle)] text-[var(--text-tertiary)] font-mono hidden sm:inline">{a.shortcut}</kbd>
+          <kbd aria-hidden="true" className="ml-1 text-[10px] px-1.5 py-0.5 rounded-md bg-[var(--bg-subtle)] text-[var(--text-tertiary)] border border-[var(--border-subtle)] font-mono hidden sm:inline select-none">{a.shortcut}</kbd>
         </Button>
       ))}
     </motion.div>
+  );
+}
+
+/* Crew filter pills — extracted so the empty and populated queue states stay pixel-identical. */
+function CrewFilterBar({ crews = [], selectedCrewFilter, setSelectedCrewFilter, totalCount = 0 }) {
+  const isAll = !selectedCrewFilter || selectedCrewFilter === 'ALL';
+  // Inactive pills carry a transparent border so toggling never causes a 1px layout shift.
+  const pill = (active) => cn(
+    "px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all duration-150 cursor-pointer",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/70 active:scale-[0.97]",
+    active
+      ? "bg-violet-500/20 text-violet-300 border-violet-500/30"
+      : "bg-[var(--bg-subtle)] text-[var(--text-tertiary)] border-transparent hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)]"
+  );
+
+  return (
+    <div role="group" aria-label="Filter tasks by crew" className="flex items-center gap-1.5 flex-wrap pb-2 border-b border-[var(--border-subtle)]">
+      <button
+        type="button"
+        onClick={() => setSelectedCrewFilter && setSelectedCrewFilter('ALL')}
+        aria-pressed={isAll}
+        className={pill(isAll)}
+      >
+        All Crews ({totalCount})
+      </button>
+      {crews.map(crew => (
+        <button
+          key={crew.id}
+          type="button"
+          onClick={() => setSelectedCrewFilter && setSelectedCrewFilter(crew.id)}
+          aria-pressed={selectedCrewFilter === crew.id}
+          className={pill(selectedCrewFilter === crew.id)}
+        >
+          {crew.name}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -168,51 +244,27 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
     ? relevantTasks.filter(t => (t.crewId === selectedCrewFilter || t.crewName === selectedCrewFilter))
     : relevantTasks;
 
+  const showCrewFilters = workspaceMode === 'CREWS' && crews.length > 0;
+
   if (!filteredTasks || filteredTasks.length === 0) {
     return (
-      <motion.div variants={itemVariants} className="w-full p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] space-y-4">
+      <motion.div variants={itemVariants} className="w-full p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ListTodo size={16} strokeWidth={1.5} className="text-[var(--accent)]" />
+            <ListTodo size={16} strokeWidth={1.5} aria-hidden="true" className="text-[var(--accent)]" />
             <h3 className="text-[13px] font-semibold text-[var(--text-primary)]">Execution Queue</h3>
           </div>
         </div>
 
-        {workspaceMode === 'CREWS' && crews.length > 0 && (
-          <div className="flex items-center gap-1.5 flex-wrap pb-2 border-b border-[var(--border-subtle)]">
-            <button
-              onClick={() => setSelectedCrewFilter && setSelectedCrewFilter('ALL')}
-              className={cn(
-                "px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all",
-                (!selectedCrewFilter || selectedCrewFilter === 'ALL')
-                  ? "bg-violet-500/20 text-violet-300 border border-violet-500/30"
-                  : "bg-[var(--bg-subtle)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-              )}
-            >
-              All Crews ({relevantTasks.length})
-            </button>
-            {crews.map(crew => (
-              <button
-                key={crew.id}
-                onClick={() => setSelectedCrewFilter && setSelectedCrewFilter(crew.id)}
-                className={cn(
-                  "px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all",
-                  selectedCrewFilter === crew.id
-                    ? "bg-violet-500/20 text-violet-300 border border-violet-500/30"
-                    : "bg-[var(--bg-subtle)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-                )}
-              >
-                {crew.name}
-              </button>
-            ))}
-          </div>
+        {showCrewFilters && (
+          <CrewFilterBar crews={crews} selectedCrewFilter={selectedCrewFilter} setSelectedCrewFilter={setSelectedCrewFilter} totalCount={relevantTasks.length} />
         )}
 
         <div className="text-center py-6">
-          <CheckCircle2 className="w-7 h-7 mx-auto mb-2 text-[var(--text-tertiary)]" strokeWidth={1.5} />
+          <CheckCircle2 className="w-7 h-7 mx-auto mb-2 text-[var(--text-tertiary)]" strokeWidth={1.5} aria-hidden="true" />
           <p className="text-xs font-medium text-[var(--text-secondary)]">Queue is clear</p>
           <p className="text-[11px] text-[var(--text-tertiary)] mt-1">No active tasks found for this workspace view.</p>
-          <Button size="sm" variant="secondary" onClick={() => navigate(workspaceMode === 'CREWS' ? '/app/crews/tasks' : '/app/tasks')} className="mt-3 text-xs rounded-xl">
+          <Button size="sm" variant="secondary" onClick={() => navigate(tasksHref)} className="mt-3 text-xs rounded-xl">
             Create Task
           </Button>
         </div>
@@ -224,50 +276,25 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
     <motion.div variants={itemVariants} className="w-full p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <ListTodo size={16} strokeWidth={1.5} className="text-[var(--accent)]" />
+          <ListTodo size={16} strokeWidth={1.5} aria-hidden="true" className="text-[var(--accent)]" />
           <h3 className="text-[13px] font-semibold text-[var(--text-primary)]">Execution Queue</h3>
           <Badge variant="secondary" className="text-[10px]">{filteredTasks.length} active</Badge>
         </div>
         <button
+          type="button"
           onClick={() => navigate(tasksHref)}
-          className="text-[11px] font-medium text-[var(--text-tertiary)] hover:text-[var(--accent)] flex items-center gap-1 transition-colors"
+          className="-mx-1.5 -my-1 px-1.5 py-1 rounded-md text-[11px] font-medium text-[var(--text-tertiary)] hover:text-[var(--accent)] flex items-center gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
-          View all <ArrowRight className="h-3 w-3" />
+          View all <ArrowRight className="h-3 w-3" aria-hidden="true" />
         </button>
       </div>
 
       {/* Collective Crew Filter Pills in CREWS mode */}
-      {workspaceMode === 'CREWS' && crews.length > 0 && (
-        <div className="flex items-center gap-1.5 flex-wrap pb-2 border-b border-[var(--border-subtle)]">
-          <button
-            onClick={() => setSelectedCrewFilter && setSelectedCrewFilter('ALL')}
-            className={cn(
-              "px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all",
-              (!selectedCrewFilter || selectedCrewFilter === 'ALL')
-                ? "bg-violet-500/20 text-violet-300 border border-violet-500/30"
-                : "bg-[var(--bg-subtle)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-            )}
-          >
-            All Crews ({relevantTasks.length})
-          </button>
-          {crews.map(crew => (
-            <button
-              key={crew.id}
-              onClick={() => setSelectedCrewFilter && setSelectedCrewFilter(crew.id)}
-              className={cn(
-                "px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all",
-                selectedCrewFilter === crew.id
-                  ? "bg-violet-500/20 text-violet-300 border border-violet-500/30"
-                  : "bg-[var(--bg-subtle)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-              )}
-            >
-              {crew.name}
-            </button>
-          ))}
-        </div>
+      {showCrewFilters && (
+        <CrewFilterBar crews={crews} selectedCrewFilter={selectedCrewFilter} setSelectedCrewFilter={setSelectedCrewFilter} totalCount={relevantTasks.length} />
       )}
 
-      <div className="space-y-2">
+      <ul className="space-y-2 list-none p-0 m-0">
         {filteredTasks.slice(0, 8).map((task, idx) => {
           const taskId = task.id || task.taskId || idx;
           const title = task.title || task.taskTitle || 'Untitled Task';
@@ -275,25 +302,38 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
           const isDone = ['COMPLETED', 'DONE', 'RESOLVED'].includes(rawStatus.toUpperCase());
           const displayStatus = rawStatus.replace(/_/g, ' ').toLowerCase();
           const assignee = task.assignee || task.assignedTo;
+          const openTask = () => navigate(`/app/tasks/${taskId}`, { state: { task } });
 
           // Derive Workspace Origin Tag
           const crewLabel = task.crewName || (task.crewId ? `Crew #${task.crewId}` : null);
           const orgLabel = task.organizationName || task.orgName;
 
           return (
-            <div
+            <li
               key={taskId}
-              onClick={() => navigate(`/app/tasks/${taskId}`, { state: { task } })}
-              className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-subtle)]/60 hover:bg-[var(--bg-hover)] border border-transparent hover:border-[var(--border-subtle)] transition-all cursor-pointer group"
+              role="button"
+              tabIndex={0}
+              aria-label={`${title}, ${displayStatus}`}
+              onClick={openTask}
+              onKeyDown={keyboardActivate(openTask)}
+              className={cn(
+                "flex items-center justify-between p-3 rounded-xl bg-[var(--bg-subtle)]/60 hover:bg-[var(--bg-hover)]",
+                "border border-transparent hover:border-[var(--border-subtle)] transition-all cursor-pointer group",
+                focusRing
+              )}
             >
               <div className="flex items-center gap-3 min-w-0 flex-1">
-                <span className={cn(
+                <span aria-hidden="true" className={cn(
                   "w-2 h-2 rounded-full shrink-0",
-                  isDone ? "bg-[var(--success)]" : rawStatus.toUpperCase() === 'IN_PROGRESS' ? "bg-[var(--warning)]" : "bg-[var(--accent)]"
+                  isDone
+                    ? "bg-[var(--success)]"
+                    : rawStatus.toUpperCase() === 'IN_PROGRESS'
+                      ? "bg-[var(--warning)] animate-pulse motion-reduce:animate-none"
+                      : "bg-[var(--accent)]"
                 )} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className={cn(
+                    <p title={title} className={cn(
                       "text-[12px] font-medium truncate group-hover:text-[var(--accent)] transition-colors",
                       isDone ? "line-through text-[var(--text-tertiary)]" : "text-[var(--text-primary)]"
                     )}>
@@ -320,6 +360,7 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
                     {task.project?.name && (
                       task.project?.id ? (
                         <button
+                          type="button"
                           onClick={(e) => { e.stopPropagation(); navigate(`/app/projects/${task.project.id}`); }}
                           className="hover:text-[var(--accent)] hover:underline transition-colors text-left"
                         >
@@ -331,8 +372,8 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
                     )}
                     {assignee && (
                       <span className="flex items-center gap-1">
-                        {(task.project?.name) && <span>·</span>}
-                        <span className="w-3.5 h-3.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-[7px] font-bold shrink-0">
+                        {(task.project?.name) && <span aria-hidden="true">·</span>}
+                        <span title={assignee} aria-hidden="true" className="w-3.5 h-3.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-[7px] font-bold shrink-0">
                           {String(assignee).charAt(0).toUpperCase()}
                         </span>
                         <span className="truncate max-w-[90px]">{assignee}</span>
@@ -348,7 +389,7 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
               <div className="flex items-center gap-2 shrink-0 ml-3">
                 {task.dueDate && (
                   <span className="text-[11px] text-[var(--text-tertiary)] flex items-center gap-1 font-mono">
-                    <Clock size={11} />
+                    <Clock size={11} aria-hidden="true" />
                     {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </span>
                 )}
@@ -356,10 +397,10 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
                   {displayStatus}
                 </Badge>
               </div>
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </motion.div>
   );
 }
@@ -406,20 +447,20 @@ function AICopilotBlock({ relevantTasks = [], activeTaskCount = 0, completedTask
   return (
     <motion.div variants={itemVariants} className="w-full p-5 rounded-2xl border border-[var(--border-subtle)] bg-gradient-to-br from-[var(--bg-elevated)] to-[var(--accent-soft)]/5">
       <div className="flex items-center gap-2 mb-3">
-        <Brain size={16} strokeWidth={1.5} className="text-[var(--accent)]" />
+        <Brain size={16} strokeWidth={1.5} aria-hidden="true" className="text-[var(--accent)]" />
         <h3 className="text-[13px] font-semibold">Insights</h3>
       </div>
-      <div className="space-y-3">
+      <ul className="space-y-3 list-none p-0 m-0">
         {insights.map((insight, i) => (
-          <div key={i} className="flex items-start gap-2.5 p-2.5 rounded-lg bg-[var(--bg-subtle)]/50">
-            <insight.icon size={14} strokeWidth={1.5} className={`${insight.tone} shrink-0 mt-0.5`} />
+          <li key={i} className="flex items-start gap-2.5 p-2.5 rounded-lg bg-[var(--bg-subtle)]/50">
+            <insight.icon size={14} strokeWidth={1.5} aria-hidden="true" className={`${insight.tone} shrink-0 mt-0.5`} />
             <div className="min-w-0">
               <p className="text-[12px] font-medium text-[var(--text-primary)]">{insight.title}</p>
-              <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 truncate">{insight.body}</p>
+              <p title={insight.body} className="text-[11px] text-[var(--text-secondary)] mt-0.5 truncate">{insight.body}</p>
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </motion.div>
   );
 }
@@ -431,14 +472,15 @@ function CollectiveCrewContextRail({ crews = [], activeCrew, setActiveCrew }) {
     <motion.div variants={itemVariants} className="w-full p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Users size={16} strokeWidth={1.5} className="text-violet-400" />
+          <Users size={16} strokeWidth={1.5} aria-hidden="true" className="text-violet-400" />
           <h3 className="text-[13px] font-semibold text-[var(--text-primary)]">All My Crews</h3>
         </div>
         <button
+          type="button"
           onClick={() => navigate('/app/crews/discover')}
-          className="text-xs text-[var(--text-tertiary)] hover:text-[var(--accent)] flex items-center gap-1 transition-colors"
+          className="-mx-1.5 -my-1 px-1.5 py-1 rounded-md text-xs text-[var(--text-tertiary)] hover:text-[var(--accent)] flex items-center gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
-          Discover <ArrowRight className="h-3 w-3" />
+          Discover <ArrowRight className="h-3 w-3" aria-hidden="true" />
         </button>
       </div>
 
@@ -450,36 +492,43 @@ function CollectiveCrewContextRail({ crews = [], activeCrew, setActiveCrew }) {
           </Button>
         </div>
       ) : (
-        <div className="space-y-2">
+        <ul className="space-y-2 list-none p-0 m-0">
           {crews.map(crew => {
             const isActive = activeCrew?.id === crew.id;
+            const selectCrew = () => setActiveCrew && setActiveCrew(crew);
             return (
-              <div
+              <li
                 key={crew.id}
-                onClick={() => setActiveCrew && setActiveCrew(crew)}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isActive}
+                aria-label={`${crew.name}, ${crew.memberCount ?? 1} members${isActive ? ' (active)' : ''}`}
+                onClick={selectCrew}
+                onKeyDown={keyboardActivate(selectCrew)}
                 className={cn(
                   "flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer group",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/70",
                   isActive
                     ? "bg-violet-500/10 border-violet-500/30 text-violet-300"
                     : "bg-[var(--bg-subtle)]/50 border-transparent hover:border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)]"
                 )}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-violet-500/20 text-violet-300 flex items-center justify-center text-xs font-bold shrink-0">
+                  <div aria-hidden="true" className="w-7 h-7 rounded-lg bg-violet-500/20 text-violet-300 flex items-center justify-center text-xs font-bold shrink-0">
                     {crew.name?.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-medium truncate group-hover:text-violet-300 transition-colors">{crew.name}</p>
+                    <p title={crew.name} className="text-xs font-medium truncate group-hover:text-violet-300 transition-colors">{crew.name}</p>
                     <p className="text-[10px] text-[var(--text-tertiary)]">{crew.memberCount ?? 1} members</p>
                   </div>
                 </div>
                 {isActive && (
-                  <span className="text-[10px] font-semibold text-violet-400 bg-violet-500/20 px-2 py-0.5 rounded-full">Active</span>
+                  <span className="text-[10px] font-semibold text-violet-400 bg-violet-500/20 px-2 py-0.5 rounded-full shrink-0">Active</span>
                 )}
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       )}
     </motion.div>
   );
@@ -743,39 +792,42 @@ export function MissionControlV2({ vm }) {
   };
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="space-y-6 max-w-6xl mx-auto px-2 pb-8"
-    >
-      {/* ── Dynamic Header (workspace-framework PageHero contract) ── */}
-      <motion.div variants={itemVariants} className="flex flex-col gap-3 w-full justify-between sm:flex-row sm:items-start pb-5 border-b border-[var(--border-subtle)]">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">{headerConfig.eyebrow}</span>
+    // Respects the user's OS "reduce motion" preference for all enter/stagger animations.
+    <MotionConfig reducedMotion="user">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="space-y-6 max-w-6xl mx-auto px-2 pb-8"
+      >
+        {/* ── Dynamic Header (workspace-framework PageHero contract) ── */}
+        <motion.div variants={itemVariants} className="flex flex-col gap-3 w-full justify-between sm:flex-row sm:items-start pb-5 border-b border-[var(--border-subtle)]">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">{headerConfig.eyebrow}</span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+              {headerConfig.title}
+            </h1>
+            <p className="text-[13px] text-[var(--text-secondary)] mt-1.5">{headerConfig.subtitle}</p>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-            {headerConfig.title}
-          </h1>
-          <p className="text-[13px] text-[var(--text-secondary)] mt-1.5">{headerConfig.subtitle}</p>
-        </div>
-        <div className="mt-2 sm:mt-0">
-          <ModeSelector />
+          <div className="mt-2 sm:mt-0">
+            <ModeSelector />
+          </div>
+        </motion.div>
+
+        {/* ── Dynamic Layout Grid ── */}
+        {renderWidgets('header')}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            {renderWidgets('primary')}
+          </div>
+          <div className="space-y-6">
+            {renderWidgets('context')}
+          </div>
         </div>
       </motion.div>
-
-      {/* ── Dynamic Layout Grid ── */}
-      {renderWidgets('header')}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          {renderWidgets('primary')}
-        </div>
-        <div className="space-y-6">
-          {renderWidgets('context')}
-        </div>
-      </div>
-    </motion.div>
+    </MotionConfig>
   );
 }
