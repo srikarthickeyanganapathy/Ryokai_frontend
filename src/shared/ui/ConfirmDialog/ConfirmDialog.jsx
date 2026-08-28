@@ -41,7 +41,7 @@ export function useConfirmDialog() {
 
   const dialog = state && (
     <Modal open onOpenChange={(open) => { if (!open) close(false) }}>
-      <ModalContent className="max-w-[420px] gap-5">
+      <ModalContent data-confirm-dialog className="max-w-[420px] gap-5">
         <ModalHeader className="gap-2">
           <div className="flex items-center gap-3">
             {state.danger && (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Pin, Trash2, X, Check, Save, Bold, Italic, Heading as HeadingIcon, Code, Quote, List, CheckSquare, Link as LinkIcon, Eye, Edit3, FileText, Maximize2, Minimize2, ListTree, Timer, StickyNote, Link2 } from '@/shared/ui/Icons'
+import { Pin, Trash2, X, Check, Save, Bold, Italic, Heading as HeadingIcon, Code, Quote, List, CheckSquare, Link as LinkIcon, Eye, Edit3, FileText, Maximize2, Minimize2, ListTree, Timer, StickyNote, Link2, Tag } from '@/shared/ui/Icons'
 import { Button, IconButton } from '@/shared/ui/Button'
 import { cn } from '@/shared/lib/cn'
 import { useUpdateNote, useDeleteNote, useCreateNote } from '@/note'
@@ -19,23 +19,28 @@ const COLORS = [
   { id: 'violet', label: 'Violet', bg: 'rgba(139, 92, 246, 0.15)', border: 'rgb(139, 92, 246)' },
 ]
 
+const MIN_PANEL_WIDTH = 380
+const RESIZE_STEP = 20
+
 /* ──────────────────────────────────────────────────────────
  * OutlinePanel — live heading navigator
  * ────────────────────────────────────────────────────────── */
 function OutlinePanel({ outline, onJump, onClose }) {
   return (
-    <div className="border border-[var(--border-subtle)] rounded-lg bg-[var(--bg-subtle)]/40 overflow-hidden shrink-0">
+    <div className="border border-[var(--border-subtle)] rounded-lg bg-[var(--bg-subtle)]/40 overflow-hidden shrink-0" role="region" aria-label="Note outline">
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-[var(--border-subtle)]">
         <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Outline</span>
-        <IconButton variant="ghost" size="sm" onClick={onClose} title="Close outline"><X className="w-3 h-3" /></IconButton>
+        <IconButton variant="ghost" size="sm" onClick={onClose} title="Close outline" aria-label="Close outline"><X className="w-3 h-3" /></IconButton>
       </div>
       <div className="p-1.5 max-h-32 overflow-y-auto custom-scrollbar space-y-0.5">
         {outline.map((item, i) => (
           <button
             key={i}
+            type="button"
             onClick={() => onJump(item)}
+            aria-label={`Jump to heading: ${item.text}`}
             className={cn(
-              'w-full text-left px-2 py-1 rounded-md text-[11px] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer truncate',
+              'w-full text-left px-2 py-1 rounded-md text-[11px] hover:bg-[var(--bg-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)] transition-colors cursor-pointer truncate',
               item.level === 1 ? 'font-semibold text-[var(--text-primary)]' :
               item.level === 2 ? 'font-medium text-[var(--text-secondary)] pl-4' :
               'text-[var(--text-secondary)] pl-7'
@@ -55,6 +60,7 @@ function OutlinePanel({ outline, onJump, onClose }) {
 function TagsEditor({ tags, onChange }) {
   const [input, setInput] = useState('')
   const inputRef = useRef(null)
+  const inputId = 'note-tags-input'
 
   const addTag = useCallback(() => {
     const raw = input.trim()
@@ -76,7 +82,7 @@ function TagsEditor({ tags, onChange }) {
 
   return (
     <div className="space-y-1">
-      <Label className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Tags</Label>
+      <Label htmlFor={inputId} className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Tags</Label>
       <div
         onClick={() => inputRef.current?.focus()}
         className="flex flex-wrap items-center gap-1 px-2 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 min-h-[32px] cursor-text focus-within:border-[var(--accent-border)] transition-colors"
@@ -86,7 +92,7 @@ function TagsEditor({ tags, onChange }) {
             key={tag}
             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] text-[10px] font-medium font-mono border border-[var(--accent-border)] group"
           >
-            <Tag className="w-2.5 h-2.5" />
+            <Tag className="w-2.5 h-2.5" aria-hidden="true" />
             {tag}
             <IconButton
               variant="ghost"
@@ -94,19 +100,21 @@ function TagsEditor({ tags, onChange }) {
               type="button"
               onClick={(e) => { e.stopPropagation(); removeTag(tag) }}
               className="ml-0.5 opacity-60 group-hover:opacity-100"
-              title="Remove tag"
-              aria-label="Remove tag"
+              title={`Remove tag ${tag}`}
+              aria-label={`Remove tag ${tag}`}
             >
               <X className="w-2.5 h-2.5" />
             </IconButton>
           </span>
         ))}
         <input
+          id={inputId}
           ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
           placeholder={tags.length === 0 ? 'Add tags…' : ''}
+          aria-label="Add a tag, press Enter to confirm"
           className="flex-1 min-w-[80px] bg-transparent text-[11px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none border-none p-0"
         />
       </div>
@@ -137,9 +145,9 @@ function BacklinksPanel({ currentNote, allNotes, onNavigate }) {
   if (backlinks.length === 0) return null
 
   return (
-    <div className="shrink-0 border border-[var(--border-subtle)] rounded-lg overflow-hidden">
+    <div className="shrink-0 border border-[var(--border-subtle)] rounded-lg overflow-hidden" role="region" aria-label={`Backlinks, ${backlinks.length} notes`}>
       <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40">
-        <Link2 className="w-3 h-3 text-[var(--accent)]" />
+        <Link2 className="w-3 h-3 text-[var(--accent)]" aria-hidden="true" />
         <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Backlinks</span>
         <span className="text-[9px] font-mono text-[var(--text-tertiary)] tabular-nums">{backlinks.length}</span>
       </div>
@@ -147,10 +155,12 @@ function BacklinksPanel({ currentNote, allNotes, onNavigate }) {
         {backlinks.map(n => (
           <button
             key={n.id}
+            type="button"
             onClick={() => onNavigate?.(n)}
-            className="w-full text-left px-2 py-1.5 rounded-md text-[11px] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer group flex items-center gap-2"
+            aria-label={`Open backlinked note: ${n.title || 'Untitled'}`}
+            className="w-full text-left px-2 py-1.5 rounded-md text-[11px] hover:bg-[var(--bg-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)] transition-colors cursor-pointer group flex items-center gap-2"
           >
-            <span className="w-1 h-4 rounded-full shrink-0" style={{ backgroundColor: 'var(--accent)' }} />
+            <span className="w-1 h-4 rounded-full shrink-0" style={{ backgroundColor: 'var(--accent)' }} aria-hidden="true" />
             <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] truncate min-w-0 font-medium transition-colors">
               {n.title || 'Untitled'}
             </span>
@@ -179,6 +189,8 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
   const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
   const textareaRef = useRef(null)
+  const titleInputRef = useRef(null)
+  const panelRef = useRef(null)
   const [activeTab, setActiveTab] = useState('write')
   const [zen, setZen] = useState(false)
   const [outlineOpen, setOutlineOpen] = useState(false)
@@ -205,13 +217,16 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
     setZen(false); setOutlineOpen(false); setSaveState('idle'); setSavedAt(null)
   }
 
+  const isNew = !note?.id
+  const maxPanelWidth = typeof window !== 'undefined' ? window.innerWidth - 60 : 1200
+
   const startResizing = useCallback((e) => {
     e.preventDefault(); setIsResizing(true)
     const startX = e.clientX
     const startWidth = panelWidth
     const handleMouseMove = (moveEvent) => {
       const deltaX = startX - moveEvent.clientX
-      const newWidth = Math.min(Math.max(startWidth + deltaX, 380), window.innerWidth - 60)
+      const newWidth = Math.min(Math.max(startWidth + deltaX, MIN_PANEL_WIDTH), window.innerWidth - 60)
       setPanelWidth(newWidth)
     }
     const handleMouseUp = () => {
@@ -223,9 +238,25 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
     window.addEventListener('mouseup', handleMouseUp)
   }, [panelWidth])
 
+  // Keyboard-accessible resizing (Left/Right arrows) for users who can't drag with a mouse
+  const onResizeKeyDown = useCallback((e) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      setPanelWidth(w => Math.min(w + RESIZE_STEP, maxPanelWidth))
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      setPanelWidth(w => Math.max(w - RESIZE_STEP, MIN_PANEL_WIDTH))
+    } else if (e.key === 'Home') {
+      e.preventDefault()
+      setPanelWidth(MIN_PANEL_WIDTH)
+    } else if (e.key === 'End') {
+      e.preventDefault()
+      setPanelWidth(maxPanelWidth)
+    }
+  }, [maxPanelWidth])
+
   useEffect(() => { if (panelWidth) localStorage.setItem('ryokai_notepanel_width', String(panelWidth)) }, [panelWidth])
 
-  const isNew = !note?.id
   const wordCount = useMemo(() => formData.content?.trim() ? formData.content.trim().split(/\s+/).filter(Boolean).length : 0, [formData.content])
   const dna = useMemo(() => noteDna({ content: formData.content, updatedAt: note?.updatedAt }), [formData.content, note?.updatedAt])
 
@@ -261,12 +292,20 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
     }
   }, [isNew, createNote, updateNote, formData, note, onClose])
 
-  const handleClose = useCallback(() => {
+  // Uses the app's own accessible confirm dialog instead of the native
+  // window.confirm(), matching the delete-confirmation flow below.
+  const handleClose = useCallback(async () => {
     if (isDirty && saveState !== 'saved') {
-      if (!window.confirm('You have unsaved changes. Close anyway?')) return
+      const confirmed = await confirm({
+        title: 'Discard changes?',
+        description: 'You have unsaved changes. Close without saving?',
+        danger: true,
+        confirmLabel: 'Discard changes',
+      })
+      if (!confirmed) return
     }
     onClose()
-  }, [isDirty, saveState, onClose])
+  }, [isDirty, saveState, onClose, confirm])
 
   const handleDelete = useCallback(async () => {
     const confirmed = await confirm({
@@ -288,13 +327,22 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
     if (!isOpen) return
     const onKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); handleSave() }
-      else if (e.key === 'Escape' && !document.querySelector('[role="dialog"]')) {
+      else if (e.key === 'Escape' && !document.querySelector('[role="dialog"][data-confirm-dialog]')) {
         handleClose()
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [isOpen, handleSave, handleClose])
+
+  // Move focus into the panel when it opens, so keyboard/screen-reader
+  // users land somewhere useful instead of staying on the trigger button.
+  useEffect(() => {
+    if (!isOpen) return
+    const target = isNew ? titleInputRef.current : (textareaRef.current || titleInputRef.current)
+    const t = setTimeout(() => target?.focus(), 60)
+    return () => clearTimeout(t)
+  }, [isOpen, isNew])
 
   if (!isOpen) return null
 
@@ -324,62 +372,105 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
     }, 50)
   }
 
+  const panelTitleId = 'note-panel-heading'
+
   return (
     <>
       {confirmDialog}
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-50 flex justify-end">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={handleClose} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={handleClose} className="absolute inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
             <motion.div
+              ref={panelRef}
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 280 }}
               style={{ width: `${panelWidth}px` }}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={panelTitleId}
               className={cn("relative bg-[var(--bg-card)] border-l border-[var(--border-subtle)] shadow-2xl h-full flex flex-col z-10", isResizing && "select-none transition-none")}
             >
-              <div onMouseDown={startResizing} className={cn("absolute left-0 top-0 bottom-0 w-3 -ml-1.5 z-30 cursor-ew-resize flex items-center justify-center group select-none hover:bg-[var(--accent)]/30 transition-colors", isResizing && "bg-[var(--accent)]/50")} title="Drag to resize panel">
+              <div
+                onMouseDown={startResizing}
+                onKeyDown={onResizeKeyDown}
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Resize note panel"
+                aria-valuenow={panelWidth}
+                aria-valuemin={MIN_PANEL_WIDTH}
+                aria-valuemax={maxPanelWidth}
+                tabIndex={0}
+                className={cn("absolute left-0 top-0 bottom-0 w-3 -ml-1.5 z-30 cursor-ew-resize flex items-center justify-center group select-none hover:bg-[var(--accent)]/30 focus-visible:bg-[var(--accent)]/40 focus-visible:outline-none transition-colors", isResizing && "bg-[var(--accent)]/50")}
+                title="Drag to resize panel, or use Left/Right arrow keys"
+              >
                 <div className="w-1 h-10 rounded-full bg-[var(--text-muted)]/40 group-hover:bg-[var(--accent)] transition-colors" />
               </div>
 
               <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] font-mono text-[10px] uppercase font-semibold border border-[var(--accent-border)] flex items-center gap-1">
-                    <StickyNote className="w-3 h-3" /> {isNew ? 'New Note' : 'Edit Note'}
+                  <span id={panelTitleId} className="px-2 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] font-mono text-[10px] uppercase font-semibold border border-[var(--accent-border)] flex items-center gap-1">
+                    <StickyNote className="w-3 h-3" aria-hidden="true" /> {isNew ? 'New Note' : 'Edit Note'}
                   </span>
-                  {formData.isPinned && <span className="px-2 py-0.5 rounded-md bg-[var(--accent)] text-white font-mono text-[10px] uppercase font-semibold flex items-center gap-1"><Pin className="w-2.5 h-2.5 fill-current" /> Pinned</span>}
+                  {formData.isPinned && <span className="px-2 py-0.5 rounded-md bg-[var(--accent)] text-white font-mono text-[10px] uppercase font-semibold flex items-center gap-1"><Pin className="w-2.5 h-2.5 fill-current" aria-hidden="true" /> Pinned</span>}
                 </div>
                 <div className="flex items-center gap-1">
-                  <IconButton variant="ghost" size="sm" title={formData.isPinned ? 'Unpin Note' : 'Pin Note'} onClick={togglePin} className={cn(formData.isPinned && 'text-[var(--accent)]')}><Pin className={cn('w-4 h-4', formData.isPinned && 'fill-current')} /></IconButton>
+                  <IconButton variant="ghost" size="sm" title={formData.isPinned ? 'Unpin Note' : 'Pin Note'} aria-label={formData.isPinned ? 'Unpin note' : 'Pin note'} aria-pressed={formData.isPinned} onClick={togglePin} className={cn(formData.isPinned && 'text-[var(--accent)]')}><Pin className={cn('w-4 h-4', formData.isPinned && 'fill-current')} /></IconButton>
                   {!isNew && note?.id && <SaveToggle entityType={ENTITY_TYPES.NOTE} entityId={note.id} disabled={updateNote.isPending} className="mr-1" />}
-                  {!isNew && <IconButton variant="ghost" size="sm" title="Delete Note" onClick={handleDelete} className="text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]"><Trash2 className="w-4 h-4" /></IconButton>}
-                  <IconButton variant="ghost" size="sm" title={zen ? 'Exit focus mode' : 'Focus mode (zen)'} onClick={() => { const next = !zen; setZen(next); if (next) setActiveTab('write') }} className={cn(zen && 'text-[var(--accent)] bg-[var(--accent-soft)]')}>
+                  {!isNew && <IconButton variant="ghost" size="sm" title="Delete Note" aria-label="Delete note" onClick={handleDelete} className="text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]"><Trash2 className="w-4 h-4" /></IconButton>}
+                  <IconButton variant="ghost" size="sm" title={zen ? 'Exit focus mode' : 'Focus mode (zen)'} aria-label={zen ? 'Exit focus mode' : 'Enter focus mode'} aria-pressed={zen} onClick={() => { const next = !zen; setZen(next); if (next) setActiveTab('write') }} className={cn(zen && 'text-[var(--accent)] bg-[var(--accent-soft)]')}>
                     {zen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                   </IconButton>
-                  <IconButton variant="ghost" size="sm" title="Close" onClick={handleClose}><X className="w-4 h-4" /></IconButton>
+                  <IconButton variant="ghost" size="sm" title="Close" aria-label="Close note panel" onClick={handleClose}><X className="w-4 h-4" /></IconButton>
                 </div>
               </div>
 
               <div className="flex-1 p-6 flex flex-col space-y-5 overflow-hidden min-h-0">
                 <div className="space-y-1">
                   <Label htmlFor="note-title" className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Note Title</Label>
-                  <input id="note-title" type="text" placeholder="Enter note title..." value={formData.title} onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))} className="w-full bg-transparent text-[18px] font-bold tracking-tight text-[var(--text-primary)] placeholder:text-[var(--text-muted)] border-b border-transparent hover:border-[var(--border-subtle)] focus:border-[var(--accent)] focus:outline-none py-1 transition-colors" />
+                  <input id="note-title" ref={titleInputRef} type="text" placeholder="Enter note title..." value={formData.title} onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))} className="w-full bg-transparent text-[18px] font-bold tracking-tight text-[var(--text-primary)] placeholder:text-[var(--text-muted)] border-b border-transparent hover:border-[var(--border-subtle)] focus:border-[var(--accent)] focus:outline-none py-1 transition-colors" />
                 </div>
 
                 {!zen && (
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
-                      <Label className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Color Theme</Label>
-                      <div className="flex items-center gap-1.5">
+                      <Label className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]" id="note-color-label">Color Theme</Label>
+                      <div className="flex items-center gap-1.5" role="group" aria-labelledby="note-color-label">
                         {COLORS.map(c => (
-                          <button key={c.id} type="button" onClick={() => setFormData(prev => ({ ...prev, color: c.id }))} className={cn('w-5 h-5 rounded-full border transition-all hover:scale-110 flex items-center justify-center', formData.color === c.id ? 'border-[var(--accent)] ring-2 ring-[var(--accent)]/30 scale-105' : 'border-transparent')} style={{ backgroundColor: c.bg, borderColor: c.border }} title={c.label}>
-                            {formData.color === c.id && <Check className="w-3 h-3 text-[var(--text-primary)]" />}
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, color: c.id }))}
+                            aria-label={`${c.label} color theme`}
+                            aria-pressed={formData.color === c.id}
+                            className={cn('w-5 h-5 rounded-full border transition-all hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] flex items-center justify-center', formData.color === c.id ? 'border-[var(--accent)] ring-2 ring-[var(--accent)]/30 scale-105' : 'border-transparent')}
+                            style={{ backgroundColor: c.bg, borderColor: c.border }}
+                            title={c.label}
+                          >
+                            {formData.color === c.id && <Check className="w-3 h-3 text-[var(--text-primary)]" aria-hidden="true" />}
                           </button>
                         ))}
                       </div>
                     </div>
-                    <div className="flex items-center bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-md p-0.5">
-                      <button type="button" onClick={() => setActiveTab('write')} className={cn('px-2.5 py-1 rounded-sm text-[11px] font-medium transition-colors flex items-center gap-1.5', activeTab === 'write' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm font-semibold' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]')}><Edit3 className="w-3 h-3" /> Write</button>
-                      <button type="button" onClick={() => setActiveTab('preview')} className={cn('px-2.5 py-1 rounded-sm text-[11px] font-medium transition-colors flex items-center gap-1.5', activeTab === 'preview' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm font-semibold' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]')}><Eye className="w-3 h-3" /> Preview</button>
+                    <div className="flex items-center bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-md p-0.5" role="tablist" aria-label="Note view mode">
+                      <button
+                        type="button"
+                        id="note-tab-write"
+                        role="tab"
+                        aria-selected={activeTab === 'write'}
+                        aria-controls="note-tabpanel-write"
+                        onClick={() => setActiveTab('write')}
+                        className={cn('px-2.5 py-1 rounded-sm text-[11px] font-medium transition-colors flex items-center gap-1.5', activeTab === 'write' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm font-semibold' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]')}
+                      ><Edit3 className="w-3 h-3" aria-hidden="true" /> Write</button>
+                      <button
+                        type="button"
+                        id="note-tab-preview"
+                        role="tab"
+                        aria-selected={activeTab === 'preview'}
+                        aria-controls="note-tabpanel-preview"
+                        onClick={() => setActiveTab('preview')}
+                        className={cn('px-2.5 py-1 rounded-sm text-[11px] font-medium transition-colors flex items-center gap-1.5', activeTab === 'preview' ? 'bg-[var(--bg-card)] text-[var(--accent)] shadow-sm font-semibold' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]')}
+                      ><Eye className="w-3 h-3" aria-hidden="true" /> Preview</button>
                     </div>
                   </div>
                 )}
@@ -396,25 +487,30 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
                   <OutlinePanel outline={outline} onJump={jumpToOutline} onClose={() => setOutlineOpen(false)} />
                 )}
 
-                <div className={cn("flex-1 flex flex-col min-h-0 border rounded-lg overflow-hidden transition-colors", formData.color === 'amber' && "bg-amber-500/5 border-amber-500/20", formData.color === 'rose' && "bg-rose-500/5 border-rose-500/20", formData.color === 'sky' && "bg-sky-500/5 border-sky-500/20", formData.color === 'violet' && "bg-violet-500/5 border-violet-500/20", (!formData.color || formData.color === 'default') && "bg-[var(--bg-subtle)]/30 border-[var(--border-subtle)]", zen && "border-transparent")}>
+                <div
+                  id={activeTab === 'write' ? 'note-tabpanel-write' : 'note-tabpanel-preview'}
+                  role="tabpanel"
+                  aria-labelledby={activeTab === 'write' ? 'note-tab-write' : 'note-tab-preview'}
+                  className={cn("flex-1 flex flex-col min-h-0 border rounded-lg overflow-hidden transition-colors", formData.color === 'amber' && "bg-amber-500/5 border-amber-500/20", formData.color === 'rose' && "bg-rose-500/5 border-rose-500/20", formData.color === 'sky' && "bg-sky-500/5 border-sky-500/20", formData.color === 'violet' && "bg-violet-500/5 border-violet-500/20", (!formData.color || formData.color === 'default') && "bg-[var(--bg-subtle)]/30 border-[var(--border-subtle)]", zen && "border-transparent")}
+                >
                   {activeTab === 'write' ? (
                     <>
                       {!zen && (
-                        <div className="px-2 py-1.5 border-b border-[var(--border-subtle)] bg-[var(--bg-card)] flex items-center gap-1 overflow-x-auto shrink-0">
-                          <IconButton variant="ghost" size="sm" title="Bold" onClick={() => insertFormatting('**', '**')} className="h-6 w-6"><Bold className="w-3 h-3" /></IconButton>
-                          <IconButton variant="ghost" size="sm" title="Italic" onClick={() => insertFormatting('*', '*')} className="h-6 w-6"><Italic className="w-3 h-3" /></IconButton>
-                          <span className="w-px h-3 bg-[var(--border-subtle)] mx-1" />
-                          <IconButton variant="ghost" size="sm" title="Heading" onClick={() => insertFormatting('# ')} className="h-6 w-6"><HeadingIcon className="w-3 h-3" /></IconButton>
-                          <IconButton variant="ghost" size="sm" title="Code" onClick={() => insertFormatting('```\n', '\n```')} className="h-6 w-6"><Code className="w-3 h-3" /></IconButton>
-                          <IconButton variant="ghost" size="sm" title="Quote" onClick={() => insertFormatting('> ')} className="h-6 w-6"><Quote className="w-3 h-3" /></IconButton>
-                          <span className="w-px h-3 bg-[var(--border-subtle)] mx-1" />
-                          <IconButton variant="ghost" size="sm" title="List" onClick={() => insertFormatting('- ')} className="h-6 w-6"><List className="w-3 h-3" /></IconButton>
-                          <IconButton variant="ghost" size="sm" title="Checklist" onClick={() => insertFormatting('- [ ] ')} className="h-6 w-6"><CheckSquare className="w-3 h-3" /></IconButton>
-                          <IconButton variant="ghost" size="sm" title="Link" onClick={() => insertFormatting('[', '](https://)')} className="h-6 w-6"><LinkIcon className="w-3 h-3" /></IconButton>
+                        <div className="px-2 py-1.5 border-b border-[var(--border-subtle)] bg-[var(--bg-card)] flex items-center gap-1 overflow-x-auto shrink-0" role="toolbar" aria-label="Formatting">
+                          <IconButton variant="ghost" size="sm" title="Bold" aria-label="Bold" onClick={() => insertFormatting('**', '**')} className="h-6 w-6"><Bold className="w-3 h-3" /></IconButton>
+                          <IconButton variant="ghost" size="sm" title="Italic" aria-label="Italic" onClick={() => insertFormatting('*', '*')} className="h-6 w-6"><Italic className="w-3 h-3" /></IconButton>
+                          <span className="w-px h-3 bg-[var(--border-subtle)] mx-1" aria-hidden="true" />
+                          <IconButton variant="ghost" size="sm" title="Heading" aria-label="Heading" onClick={() => insertFormatting('# ')} className="h-6 w-6"><HeadingIcon className="w-3 h-3" /></IconButton>
+                          <IconButton variant="ghost" size="sm" title="Code" aria-label="Code block" onClick={() => insertFormatting('```\n', '\n```')} className="h-6 w-6"><Code className="w-3 h-3" /></IconButton>
+                          <IconButton variant="ghost" size="sm" title="Quote" aria-label="Quote" onClick={() => insertFormatting('> ')} className="h-6 w-6"><Quote className="w-3 h-3" /></IconButton>
+                          <span className="w-px h-3 bg-[var(--border-subtle)] mx-1" aria-hidden="true" />
+                          <IconButton variant="ghost" size="sm" title="List" aria-label="Bulleted list" onClick={() => insertFormatting('- ')} className="h-6 w-6"><List className="w-3 h-3" /></IconButton>
+                          <IconButton variant="ghost" size="sm" title="Checklist" aria-label="Checklist item" onClick={() => insertFormatting('- [ ] ')} className="h-6 w-6"><CheckSquare className="w-3 h-3" /></IconButton>
+                          <IconButton variant="ghost" size="sm" title="Link" aria-label="Insert link" onClick={() => insertFormatting('[', '](https://)')} className="h-6 w-6"><LinkIcon className="w-3 h-3" /></IconButton>
                           {outline.length > 1 && (
                             <>
-                              <span className="w-px h-3 bg-[var(--border-subtle)] mx-1" />
-                              <IconButton variant="ghost" size="sm" title="Outline" onClick={() => setOutlineOpen(o => !o)} className={cn('h-6 w-6', outlineOpen && 'text-[var(--accent)] bg-[var(--accent-soft)]')}><ListTree className="w-3 h-3" /></IconButton>
+                              <span className="w-px h-3 bg-[var(--border-subtle)] mx-1" aria-hidden="true" />
+                              <IconButton variant="ghost" size="sm" title="Outline" aria-label="Toggle outline panel" aria-pressed={outlineOpen} onClick={() => setOutlineOpen(o => !o)} className={cn('h-6 w-6', outlineOpen && 'text-[var(--accent)] bg-[var(--accent-soft)]')}><ListTree className="w-3 h-3" /></IconButton>
                             </>
                           )}
                         </div>
@@ -433,7 +529,7 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
                       <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] font-mono">Checklist</span>
                       <span className="text-[10px] font-mono tabular-nums text-[var(--success)]">{dna.checklistDone}/{dna.checklistTotal} · {dna.progress}%</span>
                     </div>
-                    <div className="h-1 rounded-full bg-[var(--bg-subtle)] overflow-hidden">
+                    <div className="h-1 rounded-full bg-[var(--bg-subtle)] overflow-hidden" role="progressbar" aria-valuenow={dna.progress} aria-valuemin={0} aria-valuemax={100} aria-label="Checklist completion">
                       <motion.div className="h-full rounded-full bg-[var(--success)]" initial={{ width: 0 }} animate={{ width: `${dna.progress}%` }} transition={{ duration: 0.5, ease: 'easeOut' }} />
                     </div>
                   </div>
@@ -450,22 +546,22 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
               </div>
 
               <div className="p-4 border-t border-[var(--border-subtle)] flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0 flex-wrap">
+                <div className="flex items-center gap-3 min-w-0 flex-wrap" aria-live="polite" aria-atomic="true">
                   {saveState === 'saving' && <span className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--text-muted)] animate-pulse whitespace-nowrap">Saving…</span>}
                   {saveState === 'saved' && !isDirty && (
                     <span className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--success)] whitespace-nowrap">
-                      <Check className="w-3 h-3" /> Saved{savedAt ? ` ${savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
+                      <Check className="w-3 h-3" aria-hidden="true" /> Saved{savedAt ? ` ${savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
                     </span>
                   )}
-                  {isDirty && saveState !== 'saving' && <span className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--warning)] whitespace-nowrap">Unsaved</span>}
+                  {isDirty && saveState !== 'saving' && <span className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--warning)] whitespace-nowrap">Unsaved changes</span>}
                   {wordCount > 0 && (
                     <span className="flex items-center gap-1.5 text-[10px] text-[var(--text-muted)] font-mono tabular-nums whitespace-nowrap">
-                      <FileText className="w-3 h-3" /> {wordCount} words
+                      <FileText className="w-3 h-3" aria-hidden="true" /> {wordCount} words
                     </span>
                   )}
                   {dna.words > 0 && (
                     <span className="flex items-center gap-1 text-[10px] text-[var(--text-muted)] font-mono tabular-nums whitespace-nowrap">
-                      <Timer className="w-3 h-3" /> {dna.readingMinutes}m read
+                      <Timer className="w-3 h-3" aria-hidden="true" /> {dna.readingMinutes}m read
                     </span>
                   )}
                   <span className="hidden sm:flex items-center gap-1 text-[10px] text-[var(--text-tertiary)] font-mono whitespace-nowrap">
@@ -477,7 +573,7 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Button variant="outline" onClick={handleClose} className="text-[12px] h-8">Cancel</Button>
-                  <Button onClick={handleSave} disabled={createNote.isPending || updateNote.isPending} className="gap-1.5 text-[12px] h-8"><Save className="w-3.5 h-3.5" /> {createNote.isPending || updateNote.isPending ? 'Saving…' : isNew ? 'Create Note' : 'Save Changes'}</Button>
+                  <Button onClick={handleSave} disabled={createNote.isPending || updateNote.isPending} className="gap-1.5 text-[12px] h-8"><Save className="w-3.5 h-3.5" aria-hidden="true" /> {createNote.isPending || updateNote.isPending ? 'Saving…' : isNew ? 'Create Note' : 'Save Changes'}</Button>
                 </div>
               </div>
             </motion.div>

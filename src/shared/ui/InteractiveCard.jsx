@@ -20,6 +20,7 @@ export function InteractiveCard({
   className,
   variant = 'default',
   onClick,
+  onKeyDown,
   accent,
   ...props
 }) {
@@ -57,6 +58,16 @@ export function InteractiveCard({
       transition={cardSpring}
       className={cn(baseStyles, accentBorder, className)}
       onClick={onClick}
+      onKeyDown={(event) => {
+        onKeyDown?.(event)
+        if (event.defaultPrevented || event.target !== event.currentTarget || !onClick) return
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onClick(event)
+        }
+      }}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
       {...props}
     >
       {children}

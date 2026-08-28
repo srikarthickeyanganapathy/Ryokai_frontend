@@ -257,6 +257,7 @@ function NoteCard({ note, onOpen, onDelete, onTogglePin, isPinnedSection }) {
   return (
     <InteractiveCard
       onClick={() => onOpen(note)}
+      aria-label={`Open note: ${note.title || 'Untitled Note'}`}
       className={cn('h-full p-4 group relative rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)]')}
     >
       <div
@@ -384,7 +385,7 @@ function StreamDay({ group, onOpen, onDelete, onTogglePin }) {
           const theme = COLOR_THEMES[note.color] || COLOR_THEMES.default
           const dna = noteDna(note)
           return (
-            <InteractiveCard key={note.id} variant="flat" onClick={() => onOpen(note)} className="px-4 py-3 group">
+            <InteractiveCard key={note.id} variant="flat" onClick={() => onOpen(note)} aria-label={`Open note: ${note.title || 'Untitled Note'}`} className="px-4 py-3 group">
               <div className="flex items-center gap-3">
                 <div className="w-1 h-8 rounded-full shrink-0" style={{ backgroundColor: theme.accent }} />
                 <div className="min-w-0 flex-1">
