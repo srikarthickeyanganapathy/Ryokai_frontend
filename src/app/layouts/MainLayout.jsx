@@ -14,6 +14,7 @@ import {
   TeamDrawer,
 } from '@/shared/workspace-framework'
 import { SignalDrawer } from '@/dashboard'
+import { OnboardingRoot } from '@/onboarding'
 
 /** Registry of contextual drawers keyed by drawer ID. */
 const DRAWER_REGISTRY = {
@@ -84,6 +85,9 @@ export function MainLayout() {
       {/* Global Command Palette & Inspector */}
       <GlobalCommandPalette />
       <WorkspaceInspector />
+
+      {/* First-run welcome + Help Center (backend-gated, reopenable) */}
+      <OnboardingRoot />
     </div>
   )
 }

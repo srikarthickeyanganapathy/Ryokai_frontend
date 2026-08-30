@@ -1,17 +1,23 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import { PageShell, PageHero } from '@/shared/ui/PageShell'
 import { DataTable } from '@/shared/ui/data-table/DataTable'
-import { useUsersList } from '@/identity'
-import { useRoles, useAssignUserRoles } from '@/platform/admin/features/hooks/useAdmin'
+import { useRoles, useAssignUserRoles, useAdminUsers, useSuspendUser, useActivateUser } from '@/platform/admin/features/hooks/useAdmin'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/Select'
 import { SearchInput } from '@/shared/ui/SearchInput'
 import { RolesTab } from '@/platform/admin/components/RolesTab'
 import { DetailTabs } from '@/shared/ui/DetailTabs'
+import { Badge } from '@/shared/ui/Badge'
+import { Icons } from '@/shared/ui/Icons'
+import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
+import { Button } from '@/shared/ui/Button'
 
 export function PlatformUsersPage() {
-  const { data: users, isLoading: usersLoading } = useUsersList()
+  const { data: users, isLoading: usersLoading } = useAdminUsers()
   const { data: roles, isLoading: rolesLoading } = useRoles()
   const assignRolesMutation = useAssignUserRoles()
+  const suspendUser = useSuspendUser()
+  const activateUser = useActivateUser()
+  const { confirm, dialog } = useConfirmDialog()
   
   const [activeTab, setActiveTab] = useState('users')
   const [searchTerm, setSearchTerm] = useState('')
@@ -53,6 +59,18 @@ export function PlatformUsersPage() {
         cell: ({ row }) => <span className="text-[var(--text-muted)] text-[13px]">{row.original.email}</span>
       },
       {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ row }) => {
+          const isSuspended = row.original.status === 'SUSPENDED'
+          return (
+            <Badge variant={isSuspended ? 'destructive' : 'success'} className="uppercase text-[10px]">
+              {isSuspended ? 'Suspended' : 'Active'}
+            </Badge>
+          )
+        }
+      },
+      {
         id: 'role',
         header: 'Platform Role',
         cell: ({ row }) => {
@@ -80,9 +98,48 @@ export function PlatformUsersPage() {
             </Select>
           )
         }
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+          const user = row.original
+          const isSuspended = user.status === 'SUSPENDED'
+          
+          return isSuspended ? (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => activateUser.mutate(user.id)}
+              disabled={activateUser.isPending}
+              className="h-7 text-xs border-[var(--success-border)] text-[var(--success)] hover:bg-[var(--success-soft)]"
+            >
+              <Icons.checkCircle className="mr-1.5 h-3.5 w-3.5 text-[var(--success)]" />
+              Activate
+            </Button>
+          ) : (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={async () => {
+                const confirmed = await confirm({
+                  title: 'Suspend User?',
+                  description: 'Are you sure you want to suspend this user?',
+                  danger: true,
+                })
+                if (confirmed) suspendUser.mutate(user.id)
+              }}
+              disabled={suspendUser.isPending}
+              className="h-7 text-xs text-[var(--danger)] hover:bg-[var(--danger-soft)] hover:text-[var(--danger)]"
+            >
+              <Icons.slash className="mr-1.5 h-3.5 w-3.5" />
+              Suspend
+            </Button>
+          )
+        }
       }
     ]
-  }, [roles, assignRolesMutation.isPending, handleRoleChange])
+  }, [roles, assignRolesMutation.isPending, handleRoleChange, activateUser, suspendUser, confirm])
 
   return (
     <PageShell maxWidth="default" className="min-h-[calc(100vh-8rem)]">
@@ -124,6 +181,7 @@ export function PlatformUsersPage() {
           <RolesTab />
         )}
       </div>
+      {dialog}
     </PageShell>
   )
 }

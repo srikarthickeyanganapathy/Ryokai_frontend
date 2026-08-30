@@ -93,11 +93,13 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
             <Button variant="outline" className="h-8 px-3.5 rounded-lg text-[12px] font-semibold text-[var(--accent)] border-[var(--accent-border)] bg-[var(--accent-soft)] hover:bg-[var(--accent-border)]" onClick={today}>Today</Button>
             <Button variant="outline" size="icon" className="w-8 h-8 rounded-lg bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]" onClick={next}><ChevronRight className="w-4 h-4" /></Button>
           </div>
+          <div data-tour="calendar-view-toggle">
           <PillNav
             options={[{ value: 'month', label: 'Month' }, { value: 'week', label: 'Week' }]}
             value={mode}
             onChange={setMode}
           />
+          </div>
           <PillNav
             options={[{ value: 'all', label: 'All' }, { value: 'events', label: 'Events' }, { value: 'tasks', label: 'Tasks' }]}
             value={filterType}
@@ -108,7 +110,7 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
 
       <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0 items-start">
         {/* Main section: map + agenda */}
-        <div className="flex-1 min-w-0 flex flex-col w-full">
+        <div className="flex-1 min-w-0 flex flex-col w-full" data-tour="calendar-grid">
           <div className="shrink-0 overflow-x-auto custom-scrollbar">
             {mode === 'month' ? (
               <MonthView tasks={filteredTasks} events={filteredEvents} currentDate={currentDate} isLoading={isLoading} onTaskClick={onTaskClick} onEventClick={onEventClick} onSelectDay={setSelectedDay} selectedDay={selectedDay} />
@@ -117,6 +119,7 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
             )}
           </div>
           
+          <div data-tour="calendar-create-area">
           <AgendaList 
             tasks={filteredTasks} 
             events={filteredEvents} 
@@ -125,6 +128,7 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
             onEventClick={onEventClick} 
             onAddClick={(d) => setQuickAddDate(d)} 
           />
+          </div>
         </div>
 
         {/* Right rail */}

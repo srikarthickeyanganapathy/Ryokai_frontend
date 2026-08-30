@@ -16,8 +16,8 @@ import { toBackendStatus } from '@/shared/lib/status';
  */
 function useWorkspaceScope() {
   const { workspaceMode, activeOrganization, activeCrew } = useWorkspace();
-  if (workspaceMode === 'ORG' && activeOrganization?.id) return { orgId: activeOrganization.id };
-  if (workspaceMode === 'CREWS' && activeCrew?.id) return { crewId: activeCrew.id };
+  if (workspaceMode === 'ORG') return { orgId: activeOrganization?.id || 'pending' };
+  if (workspaceMode === 'CREWS') return { crewId: activeCrew?.id || 'pending' };
   return {};
 }
 
@@ -29,9 +29,12 @@ export const useTaskList = (filters) => {
   // projectId, or the crew branch would swallow the project filter and show every
   // task in the crew instead of only this project's tasks.
   const effectiveFilters = { ...(restFilters.projectId ? {} : wsScope), ...restFilters, page, size, ...(sort ? { sort } : {}) };
+  const isPendingScope = effectiveFilters.orgId === 'pending' || effectiveFilters.crewId === 'pending';
+  
   return useQuery({
     queryKey: [...queryKeys.tasks.list(effectiveFilters)],
     queryFn: () => taskApi.getTasks(effectiveFilters),
+    enabled: !isPendingScope,
     select: (data) => ({
       tasks: data?.content || (Array.isArray(data) ? data : []),
       totalCount: data?.totalCount ?? data?.totalElements ?? (Array.isArray(data) ? data.length : 0),
@@ -45,6 +48,8 @@ export const useTaskList = (filters) => {
 export const useTaskSearch = (searchQuery) => {
   const wsScope = useWorkspaceScope();
   const effectiveFilters = { ...wsScope, search: searchQuery };
+  const isPendingScope = effectiveFilters.orgId === 'pending' || effectiveFilters.crewId === 'pending';
+  
   return useQuery({
     queryKey: [...queryKeys.tasks.list(effectiveFilters)],
     queryFn: () => taskApi.getTasks(effectiveFilters),
@@ -53,7 +58,7 @@ export const useTaskSearch = (searchQuery) => {
       totalCount: data?.totalCount ?? data?.totalElements ?? (Array.isArray(data) ? data.length : 0),
       totalPages: data?.totalPages ?? 0,
     }),
-    enabled: !!searchQuery,
+    enabled: !!searchQuery && !isPendingScope,
   });
 };
 

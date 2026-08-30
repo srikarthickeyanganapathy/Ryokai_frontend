@@ -194,14 +194,14 @@ export function TasksPage() {
       subtitle="Manage, filter, and track your work across all views."
       icon={ListTodo}
       >
-      <Button variant="primary" size="sm" className="gap-1.5 h-8 text-[12px] hidden sm:inline-flex" onClick={() => logic.setCreateOpen(true)}>
+      <Button variant="primary" size="sm" className="gap-1.5 h-8 text-[12px] hidden sm:inline-flex" onClick={() => logic.setCreateOpen(true)} data-tour="tasks-new-btn">
       <Plus className="w-3.5 h-3.5" /> New Task
       </Button>
       </PageHero>
 
       <PageState state={logic.isLoading ? 'loading' : logic.isError ? 'error' : 'ready'} stateProps={{skeleton: <TasksPageSkeleton />,  loadingVariant: 'cards', onRetry: logic.refetch }} moduleId="tasks">
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_270px] gap-4 items-start">
-      <div className="min-w-0 space-y-4">
+      <div className="min-w-0 space-y-4" data-tour="tasks-first-card">
         {/* Attention band */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
       <div className="flex items-center gap-3 rounded-2xl border border-[var(--danger)]/25 bg-[var(--danger)]/5 px-3.5 py-3">
@@ -243,12 +243,14 @@ export function TasksPage() {
         </div>
 
         {/* Toolbar */}
-        <div className="flex items-center gap-2 flex-wrap">
-      <PillNav
-        options={[{ value: 'list', label: 'List' }, { value: 'board', label: 'Board' }]}
-        value={viewIsBoard ? 'board' : 'list'}
-        onChange={v => logic.setViewMode(v)}
-      />
+        <div className="flex items-center gap-2 flex-wrap" data-tour="tasks-filter-bar">
+      <div data-tour="tasks-view-toggle">
+        <PillNav
+          options={[{ value: 'list', label: 'List' }, { value: 'board', label: 'Board' }]}
+          value={viewIsBoard ? 'board' : 'list'}
+          onChange={v => logic.setViewMode(v)}
+        />
+      </div>
       <div className="w-[135px]">
         <Select value={logic.taskScope} onValueChange={logic.setTaskScope}>
           <SelectTrigger className="h-7 text-[11px]"><SelectValue /></SelectTrigger>

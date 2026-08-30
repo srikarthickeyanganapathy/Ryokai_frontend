@@ -69,6 +69,10 @@ export const deleteOrganization = async (orgId) => {
 
 // --- Users (Admin Role Assignment) ---
 
+export const getAdminUsers = () => api.get('/platform/users').then(r => r.data)
+export const suspendUser = (userId) => api.post(`/platform/users/${userId}/suspend`).then(r => r.data)
+export const activateUser = (userId) => api.post(`/platform/users/${userId}/activate`).then(r => r.data)
+
 export const assignUserRoles = async (userId, roleNames) => {
   // roleNames: List<String>
   const { data } = await api.put(`/platform/users/${userId}/roles`, roleNames);

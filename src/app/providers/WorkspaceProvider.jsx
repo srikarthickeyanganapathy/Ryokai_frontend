@@ -5,6 +5,7 @@ import { useCrews } from '@/crew';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { getWorkspaceMode, updateWorkspaceMode } from '@/platform/workspace/api/workspace.api';
+import { isPlatformUser } from '@/app/router/RouteResolver';
 
 const DEFAULT_WORKSPACE = {
   // Workspace Mode (Lens): Where you're working (PERSONAL, ORG, CREWS)
@@ -61,14 +62,14 @@ export const WorkspaceProvider = ({ children }) => {
 
   // TanStack Query handles caching, auto-fetching, and background updates!
   const { data: rawOrganizations, isLoading: loadingWorkspace } = useOrganizations({
-    enabled: !!user
+    enabled: !!user && !isPlatformUser(user)
   });
   
   const organizations = useMemo(() => rawOrganizations || [], [rawOrganizations]);
 
   // Fetch user's crews
   const { data: rawCrews } = useCrews({
-    enabled: !!user
+    enabled: !!user && !isPlatformUser(user)
   });
   const crews = useMemo(() => rawCrews || [], [rawCrews]);
 
@@ -76,7 +77,7 @@ export const WorkspaceProvider = ({ children }) => {
   const { data: operatingMode = 'NORMAL' } = useQuery({
     queryKey: queryKeys.workspace.mode(),
     queryFn: getWorkspaceMode,
-    enabled: !!user,
+    enabled: !!user && !isPlatformUser(user),
   });
 
   const modeMutation = useMutation({

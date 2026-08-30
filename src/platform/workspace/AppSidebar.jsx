@@ -17,14 +17,14 @@ import {
   Network, Clock, Megaphone, Shield, ShieldAlert, Settings,
   Rocket, Compass, Target, Scale, ChevronLeft,
   Search, Plus, LogOut, User,
-  Star, Github , ChevronRight
+  Star, Github , ChevronRight, CircleHelp
 } from 'lucide-react';
 
-/* ─── Icon map — Linear-style stroke-consistent icon set (1.5px) ─── */
+/* â”€â”€â”€ Icon map â€” Linear-style stroke-consistent icon set (1.5px) â”€â”€â”€ */
 
-/* ─── SidebarNavItem — extracted from the 5x repeated pattern ─── */
+/* â”€â”€â”€ SidebarNavItem â€” extracted from the 5x repeated pattern â”€â”€â”€ */
 
-// ── Workspace Switcher Dropdown ──
+// â”€â”€ Workspace Switcher Dropdown â”€â”€
 function WorkspaceSwitcher({ isExpanded, workspaceMode, setWorkspaceMode, activeOrganization, setActiveOrganization, organizations = [], navigate }) {
   return (
     <Popover>
@@ -94,7 +94,7 @@ function WorkspaceSwitcher({ isExpanded, workspaceMode, setWorkspaceMode, active
   );
 }
 
-// ── User Menu ──
+// â”€â”€ User Menu â”€â”€
 function UserMenu({ user, logout, isExpanded }) {
   return (
     <Popover>
@@ -132,6 +132,14 @@ function UserMenu({ user, logout, isExpanded }) {
           <Settings size={14} strokeWidth={1.5} />
           Settings
         </Link>
+        <button
+          type="button"
+          onClick={() => useHelpCenterStore.getState().open()}
+          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12px] font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
+        >
+          <CircleHelp size={14} strokeWidth={1.5} />
+          Help
+        </button>
         <div className="my-1 border-t border-[var(--border-subtle)]" />
         <button onClick={() => logout()} className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12px] font-semibold text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors">
           <LogOut size={14} strokeWidth={1.5} />
@@ -142,7 +150,7 @@ function UserMenu({ user, logout, isExpanded }) {
   );
 }
 
-/* ─── Section divider ─── */
+/* â”€â”€â”€ Section divider â”€â”€â”€ */
 function SectionDivider({ isExpanded, label }) {
   if (!isExpanded) return <div className="w-6 h-px bg-[var(--border-subtle)] my-2" />;
   return (
@@ -153,9 +161,9 @@ function SectionDivider({ isExpanded, label }) {
   );
 }
 
-/* ═══════════════════════════════════════════════
- * AppSidebar — Clean, Linear-style navigation
- * ═══════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ * AppSidebar â€” Clean, Linear-style navigation
+ * â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 export function AppSidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth();
   const { workspaceMode, setWorkspaceMode, activeOrganization, setActiveOrganization, organizations } = useWorkspace();
@@ -254,12 +262,12 @@ export function AppSidebar({ isOpen, onClose }) {
         {isExpanded && (
           <div className="flex-1 flex items-center justify-between">
             <span className="text-[12px] text-[var(--text-tertiary)]">Search...</span>
-            <kbd className="hidden sm:inline-flex h-5 items-center rounded-md bg-[var(--bg-subtle)] px-1.5 font-mono text-[10px] text-[var(--text-tertiary)] border border-[var(--border-subtle)]">⌘K</kbd>
+            <kbd className="hidden sm:inline-flex h-5 items-center rounded-md bg-[var(--bg-subtle)] px-1.5 font-mono text-[10px] text-[var(--text-tertiary)] border border-[var(--border-subtle)]">âŒ˜K</kbd>
           </div>
         )}
       </button>
 
-      <div className="flex-1 overflow-y-auto custom-scrollbar py-2">
+      <div className="flex-1 overflow-y-auto custom-scrollbar py-2" data-tour="sidebar-nav">
         {isSettings ? (
           <>
             <SidebarNavItem to="/app" icon={ICONS.back} label="Back to Workspace" isExpanded={isExpanded} onClick={() => navigate('/app')} />
@@ -407,3 +415,4 @@ export function AppSidebar({ isOpen, onClose }) {
     </>
   );
 }
+

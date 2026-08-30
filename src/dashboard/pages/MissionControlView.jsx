@@ -179,7 +179,7 @@ function QuickActionBar({ workspaceMode }) {
   };
 
   return (
-    <motion.div variants={itemVariants} className="flex items-center gap-2 flex-wrap mb-4">
+    <motion.div variants={itemVariants} className="flex items-center gap-2 flex-wrap mb-4" data-tour="dashboard-quick-actions">
       {(actions[workspaceMode] || actions.PERSONAL).map(a => (
         <Button
           key={a.label}
@@ -537,7 +537,7 @@ function CollectiveCrewContextRail({ crews = [], activeCrew, setActiveCrew }) {
 function StatsGrid({ activeTaskCount, completedTaskCount, dueSoonCount, teamSize }) {
   const navigate = useNavigate();
   return (
-    <motion.div variants={itemVariants} className="w-full grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <motion.div variants={itemVariants} className="w-full grid grid-cols-2 sm:grid-cols-4 gap-3" data-tour="dashboard-stats">
       <StatMini icon={ListTodo} label="Active Tasks" value={activeTaskCount ?? 0} tone="accent" onClick={() => navigate('/app/tasks?status=open')} />
       <StatMini icon={CheckCircle2} label="Completed" value={completedTaskCount ?? 0} tone="success" onClick={() => navigate('/app/tasks?status=done')} />
       <StatMini icon={AlertTriangle} label="Due Soon" value={dueSoonCount ?? 0} tone="warning" onClick={() => navigate('/app/calendar')} />

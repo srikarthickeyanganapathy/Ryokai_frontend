@@ -346,14 +346,14 @@ export function CrewsPage() {
           <Button variant="outline" size="sm" onClick={() => navigate('/app/crews/discover')} className="h-9 text-[12px] gap-1.5 shadow-sm hover:border-[var(--accent)]">
             <Compass className="w-3.5 h-3.5 text-[var(--accent)]" /> Discover Crews
           </Button>
-          <Button variant="primary" size="sm" onClick={() => setIsCreateOpen(true)} className="shadow-sm h-9 text-[12px] gap-1.5">
+          <Button variant="primary" size="sm" onClick={() => setIsCreateOpen(true)} className="shadow-sm h-9 text-[12px] gap-1.5" data-tour="crews-create-btn">
             <Plus className="w-4 h-4" /> Create Crew
           </Button>
         </div>
       </PageHero>
 
       {crews.length > 0 && (
-        <>
+        <div data-tour="crews-invite-info">
           {/* KPI Strip — matches teams module design language */}
           <EntityStatStrip
             stats={[
@@ -376,7 +376,7 @@ export function CrewsPage() {
             activeChip={activeTab}
             onChip={setActiveTab}
           />
-        </>
+        </div>
       )}
 
 

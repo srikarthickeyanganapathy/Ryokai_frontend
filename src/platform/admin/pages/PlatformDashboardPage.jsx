@@ -3,12 +3,11 @@ import { PageShell, PageHero } from '@/shared/ui/PageShell'
 import { Text } from '@/shared/ui/Typography'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card'
 import { Icons } from '@/shared/ui/Icons'
-import { useAdminOrganizations } from '@/platform/admin/features/hooks/useAdmin'
-import { useUsersList } from '@/identity'
+import { useAdminOrganizations, useAdminUsers } from '@/platform/admin/features/hooks/useAdmin'
 
 export function PlatformDashboardPage() {
   const { data: orgs, isLoading: orgsLoading } = useAdminOrganizations()
-  const { data: users, isLoading: usersLoading } = useUsersList()
+  const { data: users, isLoading: usersLoading } = useAdminUsers()
 
   const orgCount = orgs?.length || 0
   const userCount = users?.length || 0

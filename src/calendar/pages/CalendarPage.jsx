@@ -18,8 +18,8 @@ export function CalendarPage() {
   const navigate = useNavigate();
   const { workspaceMode, activeOrganization, activeCrew } = useWorkspace()
   const scope = useMemo(() => {
-    if (workspaceMode === 'ORG' && activeOrganization?.id) return { orgId: activeOrganization.id }
-    if (workspaceMode === 'CREWS' && activeCrew?.id) return { crewId: activeCrew.id }
+    if (workspaceMode === 'ORG') return { orgId: activeOrganization?.id || 'pending' }
+    if (workspaceMode === 'CREWS') return { crewId: activeCrew?.id || 'pending' }
     return {}
   }, [workspaceMode, activeOrganization, activeCrew])
 

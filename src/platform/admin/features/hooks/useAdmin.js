@@ -143,6 +143,43 @@ export const useDeleteOrganization = () => {
 
 // --- Users (Admin Role Assignment) ---
 
+export const useAdminUsers = () => {
+  return useQuery({
+    queryKey: ['admin', 'users'],
+    queryFn: () => adminApi.getAdminUsers(),
+  });
+};
+
+export const useSuspendUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId) => adminApi.suspendUser(userId),
+    onSuccess: () => {
+      toast.success('User suspended');
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['users', 'list'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to suspend user');
+    },
+  });
+};
+
+export const useActivateUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId) => adminApi.activateUser(userId),
+    onSuccess: () => {
+      toast.success('User activated');
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['users', 'list'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to activate user');
+    },
+  });
+};
+
 export const useAssignUserRoles = () => {
   const queryClient = useQueryClient();
   return useMutation({

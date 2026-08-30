@@ -23,8 +23,15 @@ const itemVariants = {
 }
 
 export function AnalyticsPage() {
-  const { activeCrew } = useWorkspace()
-  const { data: rawStats, isLoading, isError } = useDashboardStats({ crewId: activeCrew?.id })
+  const { workspaceMode, activeOrganization, activeCrew } = useWorkspace()
+  // Stats follow the workspace lens: ORG -> org scope, CREWS -> active crew,
+  // otherwise strictly personal. No cross-mode data mixing.
+  const statsParams = useMemo(() => {
+    if (workspaceMode === 'ORG') return { scope: 'ORG', orgId: activeOrganization?.id || 'pending' }
+    if (workspaceMode === 'CREWS') return { scope: 'CREWS', crewId: activeCrew?.id || 'pending' }
+    return { scope: 'PERSONAL' }
+  }, [workspaceMode, activeOrganization?.id, activeCrew?.id])
+  const { data: rawStats, isLoading, isError } = useDashboardStats(statsParams)
 
   const stats = useMemo(() => {
     if (!rawStats) return null
@@ -87,6 +94,7 @@ export function AnalyticsPage() {
               initial="hidden"
               animate="show"
               className="grid grid-cols-1 sm:grid-cols-2 gap-5 col-span-full min-w-0"
+              data-tour="analytics-stats"
             >
               <motion.div variants={itemVariants}>
                 <StatCard size="lg" title="Completion rate" value={`${stats?.completionRate}%`} icon={CheckCircle2} />
@@ -159,6 +167,7 @@ export function AnalyticsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2, type: 'spring', stiffness: 200, damping: 20 }}
               className="grid grid-cols-1 lg:grid-cols-3 gap-6 col-span-full min-w-0"
+              data-tour="analytics-charts"
             >
               <div className="lg:col-span-2 min-w-0">
                 <CompletionChart data={stats?.historicalData} />

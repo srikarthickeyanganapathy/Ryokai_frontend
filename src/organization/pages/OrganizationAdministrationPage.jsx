@@ -83,8 +83,11 @@ export function OrganizationAdministrationPage() {
           activeTab={activeTab}
           onTabChange={setActiveTab}
         >
+          <div data-tour="org-overview">
           {activeTab === 'overview' && (
-            <OrganizationOverview org={org} counts={counts} />
+            <div data-tour="org-invite">
+              <OrganizationOverview org={org} counts={counts} />
+            </div>
           )}
 
           {activeTab === 'administration' && (
@@ -94,6 +97,7 @@ export function OrganizationAdministrationPage() {
           {activeTab === 'danger' && (
             <DangerZone orgId={orgId} members={members} isOrgAdmin={isOrgAdmin} />
           )}
+          </div>
         </ConfigurationLayout>
       </PageStateContainer>
     </PageShell>

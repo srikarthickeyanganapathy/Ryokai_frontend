@@ -35,7 +35,7 @@ export function PlatformOrganizationsPage() {
       accessorKey: 'status',
       header: 'Status',
       cell: ({ row }) => {
-        const isSuspended = row.original.suspended
+        const isSuspended = row.original.status === 'SUSPENDED'
         return (
           <Badge variant={isSuspended ? 'destructive' : 'success'} className="uppercase text-[10px]">
             {isSuspended ? 'Suspended' : 'Active'}
@@ -53,7 +53,7 @@ export function PlatformOrganizationsPage() {
       header: 'Actions',
       cell: ({ row }) => {
         const org = row.original
-        const isSuspended = org.suspended
+        const isSuspended = org.status === 'SUSPENDED'
         
         return isSuspended ? (
           <Button 

@@ -147,7 +147,7 @@ export function ProjectsPage() {
                 From GitHub
               </Button>
             )}
-            <Button size="sm" className="shrink-0 gap-1.5 shadow-sm" onClick={() => setIsCreateOpen(true)}>
+            <Button size="sm" className="shrink-0 gap-1.5 shadow-sm" onClick={() => setIsCreateOpen(true)} data-tour="projects-new-btn">
               <Plus size={14} strokeWidth={1.5} />
               New Project
             </Button>
@@ -207,6 +207,7 @@ export function ProjectsPage() {
         </div>
       </div>
 
+      <div data-tour="projects-share-info">
       <EntityFilterBar
         searchSlot={
           <SearchPlugin value={globalFilter} onChange={setGlobalFilter} placeholder="Search projects..." className="w-full sm:w-72" />
@@ -215,6 +216,7 @@ export function ProjectsPage() {
         activeChip={activeTab}
         onChip={setActiveTab}
       />
+      </div>
 
       <PageContent>
         {isLoading ? (
@@ -244,7 +246,7 @@ export function ProjectsPage() {
             action={<Button variant="outline" onClick={() => setActiveTab('ALL')}>Show All</Button>}
           />
         ) : (
-          <div className="ec-grid">
+          <div className="ec-grid" data-tour="projects-first-card">
             {projects.map(project => {
               const healthScore = calculateHealthScore(project)
               const health = getHealthStatus(healthScore)

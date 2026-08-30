@@ -5,9 +5,20 @@ import api from '@/shared/api/api';
 import { queryKeys } from '@/shared/api/queryKeys';
 import { Calendar, ArrowRight } from '@/shared/ui/Icons';
 import { useNavigate } from 'react-router-dom';
+import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
 export function CalendarWidget() {
   const navigate = useNavigate();
+  const { workspaceMode, activeOrganization, activeCrew } = useWorkspace();
+
+  // Scope follows the active workspace lens so the Dashboard never mixes
+  // personal events into org/crew views (or vice versa).
+  const scopeParams = useMemo(() => {
+    if (workspaceMode === 'ORG' && activeOrganization?.id) return { orgId: activeOrganization.id };
+    if (workspaceMode === 'CREWS' && activeCrew?.id) return { crewId: activeCrew.id };
+    return {};
+  }, [workspaceMode, activeOrganization?.id, activeCrew?.id]);
+
   const { today, nextWeek } = useMemo(() => {
     const now = new Date();
     const t = now.toISOString().split('T')[0];
@@ -15,13 +26,19 @@ export function CalendarWidget() {
     return { today: t, nextWeek: nw };
   }, []);
 
+  const scopeKey = scopeParams.orgId
+    ? `org:${scopeParams.orgId}`
+    : scopeParams.crewId
+      ? `crew:${scopeParams.crewId}`
+      : 'personal';
+
   const { data: events = [], isLoading, isError, error } = useQuery({
-    queryKey: queryKeys.calendarEvents.range(today, nextWeek),
+    queryKey: queryKeys.calendarEvents.range(today, nextWeek, scopeKey),
     queryFn: async () => {
       const startDateTime = `${today}T00:00:00`;
       const endDateTime = `${nextWeek}T23:59:59`;
-      const res = await api.get('/calendar-events', { 
-        params: { start: startDateTime, end: endDateTime } 
+      const res = await api.get('/calendar-events', {
+        params: { start: startDateTime, end: endDateTime, ...scopeParams }
       });
       return Array.isArray(res.data) ? res.data : res.data?.content || [];
     },
@@ -37,7 +54,7 @@ export function CalendarWidget() {
             <Calendar className="h-4 w-4 text-[var(--accent)]" />
             Upcoming Events
           </CardTitle>
-          <button 
+          <button
             onClick={() => navigate('/app/calendar')}
             className="text-xs text-[var(--text-tertiary)] hover:text-[var(--accent)] flex items-center gap-1 transition-colors"
           >
@@ -45,44 +62,47 @@ export function CalendarWidget() {
           </button>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent>
         {isLoading ? (
           <div className="space-y-2">
-            {[1,2].map(i => (
-              <div key={i} className="h-8 rounded-lg bg-[var(--bg-subtle)] animate-pulse" />
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-10 rounded-lg bg-[var(--bg-subtle)] animate-pulse" />
             ))}
           </div>
         ) : isError ? (
-          <div className="text-center py-4">
-            <Calendar className="h-8 w-8 mx-auto text-[var(--text-tertiary)] mb-2 opacity-40" />
-            <p className="text-xs text-[var(--text-tertiary)]">
-              {error?.response?.status === 404 ? 'Calendar unavailable' : 'Could not load events'}
-            </p>
+          <div className="py-4 text-center">
+            <p className="text-xs text-[var(--text-tertiary)]">Could not load events</p>
           </div>
         ) : events.length === 0 ? (
-          <div className="text-center py-4">
-            <Calendar className="h-8 w-8 mx-auto text-[var(--text-tertiary)] mb-2 opacity-40" />
-            <p className="text-xs text-[var(--text-tertiary)]">No events this week</p>
+          <div className="py-4 text-center">
+            <p className="text-xs text-[var(--text-tertiary)]">No events in the next 7 days</p>
+            <button
+              onClick={() => navigate('/app/calendar')}
+              className="mt-1 text-xs text-[var(--accent)] hover:underline"
+            >
+              Plan something
+            </button>
           </div>
         ) : (
           <div className="space-y-1.5">
-            {events.slice(0, 4).map(event => (
-              <div key={event.id} className="flex items-start gap-2.5 px-3 py-2 rounded-lg hover:bg-[var(--bg-hover)] cursor-pointer transition-colors">
-                <div className="w-8 text-center shrink-0 mt-0.5">
-                  <p className="text-[10px] text-[var(--text-tertiary)] uppercase font-medium">
-                    {new Date(event.startTime).toLocaleDateString('en-US', { month: 'short' })}
-                  </p>
-                  <p className="text-sm font-bold text-[var(--text-primary)] leading-none">
-                    {new Date(event.startTime).getDate()}
-                  </p>
-                </div>
+            {events.slice(0, 4).map((event) => (
+              <button
+                key={event.id}
+                onClick={() => navigate('/app/calendar')}
+                className="w-full text-left flex items-center gap-3 p-2 rounded-lg hover:bg-[var(--bg-hover)] transition-colors"
+              >
+                <div className="shrink-0 w-1.5 h-8 rounded-full bg-[var(--accent)]/60" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-[var(--text-primary)] truncate">{event.title}</p>
-                  <p className="text-[10px] text-[var(--text-tertiary)]">
-                    {new Date(event.startTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                  <p className="text-xs font-medium text-[var(--text-primary)] truncate">
+                    {event.title}
+                  </p>
+                  <p className="text-[11px] text-[var(--text-tertiary)]">
+                    {new Date(event.startTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    {' · '}
+                    {new Date(event.startTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}

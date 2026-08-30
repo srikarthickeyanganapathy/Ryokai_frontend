@@ -20,13 +20,15 @@ export { scopeKey };
  */
 export function useCalendarEvents(start, end, scope = {}) {
   const sk = scopeKey(scope);
+  const isPendingScope = scope?.orgId === 'pending' || scope?.crewId === 'pending';
+  
   return useQuery({
     queryKey: queryKeys.calendarEvents.range(start, end, sk),
     queryFn: async () => {
       const events = await calendarApi.getCalendarEvents(start, end, scope);
       return Array.isArray(events) ? events.map(normalizeCalendarEvent) : events;
     },
-    enabled: !!start && !!end,
+    enabled: !!start && !!end && !isPendingScope,
   });
 }
 
