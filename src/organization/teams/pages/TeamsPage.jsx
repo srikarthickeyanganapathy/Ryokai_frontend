@@ -28,11 +28,11 @@ import { toast } from 'sonner'
 import { EntityStatStrip, EntityFilterBar } from '@/shared/ui/entity-card'
 
 
-/* ══════════════════════════════════════════════════════
- * MAIN COMPONENT — TeamsPage
+/* ===
+ * MAIN COMPONENT -- TeamsPage
  * (utility helpers, templates, mini primitives, and
  *  sub-components extracted to ../components/)
- * ══════════════════════════════════════════════════════ */
+ * === */
 
 export const TeamsPage = () => {
   const navigate = useNavigate()
@@ -46,23 +46,23 @@ export const TeamsPage = () => {
 
   const { canManage, canCreateTeam, canManageTeam } = usePermissions()
 
-  // ── Modal state ──
+  // --- Modal state ---
   const [createTeamModalOpen, setCreateTeamModalOpen] = useState(false)
   const [quickCreateOpen, setQuickCreateOpen] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState(null)
 
-  // ── Filtering & categorization ──
+  // --- Filtering & categorization ---
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('all')
 
-  // ── Compare mode ──
+  // --- Compare mode ---
   const [compareMode, setCompareMode] = useState(false)
   const [compareTeams, setCompareTeams] = useState([])
 
-  // ── Activity sidebar ──
+  // --- Activity sidebar ---
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  // ── Favorites ──
+  // --- Favorites ---
   const [favorites, setFavorites] = useState(() => {
     try {
       const stored = localStorage.getItem('ryokai_team_favorites')
@@ -78,7 +78,7 @@ export const TeamsPage = () => {
     setFavorites(prev => prev.includes(teamId) ? prev.filter(id => id !== teamId) : [...prev, teamId])
   }, [])
 
-  // ── Per-team computed stats ──
+  // --- Per-team computed stats ---
   const teamStatsMap = useMemo(() => {
     const map = {}
     teams.forEach(t => {
@@ -96,7 +96,7 @@ export const TeamsPage = () => {
     return map
   }, [teams, allTasks, allProjects])
 
-  // ── Category counts (for chips) ──
+  // --- Category counts (for chips) ---
   const categoryCounts = useMemo(() => {
     const counts = { all: teams.length, mine: 0, engineering: 0, design: 0, marketing: 0, product: 0, favorites: favorites.length }
     teams.forEach(t => {
@@ -109,7 +109,7 @@ export const TeamsPage = () => {
     return counts
   }, [teams, user, favorites])
 
-  // ── Filtered teams ──
+  // --- Filtered teams ---
   const filteredTeams = useMemo(() => {
     let result = teams
     const q = search.trim().toLowerCase()
@@ -124,14 +124,14 @@ export const TeamsPage = () => {
     return result.filter(t => detectTeamCategory(t, user?.id) === activeCategory)
   }, [teams, search, activeCategory, user, favorites])
 
-  // ── Aggregate stats ──
+  // --- Aggregate stats ---
   const totalTasks = useMemo(() => Object.values(teamStatsMap).reduce((s, v) => s + v.taskCount, 0), [teamStatsMap])
   const totalProjects = useMemo(() => Object.values(teamStatsMap).reduce((s, v) => s + v.projectCount, 0), [teamStatsMap])
   const myTeamsCount = useMemo(() =>
     teams.filter(t => t.members?.some(m => m.userId === user?.id || m.username?.toLowerCase() === user?.username?.toLowerCase())).length
   , [teams, user])
 
-  // ── Toggle compare team ──
+  // --- Toggle compare team ---
   const handleToggleCompare = useCallback((team) => {
     setCompareTeams(prev => {
       const exists = prev.find(t => t.id === team.id)
@@ -144,9 +144,9 @@ export const TeamsPage = () => {
     })
   }, [])
 
-  // ── Quick create with template ──
+  // --- Quick create with template ---
   const handleQuickCreate = useCallback(({ name, description, template }) => {
-    // Open the existing CreateTeamModal – the actual API call is handled there.
+    // Open the existing CreateTeamModal - the actual API call is handled there.
     // We pre-populate via localStorage or by passing context (the modal is opened, team created manually).
     // For now, show the create modal and toast the template info.
     toast.success(`"${name}" will be created with the "${template?.title}" template`, {
@@ -163,7 +163,7 @@ export const TeamsPage = () => {
   }
 
   // While organizations are still loading, activeOrganization is legitimately
-  // null — redirecting here would kick a reloading user out of the page
+  // null -- redirecting here would kick a reloading user out of the page
   // (the "reload loses context" bug). Only bounce once loading is done.
   if (!activeOrganization) {
     if (loadingWorkspace) {
@@ -182,9 +182,9 @@ export const TeamsPage = () => {
 
   return (
     <PageShell maxWidth="default">
-      {/* ── Page Hero ── */}
+      {/* --- Page Hero --- */}
       <PageHero
-        eyebrow={`Teams · ${activeOrganization?.name || ''}`}
+        eyebrow={`Teams   ${activeOrganization?.name || ''}`}
         title="Teams"
         subtitle="Organize work, track progress, and collaborate across divisions"
       >
@@ -219,7 +219,7 @@ export const TeamsPage = () => {
         </div>
       </PageHero>
 
-      {/* ── KPI Strip ── */}
+      {/* --- KPI Strip --- */}
       {!isTeamEmpty && (
         <EntityStatStrip
           stats={[
@@ -231,7 +231,7 @@ export const TeamsPage = () => {
         />
       )}
 
-      {/* ── Smart Categorization Bar + Search ── */}
+      {/* --- Smart Categorization Bar + Search --- */}
       {!isTeamEmpty && (
         <EntityFilterBar
           search={search}
@@ -250,7 +250,7 @@ export const TeamsPage = () => {
         />
       )}
 
-      {/* ── Compare mode banner ── */}
+      {/* --- Compare mode banner --- */}
       <AnimatePresence>
         {compareMode && (
           <motion.div
@@ -283,10 +283,10 @@ export const TeamsPage = () => {
         )}
       </AnimatePresence>
 
-      {/* ── Page Content ── */}
+      {/* --- Page Content --- */}
       <PageContent>
         <PageState state={pageState} moduleId="teams" stateProps={{skeleton: (<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] items-start">{<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">{Array.from({ length: 6 }).map((_, i) => <TeamTileSkeleton key={i} />)}</div>}<Skeleton className="h-96 rounded-2xl" /></div>),  loadingVariant: 'cards', onAction: canCreateTeam ? () => setQuickCreateOpen(true) : undefined }}>
-          {/* ── Loading State ── */}
+          {/* --- Loading State --- */}
           {pageState === 'loading' && (
             <motion.div
               initial="hidden"
@@ -305,7 +305,7 @@ export const TeamsPage = () => {
             </motion.div>
           )}
 
-          {/* ── Empty State ── */}
+          {/* --- Empty State --- */}
           {pageState === 'ready' && isTeamEmpty && (
             <EmptyState
               onClickCreate={() => setQuickCreateOpen(true)}
@@ -313,7 +313,7 @@ export const TeamsPage = () => {
             />
           )}
 
-          {/* ── No Results ── */}
+          {/* --- No Results --- */}
           {pageState === 'ready' && !isTeamEmpty && filteredTeams.length === 0 && (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
@@ -340,7 +340,7 @@ export const TeamsPage = () => {
             </motion.div>
           )}
 
-          {/* ── Team Gallery Grid ── */}
+          {/* --- Team Gallery Grid --- */}
           {pageState === 'ready' && !isTeamEmpty && filteredTeams.length > 0 && (
             <AnimatePresence mode="wait">
               <motion.div
@@ -375,7 +375,7 @@ export const TeamsPage = () => {
         </PageState>
       </PageContent>
 
-      {/* ── Activity Sidebar ── */}
+      {/* --- Activity Sidebar --- */}
       {!isTeamEmpty && (
         <ActivitySidebar
           teams={teams}
@@ -385,7 +385,7 @@ export const TeamsPage = () => {
         />
       )}
 
-      {/* ── Compare Panel (bottom drawer) ── */}
+      {/* --- Compare Panel (bottom drawer) --- */}
       <AnimatePresence>
         {compareMode && compareTeams.length >= 2 && (
           <ComparePanel
@@ -396,14 +396,14 @@ export const TeamsPage = () => {
         )}
       </AnimatePresence>
 
-      {/* ── Quick Create Modal ── */}
+      {/* --- Quick Create Modal --- */}
       <QuickCreateModal
         isOpen={quickCreateOpen}
         onClose={() => setQuickCreateOpen(false)}
         onCreateWithTemplate={handleQuickCreate}
       />
 
-      {/* ── Existing modals (kept for backward compat) ── */}
+      {/* --- Existing modals (kept for backward compat) --- */}
       <CreateTeamModal isOpen={createTeamModalOpen} onClose={() => setCreateTeamModalOpen(false)} orgId={orgId} />
       <ManageTeamMembersModal isOpen={!!selectedTeam} onClose={() => setSelectedTeam(null)} team={teams.find(t => t.id === selectedTeam?.id) || selectedTeam} orgMembers={members} />
     </PageShell>

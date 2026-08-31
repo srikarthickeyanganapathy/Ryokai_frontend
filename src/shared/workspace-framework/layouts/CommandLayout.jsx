@@ -5,20 +5,20 @@ import { layoutClasses } from '../tokens/layoutTokens'
 
 /**
  * CommandLayout
- * ─────────────────────────────────────────────────────────
+ * ---
  * Layout archetype for action-first operational pages.
  * Target pages: Dashboard (Mission Control), Goals.
  *
  * Structure:
- *   Hero → Metrics Strip → Quick Actions → Widget Grid
+ *   Hero -> Metrics Strip -> Quick Actions -> Widget Grid
  *
- * All slots are optional — pages opt in to what they need.
+ * All slots are optional -- pages opt in to what they need.
  * This layout renders ONLY structure. No business logic.
  *
  * Responsive:
- *   Desktop  — Full hero + inline metrics + multi-column widgets
- *   Tablet   — Collapsed hero + stacked metrics
- *   Mobile   — Compact action stack + single column
+ *   Desktop  -- Full hero + inline metrics + multi-column widgets
+ *   Tablet   -- Collapsed hero + stacked metrics
+ *   Mobile   -- Compact action stack + single column
  */
 export function CommandLayout({
   hero,
@@ -29,7 +29,7 @@ export function CommandLayout({
 }) {
   return (
     <div className={cn('flex flex-col', className)}>
-      {/* ── Hero Slot ─────────────────────────────────── */}
+      {/* --- Hero Slot --- */}
       {hero && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -41,7 +41,7 @@ export function CommandLayout({
         </motion.div>
       )}
 
-      {/* ── Metrics Strip Slot ────────────────────────── */}
+      {/* --- Metrics Strip Slot --- */}
       {metrics && (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -53,7 +53,7 @@ export function CommandLayout({
         </motion.div>
       )}
 
-      {/* ── Quick Actions Slot ────────────────────────── */}
+      {/* --- Quick Actions Slot --- */}
       {actions && (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -65,7 +65,7 @@ export function CommandLayout({
         </motion.div>
       )}
 
-      {/* ── Content / Widget Grid ─────────────────────── */}
+      {/* --- Content / Widget Grid --- */}
       {children && (
         <motion.div
           initial={{ opacity: 0, y: 8 }}

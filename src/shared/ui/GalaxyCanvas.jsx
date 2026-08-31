@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import { cn } from '@/shared/lib/cn'
 
 /**
- * GalaxyCanvas — a 3D-look spiral galaxy rendered on canvas.
+ * GalaxyCanvas -- a 3D-look spiral galaxy rendered on canvas.
  *
  * Thousands of glow-sprite particles ride logarithmic spiral arms with
  * differential rotation (inner orbits faster, like a real disk galaxy),

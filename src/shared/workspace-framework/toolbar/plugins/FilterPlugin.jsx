@@ -3,14 +3,14 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * FilterPlugin
- * ─────────────────────────────────────────────────────────
+ * ---
  * Toolbar filter dropdown plugin.
- * Stateless — page provides filters config, activeFilters, and onChange.
+ * Stateless -- page provides filters config, activeFilters, and onChange.
  *
- * @param {Array<{id, label, options: Array<{value, label}>}>} filters — Filter definitions
- * @param {Object} activeFilters — Current active filter values { [filterId]: value }
- * @param {function} onChange — Filter change handler (filterId, value)
- * @param {function} [onClear] — Clear all filters handler
+ * @param {Array<{id, label, options: Array<{value, label}>}>} filters -- Filter definitions
+ * @param {Object} activeFilters -- Current active filter values { [filterId]: value }
+ * @param {function} onChange -- Filter change handler (filterId, value)
+ * @param {function} [onClear] -- Clear all filters handler
  */
 export function FilterPlugin({ filters = [], activeFilters = {}, onChange, onClear, className }) {
   const [open, setOpen] = useState(false)

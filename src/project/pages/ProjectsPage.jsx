@@ -283,11 +283,11 @@ export function ProjectsPage() {
                     </button>
                   }
                   meta={[
-                    { icon: <CheckSquare />, text: `${project.tasksCompleted || 0}/${project.tasksTotal || 0} tasks${tasksLeft > 0 ? ` · ${tasksLeft} left` : ''}` },
+                    { icon: <CheckSquare />, text: `${project.tasksCompleted || 0}/${project.tasksTotal || 0} tasks${tasksLeft > 0 ? `   ${tasksLeft} left` : ''}` },
                     ...(project.dueDate ? [{ icon: <CalendarClock />, text: formattedDueDate }] : []),
                   ]}
                   progress={project.progress || 0}
-                  progressLabel={isOverdue ? `${formattedDueDate} · ${Math.round(project.progress || 0)}%` : `${Math.round(project.progress || 0)}%`}
+                  progressLabel={isOverdue ? `${formattedDueDate}   ${Math.round(project.progress || 0)}%` : `${Math.round(project.progress || 0)}%`}
                 />
               )
             })}

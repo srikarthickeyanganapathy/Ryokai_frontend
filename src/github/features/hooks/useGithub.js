@@ -46,7 +46,7 @@ export const useGithubConfig = () =>
     queryKey: githubQueryKeys.config,
     queryFn: getGithubConfig,
     // No staleTime: the config endpoint is a cheap DB read and must reflect a
-    // revoked connection immediately — a stale `connected:true` would render
+    // revoked connection immediately -- a stale `connected:true` would render
     // the wrong state (e.g. "Sync Repositories Now" after the user revokes
     // the OAuth grant on GitHub).
     retry: 1, // avoid 4x15s pile-ups when the backend is slow or failing
@@ -305,7 +305,7 @@ export const useSyncGithubInstallation = () => {
       queryClient.invalidateQueries({ queryKey: githubQueryKeys.repos });
       queryClient.invalidateQueries({ queryKey: githubQueryKeys.installations });
       toast.success(
-        `Synced ${result.repositories} repos · ${result.pullRequests} PRs · ${result.commits} commits`
+        `Synced ${result.repositories} repos   ${result.pullRequests} PRs   ${result.commits} commits`
       );
     },
     onError: (e) => {
@@ -331,7 +331,7 @@ export const useSyncAllGithub = () => {
       queryClient.invalidateQueries({ queryKey: githubQueryKeys.repos });
       queryClient.invalidateQueries({ queryKey: githubQueryKeys.installations });
       toast.success(
-        `Synced ${result.repositories} repos · ${result.pullRequests} PRs · ${result.commits} commits`
+        `Synced ${result.repositories} repos   ${result.pullRequests} PRs   ${result.commits} commits`
       );
     },
     onError: (e) => {

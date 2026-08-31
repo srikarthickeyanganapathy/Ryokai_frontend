@@ -9,7 +9,7 @@ function AgendaItem({ item, onClick }) {
   const date = parseISO(isEvent ? item.startTime : item.dueDate)
   
   const timeLabel = isEvent
-    ? item.isAllDay ? 'All day' : `${format(date, 'h:mm a')}${item.endTime ? ' – ' + format(parseISO(item.endTime), 'h:mm a') : ''}`
+    ? item.isAllDay ? 'All day' : `${format(date, 'h:mm a')}${item.endTime ? ' - ' + format(parseISO(item.endTime), 'h:mm a') : ''}`
     : format(date, 'h:mm a')
 
   return (
@@ -88,7 +88,7 @@ export function AgendaList({ tasks = [], events = [], selectedDay, onTaskClick, 
         <div className="text-[15px] font-bold tracking-tight text-[var(--text-primary)] flex items-baseline gap-2">
           {format(selectedDay, 'eeee, MMMM d')}
           <span className="font-mono text-[10px] text-[var(--text-tertiary)] font-medium">
-            {format(selectedDay, 'yyyy-MM-dd')} · {brief.length} item{brief.length !== 1 ? 's' : ''}
+            {format(selectedDay, 'yyyy-MM-dd')}   {brief.length} item{brief.length !== 1 ? 's' : ''}
           </span>
         </div>
         <Button 
@@ -109,7 +109,7 @@ export function AgendaList({ tasks = [], events = [], selectedDay, onTaskClick, 
               The day is clear
             </div>
             <div className="text-[11.5px] text-[var(--text-tertiary)] mt-1 font-mono">
-              No items scheduled · {format(selectedDay, 'yyyy-MM-dd')}
+              No items scheduled   {format(selectedDay, 'yyyy-MM-dd')}
             </div>
           </div>
         ) : (

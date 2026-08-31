@@ -28,7 +28,7 @@ export function CommandChain({ roles = [], selectedRole, onSelect, onCreateClick
           <Input value={searchQuery} onChange={(e) => onSearchChange(e.target.value)} placeholder="Find a role..." className="pl-8 h-8 text-[12.5px] rounded-lg border-[var(--border-subtle)] bg-[var(--bg-card)] focus:bg-[var(--bg-card)] transition-colors" />
         </div>
         <span className="text-[11px] font-mono text-[var(--text-muted)]">
-          <strong className="text-[var(--text-secondary)] font-semibold">{filtered.length}</strong> link{filtered.length === 1 ? '' : 's'} · rank 01 = highest authority
+          <strong className="text-[var(--text-secondary)] font-semibold">{filtered.length}</strong> link{filtered.length === 1 ? '' : 's'}   rank 01 = highest authority
         </span>
         <div className="flex-1" />
         <Button variant="primary" size="sm" onClick={onCreateClick} className="text-[12px] h-8 px-3.5">
@@ -62,7 +62,7 @@ export function CommandChain({ roles = [], selectedRole, onSelect, onCreateClick
                     {role.name === 'ADMIN' && <Lock className="w-3 h-3 text-[var(--text-muted)] shrink-0" />}
                   </span>
                   <span className="block text-[13px] font-semibold text-[var(--text-primary)] mt-0.5 truncate">{rolePurpose(role.name)}</span>
-                  <span className="block text-[10.5px] text-[var(--text-muted)] mt-0.5">{grantCount} grants · priority {role.priority ?? 100}</span>
+                  <span className="block text-[10.5px] text-[var(--text-muted)] mt-0.5">{grantCount} grants   priority {role.priority ?? 100}</span>
                 </span>
                 <span className="flex items-center gap-2 shrink-0">
                   {role.name === 'ADMIN' ? (
@@ -78,7 +78,7 @@ export function CommandChain({ roles = [], selectedRole, onSelect, onCreateClick
             </div>
           );
         })}
-        {filtered.length === 0 && <div className="text-center py-10 text-[12.5px] text-[var(--text-muted)]">No roles match — try a different search.</div>}
+        {filtered.length === 0 && <div className="text-center py-10 text-[12.5px] text-[var(--text-muted)]">No roles match -- try a different search.</div>}
       </div>
     </div>
   );

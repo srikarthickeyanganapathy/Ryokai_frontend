@@ -74,13 +74,13 @@ export function EventForm({ onSubmit, onCancel, onDelete, isLoading, isDeleting,
         {onDelete && isEditing ? (
           <Button type="button" variant="ghost" size="sm" className="h-8 text-[12px] text-[var(--danger)] hover:bg-[var(--danger-soft)] gap-1.5" onClick={onDelete} disabled={isDeleting} isLoading={isDeleting}>
             {!isDeleting && <Trash2 className="w-3.5 h-3.5" />}
-            {isDeleting ? 'Deleting…' : 'Delete Event'}
+            {isDeleting ? 'Deleting...' : 'Delete Event'}
           </Button>
         ) : <span />}
         <div className="flex items-center gap-3">
           {onCancel && <Button type="button" variant="outline" size="sm" className="h-8 text-[12px]" onClick={onCancel}>Cancel</Button>}
           <Button type="submit" size="sm" className="h-8 text-[12px]" disabled={isLoading} isLoading={isLoading}>
-            {isLoading ? (isEditing ? 'Saving…' : 'Creating…') : isEditing ? 'Save Changes' : 'Create Event'}
+            {isLoading ? (isEditing ? 'Saving...' : 'Creating...') : isEditing ? 'Save Changes' : 'Create Event'}
           </Button>
         </div>
       </div>

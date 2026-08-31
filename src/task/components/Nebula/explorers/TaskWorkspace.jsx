@@ -138,7 +138,7 @@ export default function TaskWorkspace({ context, navigator, analysis, onCenterOn
           onClick={() => onOpenWorkbench(currentTask)}
           className="w-full py-2.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-200 text-xs font-semibold transition-colors cursor-pointer"
         >
-          Edit in Workbench →
+          Edit in Workbench ->
         </button>
       )}
     </div>

@@ -124,7 +124,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
   const currentStatus = toBackendStatus(task?.currentStatus || task?.status)
   const st = resolveStatus(currentStatus)
 
-  /* ── State machine action buttons ── */
+  /* --- State machine action buttons --- */
   const renderStateActions = (size = "sm") => {
     if (!task) return null
     const isCrewTask = !!(task.crewId || task.crew)
@@ -270,7 +270,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
                 : "fixed top-0 right-0 bottom-0 md:top-4 md:bottom-4 md:right-4 w-full md:w-[440px] z-40 bg-[var(--bg-base)] shadow-2xl shadow-black/10 border border-[var(--border-subtle)] md:rounded-3xl"
             )}
           >
-            {/* ── Header ── */}
+            {/* --- Header --- */}
             <div className="flex items-center justify-between px-5 py-3.5 shrink-0 border-b border-[var(--border-subtle)]">
               <div className="flex items-center gap-2.5">
                 <IconButton variant="ghost" size="sm" onClick={onClose} title="Back" aria-label="Go back">
@@ -301,7 +301,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
               </div>
             </div>
 
-            {/* ── Title & Identity ── */}
+            {/* --- Title & Identity --- */}
             <div className="px-6 pt-5 pb-4 shrink-0">
               <h1 ref={titleRef} contentEditable={hasEditPerm} suppressContentEditableWarning
                 onBlur={() => { const t = titleRef.current?.textContent || ''; if (t !== task.title) { setLocalEdits(p => ({ ...p, title: t })); setIsDirty(true) } }}
@@ -318,7 +318,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
               </div>
             </div>
 
-            {/* ── Tabs ── */}
+            {/* --- Tabs --- */}
             <div className="px-5 shrink-0 border-b border-[var(--border-subtle)] flex gap-1 overflow-x-auto no-scrollbar">
               {TABS.map(tab => (
                 <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
@@ -336,7 +336,7 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
               ))}
             </div>
 
-            {/* ── Tab Content ── */}
+            {/* --- Tab Content --- */}
             {activeTab === 'details' && (
               <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-6">
@@ -526,10 +526,10 @@ export function TaskPanel({ task, isOpen, onClose, onUpdate, variant = 'default'
               </div>
             )}
 
-            {/* ── Footer ── */}
+            {/* --- Footer --- */}
             <div className="px-5 py-3.5 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 backdrop-blur-sm flex items-center justify-between gap-3 flex-wrap shrink-0">
               <span className="text-[11px] text-[var(--text-muted)]">
-                Created {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '—'}
+                Created {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '--'}
               </span>
               <div className="flex items-center gap-2 flex-wrap">
                 {renderStateActions("sm")}

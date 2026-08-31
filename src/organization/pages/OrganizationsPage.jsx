@@ -9,7 +9,7 @@ import { useOrganizations, useCreateOrganization } from '../features/hooks/useOr
 import { Modal, ModalContent } from '@/shared/ui/Modal'
 import { OrganizationForm } from '../components/Settings/OrganizationForm'
 
-// Backend note: OrganizationMembership has a unique constraint on user_id alone —
+// Backend note: OrganizationMembership has a unique constraint on user_id alone --
 // each user can belong to at most one organization, ever (enforced in
 // OrganizationService.createOrganization too). So `organizations` is always length
 // 0 or 1; a search/filter grid over "organizations" can never have more than one

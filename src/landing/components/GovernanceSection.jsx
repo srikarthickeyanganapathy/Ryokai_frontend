@@ -10,12 +10,12 @@ const roleData = {
     codeClass: 'bg-indigo-500/10 text-indigo-500',
     name: 'Administrator',
     desc: 'Full platform control',
-    grants: '16 grants · priority 0',
-    tag: '● System',
+    grants: '16 grants   priority 0',
+    tag: '  System',
     tagClass: 'text-indigo-400 bg-indigo-400/10 border-indigo-400/20',
     passport: {
       pp: 'Full platform control',
-      pr: 'Priority 0 · 16 of 16 enabled',
+      pr: 'Priority 0   16 of 16 enabled',
       chips: { on: '16/16', onCount: 16, read: 4, write: 8, flow: 4, risk: 4 },
       risk: { label: 'High', value: 80, color: 'var(--danger)' },
       outranks: ['Org Manager', 'Crew Lead', 'Member']
@@ -28,12 +28,12 @@ const roleData = {
     codeClass: 'bg-blue-500/10 text-blue-500',
     name: 'Org Manager',
     desc: 'Owns team goals, workload, and leave',
-    grants: '12 grants · priority 10',
-    tag: '✓ Safe',
+    grants: '12 grants   priority 10',
+    tag: '[x] Safe',
     tagClass: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
     passport: {
       pp: 'Owns team goals, workload, and leave',
-      pr: 'Priority 10 · 12 of 16 enabled',
+      pr: 'Priority 10   12 of 16 enabled',
       chips: { on: '12/16', onCount: 12, read: 4, write: 5, flow: 3, risk: 0 },
       risk: { label: 'Low', value: 8, color: 'var(--success)' },
       outranks: ['Crew Lead', 'Member']
@@ -46,12 +46,12 @@ const roleData = {
     codeClass: 'bg-emerald-500/10 text-emerald-500',
     name: 'Crew Lead',
     desc: 'Runs a crew and its shared tasks',
-    grants: '6 grants · priority 20',
-    tag: '✓ Safe',
+    grants: '6 grants   priority 20',
+    tag: '[x] Safe',
     tagClass: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
     passport: {
       pp: 'Runs a crew and its shared tasks',
-      pr: 'Priority 20 · 6 of 16 enabled',
+      pr: 'Priority 20   6 of 16 enabled',
       chips: { on: '6/16', onCount: 6, read: 3, write: 2, flow: 1, risk: 0 },
       risk: { label: 'Low', value: 5, color: 'var(--success)' },
       outranks: ['Member']
@@ -64,12 +64,12 @@ const roleData = {
     codeClass: 'bg-purple-500/10 text-purple-500',
     name: 'Member',
     desc: 'Default read-only baseline',
-    grants: '3 grants · priority 30',
-    tag: '✓ Safe',
+    grants: '3 grants   priority 30',
+    tag: '[x] Safe',
     tagClass: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
     passport: {
       pp: 'Default read-only baseline',
-      pr: 'Priority 30 · 3 of 16 enabled',
+      pr: 'Priority 30   3 of 16 enabled',
       chips: { on: '3/16', onCount: 3, read: 3, write: 0, flow: 0, risk: 0 },
       risk: { label: 'Minimal', value: 2, color: 'var(--success)' },
       outranks: []
@@ -116,7 +116,7 @@ export default function GovernanceSection() {
           variants={itemVariants}
           className="sec-sub reveal text-lg text-[var(--text-secondary)] max-w-2xl mb-16"
         >
-          Every action has context, every permission has scope, and every important transition has a clear owner — so teams move fast without losing control.
+          Every action has context, every permission has scope, and every important transition has a clear owner -- so teams move fast without losing control.
         </motion.p>
         
         <motion.div 
@@ -137,7 +137,7 @@ export default function GovernanceSection() {
                 <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
               </div>
               <div className="tb-search flex items-center gap-2 px-3 py-1.5 rounded-md bg-[var(--bg-base)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)] w-64 justify-center shadow-inner">
-                <Search size={14} /> Search or jump to… <span className="kb px-1 py-0.5 rounded bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[10px] ml-2">⌘K</span>
+                <Search size={14} /> Search or jump to... <span className="kb px-1 py-0.5 rounded bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[10px] ml-2">Cmd+K</span>
               </div>
               <div className="tb-actions flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-xs font-bold ring-2 ring-[var(--bg-base)]">U</div>
@@ -150,7 +150,7 @@ export default function GovernanceSection() {
                 <div className="mb-8">
                   <div className="text-xs text-[var(--accent)] font-medium uppercase tracking-wider mb-2">Authority &amp; Scope</div>
                   <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-1">Command Chain</h2>
-                  <div className="text-sm text-[var(--text-secondary)]">Roles ranked by authority — select a role to inspect its permissions and scope boundaries.</div>
+                  <div className="text-sm text-[var(--text-secondary)]">Roles ranked by authority -- select a role to inspect its permissions and scope boundaries.</div>
                 </div>
 
                 {/* Posture Bar */}
@@ -193,7 +193,7 @@ export default function GovernanceSection() {
                       <div className="absolute -left-6 text-xs text-[var(--text-tertiary)] font-mono">{role.rank}</div>
                       <div className={`w-4 h-4 rounded-full border-2 bg-[var(--bg-base)] z-10 transition-colors ${selectedRole === role.id ? 'border-[var(--accent)] ring-4 ring-[var(--accent)]/20' : 'border-[var(--border-subtle)] group-hover:border-[var(--text-secondary)]'}`}></div>
                       <div className={`flex-1 p-4 rounded-xl border transition-all flex items-center gap-4 ${selectedRole === role.id ? 'bg-[var(--bg-subtle)] border-[var(--accent)] shadow-sm' : 'bg-[var(--bg-base)] border-[var(--border-subtle)] hover:border-[var(--border-hover)]'}`}>
-                        {role.id === 'admin' && <span className="text-yellow-500 text-lg">♛</span>}
+                        {role.id === 'admin' && <span className="text-yellow-500 text-lg"> </span>}
                         <div className={`px-2 py-1 rounded font-mono text-xs font-bold ${role.codeClass}`}>{role.code}</div>
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-semibold text-[var(--text-primary)]">{role.name}</div>

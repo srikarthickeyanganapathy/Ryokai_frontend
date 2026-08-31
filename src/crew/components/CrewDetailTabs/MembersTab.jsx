@@ -194,7 +194,7 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
       {/* State 5: Permission Control Banner (Non-owners read-only notice) */}
       {!isCreator && <ReadOnlyBanner />}
 
-      {/* Directory Header Toolbar — teams design language (icon chip + title + subtitle) */}
+      {/* Directory Header Toolbar -- teams design language (icon chip + title + subtitle) */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
         <MembersHeader
           totalCount={actualMembers.length}

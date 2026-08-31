@@ -1,6 +1,6 @@
 import api from '@/shared/api/api';
 
-/** Normalize backend read → isRead; drop the raw read field to avoid confusion */
+/** Normalize backend read -> isRead; drop the raw read field to avoid confusion */
 const normalizeNotification = (n) => {
   const { read, ...rest } = n;
   return { ...rest, isRead: !!read };

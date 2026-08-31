@@ -91,7 +91,7 @@ function BulkActionsToolbar({ count, onClear, onComplete }) {
   )
 }
 
-/* Crew task card — teams design language (priority bar, meta footer, hover lift) */
+/* Crew task card -- teams design language (priority bar, meta footer, hover lift) */
 function CrewTaskCard({ task, isSelected, isBulkMode, onToggleSelect, onClaim, onComplete, onTaskClick }) {
   const priority = normalizePriority(task.priority)
   return (
@@ -194,7 +194,7 @@ export function TasksTab({ crewId, tasks }) {
   const [showFilters, setShowFilters] = useState(false)
   const navigate = useNavigate()
 
-  // FIX: reuse the shared useTasks hook — useCreateTask routes to POST /tasks/crew
+  // FIX: reuse the shared useTasks hook -- useCreateTask routes to POST /tasks/crew
   // in CREWS workspace mode (same backend contract, single mutation source of truth).
   const createTaskMutation = useCreateTask()
   const claimTaskMutation = useClaimTask()

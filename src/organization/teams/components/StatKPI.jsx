@@ -3,9 +3,9 @@ import { motion } from 'framer-motion'
 import { cn } from '@/shared/lib/cn'
 import { AnimatedCounter } from './primitives'
 
-/* ══════════════════════════════════════════════════════
+/* ===
  * STAT KPI CARD (extracted from TeamsPage)
- * ══════════════════════════════════════════════════════ */
+ * === */
 
 export function StatKPI({ icon: Icon, label, value, suffix, trend, trendLabel, caption, hue = 220, ring, className, children }) {
   return (
@@ -43,7 +43,7 @@ export function StatKPI({ icon: Icon, label, value, suffix, trend, trendLabel, c
                     : 'text-[var(--text-muted)] bg-[var(--bg-subtle)]'
               )}
             >
-              <span>{trend > 0 ? '↑' : trend < 0 ? '↓' : '→'}</span>
+              <span>{trend > 0 ? ' ' : trend < 0 ? ' ' : '->'}</span>
               <span>{Math.abs(trend)}%</span>
             </span>
           ) : null}

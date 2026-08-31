@@ -1,19 +1,19 @@
 /**
- * Ryokai — UX Interaction Tokens
+ * Ryokai -- UX Interaction Tokens
  * 
  * Standardizes micro-interaction parameters across the application.
  * Based on UX law research and Linear/ElevenLabs benchmark analysis.
  * 
- * ┌─────────────────────────────┬──────────────────────────────────┐
- * │ UX Law                      │ Application                      │
- * ├─────────────────────────────┼──────────────────────────────────┤
- * │ Doherty Threshold (<400ms)  │ All animations capped at 300ms   │
- * │ Fitts's Law                 │ 44px minimum touch targets       │
- * │ Hick's Law                  │ Max 5 items per group            │
- * │ Aesthetic-Usability Effect  │ Consistent spring curves         │
- * │ Von Restorff Effect         │ Accent glow on important items   │
- * │ Peak-End Rule               │ Completing a task = celebration  │
- * └─────────────────────────────┴──────────────────────────────────┘
+ * +---+---+
+ * | UX Law                      | Application                      |
+ * +---+---+
+ * | Doherty Threshold (<400ms)  | All animations capped at 300ms   |
+ * | Fitts's Law                 | 44px minimum touch targets       |
+ * | Hick's Law                  | Max 5 items per group            |
+ * | Aesthetic-Usability Effect  | Consistent spring curves         |
+ * | Von Restorff Effect         | Accent glow on important items   |
+ * | Peak-End Rule               | Completing a task = celebration  |
+ * +---+---+
  */
 
 export const SPRINGS = {

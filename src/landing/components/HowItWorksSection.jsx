@@ -27,7 +27,7 @@ const STEPS = [
     num: '01',
     title: 'Intent',
     desc: 'Define what needs to be accomplished and establish clear target outcomes.',
-    state: '01 · Captured',
+    state: '01   Captured',
     iconCls: 'bg-amber-500/10 text-amber-500',
     stateCls: 'bg-amber-500/10 text-amber-500',
   },
@@ -36,7 +36,7 @@ const STEPS = [
     num: '02',
     title: 'Plan',
     desc: 'Turn goals into structured projects, sequenced milestones, and deliverables.',
-    state: '02 · Structured',
+    state: '02   Structured',
     iconCls: 'bg-blue-500/10 text-blue-500',
     stateCls: 'bg-blue-500/10 text-blue-500',
   },
@@ -45,7 +45,7 @@ const STEPS = [
     num: '03',
     title: 'Create',
     desc: 'Create tasks with clear ownership across creator, assignee, and reviewer roles.',
-    state: '03 · Assigned',
+    state: '03   Assigned',
     iconCls: 'bg-indigo-500/10 text-indigo-500',
     stateCls: 'bg-indigo-500/10 text-indigo-500',
   },
@@ -54,7 +54,7 @@ const STEPS = [
     num: '04',
     title: 'Work',
     desc: 'Execute with focused work sessions while tracking tangible task progress.',
-    state: '04 · In progress',
+    state: '04   In progress',
     iconCls: 'bg-yellow-500/10 text-yellow-500',
     stateCls: 'bg-yellow-500/10 text-yellow-500',
   },
@@ -62,8 +62,8 @@ const STEPS = [
     icon: Upload,
     num: '05',
     title: 'Submit',
-    desc: 'Attach tangible evidence — links, git commits, screenshots, or notes — before submitting.',
-    state: '05 · Evidence gate',
+    desc: 'Attach tangible evidence -- links, git commits, screenshots, or notes -- before submitting.',
+    state: '05   Evidence gate',
     iconCls: 'bg-purple-500/10 text-purple-500',
     stateCls: 'bg-purple-500/10 text-purple-500',
   },
@@ -72,7 +72,7 @@ const STEPS = [
     num: '06',
     title: 'Review',
     desc: 'Reviewers inspect the submitted evidence directly, not just a comment thread.',
-    state: '06 · In review',
+    state: '06   In review',
     iconCls: 'bg-sky-500/10 text-sky-500',
     stateCls: 'bg-sky-500/10 text-sky-500',
   },
@@ -81,7 +81,7 @@ const STEPS = [
     num: '07',
     title: 'Decide',
     desc: 'Approve completed work or route it back for rework with clear, recorded feedback.',
-    state: '07 · Decided',
+    state: '07   Decided',
     iconCls: 'bg-emerald-500/10 text-emerald-500',
     stateCls: 'bg-emerald-500/10 text-emerald-500',
   },
@@ -90,7 +90,7 @@ const STEPS = [
     num: '08',
     title: 'Outcome',
     desc: 'Track completed outcomes, update team progress, and free capacity for the next priority.',
-    state: '08 · Completed',
+    state: '08   Completed',
     iconCls: 'bg-teal-500/10 text-teal-500',
     stateCls: 'bg-teal-500/10 text-teal-500',
   },
@@ -135,7 +135,7 @@ export default function HowItWorksSection() {
             <span className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0"><ImageIcon size={18} strokeWidth={1.7} /></span>
             <div>
               <h4 className="text-[15px] font-semibold mb-1">Evidence-backed execution</h4>
-              <p className="text-[13px] text-[var(--text-tertiary)] leading-relaxed">Six typed evidence kinds — LINK, GITHUB, SCREENSHOT, RECORDING, SNIPPET, NOTE — ensure decisions are backed by real work, not empty comments.</p>
+              <p className="text-[13px] text-[var(--text-tertiary)] leading-relaxed">Six typed evidence kinds -- LINK, GITHUB, SCREENSHOT, RECORDING, SNIPPET, NOTE -- ensure decisions are backed by real work, not empty comments.</p>
             </div>
           </motion.div>
           <motion.div variants={itemVariants} className="flex gap-4 p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50">

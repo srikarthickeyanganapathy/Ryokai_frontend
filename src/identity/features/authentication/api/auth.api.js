@@ -15,7 +15,7 @@ export const authAPI = {
   },
 
   register: async (userData) => {
-    // Registration does NOT create a session — the user must verify their email
+    // Registration does NOT create a session -- the user must verify their email
     // first, then sign in. Returns { message, email }.
     const { data } = await api.post('/auth/register', userData)
     return data

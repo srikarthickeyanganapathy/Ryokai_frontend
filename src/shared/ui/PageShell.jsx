@@ -1,17 +1,17 @@
 /**
- * Ryokai — Page Composition System
- * ─────────────────────────────────────────────────────────
+ * Ryokai -- Page Composition System
+ * ---
  * Every major module composes the same primitives differently,
  * giving consistency without making every page look identical.
  *
  * Architecture:
  *   PageShell
- *   ├── PageHero        (mission + context)
- *   ├── PageStats       (key metrics strip)
- *   ├── PageToolbar     (filters, search, actions)
- *   ├── PageContent     (main viewport)
- *   ├── PageAside       (context panel, AI, activity)
- *   └── FloatingActions (FAB, bulk actions)
+ *   +--- PageHero        (mission + context)
+ *   +--- PageStats       (key metrics strip)
+ *   +--- PageToolbar     (filters, search, actions)
+ *   +--- PageContent     (main viewport)
+ *   +--- PageAside       (context panel, AI, activity)
+ *   +--- FloatingActions (FAB, bulk actions)
  *
  * Each page composes only the slots it needs, in the order
  * that matches its information hierarchy.
@@ -22,9 +22,9 @@ import { motion } from 'framer-motion';
 import { cn } from '@/shared/lib/cn';
 import { SPRINGS, TIMING, EASING, STAGGER_FAST } from '@/shared/lib/uxTokens';
 
-/* ══════════════════════════════════════════════════════
- * PageShell — cross-page visual rhythm container
- * ══════════════════════════════════════════════════════ */
+/* ===
+ * PageShell -- cross-page visual rhythm container
+ * === */
 export function PageShell({
   children,
   maxWidth = 'default',
@@ -64,9 +64,9 @@ export function PageShell({
   );
 }
 
-/* ══════════════════════════════════════════════════════
- * PageHero — Mission + Context (always first)
- * ══════════════════════════════════════════════════════ */
+/* ===
+ * PageHero -- Mission + Context (always first)
+ * === */
 export function PageHero({
   title,
   subtitle,
@@ -110,9 +110,9 @@ export function PageHero({
   );
 }
 
-/* ══════════════════════════════════════════════════════
- * PageStats — Key metrics strip (optional, after hero)
- * ══════════════════════════════════════════════════════ */
+/* ===
+ * PageStats -- Key metrics strip (optional, after hero)
+ * === */
 export function PageStats({ children, className }) {
   return (
     <motion.div
@@ -124,9 +124,9 @@ export function PageStats({ children, className }) {
   );
 }
 
-/* ══════════════════════════════════════════════════════
- * PageToolbar — Filters, search, view toggles
- * ══════════════════════════════════════════════════════ */
+/* ===
+ * PageToolbar -- Filters, search, view toggles
+ * === */
 export function PageToolbar({ children, className, sticky = false }) {
   return (
     <motion.div
@@ -142,9 +142,9 @@ export function PageToolbar({ children, className, sticky = false }) {
   );
 }
 
-/* ══════════════════════════════════════════════════════
- * PageContent — Main content area with adaptive scroll
- * ══════════════════════════════════════════════════════ */
+/* ===
+ * PageContent -- Main content area with adaptive scroll
+ * === */
 export function PageContent({ children, className, variant = 'default' }) {
   const variants = {
     default: '',
@@ -162,9 +162,9 @@ export function PageContent({ children, className, variant = 'default' }) {
   );
 }
 
-/* ══════════════════════════════════════════════════════
- * PageAside — Context panel (AI, activity, upcoming)
- * ══════════════════════════════════════════════════════ */
+/* ===
+ * PageAside -- Context panel (AI, activity, upcoming)
+ * === */
 export function PageAside({ children, className, width = 'default' }) {
   const widthMap = {
     narrow: 'w-full lg:w-64',
@@ -182,9 +182,9 @@ export function PageAside({ children, className, width = 'default' }) {
   );
 }
 
-/* ══════════════════════════════════════════════════════
- * PageGrid — two-column layout: content + aside
- * ══════════════════════════════════════════════════════ */
+/* ===
+ * PageGrid -- two-column layout: content + aside
+ * === */
 export function PageGrid({ children, className, sidebarWidth = 'default' }) {
   const widthMap = {
     narrow: 'lg:grid-cols-[1fr,260px]',
@@ -202,9 +202,9 @@ export function PageGrid({ children, className, sidebarWidth = 'default' }) {
   );
 }
 
-/* ══════════════════════════════════════════════════════
- * FloatingActions — Corner FAB or bulk action bar
- * ══════════════════════════════════════════════════════ */
+/* ===
+ * FloatingActions -- Corner FAB or bulk action bar
+ * === */
 export function FloatingActions({ children, position = 'bottom-right', show = true }) {
   if (!show) return null;
 
@@ -227,9 +227,9 @@ export function FloatingActions({ children, position = 'bottom-right', show = tr
   );
 }
 
-/* ══════════════════════════════════════════════════════
- * PageEmptyState — Module-specific empty state template
- * ══════════════════════════════════════════════════════ */
+/* ===
+ * PageEmptyState -- Module-specific empty state template
+ * === */
 export function PageEmptyState({
   icon: Icon,
   title,

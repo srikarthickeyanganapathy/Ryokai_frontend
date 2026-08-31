@@ -41,12 +41,12 @@ export const useServerStatus = () => useContext(ServerStatusContext);
 const ESTIMATED_WAKE_S = 150; // timer ring fills over ~2.5 min
 
 const WAKE_STAGES = [
-  'Stretching the RAM…',
-  'Brewing virtual coffee…',
-  'Warming up the JVM…',
-  'Reticulating splines…',
-  'Negotiating with the router…',
-  'Almost there…',
+  'Stretching the RAM...',
+  'Brewing virtual coffee...',
+  'Warming up the JVM...',
+  'Reticulating splines...',
+  'Negotiating with the router...',
+  'Almost there...',
 ];
 
 const fmtClock = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -60,13 +60,13 @@ const readNumber = (key) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* Game tuning — every difficulty knob lives here                      */
+/* Game tuning -- every difficulty knob lives here                      */
 /* ------------------------------------------------------------------ */
 
 const BEST_KEY = 'ryokai:packet-best';
 
 const GAME = {
-  GRAVITY: 1900,     // px/s²
+  GRAVITY: 1900,     // px/s 
   FLAP_VY: -520,     // px/s boost per tap
   MAX_FALL: 640,     // terminal velocity
   GATE_W: 54,
@@ -96,7 +96,7 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 /* The game: "Wake-Up Packet"                                          */
 /*                                                                     */
 /* Architecture: physics lives in refs and is driven by one            */
-/* requestAnimationFrame loop that mutates DOM transforms directly —   */
+/* requestAnimationFrame loop that mutates DOM transforms directly --   */
 /* zero React re-renders per frame. React state is only used for       */
 /* phase changes (ready/playing/dead) and the score (once per gate).   */
 /* ------------------------------------------------------------------ */
@@ -412,7 +412,7 @@ function WakePacketGame() {
         transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
       />
 
-      {/* Ceiling & floor — the kill zones, visually marked */}
+      {/* Ceiling & floor -- the kill zones, visually marked */}
       <div className="absolute top-0 inset-x-0 h-2 bg-[var(--accent-soft)] border-b border-[var(--accent-border)]" />
       <div className="absolute bottom-0 inset-x-0 h-2 bg-[var(--accent-soft)] border-t border-[var(--accent-border)]" />
 
@@ -496,7 +496,7 @@ function WakePacketGame() {
             Tap or press Space to launch
           </motion.p>
           <p className="text-[11px] text-[var(--text-tertiary)] max-w-[220px]">
-            Tap = boost up · thread the gates · every gate cleared is +1
+            Tap = boost up   thread the gates   every gate cleared is +1
           </p>
         </div>
       )}
@@ -511,10 +511,10 @@ function WakePacketGame() {
         >
           <div className="text-center">
             <p className="text-[10px] uppercase tracking-widest text-[var(--text-tertiary)] mb-1">
-              {newBest ? '★ new record ★' : 'signal lost'}
+              {newBest ? '  new record  ' : 'signal lost'}
             </p>
             <p className="text-4xl font-extrabold text-[var(--accent)] tabular-nums leading-none mb-1.5">{score}</p>
-            <p className="text-[11px] text-[var(--text-tertiary)] mb-4">gates cleared · best {best}</p>
+            <p className="text-[11px] text-[var(--text-tertiary)] mb-4">gates cleared   best {best}</p>
             <p className="text-xs font-semibold text-[var(--text-primary)] animate-pulse">
               Tap to fly again
             </p>
@@ -648,7 +648,7 @@ export function ServerStatusProvider({ children }) {
                   </div>
                 </div>
                 <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider">
-                  typical wake-up 1–3 min
+                  typical wake-up 1-3 min
                 </p>
               </div>
 
@@ -659,7 +659,7 @@ export function ServerStatusProvider({ children }) {
                 </h2>
               </div>
               <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-4 max-w-[280px]">
-                You're the wake-up packet — fly through the network to the sleeping server.{' '}
+                You're the wake-up packet -- fly through the network to the sleeping server.{' '}
                 <span className="text-[var(--text-primary)] font-medium">
                   {WAKE_STAGES[Math.min(WAKE_STAGES.length - 1, Math.floor(elapsed / 7))]}
                 </span>
@@ -668,7 +668,7 @@ export function ServerStatusProvider({ children }) {
               <WakePacketGame />
 
               <p className="text-xs text-[var(--text-tertiary)] mt-4 mb-4">
-                {attempts > 0 ? `Attempt ${attempts}${attempts >= 6 ? ' — still trying' : ''} · ` : ''}
+                {attempts > 0 ? `Attempt ${attempts}${attempts >= 6 ? ' -- still trying' : ''}   ` : ''}
                 your progress is safe and will reload automatically
               </p>
 

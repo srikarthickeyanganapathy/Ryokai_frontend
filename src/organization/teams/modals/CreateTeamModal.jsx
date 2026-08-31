@@ -16,39 +16,39 @@ const NAME_MAX = 50
 const DESC_MAX = 140
 
 const CATEGORIES = [
-  { id: 'engineering', label: 'Engineering', emoji: '⚙️' },
-  { id: 'design', label: 'Design', emoji: '🎨' },
-  { id: 'marketing', label: 'Marketing', emoji: '📣' },
-  { id: 'product', label: 'Product', emoji: '🚀' },
-  { id: 'operations', label: 'Operations', emoji: '🏗️' },
-  { id: 'other', label: 'Other', emoji: '📦' },
+  { id: 'engineering', label: 'Engineering', emoji: '  ' },
+  { id: 'design', label: 'Design', emoji: '  ' },
+  { id: 'marketing', label: 'Marketing', emoji: '  ' },
+  { id: 'product', label: 'Product', emoji: '  ' },
+  { id: 'operations', label: 'Operations', emoji: '   ' },
+  { id: 'other', label: 'Other', emoji: '  ' },
 ]
 
 const TEMPLATES = [
   {
     id: 'engineering-sprint',
-    emoji: '⚡',
+    emoji: ' ',
     title: 'Engineering Sprint',
     description: 'Scrum board, code reviews, and deployment tracking for dev teams.',
     defaults: { category: 'engineering' },
   },
   {
     id: 'marketing-campaign',
-    emoji: '🎯',
+    emoji: '  ',
     title: 'Marketing Campaign',
     description: 'Campaign calendar, asset pipeline, and performance dashboards.',
     defaults: { category: 'marketing' },
   },
   {
     id: 'design-studio',
-    emoji: '✨',
+    emoji: ' ',
     title: 'Design Studio',
     description: 'Design reviews, prototype feedback, and asset handoff workflows.',
     defaults: { category: 'design' },
   },
   {
     id: 'blank-canvas',
-    emoji: '🖌️',
+    emoji: '   ',
     title: 'Blank Canvas',
     description: 'Start from scratch. Customize everything your way.',
     defaults: { category: 'other' },
@@ -61,7 +61,7 @@ function hashHue(str = '') {
   return Math.abs(hash) % 360
 }
 
-/* ── Live Preview Card ── */
+/* --- Live Preview Card --- */
 function LivePreview({ name, description, category, hue }) {
   const displayName = name?.trim() || 'New Team'
   return (
@@ -107,9 +107,9 @@ function LivePreview({ name, description, category, hue }) {
   )
 }
 
-/* ═══════════════════════════════════════════════
+/* ===
    CreateTeamModal - Template + Details
-   ═══════════════════════════════════════════════ */
+   === */
 export function CreateTeamModal({ isOpen, onClose, orgId }) {
   const createTeam = useCreateTeam(orgId)
   const [step, setStep] = useState('template') // 'template' | 'details'
@@ -155,7 +155,7 @@ export function CreateTeamModal({ isOpen, onClose, orgId }) {
     <Modal open={isOpen} onOpenChange={handleClose}>
       <ModalContent className="sm:max-w-lg p-0 overflow-hidden bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-2xl rounded-2xl">
         <AnimatePresence mode="wait">
-          {/* ═══ STEP 1: TEMPLATE SELECTION ═══ */}
+          {/* === STEP 1: TEMPLATE SELECTION === */}
           {step === 'template' && (
             <motion.div
               key="template"
@@ -242,7 +242,7 @@ export function CreateTeamModal({ isOpen, onClose, orgId }) {
             </motion.div>
           )}
 
-          {/* ═══ STEP 2: TEAM DETAILS ═══ */}
+          {/* === STEP 2: TEAM DETAILS === */}
           {step === 'details' && (
             <motion.div
               key="details"
@@ -411,7 +411,7 @@ export function CreateTeamModal({ isOpen, onClose, orgId }) {
                     >
                       {createTeam.isPending ? (
                         <span className="flex items-center gap-1.5">
-                          <Icons.loader className="w-3 h-3 animate-spin" /> Creating…
+                          <Icons.loader className="w-3 h-3 animate-spin" /> Creating...
                         </span>
                       ) : (
                         'Create Team'

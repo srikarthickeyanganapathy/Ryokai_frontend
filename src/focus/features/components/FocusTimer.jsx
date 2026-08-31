@@ -13,7 +13,7 @@ const POMODORO_MODES = [
 ]
 
 /**
- * THE PULSAR — the timer is the Ryokai brand instrument:
+ * THE PULSAR -- the timer is the Ryokai brand instrument:
  * a tilted accretion disk (elliptical progress), a white-hot core
  * (clock), a relativistic jet (running state) and orbiting
  * accretion nodes (pomodoro counter). Presentation-only rewrite:
@@ -99,7 +99,7 @@ export function FocusTimer({ task }) {
 
   const toggleStartPause = () => {
     if (!isRunning && mode === 'focus') {
-      // Bug fix: persist focus sessions even when no task is pinned — the
+      // Bug fix: persist focus sessions even when no task is pinned -- the
       // backend accepts taskId=null and the API already sends {} in that case.
       startMutation.mutate(task?.id || null)
     } else if (isRunning && activeSession?.id) {

@@ -1,8 +1,8 @@
 import { Icons } from '@/shared/ui/Icons'
 
-/* ══════════════════════════════════════════════════════
+/* ===
  * TEMPLATE DEFINITIONS (extracted from TeamsPage)
- * ══════════════════════════════════════════════════════ */
+ * === */
 
 export const TEAM_TEMPLATES = [
   {
@@ -12,7 +12,7 @@ export const TEAM_TEMPLATES = [
     description: '2-week sprint cycles, backlog, code reviews, and CI/CD pipeline tracking.',
     hue: 220,
     categories: ['Backlog', 'In Progress', 'Review', 'Done'],
-    mood: '⚡',
+    mood: ' ',
   },
   {
     id: 'marketing-campaign',
@@ -21,7 +21,7 @@ export const TEAM_TEMPLATES = [
     description: 'Campaign calendar, content pipeline, asset approvals, and analytics.',
     hue: 320,
     categories: ['Planning', 'Production', 'Review', 'Published'],
-    mood: '📢',
+    mood: '  ',
   },
   {
     id: 'design-studio',
@@ -30,7 +30,7 @@ export const TEAM_TEMPLATES = [
     description: 'Design requests, critique rounds, handoff tracking, and asset library.',
     hue: 280,
     categories: ['Brief', 'Ideation', 'Review', 'Handoff'],
-    mood: '🎨',
+    mood: '  ',
   },
   {
     id: 'blank-canvas',
@@ -39,6 +39,6 @@ export const TEAM_TEMPLATES = [
     description: 'Start from scratch. Customize everything to fit your workflow.',
     hue: 180,
     categories: ['To Do', 'In Progress', 'Done'],
-    mood: '✨',
+    mood: ' ',
   },
 ]

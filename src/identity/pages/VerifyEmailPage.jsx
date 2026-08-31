@@ -15,7 +15,7 @@ export function VerifyEmailPage() {
   const { user } = useAuth()
   const [isResending, setIsResending] = useState(false)
 
-  // Resolve the email to resend to: query param → logged-in user → stored pending email.
+  // Resolve the email to resend to: query param -> logged-in user -> stored pending email.
   const email = searchParams.get('email') || user?.email || localStorage.getItem(PENDING_EMAIL_KEY) || ''
 
   useEffect(() => {
@@ -90,7 +90,7 @@ export function VerifyEmailPage() {
         <div className="glass-panel rounded-[var(--radius-lg)] p-4 w-full">
           <Text variant="muted" className="text-[13px] flex items-center justify-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[var(--success)]" />
-            Verified — you're all set
+            Verified -- you're all set
           </Text>
         </div>
       )}

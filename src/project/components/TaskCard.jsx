@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/Popover'
 import { normalizePriority, PRIORITY_HEX } from '@/shared/lib/priority'
 
 /* ============================================================
-   components/TaskCard.jsx — board card from the approved demo:
+   components/TaskCard.jsx -- board card from the approved demo:
    priority dot, due chip, hover quick-complete, click-avatar
    reassign popover (with current-assignee check), focus pulse.
    Assign routes to the page's real reassignTaskMutation.

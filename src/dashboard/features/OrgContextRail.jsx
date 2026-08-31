@@ -46,7 +46,7 @@ export function OrgContextRail({ context }) {
         </CardContent>
       </Card>
 
-      {/* Teams — already scoped via orgId */}
+      {/* Teams -- already scoped via orgId */}
       <Card className="group">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -98,7 +98,7 @@ export function OrgContextRail({ context }) {
         </CardContent>
       </Card>
 
-      {/* Org Projects — scoped via orgId */}
+      {/* Org Projects -- scoped via orgId */}
       <Card className="group">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">

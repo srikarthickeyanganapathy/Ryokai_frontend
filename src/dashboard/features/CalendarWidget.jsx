@@ -98,7 +98,7 @@ export function CalendarWidget() {
                   </p>
                   <p className="text-[11px] text-[var(--text-tertiary)]">
                     {new Date(event.startTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                    {' · '}
+                    {'   '}
                     {new Date(event.startTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>

@@ -4,7 +4,7 @@
  * FIX: backend TaskPriority enum is { LOW, MEDIUM, HIGH, URGENT }.
  * The old code listed 'NORMAL' and 'NONE' which don't exist in the backend.
  * 'NORMAL' has been replaced with 'MEDIUM' to match the backend enum exactly.
- * 'NONE' has been removed entirely — the backend requires a priority value.
+ * 'NONE' has been removed entirely -- the backend requires a priority value.
  */
 export const PRIORITY_OPTIONS = [
   { value: 'URGENT', label: 'Urgent', color: 'red' },
@@ -32,7 +32,7 @@ export const PRIORITY_HEX = {
 export const normalizePriority = (p) => {
   if (!p) return 'Medium'
   const upper = String(p).toUpperCase()
-  // Backwards-compat: old data may have 'NORMAL' — map to 'MEDIUM'
+  // Backwards-compat: old data may have 'NORMAL' -- map to 'MEDIUM'
   if (upper === 'NORMAL') return 'Medium'
   if (upper === 'NONE') return 'Low'
   return PRIORITY_OPTIONS.find(o => o.value === upper)?.label || 'Medium'

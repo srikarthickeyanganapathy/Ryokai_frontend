@@ -22,7 +22,7 @@ export default function CapabilitiesSection() {
       color: "text-blue-500",
       bg: "bg-blue-500/10",
       title: "Missions & Projects",
-      desc: "Structure goals with the view that fits your workflow — Kanban boards, lists, tables, or the spatial Nebula graph."
+      desc: "Structure goals with the view that fits your workflow -- Kanban boards, lists, tables, or the spatial Nebula graph."
     },
     {
       num: "02 / FOCUS",

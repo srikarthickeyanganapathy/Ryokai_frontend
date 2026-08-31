@@ -3,17 +3,17 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * FrameworkEmptyState
- * ─────────────────────────────────────────────────────────
+ * ---
  * Standardized zero-state component for WEF layouts.
  * Extends the existing EmptyState with framework-consistent styling
  * and an optional illustration slot.
  *
- * @param {React.Component} [icon] — Lucide icon component
- * @param {string} title — Primary message
- * @param {string} [description] — Supporting description
- * @param {string} [actionLabel] — CTA button text
- * @param {function} [onAction] — CTA click handler
- * @param {React.ReactNode} [illustration] — Custom illustration slot
+ * @param {React.Component} [icon] -- Lucide icon component
+ * @param {string} title -- Primary message
+ * @param {string} [description] -- Supporting description
+ * @param {string} [actionLabel] -- CTA button text
+ * @param {function} [onAction] -- CTA click handler
+ * @param {React.ReactNode} [illustration] -- Custom illustration slot
  */
 export function FrameworkEmptyState({
   icon: Icon,

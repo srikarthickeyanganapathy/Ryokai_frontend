@@ -1,10 +1,10 @@
-﻿import React from 'react'
+ import React from 'react'
 import { DetailTabs } from '@/shared/ui/DetailTabs'
 import { Icons } from '@/shared/ui/Icons'
 import { FolderIcon, ChecklistIcon, ChatIcon, WhiteboardIcon } from './CrewShared'
 
 /* ============================================================
-   components/CrewTabs.jsx — section navigation for crew detail.
+   components/CrewTabs.jsx -- section navigation for crew detail.
    Thin wrapper over the shared DetailTabs so every detail page
    (Crew / Team / Project) uses the same underline tab look.
    ============================================================ */

@@ -1,6 +1,6 @@
 /**
  * Derive executive-level statistics from a list of goals.
- * Uses only data already present in the goal objects — no extra API calls.
+ * Uses only data already present in the goal objects -- no extra API calls.
  *
  * @param {Array} goals - Array of normalized goal objects
  * @returns {Object} Derived statistics

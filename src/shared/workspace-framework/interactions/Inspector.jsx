@@ -4,7 +4,7 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * Inspector
- * ─────────────────────────────────────────────────────────
+ * ---
  * Reusable side-panel UX primitive for detail inspection.
  * Used inside EditorLayout and ManagementLayout for
  * viewing detail alongside a list or canvas.
@@ -12,13 +12,13 @@ import { cn } from '@/shared/lib/cn'
  * Unlike DrawerManager (global overlay), Inspector is an
  * inline panel that sits beside the main content.
  *
- * @param {boolean} isOpen — Whether the inspector is visible
- * @param {function} onClose — Close handler
- * @param {string} [title] — Inspector header title
- * @param {React.ReactNode} [actions] — Header action buttons
- * @param {React.ReactNode} [footer] — Sticky footer content
- * @param {'sm'|'md'|'lg'} [width='md'] — Panel width
- * @param {React.ReactNode} children — Inspector body content
+ * @param {boolean} isOpen -- Whether the inspector is visible
+ * @param {function} onClose -- Close handler
+ * @param {string} [title] -- Inspector header title
+ * @param {React.ReactNode} [actions] -- Header action buttons
+ * @param {React.ReactNode} [footer] -- Sticky footer content
+ * @param {'sm'|'md'|'lg'} [width='md'] -- Panel width
+ * @param {React.ReactNode} children -- Inspector body content
  */
 export function Inspector({
   isOpen,

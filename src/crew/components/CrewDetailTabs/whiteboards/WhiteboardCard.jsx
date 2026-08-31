@@ -54,7 +54,7 @@ export function WhiteboardCard({ board, crewId, isCreator, onDelete, isFavorite,
                 <Clock className="w-3 h-3" />
                 {formatRelativeTime(board.updatedAt || board.createdAt)}
               </span>
-              <span>•</span>
+              <span>*</span>
               <span className="capitalize">{boardTemplate.name}</span>
             </div>
           </div>

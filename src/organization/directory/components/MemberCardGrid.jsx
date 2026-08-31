@@ -13,7 +13,7 @@ import {
 import { Clock, Users, FolderKanban, Shield } from '@/shared/ui/Icons';
 import { hashHue, formatLastActive, hasRecentActivity } from './directoryUtils';
 
-// ───────── Sub-component: Enhanced Member Card Grid ─────────
+// --- Sub-component: Enhanced Member Card Grid ---
 
 export function MemberCardGrid({
   membersList,
@@ -114,7 +114,7 @@ export function MemberCardGrid({
                 { icon: <FolderKanban style={{ width: 11, height: 11 }} />, text: `${tasks.length} ${tasks.length === 1 ? 'Task' : 'Tasks'}` },
               ]}
               progress={maxWorkload > 0 ? Math.round((tasks.length / maxWorkload) * 100) : 0}
-              progressLabel={`Workload · avg ${avgTasksPerMember > 0 ? avgTasksPerMember : '—'}`}
+              progressLabel={`Workload   avg ${avgTasksPerMember > 0 ? avgTasksPerMember : '--'}`}
               footer={
                 <div className="ec-card-foot">
                   <span className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] font-medium">

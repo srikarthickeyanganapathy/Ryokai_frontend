@@ -24,7 +24,7 @@ export function PersonalContextRail({ context, relevantTasks = [] }) {
       <CalendarWidget />
       <InboxWidget />
       
-      {/* Active Tasks — PERSONAL scope only */}
+      {/* Active Tasks -- PERSONAL scope only */}
       <Card className="group">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -72,7 +72,7 @@ export function PersonalContextRail({ context, relevantTasks = [] }) {
         </CardContent>
       </Card>
 
-      {/* Projects — PERSONAL scope only */}
+      {/* Projects -- PERSONAL scope only */}
       <Card className="group">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">

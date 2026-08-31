@@ -70,7 +70,7 @@ export function PermissionInspectorContent({ role, permission, isEnabled, curren
               <div className="pt-2 border-t border-[var(--border-subtle)]">
                 <span className="text-[11px] text-[var(--text-muted)] block mb-1.5">Can Manage</span>
                 <div className="flex flex-wrap gap-1">
-                  {supervisionNames.length > 0 ? supervisionNames.map((name) => <span key={name} className="text-[10px] font-medium bg-[var(--bg-card)] px-1.5 py-0.5 rounded text-[var(--text-secondary)]">{name}</span>) : <span className="text-[10px] text-[var(--text-muted)] italic">None — lowest rank</span>}
+                  {supervisionNames.length > 0 ? supervisionNames.map((name) => <span key={name} className="text-[10px] font-medium bg-[var(--bg-card)] px-1.5 py-0.5 rounded text-[var(--text-secondary)]">{name}</span>) : <span className="text-[10px] text-[var(--text-muted)] italic">None -- lowest rank</span>}
                 </div>
               </div>
             </div>
@@ -98,7 +98,7 @@ export function PermissionInspectorContent({ role, permission, isEnabled, curren
           </div>
           <span className="text-[10px] font-mono text-[var(--text-muted)] block pl-6">{permission.code}</span>
         </div>
-        {onClose && <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-[12px] transition-colors p-1 rounded hover:bg-[var(--bg-hover)]">✕</button>}
+        {onClose && <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-[12px] transition-colors p-1 rounded hover:bg-[var(--bg-hover)]">[ ]</button>}
       </div>
 
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
@@ -145,7 +145,7 @@ export function PermissionInspectorContent({ role, permission, isEnabled, curren
         )}
 
         {requires.length > 0 && (
-          <Section title="Dependency Graph — Prerequisites" icon={GitBranch}>
+          <Section title="Dependency Graph -- Prerequisites" icon={GitBranch}>
             <div className="relative pl-4">
               <div className="absolute left-[7px] top-1 bottom-1 w-px bg-[var(--border-subtle)]" />
               <div className="space-y-1.5">
@@ -170,7 +170,7 @@ export function PermissionInspectorContent({ role, permission, isEnabled, curren
         )}
 
         {requiredBy.length > 0 && (
-          <Section title="Impact Analysis — Dependent Permissions" icon={Radar}>
+          <Section title="Impact Analysis -- Dependent Permissions" icon={Radar}>
             <div className="p-2.5 bg-[var(--danger-soft)] rounded-md border border-[var(--border-subtle)]">
               <div className="flex items-start gap-2">
                 <Info className="w-3.5 h-3.5 text-[var(--danger)] mt-0.5 shrink-0" />

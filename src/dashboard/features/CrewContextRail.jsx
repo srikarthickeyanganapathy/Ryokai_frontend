@@ -18,7 +18,7 @@ export function CrewContextRail({ context }) {
       {/* Crew Members */}
       <RecentlyActive />
 
-      {/* Crew Tasks — scoped to this crew */}
+      {/* Crew Tasks -- scoped to this crew */}
       <Card className="group">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -61,7 +61,7 @@ export function CrewContextRail({ context }) {
         </CardContent>
       </Card>
 
-      {/* Crew Projects — already scoped via crewId */}
+      {/* Crew Projects -- already scoped via crewId */}
       <Card className="group">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -113,7 +113,7 @@ export function CrewContextRail({ context }) {
         </CardContent>
       </Card>
 
-      {/* Crew Channels — already scoped via crewId */}
+      {/* Crew Channels -- already scoped via crewId */}
       <Card className="group">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">

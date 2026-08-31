@@ -39,7 +39,7 @@ function DiffBar({ additions, deletions }) {
   const del = deletions || 0;
   const total = add + del;
   if (total === 0) {
-    return <span className="text-[11px] tabular-nums text-[var(--text-tertiary)]" title="No line changes">±0</span>;
+    return <span className="text-[11px] tabular-nums text-[var(--text-tertiary)]" title="No line changes"> 0</span>;
   }
   const addPct = Math.round((add / total) * 100);
   return (
@@ -49,7 +49,7 @@ function DiffBar({ additions, deletions }) {
         <div className="bg-rose-500/70 transition-all duration-300" style={{ width: `${100 - addPct}%` }} />
       </div>
       <span aria-hidden="true" className="text-[11px] tabular-nums text-emerald-600 dark:text-emerald-400">+{add}</span>
-      <span aria-hidden="true" className="text-[11px] tabular-nums text-rose-500">−{del}</span>
+      <span aria-hidden="true" className="text-[11px] tabular-nums text-rose-500"> {del}</span>
       <span className="sr-only">{add} additions and {del} deletions</span>
     </div>
   );
@@ -97,9 +97,9 @@ export function PullRequestList({ pullRequests, isLoading, onRefreshAll, isRefre
       {/* Live region: announces loading, syncing, and filter results */}
       <p className="sr-only" role="status">
         {isRefreshing
-          ? 'Syncing pull requests…'
+          ? 'Syncing pull requests...'
           : isLoading
-          ? 'Loading pull requests…'
+          ? 'Loading pull requests...'
           : `Showing ${filtered.length} of ${pullRequests.length} pull requests`}
       </p>
 
@@ -134,7 +134,7 @@ export function PullRequestList({ pullRequests, isLoading, onRefreshAll, isRefre
           className="ml-auto flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/40 px-2.5 py-1.5 text-[12px] font-medium text-[var(--text-secondary)] transition-colors duration-150 hover:text-[var(--text-primary)] disabled:opacity-45"
         >
           <RefreshCw className={cn('h-3.5 w-3.5 motion-reduce:animate-none', isRefreshing && 'animate-spin')} strokeWidth={1.5} aria-hidden="true" />
-          {isRefreshing ? 'Syncing…' : 'Sync'}
+          {isRefreshing ? 'Syncing...' : 'Sync'}
         </button>
       </div>
 
@@ -164,7 +164,7 @@ export function PullRequestList({ pullRequests, isLoading, onRefreshAll, isRefre
             </p>
             <p className="mt-1 max-w-xs text-[12px] text-[var(--text-tertiary)]">
               {filter === 'all'
-                ? 'Open a PR on GitHub and hit Sync — it will show up here within seconds.'
+                ? 'Open a PR on GitHub and hit Sync -- it will show up here within seconds.'
                 : 'Try a different filter, or sync to pull in fresh activity.'}
             </p>
           </motion.div>

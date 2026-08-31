@@ -35,7 +35,7 @@ const isHighPriority = (priority) => ['High', 'Urgent'].includes(normalizePriori
 
 /* ============================================================
    pages/TeamDetailPage.jsx
-   Team HQ — Overview / Work / People / Discussion / Insights.
+   Team HQ -- Overview / Work / People / Discussion / Insights.
    Data layer (hooks, derivations, mutations, permissions,
    PageState, modals) is preserved from the original page;
    only the presentation follows the approved redesign and is
@@ -244,7 +244,7 @@ export function TeamDetailPage() {
     updateProjectMutation.mutate({ id: projectId, updates: { status: newStatus } })
   }
 
-  // Attention band — pure presentation derivation from real task data
+  // Attention band -- pure presentation derivation from real task data
   const band = useMemo(() => {
     const now = new Date().setHours(0, 0, 0, 0)
     const overdue = teamTasks.filter(t => t.status !== 'Done' && !t.archived && t.dueDate && new Date(t.dueDate).setHours(0, 0, 0, 0) < now)
@@ -572,7 +572,7 @@ export function TeamDetailPage() {
         {confirmDialog}
       </PageState>
 
-      {/* Mobile FAB — new task (demo parity) */}
+      {/* Mobile FAB -- new task (demo parity) */}
       {isAuthorized && !isReadOnly && (
         <motion.button
           initial={{ opacity: 0, scale: 0.5, y: 16 }}

@@ -35,7 +35,7 @@ export function AuthLayout() {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)]">
 
-      {/* LEFT SIDE — brand stage: logo + live product demo over the nebula-eye galaxy */}
+      {/* LEFT SIDE -- brand stage: logo + live product demo over the nebula-eye galaxy */}
       <aside className="relative hidden lg:flex lg:w-[46%] flex-col overflow-hidden border-r border-[var(--border-subtle)] bg-[var(--bg-subtle)] mesh-bg shadow-[var(--inset-highlight-soft)]">
         <CosmicBackground variant="hero" opacity={0.3} />
         {/* Corner nebula glows */}
@@ -58,7 +58,7 @@ export function AuthLayout() {
           }}
         />
 
-        {/* Header — logo + brand line */}
+        {/* Header -- logo + brand line */}
         <div className="relative z-10 flex shrink-0 items-center justify-between px-10 pt-8">
           <RyokaiLogo size="lg" />
           <span className="font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-[var(--text-tertiary)]">
@@ -66,24 +66,24 @@ export function AuthLayout() {
           </span>
         </div>
 
-        {/* Middle — the demo stage owns the space (scales itself to fit) */}
+        {/* Middle -- the demo stage owns the space (scales itself to fit) */}
         <div className="relative z-10 flex min-h-0 min-w-0 flex-1 items-stretch justify-stretch overflow-hidden p-4">
           <AuthDemoStage />
         </div>
 
         {/* Footer */}
         <div className="relative z-10 flex shrink-0 items-center justify-between px-10 pb-7">
-          <Text size="xs" variant="muted">© 2026 Ryokai</Text>
+          <Text size="xs" variant="muted">  2026 Ryokai</Text>
           <Text size="xs" variant="muted" className="font-mono tracking-wide">Made for teams that ship</Text>
         </div>
       </aside>
 
-      {/* RIGHT SIDE — form stage */}
+      {/* RIGHT SIDE -- form stage */}
       <main className="relative flex flex-1 flex-col overflow-hidden bg-[var(--bg-base)]">
         {/* Faint starfield ties the form side to the brand panel */}
         <CosmicBackground variant="hero" opacity={0.1} />
 
-        {/* Top chrome — back to landing + theme toggle */}
+        {/* Top chrome -- back to landing + theme toggle */}
         <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between p-5 sm:p-7">
           <Link
             to="/landing"

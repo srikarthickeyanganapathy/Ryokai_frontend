@@ -1,5 +1,5 @@
 /* ============================================================
-   Entity Card system — shared card UI for Projects / Teams /
+   Entity Card system -- shared card UI for Projects / Teams /
    Crews / Discover / Directory.
    Design language: flat + minimal (matches InteractiveCard /
    PillNav / Badge). Solid surfaces, 1px borders, small shadows,
@@ -20,7 +20,7 @@
 .ec-card--disabled{opacity:.55;cursor:default}
 .ec-card--disabled:hover{transform:none;border-color:var(--border-subtle);box-shadow:var(--shadow-sm)}
 .ec-card--selected{outline:2px solid var(--accent);outline-offset:2px}
-/* per-type accents (tone only — no glow) */
+/* per-type accents (tone only -- no glow) */
 .ec-card[data-type="project"]{--ec-pcol:var(--ec-cyan,#38bdf8)}
 .ec-card[data-type="team"]{--ec-pcol:var(--ec-amber,#fbbf24)}
 .ec-card[data-type="crew"]{--ec-pcol:var(--ec-emerald,#34d399)}

@@ -13,7 +13,7 @@ function CommitAvatar({ commit }) {
     return (
       <img
         src={commit.avatarUrl}
-        alt="" /* decorative — author name is rendered right next to it */
+        alt="" /* decorative -- author name is rendered right next to it */
         loading="lazy"
         className="h-7 w-7 shrink-0 rounded-full ring-1 ring-[var(--border-subtle)]"
       />
@@ -60,9 +60,9 @@ export function CommitList({ commits, isLoading, onRefreshAll, isRefreshing }) {
       {/* Live region: announces loading, syncing, and filter result counts */}
       <p className="sr-only" role="status">
         {isRefreshing
-          ? 'Syncing commits…'
+          ? 'Syncing commits...'
           : isLoading
-          ? 'Loading commits…'
+          ? 'Loading commits...'
           : `${filtered.length} ${filtered.length === 1 ? 'commit' : 'commits'}${branch !== 'all' ? ` on ${branch}` : ''}`}
       </p>
 
@@ -96,7 +96,7 @@ export function CommitList({ commits, isLoading, onRefreshAll, isRefreshing }) {
           className="ml-auto flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)]/40 px-2.5 py-1.5 text-[12px] font-medium text-[var(--text-secondary)] transition-colors duration-150 hover:text-[var(--text-primary)] disabled:opacity-45"
         >
           <RefreshCw className={cn('h-3.5 w-3.5 motion-reduce:animate-none', isRefreshing && 'animate-spin')} strokeWidth={1.5} aria-hidden="true" />
-          {isRefreshing ? 'Syncing…' : 'Sync'}
+          {isRefreshing ? 'Syncing...' : 'Sync'}
         </button>
       </div>
 
@@ -127,7 +127,7 @@ export function CommitList({ commits, isLoading, onRefreshAll, isRefreshing }) {
             </div>
             <p className="mt-3 text-[13px] font-semibold text-[var(--text-primary)]">No commits yet</p>
             <p className="mt-1 max-w-xs text-[12px] text-[var(--text-tertiary)]">
-              Push to GitHub and hit Sync — commits land here in near real time.
+              Push to GitHub and hit Sync -- commits land here in near real time.
             </p>
           </motion.div>
         ) : (

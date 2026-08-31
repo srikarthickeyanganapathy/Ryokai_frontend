@@ -7,7 +7,7 @@ import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { toast } from 'sonner'
 
 /* ============================================================
-   components/TaskBoardSection.jsx — org-wide kanban.
+   components/TaskBoardSection.jsx -- org-wide kanban.
    Delegates to the project's own KanbanBoard engine: mode-aware
    columns (PERSONAL / CREWS / ORG), the full workflow state
    machine (submit / approve / reject-with-reason / recall /

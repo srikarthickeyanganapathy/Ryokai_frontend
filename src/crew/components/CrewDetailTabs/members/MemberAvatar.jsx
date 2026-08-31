@@ -3,12 +3,12 @@ import { cn } from '@/shared/lib/cn';
 import { Crown, ShieldCheck, UserCheck } from '@/shared/ui/Icons';
 import { PRESENCE_CONFIG, getAvatarGradient, getMemberInitial, getMemberPresence } from './utils';
 
-/* ══════════════════════════════════════════════════════
+/* ===
    Shared member presentational primitives
    (RoleBadge / PresenceChip / MemberAvatar)
-   ══════════════════════════════════════════════════════ */
+   === */
 
-// Role badge chip (shared Badge component — teams design language)
+// Role badge chip (shared Badge component -- teams design language)
 export function RoleBadge({ member }) {
   const isOwner = member.role === 'CREATOR' || member.role === 'OWNER';
 

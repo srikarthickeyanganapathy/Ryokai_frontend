@@ -3,7 +3,7 @@ import { cn } from '@/shared/lib/cn';
 
 /**
  * Stepper-style capacity threshold control matching V1 demo.
- * − / value / + / unit label + ghost refresh button.
+ *   / value / + / unit label + ghost refresh button.
  */
 export function CapacityThresholdControl({
   threshold,
@@ -17,7 +17,7 @@ export function CapacityThresholdControl({
       {/* Stepper */}
       <div
         className="flex items-center bg-[var(--bg-card)] border border-[var(--border-default)] rounded-[var(--radius-sm)] shadow-[var(--shadow-xs)] overflow-hidden"
-        title="Capacity threshold — tasks per member"
+        title="Capacity threshold -- tasks per member"
       >
         <button
           onClick={onDecrement}
@@ -43,7 +43,7 @@ export function CapacityThresholdControl({
         </span>
       </div>
 
-      {/* Refresh — ghost style */}
+      {/* Refresh -- ghost style */}
       <button
         onClick={onRefresh}
         disabled={isLoading}

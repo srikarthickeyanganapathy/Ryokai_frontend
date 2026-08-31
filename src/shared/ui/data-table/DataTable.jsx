@@ -18,7 +18,7 @@ export function DataTable({
   columns,
   data,
   isLoading,
-  emptyStateTitle = "🎉 You're all caught up.",
+  emptyStateTitle = "   You're all caught up.",
   emptyStateDescription = "Create your first task.",
   emptyStateAction,
   emptyStateNode,

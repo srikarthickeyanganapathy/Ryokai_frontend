@@ -8,7 +8,7 @@ import { HelpCenter } from './HelpCenter'
 /**
  * Mounts the first-run and help experiences:
  *  - WelcomeOnboarding renders once, only while backend state is NOT_STARTED
- *    (loading or COMPLETED/SKIPPED render nothing — never nags).
+ *    (loading or COMPLETED/SKIPPED render nothing -- never nags).
  *  - HelpCenter renders on demand from any surface via the zustand store.
  *  - PageCoach teaches each page on first visit after the welcome flow
  *    (Dashboard -> Tasks -> Projects -> Calendar -> Analytics chain).

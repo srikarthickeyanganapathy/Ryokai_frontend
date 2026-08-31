@@ -9,8 +9,8 @@ import { EmptyState } from '@/shared/ui/EmptyState'
 import { normalizePriority, PRIORITY_HEX } from '@/shared/lib/priority'
 
 /* ============================================================
-   components/TaskListSection.jsx — urgency-first task list.
-   Groups: Overdue → This week → Later → No date → Done.
+   components/TaskListSection.jsx -- urgency-first task list.
+   Groups: Overdue -> This week -> Later -> No date -> Done.
    Selection feeds your bulk bar; assign opens your Reassign
    modal; complete/delete use your quick mutations; clicking a
    row opens your TaskPanel.

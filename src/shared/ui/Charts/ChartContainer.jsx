@@ -5,7 +5,7 @@ import { cn } from '@/shared/lib/cn'
 /*
  * These were referenced from '@/shared/ui/Charts' (ChartContainer, ChartTooltip,
  * ChartTooltipContent, ChartLegend, ChartLegendContent) by WeeklyProgressChart
- * and the design-system showcase page, but were never defined — both call
+ * and the design-system showcase page, but were never defined -- both call
  * sites would throw on render. This restores the standard shadcn-style chart
  * primitives, wired to this app's token system instead of Tailwind defaults.
  */

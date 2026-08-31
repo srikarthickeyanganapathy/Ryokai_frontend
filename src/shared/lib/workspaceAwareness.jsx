@@ -1,11 +1,11 @@
 /**
- * Ryokai — Workspace Awareness System
- * ─────────────────────────────────────────────────────────
+ * Ryokai -- Workspace Awareness System
+ * ---
  * Different workspaces feel different:
  *
- *   PERSONAL → relaxed, minimal, focus-driven
- *   ORG      → professional, dense, structured
- *   CREWS    → collaborative, social, mission-driven
+ *   PERSONAL -> relaxed, minimal, focus-driven
+ *   ORG      -> professional, dense, structured
+ *   CREWS    -> collaborative, social, mission-driven
  *
  * This module provides density presets, visual tone mappings,
  * and workspace-adaptive component wrappers.
@@ -14,7 +14,7 @@
 import React, { createContext, useContext } from 'react';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
-/* ─── Workspace Tone Presets ─── */
+/* --- Workspace Tone Presets --- */
 export const WORKSPACE_TONES = {
   PERSONAL: {
     density: 'relaxed',     // generous spacing, fewer columns
@@ -60,7 +60,7 @@ export const WORKSPACE_TONES = {
   },
 };
 
-/* ─── Workspace-aware context hook ─── */
+/* --- Workspace-aware context hook --- */
 export function useWorkspaceTone() {
   const { workspaceMode, activeCrew, activeOrganization } = useWorkspace();
   const tone = WORKSPACE_TONES[workspaceMode] || WORKSPACE_TONES.PERSONAL;
@@ -74,14 +74,14 @@ export function useWorkspaceTone() {
   };
 }
 
-/* ─── Workspace-adaptive spacing component ─── */
+/* --- Workspace-adaptive spacing component --- */
 export function WorkspaceSpacing({ children, className }) {
   const { density } = useWorkspaceTone();
   const gapMap = { relaxed: 'gap-6', balanced: 'gap-5', compact: 'gap-4' };
   return <div className={gapMap[density]}>{children}</div>;
 }
 
-/* ─── Workspace-adaptive grid component ─── */
+/* --- Workspace-adaptive grid component --- */
 export function WorkspaceGrid({ children, columns }) {
   const { gridColumns } = useWorkspaceTone();
   const cols = columns || gridColumns;
@@ -93,13 +93,13 @@ export function WorkspaceGrid({ children, columns }) {
   return <div className={gridMap[cols] || gridMap[3]}>{children}</div>;
 }
 
-/* ─── Module identity wrapper ─── 
+/* --- Module identity wrapper --- 
  * Every module gets a visual identity:
- *   Projects  → progress-centric (radial rings, completion stats)
- *   Goals     → achievement-centric (milestones, trophies)
- *   Calendar  → schedule-centric (timeline, time blocks)
- *   Teams     → directory-centric (avatar grids, role badges)
- *   Announcements → timeline-centric (chronological feed)
+ *   Projects  -> progress-centric (radial rings, completion stats)
+ *   Goals     -> achievement-centric (milestones, trophies)
+ *   Calendar  -> schedule-centric (timeline, time blocks)
+ *   Teams     -> directory-centric (avatar grids, role badges)
+ *   Announcements -> timeline-centric (chronological feed)
  */
 export const MODULE_IDENTITIES = {
   projects: {

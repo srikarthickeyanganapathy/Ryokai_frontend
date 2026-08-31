@@ -10,7 +10,7 @@ import { PageShell, PageHero, PageContent } from '@/shared/ui/PageShell'
 import { PageState } from '@/shared/ui/PageState'
 
 function formatDate(isoString) {
-  if (!isoString) return '—'
+  if (!isoString) return '--'
   return new Date(isoString).toLocaleString(undefined, {
     month: 'short',
     day: 'numeric',
@@ -21,8 +21,8 @@ function formatDate(isoString) {
 }
 
 function maskTokenId(tokenId) {
-  if (!tokenId) return '—'
-  return tokenId.slice(0, 8) + '…'
+  if (!tokenId) return '--'
+  return tokenId.slice(0, 8) + '...'
 }
 
 function getDeviceIcon(deviceInfo = '') {

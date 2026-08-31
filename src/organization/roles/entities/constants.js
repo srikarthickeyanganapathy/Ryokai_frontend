@@ -35,7 +35,7 @@ export const GROUP_CONFIG = {
 
 export const getGroupConfig = (group) => GROUP_CONFIG[group] || GROUP_CONFIG.GENERAL;
 
-/* ── V10 access levels: one-tap module levels mapped onto permission groups ── */
+/* --- V10 access levels: one-tap module levels mapped onto permission groups --- */
 export const LEVEL_TIERS = [
   { lvl: 1, name: 'View', icon: 'Eye', groups: ['READ'] },
   { lvl: 2, name: 'Work', icon: 'Pencil', groups: ['READ', 'WRITE'] },
@@ -66,7 +66,7 @@ export function computeModuleLevel({ module, enabledCodes, permissionMap }) {
   return { cov, max, exact: allUpToMax && noneAbove };
 }
 
-/* ── Role identity hues (monograms / chips) ── */
+/* --- Role identity hues (monograms / chips) --- */
 export const ROLE_HUES = ['#A78BFA', '#67E8F9', '#34D399', '#FBBF24', '#FB7185', '#F472B6', '#60A5FA', '#2DD4BF', '#A3E635', '#F59E0B'];
 export const roleHue = (name) => {
   let h = 0;
@@ -74,7 +74,7 @@ export const roleHue = (name) => {
   return ROLE_HUES[h % ROLE_HUES.length];
 };
 
-/* ── Role purposes — human-readable intent for each backend role ── */
+/* --- Role purposes -- human-readable intent for each backend role --- */
 export const ROLE_PURPOSES = {
   ADMIN: 'Full control over the organization and its members.',
   ENGINEER: 'Builds and ships tasks across projects.',
@@ -85,19 +85,19 @@ export const ROLE_PURPOSES = {
   OPERATIONS: 'Keeps the organization running smoothly.',
   GUEST: 'Limited read-only access.',
 };
-export const rolePurpose = (name) => ROLE_PURPOSES[name] || 'Custom role — configure its access below.';
+export const rolePurpose = (name) => ROLE_PURPOSES[name] || 'Custom role -- configure its access below.';
 
-/* ── Permission labels — human action names instead of backend codes (demo rows) ── */
+/* --- Permission labels -- human action names instead of backend codes (demo rows) --- */
 export function permissionLabel(perm) {
   const raw = (perm?.name || perm?.code || '').trim();
   if (!raw) return '';
-  // Already human-readable (mixed case or spaced words) → keep as-is
+  // Already human-readable (mixed case or spaced words) -> keep as-is
   if (/[a-z]/.test(raw) && raw !== raw.toUpperCase()) return raw;
-  // Backend code (ORG_SETTINGS_UPDATE) → sentence case (Org Settings Update)
+  // Backend code (ORG_SETTINGS_UPDATE) -> sentence case (Org Settings Update)
   return raw.replace(/_+/g, ' ').toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
 }
 
-/* ── Resource chip hue — deterministic color per resource id ── */
+/* --- Resource chip hue -- deterministic color per resource id --- */
 export const resourceHue = (id) => {
   let h = 0;
   const s = String(id || '');

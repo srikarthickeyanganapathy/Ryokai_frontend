@@ -59,7 +59,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
   const [showReview, setShowReview] = useState(false);
   const [showCreateRole, setShowCreateRole] = useState(false);
 
-  // ── Inspector visibility — reclaim horizontal space for the permission list ──
+  // --- Inspector visibility -- reclaim horizontal space for the permission list ---
   const [inspectorOpen, setInspectorOpen] = useState(() => readLocalBool(INSPECTOR_STORAGE_KEY, true));
   const toggleInspector = useCallback(() => {
     setInspectorOpen((prev) => {
@@ -69,7 +69,7 @@ export function useRoleStudio({ orgId, roles = [], rolesLoading }) {
     });
   }, []);
 
-  // ── Pinned / Recent roles (client-side convenience state) ──
+  // --- Pinned / Recent roles (client-side convenience state) ---
   const [pinnedRoleIds, setPinnedRoleIds] = useState(() => readLocalSet(PIN_STORAGE_KEY));
   const [recentRoleIds, setRecentRoleIds] = useState(() => readLocalList(RECENT_STORAGE_KEY));
 

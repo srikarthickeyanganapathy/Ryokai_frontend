@@ -8,14 +8,14 @@ const api = axios.create({
 });
 
 /**
- * Fired when a request can't reach the server at all (no response — asleep or
+ * Fired when a request can't reach the server at all (no response -- asleep or
  * cold-starting Render instance, or local outage) or gets a gateway error
  * (502/503/504). ServerStatusProvider listens for it and takes over the UX.
  */
 export const SERVER_UNREACHABLE_EVENT = 'ryokai:server-unreachable';
 
 /**
- * Debounced error toast — prevents flooding when many queries fail simultaneously
+ * Debounced error toast -- prevents flooding when many queries fail simultaneously
  * (e.g. backend down triggers 10+ concurrent API calls).
  */
 let lastToastMessage = '';
@@ -79,7 +79,7 @@ const transformDates = (obj, seen = new WeakSet()) => {
       // Recursively transform only arrays of objects. Numeric arrays are left
       // untouched (F-014): the backend serializes all dates as ISO strings, so a
       // numeric [year, month, day, ...] array is user data (coordinates, chart
-      // series), never a date — converting it corrupts legitimate payloads.
+      // series), never a date -- converting it corrupts legitimate payloads.
       if (val.length > 0 && typeof val[0] === 'object') {
         transformDates(val, seen);
       }
@@ -102,7 +102,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Server unreachable (no response: asleep/cold-starting instance, network
-    // cut) or gateway error — let ServerStatusProvider show the reconnect
+    // cut) or gateway error -- let ServerStatusProvider show the reconnect
     // screen and poll until the instance answers.
     const status = error.response?.status;
     if (typeof window !== 'undefined' && (!error.response || status === 502 || status === 503 || status === 504)) {
@@ -184,9 +184,9 @@ api.interceptors.response.use(
         }
         toast.error(data.message || 'Validation error');
       } else if (error.response.status === 429) {
-        debouncedToast("Rate limited — please slow down");
+        debouncedToast("Rate limited -- please slow down");
       } else if (error.response.status >= 500) {
-        debouncedToast("Server error — try again");
+        debouncedToast("Server error -- try again");
       }
     }
     // No-response failures are surfaced by ServerStatusProvider's overlay;

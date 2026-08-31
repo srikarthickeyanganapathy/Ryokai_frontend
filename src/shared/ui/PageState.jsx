@@ -11,8 +11,8 @@ import { Button } from '@/shared/ui/Button';
 import { Skeleton } from '@/shared/ui/Skeleton';
 
 /**
- * PageState — Unified page lifecycle renderer.
- * ─────────────────────────────────────────────────────────
+ * PageState -- Unified page lifecycle renderer.
+ * ---
  * Replaces per-page ad-hoc state handling with a single wrapper.
  * Every page becomes:
  *
@@ -24,17 +24,17 @@ import { Skeleton } from '@/shared/ui/Skeleton';
  *   </PageShell>
  *
  * Supported states:
- *   loading      — Skeleton loader; pass `stateProps.skeleton` for a
+ *   loading      -- Skeleton loader; pass `stateProps.skeleton` for a
  *                  structure-matched skeleton, or pick `loadingVariant`
  *                  from table | cards | dashboard | list | insight | calendar
- *   empty        — Module-aware empty state with CTA
- *   error        — Error with retry
- *   offline      — Offline indicator
- *   unauthorized — Access denied
- *   ready        — Passes children through
+ *   empty        -- Module-aware empty state with CTA
+ *   error        -- Error with retry
+ *   offline      -- Offline indicator
+ *   unauthorized -- Access denied
+ *   ready        -- Passes children through
  *
  * Every state is presented with consistent spacing, typography,
- * and animation — no page deviates.
+ * and animation -- no page deviates.
  */
 
 const stateConfigs = {
@@ -95,10 +95,10 @@ export function PageState({
   children,
   className,
 }) {
-  // Module-aware messages for empty state — must be called before any early return (rules of hooks)
+  // Module-aware messages for empty state -- must be called before any early return (rules of hooks)
   const moduleIdentity = useModuleIdentity(moduleId);
 
-  // ── LOADING ──
+  // --- LOADING ---
   if (state === 'loading') {
     // Custom structure-matched skeleton wins over generic variants
     if (stateProps.skeleton) {
@@ -107,12 +107,12 @@ export function PageState({
     return <PageStateSkeleton variant={stateProps.loadingVariant || 'table'} className={className} />;
   }
 
-  // ── READY ──
+  // --- READY ---
   if (state === 'ready') {
     return <>{children}</>;
   }
 
-  // ── ALL OTHER STATES: unified shell ──
+  // --- ALL OTHER STATES: unified shell ---
   const cfg = stateConfigs[state] || stateConfigs.error;
   const Icon = stateProps.icon || cfg.icon;
   const tone = stateProps.tone || cfg.tone;
@@ -191,7 +191,7 @@ export function PageState({
   );
 }
 
-/* ─── Skeleton Variants ─── */
+/* --- Skeleton Variants --- */
 function PageStateSkeleton({ variant = 'table', className }) {
   if (variant === 'cards') {
     return (

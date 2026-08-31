@@ -42,7 +42,7 @@ export default function HistoryExplorer({ context, navigator, analysis, onCenter
   }
 
   const assigneeName = typeof currentTask.assignee === 'object' ? currentTask.assignee?.username : (currentTask.assignee || currentTask.assignedTo || 'Unassigned');
-  const creatorName = typeof currentTask.creator === 'object' ? currentTask.creator?.username : (currentTask.creator || currentTask.createdBy || '—');
+  const creatorName = typeof currentTask.creator === 'object' ? currentTask.creator?.username : (currentTask.creator || currentTask.createdBy || '--');
 
   return (
     <div className="space-y-4">
@@ -53,19 +53,19 @@ export default function HistoryExplorer({ context, navigator, analysis, onCenter
         <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-3">
           <div className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider mb-1">Age</div>
           <div className="text-sm font-bold text-[var(--text-primary)]">
-            {lifecycle.daysSinceCreation !== null ? `${lifecycle.daysSinceCreation}d` : '—'}
+            {lifecycle.daysSinceCreation !== null ? `${lifecycle.daysSinceCreation}d` : '--'}
           </div>
         </div>
         <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-3">
           <div className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider mb-1">Last Activity</div>
           <div className={cn("text-sm font-bold", lifecycle.isStale ? "text-amber-400" : "text-[var(--text-primary)]")}>
-            {lifecycle.daysSinceUpdate !== null ? `${lifecycle.daysSinceUpdate}d ago` : '—'}
+            {lifecycle.daysSinceUpdate !== null ? `${lifecycle.daysSinceUpdate}d ago` : '--'}
           </div>
         </div>
         <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-3">
           <div className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider mb-1">Deadline</div>
           <div className={cn("text-sm font-bold", lifecycle.isOverdue ? "text-rose-500" : lifecycle.daysUntilDue !== null && lifecycle.daysUntilDue <= 3 ? "text-amber-400" : "text-[var(--text-primary)]")}>
-            {lifecycle.daysUntilDue !== null ? (lifecycle.isOverdue ? `${Math.abs(lifecycle.daysUntilDue)}d overdue` : `${lifecycle.daysUntilDue}d left`) : '—'}
+            {lifecycle.daysUntilDue !== null ? (lifecycle.isOverdue ? `${Math.abs(lifecycle.daysUntilDue)}d overdue` : `${lifecycle.daysUntilDue}d left`) : '--'}
           </div>
         </div>
         <div className="bg-[var(--bg-elevated)] border border-[var(--color-border-subtle)] rounded-lg p-3">
@@ -81,7 +81,7 @@ export default function HistoryExplorer({ context, navigator, analysis, onCenter
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--warning-soft)] border border-amber-500/25">
           <Clock size={14} className="text-amber-400 shrink-0" />
           <span className="text-xs text-[var(--warning)] font-medium">
-            No activity for {lifecycle.daysSinceUpdate} days — this task may be stalled
+            No activity for {lifecycle.daysSinceUpdate} days -- this task may be stalled
           </span>
         </div>
       )}

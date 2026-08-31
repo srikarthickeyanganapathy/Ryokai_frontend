@@ -34,7 +34,7 @@ export function RepoList({ repos, selectedFullName, onSelect, isLoading }) {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Filter repositories…"
+            placeholder="Filter repositories..."
             aria-label="Filter repositories"
             className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-base)] py-1.5 pl-8 pr-8 text-[12px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none transition-colors duration-150 focus:border-[var(--accent-border)]"
           />
@@ -59,7 +59,7 @@ export function RepoList({ repos, selectedFullName, onSelect, isLoading }) {
       {/* Screen-reader announcements: loading + live filter result counts */}
       <p className="sr-only" role="status">
         {isLoading
-          ? 'Loading repositories…'
+          ? 'Loading repositories...'
           : query
           ? `${filtered.length} of ${repos.length} repositories match`
           : ''}

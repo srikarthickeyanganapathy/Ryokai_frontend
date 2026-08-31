@@ -43,7 +43,7 @@ export function MainLayout() {
       </a>
 
       
-      {/* Cosmic ambient particles — Ryokai signature atmosphere */}
+      {/* Cosmic ambient particles -- Ryokai signature atmosphere */}
       <CosmicBackground variant="full" opacity={0.25} />
       
       {/* Sidebar - Desktop is persistent, Mobile is drawer */}

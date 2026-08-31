@@ -24,7 +24,7 @@ export const updateProfile = async (profileData) => {
 };
 
 export const changePassword = async (currentPassword, newPassword) => {
-  // Backend returns 200 with empty body — don't read response data
+  // Backend returns 200 with empty body -- don't read response data
   await api.post('/users/me/password', { currentPassword, newPassword });
 };
 

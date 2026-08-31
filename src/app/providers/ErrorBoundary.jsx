@@ -22,7 +22,7 @@ export class ErrorBoundary extends React.Component {
         <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)]">
           <div className="p-8 max-w-md w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl shadow-lg text-center flex flex-col">
             <div className="w-16 h-16 rounded-full bg-[var(--danger-soft)] flex items-center justify-center mx-auto mb-4">
-              <span className="text-[var(--danger)] text-2xl" role="img" aria-label="Warning">⚠️</span>
+              <span className="text-[var(--danger)] text-2xl" role="img" aria-label="Warning">[WARNING]</span>
             </div>
             <Heading level={2} className="text-xl font-bold mb-2">Something went wrong</Heading>
             <Text variant="muted" className="mb-6">An unexpected error occurred. Please try reloading the page or return to the dashboard.</Text>

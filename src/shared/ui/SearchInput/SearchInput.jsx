@@ -5,7 +5,7 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * SearchInput
- * ─────────────────────────────────────────────────────────
+ * ---
  * Canonical search input with search icon and clear button.
  * Supports optional debounce to avoid excessive callbacks.
  *

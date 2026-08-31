@@ -9,7 +9,7 @@ import { resolveStatus } from '@/shared/lib/statusRegistry'
 
 /**
  * TaskDrawer
- * ─────────────────────────────────────────────────────────
+ * ---
  * Quick-view contextual drawer for task summary.
  * Shown when hovering/clicking a task reference in dashboards,
  * activity streams, or notification feeds.

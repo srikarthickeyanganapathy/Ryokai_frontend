@@ -44,7 +44,7 @@ function resolveStatus(member) {
   if (!member) return null
   // Presence must come from explicit data (a presence flag or a known
   // presenceStatus). Account fields like member.status ("ACTIVE") are NOT
-  // presence — mapping them would fabricate an online state we can't know.
+  // presence -- mapping them would fabricate an online state we can't know.
   if (typeof member.presence === 'boolean') {
     return member.presence ? STATUS_CONFIG.online : STATUS_CONFIG.offline
   }
@@ -86,7 +86,7 @@ export const MemberAvatarHalo = forwardRef(({ member, size = 'sm', className, sh
       role="img"
       aria-label={statusInfo ? `${name} (${statusInfo.label})` : name}
     >
-      {/* Dynamic presence halo ring around avatar — only when real presence data exists */}
+      {/* Dynamic presence halo ring around avatar -- only when real presence data exists */}
       {statusInfo && (
         <div
           className={cn(
@@ -103,7 +103,7 @@ export const MemberAvatarHalo = forwardRef(({ member, size = 'sm', className, sh
         </AvatarFallback>
       </Avatar>
 
-      {/* Status dot — only when real presence data exists */}
+      {/* Status dot -- only when real presence data exists */}
       {statusInfo && (
         <span
           className={cn(
@@ -191,7 +191,7 @@ export const PresenceHalo = forwardRef(({ members = [], member, maxDisplay = 5, 
               <ul className="text-[11px] text-[var(--text-secondary)] space-y-0.5 max-h-[120px] overflow-y-auto">
                 {overflowMembers.map((om, i) => (
                   <li key={om.id || i} className="truncate">
-                    • {om.name || om.email || 'Crew Member'}
+                    * {om.name || om.email || 'Crew Member'}
                   </li>
                 ))}
               </ul>

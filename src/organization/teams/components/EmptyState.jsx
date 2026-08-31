@@ -4,11 +4,11 @@ import { Heading, Text } from '@/shared/ui/Typography'
 import { Button } from '@/shared/ui/Button'
 import { Icons } from '@/shared/ui/Icons'
 
-/* ══════════════════════════════════════════════════════
- * EMPTY STATE (LOCAL — extracted from TeamsPage)
+/* ===
+ * EMPTY STATE (LOCAL -- extracted from TeamsPage)
  * NOTE: this is the LOCAL EmptyState, NOT the shared one
  * from '@/shared/ui/EmptyState'.
- * ══════════════════════════════════════════════════════ */
+ * === */
 
 export function EmptyState({ onCreateClick, organizationName }) {
   return (

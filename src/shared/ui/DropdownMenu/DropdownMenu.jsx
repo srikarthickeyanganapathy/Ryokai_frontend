@@ -6,7 +6,7 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * DropdownMenu
- * ─────────────────────────────────────────────────────────
+ * ---
  * Canonical dropdown/context menu for 3-dot (kebab) actions,
  * right-click menus, and inline action menus.
  *

@@ -59,7 +59,7 @@ export function TasksWorkbench({
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="flex flex-1 min-h-0 w-full overflow-hidden relative">
-      {/* Inline Sidebar — large only, reduced width, task list only */}
+      {/* Inline Sidebar -- large only, reduced width, task list only */}
       {sidebarInline && (
         <div className="shrink-0 relative z-20" style={{ width: sidebarCollapsed ? 0 : 220 }}>
           {!sidebarCollapsed && (
@@ -118,7 +118,7 @@ export function TasksWorkbench({
         {workspaceFooter && <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-30"><div className="pointer-events-auto">{workspaceFooter}</div></div>}
       </div>
 
-      {/* Task Panel — inline or overlay */}
+      {/* Task Panel -- inline or overlay */}
       {panelInline && <TaskContextPanel task={selectedTask} isOpen={!!selectedTask} onClose={onTaskClose} width={panelWidth} onWidthChange={setPanelWidth} isLoading={false} />}
       {!panelInline && (
         <AnimatePresence>

@@ -34,7 +34,7 @@ export function MembersSidebar({ members }) {
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-1">
                 <span className="text-[13px] font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--accent)] transition-colors">@{m.username}</span>
-                {m.role === 'CREATOR' && <span className="text-[var(--warning)] text-[11px]" title="Crew Owner">👑</span>}
+                {m.role === 'CREATOR' && <span className="text-[var(--warning)] text-[11px]" title="Crew Owner">  </span>}
               </div>
               <span className="text-[10px] text-[var(--text-muted)] block truncate font-medium">
                 {m.role === 'CREATOR' ? 'Crew Owner' : 'Squad Member'}

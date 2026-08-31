@@ -1,8 +1,8 @@
 import React from 'react'
 
-/* ══════════════════════════════════════════════════════
+/* ===
  * TEAM TILE SKELETON (extracted from TeamsPage)
- * ══════════════════════════════════════════════════════ */
+ * === */
 
 export function TeamTileSkeleton() {
   return (

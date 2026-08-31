@@ -11,7 +11,7 @@ import { cn } from '@/shared/lib/cn'
 import { useOnboardingActions, ONBOARDING_STATUS } from '../hooks/useOnboarding'
 
 /**
- * First-run welcome experience. Lightweight and skippable — a short guided
+ * First-run welcome experience. Lightweight and skippable -- a short guided
  * intro (not a mandatory wizard) that teaches the Ryokai workflow and links
  * straight into real product pages. Shown once per user (backend state),
  * reopenable later from the Help Center.
@@ -34,7 +34,7 @@ const STEPS = [
     key: 'projects',
     icon: FolderKanban,
     title: 'Projects group related tasks',
-    body: 'A project gathers every task that serves one outcome — a launch, a skill, a product area. Create a project, add tasks to it, and track completion at a glance.',
+    body: 'A project gathers every task that serves one outcome -- a launch, a skill, a product area. Create a project, add tasks to it, and track completion at a glance.',
     cta: { label: 'Open Projects', to: '/app/projects' },
   },
   {
@@ -48,7 +48,7 @@ const STEPS = [
     key: 'productivity',
     icon: CalendarClock,
     title: 'Stay on rhythm',
-    body: 'The Dashboard summarizes your day, the Calendar shows what is due, and Focus Mode helps you work one task at a time. Your workspace came with starter tasks — edit them, complete them, or replace them with your own.',
+    body: 'The Dashboard summarizes your day, the Calendar shows what is due, and Focus Mode helps you work one task at a time. Your workspace came with starter tasks -- edit them, complete them, or replace them with your own.',
     cta: { label: 'Open Dashboard', to: '/app' },
   },
 ]
@@ -70,7 +70,7 @@ export function WelcomeOnboarding({ status, onReopenMode = false }) {
   const dismiss = () => skip.mutate()
 
   const goTo = (to) => {
-    // Navigating away counts as engaging with onboarding — close quietly so
+    // Navigating away counts as engaging with onboarding -- close quietly so
     // the education never blocks exploring the real product.
     if (isFirstRun) skip.mutate()
     navigate(to)

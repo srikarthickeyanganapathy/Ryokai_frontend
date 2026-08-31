@@ -29,7 +29,7 @@ export function RealtimeProvider({ children }) {
     const token = localStorage.getItem('jwt_token')
     if (!token || clientRef.current?.active) return
 
-    // Derive WS URL from the API base: http://localhost:8080/api → ws://localhost:8080/ws
+    // Derive WS URL from the API base: http://localhost:8080/api -> ws://localhost:8080/ws
     const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1'
     const wsUrl = apiBase.replace(/\/api(\/v1)?\/?$/, '').replace(/^http/i, 'ws') + '/ws'
 

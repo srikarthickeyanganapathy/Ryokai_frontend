@@ -11,7 +11,7 @@ const TONE_STYLE = {
 }
 
 /**
- * EntityStatStrip — shared "data cards" row on top of entity pages.
+ * EntityStatStrip -- shared "data cards" row on top of entity pages.
  * stats: [{ key, label, value (node|string), sublabel, icon: LucideIcon,
  *           tone: 'cyan'|'amber'|'emerald'|'rose'|'accent', trend: {label, dir:'up'|'down'} }]
  */

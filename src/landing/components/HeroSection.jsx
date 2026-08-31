@@ -63,7 +63,7 @@ export default function HeroSection() {
           
           <motion.div variants={fadeUp} className="hero-cta">
             <Link className="btn btn-primary" to="/register">
-              Start free <span className="arr">→</span>
+              Start free <span className="arr">-></span>
             </Link>
             <a className="btn btn-ghost" href="#how-it-works">
               See how it works
@@ -71,7 +71,7 @@ export default function HeroSection() {
           </motion.div>
           
           <motion.div variants={fadeUp} className="hero-note">
-            Free personal & crew workspaces · No credit card required
+            Free personal & crew workspaces   No credit card required
           </motion.div>
         </motion.div>
 

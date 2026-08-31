@@ -44,7 +44,7 @@ import { cn } from '@/shared/lib/cn';
 import { SPRINGS, EASING } from '@/shared/lib/uxTokens';
 import { toast } from 'sonner';
 
-// ─── Saved Filter Presets ─────────────────────────────────────────────
+// --- Saved Filter Presets ---
 const SAVED_VIEWS = [
   {
     id: 'all',
@@ -76,7 +76,7 @@ const SAVED_VIEWS = [
   },
 ];
 
-// ─── Search Suggestions Dropdown ──────────────────────────────────────
+// --- Search Suggestions Dropdown ---
 function SearchSuggestions({ query, members, onSelect, visible }) {
   const suggestions = useMemo(() => {
     if (!query || query.trim().length < 1) return [];
@@ -118,7 +118,7 @@ function SearchSuggestions({ query, members, onSelect, visible }) {
             </div>
           </div>
           <span className="text-[10px] text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity">
-            Jump →
+            Jump ->
           </span>
         </button>
       ))}
@@ -414,7 +414,7 @@ export function DirectoryBulkActionsBar({
   }, [selectedMembers, allMembers, memberTeamsMap, memberTasksMap]);
 
   const handleSendAnnouncement = useCallback(() => {
-    toast('📢 Announcements coming soon!', {
+    toast('   Announcements coming soon!', {
       description: `Broadcasting to ${selectedIds.length} selected members will be available in a future update.`,
       duration: 3000,
     });
@@ -580,7 +580,7 @@ export function DirectoryBulkActionsBar({
 
           <div className="py-3 space-y-3">
             <div className="p-3 rounded-lg bg-[var(--danger-soft)]/20 border border-[var(--danger-border)]/40 text-[11px] text-[var(--danger)] font-medium">
-              ⚠️ This operation will sequentially revoke workspace access for all selected accounts.
+              [WARNING] This operation will sequentially revoke workspace access for all selected accounts.
             </div>
 
             {requireTypeConfirm && (

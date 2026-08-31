@@ -48,7 +48,7 @@ const isFileName = (key = '') => /\.(png|jpe?g|gif|webp)$/i.test(key);
 
 function filenameFromKey(key = '') {
   const part = key.split('/').pop() || 'file';
-  // keys look like "uuid-original-name.ext" — strip the uuid prefix for display
+  // keys look like "uuid-original-name.ext" -- strip the uuid prefix for display
   return part.replace(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-/i, '');
 }
 
@@ -530,7 +530,7 @@ export function TaskEvidence({ taskId, hasEditPerm }) {
         {/* Rich Cards */}
         {evidence.map(item => {
           // Uploaded files carry imageKey (no url); links carry url. The two
-          // need different rendering — mixing them crashed on null urls before.
+          // need different rendering -- mixing them crashed on null urls before.
           const isStoredFile = !!item.imageKey
           const hasUrl = !!item.url
           const isImg = !isStoredFile && isImageUrl(item.url)

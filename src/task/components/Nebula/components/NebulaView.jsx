@@ -259,7 +259,7 @@ export default function NebulaView({ tasks = [], selectedTask = null, onTaskSele
     });
   }, []);
 
-  // Analyze orb click → show radial menu
+  // Analyze orb click -> show radial menu
   const handleAnalyze = useCallback((task, screenPos) => {
     setAnalyzeMenuState({ position: screenPos, task });
   }, []);
@@ -270,7 +270,7 @@ export default function NebulaView({ tasks = [], selectedTask = null, onTaskSele
     graphControlsRef.current?.flyToTask(taskId);
   }, []);
 
-  // Insight click → fly + open analysis
+  // Insight click -> fly + open analysis
   const handleInsightClick = useCallback((insight) => {
     if (insight.taskId) {
       handleCameraSync(insight.taskId);
@@ -356,7 +356,7 @@ export default function NebulaView({ tasks = [], selectedTask = null, onTaskSele
         />
       )}
 
-      {/* 3. Workspace Manager — Explorer Windows with per-window GraphNavigator */}
+      {/* 3. Workspace Manager -- Explorer Windows with per-window GraphNavigator */}
       <WorkspaceManager
         windows={openWindows}
         graph={graphData}

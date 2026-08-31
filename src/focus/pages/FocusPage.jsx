@@ -249,7 +249,7 @@ export function FocusPage() {
                 <span className="fz-lockchip font-mono"><i className="fz-xhair" /> Target Lock</span>
                 <h2 className="fz-plaque-title">{currentTask.title}</h2>
                 <span className="fz-plaque-sub font-mono">
-                  {currentTask.isPersonal ? 'Personal' : (currentTask.crewId || currentTask.crew) ? 'Crew' : 'Submit'} · {fmtDur(currentTask.timeEstimateMinutes || 60)}
+                  {currentTask.isPersonal ? 'Personal' : (currentTask.crewId || currentTask.crew) ? 'Crew' : 'Submit'}   {fmtDur(currentTask.timeEstimateMinutes || 60)}
                 </span>
                 <button
                   type="button"
@@ -303,7 +303,7 @@ export function FocusPage() {
             <div className="fz-rail-tasks">
               {todayTasks.length === 0 && (
                 <div className="fz-rail-empty">
-                  <span className="fz-rail-empty-star">✦</span>
+                  <span className="fz-rail-empty-star"> </span>
                   <p>No tasks scheduled for today</p>
                   <span>Enjoy your clear sky.</span>
                 </div>

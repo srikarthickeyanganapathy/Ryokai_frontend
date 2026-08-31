@@ -1,4 +1,4 @@
-﻿import { ArrowUpDown } from '@/shared/ui/Icons';
+ import { ArrowUpDown } from '@/shared/ui/Icons';
 import { PillNav } from '@/shared/ui/PillNav';
 import {
   Select,

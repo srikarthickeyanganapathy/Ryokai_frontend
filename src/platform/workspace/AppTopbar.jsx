@@ -47,8 +47,8 @@ function SyncStatusIndicator() {
   return (
     <div
       title={connected
-        ? 'Connected — live updates enabled'
-        : 'Offline — reconnecting… updates may be delayed'}
+        ? 'Connected -- live updates enabled'
+        : 'Offline -- reconnecting... updates may be delayed'}
       role="status"
       aria-label={connected ? 'Online' : 'Offline'}
       className={cn(
@@ -86,7 +86,7 @@ export function AppTopbar({ onMenuClick }) {
   const { theme, setTheme } = useTheme()
   const navigate = useNavigate()
   const [notifOpen, setNotifOpen] = useState(false)
-  const [inviteDecisions, setInviteDecisions] = useState({}) // notifId → 'accepted' | 'declined'
+  const [inviteDecisions, setInviteDecisions] = useState({}) // notifId -> 'accepted' | 'declined'
   const { data: unreadCount = 0 } = useUnreadCount()
   const { data: notifications = [], isLoading: notifLoading } = useNotificationList({ size: 20 })
   const markRead = useMarkRead()
@@ -107,7 +107,7 @@ export function AppTopbar({ onMenuClick }) {
         </div>
       </div>
 
-      {/* RIGHT — status context → divider → actions */}
+      {/* RIGHT -- status context -> divider -> actions */}
       <div className="flex items-center gap-1 shrink-0 min-w-0">
 
         <LensStatusIndicator />

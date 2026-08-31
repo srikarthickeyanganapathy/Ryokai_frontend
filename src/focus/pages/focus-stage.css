@@ -1,5 +1,5 @@
 /* ============================================================
-   Ryokai Focus Stage — "The Observatory / The Pulsar" (V4)
+   Ryokai Focus Stage -- "The Observatory / The Pulsar" (V4)
    In-app port of the approved creative demo. Design-only layer:
    consumes the app's design tokens (accent, bg, text, borders,
    success, glass, shadows) so it follows light/dark theme.
@@ -218,7 +218,7 @@
   box-shadow: 0 0 10px var(--accent-soft);
 }
 .fz-constfill::after {
-  content: "✦"; position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+  content: " "; position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
   font-size: 11px; color: var(--success); opacity: 0; transition: opacity .6s;
 }
 .fz-constfill.lit::after { opacity: 1; animation: fz-tw 1.8s ease-in-out infinite; }
@@ -256,7 +256,7 @@
 .fz-rail-empty p { font-size: 12px; font-weight: 600; margin-top: 6px; }
 .fz-rail-empty span:last-child { font-size: 10.5px; color: var(--text-tertiary); }
 
-/* collapsed rail → slim vertical tab (desktop) */
+/* collapsed rail -> slim vertical tab (desktop) */
 .fz-rail.collapsed { width: 52px; }
 .fz-rail.collapsed .fz-rail-head { flex-direction: column; padding: 12px 0; gap: 8px; height: 100%; justify-content: space-between; }
 .fz-rail.collapsed .fz-rail-title span, .fz-rail.collapsed .fz-rail-meta,

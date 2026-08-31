@@ -22,7 +22,7 @@ import {
 } from '@/shared/ui/Select';
 import { StatKPI } from '@/organization/teams/components/StatKPI';
 
-/* ── KpiTile / OrgSnapshotBanner: StatKPI tile strip ─────────────────── */
+/* --- KpiTile / OrgSnapshotBanner: StatKPI tile strip --- */
 export function KpiTile({ icon: Icon, label, value, caption, tone, hue, suffix, ring }) {
   const defaultHue = tone === 'danger' ? 0 : tone === 'warning' ? 38 : tone === 'success' ? 145 : 215;
   const currentHue = hue ?? defaultHue;
@@ -89,7 +89,7 @@ export function OrgSnapshotBanner({ stats, threshold }) {
   );
 }
 
-/* ── AIInsightsPanel: tagged insight rows ──────────────────────────────── */
+/* --- AIInsightsPanel: tagged insight rows --- */
 export function AIInsightsPanel({ stats }) {
   const insights = [];
 
@@ -189,7 +189,7 @@ export function AIInsightsPanel({ stats }) {
   );
 }
 
-/* ── TeamHealthCard: gauge + breakdown bars ────────────────────────────── */
+/* --- TeamHealthCard: gauge + breakdown bars --- */
 export function TeamHealthCard({ score, stats }) {
   const tone = score > 80 ? 'accent' : score > 50 ? 'warning' : 'danger';
   const toneColor =
@@ -213,7 +213,7 @@ export function TeamHealthCard({ score, stats }) {
           Team Health Score
         </Heading>
         <span className="ml-auto font-mono text-[9px] uppercase tracking-[0.1em] text-[var(--text-muted)]">
-          0–100
+          0-100
         </span>
       </div>
       <div className="flex items-center gap-5">
@@ -259,7 +259,7 @@ export function TeamHealthCard({ score, stats }) {
   );
 }
 
-/* ── DistributionChart ─────────────────────────────────────────────────── */
+/* --- DistributionChart --- */
 export function DistributionChart({ rows, threshold }) {
   const dist = { idle: 0, light: 0, normal: 0, heavy: 0, critical: 0 };
   rows.forEach((row) => {
@@ -314,9 +314,9 @@ export function DistributionChart({ rows, threshold }) {
   );
 }
 
-/* LeaderboardPanel removed — not in V1 Capacity Command demo */
+/* LeaderboardPanel removed -- not in V1 Capacity Command demo */
 
-/* ── RebalanceSimulator ────────────────────────────────────────────────── */
+/* --- RebalanceSimulator --- */
 export function RebalanceSimulator({ rows, threshold }) {
   const over = rows.filter((r) => (r.totalActiveCount ?? 0) > threshold);
   const under = rows.filter((r) => (r.totalActiveCount ?? 0) < threshold);
@@ -377,7 +377,7 @@ export function RebalanceSimulator({ rows, threshold }) {
         <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center mb-3">
           <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-card)] p-2">
             <Text size="10px" variant="muted" className="block mb-1 font-mono uppercase tracking-wider">
-              From · Overloaded
+              From   Overloaded
             </Text>
             <Select value={String(getUserId(fromUser))} onValueChange={(val) => setFromId(val)}>
               <SelectTrigger className="w-full h-8 text-xs bg-[var(--bg-base)]">
@@ -401,7 +401,7 @@ export function RebalanceSimulator({ rows, threshold }) {
           </span>
           <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-card)] p-2">
             <Text size="10px" variant="muted" className="block mb-1 font-mono uppercase tracking-wider">
-              To · Available
+              To   Available
             </Text>
             <Select value={String(getUserId(toUser))} onValueChange={(val) => setToId(val)}>
               <SelectTrigger className="w-full h-8 text-xs bg-[var(--bg-base)]">
@@ -448,14 +448,14 @@ export function RebalanceSimulator({ rows, threshold }) {
             user: fromUser,
             after: fromAfter,
             tone: 'danger',
-            delta: `Δ −${clampedTasks}`,
+            delta: `   ${clampedTasks}`,
             verdict: fromAfter > threshold ? 'still over' : 'under threshold',
           },
           {
             user: toUser,
             after: toAfter,
             tone: 'success',
-            delta: `Δ +${clampedTasks}`,
+            delta: `  +${clampedTasks}`,
             verdict: toAfter > threshold ? 'near limit' : 'headroom left',
           },
         ].map(({ user, after, tone, delta, verdict }) => {

@@ -1,6 +1,6 @@
 /**
  * Downscales an image file with a canvas before upload.
- * Keeps avatars/attachments small — the backend caps avatars at 2MB and
+ * Keeps avatars/attachments small -- the backend caps avatars at 2MB and
  * stores them base64-encoded, so a raw phone photo would be rejected.
  *
  * @param {File} file - image file to resize

@@ -24,7 +24,7 @@ function useWorkspaceScope() {
 export const useTaskList = (filters) => {
   const wsScope = useWorkspaceScope();
   const { page = 0, size = 50, sort, ...restFilters } = filters || {};
-  // A project board is the most specific scope — the backend resolves access per
+  // A project board is the most specific scope -- the backend resolves access per
   // project. Never stack the workspace scope (crewId/orgId) on top of an explicit
   // projectId, or the crew branch would swallow the project filter and show every
   // task in the crew instead of only this project's tasks.
@@ -73,7 +73,7 @@ export const useTask = (taskId, options = {}) => {
     queryFn: () => taskApi.getTaskById(taskId),
     enabled: !!taskId && options.enabled !== false,
     retry: (failureCount, error) => {
-      // 403/404 mean the task is gone or inaccessible — don't retry.
+      // 403/404 mean the task is gone or inaccessible -- don't retry.
       if (error?.response?.status === 403 || error?.response?.status === 404) return false;
       return failureCount < 2;
     },
@@ -109,7 +109,7 @@ export const useCreateTask = () => {
   return useMutation({
     mutationFn: async (payload) => {
       // Ensure required fields: assigneeUsername defaults to current user, priority defaults to MEDIUM
-      // Backend expects LocalDateTime — empty string "" causes Jackson 500.
+      // Backend expects LocalDateTime -- empty string "" causes Jackson 500.
       const taskPayload = {
         ...payload,
         assigneeUsername: payload.assigneeUsername || user?.username,
@@ -137,7 +137,7 @@ export const useCreateTask = () => {
         // a crew create into an org-RBAC evaluation (403 ACCESS_DENIED).
         delete taskPayload.orgId;
         delete taskPayload.teamId;
-        // FIX: crew tasks are claim-based — the backend maps a provided
+        // FIX: crew tasks are claim-based -- the backend maps a provided
         // assigneeUsername to IN_PROGRESS (claimed). Never auto-assign the
         // creator; crew tasks must start unclaimed (TODO) so members can claim.
         delete taskPayload.assigneeUsername;
@@ -502,7 +502,7 @@ export const useUpdateTask = () => {
 /**
  * Shared status-transition router for kanban boards (projects / teams).
  *
- * The backend has NO `status` field on PUT /tasks/{id} — status changes MUST go
+ * The backend has NO `status` field on PUT /tasks/{id} -- status changes MUST go
  * through the dedicated state-transition endpoints (submit / approve / reject /
  * recall / complete / complete-crew / claim). This hook routes a board drop to
  * the correct mutation and enforces the same permission rules as the backend
@@ -561,7 +561,7 @@ export const useTaskStatusChange = () => {
     if (reviewTarget) {
       if (current === 'SUBMITTED') { toast.info('Task is already In Review'); return false; }
       if (isPersonalTask) { toast.error('Personal tasks have no review step'); return false; }
-      if (isCrewTask) { toast.error('Crew tasks skip review — move to Done to complete'); return false; }
+      if (isCrewTask) { toast.error('Crew tasks skip review -- move to Done to complete'); return false; }
       if (current !== 'TODO' && current !== 'IN_PROGRESS') { toast.error('Only To Do / In Progress tasks can be submitted for review'); return false; }
       if (!isAssignee && !isSuperAdmin && !canEditTask) { toast.error('Only the assignee can submit a task for review'); return false; }
       submitMutation.mutate(task.id); return true;

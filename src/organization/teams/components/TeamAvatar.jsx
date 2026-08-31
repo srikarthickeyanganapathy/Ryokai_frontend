@@ -2,9 +2,9 @@ import React from 'react'
 import { cn } from '@/shared/lib/cn'
 import { hashHue } from './utils'
 
-/* ══════════════════════════════════════════════════════
+/* ===
  * TEAM AVATAR (extracted from TeamsPage)
- * ══════════════════════════════════════════════════════ */
+ * === */
 
 export function TeamAvatar({ name, size = 'md', hue, className }) {
   const h = hue ?? hashHue(name || '?')

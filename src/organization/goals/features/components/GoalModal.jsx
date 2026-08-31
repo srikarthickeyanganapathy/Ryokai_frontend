@@ -63,7 +63,7 @@ export function GoalModal({ open, editing, setEditing, onSave, isPending }) {
         </ModalHeader>
 
         <div className="space-y-6 mt-4 max-h-[65vh] overflow-y-auto pr-1">
-          {/* ── Goal Information ── */}
+          {/* --- Goal Information --- */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-[var(--color-border-subtle)]">
               <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--accent)] px-2 py-0.5 rounded-full bg-[var(--accent-soft)]">
@@ -141,7 +141,7 @@ export function GoalModal({ open, editing, setEditing, onSave, isPending }) {
             </div>
           </div>
 
-          {/* ── Key Results ── */}
+          {/* --- Key Results --- */}
           <div className="space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-[var(--color-border-subtle)]">
               <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--accent)] px-2 py-0.5 rounded-full bg-[var(--accent-soft)]">
@@ -237,7 +237,7 @@ export function GoalModal({ open, editing, setEditing, onSave, isPending }) {
             </Button>
             <Button onClick={onSave} disabled={isPending || !isFormValid}>
               {isPending
-                ? 'Saving…'
+                ? 'Saving...'
                 : isEditingExisting
                   ? 'Save changes'
                   : 'Create goal'}

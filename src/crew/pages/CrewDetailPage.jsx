@@ -305,7 +305,7 @@ export function CrewDetailPage() {
             {/* Sentinel for sticky detection */}
             <div ref={sentinelRef} className="h-px" />
 
-            {/* Sticky Header — identity + actions only (rich stats live in Overview) */}
+            {/* Sticky Header -- identity + actions only (rich stats live in Overview) */}
             <div
               className={cn(
                 'sticky top-0 z-30 transition-shadow duration-200',
@@ -440,7 +440,7 @@ export function CrewDetailPage() {
                   </AnimatePresence>
                 </div>
 
-                {/* Sidebar: Activity Feed — floating overlay, does not steal content width */}
+                {/* Sidebar: Activity Feed -- floating overlay, does not steal content width */}
                 <AnimatePresence>
                   {showSidebar && (
                     <motion.aside

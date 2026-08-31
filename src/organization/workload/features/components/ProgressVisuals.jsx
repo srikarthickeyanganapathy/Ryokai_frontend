@@ -1,14 +1,14 @@
 /**
  * @deprecated Use @/shared/ui/Progress/ProgressVisuals instead.
- * This file is kept for backward compat only — re-exports the canonical module.
- * The CapacityRing is unique to workload — kept here; all others delegate.
+ * This file is kept for backward compat only -- re-exports the canonical module.
+ * The CapacityRing is unique to workload -- kept here; all others delegate.
  */
 export { AnimatedNumber, ProgressBar } from '@/shared/ui/Progress/ProgressVisuals';
 import React from 'react';
 
 import { cn } from '@/shared/lib/cn';
 
-/** Capacity gauge ring — unique to workload domain */
+/** Capacity gauge ring -- unique to workload domain */
 export function CapacityRing({ value, size = 80, stroke = 8, color = 'var(--accent)', showValue = true, children, className }) {
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;

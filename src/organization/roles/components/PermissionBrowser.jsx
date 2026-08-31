@@ -68,7 +68,7 @@ export function PermissionBrowser({ module, groupedPermissions, localScopedPerms
 
   return (
     <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-4 px-[18px] min-w-0">
-      {/* ── Panel header ── */}
+      {/* --- Panel header --- */}
       {module && (
         <div className="flex items-center gap-3 mb-1">
           <span
@@ -83,13 +83,13 @@ export function PermissionBrowser({ module, groupedPermissions, localScopedPerms
             </div>
             <div className="text-[11px] text-[var(--text-muted)] mt-0.5">
               {en} of {total} permissions enabled
-              {level.exact && level.max > 0 ? ` · level ${LEVEL_TIERS[level.max - 1].name}` : level.max > 0 ? ' · custom mix' : ' · no access'}
+              {level.exact && level.max > 0 ? `   level ${LEVEL_TIERS[level.max - 1].name}` : level.max > 0 ? '   custom mix' : '   no access'}
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Level bar ── */}
+      {/* --- Level bar --- */}
       <div className="flex items-center gap-[5px] my-3 py-[9px] px-[11px] border border-[var(--border-subtle)] rounded-xl bg-[var(--bg-subtle)]">
         <span className="font-mono text-[8.5px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)] mr-1.5 shrink-0">
           Level
@@ -102,7 +102,7 @@ export function PermissionBrowser({ module, groupedPermissions, localScopedPerms
               key={t.lvl}
               disabled={isAdmin}
               onClick={() => onSetModuleLevel(t.lvl)}
-              title={`${t.name} — enables ${t.groups.join(', ').toLowerCase()} permissions`}
+              title={`${t.name} -- enables ${t.groups.join(', ').toLowerCase()} permissions`}
               className={cn(
                 'flex-1 h-[30px] rounded-[9px] border',
                 'font-mono text-[9px] font-bold uppercase tracking-[0.08em]',
@@ -136,7 +136,7 @@ export function PermissionBrowser({ module, groupedPermissions, localScopedPerms
         </button>
       </div>
 
-      {/* ── Search + filter row ── */}
+      {/* --- Search + filter row --- */}
       <div className="flex items-center gap-2 mb-1">
         <div className="flex-1 max-w-xs relative">
           <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
@@ -178,7 +178,7 @@ export function PermissionBrowser({ module, groupedPermissions, localScopedPerms
         )}
       </div>
 
-      {/* ── Permission rows ── */}
+      {/* --- Permission rows --- */}
       <div className="flex flex-col max-h-[calc(100vh-440px)] min-h-[320px] overflow-y-auto custom-scrollbar">
         {flatPerms.length > 0 ? (
           flatPerms.map((p) => (

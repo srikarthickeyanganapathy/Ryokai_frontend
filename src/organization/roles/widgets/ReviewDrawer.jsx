@@ -26,7 +26,7 @@ export function ReviewDrawer({ open, onOpenChange, roleName, addedPerms, removed
                 <ShieldAlert className="w-4 h-4 text-[var(--danger)] shrink-0 mt-0.5" />
                 <div>
                   <p className="text-[12px] font-semibold text-[var(--danger)]">This change touches {changeRisk.total} elevated permission{changeRisk.total !== 1 ? 's' : ''}</p>
-                  <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">{changeRisk.critical > 0 && `${changeRisk.critical} critical`}{changeRisk.critical > 0 && changeRisk.high > 0 && ', '}{changeRisk.high > 0 && `${changeRisk.high} high`}{' '}risk — review carefully before saving.</p>
+                  <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">{changeRisk.critical > 0 && `${changeRisk.critical} critical`}{changeRisk.critical > 0 && changeRisk.high > 0 && ', '}{changeRisk.high > 0 && `${changeRisk.high} high`}{' '}risk -- review carefully before saving.</p>
                 </div>
               </div>
             ) : (
@@ -62,7 +62,7 @@ export function ReviewDrawer({ open, onOpenChange, roleName, addedPerms, removed
                   const elevated = p?.riskLevel === 'CRITICAL' || p?.riskLevel === 'HIGH';
                   return (
                     <DiffRow key={code} badge="+" tone="var(--success)" title={p?.name || code} elevated={elevated}>
-                      <Badge variant="outline" className="text-[9px] uppercase">{SCOPE_LABELS[scope] || scope}{resCount > 0 ? ` · ${resCount} res` : ''}</Badge>
+                      <Badge variant="outline" className="text-[9px] uppercase">{SCOPE_LABELS[scope] || scope}{resCount > 0 ? `   ${resCount} res` : ''}</Badge>
                     </DiffRow>
                   );
                 })}
@@ -107,7 +107,7 @@ export function ReviewDrawer({ open, onOpenChange, roleName, addedPerms, removed
                 {removedPerms.map((code) => {
                   const p = permissionMap.get(code);
                   const elevated = p?.riskLevel === 'CRITICAL' || p?.riskLevel === 'HIGH';
-                  return <DiffRow key={code} badge="−" tone="var(--danger)" title={p?.name || code} isRemoved elevated={elevated} />;
+                  return <DiffRow key={code} badge=" " tone="var(--danger)" title={p?.name || code} isRemoved elevated={elevated} />;
                 })}
               </Section>
             )}

@@ -112,7 +112,7 @@ export default function RelationshipExplorer({ context, navigator, analysis, onC
         <div className="flex items-center gap-1.5 mb-2">
           <Network size={12} className="text-amber-400" />
           <span className="text-[11px] font-semibold text-white/50 uppercase tracking-wider">
-            Neighborhood — 2 hops ({neighbors.length})
+            Neighborhood -- 2 hops ({neighbors.length})
           </span>
         </div>
         <TaskList tasks={neighbors} navigator={navigator} currentTaskId={currentTaskId} emptyText="No connected tasks in the graph" />

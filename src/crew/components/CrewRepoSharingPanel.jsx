@@ -18,7 +18,7 @@ import {
 import { useGithubConfig, useRefreshGithubRepo, useGithubConnect } from '@/github'
 
 /* ============================================================
-   CrewRepoSharingPanel — federated GitHub sharing for crew
+   CrewRepoSharingPanel -- federated GitHub sharing for crew
    projects. Everything shown comes from real backend endpoints
    (repo-shares / repo-invitations / crew members / github config):
    - shares list + owner identity   -> GET repo-shares
@@ -68,7 +68,7 @@ function MemberRow({ member, share, invite, myGithubLogin, canManage, invitePend
         </div>
         {!member.githubLogin && (
           <p className="text-[10.5px] text-[var(--text-muted)] flex items-center gap-1">
-            <AlertCircle className="w-3 h-3 shrink-0" /> No GitHub connection — cannot be invited yet
+            <AlertCircle className="w-3 h-3 shrink-0" /> No GitHub connection -- cannot be invited yet
           </p>
         )}
       </div>
@@ -135,7 +135,7 @@ function ShareCard({ share, members, invitationsByRepo, myGithubLogin, canManage
             </Badge>
           </div>
           <div className="text-[11px] text-[var(--text-muted)] mt-0.5 font-mono">
-            {owner} · shared {new Date(share.sharedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            {owner}   shared {new Date(share.sharedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
           </div>
         </div>
         {(isOwner || canManage) && (
@@ -157,7 +157,7 @@ function ShareCard({ share, members, invitationsByRepo, myGithubLogin, canManage
         </div>
         {members.length === 0 && (
           <p className="text-[12px] text-[var(--text-muted)] px-1 py-1">
-            No crew members yet — invite people to the crew first.
+            No crew members yet -- invite people to the crew first.
           </p>
         )}
         {members.map((member) => (
@@ -250,7 +250,7 @@ export default function CrewRepoSharingPanel({ crewId, projectId, linkedRepos = 
         <div className="min-w-0 flex-1">
           <h3 className="text-[13.5px] font-semibold text-[var(--text-primary)]">Crew sharing</h3>
           <p className="text-[12px] text-[var(--text-muted)] mt-0.5 leading-relaxed">
-            Federated access — each member shares their <em className="not-italic text-[var(--text-secondary)]">own</em> repos and invites the rest as GitHub collaborators.
+            Federated access -- each member shares their <em className="not-italic text-[var(--text-secondary)]">own</em> repos and invites the rest as GitHub collaborators.
           </p>
         </div>
         {connected && (
@@ -260,7 +260,7 @@ export default function CrewRepoSharingPanel({ crewId, projectId, linkedRepos = 
         )}
       </div>
 
-      {/* connect / sync gates — real backend actions, not placeholders */}
+      {/* connect / sync gates -- real backend actions, not placeholders */}
       {!config?.appConfigured ? (
         <div className="mt-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40 px-3.5 py-3 flex flex-wrap items-center justify-between gap-2">
           <div className="min-w-0">
@@ -275,7 +275,7 @@ export default function CrewRepoSharingPanel({ crewId, projectId, linkedRepos = 
         <div className="mt-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40 px-3.5 py-3 flex flex-wrap items-center justify-between gap-2">
           <div className="min-w-0">
             <p className="text-[12.5px] font-medium text-[var(--text-primary)]">Connect your GitHub to share repos</p>
-            <p className="text-[11.5px] text-[var(--text-muted)]">You can only share repositories you own — connect to get started.</p>
+            <p className="text-[11.5px] text-[var(--text-muted)]">You can only share repositories you own -- connect to get started.</p>
           </div>
           <Button size="sm" className="shrink-0 gap-1.5" onClick={() => connect.mutate()} isLoading={connect.isPending}>
             <Github className="w-3.5 h-3.5" /> Connect
@@ -314,7 +314,7 @@ export default function CrewRepoSharingPanel({ crewId, projectId, linkedRepos = 
               </div>
               <p className="text-[13px] font-medium text-[var(--text-primary)]">Nothing shared with the crew yet</p>
               <p className="text-[12px] text-[var(--text-muted)] max-w-[320px]">
-                Link a repository above, then share one of your own repos — crew members get access instantly, no hub, no central account.
+                Link a repository above, then share one of your own repos -- crew members get access instantly, no hub, no central account.
               </p>
             </motion.div>
           )}
@@ -336,19 +336,19 @@ export default function CrewRepoSharingPanel({ crewId, projectId, linkedRepos = 
         </AnimatePresence>
         {loading && (
           <div className="flex items-center justify-center gap-2 py-6 text-[var(--text-muted)]">
-            <Loader2 className="w-4 h-4 animate-spin" /> Loading crew shares…
+            <Loader2 className="w-4 h-4 animate-spin" /> Loading crew shares...
           </div>
         )}
       </div>
 
-      {/* share picker — ANY connected member shares their OWN repos */}
+      {/* share picker -- ANY connected member shares their OWN repos */}
       {config?.connected && shareable.length > 0 && (
         <div className="mt-3.5 flex flex-wrap items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40 px-3 py-2.5">
           <Link2 className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
           <div className="flex-1 min-w-[180px]">
             <Select value={pickRepo} onValueChange={setPickRepo}>
               <SelectTrigger className="h-8 w-full">
-                <SelectValue placeholder="Share a repo you own with the crew…" />
+                <SelectValue placeholder="Share a repo you own with the crew..." />
               </SelectTrigger>
               <SelectContent>
                 {shareable.map((fullName) => (
@@ -380,7 +380,7 @@ export default function CrewRepoSharingPanel({ crewId, projectId, linkedRepos = 
       )}
       {config?.connected && shareable.length === 0 && shares.length === 0 && linkedRepos.length > 0 && (
         <p className="mt-3 text-[11.5px] text-[var(--text-muted)]">
-          You don't own any of the linked repos — only the owner of a repo can share it.
+          You don't own any of the linked repos -- only the owner of a repo can share it.
         </p>
       )}
       {!config?.connected && (

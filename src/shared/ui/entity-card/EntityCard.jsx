@@ -28,11 +28,11 @@ const TONE_STYLE = {
 }
 
 /**
- * EntityCard — one card UI for every entity (project / team / crew / discover / member).
- * Data-driven anatomy: glyph tile · badges · name · tagline · orbital meta · avatars ·
- * constellation progress · footer slots. Feature slots: `actions` (top-right),
+ * EntityCard -- one card UI for every entity (project / team / crew / discover / member).
+ * Data-driven anatomy: glyph tile   badges   name   tagline   orbital meta   avatars  
+ * constellation progress   footer slots. Feature slots: `actions` (top-right),
  * `footer`, `badges`, `glyph` (override), `avatars`, `progress`.
- * WIRE: click handlers / navigation stay owned by the caller — pass `onClick`.
+ * WIRE: click handlers / navigation stay owned by the caller -- pass `onClick`.
  */
 export function EntityCard({
   type = 'project',

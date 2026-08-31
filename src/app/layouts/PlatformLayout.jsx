@@ -10,7 +10,7 @@ export function PlatformLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)] font-sans">
-      {/* Control Plane Navigation — desktop sidebar */}
+      {/* Control Plane Navigation -- desktop sidebar */}
       <PlatformSidebar className="hidden md:flex" />
 
       {/* Mobile overlay sidebar */}

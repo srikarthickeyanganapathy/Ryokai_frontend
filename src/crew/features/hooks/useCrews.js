@@ -343,7 +343,7 @@ export const useChannelMessages = (crewId, channelId) => {
     queryKey: queryKeys.crews.messages(crewId, channelId),
     queryFn: () => crewApi.getChannelMessages(crewId, channelId),
     enabled: !!crewId && !!channelId,
-    refetchInterval: 30000, // polling only — STOMP topic not yet available
+    refetchInterval: 30000, // polling only -- STOMP topic not yet available
   });
 };
 

@@ -9,9 +9,9 @@ import { TEAM_TEMPLATES } from './teamTemplates'
 import { TeamAvatar } from './TeamAvatar'
 import { MemberAvatarPill } from './MemberAvatarPill'
 
-/* ══════════════════════════════════════════════════════
+/* ===
  * QUICK CREATE MODAL WITH TEMPLATES (extracted from TeamsPage)
- * ══════════════════════════════════════════════════════ */
+ * === */
 
 const TEMPLATE_STEP = 'template'
 const DETAILS_STEP = 'details'
@@ -223,7 +223,7 @@ export function QuickCreateModal({ isOpen, onClose, onCreateWithTemplate }) {
                         <selectedTemplate.icon className="w-4 h-4" style={{ color: `hsl(${selectedTemplate.hue} 70% 50%)` }} />
                         <Text size="xs" className="text-[var(--text-secondary)]">
                           Template: <span className="font-semibold text-[var(--text-primary)]">{selectedTemplate.title}</span>
-                          <span className="mx-1 text-[var(--text-muted)]">·</span>
+                          <span className="mx-1 text-[var(--text-muted)]"> </span>
                           {selectedTemplate.categories.length} preset categories
                         </Text>
                       </div>

@@ -18,9 +18,9 @@ import { useLinkGithubRepo, useUnlinkGithubRepo } from '../features/hooks/usePro
 import CrewRepoSharingPanel from '@/crew/components/CrewRepoSharingPanel'
 
 /* ============================================================
-   components/RepositoriesTab.jsx — the project's embedded GitHub
+   components/RepositoriesTab.jsx -- the project's embedded GitHub
    workspace. Users work here: browse files, review pull requests,
-   follow commits and edit/commit — without leaving the project.
+   follow commits and edit/commit -- without leaving the project.
    Linked repos come from the real mirror (no invented data).
    ============================================================ */
 
@@ -80,7 +80,7 @@ function RepoRailItem({ fullName, repo, active, onClick }) {
           {name}
         </span>
         <span className="block truncate text-[10.5px] font-mono text-[var(--text-tertiary)] mt-0.5">
-          {fullName.split('/')[0]} · {meta.defaultBranch}
+          {fullName.split('/')[0]}   {meta.defaultBranch}
         </span>
       </span>
       {meta.openPrs > 0 && (
@@ -101,7 +101,7 @@ export function RepositoriesTab({ project, canManage }) {
   const linked = useMemo(() => Array.isArray(project?.linkedGithubRepos) ? project.linkedGithubRepos : [], [project])
   // Workspace separation: in a crew project ANY crew member can link their own
   // repos (federated model); unlink stays structural (creator only).
-  // In personal mode the owner is directly the user — no sharing needed.
+  // In personal mode the owner is directly the user -- no sharing needed.
   // In ORG mode this tab is never rendered (guarded by ProjectTabs + ProjectDetailPage).
   const isCrewShared = workspaceMode === 'CREWS' && Array.isArray(project?.sharedCrewIds) && project.sharedCrewIds.length > 0
   const canLinkRepos = canManage || isCrewShared
@@ -229,7 +229,7 @@ export function RepositoriesTab({ project, canManage }) {
         </div>
         <Text className="font-semibold text-[14px]">Connect your GitHub account</Text>
         <Text variant="muted" size="sm" className="max-w-sm mt-1">
-          GitHub repositories are personal — authorize with your own GitHub identity to link repositories to this project.
+          GitHub repositories are personal -- authorize with your own GitHub identity to link repositories to this project.
         </Text>
         <Button size="sm" className="mt-4 gap-1.5 h-8 text-[12px]" onClick={() => connect.mutate()} isLoading={connect.isPending}>
           <UserPlus className="w-3.5 h-3.5" /> Connect GitHub Account
@@ -238,7 +238,7 @@ export function RepositoriesTab({ project, canManage }) {
     )
   }
 
-  /* Link picker — rendered in BOTH the empty and workspace states so
+  /* Link picker -- rendered in BOTH the empty and workspace states so
      "Link first repository" actually opens the picker */
   const linkPicker = (
     <AnimatePresence>
@@ -264,7 +264,7 @@ export function RepositoriesTab({ project, canManage }) {
             <div className="max-h-52 overflow-y-auto custom-scrollbar space-y-1 pr-1">
               {reposLoading && (
                 <div className="flex items-center justify-center py-4 text-[var(--text-muted)]">
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" /> Syncing repository list…
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" /> Syncing repository list...
                 </div>
               )}
               {!reposLoading && candidates.length === 0 && (
@@ -354,7 +354,7 @@ export function RepositoriesTab({ project, canManage }) {
           <GitCommitHorizontal className="w-4 h-4 text-[var(--accent)]" strokeWidth={1.5} />
           <span>
             <strong className="text-[var(--text-primary)] font-semibold">{linked.length}</strong> linked{' '}
-            {linked.length === 1 ? 'repository' : 'repositories'} · mirrored from GitHub
+            {linked.length === 1 ? 'repository' : 'repositories'}   mirrored from GitHub
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -472,7 +472,7 @@ export function RepositoriesTab({ project, canManage }) {
         </div>
       </div>
 
-      {/* Federated crew sharing — only in CREWS workspace mode when this project is shared with a crew */}
+      {/* Federated crew sharing -- only in CREWS workspace mode when this project is shared with a crew */}
       {workspaceMode === 'CREWS' && Array.isArray(project?.sharedCrewIds) && project.sharedCrewIds.length > 0 && (
         <CrewRepoSharingPanel
           crewId={project.sharedCrewIds[0]}

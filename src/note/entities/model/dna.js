@@ -1,5 +1,5 @@
 /**
- * Note DNA — auto-derived fingerprint computed from real note content.
+ * Note DNA -- auto-derived fingerprint computed from real note content.
  * Never stored, never mocked. Powers the Notes Garden cards and the
  * Focus Editor footer (checklist progress, reading time, freshness).
  */

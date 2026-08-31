@@ -1,17 +1,17 @@
 /**
- * Ryokai — Semantic Status Registry
- * ─────────────────────────────────────────────────────────
+ * Ryokai -- Semantic Status Registry
+ * ---
  * Single source of truth for every product status.
  * Each entry defines: icon, color, motion priority, tone, ARIA label.
  *
  * Extends the earlier statusLanguage.js into a complete registry
- * where ANY component can look up status→presentation in one call.
+ * where ANY component can look up status->presentation in one call.
  *
  * Layers:
- *   Layer 1  — Visual  (icon, color, variant)
- *   Layer 2  — Motion  (priority, spring, ripple)
- *   Layer 3  — Semantic (tone, ARIA label, description)
- *   Layer 4  — Display (badge, pill, indicator variants)
+ *   Layer 1  -- Visual  (icon, color, variant)
+ *   Layer 2  -- Motion  (priority, spring, ripple)
+ *   Layer 3  -- Semantic (tone, ARIA label, description)
+ *   Layer 4  -- Display (badge, pill, indicator variants)
  */
 
 import {
@@ -21,7 +21,7 @@ import {
     Calendar, Users, Megaphone, Target, FolderKanban
 } from 'lucide-react';
 
-/* ─── Motion priority presets ─── */
+/* --- Motion priority presets --- */
 export const MOTION = {
     CRITICAL: { spring: { type: 'spring', stiffness: 400, damping: 20, mass: 0.4 }, duration: 300, ripple: true, scale: true, glow: true },
     IMPORTANT: { spring: { type: 'spring', stiffness: 350, damping: 24, mass: 0.5 }, duration: 250, ripple: false, scale: true, glow: false },
@@ -29,7 +29,7 @@ export const MOTION = {
     SUBTLE: { spring: { type: 'spring', stiffness: 200, damping: 28, mass: 0.8 }, duration: 120, ripple: false, scale: false, glow: false },
 };
 
-/* ─── Product-semantic color palettes ─── */
+/* --- Product-semantic color palettes --- */
 export const SEMANTIC_COLORS = {
     taskCompleted: 'bg-[var(--success-soft)] text-[var(--success)] border-transparent',
     goalAchieved: 'bg-[var(--success-soft)] text-[var(--success)] border-transparent',
@@ -46,11 +46,11 @@ export const SEMANTIC_COLORS = {
     crewQuiet: 'bg-[var(--bg-subtle)] text-[var(--text-tertiary)] border-[var(--border-subtle)]',
 };
 
-/* ══════════════════════════════════════════════════════
+/* ===
  * Complete Status Registry
- * ══════════════════════════════════════════════════════ */
+ * === */
 export const STATUS_REGISTRY = {
-    // ── Task Workflow ──
+    // --- Task Workflow ---
     TODO: {
         icon: Circle, iconStroke: 1.5,
         color: 'neutral', colorClass: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)]',
@@ -160,7 +160,7 @@ export const STATUS_REGISTRY = {
         productSemantic: 'taskDraft',
     },
     
-    // ── Leave/Exit Request States ──
+    // --- Leave/Exit Request States ---
     OFFBOARDING: {
         icon: Shield, iconStroke: 2,
         color: 'warning', colorClass: 'bg-[var(--warning-soft)] text-[var(--warning)] border-transparent',
@@ -180,7 +180,7 @@ export const STATUS_REGISTRY = {
         productSemantic: null,
     },
 
-    // ── Priority Levels ──
+    // --- Priority Levels ---
     URGENT: {
         icon: Flag, iconStroke: 2,
         color: 'danger', colorClass: 'bg-[var(--danger-soft)] text-[var(--danger)] border-transparent',
@@ -218,7 +218,7 @@ export const STATUS_REGISTRY = {
         productSemantic: null,
     },
 
-    // ── Project Health ──
+    // --- Project Health ---
     HEALTHY: {
         icon: CheckCircle2, iconStroke: 2,
         color: 'success', colorClass: 'bg-[var(--success-soft)] text-[var(--success)] border-transparent',
@@ -247,7 +247,7 @@ export const STATUS_REGISTRY = {
         productSemantic: 'projectAtRisk',
     },
 
-    // ── Goal States ──
+    // --- Goal States ---
     GOAL_ACTIVE: {
         icon: Target, iconStroke: 1.5,
         color: 'active', colorClass: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]',
@@ -267,7 +267,7 @@ export const STATUS_REGISTRY = {
         productSemantic: 'goalAchieved',
     },
 
-    // ── Crew States ──
+    // --- Crew States ---
     CREW_ACTIVE: {
         icon: Zap, iconStroke: 2,
         color: 'active', colorClass: 'bg-violet-500/20 text-violet-400 border-violet-500/20',
@@ -287,7 +287,7 @@ export const STATUS_REGISTRY = {
         productSemantic: 'crewQuiet',
     },
 
-    // ── Announcement States ──
+    // --- Announcement States ---
     ANNOUNCEMENT_PINNED: {
         icon: Megaphone, iconStroke: 2,
         color: 'active', colorClass: 'bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent-border)]',
@@ -308,7 +308,7 @@ export const STATUS_REGISTRY = {
     },
 };
 
-/* ─── Lookup helpers ─── */
+/* --- Lookup helpers --- */
 export function resolveStatus(status) {
     if (!status) return STATUS_REGISTRY.TODO;
     const key = String(status).toUpperCase().replace(/[\s-]+/g, '_').replace(/^_|_$/g, '');
@@ -328,13 +328,13 @@ export function getSemanticColor(status) {
     return SEMANTIC_COLORS[def.productSemantic] || def.colorClass || '';
 }
 
-/* ─── Feedback Orchestration Matrix ───
+/* --- Feedback Orchestration Matrix ---
  * Defines WHICH micro-feedback effects fire for WHICH actions.
  * Prevents the interface from becoming noisy.
  *
  * Legend:
- *   ✓  = fire this effect
- *   ✗  = skip (would be noise)
+ *   [x]  = fire this effect
+ *   [ ]  = skip (would be noise)
  *   ~  = fire with reduced intensity
  */
 

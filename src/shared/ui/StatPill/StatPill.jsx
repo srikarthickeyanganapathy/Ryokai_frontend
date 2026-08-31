@@ -3,7 +3,7 @@ import { cn } from '@/shared/lib/cn';
 
 /**
  * StatPill
- * ─────────────────────────────────────────────────────────
+ * ---
  * Shared pill badge for displaying a metric value with an icon and label.
  *
  * @param {React.ElementType} [icon] - Lucide icon component

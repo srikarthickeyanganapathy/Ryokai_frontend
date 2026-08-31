@@ -16,10 +16,10 @@ import { useProject } from '@/project'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
 /* ============================================================
-   TaskPullLinks — link pull requests to a task (P2). Real data
+   TaskPullLinks -- link pull requests to a task (P2). Real data
    only: links come from GET /github/tasks/{id}/pulls, candidates
    from the repo mirror + PR mirror. Linking requires the PR to be
-   mirrored (sync the repo first) — the backend enforces this and
+   mirrored (sync the repo first) -- the backend enforces this and
    surfaces the reason.
    ============================================================ */
 
@@ -137,17 +137,17 @@ export function TaskPullLinks({ taskId, projectId, crewId, hasEditPerm = false }
                   </div>
                   <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)] mt-0.5">
                     <span className="font-mono">{link.repoFullName}</span>
-                    <span className="text-[var(--border-subtle)]">·</span>
+                    <span className="text-[var(--border-subtle)]"> </span>
                     <span>#{link.prNumber}</span>
                     {link.authorLogin && (
                       <>
-                        <span className="text-[var(--border-subtle)]">·</span>
+                        <span className="text-[var(--border-subtle)]"> </span>
                         <span>@{link.authorLogin}</span>
                       </>
                     )}
                     {link.linkedAt && (
                       <>
-                        <span className="text-[var(--border-subtle)]">·</span>
+                        <span className="text-[var(--border-subtle)]"> </span>
                         <span>linked {new Date(link.linkedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                       </>
                     )}
@@ -204,7 +204,7 @@ export function TaskPullLinks({ taskId, projectId, crewId, hasEditPerm = false }
               <div className="flex-1 min-w-[160px]">
                 <Select value={repo} onValueChange={(v) => { setRepo(v); setPrNumber('') }}>
                   <SelectTrigger className="h-9 w-full text-xs">
-                    <SelectValue placeholder="Repository…" />
+                    <SelectValue placeholder="Repository..." />
                   </SelectTrigger>
                   <SelectContent>
                     {repos.map((r) => {
@@ -218,7 +218,7 @@ export function TaskPullLinks({ taskId, projectId, crewId, hasEditPerm = false }
               <div className="flex-1 min-w-[160px]">
                 <Select value={prNumber} onValueChange={setPrNumber} disabled={!repo}>
                   <SelectTrigger className="h-9 w-full text-xs">
-                    <SelectValue placeholder={repo ? 'Open pull request…' : 'Select a repo first'} />
+                    <SelectValue placeholder={repo ? 'Open pull request...' : 'Select a repo first'} />
                   </SelectTrigger>
                   <SelectContent>
                     {repo && pullsQuery.isLoading && (
@@ -252,7 +252,7 @@ export function TaskPullLinks({ taskId, projectId, crewId, hasEditPerm = false }
                     )}
                     {openPulls.map((pr) => (
                       <SelectItem key={pr.prNumber} value={String(pr.prNumber)}>
-                        #{pr.prNumber} · {pr.title}
+                        #{pr.prNumber}   {pr.title}
                       </SelectItem>
                     ))}
                   </SelectContent>

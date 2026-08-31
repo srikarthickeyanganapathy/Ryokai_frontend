@@ -15,11 +15,11 @@ import { Users } from '@/shared/ui/Icons'
 import { UserCheck } from 'lucide-react'
 
 /* ============================================================
-   CrewProjectShareModal — shares a PERSONAL project into a crew.
+   CrewProjectShareModal -- shares a PERSONAL project into a crew.
    Contract matches the backend exactly (ProjectController
    POST /projects/{id}/share/crew + CrewController project routes):
      payload = { crewId, collaboratorIds }
-   Crew permissions are NOT configurable per member — the crew
+   Crew permissions are NOT configurable per member -- the crew
    model is creator/member (creator manages the crew, members
    work). Explicit collaborators get view access to the project
    itself, which is what collaboratorIds means.
@@ -103,7 +103,7 @@ export function CrewProjectShareModal({ isOpen, onClose, project }) {
         </Heading>
         <Text variant="muted" className="mb-4 text-xs">
           Sharing <strong>{project?.name}</strong> with a crew makes it visible in that crew's
-          workspace. Crew members can view and work on the project's tasks — the crew creator
+          workspace. Crew members can view and work on the project's tasks -- the crew creator
           manages membership, and you keep full control of the project.
         </Text>
 

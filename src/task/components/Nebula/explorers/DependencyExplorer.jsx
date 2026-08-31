@@ -59,7 +59,7 @@ export default function DependencyExplorer({ context, navigator, analysis, onCen
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-500/10 border border-rose-500/25">
           <ShieldAlert size={14} className="text-rose-400 shrink-0" />
           <span className="text-xs text-rose-300">
-            {unresolvedBlockers.length} unresolved blocker{unresolvedBlockers.length > 1 ? 's' : ''} · Chain depth: {chainDepth}
+            {unresolvedBlockers.length} unresolved blocker{unresolvedBlockers.length > 1 ? 's' : ''}   Chain depth: {chainDepth}
           </span>
         </div>
       )}
@@ -73,7 +73,7 @@ export default function DependencyExplorer({ context, navigator, analysis, onCen
           </span>
         </div>
         {blockers.length === 0 ? (
-          <p className="text-xs text-white/25 italic pl-5">No blockers — this task is free to execute</p>
+          <p className="text-xs text-white/25 italic pl-5">No blockers -- this task is free to execute</p>
         ) : (
           <div className="space-y-0.5">
             {blockers.map(task => (

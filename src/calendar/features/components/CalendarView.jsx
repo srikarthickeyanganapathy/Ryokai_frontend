@@ -71,19 +71,19 @@ export function CalendarView({ tasks, events = [], isLoading, onTaskClick, onEve
 
   return (
     <div className="flex flex-col h-full min-h-0 pb-12">
-      {/* Topbar equivalent (header inside view) — PageHero contract */}
+      {/* Topbar equivalent (header inside view) -- PageHero contract */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between pb-5 border-b border-[var(--border-subtle)] mb-5">
         <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-2 mb-1.5">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
-              {eyebrow} · {mode === 'month' ? 'Month' : `Week of ${format(startOfWeek(currentDate), 'EEE d')}`}
+              {eyebrow}   {mode === 'month' ? 'Month' : `Week of ${format(startOfWeek(currentDate), 'EEE d')}`}
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] leading-none flex items-baseline">
             {format(currentDate, 'MMMM')} <span className="text-[13px] font-semibold text-[var(--text-tertiary)] tracking-[0.06em] ml-2">{format(currentDate, 'yyyy')}</span>
           </h2>
           <p className="mt-1.5 text-[13px] text-[var(--text-secondary)]">
-            <span className="font-semibold text-[var(--text-secondary)]">{rangeCounts.events}</span> events · <span className="font-semibold text-[var(--text-secondary)]">{rangeCounts.tasks}</span> tasks this period
+            <span className="font-semibold text-[var(--text-secondary)]">{rangeCounts.events}</span> events   <span className="font-semibold text-[var(--text-secondary)]">{rangeCounts.tasks}</span> tasks this period
           </p>
         </div>
         

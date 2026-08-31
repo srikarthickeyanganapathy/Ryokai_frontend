@@ -4,7 +4,7 @@ import { Input } from '@/shared/ui/Input';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '@/shared/ui/Modal';
 import { Mail } from '@/shared/ui/Icons';
 
-// Email invitation modal — used from both the empty roster state and the main directory toolbar
+// Email invitation modal -- used from both the empty roster state and the main directory toolbar
 export function InviteMemberModal({ open, onOpenChange, email, onEmailChange, isPending, onSubmit }) {
   return (
     <Modal open={open} onOpenChange={onOpenChange}>

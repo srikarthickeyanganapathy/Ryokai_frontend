@@ -13,7 +13,7 @@ import { cn } from '@/shared/lib/cn'
 import { TeamIdentity } from './TeamIdentity'
 
 /* ============================================================
-   components/OverviewTab.jsx — team command center.
+   components/OverviewTab.jsx -- team command center.
    Health strip (ring + status + overdue / in progress / due this
    week) that routes into Work, open-task triage, project
    progress, a member strip and a Recents + Upcoming rail.
@@ -220,7 +220,7 @@ export function OverviewTab({
                   <p className="text-[12px] font-semibold truncate">{members.map(m => m.username || m.name).slice(0, 3).join(', ')}{members.length > 3 ? ` +${members.length - 3} more` : ''}</p>
                   <p className="text-[10.5px] text-[var(--text-muted)]">
                     {members.length} member{members.length !== 1 ? 's' : ''}
-                    {observerCount > 0 && ` Â· ${observerCount} observer${observerCount !== 1 ? 's' : ''}`}
+                    {observerCount > 0 && `   ${observerCount} observer${observerCount !== 1 ? 's' : ''}`}
                   </p>
                 </div>
               </div>

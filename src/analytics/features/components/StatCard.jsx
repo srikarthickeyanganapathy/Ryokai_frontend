@@ -55,7 +55,7 @@ export function StatCard({ title, value, description, icon: Icon, trend, size = 
                       : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)]'
                   )}
                 >
-                  {trend > 0 ? '↑' : trend < 0 ? '↓' : '→'} {Math.abs(trend)}%
+                  {trend > 0 ? ' ' : trend < 0 ? ' ' : '->'} {Math.abs(trend)}%
                 </span>
               )}
               {description && <span className="text-[11px] text-[var(--text-muted)]">{description}</span>}

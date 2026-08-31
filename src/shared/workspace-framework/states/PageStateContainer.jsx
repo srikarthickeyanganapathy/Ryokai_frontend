@@ -5,19 +5,19 @@ import { FrameworkEmptyState } from './FrameworkEmptyState'
 
 /**
  * PageStateContainer
- * ─────────────────────────────────────────────────────────
+ * ---
  * Unified page lifecycle renderer.
  * The PAGE decides WHICH state is active.
  * This component only RENDERS the appropriate UI feedback.
  *
- * Lifecycle: Loading → Ready → Refreshing → Empty | Error | Offline | Unauthorized
+ * Lifecycle: Loading -> Ready -> Refreshing -> Empty | Error | Offline | Unauthorized
  *
  * @param {'loading'|'ready'|'empty'|'error'|'offline'|'unauthorized'} state
- * @param {Object} [loadingConfig] — Skeleton config. Pass `skeleton` (React node) for a
+ * @param {Object} [loadingConfig] -- Skeleton config. Pass `skeleton` (React node) for a
  *                  structure-matched skeleton, or { variant, rows, columns } for generic.
- * @param {Object} [emptyConfig] — Zero-state config { icon, title, description, actionLabel, onAction }
- * @param {Object} [errorConfig] — Error config { title, description, onRetry }
- * @param {React.ReactNode} children — Rendered when state === 'ready'
+ * @param {Object} [emptyConfig] -- Zero-state config { icon, title, description, actionLabel, onAction }
+ * @param {Object} [errorConfig] -- Error config { title, description, onRetry }
+ * @param {React.ReactNode} children -- Rendered when state === 'ready'
  */
 export function PageStateContainer({
   state = 'ready',

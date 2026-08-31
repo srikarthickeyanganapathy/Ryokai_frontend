@@ -18,7 +18,7 @@ import { PersonalContextRail } from '../features/PersonalContextRail';
 import { CrewContextRail } from '../features/CrewContextRail';
 import { OrgContextRail } from '../features/OrgContextRail';
 
-/* ─── Stagger variants ─── */
+/* --- Stagger variants --- */
 const containerVariants = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.06, delayChildren: 0.1 } }
@@ -28,7 +28,7 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } }
 };
 
-/* ─── A11y helpers ─── */
+/* --- A11y helpers --- */
 // Cards/rows are styled divs; this gives them real button keyboard behaviour (Enter/Space).
 const keyboardActivate = (handler) => (e) => {
   if (e.key === 'Enter' || e.key === ' ') {
@@ -40,7 +40,7 @@ const keyboardActivate = (handler) => (e) => {
 // One consistent, always-visible focus indicator for keyboard users.
 const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]';
 
-/* ─── V2 Beautiful UI Components ─── */
+/* --- V2 Beautiful UI Components --- */
 
 function StatMini({ icon: Icon, label, value, tone = 'default', onClick }) {
   const toneMap = {
@@ -127,10 +127,10 @@ function FocusCardWidget({ focusTask, workspaceMode, activeCrew }) {
               {displayStatus}
             </Badge>
             {focusTask.crewName && (
-              <span className="text-[11px] font-semibold text-violet-400">· Crew: {focusTask.crewName}</span>
+              <span className="text-[11px] font-semibold text-violet-400">  Crew: {focusTask.crewName}</span>
             )}
             {workspaceMode === 'CREWS' && activeCrew && !focusTask.crewName && (
-              <span className="text-[11px] font-medium text-[var(--text-tertiary)]">· Crew: {activeCrew.name}</span>
+              <span className="text-[11px] font-medium text-[var(--text-tertiary)]">  Crew: {activeCrew.name}</span>
             )}
           </div>
           <h3 title={focusTitle} className="text-xl font-bold text-[var(--text-primary)] line-clamp-1 group-hover:text-[var(--accent)] transition-colors">
@@ -140,7 +140,7 @@ function FocusCardWidget({ focusTask, workspaceMode, activeCrew }) {
             {focusTask.project?.name && (
               <span className="truncate max-w-[220px]" title={focusTask.project.name}>Project: {focusTask.project.name}</span>
             )}
-            {focusTask.priority && <span className="uppercase font-semibold text-[10px]">· Priority: {focusTask.priority}</span>}
+            {focusTask.priority && <span className="uppercase font-semibold text-[10px]">  Priority: {focusTask.priority}</span>}
             {focusTask.dueDate && (
               <span className="flex items-center gap-1">
                 <Clock size={12} aria-hidden="true" />
@@ -198,7 +198,7 @@ function QuickActionBar({ workspaceMode }) {
   );
 }
 
-/* Crew filter pills — extracted so the empty and populated queue states stay pixel-identical. */
+/* Crew filter pills -- extracted so the empty and populated queue states stay pixel-identical. */
 function CrewFilterBar({ crews = [], selectedCrewFilter, setSelectedCrewFilter, totalCount = 0 }) {
   const isAll = !selectedCrewFilter || selectedCrewFilter === 'ALL';
   // Inactive pills carry a transparent border so toggling never causes a 1px layout shift.
@@ -372,7 +372,7 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
                     )}
                     {assignee && (
                       <span className="flex items-center gap-1">
-                        {(task.project?.name) && <span aria-hidden="true">·</span>}
+                        {(task.project?.name) && <span aria-hidden="true"> </span>}
                         <span title={assignee} aria-hidden="true" className="w-3.5 h-3.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center text-[7px] font-bold shrink-0">
                           {String(assignee).charAt(0).toUpperCase()}
                         </span>
@@ -380,7 +380,7 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
                       </span>
                     )}
                     {task.priority && (
-                      <span className="font-semibold uppercase tracking-wider text-[9px]">· {task.priority}</span>
+                      <span className="font-semibold uppercase tracking-wider text-[9px]">  {task.priority}</span>
                     )}
                   </div>
                 </div>
@@ -406,7 +406,7 @@ function TaskQueueCard({ relevantTasks = [], workspaceMode, selectedCrewFilter, 
 }
 
 function AICopilotBlock({ relevantTasks = [], activeTaskCount = 0, completedTaskCount = 0, dueSoonCount = 0 }) {
-  // Derived from the live task set — no placeholder copy.
+  // Derived from the live task set -- no placeholder copy.
   const now = new Date();
   const overdueCount = relevantTasks.filter(t => {
     if (!t.dueDate) return false;
@@ -437,10 +437,10 @@ function AICopilotBlock({ relevantTasks = [], activeTaskCount = 0, completedTask
       icon: inProgressCount > 0 ? Zap : TrendingUp,
       tone: inProgressCount > 0 ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)]',
       title: inProgressCount > 0 ? `${inProgressCount} in progress` : 'No active work',
-      body: inProgressCount > 0 ? 'Keep momentum — finish started work before picking up new tasks.' : 'Pick a task from the queue to get moving.',
+      body: inProgressCount > 0 ? 'Keep momentum -- finish started work before picking up new tasks.' : 'Pick a task from the queue to get moving.',
     },
     nextDue
-      ? { icon: Calendar, tone: 'text-[var(--info)]', title: 'Next deadline', body: `${nextDue.title || 'Untitled task'} · ${new Date(nextDue.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` }
+      ? { icon: Calendar, tone: 'text-[var(--info)]', title: 'Next deadline', body: `${nextDue.title || 'Untitled task'}   ${new Date(nextDue.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` }
       : { icon: BarChart3, tone: 'text-[var(--text-tertiary)]', title: 'Completion rate', body: `${completionRate}% of tracked work is complete.` },
   ];
 
@@ -621,7 +621,7 @@ const DEFAULT_WIDGET_REGISTRY = [
   }
 ];
 
-/* ─── V2 Widget Map ─── */
+/* --- V2 Widget Map --- */
 const V2_WIDGET_COMPONENTS = {
   SignalStrip: QuickActionBar,
   ExecutionQueue: TaskQueueCard,
@@ -633,7 +633,7 @@ const V2_WIDGET_COMPONENTS = {
   AICopilotPanel: AICopilotBlock
 };
 
-/* ═══════════════════════════════════════════════ */
+/* === */
 export function MissionControlV2({ vm }) {
   const { user } = useAuth();
   const { can } = usePermissions();
@@ -657,7 +657,7 @@ export function MissionControlV2({ vm }) {
         };
       case 'ORG':
         return {
-          eyebrow: activeOrganization ? `Organization · ${activeOrganization.name}` : 'Organization Space',
+          eyebrow: activeOrganization ? `Organization   ${activeOrganization.name}` : 'Organization Space',
           title: 'Mission Control',
           subtitle: activeOrganization
             ? `Organization-wide overview for ${activeOrganization.name}.`
@@ -674,7 +674,7 @@ export function MissionControlV2({ vm }) {
 
   const headerConfig = getHeaderConfig();
 
-  /* ─── Task Aggregation with Fallback ─── */
+  /* --- Task Aggregation with Fallback --- */
   const context = vm?.context;
   const fallbackTasks = vm?.fallbackTasks || [];
   const queueTasks = context?.executionQueue?.tasks || [];
@@ -800,7 +800,7 @@ export function MissionControlV2({ vm }) {
         animate="show"
         className="space-y-6 max-w-6xl mx-auto px-2 pb-8"
       >
-        {/* ── Dynamic Header (workspace-framework PageHero contract) ── */}
+        {/* --- Dynamic Header (workspace-framework PageHero contract) --- */}
         <motion.div variants={itemVariants} className="flex flex-col gap-3 w-full justify-between sm:flex-row sm:items-start pb-5 border-b border-[var(--border-subtle)]">
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
@@ -816,7 +816,7 @@ export function MissionControlV2({ vm }) {
           </div>
         </motion.div>
 
-        {/* ── Dynamic Layout Grid ── */}
+        {/* --- Dynamic Layout Grid --- */}
         {renderWidgets('header')}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

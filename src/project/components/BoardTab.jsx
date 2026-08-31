@@ -9,7 +9,7 @@ import { useConfirmDialog } from '@/shared/ui/ConfirmDialog'
 import { toast } from 'sonner'
 
 /* ============================================================
-   components/BoardTab.jsx — project task board.
+   components/BoardTab.jsx -- project task board.
    Delegates to the project's own KanbanBoard engine: the full
    workflow state machine (submit / approve / reject-with-reason /
    recall / claim / complete), permission-rendered drag

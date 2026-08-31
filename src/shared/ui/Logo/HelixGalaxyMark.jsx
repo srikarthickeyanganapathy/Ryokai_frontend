@@ -1,7 +1,7 @@
 import React, { useId } from 'react'
 
 /**
- * HelixGalaxyMark — the Ryokai galaxy badge mark.
+ * HelixGalaxyMark -- the Ryokai galaxy badge mark.
  *
  * A circular badge: warm gradient backdrop with haze, a tilted two-arm
  * galaxy spiral around a glowing core, an opposite-diagonal orbit ring

@@ -10,7 +10,7 @@ import { EmptyState } from '@/shared/ui/EmptyState'
 import { normalizePriority, PRIORITY_HEX } from '@/shared/lib/priority'
 
 /* ============================================================
-   components/OverviewTab.jsx — project command center.
+   components/OverviewTab.jsx -- project command center.
    Progress + milestones, open-task triage, member contribution
    (gradient bars), and an aside with details / crew access /
    recent activity. Everything derives from the page's real
@@ -45,7 +45,7 @@ function MilestoneCheck({ done, label }) {
   return (
     <div className="flex items-center gap-2.5 text-[11px]">
       <span className={`w-4 h-4 rounded-md border flex items-center justify-center text-[8px] shrink-0 transition-colors ${done ? 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]/30' : 'border-[var(--border-default)] text-transparent'}`}>
-        {done && '✓'}
+        {done && '[x]'}
       </span>
       <span className={done ? 'text-[var(--text-secondary)]' : 'text-[var(--text-muted)]'}>{label}</span>
     </div>
@@ -238,11 +238,11 @@ export function OverviewTab({
             <Activity className="w-4 h-4 text-[var(--accent)]" strokeWidth={1.75} /> Recent Activity
           </div>
           {activities.length === 0 ? (
-            <p className="text-[11.5px] text-[var(--text-muted)] py-1">No activity yet — actions will stream in here.</p>
+            <p className="text-[11.5px] text-[var(--text-muted)] py-1">No activity yet -- actions will stream in here.</p>
           ) : (
             <div className="space-y-2">
               {activities.slice(0, 4).map((act, idx) => {
-                // Backend sends actor as a {id, username} object — calling
+                // Backend sends actor as a {id, username} object -- calling
                 // .charAt() on it crashed the whole Overview tab.
                 const actorName = act.actor?.username || act.username || 'System';
                 return (
@@ -273,7 +273,7 @@ export function OverviewTab({
           </div>
           <p className="text-[12px] text-[var(--text-secondary)]">
             {project.dueDate
-              ? `Due ${new Date(project.dueDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} · ${daysRemaining !== null ? `${daysRemaining} day${daysRemaining === 1 ? '' : 's'} left` : '—'}`
+              ? `Due ${new Date(project.dueDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}   ${daysRemaining !== null ? `${daysRemaining} day${daysRemaining === 1 ? '' : 's'} left` : '--'}`
               : 'No deadline set yet.'}
           </p>
         </div>

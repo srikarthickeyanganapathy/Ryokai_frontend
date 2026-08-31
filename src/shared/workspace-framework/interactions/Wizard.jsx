@@ -4,20 +4,20 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * Wizard
- * ─────────────────────────────────────────────────────────
+ * ---
  * Multi-step workflow UX primitive.
  * Renders a step indicator + content panel + navigation buttons.
  *
  * The PAGE owns step state and step content.
  * Wizard only renders the shell.
  *
- * @param {Array<{id, label}>} steps — Step definitions
- * @param {number} currentStep — Active step index (0-based)
- * @param {function} onNext — Next step handler
- * @param {function} onBack — Previous step handler
- * @param {function} [onComplete] — Final step completion handler
- * @param {boolean} [canProgress=true] — Whether Next is enabled
- * @param {React.ReactNode} children — Current step content
+ * @param {Array<{id, label}>} steps -- Step definitions
+ * @param {number} currentStep -- Active step index (0-based)
+ * @param {function} onNext -- Next step handler
+ * @param {function} onBack -- Previous step handler
+ * @param {function} [onComplete] -- Final step completion handler
+ * @param {boolean} [canProgress=true] -- Whether Next is enabled
+ * @param {React.ReactNode} children -- Current step content
  */
 export function Wizard({
   steps = [],

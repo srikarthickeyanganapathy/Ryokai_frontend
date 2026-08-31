@@ -53,7 +53,7 @@ export function OrganizationOverview({ org, counts }) {
   return (
     <div className="space-y-10">
 
-      {/* ── Organization Health ───────────────────────── */}
+      {/* --- Organization Health --- */}
       <section>
         <div className="flex items-center justify-between mb-3">
           <Heading level={5} className="text-[var(--text-primary)] text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)]">Needs Attention</Heading>
@@ -106,7 +106,7 @@ export function OrganizationOverview({ org, counts }) {
         )}
       </section>
 
-      {/* ── Organization Statistics ───────────────────────── */}
+      {/* --- Organization Statistics --- */}
       <section>
         <Heading level={5} className="text-[var(--text-primary)] text-sm font-semibold mb-3 uppercase tracking-wider text-[var(--text-muted)]">Organization Statistics</Heading>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -168,7 +168,7 @@ export function OrganizationOverview({ org, counts }) {
         </div>
       </section>
 
-      {/* ── Quick Actions ───────────────────────── */}
+      {/* --- Quick Actions --- */}
       <section>
         <Heading level={5} className="text-[var(--text-primary)] text-sm font-semibold mb-3 uppercase tracking-wider text-[var(--text-muted)]">Quick Actions</Heading>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -228,7 +228,7 @@ export function OrganizationOverview({ org, counts }) {
 
       <hr className="border-[var(--border-subtle)]" />
 
-      {/* ── Organization Identity ───────────────────────── */}
+      {/* --- Organization Identity --- */}
       <section>
         <OrganizationIdentity org={org} key={org?.id} />
       </section>

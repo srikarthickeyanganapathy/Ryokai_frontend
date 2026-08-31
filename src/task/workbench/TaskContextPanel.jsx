@@ -10,7 +10,7 @@ import { Button } from '@/shared/ui/Button'
  * Thin wrapper around the canonical TaskPanel.
  *
  * CRITICAL: TaskPanel.jsx already handles its own animation via motion.aside.
- * We do NOT wrap it with another AnimatePresence/motion — that causes double-animation glitches.
+ * We do NOT wrap it with another AnimatePresence/motion -- that causes double-animation glitches.
  *
  * This component adds:
  *   - Desktop: resize handle (3px draggable left edge)
@@ -65,7 +65,7 @@ export function TaskContextPanel({
     [width, onWidthChange, isMobile],
   )
 
-  /* ── Mobile: full-screen overlay ── */
+  /* --- Mobile: full-screen overlay --- */
   if (isMobile) {
     return (
       <AnimatePresence>
@@ -101,12 +101,12 @@ export function TaskContextPanel({
     )
   }
 
-  /* ── Desktop: TaskPanel handles its own animation ── */
+  /* --- Desktop: TaskPanel handles its own animation --- */
   if (!isOpen) return null
 
   return (
     <div className="flex shrink-0 h-full">
-      {/* Resize handle — user drags left to resize */}
+      {/* Resize handle -- user drags left to resize */}
       <div
         onMouseDown={handleDragStart}
         className="w-[3px] shrink-0 cursor-col-resize hover:bg-[var(--accent)]/30 transition-colors z-10"
@@ -128,7 +128,7 @@ export function TaskContextPanel({
   )
 }
 
-/* ── Panel loading skeleton ── */
+/* --- Panel loading skeleton --- */
 function PanelSkeleton() {
   return (
     <div className="h-full flex flex-col animate-pulse border-l border-[var(--color-border-subtle)] bg-[var(--bg-card)]" style={{ width: 420 }}>
@@ -157,7 +157,7 @@ function PanelSkeleton() {
   )
 }
 
-/* ── Panel error ── */
+/* --- Panel error --- */
 function PanelError({ onRetry }) {
   return (
     <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6" style={{ width: 420 }}>

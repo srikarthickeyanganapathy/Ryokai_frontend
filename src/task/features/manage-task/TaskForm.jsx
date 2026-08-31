@@ -53,7 +53,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
     enabled: !!activeOrganization?.id && !isPersonalMode
   })
 
-  // Project dropdown — scoped to the active workspace (isolation: only projects
+  // Project dropdown -- scoped to the active workspace (isolation: only projects
   // the user can see in the CURRENT workspace are offered; the backend re-checks
   // access on save).
   const projectScopeParams = useMemo(() => {
@@ -279,7 +279,7 @@ export function TaskForm({ onSubmit, defaultValues, isLoading, isPersonalTask, f
             )}
           />
 
-                              {/* Fixed project context: task is bound to this project — project only, no team picker */}
+                              {/* Fixed project context: task is bound to this project -- project only, no team picker */}
           {fixedProjectId && (
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--accent-border)] bg-[var(--accent-soft)]/40">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] shrink-0" />

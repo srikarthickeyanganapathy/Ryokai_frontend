@@ -121,7 +121,7 @@ export default function ImpactExplorer({ context, navigator, analysis, onCenterO
           {Array.from(cascadeByDepth.entries()).map(([depth, tasks]) => (
             <div key={depth} className="mb-2">
               <div className="text-[10px] text-white/25 font-mono mb-1 pl-2">
-                Depth {depth} — {tasks.length} task{tasks.length > 1 ? 's' : ''}
+                Depth {depth} -- {tasks.length} task{tasks.length > 1 ? 's' : ''}
               </div>
               <div className="space-y-0.5">
                 {tasks.slice(0, 8).map(task => (

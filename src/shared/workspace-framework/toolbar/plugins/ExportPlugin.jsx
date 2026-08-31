@@ -3,13 +3,13 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * ExportPlugin
- * ─────────────────────────────────────────────────────────
+ * ---
  * Toolbar export button plugin.
- * Stateless — page provides the onExport handler.
+ * Stateless -- page provides the onExport handler.
  *
- * @param {function} onExport — Export click handler
- * @param {string} [label='Export'] — Button label
- * @param {boolean} [loading=false] — Loading state
+ * @param {function} onExport -- Export click handler
+ * @param {string} [label='Export'] -- Button label
+ * @param {boolean} [loading=false] -- Loading state
  */
 export function ExportPlugin({ onExport, label = 'Export', loading = false, className }) {
   return (

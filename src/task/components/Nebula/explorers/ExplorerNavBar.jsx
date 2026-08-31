@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, Pin, PinOff, MapPin } from '@/shared/ui/Icon
 import { cn } from '@/shared/lib/cn'
 
 /**
- * ExplorerNavBar — shared navigation bar used by all analysis modes.
+ * ExplorerNavBar -- shared navigation bar used by all analysis modes.
  * Shows back/forward, breadcrumb trail, and pin controls.
  */
 export default function ExplorerNavBar({ navigator, onCenterOnGraph }) {
@@ -44,7 +44,7 @@ export default function ExplorerNavBar({ navigator, onCenterOnGraph }) {
           const isLast = idx === breadcrumbs.length - 1
           return (
             <React.Fragment key={crumb.id}>
-              {idx > 0 && <span className="text-white/15 text-[10px]">›</span>}
+              {idx > 0 && <span className="text-white/15 text-[10px]"> </span>}
               <button
                 onClick={() => {
                   if (!isLast) {

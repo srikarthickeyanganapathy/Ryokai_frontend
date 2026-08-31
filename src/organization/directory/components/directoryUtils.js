@@ -1,4 +1,4 @@
-// ───────── Directory Utility Helpers ─────────
+// --- Directory Utility Helpers ---
 // Shared formatting/activity helpers extracted from DirectoryPage.
 // Used by DirectoryPage, MemberCardGrid, MemberCompareModal, RecentActivityFeed.
 

@@ -27,8 +27,8 @@ export function Footer() {
           </div>
         </div>
         <div className="foot-bottom">
-          <span>© 2026 Ryokai. All rights reserved.</span>
-          <span>Personal · Crews · Organization · One System</span>
+          <span>  2026 Ryokai. All rights reserved.</span>
+          <span>Personal   Crews   Organization   One System</span>
         </div>
       </div>
     </footer>

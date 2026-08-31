@@ -4,7 +4,7 @@ import { Heading } from '@/shared/ui/Typography'
 import { EmptyState } from '@/shared/ui/EmptyState'
 
 /* ============================================================
-   components/ActivityTab.jsx — project activity timeline.
+   components/ActivityTab.jsx -- project activity timeline.
    Renders the page's real projectActivities (up to 30).
    ============================================================ */
 

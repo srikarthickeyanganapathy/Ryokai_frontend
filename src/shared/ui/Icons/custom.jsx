@@ -1,7 +1,7 @@
 import React from 'react'
 
 /**
- * Custom SVG icons — thin 16×16 icons that complement lucide-react.
+ * Custom SVG icons -- thin 16 16 icons that complement lucide-react.
  * Used by both crew/CrewShared.jsx and organization/teams/components/Shared.jsx.
  */
 

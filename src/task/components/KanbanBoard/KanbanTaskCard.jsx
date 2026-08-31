@@ -1,4 +1,4 @@
-﻿import React from 'react'
+ import React from 'react'
 import { motion } from 'framer-motion'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -9,7 +9,7 @@ import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
 import { useAuth, usePermissions } from '@/identity'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
-/* ─── Priority accent bars ─── */
+/* --- Priority accent bars --- */
 const PRIORITY_ACCENTS = {
   URGENT:  { bar: 'bg-[var(--danger)]', glow: 'shadow-[0_0_16px_var(--danger-soft)]', border: 'border-[var(--danger)]/20 hover:border-[var(--danger)]/40' },
   HIGH:    { bar: 'bg-orange-400', glow: 'shadow-[0_0_12px_rgba(251,146,60,0.12)]', border: 'border-orange-400/20 hover:border-orange-400/35' },
@@ -158,7 +158,7 @@ export function KanbanTaskCard({ task, onClick, onQuickComplete, onQuickDelete, 
                 {new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
               </span>
             ) : (
-              <span className="text-[10px] text-[var(--text-muted)]">—</span>
+              <span className="text-[10px] text-[var(--text-muted)]">--</span>
             )}
           </div>
 

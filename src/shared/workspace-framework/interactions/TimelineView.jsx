@@ -3,7 +3,7 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * TimelineView
- * ─────────────────────────────────────────────────────────
+ * ---
  * Vertical timeline UX primitive for activity streams,
  * event logs, and chronological data visualization.
  *
@@ -80,11 +80,11 @@ function TimelineItem({ icon: Icon, color = 'accent', title, description, time, 
 
 /**
  * TimelineGroup
- * ─────────────────────────────────────────────────────────
+ * ---
  * Groups timeline items under a date/label heading.
  *
- * @param {string} label — Group label (e.g. "Today", "Yesterday", "Jul 28")
- * @param {React.ReactNode} children — TimelineView or items
+ * @param {string} label -- Group label (e.g. "Today", "Yesterday", "Jul 28")
+ * @param {React.ReactNode} children -- TimelineView or items
  */
 export function TimelineGroup({ label, children, className }) {
   return (

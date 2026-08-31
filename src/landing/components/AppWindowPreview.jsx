@@ -8,7 +8,7 @@ import {
   GitBranch, GitMerge, Activity, Target,
 } from 'lucide-react';
 
-/* ── shared tone/badge helpers ── */
+/* --- shared tone/badge helpers --- */
 const TONE = {
   accent: 'bg-[var(--accent-soft)] text-[var(--accent)]',
   success: 'bg-[var(--success-soft)] text-[var(--success)]',
@@ -33,7 +33,7 @@ function Chip({ children, color }) {
   return <span className={`rounded px-1.5 py-0.5 text-[8px] font-bold ${color}`}>{children}</span>;
 }
 
-/* ── data ── */
+/* --- data --- */
 const MODES = {
   PERSONAL: {
     name: 'Personal', swIcon: User, swCls: 'bg-cyan-500/20 text-cyan-400',
@@ -47,7 +47,7 @@ const MODES = {
   },
   ORG: {
     name: 'Atlas Org', swIcon: Building2, swCls: 'bg-blue-500/20 text-blue-400',
-    header: { eyebrow: 'Organization · Atlas', title: 'Mission Control', sub: 'Organization-wide overview for Atlas.', pill: 'Org' },
+    header: { eyebrow: 'Organization   Atlas', title: 'Mission Control', sub: 'Organization-wide overview for Atlas.', pill: 'Org' },
     nav: [
       { sec: 'Workspace', items: [['home', 'Home', LayoutDashboard], ['tasks', 'Tasks', CheckSquare], ['projects', 'Projects', FolderClosed]] },
       { sec: 'Code', items: [['github', 'GitHub', Github]] },
@@ -108,7 +108,7 @@ const INBOX = [
   { ic: CheckCircle2, t: 'Your task "Update analytics dashboard" was approved', d: 'Yesterday', unread: false },
 ];
 
-/* ── views ── */
+/* --- views --- */
 function Home({ mode }) {
   const m = MODES[mode];
   const tag = mode === 'PERSONAL' ? 'Personal' : mode === 'ORG' ? 'Org' : 'Crew';
@@ -148,7 +148,7 @@ function Home({ mode }) {
             <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full" style={{ background: 'radial-gradient(circle, var(--accent-soft), transparent 70%)' }} />
             <div className="flex gap-1.5 mb-2 flex-wrap"><Badge tone="accent">Primary Focus</Badge><Badge tone={focusStatus}>{focusStatus}</Badge></div>
             <div className="text-base font-bold tracking-tight">{focusTitle}</div>
-            <div className="text-[10.5px] text-[var(--text-tertiary)] my-2.5">Project: Q3 Landing · Priority: High · Due Aug 21</div>
+            <div className="text-[10.5px] text-[var(--text-tertiary)] my-2.5">Project: Q3 Landing   Priority: High   Due Aug 21</div>
             <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--text-on-accent)] bg-[var(--accent)] rounded-full px-3.5 py-1.5">Resume Work <ArrowRight size={12} /></span>
           </div>
           <div className="rounded-[13px] border border-[var(--border-subtle)] p-3.5 bg-[var(--bg-subtle)]/30">
@@ -193,7 +193,7 @@ function Tasks({ filter, setFilter, done, toggleDone }) {
             <button key={v} onClick={() => setFilter(v)} className={`text-[11.5px] font-medium px-2.5 py-1 rounded-md transition ${filter === v ? 'bg-[var(--accent-soft)] text-[var(--accent)] font-semibold' : 'text-[var(--text-tertiary)]'}`}>{l}</button>
           ))}
         </div>
-        <span className="mono text-[10.5px] text-[var(--text-tertiary)]">{rows.length} tasks · governed lifecycle</span>
+        <span className="mono text-[10.5px] text-[var(--text-tertiary)]">{rows.length} tasks   governed lifecycle</span>
       </div>
       <div className="flex flex-col">
         {rows.map((t) => {
@@ -203,7 +203,7 @@ function Tasks({ filter, setFilter, done, toggleDone }) {
               <span className={`w-[18px] h-[18px] rounded-md border-[1.5px] flex items-center justify-center shrink-0 transition ${isDone ? 'bg-[var(--success)] border-[var(--success)] text-white' : 'border-[var(--border-strong)] text-transparent'}`}><CheckCircle2 size={11} /></span>
               <div className="flex-1 min-w-0">
                 <div className={`text-[12.5px] font-medium ${isDone ? 'line-through text-[var(--text-tertiary)]' : 'group-hover:text-[var(--accent)]'}`}>{t.t}</div>
-                <div className="text-[10.5px] text-[var(--text-tertiary)]">{t.p} · <span className={`font-semibold ${prCls[t.pr]}`}>{t.pr}</span></div>
+                <div className="text-[10.5px] text-[var(--text-tertiary)]">{t.p}   <span className={`font-semibold ${prCls[t.pr]}`}>{t.pr}</span></div>
               </div>
               <span className="hidden sm:flex items-center gap-1 text-[10.5px] text-[var(--text-tertiary)] font-mono"><Clock size={11} />{t.due}</span>
               <Badge tone={t.st}>{t.st}</Badge>
@@ -219,7 +219,7 @@ function Tasks({ filter, setFilter, done, toggleDone }) {
 function Projects() {
   return (
     <>
-      <div className="flex items-center gap-2 flex-wrap mb-3.5"><span className="mono text-[10.5px] text-[var(--text-tertiary)]">{PROJECTS.length} projects · org plane</span><span className="ml-auto inline-flex items-center gap-1.5 text-[11.5px] border border-[var(--border-subtle)] rounded-lg px-2.5 py-1.5"><Plus size={13} /> New Project</span></div>
+      <div className="flex items-center gap-2 flex-wrap mb-3.5"><span className="mono text-[10.5px] text-[var(--text-tertiary)]">{PROJECTS.length} projects   org plane</span><span className="ml-auto inline-flex items-center gap-1.5 text-[11.5px] border border-[var(--border-subtle)] rounded-lg px-2.5 py-1.5"><Plus size={13} /> New Project</span></div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {PROJECTS.map((p) => (
           <div key={p.name} className="rounded-xl border border-[var(--border-subtle)] p-3.5 bg-[var(--bg-subtle)]/30 hover:border-[var(--border-default)] transition">
@@ -237,12 +237,12 @@ function Projects() {
 function GithubView() {
   return (
     <>
-      <div className="mb-3.5 mono text-[10.5px] text-[var(--text-tertiary)]">Linked via your GitHub connection · read-only for crew viewers</div>
+      <div className="mb-3.5 mono text-[10.5px] text-[var(--text-tertiary)]">Linked via your GitHub connection   read-only for crew viewers</div>
       <div className="flex flex-col">
         {PRS.map((pr) => (
           <div key={pr.n} className="flex items-center gap-3 py-2.5 border-t border-[var(--border-subtle)] first:border-0">
             <span className="w-7 h-7 rounded-lg bg-[var(--bg-subtle)] text-[var(--text-secondary)] flex items-center justify-center shrink-0">{pr.st === 'merged' ? <GitMerge size={13} /> : <GitBranch size={13} />}</span>
-            <div className="flex-1 min-w-0"><div className="text-[12.5px] font-medium">{pr.t}</div><div className="text-[10.5px] text-[var(--text-tertiary)] font-mono">{pr.repo} · {pr.n} · {pr.branch}</div></div>
+            <div className="flex-1 min-w-0"><div className="text-[12.5px] font-medium">{pr.t}</div><div className="text-[10.5px] text-[var(--text-tertiary)] font-mono">{pr.repo}   {pr.n}   {pr.branch}</div></div>
             <span className="text-[10px] text-[var(--text-tertiary)] font-mono">{pr.files} files</span>
             <Badge tone={pr.st}>{pr.st}</Badge>
           </div>
@@ -309,7 +309,7 @@ function Notes() {
         </div>
         <div className="rounded-xl border border-[var(--border-subtle)] p-4 bg-[var(--bg-subtle)]/30 flex flex-col">
           <div className="text-[15px] font-bold mb-2">Landing page ideas</div>
-          <div className="text-[12.5px] text-[var(--text-secondary)] leading-relaxed flex-1">Three scopes, one permission model.<br /><br />Keep the interactive demo front and center on the hero — it is the fastest way for a visitor to understand the product.</div>
+          <div className="text-[12.5px] text-[var(--text-secondary)] leading-relaxed flex-1">Three scopes, one permission model.<br /><br />Keep the interactive demo front and center on the hero -- it is the fastest way for a visitor to understand the product.</div>
           <div className="mt-3"><span className="inline-flex items-center gap-1.5 text-[11px] border border-[var(--border-subtle)] rounded-lg px-2.5 py-1.5"><CheckSquare size={13} /> Convert to task</span></div>
         </div>
       </div>
@@ -417,11 +417,11 @@ function Directory() {
 function Goals() {
   return (
     <div className="flex flex-col gap-3">
-      {[['Ship governed workflows', 'on track', 72, '4 / 6 tasks · due Aug 30'], ['Improve approval latency', 'at risk', 38, '3 / 8 tasks · due Sep 14'], ['Grow to 3 crews', 'on track', 66, '2 / 3 crews · due Sep 30']].map(([t, chip, pct, meta]) => (
+      {[['Ship governed workflows', 'on track', 72, '4 / 6 tasks   due Aug 30'], ['Improve approval latency', 'at risk', 38, '3 / 8 tasks   due Sep 14'], ['Grow to 3 crews', 'on track', 66, '2 / 3 crews   due Sep 30']].map(([t, chip, pct, meta]) => (
         <div key={t} className="rounded-xl border border-[var(--border-subtle)] p-3.5 bg-[var(--bg-subtle)]/30">
           <div className="flex items-center justify-between mb-2.5"><span className="text-[13px] font-semibold">{t}</span><Badge tone={chip === 'on track' ? 'merged' : 'in review'}>{chip}</Badge></div>
           <div className="h-1.5 rounded-full bg-[var(--bg-subtle)] overflow-hidden mb-2"><div className="h-full rounded-full" style={{ width: `${pct}%`, background: 'var(--accent-gradient)' }} /></div>
-          <div className="text-[10.5px] text-[var(--text-tertiary)] font-mono">{pct}% · {meta}</div>
+          <div className="text-[10.5px] text-[var(--text-tertiary)] font-mono">{pct}%   {meta}</div>
         </div>
       ))}
     </div>
@@ -431,7 +431,7 @@ function Goals() {
 function WorkloadMini() {
   return (
     <>
-      <div className="rounded-xl border border-dashed border-[var(--border-default)] p-4 text-[12.5px] text-[var(--text-secondary)] mb-3.5 bg-[var(--bg-subtle)]/30">Full workload view — distribution, rebalance simulator and 14-day heatmap — lives in the Workload section below.</div>
+      <div className="rounded-xl border border-dashed border-[var(--border-default)] p-4 text-[12.5px] text-[var(--text-secondary)] mb-3.5 bg-[var(--bg-subtle)]/30">Full workload view -- distribution, rebalance simulator and 14-day heatmap -- lives in the Workload section below.</div>
       <div className="grid grid-cols-3 gap-2.5">
         {[['24', 'Members'], ['3', 'Overloaded'], ['82', 'Health score']].map(([v, l]) => (
           <div key={l} className="rounded-xl border border-[var(--border-subtle)] p-3 bg-[var(--bg-subtle)]/30"><span className="block text-lg font-bold tabular-nums">{v}</span><span className="text-[10px] text-[var(--text-tertiary)]">{l}</span></div>
@@ -442,7 +442,7 @@ function WorkloadMini() {
 }
 
 function Leaves() {
-  const rows = [['Maya Rao', 'Aug 24 – 26', 'pending'], ['Omar Haddad', 'Aug 19', 'approved'], ['Lin Chen', 'Sep 2 – 5', 'pending']];
+  const rows = [['Maya Rao', 'Aug 24 - 26', 'pending'], ['Omar Haddad', 'Aug 19', 'approved'], ['Lin Chen', 'Sep 2 - 5', 'pending']];
   return (
     <div className="flex flex-col">
       {rows.map(([name, range, status]) => (
@@ -459,7 +459,7 @@ function Leaves() {
 function Announce() {
   return (
     <div className="flex flex-col gap-3">
-      {[['Q3 permissions audit — kickoff', 'Posted by Sarah · Aug 14', 'All hands: review scopes for frontend and data teams before Aug 24.'], ['Release train Aug 30', 'Posted by Dev · Aug 12', 'Feature freeze Aug 26. Code freeze Aug 29.']].map(([t, d, b]) => (
+      {[['Q3 permissions audit -- kickoff', 'Posted by Sarah   Aug 14', 'All hands: review scopes for frontend and data teams before Aug 24.'], ['Release train Aug 30', 'Posted by Dev   Aug 12', 'Feature freeze Aug 26. Code freeze Aug 29.']].map(([t, d, b]) => (
         <div key={t} className="flex gap-3 p-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/30">
           <span className="w-7 h-7 rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center shrink-0"><Megaphone size={13} /></span>
           <div><div className="text-[13px] font-semibold">{t}</div><div className="text-[10px] text-[var(--text-tertiary)] my-0.5">{d}</div><div className="text-[12px] text-[var(--text-secondary)] leading-relaxed">{b}</div></div>
@@ -505,7 +505,7 @@ function Discover() {
       {crews.map(([name, members, topics, hue]) => (
         <div key={name} className="rounded-xl border border-[var(--border-subtle)] p-3.5 bg-[var(--bg-subtle)]/30">
           <div className="flex items-center gap-2 mb-2"><span className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px] text-white" style={{ background: `hsl(${hue} 60% 48%)` }}>{name.charAt(0)}</span><span className="text-[13px] font-semibold">{name}</span></div>
-          <div className="text-[11px] text-[var(--text-tertiary)] mb-2.5"><span className="inline-flex items-center gap-1"><Users size={12} />{members} members</span> · {topics}</div>
+          <div className="text-[11px] text-[var(--text-tertiary)] mb-2.5"><span className="inline-flex items-center gap-1"><Users size={12} />{members} members</span>   {topics}</div>
           <span className="inline-flex items-center gap-1.5 text-[11px] border border-[var(--border-subtle)] rounded-lg px-2.5 py-1.5"><Plus size={13} /> Join</span>
         </div>
       ))}
@@ -513,7 +513,7 @@ function Discover() {
   );
 }
 
-/* ── shell ── */
+/* --- shell --- */
 export default function AppWindowPreview() {
   const [mode, setMode] = useState('PERSONAL');
   const [view, setView] = useState('home');
@@ -602,7 +602,7 @@ export default function AppWindowPreview() {
               <span className={`ic ${m.swCls}`}><m.swIcon size={13} strokeWidth={1.6} /></span>
               <div><div className="t">{m.name}</div><div className="s">Switch workspace</div></div>
             </div>
-            <div className="sb-search"><Search size={14} /><span>Search…</span><span className="kb">⌘K</span></div>
+            <div className="sb-search"><Search size={14} /><span>Search...</span><span className="kb">Cmd+K</span></div>
             {m.nav.map((group) => (
               <div key={group.sec}>
                 <div className="sb-sec">{group.sec}</div>
@@ -621,7 +621,7 @@ export default function AppWindowPreview() {
             <div className="maincard">
               <div className="topbar">
                 <div className="tb-left" />
-                <div className="tb-search"><Search size={13} /> Search or jump to… <span className="kb">⌘K</span></div>
+                <div className="tb-search"><Search size={13} /> Search or jump to... <span className="kb">Cmd+K</span></div>
                 <div className="tb-right">
                   <motion.span className="tb-ic" whileHover={{ scale: 1.1 }} title="Quick actions"><Plus size={15} /></motion.span>
                   <motion.span className="tb-ic" whileHover={{ scale: 1.1 }} title="Theme"><Sun size={15} /></motion.span>

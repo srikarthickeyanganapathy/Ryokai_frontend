@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import { cn } from '@/shared/lib/cn';
 
 /**
- * InlineEditable — Linear-style click-to-edit cell.
- * ─────────────────────────────────────────────────────────
+ * InlineEditable -- Linear-style click-to-edit cell.
+ * ---
  * Click text to enter edit mode, hit Enter to save, Esc to cancel,
- * click outside to blur-save. Instant feedback — no modal overhead.
+ * click outside to blur-save. Instant feedback -- no modal overhead.
  *
  * Usage:
  *   <InlineEditable

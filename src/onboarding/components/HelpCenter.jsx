@@ -9,7 +9,7 @@ import { Modal, ModalContent, ModalTitle } from '@/shared/ui/Modal'
 import { cn } from '@/shared/lib/cn'
 
 /**
- * Help Center — "How Ryokai works". Reopenable product education organized by
+ * Help Center -- "How Ryokai works". Reopenable product education organized by
  * topic. Every entry links into real application pages (no simulated
  * walkthroughs). Content adapts to the three workspace modes.
  */
@@ -22,7 +22,7 @@ const SECTIONS = [
     topics: [
       {
         q: 'What is Ryokai?',
-        a: 'Ryokai is a workspace for organizing work: projects, tasks, checklists, priorities, and due dates — for yourself, a small crew, or a whole organization.',
+        a: 'Ryokai is a workspace for organizing work: projects, tasks, checklists, priorities, and due dates -- for yourself, a small crew, or a whole organization.',
       },
       {
         q: 'Understanding workspaces',
@@ -30,12 +30,12 @@ const SECTIONS = [
       },
       {
         q: 'Creating your first project',
-        a: 'Projects group related tasks around one outcome. Open Projects and use "New Project" — your workspace may already contain a starter project you can edit or replace.',
+        a: 'Projects group related tasks around one outcome. Open Projects and use "New Project" -- your workspace may already contain a starter project you can edit or replace.',
         link: { label: 'Go to Projects', to: '/app/projects' },
       },
       {
         q: 'Creating your first task',
-        a: 'Tasks are the individual pieces of work you complete. Open Tasks and create one — add a description, a priority, a due date, and checklist steps.',
+        a: 'Tasks are the individual pieces of work you complete. Open Tasks and create one -- add a description, a priority, a due date, and checklist steps.',
         link: { label: 'Go to Tasks', to: '/app/tasks' },
       },
     ],
@@ -47,7 +47,7 @@ const SECTIONS = [
     topics: [
       {
         q: 'Task workflow',
-        a: 'A task moves from Todo to In Progress, then to Done. In organizations, completed work is Submitted for review and gets Approved or Rejected by someone else — assignees never review their own work.',
+        a: 'A task moves from Todo to In Progress, then to Done. In organizations, completed work is Submitted for review and gets Approved or Rejected by someone else -- assignees never review their own work.',
       },
       { q: 'Statuses', a: 'Todo, In Progress, In Review, Done. Personal and crew tasks finish at Done; organization tasks finish at Approved.' },
       { q: 'Priorities', a: 'Low, Medium, High, and Urgent. Priority drives ordering and highlights across the Tasks page and Dashboard.' },
@@ -88,8 +88,8 @@ const SECTIONS = [
     icon: Building2,
     title: 'Organization',
     topics: [
-      { q: 'Organization structure', a: 'Organizations contain members, teams, projects, and tasks. Work is assigned between members — a task is assigned by one member to another.' },
-      { q: 'Members and invites', a: 'Invite members from the organization administration page. Until others join, an organization cannot have assigned tasks — which is why yours starts with guidance instead of assignments.', link: { label: 'Open Organizations', to: '/app/organizations' } },
+      { q: 'Organization structure', a: 'Organizations contain members, teams, projects, and tasks. Work is assigned between members -- a task is assigned by one member to another.' },
+      { q: 'Members and invites', a: 'Invite members from the organization administration page. Until others join, an organization cannot have assigned tasks -- which is why yours starts with guidance instead of assignments.', link: { label: 'Open Organizations', to: '/app/organizations' } },
       { q: 'Roles and permissions', a: 'Organization roles define who can view, create, assign, and approve work. Manage them under Roles & Permissions.', link: { label: 'Open Roles & Permissions', to: '/app/roles-permissions' } },
       { q: 'Task assignment', a: 'In an organization, tasks are assigned member-to-member and reviewed by a different member. Self-assignment is not part of the org workflow.' },
     ],
@@ -121,7 +121,7 @@ export function HelpCenter({ open, onOpenChange }) {
           <ModalTitle className="text-[17px]">How Ryokai works</ModalTitle>
         </div>
         <p className="text-[13px] text-[var(--text-secondary)]">
-          Short answers with links into the real product — jump straight to wherever you want to try things.
+          Short answers with links into the real product -- jump straight to wherever you want to try things.
         </p>
 
         <div className="mt-4 space-y-2 max-h-[52vh] overflow-y-auto custom-scrollbar pr-1">

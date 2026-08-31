@@ -1,6 +1,6 @@
-/* ── Shared presentational helpers for the Channels tab ── */
+/* --- Shared presentational helpers for the Channels tab --- */
 
-export const QUICK_EMOJIS = ['👍', '❤️', '🔥', '🚀', '💡', '✅'];
+export const QUICK_EMOJIS = ['  ', '  ', '  ', '  ', '  ', ' '];
 
 export function getAvatarGradient(name = '?') {
   const hash = (name || '').split('').reduce((acc, c) => c.charCodeAt(0) + ((acc << 5) - acc), 0)

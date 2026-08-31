@@ -20,11 +20,11 @@ import {
   Star, Github , ChevronRight, CircleHelp
 } from 'lucide-react';
 
-/* â”€â”€â”€ Icon map â€” Linear-style stroke-consistent icon set (1.5px) â”€â”€â”€ */
+/*  "  "  "  Icon map   " Linear-style stroke-consistent icon set (1.5px)  "  "  "  */
 
-/* â”€â”€â”€ SidebarNavItem â€” extracted from the 5x repeated pattern â”€â”€â”€ */
+/*  "  "  "  SidebarNavItem   " extracted from the 5x repeated pattern  "  "  "  */
 
-// â”€â”€ Workspace Switcher Dropdown â”€â”€
+//  "  "  Workspace Switcher Dropdown  "  " 
 function WorkspaceSwitcher({ isExpanded, workspaceMode, setWorkspaceMode, activeOrganization, setActiveOrganization, organizations = [], navigate }) {
   return (
     <Popover>
@@ -94,7 +94,7 @@ function WorkspaceSwitcher({ isExpanded, workspaceMode, setWorkspaceMode, active
   );
 }
 
-// â”€â”€ User Menu â”€â”€
+//  "  "  User Menu  "  " 
 function UserMenu({ user, logout, isExpanded }) {
   return (
     <Popover>
@@ -150,7 +150,7 @@ function UserMenu({ user, logout, isExpanded }) {
   );
 }
 
-/* â”€â”€â”€ Section divider â”€â”€â”€ */
+/*  "  "  "  Section divider  "  "  "  */
 function SectionDivider({ isExpanded, label }) {
   if (!isExpanded) return <div className="w-6 h-px bg-[var(--border-subtle)] my-2" />;
   return (
@@ -161,9 +161,9 @@ function SectionDivider({ isExpanded, label }) {
   );
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
- * AppSidebar â€” Clean, Linear-style navigation
- * â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === 
+ * AppSidebar   " Clean, Linear-style navigation
+ * === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === === ===  */
 export function AppSidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth();
   const { workspaceMode, setWorkspaceMode, activeOrganization, setActiveOrganization, organizations } = useWorkspace();
@@ -262,7 +262,7 @@ export function AppSidebar({ isOpen, onClose }) {
         {isExpanded && (
           <div className="flex-1 flex items-center justify-between">
             <span className="text-[12px] text-[var(--text-tertiary)]">Search...</span>
-            <kbd className="hidden sm:inline-flex h-5 items-center rounded-md bg-[var(--bg-subtle)] px-1.5 font-mono text-[10px] text-[var(--text-tertiary)] border border-[var(--border-subtle)]">âŒ˜K</kbd>
+            <kbd className="hidden sm:inline-flex h-5 items-center rounded-md bg-[var(--bg-subtle)] px-1.5 font-mono text-[10px] text-[var(--text-tertiary)] border border-[var(--border-subtle)]">Cmd+K</kbd>
           </div>
         )}
       </button>

@@ -26,7 +26,7 @@
   --color-danger: var(--danger);
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  /* Brand wordmark only — hand-drawn Japanese brush face ("Japanoso" style) */
+  /* Brand wordmark only -- hand-drawn Japanese brush face ("Japanoso" style) */
   --font-brand: "Yusei Magic", "Inter", -apple-system, sans-serif;
 }
 
@@ -69,7 +69,7 @@
     &:focus-visible { outline: none; box-shadow: var(--focus-ring); }
   }
 
-  /* ── Glass Panel ── */
+  /* --- Glass Panel --- */
   .glass-panel {
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate, 1.8));
@@ -83,7 +83,7 @@
     border: 1px solid var(--glass-border);
   }
 
-  /* ── Mesh Background ── */
+  /* --- Mesh Background --- */
   .mesh-bg {
     position: relative; isolation: isolate;
   }
@@ -98,7 +98,7 @@
     filter: blur(80px); opacity: 0.9;
   }
 
-  /* ── Noise Texture Overlay ── */
+  /* --- Noise Texture Overlay --- */
   .noise-overlay {
     position: relative;
   }
@@ -109,22 +109,22 @@
     background-repeat: repeat; background-size: 128px 128px;
   }
 
-  /* ── Accent Glow ── */
+  /* --- Accent Glow --- */
   .accent-glow { box-shadow: var(--accent-glow); transition: box-shadow var(--duration-base) var(--ease-out); }
   .accent-glow:hover { box-shadow: var(--accent-glow-lg); }
 
-  /* ── Gradient Text ── */
+  /* --- Gradient Text --- */
   .text-gradient {
     background: var(--accent-gradient);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* ── Surface Gradient ── */
+  /* --- Surface Gradient --- */
   .surface-gradient-1 { background: var(--surface-gradient-1); }
   .surface-gradient-2 { background: var(--surface-gradient-2); }
 
-  /* ── Shimmer/Skeleton ── */
+  /* --- Shimmer/Skeleton --- */
   .shimmer { position: relative; overflow: hidden; }
   .shimmer::after {
     content: ''; position: absolute; inset: 0;
@@ -135,13 +135,13 @@
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
   }
 
-  /* ── Spring In ── */
+  /* --- Spring In --- */
   .spring-in { animation: spring-in var(--duration-slow) var(--ease-spring) both; }
 
-  /* ── Rise In ── */
+  /* --- Rise In --- */
   .rise-in { animation: rise-in var(--duration-slow) var(--ease-out) both; }
 
-  /* ── KBD Chip ── */
+  /* --- KBD Chip --- */
   .kbd {
     font-family: var(--font-mono); font-size: 11px; line-height: 1;
     color: var(--text-tertiary); background: var(--bg-subtle);
@@ -149,7 +149,7 @@
     padding: 3px 5px;
   }
 
-  /* ── Card Fan Carousel (auth brand panel) ── */
+  /* --- Card Fan Carousel (auth brand panel) --- */
   .fan-layout {
     min-height: 23.5rem; /* reserve vertical room for the arc */
   }
@@ -170,7 +170,7 @@
     .fan-layout { min-height: 17rem; }
   }
 
-  /* ── Shooting stars (auth brand panel) ── */
+  /* --- Shooting stars (auth brand panel) --- */
   .shooting-star {
     position: absolute;
     width: 90px;
@@ -183,7 +183,7 @@
     pointer-events: none;
   }
 
-  /* ── Card Hover Lift ── */
+  /* --- Card Hover Lift --- */
   .card-lift {
     transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
   }
@@ -192,11 +192,11 @@
     box-shadow: var(--shadow-lg);
   }
 
-  /* ── Ring Glow (for avatars, status indicators) ── */
+  /* --- Ring Glow (for avatars, status indicators) --- */
   .ring-glow-accent { box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent-border); }
   .ring-glow-success { box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--success-border); }
 
-  /* ── Divider with dot ── */
+  /* --- Divider with dot --- */
   .divider-dotted {
     border: none; border-top: 2px dotted var(--border-default);
   }
@@ -234,7 +234,7 @@
   100% { transform: translateX(100%); }
 }
 
-/* ── View Transitions for Theme Toggle ── */
+/* --- View Transitions for Theme Toggle --- */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   mix-blend-mode: normal; display: block;

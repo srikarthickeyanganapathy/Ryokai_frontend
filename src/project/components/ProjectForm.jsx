@@ -185,7 +185,7 @@ export function ProjectForm({ onSubmit, defaultValues, isLoading, workspaceMode,
                   <p className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Has access</p>
                   <div className="flex flex-wrap gap-1.5">
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--accent-soft)] border border-[var(--accent-border)]/60 text-[11px] font-medium text-[var(--text-primary)]">
-                      {crews.find((c) => c.id.toString() === watchCrewId)?.name || 'Crew'} — everyone
+                      {crews.find((c) => c.id.toString() === watchCrewId)?.name || 'Crew'} -- everyone
                     </span>
                     {currentCollaborators.map((m) => (
                       <span key={m.userId} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)]">
@@ -199,7 +199,7 @@ export function ProjectForm({ onSubmit, defaultValues, isLoading, workspaceMode,
                 </div>
 
                 <FormDescription className="text-[11px] text-[var(--text-muted)]">
-                  Everyone in the crew sees this project. Add explicit collaborators below — only members without access are listed.
+                  Everyone in the crew sees this project. Add explicit collaborators below -- only members without access are listed.
                 </FormDescription>
                 {assignableCollaborators.length === 0 ? (
                   <div className="text-[12px] text-[var(--text-muted)] p-3 border border-dashed border-[var(--border-subtle)] rounded-md text-center">

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/shared/lib/cn';
 
 /**
- * InteractiveCard — Premium card with Linear-style micro-interactions.
+ * InteractiveCard -- Premium card with Linear-style micro-interactions.
  * 
  * Features:
  *   - Subtle border glow on hover (Fitts's Law: larger visual affordance)

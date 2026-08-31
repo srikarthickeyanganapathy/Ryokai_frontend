@@ -3,12 +3,12 @@ import { cn } from '@/shared/lib/cn'
 import { resolveStatus } from '@/shared/lib/statusRegistry'
 
 /**
- * PriorityBadge — canonical priority badge using the status registry.
+ * PriorityBadge -- canonical priority badge using the status registry.
  * Matches URGENT, HIGH, MEDIUM, LOW from STATUS_REGISTRY.
  */
 export function PriorityBadge({ priority, className }) {
   const def = resolveStatus(priority)
-  if (!def) return <span className={cn('text-[var(--text-muted)] text-xs', className)}>{priority || '—'}</span>
+  if (!def) return <span className={cn('text-[var(--text-muted)] text-xs', className)}>{priority || '--'}</span>
 
   const Icon = def.icon
 

@@ -39,7 +39,7 @@ import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
 
 
-/* ── Custom Premium Checklist ── */
+/* --- Custom Premium Checklist --- */
 function PremiumChecklist({ items, hasPerm, onToggle, onDelete, onAdd, onMoveUp, onMoveDown, addLoading }) {
   const done = (items || []).filter(c => c.completed).length
   const total = (items || []).length
@@ -144,7 +144,7 @@ function ChecklistItem({ item, index, total, hasPerm, onToggle, onDelete, onMove
   )
 }
 
-/* ── Section Label ── */
+/* --- Section Label --- */
 const SectionLabel = ({ children }) => (
   <div className="flex items-center gap-2 mb-3">
     <div className="w-2 h-2 rounded-[2px] bg-[var(--accent)] shrink-0" />
@@ -375,7 +375,7 @@ export default function TaskDetailPage() {
     reorderChecklist.mutate(items.map(i => i.id));
   }
 
-  // ── Loading ──
+  // --- Loading ---
   if (!task && isLoading) {
     return (
       <PageShell maxWidth="full">
@@ -384,7 +384,7 @@ export default function TaskDetailPage() {
     )
   }
 
-  // ── Error ──
+  // --- Error ---
   if (!task && isError) {
     return (
       <PageShell maxWidth="full">
@@ -393,7 +393,7 @@ export default function TaskDetailPage() {
     )
   }
 
-  // ── Not found ──
+  // --- Not found ---
   if (!task) {
     return (
       <PageShell maxWidth="full">
@@ -404,7 +404,7 @@ export default function TaskDetailPage() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* ── Header ── */}
+      {/* --- Header --- */}
       <div className="shrink-0 bg-[var(--bg-base)] border-b border-[var(--border-subtle)]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 py-3.5 flex-wrap">
@@ -456,7 +456,7 @@ export default function TaskDetailPage() {
         </div>
       </div>
 
-      {/* ── Body ── */}
+      {/* --- Body --- */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
 
         <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-12">
@@ -481,7 +481,7 @@ export default function TaskDetailPage() {
             >
               {activeTab === 'details' && (
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
-                  {/* ── Left ── */}
+                  {/* --- Left --- */}
                   <div className="min-w-0 space-y-5">
                     {/* Title */}
                     {hasEditPerm && (
@@ -501,11 +501,11 @@ export default function TaskDetailPage() {
                       <div ref={descRef} contentEditable={hasEditPerm} suppressContentEditableWarning
                         onBlur={() => { const t = descRef.current?.textContent || ''; if (t !== (task.description || '')) { setLocalEdits(p => ({ ...p, description: t })); setIsDirty(true) } }}
                         className="text-[13px] text-[var(--text-primary)] leading-relaxed min-h-[72px] outline-none hover:bg-[var(--bg-subtle)] p-3 rounded-lg transition-colors cursor-text whitespace-pre-wrap">
-                        {task?.description || (hasEditPerm ? 'Click to add a description…' : 'No description provided.')}
+                        {task?.description || (hasEditPerm ? 'Click to add a description...' : 'No description provided.')}
                       </div>
                     </section>
 
-                    {/* Checklist — premium custom version */}
+                    {/* Checklist -- premium custom version */}
                     <section className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-6">
                       <PremiumChecklist
                         items={task.checklists || []}
@@ -526,7 +526,7 @@ export default function TaskDetailPage() {
                     </section>
                   </div>
 
-                  {/* ── Right sidebar ── */}
+                  {/* --- Right sidebar --- */}
                   <aside className="hidden lg:flex flex-col gap-4 sticky top-0">
                     <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-5">
                       <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.08em] mb-3 block">Attributes</span>
@@ -589,7 +589,7 @@ export default function TaskDetailPage() {
                         </div>
                         <div className="flex items-center justify-between py-2.5 border-b border-[var(--border-subtle)]">
                           <span className="text-[11px] text-[var(--text-muted)]">Created</span>
-                          <span className="text-[11px] font-semibold text-[var(--text-primary)]">{task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '—'}</span>
+                          <span className="text-[11px] font-semibold text-[var(--text-primary)]">{task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '--'}</span>
                         </div>
                         <div className="flex items-center justify-between pt-2.5">
                           <span className="text-[11px] text-[var(--text-muted)]">Task ID</span>
@@ -617,11 +617,11 @@ export default function TaskDetailPage() {
         </div>
       </div>
 
-      {/* ── Footer ── */}
+      {/* --- Footer --- */}
       <div className="shrink-0 px-5 py-3 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/50 flex items-center justify-between gap-3 flex-wrap">
         <span className="text-[11px] text-[var(--text-muted)]">
-          Created {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '—'}
-          {task.updatedAt && task.updatedAt !== task.createdAt && <> · Updated {new Date(task.updatedAt).toLocaleDateString()}</>}
+          Created {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '--'}
+          {task.updatedAt && task.updatedAt !== task.createdAt && <>   Updated {new Date(task.updatedAt).toLocaleDateString()}</>}
         </span>
         <div className="flex items-center gap-2">
           <div className="hidden lg:flex items-center gap-2">{renderStateActions("sm")}</div>

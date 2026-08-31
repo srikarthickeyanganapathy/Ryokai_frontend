@@ -24,7 +24,7 @@ const PRIORITY_LABELS = {
 
 const getPriorityLabel = (priority) => PRIORITY_LABELS[priority] || `Tier ${priority}`;
 
-// ─── Department Color Coding ─────────────────────────────────────────
+// --- Department Color Coding ---
 const ROLE_HUE_MAP = [0, 35, 210, 260]; // Admin=red, Director=amber, Manager=blue, Member=purple-blue
 
 function getNodeColor(rolePriority = 99) {
@@ -39,7 +39,7 @@ function getNodeColor(rolePriority = 99) {
   };
 }
 
-// ─── Tree Builder ─────────────────────────────────────────────────────
+// --- Tree Builder ---
 function buildOrgTree(members) {
   const memberMap = new Map();
   const roots = [];
@@ -66,7 +66,7 @@ function buildOrgTree(members) {
   return roots;
 }
 
-// ─── Empty State Illustration ─────────────────────────────────────────
+// --- Empty State Illustration ---
 function EmptyOrgIllustration() {
   return (
     <svg width="160" height="120" viewBox="0 0 160 120" fill="none" className="mb-4 opacity-40">
@@ -98,7 +98,7 @@ function EmptyOrgIllustration() {
   );
 }
 
-// ─── Zoom Controls ────────────────────────────────────────────────────
+// --- Zoom Controls ---
 function ZoomControls({ scale, onZoomIn, onZoomOut, onFitToScreen, containerRef }) {
   return (
     <div className="absolute bottom-4 right-4 flex items-center gap-0.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg p-1 shadow-lg z-20">
@@ -133,7 +133,7 @@ function ZoomControls({ scale, onZoomIn, onZoomOut, onFitToScreen, containerRef 
   );
 }
 
-// ─── Tree Node ────────────────────────────────────────────────────────
+// --- Tree Node ---
 function TreeNode({ node, onClick, searchQuery, depth = 0, teamCount = 0 }) {
   const isSuspended = node.status === 'SUSPENDED';
   const colors = getNodeColor(node.rolePriority);
@@ -264,7 +264,7 @@ function TreeNode({ node, onClick, searchQuery, depth = 0, teamCount = 0 }) {
   );
 }
 
-// ─── Tiered Fallback Layout ───────────────────────────────────────────
+// --- Tiered Fallback Layout ---
 function TieredLayout({ groupedMembers, onSelectMember, searchQuery, memberTeamsMap }) {
   const [expandedTiers, setExpandedTiers] = useState({});
 
@@ -349,7 +349,7 @@ function TieredLayout({ groupedMembers, onSelectMember, searchQuery, memberTeams
   );
 }
 
-// ─── Enhanced Org Node (used in tiered fallback) ──────────────────────
+// --- Enhanced Org Node (used in tiered fallback) ---
 function EnhancedOrgNode({ member, onClick, isSearchMatch, teamCount = 0 }) {
   const isSuspended = member.status === 'SUSPENDED';
   const colors = getNodeColor(member.rolePriority);
@@ -432,7 +432,7 @@ function EnhancedOrgNode({ member, onClick, isSearchMatch, teamCount = 0 }) {
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────
+// --- Main Component ---
 export function DirectoryOrgChart({ members, onSelectMember, searchQuery = '', memberTeamsMap = {} }) {
   const [scale, setScale] = useState(1);
   const containerRef = useRef(null);

@@ -27,7 +27,7 @@ const DEFAULT_WORKSPACE = {
 
 const WorkspaceContext = createContext(DEFAULT_WORKSPACE);
 
-// ── Persistence ──────────────────────────────────────────────────────────────
+// --- Persistence ---
 // The workspace lens (mode + active org/crew) survives reloads so the sidebar
 // and page content stay in sync with the URL. Cleared on logout.
 const WORKSPACE_STORAGE_KEY = 'ryokai_workspace_context';
@@ -97,7 +97,7 @@ export const WorkspaceProvider = ({ children }) => {
     modeMutation.mutate(mode);
   }, [modeMutation]);
 
-  // ═══ Cache isolation: invalidate workspace-scoped queries on lens switch ═══
+  // === Cache isolation: invalidate workspace-scoped queries on lens switch ===
   useEffect(() => {
     if (prevWorkspaceMode.current !== workspaceMode) {
       // Invalidate workspace-scoped data so stale data doesn't leak
@@ -113,7 +113,7 @@ export const WorkspaceProvider = ({ children }) => {
   const prevOrgId = useRef(activeOrganization?.id);
   const prevCrewId = useRef(activeCrew?.id);
 
-  // ═══ Cache isolation: invalidate workspace-scoped queries on org/crew switch ═══
+  // === Cache isolation: invalidate workspace-scoped queries on org/crew switch ===
   useEffect(() => {
     if (activeOrganization?.id !== prevOrgId.current || activeCrew?.id !== prevCrewId.current) {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
@@ -131,7 +131,7 @@ export const WorkspaceProvider = ({ children }) => {
 
   useEffect(() => {
     // Clean up ONLY on a real logout transition (had a user, now none).
-    // During boot `user` is null while the session restores — treating that
+    // During boot `user` is null while the session restores -- treating that
     // as logout wiped the persisted workspace and reset the lens to PERSONAL
     // on every reload.
     const hadUser = !!prevUserRef.current;
@@ -181,7 +181,7 @@ export const WorkspaceProvider = ({ children }) => {
     }
   }, [organizations, activeOrganization, user, initialState]);
 
-  // ═══ Auto-select first crew when switching to CREWS mode ═══
+  // === Auto-select first crew when switching to CREWS mode ===
   useEffect(() => {
     if (workspaceMode === 'CREWS' && crews.length > 0 && !activeCrew) {
       queueMicrotask(() => {
@@ -206,7 +206,7 @@ export const WorkspaceProvider = ({ children }) => {
     }
   }, [workspaceMode, crews, activeCrew, initialState]);
 
-  // ═══ Persist the active lens so reloads land back in the same workspace ═══
+  // === Persist the active lens so reloads land back in the same workspace ===
   useEffect(() => {
     if (!user) return;
     try {

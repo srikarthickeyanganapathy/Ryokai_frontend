@@ -1,7 +1,7 @@
 /**
  * Status normalization between frontend display values and backend enum values.
  * Backend TaskStatus enum: TODO, IN_PROGRESS, SUBMITTED, APPROVED, REJECTED, COMPLETED.
- * Canonical status definitions in statusRegistry.js — this module provides
+ * Canonical status definitions in statusRegistry.js -- this module provides
  * normalization/conversion utilities only.
  *
  * Frontend display: To Do, In Progress, In Review, Approved, Rejected, Done.

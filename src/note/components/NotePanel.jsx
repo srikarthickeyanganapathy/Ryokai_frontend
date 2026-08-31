@@ -22,9 +22,9 @@ const COLORS = [
 const MIN_PANEL_WIDTH = 380
 const RESIZE_STEP = 20
 
-/* ──────────────────────────────────────────────────────────
- * OutlinePanel — live heading navigator
- * ────────────────────────────────────────────────────────── */
+/* ---
+ * OutlinePanel -- live heading navigator
+ * --- */
 function OutlinePanel({ outline, onJump, onClose }) {
   return (
     <div className="border border-[var(--border-subtle)] rounded-lg bg-[var(--bg-subtle)]/40 overflow-hidden shrink-0" role="region" aria-label="Note outline">
@@ -54,9 +54,9 @@ function OutlinePanel({ outline, onJump, onClose }) {
   )
 }
 
-/* ──────────────────────────────────────────────────────────
- * TagsEditor — chip input for note tags
- * ────────────────────────────────────────────────────────── */
+/* ---
+ * TagsEditor -- chip input for note tags
+ * --- */
 function TagsEditor({ tags, onChange }) {
   const [input, setInput] = useState('')
   const inputRef = useRef(null)
@@ -113,7 +113,7 @@ function TagsEditor({ tags, onChange }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder={tags.length === 0 ? 'Add tags…' : ''}
+          placeholder={tags.length === 0 ? 'Add tags...' : ''}
           aria-label="Add a tag, press Enter to confirm"
           className="flex-1 min-w-[80px] bg-transparent text-[11px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none border-none p-0"
         />
@@ -122,10 +122,10 @@ function TagsEditor({ tags, onChange }) {
   )
 }
 
-/* ──────────────────────────────────────────────────────────
- * BacklinksPanel — notes in the same scope that reference
+/* ---
+ * BacklinksPanel -- notes in the same scope that reference
  * the current note via [[Title]] syntax or title mention.
- * ────────────────────────────────────────────────────────── */
+ * --- */
 function BacklinksPanel({ currentNote, allNotes, onNavigate }) {
   const backlinks = useMemo(() => {
     if (!currentNote?.id || !allNotes?.length) return []
@@ -178,10 +178,10 @@ function BacklinksPanel({ currentNote, allNotes, onNavigate }) {
 
 function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') }
 
-/* ══════════════════════════════════════════════════════
- * NotePanel — Focus Editor with tags, backlinks, outline,
+/* ===
+ * NotePanel -- Focus Editor with tags, backlinks, outline,
  * zen mode, save-status feedback
- * ══════════════════════════════════════════════════════ */
+ * === */
 export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
   const updateNote = useUpdateNote()
   const createNote = useCreateNote(scope)
@@ -527,7 +527,7 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
                   <div className="shrink-0">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] font-mono">Checklist</span>
-                      <span className="text-[10px] font-mono tabular-nums text-[var(--success)]">{dna.checklistDone}/{dna.checklistTotal} · {dna.progress}%</span>
+                      <span className="text-[10px] font-mono tabular-nums text-[var(--success)]">{dna.checklistDone}/{dna.checklistTotal}   {dna.progress}%</span>
                     </div>
                     <div className="h-1 rounded-full bg-[var(--bg-subtle)] overflow-hidden" role="progressbar" aria-valuenow={dna.progress} aria-valuemin={0} aria-valuemax={100} aria-label="Checklist completion">
                       <motion.div className="h-full rounded-full bg-[var(--success)]" initial={{ width: 0 }} animate={{ width: `${dna.progress}%` }} transition={{ duration: 0.5, ease: 'easeOut' }} />
@@ -547,7 +547,7 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
 
               <div className="p-4 border-t border-[var(--border-subtle)] flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0 flex-wrap" aria-live="polite" aria-atomic="true">
-                  {saveState === 'saving' && <span className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--text-muted)] animate-pulse whitespace-nowrap">Saving…</span>}
+                  {saveState === 'saving' && <span className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--text-muted)] animate-pulse whitespace-nowrap">Saving...</span>}
                   {saveState === 'saved' && !isDirty && (
                     <span className="flex items-center gap-1.5 text-[10px] font-mono text-[var(--success)] whitespace-nowrap">
                       <Check className="w-3 h-3" aria-hidden="true" /> Saved{savedAt ? ` ${savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
@@ -573,7 +573,7 @@ export function NotePanel({ note, isOpen, onClose, notes = [], scope = {} }) {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Button variant="outline" onClick={handleClose} className="text-[12px] h-8">Cancel</Button>
-                  <Button onClick={handleSave} disabled={createNote.isPending || updateNote.isPending} className="gap-1.5 text-[12px] h-8"><Save className="w-3.5 h-3.5" aria-hidden="true" /> {createNote.isPending || updateNote.isPending ? 'Saving…' : isNew ? 'Create Note' : 'Save Changes'}</Button>
+                  <Button onClick={handleSave} disabled={createNote.isPending || updateNote.isPending} className="gap-1.5 text-[12px] h-8"><Save className="w-3.5 h-3.5" aria-hidden="true" /> {createNote.isPending || updateNote.isPending ? 'Saving...' : isNew ? 'Create Note' : 'Save Changes'}</Button>
                 </div>
               </div>
             </motion.div>

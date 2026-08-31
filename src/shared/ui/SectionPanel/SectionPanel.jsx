@@ -5,7 +5,7 @@ import { Heading, Text } from '@/shared/ui/Typography';
 
 /**
  * SectionPanel
- * ─────────────────────────────────────────────────────────
+ * ---
  * Standardized section card with an optional icon, title, subtitle, and actions.
  * Wrapped in a fade-up motion container for premium entrance feel.
  *

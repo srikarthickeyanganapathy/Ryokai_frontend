@@ -3,13 +3,13 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * FrameworkLoadingState
- * ─────────────────────────────────────────────────────────
+ * ---
  * Standardized skeleton loader variants for WEF layouts.
  * Matches the visual rhythm of the layout archetype it fills.
  *
  * @param {'default'|'cards'|'table'|'editor'|'insight'} variant
- * @param {number} [rows=5] — Number of skeleton rows (for table variant)
- * @param {number} [columns=4] — Number of skeleton columns (for table variant)
+ * @param {number} [rows=5] -- Number of skeleton rows (for table variant)
+ * @param {number} [columns=4] -- Number of skeleton columns (for table variant)
  */
 const Bone = ({ className: boneClass }) => (
   <div className={cn('animate-pulse rounded-[var(--radius-md)] bg-[var(--bg-subtle)]/70 border border-[var(--border-subtle)]/30', boneClass)} />

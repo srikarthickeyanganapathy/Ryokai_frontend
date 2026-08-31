@@ -5,7 +5,7 @@ import { Progress } from '@/shared/ui/Progress'
 import { LockIcon } from '@/shared/ui/Icons/custom'
 
 /**
- * SharedWidgets — Common stat & permission components used across org and crew domains.
+ * SharedWidgets -- Common stat & permission components used across org and crew domains.
  * Previously duplicated in organization/teams/components/Shared.jsx and crew/components/CrewShared.jsx.
  */
 

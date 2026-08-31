@@ -24,7 +24,7 @@ export function NotificationPanel({
   const [isResizing, setIsResizing] = useState(false)
   const dragStartRef = useRef(null)
 
-  // Invite decision taken inside this panel ('accepted' | 'declined') — the
+  // Invite decision taken inside this panel ('accepted' | 'declined') -- the
   // card must reflect the outcome instead of showing action buttons forever.
   // Reset when a different notification is opened.
   const [inviteDecision, setInviteDecision] = useState(null)
@@ -39,7 +39,7 @@ export function NotificationPanel({
   }, [panelWidth])
 
   // Window listeners live in an effect bound to isResizing so they are ALWAYS
-  // cleaned up — on mouseup AND on unmount-mid-drag (route change / panel close
+  // cleaned up -- on mouseup AND on unmount-mid-drag (route change / panel close
   // used to leak the listeners and keep mutating a removed component).
   useEffect(() => {
     if (!isResizing) return
@@ -78,7 +78,7 @@ export function NotificationPanel({
 
   if (!isOpen || !notification) return null
 
-  // Extract linked taskId: prefer the DTO's own taskId/taskTitleSnapshot — the
+  // Extract linked taskId: prefer the DTO's own taskId/taskTitleSnapshot -- the
   // old tasks.find(...) searched an array that was never defined or passed in,
   // crashing with ReferenceError on every task-linked notification.
   const taskIdMatch = notification.taskId

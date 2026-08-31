@@ -28,7 +28,7 @@ export function PermissionToolbar({ searchQuery, onSearchChange, riskFilter = 'A
               key={t.lvl}
               disabled={isAdmin}
               onClick={() => onSetLevel(t.lvl)}
-              title={`${t.name} — enables ${t.groups.join(', ').toLowerCase()} permissions`}
+              title={`${t.name} -- enables ${t.groups.join(', ').toLowerCase()} permissions`}
               className={cn('flex-1 h-8 rounded-md border text-[10.5px] font-mono font-bold uppercase tracking-wide flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50', on ? LEVEL_TONES[t.lvl - 1].active : 'border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)]')}
             >
               <Icon className="w-3 h-3" />

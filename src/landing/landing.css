@@ -208,7 +208,7 @@
 .landing-page .ic-success { background: color-mix(in srgb, var(--success) 14%, transparent); color: var(--success); }
 .landing-page .ic-secondary { background: color-mix(in srgb, var(--accent-secondary) 14%, transparent); color: var(--accent-secondary); }
 
-/* Roles — Command Chain + passport */
+/* Roles -- Command Chain + passport */
 .landing-page .posture { display: flex; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--card-bg); overflow: hidden; margin-bottom: 16px; }
 .landing-page .pm { flex: 1; display: flex; align-items: center; gap: 10px; padding: 11px 14px; min-width: 0; }
 .landing-page .pm + .pm { border-left: 1px solid var(--border-subtle); }
@@ -334,7 +334,7 @@
   .landing-page section { padding: 76px 0; }
 }
 
-/* ── Added: faithful Mission Control demo (matches real app) ── */
+/* --- Added: faithful Mission Control demo (matches real app) --- */
 .landing-page .mainarea { flex: 1; min-width: 0; padding: 10px; display: flex; }
 .landing-page .mainarea .maincard { margin: 0; }
 .landing-page .tb-logo { width: 26px; height: 26px; border-radius: 8px; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; margin-left: 4px; flex: none; }

@@ -2,10 +2,10 @@ import React, { useEffect } from 'react'
 import { motion, useSpring, useTransform } from 'framer-motion'
 import { cn } from '@/shared/lib/cn'
 
-/* ══════════════════════════════════════════════════════
+/* ===
  * MINI UI PRIMITIVES (extracted from TeamsPage)
  * TaskCompletionRing / MiniProgressBar / AnimatedCounter
- * ══════════════════════════════════════════════════════ */
+ * === */
 
 export function TaskCompletionRing({ rate, size = 36, strokeWidth = 3 }) {
   const radius = (size - strokeWidth) / 2

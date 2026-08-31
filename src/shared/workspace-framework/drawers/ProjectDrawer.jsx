@@ -17,7 +17,7 @@ const STATUS_CONFIG = {
 
 /**
  * ProjectDrawer
- * ─────────────────────────────────────────────────────────
+ * ---
  * Quick-view contextual drawer for project summaries.
  * Shown when clicking a project reference in task lists,
  * dashboards, or analytics.

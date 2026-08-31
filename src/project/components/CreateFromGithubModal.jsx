@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
 /* ============================================================
-   components/CreateFromGithubModal.jsx — turn a connected GitHub
+   components/CreateFromGithubModal.jsx -- turn a connected GitHub
    repository into a project in one step. No mock data: only
    repos the GitHub mirror actually knows are offered.
    ============================================================ */
@@ -30,7 +30,7 @@ export function CreateFromGithubModal({ open, onOpenChange }) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
 
-  // /github/repos returns { connected, repositories } — normalize the array.
+  // /github/repos returns { connected, repositories } -- normalize the array.
   const repos = useMemo(() => (Array.isArray(reposData?.repositories) ? reposData.repositories : []), [reposData])
 
   const filtered = useMemo(() => {
@@ -89,7 +89,7 @@ export function CreateFromGithubModal({ open, onOpenChange }) {
             </div>
             <div>
               <Heading level={3} className="text-[15px] font-semibold mb-0.5">Create project from GitHub</Heading>
-              <Text variant="muted" size="sm">Pick a connected repository — the project is born linked to it.</Text>
+              <Text variant="muted" size="sm">Pick a connected repository -- the project is born linked to it.</Text>
             </div>
           </div>
         </div>
@@ -102,7 +102,7 @@ export function CreateFromGithubModal({ open, onOpenChange }) {
         ) : config?.connected !== true || reposData?.connected === false ? (
           <div className="p-10 text-center">
             <Text className="text-[13.5px]">Connect your GitHub account first.</Text>
-            <Text variant="muted" size="sm" className="mt-1">Repositories are personal — authorize with your own GitHub identity to create a project from a repo.</Text>
+            <Text variant="muted" size="sm" className="mt-1">Repositories are personal -- authorize with your own GitHub identity to create a project from a repo.</Text>
             <Button
               size="sm"
               className="mt-4 gap-1.5 h-8 text-[12px]"
@@ -128,14 +128,14 @@ export function CreateFromGithubModal({ open, onOpenChange }) {
               <div className="max-h-56 overflow-y-auto custom-scrollbar rounded-xl border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
                 {reposLoading && (
                   <div className="flex items-center justify-center py-8 text-[var(--text-muted)] text-[12.5px]">
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" /> Loading connected repositories…
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" /> Loading connected repositories...
                   </div>
                 )}
                 {!reposLoading && filtered.length === 0 && (
                   <div className="py-8 text-center text-[12.5px] text-[var(--text-muted)] space-y-3">
                     {repos.length === 0 ? (
                       <>
-                        <p>No repositories mirrored yet — sync from GitHub first.</p>
+                        <p>No repositories mirrored yet -- sync from GitHub first.</p>
                         <Button
                           size="sm"
                           variant="outline"
@@ -166,7 +166,7 @@ export function CreateFromGithubModal({ open, onOpenChange }) {
                       <div className="min-w-0 flex-1">
                         <p className="text-[13px] font-medium text-[var(--text-primary)] truncate">{repo.fullName}</p>
                         <p className="text-[11px] text-[var(--text-muted)] truncate">
-                          {repo.isPrivate ? 'Private' : 'Public'} · branch {repo.defaultBranch || 'main'} · {repo.openPullRequests ?? 0} open PRs
+                          {repo.isPrivate ? 'Private' : 'Public'}   branch {repo.defaultBranch || 'main'}   {repo.openPullRequests ?? 0} open PRs
                         </p>
                       </div>
                       <span className={cn(

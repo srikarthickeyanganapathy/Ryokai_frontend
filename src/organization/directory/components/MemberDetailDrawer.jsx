@@ -35,7 +35,7 @@ import {
 } from '@/shared/ui/Icons';
 import { toast } from 'sonner';
 
-// ───────── Helpers ─────────
+// --- Helpers ---
 
 function timeAgo(date) {
   if (!date) return null;
@@ -70,7 +70,7 @@ function getStatusConfig(status) {
   return STATUS_CONFIG[key] || { label: status || 'Unknown', color: 'bg-[var(--text-muted)]', textColor: 'text-[var(--text-muted)]' };
 }
 
-// ───────── Permission Grouping ─────────
+// --- Permission Grouping ---
 
 const PERMISSION_GROUPS = {
   'Projects': {
@@ -131,7 +131,7 @@ const GROUP_ICONS = {
   Other: Tag,
 };
 
-// ───────── Member Detail Drawer ─────────
+// --- Member Detail Drawer ---
 
 export function MemberDetailDrawer({
   isOpen,
@@ -139,12 +139,12 @@ export function MemberDetailDrawer({
   member,
   roles = [],
   memberTeams = [],
-  memberTasks,        // Array of task objects — preferred prop
+  memberTasks,        // Array of task objects -- preferred prop
   activeTaskCount,    // Legacy fallback
   canManageRoles,
   canRemoveMembers,
-  onUpdateRole,       // (userId, roleId) — preferred prop
-  onRoleChange,       // (userId, roleId) — legacy fallback
+  onUpdateRole,       // (userId, roleId) -- preferred prop
+  onRoleChange,       // (userId, roleId) -- legacy fallback
   onRemoveMember,     // (member object)
   isUpdatingRole,
   isRemovingMember,
@@ -157,9 +157,9 @@ export function MemberDetailDrawer({
   const taskCount = activeTaskCount ?? tasks.length;
   const updateRole = onUpdateRole || onRoleChange;
 
-  // ───────── Computed values ─────────
+  // --- Computed values ---
 
-  // Task activity timeline — last 5 tasks sorted by most recent
+  // Task activity timeline -- last 5 tasks sorted by most recent
   const recentTasks = useMemo(() => {
     return [...tasks]
       .filter(t => t.updatedAt)
@@ -190,7 +190,7 @@ export function MemberDetailDrawer({
     return groupPermissions(member?.permissions || []);
   }, [member]);
 
-  // Team roles — find member's role within each team
+  // Team roles -- find member's role within each team
   const teamRoles = useMemo(() => {
     if (!member) return [];
     return memberTeams.map(team => {
@@ -266,7 +266,7 @@ export function MemberDetailDrawer({
             </div>
           </div>
 
-          {/* ───────── Quick Actions Panel ───────── */}
+          {/* --- Quick Actions Panel --- */}
           <div className="mt-4 flex items-center gap-2">
             <Button
               variant="outline"
@@ -325,7 +325,7 @@ export function MemberDetailDrawer({
             </div>
           </div>
 
-          {/* ───────── Member Activity Timeline ───────── */}
+          {/* --- Member Activity Timeline --- */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-[var(--accent)]" />
@@ -375,7 +375,7 @@ export function MemberDetailDrawer({
             )}
           </div>
 
-          {/* ───────── Workload Distribution ───────── */}
+          {/* --- Workload Distribution --- */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <BarChart3 className="w-3.5 h-3.5 text-[var(--text-muted)]" />
@@ -419,7 +419,7 @@ export function MemberDetailDrawer({
             )}
           </div>
 
-          {/* ───────── Team Affiliations with Roles ───────── */}
+          {/* --- Team Affiliations with Roles --- */}
           <div className="space-y-3">
             <Text className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
               Team Affiliations
@@ -454,7 +454,7 @@ export function MemberDetailDrawer({
             )}
           </div>
 
-          {/* ───────── Permission Groups ───────── */}
+          {/* --- Permission Groups --- */}
           <div className="space-y-3">
             <Text className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
               Access & Permissions

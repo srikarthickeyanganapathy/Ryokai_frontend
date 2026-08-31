@@ -4,19 +4,19 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * ConfigurationLayout
- * ─────────────────────────────────────────────────────────
+ * ---
  * Layout archetype for settings / configuration / admin pages.
  * Target pages: Organization Settings, Security, Audit, Permissions.
  *
  * Structure:
- *   Breadcrumb → Compact Title → Tab Navigation → Form/Content Panel
+ *   Breadcrumb -> Compact Title -> Tab Navigation -> Form/Content Panel
  *
  * This layout renders ONLY structure. No business logic.
  *
  * Responsive:
- *   Desktop  — Left vertical tabs + right form panel (or top horizontal tabs)
- *   Tablet   — Top scrollable horizontal tabs
- *   Mobile   — Select dropdown for tabs
+ *   Desktop  -- Left vertical tabs + right form panel (or top horizontal tabs)
+ *   Tablet   -- Top scrollable horizontal tabs
+ *   Mobile   -- Select dropdown for tabs
  */
 export function ConfigurationLayout({
   header,
@@ -28,7 +28,7 @@ export function ConfigurationLayout({
 }) {
   return (
     <div className={cn('flex flex-col', className)}>
-      {/* ── Compact Header Slot ───────────────────────── */}
+      {/* --- Compact Header Slot --- */}
       {header && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -40,7 +40,7 @@ export function ConfigurationLayout({
         </motion.div>
       )}
 
-      {/* ── Tab Navigation + Content ──────────────────── */}
+      {/* --- Tab Navigation + Content --- */}
       <div className="flex flex-col lg:flex-row gap-0 lg:gap-8 mt-5">
         {/* Tab Navigation */}
         {tabs && tabs.length > 0 && (
@@ -100,7 +100,7 @@ export function ConfigurationLayout({
           </>
         )}
 
-        {/* ── Content Panel ───────────────────────────── */}
+        {/* --- Content Panel --- */}
         <motion.div
           key={activeTab}
           initial={{ opacity: 0, y: 6 }}

@@ -95,7 +95,7 @@ export function LoginForm() {
                 </Link>
               </div>
               <FormControl>
-                <Input type="password" placeholder="••••••••" size="lg" {...field} />
+                <Input type="password" placeholder="********" size="lg" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -3,7 +3,7 @@ import { cn } from '@/shared/lib/cn'
 import { resolveStatus } from '@/shared/lib/statusRegistry'
 
 /**
- * StatusBadge — canonical status badge using the single-source status registry.
+ * StatusBadge -- canonical status badge using the single-source status registry.
  * Replaces 52+ component-level inline status color definitions.
  *
  * @param {{ status: string, variant?: 'badge'|'pill'|'dot', className?: string, showIcon?: boolean }} props
@@ -62,14 +62,14 @@ export function StatusBadge({ status, variant = 'badge', className, showIcon = t
 }
 
 /**
- * StatusDot — minimal colored dot indicator for status.
+ * StatusDot -- minimal colored dot indicator for status.
  */
 export function StatusDot({ status, className }) {
   return <StatusBadge status={status} variant="dot" className={className} />
 }
 
 /**
- * StatusPill — rounded pill variant for compact status display.
+ * StatusPill -- rounded pill variant for compact status display.
  */
 export function StatusPill({ status, className }) {
   return <StatusBadge status={status} variant="pill" className={className} />

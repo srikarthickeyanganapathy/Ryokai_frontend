@@ -41,7 +41,7 @@ export function SavedPage() {
       <PageHero
         title="Saved & Bookmarked"
         subtitle="Quick access to your bookmarked tasks, projects, notes, and teams."
-        eyebrow={`Archive · ${items.length} bookmarks`}
+        eyebrow={`Archive   ${items.length} bookmarks`}
         icon={Bookmark}
       />
 

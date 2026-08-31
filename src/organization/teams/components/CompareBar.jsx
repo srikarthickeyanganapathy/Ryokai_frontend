@@ -2,9 +2,9 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { Text } from '@/shared/ui/Typography'
 
-/* ══════════════════════════════════════════════════════
- * COMPARISON PANEL — CompareBar (extracted from TeamsPage)
- * ══════════════════════════════════════════════════════ */
+/* ===
+ * COMPARISON PANEL -- CompareBar (extracted from TeamsPage)
+ * === */
 
 export function CompareBar({ label, values, max, hues }) {
   return (

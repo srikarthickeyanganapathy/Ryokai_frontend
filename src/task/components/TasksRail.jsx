@@ -5,7 +5,7 @@ import { ProgressRing } from '@/shared/ui/Progress'
 import { EmptyState } from '@/shared/ui/EmptyState'
 
 /* ============================================================
-   components/TasksRail.jsx — week ring + due today / tomorrow.
+   components/TasksRail.jsx -- week ring + due today / tomorrow.
    Pure presentation derivations over the page's real tasks.
    ============================================================ */
 

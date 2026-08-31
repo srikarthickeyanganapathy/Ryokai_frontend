@@ -5,20 +5,20 @@ import { layoutClasses } from '../tokens/layoutTokens'
 
 /**
  * ManagementLayout
- * ─────────────────────────────────────────────────────────
+ * ---
  * Layout archetype for CRUD / operational pages.
  * Target pages: Projects, Tasks, Teams, Directory (People Hub), Announcements.
  *
  * Structure:
- *   Compact Header (Title + Metric Chips) → Toolbar → Content View
+ *   Compact Header (Title + Metric Chips) -> Toolbar -> Content View
  *
- * All slots are optional — pages opt in to what they need.
+ * All slots are optional -- pages opt in to what they need.
  * This layout renders ONLY structure. No business logic.
  *
  * Responsive:
- *   Desktop  — Inline toolbar + multi-column/table content
- *   Tablet   — Stacked toolbar + compact cards
- *   Mobile   — Drawer toolbar + single-column list
+ *   Desktop  -- Inline toolbar + multi-column/table content
+ *   Tablet   -- Stacked toolbar + compact cards
+ *   Mobile   -- Drawer toolbar + single-column list
  */
 export function ManagementLayout({
   header,
@@ -30,7 +30,7 @@ export function ManagementLayout({
 }) {
   return (
     <div className={cn('flex flex-col', className)}>
-      {/* ── Compact Header Slot ───────────────────────── */}
+      {/* --- Compact Header Slot --- */}
       {header && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -42,14 +42,14 @@ export function ManagementLayout({
         </motion.div>
       )}
 
-      {/* ── Tabs Slot ─────────────────────────────────── */}
+      {/* --- Tabs Slot --- */}
       {tabs && (
         <div className="border-b border-[var(--border-subtle)] overflow-hidden">
           {tabs}
         </div>
       )}
 
-      {/* ── Toolbar Slot ──────────────────────────────── */}
+      {/* --- Toolbar Slot --- */}
       {toolbar && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -61,7 +61,7 @@ export function ManagementLayout({
         </motion.div>
       )}
 
-      {/* ── Content Area (with optional sidebar) ──────── */}
+      {/* --- Content Area (with optional sidebar) --- */}
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}

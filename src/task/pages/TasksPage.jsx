@@ -25,7 +25,7 @@ import { TasksRail } from '../components/TasksRail'
 import { Skeleton } from '@/shared/ui/Skeleton';
 
 /* ============================================================
-   pages/TasksPage.jsx — org-wide tasks, triage first.
+   pages/TasksPage.jsx -- org-wide tasks, triage first.
    Data layer = your useTasksPageLogic (fetch, pagination,
    scopes, filters, sort, bulk + quick mutations, permissions)
    consumed as-is; this file only presents it with your shared
@@ -113,7 +113,7 @@ export function TasksPage() {
     return { overdue, dueSoon, inProgress, completionRate: total > 0 ? Math.round((done / total) * 100) : 0 }
   }, [logic.tasks])
 
-  /* ----- status change — same mapping as your team kanban ----- */
+  /* ----- status change -- same mapping as your team kanban ----- */
   const handleUpdateTaskStatus = useCallback((task, targetStatus) => {
     const normalized = String(targetStatus || '').toUpperCase().replace(/\s+/g, '_')
     const mapped = normalized === 'IN_REVIEW' || normalized === 'REVIEW'
@@ -122,7 +122,7 @@ export function TasksPage() {
     changeTaskStatus(task, mapped)
   }, [changeTaskStatus])
 
-  /* ----- bulk reject — same flow as your original page ----- */
+  /* ----- bulk reject -- same flow as your original page ----- */
   const handleBulkReject = useCallback(async () => {
     const reason = await confirm({
       title: 'Send back for rework',
@@ -262,7 +262,7 @@ export function TasksPage() {
       <SearchInput
         value={logic.globalFilter}
         onChange={logic.setGlobalFilter}
-        placeholder="Search tasks…"
+        placeholder="Search tasks..."
         debounceMs={0}
         className="w-[180px] sm:w-[230px]"
       />
@@ -356,25 +356,25 @@ export function TasksPage() {
       />
         )}
 
-        {/* Pager — your paginated API */}
+        {/* Pager -- your paginated API */}
         {logic.totalPages > 1 && (
       <div className="flex items-center justify-between px-4 py-3 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl">
-        <span className="text-[12px] text-[var(--text-tertiary)]">{logic.totalCount} tasks · Page {logic.currentPage + 1} of {logic.totalPages}</span>
+        <span className="text-[12px] text-[var(--text-tertiary)]">{logic.totalCount} tasks   Page {logic.currentPage + 1} of {logic.totalPages}</span>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" disabled={logic.currentPage <= 0} onClick={() => logic.setCurrentPage(p => Math.max(0, p - 1))}>‹</Button>
-          <Button variant="outline" size="sm" disabled={logic.currentPage >= logic.totalPages - 1} onClick={() => logic.setCurrentPage(p => Math.min(logic.totalPages - 1, p + 1))}>›</Button>
+          <Button variant="outline" size="sm" disabled={logic.currentPage <= 0} onClick={() => logic.setCurrentPage(p => Math.max(0, p - 1))}> </Button>
+          <Button variant="outline" size="sm" disabled={logic.currentPage >= logic.totalPages - 1} onClick={() => logic.setCurrentPage(p => Math.min(logic.totalPages - 1, p + 1))}> </Button>
         </div>
       </div>
         )}
       </div>
 
-      {/* Rail — week ring + due today/tomorrow */}
+      {/* Rail -- week ring + due today/tomorrow */}
       <TasksRail tasks={logic.tasks} onOpen={handleTaskNavigate} />
       </div>
       </PageState>
       </PageShell>
     )}
-      {/* Bulk bar — your bulk mutations */}
+      {/* Bulk bar -- your bulk mutations */}
       <AnimatePresence>
         {hasSelection && (
           <motion.div

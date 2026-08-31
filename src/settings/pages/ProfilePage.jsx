@@ -64,7 +64,7 @@ export function ProfilePage() {
       return
     }
     try {
-      // Downscale first — raw phone photos are several MB and the backend
+      // Downscale first -- raw phone photos are several MB and the backend
       // stores avatars as base64 (2MB cap). 512px JPEG is plenty for avatars.
       const resized = await resizeImageFile(file, 512)
       uploadAvatar.mutate(resized)
@@ -84,7 +84,7 @@ export function ProfilePage() {
 
       <PageContent>
         <div className="space-y-8">
-          {/* 👤 HERO PROFILE BANNER CARD */}
+          {/*    HERO PROFILE BANNER CARD */}
           {isLoading ? (
             <div className="space-y-6 animate-pulse">
               <div className="h-52 bg-[var(--bg-subtle)] rounded-3xl" />
@@ -166,7 +166,7 @@ export function ProfilePage() {
             </motion.div>
           )}
 
-          {/* 📝 PROFILE EDIT FORM */}
+          {/*    PROFILE EDIT FORM */}
           {!isLoading && (
             <motion.div
               initial={{ opacity: 0, y: 12 }}
@@ -258,7 +258,7 @@ export function ProfilePage() {
             </motion.div>
           )}
 
-          {/* 🔔 NOTIFICATIONS PREFERENCES */}
+          {/*    NOTIFICATIONS PREFERENCES */}
           {!isLoading && (
             <motion.div
               initial={{ opacity: 0, y: 12 }}

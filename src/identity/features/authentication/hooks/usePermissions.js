@@ -55,7 +55,7 @@ export const usePermissions = () => {
 
   const isAdminOrAbove = isSuperAdmin || orgRole === 'ADMIN';
 
-  // Computed permission flags — canonical source: resolvePermission() pure fn
+  // Computed permission flags -- canonical source: resolvePermission() pure fn
   const canManage = isAdminOrAbove || resolvePermission('ROLE_UPDATE', permissions);
   const canAssign = isAdminOrAbove || resolvePermission('TASK_ASSIGN', permissions);
   const canReview = isAdminOrAbove || resolvePermission('TASK_APPROVE', permissions) || resolvePermission('TASK_REJECT', permissions);
@@ -196,7 +196,7 @@ export const usePermissions = () => {
   };
 };
 
-/** Quick check — whether user has an org, without full membership fetch */
+/** Quick check -- whether user has an org, without full membership fetch */
 export const useHasOrganization = () => {
   const { data: orgsData } = useOrganizations();
   const organizations = orgsData?.content || orgsData || [];

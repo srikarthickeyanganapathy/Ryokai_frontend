@@ -8,17 +8,17 @@ import { Card } from '@/shared/ui/Card'
 import { Icons } from '@/shared/ui/Icons'
 
 /**
- * Organization invite accept page — finite state machine.
+ * Organization invite accept page -- finite state machine.
  *
  * States (exactly one visible at any time):
- *   accepting → spinner + "joining..." copy
- *   success   → confirmation, auto-navigates into the organization
- *   error     → backend reason + Try again / Go to workspace actions
- *   invalid   → link reached without a token (never spins)
+ *   accepting -> spinner + "joining..." copy
+ *   success   -> confirmation, auto-navigates into the organization
+ *   error     -> backend reason + Try again / Go to workspace actions
+ *   invalid   -> link reached without a token (never spins)
  *
  * Why not drive the UI off useMutation flags alone: React Query mutation
  * observers are per-mount, so HMR/StrictMode remounts reset them to `idle`
- * while a request is still in flight — that combination rendered an endless
+ * while a request is still in flight -- that combination rendered an endless
  * spinner before. Local explicit state cannot flap between renders.
  */
 export function AcceptInvitePage() {
@@ -82,7 +82,7 @@ export function AcceptInvitePage() {
     navigate(orgId ? `/app/organizations/${orgId}` : '/app/organizations')
   }
 
-  // No token in the URL at all → this is not an invitation link. Show a
+  // No token in the URL at all -> this is not an invitation link. Show a
   // definite outcome instead of spinning forever.
   if (!token) {
     return (
@@ -92,7 +92,7 @@ export function AcceptInvitePage() {
             <Icons.alertCircle className="w-6 h-6" />
           </div>
           <Heading level={3}>Organization invitation</Heading>
-          <Text variant="muted">This invitation link is invalid — the invite token is missing.</Text>
+          <Text variant="muted">This invitation link is invalid -- the invite token is missing.</Text>
           <Button variant="primary" onClick={() => navigate('/app/organizations')}>
             Go to workspace
           </Button>

@@ -4,14 +4,14 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * PillNav
- * ────────────────────────────────────────────────
+ * ---
  * Canonical pill/tab/segmented switcher for the entire application.
  * Consumes the behavior of FilterTabs and SegmentedToggle via variant prop.
  *
  * @param {"standard"|"filter"|"segmented"} [variant="standard"]
- *   standard  — Plain pill nav, CSS-only active state (existing PillNav behavior)
- *   filter    — Animated sliding highlight indicator (existing FilterTabs behavior)
- *   segmented — iOS-style segmented control with sliding background (existing SegmentedToggle behavior)
+ *   standard  -- Plain pill nav, CSS-only active state (existing PillNav behavior)
+ *   filter    -- Animated sliding highlight indicator (existing FilterTabs behavior)
+ *   segmented -- iOS-style segmented control with sliding background (existing SegmentedToggle behavior)
  *
  * @param {Array<{value: string, label: string, icon?: React.ElementType}>} items
  *   Item definitions. Also accepts `options` or `filters` as aliases for backward compat.

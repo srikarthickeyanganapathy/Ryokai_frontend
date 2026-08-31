@@ -90,7 +90,7 @@ function getHealthInfo(project) {
   };
 }
 
-// Team-style health score utilities (mirrors @/project/features/utils/projectUtils —
+// Team-style health score utilities (mirrors @/project/features/utils/projectUtils --
 // inlined here to respect the domain barrel boundary)
 function calculateHealthScore(project) {
   if (!project) return 100;
@@ -170,7 +170,7 @@ function ProjectsTabSkeleton({ viewMode }) {
 }
 
 // Project Card Component for Grid View
-// Team-look Shared Project Card — structural clone of @/project/components/ProjectCard.
+// Team-look Shared Project Card -- structural clone of @/project/components/ProjectCard.
 // Click / arrow open the project workspace (functional); unshare kept only for creators
 // (backend DELETE /crew/{id}/projects/{projectId}). Favorites removed: client-only, no persistence.
 function SharedProjectCard({ project, index, canUnshare, onRequestUnshare }) {
@@ -276,7 +276,7 @@ function SharedProjectCard({ project, index, canUnshare, onRequestUnshare }) {
             className="text-[10px] font-medium text-[var(--text-tertiary)] hover:text-[var(--accent)] transition-colors px-2 py-1 rounded-md hover:bg-[var(--bg-subtle)]"
             title="Open full project"
           >
-            →
+            ->
           </button>
         </div>
       </InteractiveCard>
@@ -397,7 +397,7 @@ function MiniGanttTimelineView({ projects, canUnshare, onRequestUnshare }) {
   );
 }
 
-// Main ProjectsTab — Crew Shared Projects
+// Main ProjectsTab -- Crew Shared Projects
 export function ProjectsTab({
   crewId,
   isCreator = false,
@@ -528,10 +528,10 @@ export function ProjectsTab({
             </SelectTrigger>
             <SelectContent className="rounded-lg">
               <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="on_track">🟢 On Track</SelectItem>
-              <SelectItem value="at_risk">🟡 At Risk</SelectItem>
-              <SelectItem value="delayed">🔴 Delayed</SelectItem>
-              <SelectItem value="planning">⚪ Planning</SelectItem>
+              <SelectItem value="on_track">   On Track</SelectItem>
+              <SelectItem value="at_risk">   At Risk</SelectItem>
+              <SelectItem value="delayed">   Delayed</SelectItem>
+              <SelectItem value="planning">  Planning</SelectItem>
             </SelectContent>
           </Select>
 

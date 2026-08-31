@@ -4,18 +4,18 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * DrawerManager
- * ─────────────────────────────────────────────────────────
+ * ---
  * Centralized presentation controller for contextual workspace drawers.
  *
  * Manages ONLY the open/close lifecycle and animation of drawers.
- * Does NOT fetch data — the opening page provides all data via payload.
+ * Does NOT fetch data -- the opening page provides all data via payload.
  *
  * Drawer Contract:
- *   open(drawerId, payload) — Open a drawer with data
- *   close()                 — Close the active drawer
- *   isOpen                  — Boolean open state
- *   activeDrawer            — Current drawer ID
- *   payload                 — Data passed to the drawer
+ *   open(drawerId, payload) -- Open a drawer with data
+ *   close()                 -- Close the active drawer
+ *   isOpen                  -- Boolean open state
+ *   activeDrawer            -- Current drawer ID
+ *   payload                 -- Data passed to the drawer
  *
  * Scope: Contextual workspace drawers only (Member, Task, Project, Team).
  * NOT for: Delete confirmations, date pickers, simple form modals.
@@ -62,11 +62,11 @@ export function useDrawerManager() {
 
 /**
  * DrawerOutlet
- * ─────────────────────────────────────────────────────────
+ * ---
  * Place this once in your layout. It renders the currently active drawer.
  * Accepts a registry of drawer components keyed by drawer ID.
  *
- * @param {Object<string, React.Component>} drawers — { memberId: MemberDrawer, ... }
+ * @param {Object<string, React.Component>} drawers -- { memberId: MemberDrawer, ... }
  *
  * Usage:
  *   <DrawerOutlet drawers={{

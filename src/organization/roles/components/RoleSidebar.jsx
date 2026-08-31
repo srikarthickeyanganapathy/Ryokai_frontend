@@ -121,7 +121,7 @@ function RoleItem({ role, isSelected, isPinned, onSelect, onTogglePin, delay = 0
         <div className="flex-1 h-1 rounded-full bg-[var(--bg-subtle)] overflow-hidden">
           <div className="h-full rounded-full transition-all" style={{ width: `${coverage}%`, backgroundColor: isSelected ? 'var(--accent)' : 'var(--text-muted)', opacity: isSelected ? 1 : 0.5 }} />
         </div>
-        <span className="text-[10px] font-mono text-[var(--text-muted)] shrink-0">{permCount}·P{role.priority ?? 0}</span>
+        <span className="text-[10px] font-mono text-[var(--text-muted)] shrink-0">{permCount} P{role.priority ?? 0}</span>
       </div>
     </motion.div>
   );

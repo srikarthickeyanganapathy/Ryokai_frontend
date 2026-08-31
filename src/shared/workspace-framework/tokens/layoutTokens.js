@@ -1,18 +1,18 @@
 /**
  * WEF Layout Tokens
- * ─────────────────────────────────────────────────────────
+ * ---
  * Pure constants defining the spatial rhythm of the framework.
  * No React. No API. No domain logic. UI infrastructure only.
  *
  * Categories:
- *   Container  — max-widths for page content
- *   Spacing    — vertical & horizontal page rhythm
- *   Gaps       — grid & flex gap scales
- *   Breakpoints — responsive thresholds (mirrors Tailwind defaults)
- *   Elevation  — z-index layers
+ *   Container  -- max-widths for page content
+ *   Spacing    -- vertical & horizontal page rhythm
+ *   Gaps       -- grid & flex gap scales
+ *   Breakpoints -- responsive thresholds (mirrors Tailwind defaults)
+ *   Elevation  -- z-index layers
  */
 
-// ── Container ────────────────────────────────────────────
+// --- Container ---
 export const container = {
   /** Default page max-width */
   default: '1280px',       // max-w-7xl equivalent
@@ -24,7 +24,7 @@ export const container = {
   full: '100%',
 }
 
-// ── Spacing ──────────────────────────────────────────────
+// --- Spacing ---
 export const spacing = {
   /** Horizontal page padding */
   pageX: {
@@ -40,7 +40,7 @@ export const spacing = {
   cardPadding: '20px',    // p-5
 }
 
-// ── Gaps ─────────────────────────────────────────────────
+// --- Gaps ---
 export const gaps = {
   xs: '4px',
   sm: '8px',
@@ -50,7 +50,7 @@ export const gaps = {
   '2xl': '32px',
 }
 
-// ── Breakpoints ──────────────────────────────────────────
+// --- Breakpoints ---
 export const breakpoints = {
   sm: 640,
   md: 768,
@@ -59,7 +59,7 @@ export const breakpoints = {
   '2xl': 1536,
 }
 
-// ── Elevation (z-index layers) ───────────────────────────
+// --- Elevation (z-index layers) ---
 export const elevation = {
   base: 0,
   sticky: 10,
@@ -71,7 +71,7 @@ export const elevation = {
   tooltip: 80,
 }
 
-// ── Tailwind class presets (composable strings) ──────────
+// --- Tailwind class presets (composable strings) ---
 export const layoutClasses = {
   /** Standard page container */
   pageContainer: 'w-full mx-auto',

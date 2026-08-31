@@ -37,7 +37,7 @@ export default function App() {
               
               <Route path="/landing" element={<LandingPage />} />
 
-              {/* OAuth redirect target — outside PublicRoute so it runs for both anonymous and authenticated sessions */}
+              {/* OAuth redirect target -- outside PublicRoute so it runs for both anonymous and authenticated sessions */}
               <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
 
               {/* Public Auth Routes */}

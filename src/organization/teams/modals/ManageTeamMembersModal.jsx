@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react'
+ import React, { useState } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription } from '@/shared/ui/Modal'
 import { Heading, Text } from '@/shared/ui/Typography'
 import { Button, IconButton } from '@/shared/ui/Button'
@@ -118,7 +118,7 @@ export function ManageTeamMembersModal({ isOpen, onClose, team, orgMembers }) {
               <section>
                 <div className="flex items-start gap-2 mb-4 rounded-md bg-[var(--info-soft)]/60 border border-[var(--info)]/20 px-3 py-2.5">
                   <Icons.search className="w-3.5 h-3.5 text-[var(--info)] mt-0.5 shrink-0" />
-                  <Text size="xs" className="text-[var(--text-secondary)] leading-relaxed">Observers get read-only access to this team's discussions, projects, and tasks — without becoming members.</Text>
+                  <Text size="xs" className="text-[var(--text-secondary)] leading-relaxed">Observers get read-only access to this team's discussions, projects, and tasks -- without becoming members.</Text>
                 </div>
                 <Text className="mb-3 text-[11px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">Team Observers (Read-Only)</Text>
                 {!observers || observers.length === 0 ? <EmptyRow text="No observers in this team." /> : (

@@ -3,7 +3,7 @@ import gsap from 'gsap'
 import { cn } from '@/shared/lib/cn'
 
 /**
- * CardFanCarousel — an arc of overlapping cards that fan out from a center
+ * CardFanCarousel -- an arc of overlapping cards that fan out from a center
  * card. Cards carry real content (image + title + body), cycle with arrows /
  * dots, and gently auto-advance unless the user is hovering.
  *
@@ -78,7 +78,7 @@ function CardFace({ card, idx }) {
         style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)`, opacity: 0.9 }}
       />
 
-      {/* Visual band — a quiet nebula wash built from the card's theme color */}
+      {/* Visual band -- a quiet nebula wash built from the card's theme color */}
       <div
         className="relative h-[50%] shrink-0 overflow-hidden flex items-center justify-center"
         style={{
@@ -152,7 +152,7 @@ function CardFace({ card, idx }) {
         <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[var(--bg-card)] to-transparent pointer-events-none" />
       </div>
 
-      {/* Info band — the valuable part */}
+      {/* Info band -- the valuable part */}
       <div className="flex-1 min-h-0 p-3.5 pt-1.5 flex flex-col gap-1.5 text-left">
         <p className="text-[13px] font-semibold text-[var(--text-primary)] leading-snug line-clamp-2">
           {card.title}

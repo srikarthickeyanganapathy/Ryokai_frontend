@@ -10,7 +10,7 @@ import { GalaxyCanvas } from '@/shared/ui/GalaxyCanvas'
 const AUTOPLAY_MS = 4200
 
 /* The stage is designed once at a fixed size and uniformly scaled to fit
-   the panel — so every device sees the exact same composition. */
+   the panel -- so every device sees the exact same composition. */
 const DESIGN_W = 640
 const DESIGN_H = 740
 
@@ -31,13 +31,13 @@ function Chip({ children, color }) {
 
 const labelCls = 'font-mono text-[7px] uppercase tracking-[0.16em] text-[var(--text-tertiary)]'
 
-/* ── Mini application demos — every screen filled edge to edge ── */
+/* --- Mini application demos -- every screen filled edge to edge --- */
 
 const DEMOS = [
   {
     id: 'dashboard',
     label: 'Mission Control',
-    quote: 'Every task, every crew — one calm home.',
+    quote: 'Every task, every crew -- one calm home.',
     color: 'var(--info)',
     icon: LayoutDashboard,
     render: () => (
@@ -50,7 +50,7 @@ const DEMOS = [
             </div>
           ))}
         </div>
-        <p className={cn(labelCls, 'mb-1.5 mt-3')}>My queue · 7</p>
+        <p className={cn(labelCls, 'mb-1.5 mt-3')}>My queue   7</p>
         <div className="flex flex-1 flex-col justify-between">
           {[
             ['Ship auth flow', 'doing', 'var(--warning)'],
@@ -85,7 +85,7 @@ const DEMOS = [
           ['Done', 4, [['Auth flow', 'var(--success)'], ['Write tests', 'var(--success)'], ['Update deps', 'var(--success)'], ['Clean logs', 'var(--success)']]],
         ].map(([name, count, items]) => (
           <div key={name} className="flex flex-col rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40 p-1.5">
-            <p className="px-0.5 font-mono text-[6.5px] uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{name} · {count}</p>
+            <p className="px-0.5 font-mono text-[6.5px] uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{name}   {count}</p>
             <div className="mt-1 flex flex-1 flex-col justify-between">
               {items.map(([t, c]) => (
                 <div key={t} className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-1.5">
@@ -110,7 +110,7 @@ const DEMOS = [
     icon: CheckCircle2,
     render: () => (
       <div className="flex h-full flex-col">
-        <p className={cn(labelCls, 'mb-1.5')}>Pending your approval · 7</p>
+        <p className={cn(labelCls, 'mb-1.5')}>Pending your approval   7</p>
         <div className="flex flex-1 flex-col justify-between">
           {[['Onboarding revamp', 'approved'], ['Q3 roadmap brief', 'approved'], ['Billing migration', 'pending'], ['Mobile nav spec', 'pending'], ['Crew calendar sync', 'pending'], ['Design audit', 'approved'], ['API docs update', 'pending']].map(([t, s]) => {
             const c = s === 'approved' ? 'var(--success)' : 'var(--warning)'
@@ -124,7 +124,7 @@ const DEMOS = [
             )
           })}
         </div>
-        <p className={cn(labelCls, 'mt-1.5 text-center')}>evidence attached · approvals logged</p>
+        <p className={cn(labelCls, 'mt-1.5 text-center')}>evidence attached   approvals logged</p>
       </div>
     ),
   },
@@ -146,7 +146,7 @@ const DEMOS = [
             <p className="font-mono text-[6.5px] uppercase tracking-[0.2em] text-[var(--text-tertiary)]">remaining</p>
           </div>
         </div>
-        <p className="mt-3 max-w-[200px] truncate text-center text-[8.5px] text-[var(--text-secondary)]">Refactor sync engine — deep work</p>
+        <p className="mt-3 max-w-[200px] truncate text-center text-[8.5px] text-[var(--text-secondary)]">Refactor sync engine -- deep work</p>
         <span
           className="mt-2 inline-flex items-center gap-1 rounded-full border px-2.5 py-[3px] font-mono text-[7px] font-semibold uppercase tracking-[0.14em]"
           style={{
@@ -198,7 +198,7 @@ const DEMOS = [
             {[0, 1, 2].map((d) => (
               <span key={d} className="h-1 w-1 animate-pulse rounded-full bg-[var(--text-tertiary)]" style={{ animationDelay: `${d * 0.2}s` }} />
             ))}
-            <span className="font-mono text-[6.5px] text-[var(--text-tertiary)]">Sofia is typing…</span>
+            <span className="font-mono text-[6.5px] text-[var(--text-tertiary)]">Sofia is typing...</span>
           </div>
         </div>
         <p className={cn(labelCls, 'mt-1.5 text-center')}>synced across every device</p>
@@ -213,7 +213,7 @@ const DEMOS = [
     icon: GitPullRequest,
     render: () => (
       <div className="flex h-full flex-col">
-        <p className={cn(labelCls, 'mb-1.5')}>Linked activity · ryokai/ryokai</p>
+        <p className={cn(labelCls, 'mb-1.5')}>Linked activity   ryokai/ryokai</p>
         <div
           className="flex items-center gap-2 rounded-lg border px-2 py-[7px]"
           style={{
@@ -315,14 +315,14 @@ const DEMOS = [
           ))}
         </div>
         <div className="mt-1.5 border-t border-[var(--border-subtle)] pt-1 text-center font-mono text-[6.5px] uppercase tracking-[0.16em] text-[var(--text-tertiary)]">
-          completion · last 8 weeks
+          completion   last 8 weeks
         </div>
       </div>
     ),
   },
 ]
 
-/* ── The hero card — a miniature of the real application shell ── */
+/* --- The hero card -- a miniature of the real application shell --- */
 
 function HeroCard({ demo, index }) {
   return (
@@ -333,7 +333,7 @@ function HeroCard({ demo, index }) {
         style={{ background: `linear-gradient(90deg, transparent, ${demo.color}, transparent)` }}
       />
 
-      {/* Window topbar — search-first, exactly as drawn */}
+      {/* Window topbar -- search-first, exactly as drawn */}
       <div className="flex h-10 items-center gap-2.5 border-b border-[var(--border-subtle)] px-3">
         <div className="flex h-[22px] flex-1 items-center gap-1.5 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)]/50 px-2">
           <Search size={9} strokeWidth={2} className="text-[var(--text-tertiary)]" />
@@ -346,7 +346,7 @@ function HeroCard({ demo, index }) {
         </div>
       </div>
 
-      {/* Body — demo content edge to edge, no sidebar */}
+      {/* Body -- demo content edge to edge, no sidebar */}
       <div className="relative h-[360px] p-3.5">
         <AnimatePresence mode="wait">
           <motion.div
@@ -362,7 +362,7 @@ function HeroCard({ demo, index }) {
         </AnimatePresence>
       </div>
 
-      {/* Footer — label + position (no controls; the galaxy tells you where you are) */}
+      {/* Footer -- label + position (no controls; the galaxy tells you where you are) */}
       <div className="flex items-center justify-between border-t border-[var(--border-subtle)] px-3.5 py-2">
         <AnimatePresence mode="wait">
           <motion.span
@@ -385,7 +385,7 @@ function HeroCard({ demo, index }) {
   )
 }
 
-/* ── Stage — one fixed composition, uniformly scaled to any panel ── */
+/* --- Stage -- one fixed composition, uniformly scaled to any panel --- */
 
 export function AuthDemoStage() {
   const wrapRef = useRef(null)
@@ -428,7 +428,7 @@ export function AuthDemoStage() {
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
-        {/* Quote heading — pb reserves room for the hero card's upward lift */}
+        {/* Quote heading -- pb reserves room for the hero card's upward lift */}
         <div className="relative z-20 flex min-h-[48px] w-full max-w-[380px] items-end justify-center pb-10 text-center">
           <AnimatePresence mode="wait">
             <motion.p
@@ -454,7 +454,7 @@ export function AuthDemoStage() {
             style={{ background: 'radial-gradient(ellipse, var(--accent-soft), transparent 70%)' }}
           />
 
-          {/* The spiral galaxy — centered on the card's bottom edge, so exactly
+          {/* The spiral galaxy -- centered on the card's bottom edge, so exactly
               half peeks out beneath the hero card; spins with the carousel */}
           <GalaxyCanvas
             spinKey={index}
@@ -466,7 +466,7 @@ export function AuthDemoStage() {
           <span className="shooting-star" style={{ top: '5%', left: '56%' }} />
           <span className="shooting-star" style={{ top: '16%', left: '84%', animationDuration: '15s', animationDelay: '6s' }} />
 
-          {/* The one hero card — the sole card in the composition */}
+          {/* The one hero card -- the sole card in the composition */}
           <HeroCard demo={demo} index={index} />
         </div>
       </div>

@@ -13,7 +13,7 @@ import TaskWorkspace from '../explorers/TaskWorkspace'
 
 import { Network, Zap, Globe, Target, Clock, Waves, Eye } from '@/shared/ui/Icons'
 
-// Explorer Registry — Analysis Modes
+// Explorer Registry -- Analysis Modes
 const EXPLORER_REGISTRY = {
   dependency: { Component: DependencyExplorer, title: 'Dependencies', icon: Network, badge: 'Analysis' },
   impact: { Component: ImpactExplorer, title: 'Impact', icon: Zap, badge: 'Analysis' },
@@ -25,7 +25,7 @@ const EXPLORER_REGISTRY = {
 }
 
 /**
- * ExplorerWindowInstance — wraps an explorer with its own GraphNavigator.
+ * ExplorerWindowInstance -- wraps an explorer with its own GraphNavigator.
  * Each window gets an independent history/navigation stack, but shares graph data.
  */
 function ExplorerWindowInstance({

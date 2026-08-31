@@ -31,7 +31,7 @@ export function CTASection() {
           
           <motion.div className="cta-actions" variants={itemVariants}>
             <Link className="btn btn-primary" to="/register">
-              Start free <span className="arr">→</span>
+              Start free <span className="arr">-></span>
             </Link>
             <a className="btn btn-ghost" href="mailto:sales@ryokai.dev">
               Talk to sales for enterprise plans

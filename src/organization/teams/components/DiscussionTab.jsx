@@ -10,16 +10,16 @@ import { Text } from '@/shared/ui/Typography'
 import { cn } from '@/shared/lib/cn'
 
 /* ============================================================
-   components/DiscussionTab.jsx — Exchange.
+   components/DiscussionTab.jsx -- Exchange.
    Conversations | Files segments, search, attachments, six-emoji
-   reactions, reply threads and day separators — the approved
+   reactions, reply threads and day separators -- the approved
    demo layout. Real API: messages / onSend / onDelete
    (useTeamMessages / useSendTeamMessage / useDeleteTeamMessage +
    confirm dialog). Replies, reactions and uploads are client-side
-   until your backend exposes them — marked WIRE.
+   until your backend exposes them -- marked WIRE.
    ============================================================ */
 
-const EMOJI_REACTIONS = ['👍', '❤️', '🔥', '🎉', '👀', '💡']
+const EMOJI_REACTIONS = ['  ', '  ', '  ', '  ', '  ', '  ']
 
 function hashHue(str = '') {
   let h = 0
@@ -143,7 +143,7 @@ export function DiscussionTab({
           value={view}
           onChange={setView}
         />
-        <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="Search…" debounceMs={0} className="w-[170px] sm:w-[220px] ml-auto" />
+        <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="Search..." debounceMs={0} className="w-[170px] sm:w-[220px] ml-auto" />
       </div>
 
       {view === 'conv' && (
@@ -249,7 +249,7 @@ export function DiscussionTab({
                                         value={threadInput}
                                         onChange={e => setThreadInput(e.target.value)}
                                         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleThreadReply(msg.id) } }}
-                                        placeholder="Reply…"
+                                        placeholder="Reply..."
                                         className="flex-1 bg-transparent text-[12px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
                                         aria-label="Reply"
                                       />
@@ -285,7 +285,7 @@ export function DiscussionTab({
                   value={draft}
                   onChange={e => setDraft(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() } }}
-                  placeholder="Start a discussion in the team…"
+                  placeholder="Start a discussion in the team..."
                   rows={1}
                   className="flex-1 resize-none bg-transparent text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none max-h-32 py-1"
                   aria-label="Discussion content"
@@ -300,7 +300,7 @@ export function DiscussionTab({
               </div>
             </div>
           )}
-          {isReadOnly && <p className="text-[11px] text-[var(--text-muted)] px-3 pb-2">You're an observer — read only.</p>}
+          {isReadOnly && <p className="text-[11px] text-[var(--text-muted)] px-3 pb-2">You're an observer -- read only.</p>}
         </div>
       )}
 

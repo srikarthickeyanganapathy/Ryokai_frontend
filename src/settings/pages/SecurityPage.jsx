@@ -86,7 +86,7 @@ export function SecurityPage() {
 
       <PageContent>
         <div className="space-y-8">
-          {/* 🔑 PASSWORD FORM */}
+          {/*    PASSWORD FORM */}
           <motion.div {...fadeUp}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -105,7 +105,7 @@ export function SecurityPage() {
                           <FormItem className="space-y-0">
                             <SettingsRow label="Current Password" description="Enter your existing account password">
                               <FormControl>
-                                <Input type="password" placeholder="••••••••••••" className="w-full max-w-[320px] text-xs h-9" {...field} />
+                                <Input type="password" placeholder="************" className="w-full max-w-[320px] text-xs h-9" {...field} />
                               </FormControl>
                               <FormMessage />
                             </SettingsRow>
@@ -188,7 +188,7 @@ export function SecurityPage() {
             </Form>
           </motion.div>
 
-          {/* 🛡️ TWO-FACTOR AUTHENTICATION */}
+          {/*     TWO-FACTOR AUTHENTICATION */}
           <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.05 }}>
             <div className="space-y-3">
               <Heading level={4} className="text-sm font-bold text-[var(--text-primary)]">

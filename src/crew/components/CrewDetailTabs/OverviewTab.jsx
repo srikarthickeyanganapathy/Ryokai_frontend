@@ -211,7 +211,7 @@ export function OverviewTab({
   error = null,
   onRetry = null,
 }) {
-  // Derived Task Metrics — hooks must run unconditionally (React Compiler)
+  // Derived Task Metrics -- hooks must run unconditionally (React Compiler)
   const totalTasks = crewTasks.length;
   const activeTasks = useMemo(() => {
     return crewTasks.filter(t => {
@@ -304,7 +304,7 @@ export function OverviewTab({
     <div className="p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
       
       {/* ----------------------------------------------------------------- */}
-      {/* Header — teams design language (icon chip + title + meta) */}
+      {/* Header -- teams design language (icon chip + title + meta) */}
       <div className="flex items-center justify-between flex-wrap gap-3 px-1">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center border border-[var(--accent-border)] shrink-0">
@@ -329,7 +329,7 @@ export function OverviewTab({
         </div>
       </div>
 
-      {/* Stat cards row — teams design language */}
+      {/* Stat cards row -- teams design language */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4">
           <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Total Tasks</div>
@@ -349,11 +349,11 @@ export function OverviewTab({
         <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4">
           <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Members</div>
           <div className="text-[22px] font-bold text-[var(--text-primary)] leading-none mt-2 tabular-nums">{members.length}</div>
-          <div className="text-[11px] text-[var(--text-secondary)] mt-1.5">{sharedProjects.length} projects · {channels.length} channels</div>
+          <div className="text-[11px] text-[var(--text-secondary)] mt-1.5">{sharedProjects.length} projects   {channels.length} channels</div>
         </div>
       </div>
 
-      {/* Quick actions — teams design language */}
+      {/* Quick actions -- teams design language */}
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="primary" size="sm" className="gap-1.5 h-8 text-[12px] font-semibold shadow-sm" onClick={() => setActiveTab('tasks')}>
           <Plus className="w-3.5 h-3.5" /> Add Task
@@ -483,7 +483,7 @@ export function OverviewTab({
                           <span className="flex items-center gap-1 font-mono">
                             <Clock className="w-3 h-3 text-[var(--text-tertiary)]" /> {formatTimeAgo(task.updatedAt || task.createdAt)}
                           </span>
-                          <span>•</span>
+                          <span>*</span>
                           <span className="capitalize">{task.assignee?.username || 'Assigned to Squad'}</span>
                         </div>
                       </div>
@@ -622,7 +622,7 @@ export function OverviewTab({
                       </div>
                       <div className="flex items-center gap-2 text-[11px] text-[var(--text-secondary)] mt-1">
                         <span>{event.actor}</span>
-                        <span>•</span>
+                        <span>*</span>
                         <Badge variant={event.badgeVariant || 'default'} size="xs" className="text-[9px]">
                           {event.status}
                         </Badge>
@@ -686,7 +686,7 @@ export function OverviewTab({
                 onClick={() => setActiveTab('members')}
                 className="text-[11px] font-semibold text-[var(--accent)] hover:underline"
               >
-                View All ({members.length}) →
+                View All ({members.length}) ->
               </button>
             }
           >

@@ -58,7 +58,7 @@ export function WorkloadPage() {
     }
   }, [orgId, rows]);
 
-  /* ── Stepper handlers ── */
+  /* --- Stepper handlers --- */
   const handleDecrement = () => {
     if (threshold <= 2) return;
     const next = threshold - 1;
@@ -100,7 +100,7 @@ export function WorkloadPage() {
   const toggleCard = (id) =>
     setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
 
-  /* ── No active org: empty fallback ── */
+  /* --- No active org: empty fallback --- */
   if (!orgId) {
     return (
       <PageShell maxWidth="default">
@@ -128,7 +128,7 @@ export function WorkloadPage() {
 
   return (
     <PageShell maxWidth="default">
-      {/* ═══ Header ═══ */}
+      {/* === Header === */}
       <PageHero
         eyebrow="Resource Capacity"
         title="Team Capacity & Utilization"
@@ -157,24 +157,24 @@ export function WorkloadPage() {
           }}
         >
           <div className="flex flex-col gap-6">
-            {/* ═══ KPI Strip ═══ */}
+            {/* === KPI Strip === */}
             <OrgSnapshotBanner stats={stats} threshold={threshold} />
 
-            {/* ═══ Team Pulse ═══ */}
+            {/* === Team Pulse === */}
             <SectionDivider title="Team pulse" tag="Live" hint="updated 2 min ago" />
             <div className="grid grid-cols-1 md:grid-cols-[2fr_1.3fr] gap-3.5">
               <TeamHealthCard score={healthScore} stats={stats} />
               <AIInsightsPanel stats={stats} />
             </div>
 
-            {/* ═══ Load Shape ═══ */}
+            {/* === Load Shape === */}
             <SectionDivider title="Load shape" tag="Analytics" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               <DistributionChart rows={rows} threshold={threshold} />
               <RebalanceSimulator rows={rows} threshold={threshold} />
             </div>
 
-            {/* ═══ 14-Day Heatmap ═══ */}
+            {/* === 14-Day Heatmap === */}
             <SectionDivider
               title="14-day capacity heatmap"
               tag="History"
@@ -186,7 +186,7 @@ export function WorkloadPage() {
               history={history}
             />
 
-            {/* ═══ Member Capacity (Roster) ═══ */}
+            {/* === Member Capacity (Roster) === */}
             <SectionDivider title="Member capacity" tag="Roster" />
             <div className="flex items-center gap-3 flex-wrap">
               <WorkloadFilters value={filter} onChange={setFilter} />
@@ -205,7 +205,7 @@ export function WorkloadPage() {
               onToggleCard={toggleCard}
             />
 
-            {/* ═══ Workload Matrix Table ═══ */}
+            {/* === Workload Matrix Table === */}
             <SectionDivider title="Workload matrix" tag="Table" />
             <WorkloadMatrixTable
               rows={filteredRows}
@@ -214,9 +214,9 @@ export function WorkloadPage() {
               isLoading={isLoading}
             />
 
-            {/* ═══ Footer Note ═══ */}
+            {/* === Footer Note === */}
             <div className="mt-4 text-center font-mono text-[10.5px] text-[var(--text-tertiary)] tracking-[0.06em]">
-              V1 · Capacity Command · workload view
+              V1   Capacity Command   workload view
             </div>
           </div>
         </PageState>

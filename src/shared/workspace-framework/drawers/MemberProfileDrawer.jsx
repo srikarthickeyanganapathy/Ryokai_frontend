@@ -7,7 +7,7 @@ import { Mail, Shield, Calendar, ExternalLink } from '@/shared/ui/Icons'
 
 /**
  * MemberProfileDrawer
- * ─────────────────────────────────────────────────────────
+ * ---
  * Quick-view contextual drawer for a member profile.
  * Shown when clicking a member avatar/name anywhere in the workspace.
  *

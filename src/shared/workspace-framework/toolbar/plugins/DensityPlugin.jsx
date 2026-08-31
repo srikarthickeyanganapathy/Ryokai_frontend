@@ -3,12 +3,12 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * DensityPlugin
- * ─────────────────────────────────────────────────────────
+ * ---
  * Toolbar row density toggle plugin.
- * Stateless — page provides value and onChange.
+ * Stateless -- page provides value and onChange.
  *
- * @param {'compact'|'normal'|'comfortable'} value — Current density
- * @param {function} onChange — Density change handler
+ * @param {'compact'|'normal'|'comfortable'} value -- Current density
+ * @param {function} onChange -- Density change handler
  */
 export function DensityPlugin({ value = 'normal', onChange, className }) {
   const densities = [

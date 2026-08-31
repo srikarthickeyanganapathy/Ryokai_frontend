@@ -6,9 +6,9 @@ import { TeamAvatar } from './TeamAvatar'
 import { CompareBar } from './CompareBar'
 import { hashHue } from './utils'
 
-/* ══════════════════════════════════════════════════════
- * COMPARISON PANEL (BOTTOM DRAWER) — extracted from TeamsPage
- * ══════════════════════════════════════════════════════ */
+/* ===
+ * COMPARISON PANEL (BOTTOM DRAWER) -- extracted from TeamsPage
+ * === */
 
 export function ComparePanel({ teams, statsMap, onClose }) {
   if (teams.length === 0) return null

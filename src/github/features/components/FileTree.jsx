@@ -69,7 +69,7 @@ export function FileTree({ fullName }) {
     return [...dirs, ...files]
   }, [data])
 
-  // After navigating into a folder, the previously focused row is unmounted —
+  // After navigating into a folder, the previously focused row is unmounted --
   // move focus to the breadcrumbs so keyboard users don't lose their place.
   useEffect(() => {
     if (!mountedRef.current) {
@@ -86,12 +86,12 @@ export function FileTree({ fullName }) {
       {/* Announce navigation to screen readers */}
       <p className="sr-only" role="status">{path ? `Opened folder ${path}` : ''}</p>
 
-      {/* Always rendered — fixes getting trapped in empty/error folders */}
+      {/* Always rendered -- fixes getting trapped in empty/error folders */}
       <Breadcrumbs fullName={fullName} path={path} onNavigate={setPath} navRef={navRef} />
 
       {isLoading ? (
         <div role="status" className="px-3.5 py-8 flex items-center justify-center gap-2 text-[var(--text-muted)]">
-          <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" aria-hidden="true" /> Loading repository files…
+          <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" aria-hidden="true" /> Loading repository files...
         </div>
       ) : isError ? (
         <div className="px-3.5 py-8 flex flex-col items-center gap-2 text-center">

@@ -43,7 +43,7 @@ export function BulkCreateTaskModal({ open, onOpenChange }) {
       assigneeUsernames: usernames,
       dueDate: data.dueDate || null,
       tags: data.tags ? data.tags.split(',').map(s => s.trim()).filter(Boolean) : [],
-      // Note: no isPersonal — BulkAssignRequestDTO is always for org tasks
+      // Note: no isPersonal -- BulkAssignRequestDTO is always for org tasks
     };
 
     bulkAssignMutation.mutate(payload, {

@@ -39,7 +39,7 @@ const AnimatedCounter = ({ value, color, delay = 0 }) => {
   return <div ref={ref} className={`text-xl font-bold leading-tight tabular-nums ${color}`}>{count}</div>;
 };
 
-/* ── Roster data — reflects the real WorkloadPage shape ── */
+/* --- Roster data -- reflects the real WorkloadPage shape --- */
 const BASE_ROWS = [
   { id: 'p', name: 'Priya Sharma', role: 'Frontend', count: 11, hue: 210 },
   { id: 'd', name: 'Dev Patel', role: 'Backend', count: 10, hue: 150 },
@@ -137,7 +137,7 @@ export default function WorkloadSection() {
                 <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
               </div>
               <div className="tb-search flex items-center gap-2 px-3 py-1.5 rounded-md bg-[var(--bg-base)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)] w-64 justify-center shadow-inner">
-                <Search size={14} /> Search or jump to… <span className="kb px-1 py-0.5 rounded bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[10px] ml-2">⌘K</span>
+                <Search size={14} /> Search or jump to... <span className="kb px-1 py-0.5 rounded bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[10px] ml-2">Cmd+K</span>
               </div>
               <div className="w-6 h-6 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-xs font-bold ring-2 ring-[var(--bg-base)]">U</div>
             </div>
@@ -151,13 +151,13 @@ export default function WorkloadSection() {
                 </div>
                 <div className="flex items-center gap-2 border border-[var(--border-subtle)] rounded-lg bg-[var(--bg-subtle)] px-2 py-1.5">
                   <span className="text-[10px] uppercase tracking-wide text-[var(--text-tertiary)] font-mono mr-1">Threshold</span>
-                  <button onClick={() => setThreshold((t) => Math.max(2, t - 1))} className="w-6 h-6 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--accent)] transition-colors" aria-label="Decrease threshold">−</button>
+                  <button onClick={() => setThreshold((t) => Math.max(2, t - 1))} className="w-6 h-6 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--accent)] transition-colors" aria-label="Decrease threshold"> </button>
                   <span className="font-mono font-bold text-sm min-w-[20px] text-center">{threshold}</span>
                   <button onClick={() => setThreshold((t) => Math.min(20, t + 1))} className="w-6 h-6 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--accent)] transition-colors" aria-label="Increase threshold">+</button>
                 </div>
               </div>
 
-              {/* KPI strip — OrgSnapshotBanner */}
+              {/* KPI strip -- OrgSnapshotBanner */}
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 mb-8">
                 {kpis.map((k) => (
                   <div key={k.label} className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4 relative overflow-hidden">
@@ -180,7 +180,7 @@ export default function WorkloadSection() {
                 <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-xs font-semibold">Team Health Score</span>
-                    <span className="ml-auto font-mono text-[9px] uppercase tracking-widest text-[var(--text-tertiary)]">0–100</span>
+                    <span className="ml-auto font-mono text-[9px] uppercase tracking-widest text-[var(--text-tertiary)]">0-100</span>
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="relative w-[104px] h-[104px] shrink-0">
@@ -258,19 +258,19 @@ export default function WorkloadSection() {
                   </div>
                   <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center mb-4">
                     <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-card)] p-2.5">
-                      <div className="text-[9px] uppercase tracking-wider font-mono text-[var(--text-tertiary)] mb-1.5">From · Overloaded</div>
+                      <div className="text-[9px] uppercase tracking-wider font-mono text-[var(--text-tertiary)] mb-1.5">From   Overloaded</div>
                       <div className="text-sm font-semibold">Priya Sharma</div>
                     </div>
                     <span className="w-7 h-7 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center"><ArrowRight size={14} /></span>
                     <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-card)] p-2.5">
-                      <div className="text-[9px] uppercase tracking-wider font-mono text-[var(--text-tertiary)] mb-1.5">To · Available</div>
+                      <div className="text-[9px] uppercase tracking-wider font-mono text-[var(--text-tertiary)] mb-1.5">To   Available</div>
                       <div className="text-sm font-semibold">Lin Chen</div>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2.5">
                     {[
-                      { name: 'Priya Sharma', before: 11, after: 9, tone: 'var(--danger)', delta: 'Δ −2', verdict: 'under threshold' },
-                      { name: 'Lin Chen', before: 3, after: 5, tone: 'var(--success)', delta: 'Δ +2', verdict: 'headroom left' },
+                      { name: 'Priya Sharma', before: 11, after: 9, tone: 'var(--danger)', delta: '   2', verdict: 'under threshold' },
+                      { name: 'Lin Chen', before: 3, after: 5, tone: 'var(--success)', delta: '  +2', verdict: 'headroom left' },
                     ].map((r) => (
                       <div key={r.name} className="rounded-lg bg-[var(--bg-base)] border border-[var(--border-subtle)] p-2.5">
                         <div className="text-xs font-medium truncate mb-2">{r.name}</div>
@@ -333,13 +333,13 @@ export default function WorkloadSection() {
                       </div>
                       <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)] mb-1.5"><span>Active tasks</span><b className="font-mono text-base">{r.count}</b></div>
                       <div className="h-1.5 bg-[var(--bg-subtle)] rounded-full overflow-hidden"><motion.div initial={{ width: 0 }} whileInView={{ width: `${pct}%` }} transition={{ duration: 0.8 }} className="h-full rounded-full" style={{ background: barColor }} /></div>
-                      <div className="mt-1.5 font-mono text-[9px] text-[var(--text-tertiary)]">· {r.count} / {threshold} threshold</div>
+                      <div className="mt-1.5 font-mono text-[9px] text-[var(--text-tertiary)]">  {r.count} / {threshold} threshold</div>
                     </div>
                   );
                 })}
               </div>
 
-              <div className="mt-8 text-center text-xs text-[var(--text-tertiary)] font-mono uppercase tracking-widest">V1 · Capacity Command · workload view</div>
+              <div className="mt-8 text-center text-xs text-[var(--text-tertiary)] font-mono uppercase tracking-widest">V1   Capacity Command   workload view</div>
             </div>
           </div>
         </motion.div>

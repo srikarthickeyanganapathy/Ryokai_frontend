@@ -108,7 +108,7 @@ export function ProjectCard({ project }) {
             className="text-[10px] font-medium text-[var(--text-tertiary)] hover:text-[var(--accent)] transition-colors px-2 py-1 rounded-md hover:bg-[var(--bg-subtle)]"
             title="Open full project"
           >
-            →
+            ->
           </button>
         </div>
       </InteractiveCard>

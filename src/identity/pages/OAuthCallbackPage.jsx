@@ -43,7 +43,7 @@ export function OAuthCallbackPage() {
     }
 
     if (error) {
-      // Single-use state replayed or expired — the common GitHub failure.
+      // Single-use state replayed or expired -- the common GitHub failure.
       if (error === 'oauth_state_expired' || error === 'authentication_failed') {
         setOauthStateError(true)
         return
@@ -115,7 +115,7 @@ export function OAuthCallbackPage() {
     <div className="flex min-h-screen items-center justify-center bg-[var(--bg-base)]">
       <div className="flex flex-col items-center space-y-3">
         <Spinner size="lg" />
-        <Text variant="muted" className="text-[13px]">Completing sign in…</Text>
+        <Text variant="muted" className="text-[13px]">Completing sign in...</Text>
       </div>
     </div>
   )

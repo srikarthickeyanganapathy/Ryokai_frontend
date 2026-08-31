@@ -46,7 +46,7 @@ export function AnnouncementDrawer({ announcement, isOpen, onClose, onPin, onDel
               <AvatarFallback>{announcement.author?.username?.charAt(0).toUpperCase() || 'A'}</AvatarFallback>
             </Avatar>
             <Text size="xs" className="font-medium">{announcement.author?.username || 'Admin'}</Text>
-            <span className="text-[var(--text-muted)]">•</span>
+            <span className="text-[var(--text-muted)]">*</span>
             <Text size="xs" variant="muted" className="flex items-center gap-1">
               <Icons.clock className="w-3 h-3" />
               {format(new Date(announcement.createdAt), 'MMM d, yyyy')}

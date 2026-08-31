@@ -61,7 +61,7 @@ export function useConfirmDialog() {
             autoFocus
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder={state.inputPlaceholder || 'Add a note…'}
+            placeholder={state.inputPlaceholder || 'Add a note...'}
             className="min-h-[84px]"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {

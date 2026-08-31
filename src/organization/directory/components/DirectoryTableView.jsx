@@ -42,7 +42,7 @@ function hashHue(str = '') {
   return Math.abs(hash) % 360;
 }
 
-// ─── Sortable Header Renderer ─────────────────────────────────────────
+// --- Sortable Header Renderer ---
 function SortableHeader({ label, sortKey, currentSort, onSort, className }) {
   const isActive = currentSort?.key === sortKey;
   const direction = isActive ? currentSort?.direction : null;
@@ -70,7 +70,7 @@ function SortableHeader({ label, sortKey, currentSort, onSort, className }) {
   );
 }
 
-// ─── Column Visibility Toggle ─────────────────────────────────────────
+// --- Column Visibility Toggle ---
 const COLUMN_DEFS = [
   { id: 'username', label: 'Name', alwaysOn: true },
   { id: 'orgRole', label: 'Role', alwaysOn: false },
@@ -123,7 +123,7 @@ function ColumnVisibilityToggle({ visibleColumns, onToggle }) {
   );
 }
 
-// ─── Quick Row Actions ────────────────────────────────────────────────
+// --- Quick Row Actions ---
 function QuickRowActions({ member, onView, onMessage, onTasks }) {
   return (
     <motion.div
@@ -167,7 +167,7 @@ function QuickRowActions({ member, onView, onMessage, onTasks }) {
   );
 }
 
-// ─── Sorting Logic ────────────────────────────────────────────────────
+// --- Sorting Logic ---
 function useSortedMembers(members, sort, memberTeamsMap, memberTasksMap) {
   return useMemo(() => {
     if (!sort?.key) return members;
@@ -222,7 +222,7 @@ export function DirectoryTableView({
   const [visibleColumns, setVisibleColumns] = useState([
     'orgRole', 'email', 'teams', 'workload', 'joined', 'status',
   ]);
-  const [updatedRoles, setUpdatedRoles] = useState({}); // userId → timestamp
+  const [updatedRoles, setUpdatedRoles] = useState({}); // userId -> timestamp
 
   const sortedMembers = useSortedMembers(members, sort, memberTeamsMap, memberTasksMap);
 
@@ -404,7 +404,7 @@ export function DirectoryTableView({
                         animate={{ rotate: [0, -15, 15, 0] }}
                         transition={{ duration: 0.4, delay: 0.1 }}
                       >
-                        ✓
+                        [x]
                       </motion.span>
                       Updated!
                     </motion.span>
@@ -498,7 +498,7 @@ export function DirectoryTableView({
           const member = row.original;
           const joinedDate = member.createdAt || member.joinedAt;
           if (!joinedDate) {
-            return <span className="text-xs text-[var(--text-muted)]">—</span>;
+            return <span className="text-xs text-[var(--text-muted)]">--</span>;
           }
           const date = new Date(joinedDate);
           const formatted = date.toLocaleDateString('en-US', {

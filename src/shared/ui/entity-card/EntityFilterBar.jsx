@@ -5,7 +5,7 @@ import { PillNav } from '@/shared/ui/PillNav'
 import './entity-card.css'
 
 /**
- * EntityFilterBar — shared search + filter row for entity pages.
+ * EntityFilterBar -- shared search + filter row for entity pages.
  * Uses the app's canonical PillNav for chips + view switching.
  * - search / onSearch: internal input (with clear). Pass `searchSlot` to override (e.g. SearchPlugin).
  * - chips: [{ id, label, count }]; activeChip / onChip drive selection.
@@ -15,7 +15,7 @@ import './entity-card.css'
 export function EntityFilterBar({
   search,
   onSearch,
-  searchPlaceholder = 'Search…',
+  searchPlaceholder = 'Search...',
   searchSlot,
   chips = [],
   activeChip,

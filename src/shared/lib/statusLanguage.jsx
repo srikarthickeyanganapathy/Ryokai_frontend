@@ -1,5 +1,5 @@
 /**
- * Ryokai — Status Language System
+ * Ryokai -- Status Language System
  * @deprecated Use `@/shared/lib/statusRegistry` instead.
  * The STATUS_MAP and MOTION_PRIORITY here are kept only for backward compat.
  * New code should import { resolveStatus, getSemanticColor, getMotion } from '@/shared/lib/statusRegistry'.
@@ -12,7 +12,7 @@ import {
   XCircle, Archive, Play, Pause, Flag, Star
 } from 'lucide-react';
 
-/* ─── Status definitions ─── */
+/* --- Status definitions --- */
 export const STATUS_MAP = {
   // Task/Workflow statuses
   TODO:           { icon: Circle, label: 'To Do',       variant: 'neutral', priority: 'STANDARD' },
@@ -40,7 +40,7 @@ export const STATUS_MAP = {
   CRITICAL:       { icon: XCircle, label: 'Critical',     variant: 'danger', priority: 'CRITICAL' },
 };
 
-/* ─── Motion priority presets ─── */
+/* --- Motion priority presets --- */
 export const MOTION_PRIORITY = {
   CRITICAL: {
     spring: { type: 'spring', stiffness: 400, damping: 20, mass: 0.4 },
@@ -72,7 +72,7 @@ export const MOTION_PRIORITY = {
   },
 };
 
-/* ─── Status Badge Component ─── */
+/* --- Status Badge Component --- */
 export function StatusBadge({ status, size = 'sm', className }) {
   const def = STATUS_MAP[status?.toUpperCase()?.replace(/\s+/g, '_')] || STATUS_MAP.TODO;
   const Icon = def.icon;
@@ -105,7 +105,7 @@ export function StatusBadge({ status, size = 'sm', className }) {
   );
 }
 
-/* ─── Motion-aware wrapper for completion events ─── */
+/* --- Motion-aware wrapper for completion events --- */
 export function CompletionRipple({ children, onComplete }) {
   const [ripple, setRipple] = React.useState(false);
 

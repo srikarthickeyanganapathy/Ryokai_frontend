@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useEffect } from 'react';
+ import React, { useState, useMemo, useEffect } from 'react';
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
@@ -48,7 +48,7 @@ export function InviteMemberModal({ isOpen, onClose, orgId }) {
   const [userSelectedRole, setUserSelectedRole] = useState('');
   const effectiveRoleId = userSelectedRole || defaultRoleId;
 
-  // Reset on reopen via key in parent — no effect needed
+  // Reset on reopen via key in parent -- no effect needed
 
   const handleSubmitDirect = (e) => {
     e.preventDefault();

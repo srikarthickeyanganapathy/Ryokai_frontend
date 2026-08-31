@@ -1,12 +1,12 @@
 import { useState, useCallback, useMemo } from 'react'
 
 /**
- * useGraphWorkspace — The core hook for Nebula's graph-native exploration.
+ * useGraphWorkspace -- The core hook for Nebula's graph-native exploration.
  *
  * Returns three separated concerns:
- *   context   — shared graph state, selection, highlighting
- *   navigator — per-window history, back/forward, pins
- *   analysis  — graph computation engine (blockers, unlocks, critical path, etc.)
+ *   context   -- shared graph state, selection, highlighting
+ *   navigator -- per-window history, back/forward, pins
+ *   analysis  -- graph computation engine (blockers, unlocks, critical path, etc.)
  */
 export default function useGraphWorkspace({ graph, allTasks, initialTaskId }) {
   // --- Navigator State ---
@@ -72,9 +72,9 @@ export default function useGraphWorkspace({ graph, allTasks, initialTaskId }) {
 
   // Build adjacency indexes
   const { blockersOf, unblocksOf, childrenOf } = useMemo(() => {
-    const blockersOf = new Map() // taskId → [tasks that block it]
-    const unblocksOf = new Map() // taskId → [tasks it unblocks]
-    const childrenOf = new Map() // taskId → [child tasks]
+    const blockersOf = new Map() // taskId -> [tasks that block it]
+    const unblocksOf = new Map() // taskId -> [tasks it unblocks]
+    const childrenOf = new Map() // taskId -> [child tasks]
 
     allTasks.forEach(task => {
       if (Array.isArray(task.blockedBy)) {

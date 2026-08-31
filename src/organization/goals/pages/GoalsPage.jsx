@@ -95,10 +95,10 @@ export function GoalsPage() {
     updateGoal.mutate({ goalId: goal.id, payload });
   };
 
-  // ── Derived statistics (no extra API calls) ──
+  // --- Derived statistics (no extra API calls) ---
   const stats = useMemo(() => deriveGoalStats(goals), [goals]);
 
-  // ── Filter counts for tab badges ──
+  // --- Filter counts for tab badges ---
   const filterCounts = useMemo(
     () => ({
       ALL: goals.length,
@@ -110,7 +110,7 @@ export function GoalsPage() {
     [goals],
   );
 
-  // ── Filtered + sorted goals ──
+  // --- Filtered + sorted goals ---
   const visibleGoals = useMemo(
     () => sortGoals(filterGoalsByStatus(goals, filter), sortBy),
     [goals, filter, sortBy],

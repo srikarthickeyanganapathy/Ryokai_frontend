@@ -190,7 +190,7 @@ export default function WorkspaceSection() {
           variants={itemVariants}
           className="sec-sub reveal text-lg text-[var(--text-secondary)] max-w-2xl mb-16"
         >
-          Where intent becomes organized work across three distinct scopes — personal focus for deep work, crew coordination for agile teams, and organizational alignment for governed execution.
+          Where intent becomes organized work across three distinct scopes -- personal focus for deep work, crew coordination for agile teams, and organizational alignment for governed execution.
         </motion.p>
         
         <motion.div 
@@ -220,7 +220,7 @@ export default function WorkspaceSection() {
             </div>
             <motion.h3 layout className="text-xl font-semibold text-[var(--text-primary)] mb-3">Personal</motion.h3>
             <motion.p layout className="text-[var(--text-secondary)] mb-6 text-sm leading-relaxed">
-              Your private command deck — tasks, focus timer, notes, and private priorities without team noise.
+              Your private command deck -- tasks, focus timer, notes, and private priorities without team noise.
             </motion.p>
             <motion.ul layout className="space-y-3 mb-2">
               <li className="flex items-center text-sm text-[var(--text-secondary)]">
@@ -258,7 +258,7 @@ export default function WorkspaceSection() {
             </div>
             <motion.h3 layout className="text-xl font-semibold text-[var(--text-primary)] mb-3">Organization</motion.h3>
             <motion.p layout className="text-[var(--text-secondary)] mb-6 text-sm leading-relaxed">
-              Enterprise-wide alignment — projects, teams, directory, goals, workload balance, and role structures.
+              Enterprise-wide alignment -- projects, teams, directory, goals, workload balance, and role structures.
             </motion.p>
             <motion.ul layout className="space-y-3 mb-2">
               <li className="flex items-center text-sm text-[var(--text-secondary)]">
@@ -296,7 +296,7 @@ export default function WorkspaceSection() {
             </div>
             <motion.h3 layout className="text-xl font-semibold text-[var(--text-primary)] mb-3">Crews</motion.h3>
             <motion.p layout className="text-[var(--text-secondary)] mb-6 text-sm leading-relaxed">
-              Dynamic cross-functional squads with shared tasks and real-time whiteboards — join or leave anytime.
+              Dynamic cross-functional squads with shared tasks and real-time whiteboards -- join or leave anytime.
             </motion.p>
             <motion.ul layout className="space-y-3 mb-2">
               <li className="flex items-center text-sm text-[var(--text-secondary)]">

@@ -33,7 +33,7 @@ import { RepositoriesTab } from '../components/RepositoriesTab'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
 /* ============================================================
-   pages/ProjectDetailPage.jsx — project HQ (approved demo).
+   pages/ProjectDetailPage.jsx -- project HQ (approved demo).
    Data layer (hooks, derivations, permissions, mutations,
    modals, TaskPanel, crew logic) is preserved from your page;
    presentation follows the approved demo and uses your shared
@@ -161,7 +161,7 @@ export function ProjectDetailPage() {
   const daysRemaining = project?.dueDate ? Math.max(0, Math.ceil((new Date(project.dueDate) - new Date()) / 86400000)) : null
   const pageState = projectLoading || tasksLoading ? 'loading' : projectError || !project ? 'error' : 'ready'
 
-  // Attention tiles — pure presentation derivation from real tasks
+  // Attention tiles -- pure presentation derivation from real tasks
   const band = useMemo(() => {
     const overdue = projectTasks.filter(t => !isDone(t) && !t.archived && daysUntil(t.dueDate) != null && daysUntil(t.dueDate) < 0).length
     const dueSoon = projectTasks.filter(t => { const d = daysUntil(t.dueDate); return !isDone(t) && !t.archived && d != null && d >= 0 && d <= 7 }).length

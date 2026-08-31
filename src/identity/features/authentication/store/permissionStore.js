@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 /**
  * Pure function: check if a permission code exists in a permissions array.
- * This is the canonical source of truth — used by both inline computed
+ * This is the canonical source of truth -- used by both inline computed
  * booleans AND the Zustand store snapshot.
  */
 export const resolvePermission = (permissionName, permissionList) => {

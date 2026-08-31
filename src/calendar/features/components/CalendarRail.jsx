@@ -25,7 +25,7 @@ function UpNextItem({ item, onClick }) {
           {item.title}
         </div>
         <div className="font-mono text-[9px] text-[var(--text-tertiary)] mt-0.5">
-          {dateLabel} · {timeLabel}
+          {dateLabel}   {timeLabel}
         </div>
       </div>
       <span className="font-mono text-[9px] text-[var(--text-tertiary)] shrink-0">

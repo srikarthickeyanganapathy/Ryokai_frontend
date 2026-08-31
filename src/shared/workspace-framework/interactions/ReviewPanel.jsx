@@ -4,18 +4,18 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * ReviewPanel
- * ─────────────────────────────────────────────────────────
+ * ---
  * UX primitive for review/approval workflows.
  * Renders a structured review view with metadata,
  * diff/changes summary, and approve/reject actions.
  *
- * @param {string} title — Review item title
- * @param {string} [subtitle] — Supporting context
- * @param {string} [status] — Current status badge ('pending'|'approved'|'rejected')
- * @param {React.ReactNode} [metadata] — Key-value metadata section
- * @param {React.ReactNode} children — Review body (diffs, details)
- * @param {function} [onApprove] — Approve handler
- * @param {function} [onReject] — Reject handler
+ * @param {string} title -- Review item title
+ * @param {string} [subtitle] -- Supporting context
+ * @param {string} [status] -- Current status badge ('pending'|'approved'|'rejected')
+ * @param {React.ReactNode} [metadata] -- Key-value metadata section
+ * @param {React.ReactNode} children -- Review body (diffs, details)
+ * @param {function} [onApprove] -- Approve handler
+ * @param {function} [onReject] -- Reject handler
  * @param {string} [approveLabel='Approve']
  * @param {string} [rejectLabel='Reject']
  */

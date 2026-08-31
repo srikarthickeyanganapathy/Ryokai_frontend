@@ -317,12 +317,12 @@ const TaskNebulaGraph = forwardRef(function TaskNebulaGraph({
 
     // 3D Spatial Impact Badge Sprite on Terminal Node
     if (isTerminalCausal && unblockedChainCount > 0) {
-      const impactBadge = createImpactBadgeSprite(`⚡ ${unblockedChainCount} tasks unblocked`);
+      const impactBadge = createImpactBadgeSprite(`  ${unblockedChainCount} tasks unblocked`);
       impactBadge.position.y = val + 18;
       group.add(impactBadge);
     }
 
-    // Single "Analyze" orbit satellite — progressive disclosure
+    // Single "Analyze" orbit satellite -- progressive disclosure
     if (isSelected && node.rawTask) {
       const analyzeRadius = 34;
       const analyzeAngle = -Math.PI / 2; // top position
@@ -339,7 +339,7 @@ const TaskNebulaGraph = forwardRef(function TaskNebulaGraph({
       analyzeGroup.add(analyzeMesh);
 
       // Analyze label sprite
-      const analyzeSprite = createOrbitOrbSprite('Analyze', '🔍', '#06b6d4');
+      const analyzeSprite = createOrbitOrbSprite('Analyze', '  ', '#06b6d4');
       analyzeSprite.position.y = 5;
       analyzeGroup.add(analyzeSprite);
 

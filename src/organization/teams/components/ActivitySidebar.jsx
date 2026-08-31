@@ -6,9 +6,9 @@ import { cn } from '@/shared/lib/cn'
 import { TeamAvatar } from './TeamAvatar'
 import { hashHue } from './utils'
 
-/* ══════════════════════════════════════════════════════
+/* ===
  * ACTIVITY FEED SIDEBAR (extracted from TeamsPage)
- * ══════════════════════════════════════════════════════ */
+ * === */
 
 export function ActivitySidebar({ teams, statsMap, isOpen, onToggle }) {
   const activeTeams = useMemo(() =>

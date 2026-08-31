@@ -1,7 +1,7 @@
 import { Badge } from '@/shared/ui/Badge';
 import { Info } from '@/shared/ui/Icons';
 
-// Permission control banner — non-owners read-only notice
+// Permission control banner -- non-owners read-only notice
 export function ReadOnlyBanner() {
   return (
     <div className="bg-[var(--accent-soft)]/50 border border-[var(--accent-border)] rounded-xl p-3.5 flex items-center justify-between gap-3 text-xs text-[var(--text-secondary)]">

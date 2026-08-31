@@ -5,7 +5,7 @@ import { Text } from '@/shared/ui/Typography';
 import { TrendingUp, ChevronDown, ChevronUp, UserPlus } from '@/shared/ui/Icons';
 import { hashHue, timeAgo } from './directoryUtils';
 
-// ───────── Recent Activity Feed ─────────
+// --- Recent Activity Feed ---
 // Collapsible feed showing recently joined members + role-change history.
 // Expansion state is controlled by the parent (`expanded` / `onToggleExpanded`).
 

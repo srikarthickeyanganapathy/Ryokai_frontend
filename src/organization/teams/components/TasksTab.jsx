@@ -17,13 +17,13 @@ import { toast } from 'sonner'
 import { cn } from '@/shared/lib/cn'
 
 /* ============================================================
-   components/TasksTab.jsx — Work segment (tasks side).
-   Urgency-first groups (Overdue → This week → Later → No date →
+   components/TasksTab.jsx -- Work segment (tasks side).
+   Urgency-first groups (Overdue -> This week -> Later -> No date ->
    Done), filter chips with live counts, and the full task
    function set: quick-complete (canEditTask), inline assign
-   (canAssignTask), delete (canDeleteTask + confirm), row click →
+   (canAssignTask), delete (canDeleteTask + confirm), row click ->
    TaskPanel, and a bulk bar (complete / submit for review /
-   send back / assign / delete) — all permission-rendered the
+   send back / assign / delete) -- all permission-rendered the
    same way as the org-wide tasks page. Status changes go through
    the page's real onUpdateTaskStatus; assignment through
    handleAssignTask (taskId, memberId, username).

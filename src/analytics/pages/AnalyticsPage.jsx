@@ -87,7 +87,7 @@ export function AnalyticsPage() {
             icon: BarChart3,
           }}
         >
-          {/* Tier 1 — hero KPIs */}
+          {/* Tier 1 -- hero KPIs */}
           <InsightSection question="What's the overall health?">
             <motion.div
               variants={containerVariants}
@@ -105,7 +105,7 @@ export function AnalyticsPage() {
             </motion.div>
           </InsightSection>
 
-          {/* Tier 2 — grouped secondary metrics */}
+          {/* Tier 2 -- grouped secondary metrics */}
           <InsightSection question="What needs attention?">
             <motion.div
               variants={containerVariants}
@@ -160,7 +160,7 @@ export function AnalyticsPage() {
             </motion.div>
           </InsightSection>
 
-          {/* Tier 3 — trends and distribution */}
+          {/* Tier 3 -- trends and distribution */}
           <InsightSection question="How are trends shaping up?">
             <motion.div
               initial={{ opacity: 0, y: 20 }}

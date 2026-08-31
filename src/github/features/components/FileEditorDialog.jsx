@@ -100,13 +100,13 @@ export function FileEditorDialog({ fullName, path, onClose }) {
           </ModalTitle>
           <ModalDescription>
             {fullName}
-            {file?.size > 0 && <span className="text-[var(--text-tertiary)]"> · {file.size} bytes</span>}
+            {file?.size > 0 && <span className="text-[var(--text-tertiary)]">   {file.size} bytes</span>}
           </ModalDescription>
         </ModalHeader>
 
         {isLoading && (
           <div role="status" className="py-10 flex items-center justify-center gap-2 text-[var(--text-muted)]">
-            <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" aria-hidden="true" /> Loading file…
+            <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" aria-hidden="true" /> Loading file...
           </div>
         )}
 
@@ -130,7 +130,7 @@ export function FileEditorDialog({ fullName, path, onClose }) {
               <Lock className="w-[18px] h-[18px] text-[var(--text-muted)]" aria-hidden="true" />
             </div>
             <p className="text-[12.5px] text-[var(--text-secondary)]">
-              Binary file — can be viewed in GitHub, not edited here.
+              Binary file -- can be viewed in GitHub, not edited here.
             </p>
           </div>
         )}
@@ -204,7 +204,7 @@ export function FileEditorDialog({ fullName, path, onClose }) {
                   </div>
                   {createBranchFirst && branch === defaultBranch && (
                     <p id="branch-name-warning" role="alert" className="text-[11.5px] text-amber-500 flex items-center gap-1.5">
-                      <AlertCircle className="w-3 h-3" aria-hidden="true" /> Branch already exists — give it a different name to create it.
+                      <AlertCircle className="w-3 h-3" aria-hidden="true" /> Branch already exists -- give it a different name to create it.
                     </p>
                   )}
                   <div className="flex items-center gap-3">
@@ -263,7 +263,7 @@ export function FileEditorDialog({ fullName, path, onClose }) {
                   </span>
                 )}
                 <Button variant="outline" size="sm" onClick={() => setMode('view')} disabled={busy}>Cancel</Button>
-                <Button size="sm" onClick={handleCommit} disabled={!canCommit} title="Ctrl/⌘ + Enter">
+                <Button size="sm" onClick={handleCommit} disabled={!canCommit} title="Ctrl/  + Enter">
                   {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" aria-hidden="true" /> : <Save className="w-3.5 h-3.5 mr-1" aria-hidden="true" />}
                   Commit{branch !== defaultBranch ? ` to ${branch}` : ''}
                 </Button>
@@ -275,13 +275,13 @@ export function FileEditorDialog({ fullName, path, onClose }) {
         {!isLoading && !isError && !binary && mode === 'edit' && openPr && !createBranchFirst && branch !== defaultBranch && (
           <p className="text-[11px] text-[var(--text-tertiary)] flex items-center gap-1.5 -mt-2">
             <GitPullRequest className="w-3 h-3" aria-hidden="true" /> The pull request will open from <span className="font-mono">{branch}</span> into{' '}
-            <span className="font-mono">{defaultBranch}</span>. If the branch does not exist yet, enable “Create branch first”.
+            <span className="font-mono">{defaultBranch}</span>. If the branch does not exist yet, enable "Create branch first".
           </p>
         )}
 
         {commitMutation.isSuccess && (
           <p role="status" className="text-[12px] text-emerald-500 flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" /> Committed — closing…
+            <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" /> Committed -- closing...
           </p>
         )}
       </ModalContent>

@@ -144,7 +144,7 @@ export function GlobalCommandPalette() {
           <CommandItem onSelect={() => runCommand(() => navigate('/app/settings/profile'))}>
             <Icons.user className="mr-2 h-4 w-4" />
             <span>Profile Settings</span>
-            <CommandShortcut>⌘P</CommandShortcut>
+            <CommandShortcut> P</CommandShortcut>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate('/app/settings/security'))}>
             <Icons.shield className="mr-2 h-4 w-4" />

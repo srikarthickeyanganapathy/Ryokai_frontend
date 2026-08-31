@@ -7,7 +7,7 @@ import { Users, ExternalLink, Calendar, Shield, FolderKanban } from '@/shared/ui
 
 /**
  * TeamDrawer
- * ─────────────────────────────────────────────────────────
+ * ---
  * Quick-view contextual drawer for team summaries.
  * Shown when clicking a team badge or reference
  * anywhere in the workspace.

@@ -7,7 +7,7 @@ import { Icons } from "@/shared/ui/Icons";
 import { KanbanBoard } from "../components/KanbanBoard/KanbanBoard";
 import { TasksTable } from "../components/TableView/TasksTable";
 
-/* ─── Scope tabs ─── */
+/* --- Scope tabs --- */
 const SCOPES = [
   { id: "all",       label: "All" },
   { id: "assigned",  label: "Mine" },
@@ -47,7 +47,7 @@ export function TasksWorkspace({
   const [sortOpen, setSortOpen] = useState(false);
   const activeFilterCount = (priorityFilter?.length > 0 ? 1 : 0) + (projectFilter !== "ALL" ? 1 : 0) + (teamFilter !== "ALL" ? 1 : 0);
 
-  /* ─── States ─── */
+  /* --- States --- */
   if (isError && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-5 text-center px-6">
@@ -65,7 +65,7 @@ export function TasksWorkspace({
 
   if (isLoading) return <LoadingSkeleton activeView={activeView} />;
 
-  /* ─── Empty states ─── */
+  /* --- Empty states --- */
   let emptyState = null;
   if (tasks.length === 0) {
     if (!searchActive && !filtersActive) {
@@ -89,7 +89,7 @@ export function TasksWorkspace({
     }
   }
 
-  /* ─── Unified Toolbar: scope tabs + search + filters + sort + view toggle + create + count ─── */
+  /* --- Unified Toolbar: scope tabs + search + filters + sort + view toggle + create + count --- */
   const Toolbar = (
     <div className="flex items-center gap-2 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--bg-card)]/60 flex-wrap">
       {/* Sidebar toggle (drawer mode) */}
@@ -99,7 +99,7 @@ export function TasksWorkspace({
         </IconButton>
       )}
 
-      {/* Scope tabs — horizontal pills */}
+      {/* Scope tabs -- horizontal pills */}
       <div className="flex items-center gap-0.5 min-w-0 flex-wrap">
         {SCOPES.map(s => (
           <button

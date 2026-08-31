@@ -5,22 +5,22 @@ import { layoutClasses } from '../tokens/layoutTokens'
 
 /**
  * InsightLayout
- * ─────────────────────────────────────────────────────────
+ * ---
  * Layout archetype for question-driven analysis pages.
  * Target pages: Analytics, Workload.
  *
  * Structure:
- *   Header → View Switcher → Question Sections → Trends → Breakdowns
+ *   Header -> View Switcher -> Question Sections -> Trends -> Breakdowns
  *
  * Organizes analytics around operational questions:
- *   "What is improving?" → "What's blocked?" → "Who's overloaded?"
+ *   "What is improving?" -> "What's blocked?" -> "Who's overloaded?"
  *
  * This layout renders ONLY structure. No business logic.
  *
  * Responsive:
- *   Desktop  — Side-by-side chart panels
- *   Tablet   — Accordion question sections
- *   Mobile   — Stacked single-column charts
+ *   Desktop  -- Side-by-side chart panels
+ *   Tablet   -- Accordion question sections
+ *   Mobile   -- Stacked single-column charts
  */
 export function InsightLayout({
   header,
@@ -30,7 +30,7 @@ export function InsightLayout({
 }) {
   return (
     <div className={cn('flex flex-col', className)}>
-      {/* ── Header Slot ───────────────────────────────── */}
+      {/* --- Header Slot --- */}
       {header && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -42,7 +42,7 @@ export function InsightLayout({
         </motion.div>
       )}
 
-      {/* ── View Switcher Slot ────────────────────────── */}
+      {/* --- View Switcher Slot --- */}
       {viewSwitcher && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -54,7 +54,7 @@ export function InsightLayout({
         </motion.div>
       )}
 
-      {/* ── Insight Sections ──────────────────────────── */}
+      {/* --- Insight Sections --- */}
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -69,13 +69,13 @@ export function InsightLayout({
 
 /**
  * InsightSection
- * ─────────────────────────────────────────────────────────
+ * ---
  * A question-driven section within InsightLayout.
  * Groups related charts/metrics under a single operational question.
  *
- * @param {string} question — The operational question (e.g. "What is improving?")
- * @param {string} [description] — Supporting context
- * @param {React.ReactNode} children — Charts / metric cards
+ * @param {string} question -- The operational question (e.g. "What is improving?")
+ * @param {string} [description] -- Supporting context
+ * @param {React.ReactNode} children -- Charts / metric cards
  */
 export function InsightSection({ question, description, children, className }) {
   return (

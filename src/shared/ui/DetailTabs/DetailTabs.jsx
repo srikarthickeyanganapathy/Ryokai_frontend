@@ -4,14 +4,14 @@ import { cn } from '@/shared/lib/cn';
 
 /**
  * DetailTabs
- * ─────────────────────────────────────────────────────────
+ * ---
  * Shared underline tab navigation for detail pages.
  * Features animated tab indicator that slides between tabs.
  *
  * @param {Array<{id: string, label: string, icon?: React.ElementType}>} tabs - Tab definitions
  * @param {string} activeTab - Currently active tab id
  * @param {(id: string) => void} onChange - Callback when tab is clicked
- * @param {Object} [counts] - Optional map of tab id → count badge number
+ * @param {Object} [counts] - Optional map of tab id -> count badge number
  * @param {boolean} [sticky=true] - Whether the tab bar should stick to the top
  * @param {string} [className] - Additional container classes
  */

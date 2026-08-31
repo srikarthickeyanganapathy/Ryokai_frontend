@@ -151,7 +151,7 @@ export function MemberDetailDrawer({ member, isOpen, onClose, workload, isCreato
                       <p className="text-xs font-semibold text-[var(--text-primary)] truncate">{t.title}</p>
                       <div className="flex items-center gap-2 mt-1 text-[10px] text-[var(--text-muted)]">
                         <span className="uppercase font-mono">{t.priority || 'Medium'}</span>
-                        <span>•</span>
+                        <span>*</span>
                         <span>{t.dueDate ? new Date(t.dueDate).toLocaleDateString() : 'No due date'}</span>
                       </div>
                     </div>

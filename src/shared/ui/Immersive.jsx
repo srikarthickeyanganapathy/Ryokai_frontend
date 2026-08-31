@@ -96,7 +96,7 @@ export function ImmersiveBadge({ children, tone = 'neutral', className }) {
  * @param {string|number} value - Primary metric value
  * @param {React.ComponentType} [icon] - Lucide icon component
  * @param {'default'|'accent'|'success'|'warning'|'danger'} [tone] - Color tone
- * @param {string} [subtitle] - Secondary context line (e.g. "3 Active · 2 Completed")
+ * @param {string} [subtitle] - Secondary context line (e.g. "3 Active   2 Completed")
  * @param {string} [className] - Additional wrapper classes
  */
 export function ImmersiveMetric({ label, value, icon: Icon, tone = 'default', subtitle, className }) {

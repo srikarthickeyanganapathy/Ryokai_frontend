@@ -188,7 +188,7 @@ export function GoalCard({ goal, expanded, onToggle, canManage, onUpdateKR, onEd
           : 'border-[var(--color-border-subtle)] hover:border-[var(--accent-border)]',
       )}
     >
-      {/* Card header — clickable to toggle expansion */}
+      {/* Card header -- clickable to toggle expansion */}
       <button
         onClick={onToggle}
         className="w-full text-left p-4 hover:bg-[var(--bg-subtle)] transition-colors"

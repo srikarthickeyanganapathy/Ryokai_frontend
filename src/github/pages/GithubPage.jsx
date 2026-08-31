@@ -73,7 +73,7 @@ export function GithubPage() {
     return { repos: repos.length, open, merged, installations: installations.length };
   }, [repos, installations]);
 
-  // GitHub is a personal workspace surface only — not available in Crews or Org.
+  // GitHub is a personal workspace surface only -- not available in Crews or Org.
   if (workspaceMode === 'CREWS' || workspaceMode === 'ORG') {
     return <Navigate to="/app" replace />;
   }
@@ -131,7 +131,7 @@ export function GithubPage() {
   }
 
   const appConfigured = config?.appConfigured === true;
-  // The repos response carries the authoritative `connected` flag — a revoked
+  // The repos response carries the authoritative `connected` flag -- a revoked
   // connection shows up there (200 + connected:false) before config ever
   // refetches, so trust it too. reconnectRequired covers the 401 path.
   const reconnectRequired = error?.response?.data?.error === 'github_reconnect_required';
@@ -190,7 +190,7 @@ export function GithubPage() {
       <PageHero
         eyebrow="GitHub App"
         title="GitHub"
-        subtitle="Pull requests and commits, mirrored into Ryokai — reviewed without leaving the workspace."
+        subtitle="Pull requests and commits, mirrored into Ryokai -- reviewed without leaving the workspace."
         icon={Github}
         actions={heroActions}
       />

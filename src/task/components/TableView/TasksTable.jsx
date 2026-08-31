@@ -12,7 +12,7 @@ import { normalizePriority, PRIORITY_COLORS } from '@/shared/lib/priority'
 import { StatusBadge } from '@/shared/ui/StatusBadge'
 
 function DueBadge({ dueDate }) {
-  if (!dueDate) return <span className="text-[var(--text-muted)] text-xs">—</span>
+  if (!dueDate) return <span className="text-[var(--text-muted)] text-xs">--</span>
   const due = new Date(dueDate)
   const now = new Date()
   const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24))
@@ -20,7 +20,7 @@ function DueBadge({ dueDate }) {
 
   if (diffDays < 0) return (
     <span className="text-[11px] font-semibold text-[var(--danger)] bg-[var(--danger-soft)] px-2 py-0.5 rounded-md">
-      {dateStr} · Overdue
+      {dateStr}   Overdue
     </span>
   )
   if (diffDays === 0) return (
@@ -30,7 +30,7 @@ function DueBadge({ dueDate }) {
   )
   if (diffDays <= 2) return (
     <span className="text-[11px] font-semibold text-orange-400 bg-orange-400/10 px-2 py-0.5 rounded-md">
-      {dateStr} · Soon
+      {dateStr}   Soon
     </span>
   )
   return <span className="text-[var(--text-secondary)] text-xs">{dateStr}</span>
@@ -114,7 +114,7 @@ export function TasksTable({
       cell: ({ row }) => {
         const projectName = row.original.projectName
         const projectId = row.original.projectId
-        if (!projectId) return <span className="text-[var(--text-muted)] text-xs">—</span>
+        if (!projectId) return <span className="text-[var(--text-muted)] text-xs">--</span>
         return (
           <span className="text-xs font-medium text-[var(--text-secondary)] bg-[var(--bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--border-subtle)]">
             {projectName || `#${projectId}`}
@@ -128,7 +128,7 @@ export function TasksTable({
       cell: ({ row }) => {
         const teamName = row.original.teamName || row.original.team?.name
         const teamId = row.original.teamId || row.original.team?.id
-        if (!teamId && !teamName) return <span className="text-[var(--text-muted)] text-xs">—</span>
+        if (!teamId && !teamName) return <span className="text-[var(--text-muted)] text-xs">--</span>
         return (
           <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md">
             {teamName || `#${teamId}`}

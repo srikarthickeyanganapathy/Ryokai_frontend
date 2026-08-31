@@ -4,7 +4,7 @@ import { DetailTabs } from '@/shared/ui/DetailTabs'
 import { useWorkspace } from '@/app/providers/WorkspaceProvider'
 
 /* ============================================================
-   components/ProjectTabs.jsx — project tab bar on shared
+   components/ProjectTabs.jsx -- project tab bar on shared
    DetailTabs: Overview / Task Board / Repositories / Activity.
    Repositories tab is hidden in ORG mode (GitHub is not
    available for organization projects).

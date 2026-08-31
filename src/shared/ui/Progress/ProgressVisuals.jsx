@@ -3,7 +3,7 @@ import { cn } from '@/shared/lib/cn';
 
 /**
  * AnimatedNumber
- * ─────────────────────────────────────────────────────────
+ * ---
  * Animated number that counts up/down smoothly using requestAnimationFrame.
  * Eases with a cubic-out curve for natural deceleration.
  */
@@ -48,7 +48,7 @@ export function AnimatedNumber({ value, duration = 600, className, suffix = '' }
 
 /**
  * ProgressBar
- * ─────────────────────────────────────────────────────────
+ * ---
  * Horizontal progress bar with smooth width easing and optional glow pulse.
  */
 export function ProgressBar({ value, className, barClassName, glow = true, height = 'h-1.5' }) {
@@ -81,7 +81,7 @@ export function ProgressBar({ value, className, barClassName, glow = true, heigh
 
 /**
  * ProgressRing
- * ─────────────────────────────────────────────────────────
+ * ---
  * SVG circular progress indicator with smooth animation.
  * Used by ProjectCard and detail pages for a premium ring display.
  *

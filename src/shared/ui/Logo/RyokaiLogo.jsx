@@ -19,7 +19,7 @@ export function RyokaiLogo({ className, iconOnly = false, size = "md" }) {
 
   return (
     <div className={cn("flex items-center gap-2.5 shrink-0 select-none", className)}>
-      {/* 🌌 Galaxy badge — tilted spiral around a glowing core */}
+      {/*    Galaxy badge -- tilted spiral around a glowing core */}
       <RyokaiSealMark
         className={cn("shrink-0", iconSizes[size] || iconSizes.md)}
         style={{ filter: 'drop-shadow(0 0 12px var(--mark-glow))' }}

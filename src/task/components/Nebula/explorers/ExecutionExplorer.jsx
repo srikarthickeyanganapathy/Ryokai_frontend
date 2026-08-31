@@ -11,7 +11,7 @@ function ReadinessBar({ score }) {
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
         <span className="text-[10px] text-white/40 uppercase tracking-wider font-semibold">Readiness</span>
-        <span className="text-xs font-bold" style={{ color }}>{score}% — {label}</span>
+        <span className="text-xs font-bold" style={{ color }}>{score}% -- {label}</span>
       </div>
       <div className="h-2 rounded-full bg-white/10 overflow-hidden">
         <div className="h-full rounded-full transition-all duration-700" style={{ width: `${score}%`, backgroundColor: color }} />
@@ -158,7 +158,7 @@ export default function ExecutionExplorer({ context, navigator, analysis, onCent
           onClick={() => onOpenWorkbench(currentTask)}
           className="w-full mt-2 py-2.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-200 text-xs font-semibold transition-colors cursor-pointer"
         >
-          Edit in Workbench →
+          Edit in Workbench ->
         </button>
       )}
     </div>

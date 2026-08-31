@@ -2,7 +2,7 @@ import React from 'react'
 
 // Deliberately minimal: a thin indeterminate bar, not a spinner or skeleton
 // screen. Route chunks are small and cached after first visit, so this is
-// rarely on screen for more than a couple hundred ms — it should read as
+// rarely on screen for more than a couple hundred ms -- it should read as
 // "already loading" rather than announce itself.
 export function RouteLoader() {
   return (

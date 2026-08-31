@@ -67,7 +67,7 @@ export function TasksSidebar({
         </Button>
       </div>
 
-      {/* Scope tabs — only if not hidden */}
+      {/* Scope tabs -- only if not hidden */}
       {!hideScopeTabs && (
         <div className="px-3 py-2 space-y-0.5">
           {SCOPES.map(s => (
@@ -108,7 +108,7 @@ export function TasksSidebar({
         </div>
       </div>
 
-      {/* View toggle — only if not hidden */}
+      {/* View toggle -- only if not hidden */}
       {!hideViewToggle && (
         <div className="px-3 py-2 border-t border-[var(--border-subtle)]">
           <div className="flex items-center bg-[var(--bg-subtle)] rounded-lg p-0.5 gap-0.5">

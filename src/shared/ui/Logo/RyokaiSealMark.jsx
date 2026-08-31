@@ -2,9 +2,9 @@ import React from 'react'
 import { cn } from '@/shared/lib/cn'
 
 /**
- * RyokaiSealMark — Authentic Ryokai Hanko Monogram Seal.
+ * RyokaiSealMark -- Authentic Ryokai Hanko Monogram Seal.
  *
- * Crisp, single-layer calligraphic vector mark (R, checkmark, and 了 inside tilted frame).
+ * Crisp, single-layer calligraphic vector mark (R, checkmark, and   inside tilted frame).
  * In dark mode: resolves to vibrant golden-yellow (var(--seal-ink, #F5C451)).
  * In light mode: resolves to vermilion red (var(--seal-ink, #F85030)).
  * Transparent background by default so it blends seamlessly with dark & light themes.

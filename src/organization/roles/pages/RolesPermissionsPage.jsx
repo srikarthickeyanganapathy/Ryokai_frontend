@@ -60,7 +60,7 @@ export function RolesPermissionsPage() {
         title={isDetail ? selected?.name : 'Command Chain'}
         subtitle={isDetail
           ? 'Pick a module, set its level, then assign resources.'
-          : 'Every role ranked by authority — pick a link in the chain to open its passport.'}
+          : 'Every role ranked by authority -- pick a link in the chain to open its passport.'}
       >
         {canManageRoles && !studio.rolesLoading && !isDetail && <PostureStrip posture={posture} />}
       </PageHero>
@@ -184,14 +184,14 @@ function RiskBanner({ roleName, critical }) {
     return (
       <div className="flex items-center gap-2.5 rounded-xl border border-[var(--danger)]/35 bg-[var(--danger-soft)] px-4 py-3">
         <ShieldAlert className="w-4 h-4 text-[var(--danger)] shrink-0" />
-        <span className="text-[12px] font-medium text-[var(--text-primary)]">{roleName} holds {critical} elevated permission{critical === 1 ? '' : 's'} — watch the red levels below.</span>
+        <span className="text-[12px] font-medium text-[var(--text-primary)]">{roleName} holds {critical} elevated permission{critical === 1 ? '' : 's'} -- watch the red levels below.</span>
       </div>
     );
   }
   return (
     <div className="flex items-center gap-2.5 rounded-xl border border-[var(--success)]/30 bg-[var(--success-soft)] px-4 py-3">
       <CheckCircle2 className="w-4 h-4 text-[var(--success)] shrink-0" />
-      <span className="text-[12px] font-medium text-[var(--text-primary)]">No elevated permissions — this role stays within safe limits.</span>
+      <span className="text-[12px] font-medium text-[var(--text-primary)]">No elevated permissions -- this role stays within safe limits.</span>
     </div>
   );
 }

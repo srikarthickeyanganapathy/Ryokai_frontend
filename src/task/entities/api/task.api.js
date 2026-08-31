@@ -11,7 +11,7 @@ const normalizeChecklistItem = (item) => ({
 
 /** Normalize backend task: split comma-separated tags into array */
 // FIX: backend TaskResponseDTO field is `assignee` (String username), not `assignedTo`.
-//      The old code mapped t.assignedTo which was always undefined — assignee was lost.
+//      The old code mapped t.assignedTo which was always undefined -- assignee was lost.
 //      Backend also returns `archived` (not `isArchived`), `isPersonal` (via @JsonProperty).
 export const normalizeTask = (t) => ({
   ...t,
@@ -100,7 +100,7 @@ export const approveTask = async (id) => {
 };
 
 // FIX (SM-M01): backend now REQUIRES a non-blank reason (@NotBlank on RejectReasonDTO).
-// The body is mandatory — backend returns 400 if reason is missing or blank.
+// The body is mandatory -- backend returns 400 if reason is missing or blank.
 export const rejectTask = async (id, reason) => {
   if (!reason || reason.trim() === '') {
     throw new Error('Reason is required to reject a task');
@@ -151,12 +151,12 @@ export const getTaskHistory = async (id, params) => {
 // FIX: backend TaskDependencyRequestDTO field is `dependsOnId`, NOT `blocksTaskId`.
 // The old code sent { blocksTaskId } which caused a 400 validation error on every dependency add.
 export const addDependency = async (taskId, dependsOnId) => {
-  // Returns 201 with empty body — don't read response data
+  // Returns 201 with empty body -- don't read response data
   await api.post(`/tasks/${taskId}/dependencies`, { dependsOnId });
 };
 
 export const updateTask = async (taskId, payload) => {
-  // FIX: backend TaskUpdateRequestDTO has NO status field — status changes must go through
+  // FIX: backend TaskUpdateRequestDTO has NO status field -- status changes must go through
   // the dedicated state-transition endpoints (submit/approve/reject/recall/complete/claim),
   // never through PUT /tasks/{id}. Strip it so callers can't accidentally rely on it.
   const { status, ...rest } = payload || {};
@@ -212,7 +212,7 @@ export const uploadAttachment = async (taskId, file) => {
 
   const storageKey = uploadRes.data.imageKey;
 
-  // 2. Submit the evidence record — images stay SCREENSHOT, everything else FILE
+  // 2. Submit the evidence record -- images stay SCREENSHOT, everything else FILE
   const isImage = file.type?.startsWith('image/') || false;
   return addEvidence(taskId, {
     type: isImage ? 'SCREENSHOT' : 'FILE',

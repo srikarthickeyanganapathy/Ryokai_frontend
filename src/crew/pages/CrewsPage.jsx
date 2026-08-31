@@ -102,7 +102,7 @@ function RadialProgressRing({ progress = 0, size = 46, strokeWidth = 4, hue = 23
   );
 }
 
-/* ─── KPI / Category / Compare (Teams-module design language) ─── */
+/* --- KPI / Category / Compare (Teams-module design language) --- */
 
 function AnimatedCounter({ value, duration = 0.8 }) {
   const [display, setDisplay] = useState(0)
@@ -246,7 +246,7 @@ function ComparePanel({ crews, statsMap, onClose }) {
         <div className="flex items-center gap-3">
           <Icons.scale className="w-5 h-5 text-[var(--accent)]" />
           <Heading level={4} className="text-[14px] font-bold tracking-tight mb-0">Crew Comparison</Heading>
-          <span className="text-[11px] text-[var(--text-muted)]">{crews.length} selected · click a crew's scale icon to add/remove</span>
+          <span className="text-[11px] text-[var(--text-muted)]">{crews.length} selected   click a crew's scale icon to add/remove</span>
         </div>
         <IconButton variant="ghost" size="sm" onClick={onClose} title="Close comparison">
           <X className="w-4 h-4" />
@@ -271,9 +271,9 @@ function ComparePanel({ crews, statsMap, onClose }) {
   )
 }
 
-/* ══════════════════════════════════════════════════════════════════════
+/* ===
    CrewsPage - Crew Mission Control
-   ══════════════════════════════════════════════════════════════════════ */
+   === */
 export function CrewsPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -354,7 +354,7 @@ export function CrewsPage() {
 
       {crews.length > 0 && (
         <div data-tour="crews-invite-info">
-          {/* KPI Strip — matches teams module design language */}
+          {/* KPI Strip -- matches teams module design language */}
           <EntityStatStrip
             stats={[
               { key: 'total', label: 'Total Crews', value: crews.length, sublabel: 'Squads in your orbit', icon: Users, tone: 'cyan' },
@@ -525,7 +525,7 @@ function CrewCard({ crew, navigate, isCompareSelected = false, onToggleCompare }
       avatars={memberAvatars}
       avatarOverflow={Math.max(0, (crew.activeMembers?.length || 0) - 4)}
       meta={[
-        { icon: <Users style={{ width: 11, height: 11 }} />, text: `${memberCount}/${crew.memberCap || '∞'} members` },
+        { icon: <Users style={{ width: 11, height: 11 }} />, text: `${memberCount}/${crew.memberCap || ' '} members` },
         { icon: <Folder style={{ width: 11, height: 11 }} />, text: `${crew.projectCount ?? 0} projects` },
         { icon: <MessageSquare style={{ width: 11, height: 11 }} />, text: `${crew.channelCount ?? 1} channels` },
       ]}

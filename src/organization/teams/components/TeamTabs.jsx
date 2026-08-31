@@ -3,7 +3,7 @@ import { LayoutDashboard, KanbanSquare, Users, MessageSquare, ChartColumn } from
 import { DetailTabs } from '@/shared/ui/DetailTabs'
 
 /* ============================================================
-   components/TeamTabs.jsx — 5-chunk tab bar (Overview / Work /
+   components/TeamTabs.jsx -- 5-chunk tab bar (Overview / Work /
    People / Discussion / Insights) built on shared DetailTabs.
    ============================================================ */
 

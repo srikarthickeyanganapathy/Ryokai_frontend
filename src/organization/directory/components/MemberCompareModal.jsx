@@ -8,7 +8,7 @@ import { Badge } from '@/shared/ui/Badge';
 import { cn } from '@/shared/lib/cn';
 import { hashHue } from './directoryUtils';
 
-// ───────── Member Compare Modal ─────────
+// --- Member Compare Modal ---
 // Side-by-side comparison of two selected members (teams, tasks, priority,
 // last active, workload bars, shared teams). Fully controlled by the parent.
 
@@ -36,7 +36,7 @@ export function MemberCompareModal({ open, onOpenChange, compareMembers }) {
             </IconButton>
           </div>
 
-          {/* Modal body — side-by-side comparison */}
+          {/* Modal body -- side-by-side comparison */}
           <div className="p-5 space-y-5">
             <div className="grid grid-cols-2 gap-4">
               {/* Member A */}

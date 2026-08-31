@@ -1,7 +1,7 @@
 import { Heading, Text } from '@/shared/ui/Typography';
 import { Users } from '@/shared/ui/Icons';
 
-// Directory header — icon chip + title + seat/subtitle stats (teams design language)
+// Directory header -- icon chip + title + seat/subtitle stats (teams design language)
 export function MembersHeader({ totalCount, memberCap, activeCount }) {
   return (
     <div className="flex items-center gap-2.5 min-w-0">
@@ -13,7 +13,7 @@ export function MembersHeader({ totalCount, memberCap, activeCount }) {
           Crew Members
         </Heading>
         <Text variant="muted" className="text-[12px] mt-0.5">
-          {totalCount} of {memberCap} seats filled ·{' '}
+          {totalCount} of {memberCap} seats filled  {' '}
           <span className="text-[var(--success)] font-medium inline-flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)]" />
             {activeCount} active now

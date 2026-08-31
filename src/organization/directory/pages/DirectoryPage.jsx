@@ -36,7 +36,7 @@ import { Skeleton } from '@/shared/ui/Skeleton';
 import { useAuth } from '@/identity';
 import { EntityFilterBar, EntityStatStrip } from '@/shared/ui/entity-card';
 import { UserIcon, PieChart, BarChart3, Activity } from 'lucide-react';
-// ───────── Main Page Component ─────────
+// --- Main Page Component ---
 
 export function DirectoryPage() {
   const { activeOrganization } = useWorkspace();
@@ -77,7 +77,7 @@ export function DirectoryPage() {
   const updateRoleMutation = useUpdateMemberRole(orgId);
   const removeMemberMutation = useRemoveMember(orgId);
 
-  // ───────── Data Maps ─────────
+  // --- Data Maps ---
 
   // Heavily memoized O(1) lookup map for member team affiliations
   const memberTeamsMap = useMemo(() => {
@@ -119,7 +119,7 @@ export function DirectoryPage() {
     return map;
   }, [members, allTasks]);
 
-  // ───────── Analytics ─────────
+  // --- Analytics ---
 
   const analytics = useMemo(() => {
     const totalMembers = members.length;
@@ -160,7 +160,7 @@ export function DirectoryPage() {
     return Math.round((total / members.length) * 10) / 10;
   }, [members, memberTasksMap]);
 
-  // ───────── Multi-criteria Filter Execution ─────────
+  // --- Multi-criteria Filter Execution ---
 
   const filteredMembers = useMemo(() => {
     const q = debouncedSearchQuery.toLowerCase().trim();
@@ -194,7 +194,7 @@ export function DirectoryPage() {
 
 
 
-  // ───────── Recently Joined & Activity Feed ─────────
+  // --- Recently Joined & Activity Feed ---
 
   const recentlyJoined = useMemo(() => {
     const now = new Date();
@@ -213,7 +213,7 @@ export function DirectoryPage() {
       });
   }, [members]);
 
-  // ───────── Compare Data ─────────
+  // --- Compare Data ---
 
   const compareMembers = useMemo(() => {
     if (selectedIds.length !== 2) return null;
@@ -249,7 +249,7 @@ export function DirectoryPage() {
     };
   }, [selectedIds, members, memberTeamsMap, memberTasksMap]);
 
-  // ───────── CSV Export ─────────
+  // --- CSV Export ---
 
   const handleExportCSV = useCallback(() => {
     try {
@@ -290,7 +290,7 @@ export function DirectoryPage() {
     }
   }, [filteredMembers, memberTeamsMap, memberTasksMap]);
 
-  // ───────── Selection toggling handlers ─────────
+  // --- Selection toggling handlers ---
 
   const handleToggleSelect = useCallback((userId) => {
     setSelectedIds((prev) =>
@@ -345,7 +345,7 @@ export function DirectoryPage() {
     <PageShell maxWidth="default">
       <PageHero
         eyebrow="People & Governance"
-        meta={`${members.length} member${members.length !== 1 ? 's' : ''} · ${teams.length} ${teams.length === 1 ? 'team' : 'teams'}`}
+        meta={`${members.length} member${members.length !== 1 ? 's' : ''}   ${teams.length} ${teams.length === 1 ? 'team' : 'teams'}`}
         title="Organization Directory"
         subtitle={`Interactive member roster and authority hierarchy for ${activeOrganization.name}.`}
         actions={
@@ -403,14 +403,14 @@ export function DirectoryPage() {
           <EntityStatStrip
             stats={[
               { key: 'total', label: 'Total Members', value: analytics.totalMembers, sublabel: analytics.newThisMonth > 0 ? `${analytics.newThisMonth} new this month` : 'Members', icon: Users, tone: 'cyan' },
-              { key: 'roles', label: 'Roles', value: Object.keys(analytics.roleCounts || {}).length || '—', sublabel: 'Role distribution', icon: PieChart, tone: 'amber' },
-              { key: 'coverage', label: 'Coverage', value: `${analytics.teamsCoveragePct}%`, sublabel: 'Members in ≥1 team', icon: BarChart3, tone: 'emerald' },
+              { key: 'roles', label: 'Roles', value: Object.keys(analytics.roleCounts || {}).length || '--', sublabel: 'Role distribution', icon: PieChart, tone: 'amber' },
+              { key: 'coverage', label: 'Coverage', value: `${analytics.teamsCoveragePct}%`, sublabel: 'Members in  1 team', icon: BarChart3, tone: 'emerald' },
               { key: 'active', label: 'Active', value: analytics.activeThisWeek, sublabel: analytics.totalMembers > 0 ? `${Math.round((analytics.activeThisWeek / analytics.totalMembers) * 100)}% active this week` : 'No recent activity', icon: Activity, tone: 'rose' },
             ]}
           />
         )}
 
-        {/* ───────── Page State & Views ───────── */}
+        {/* --- Page State & Views --- */}
         <PageState
           state={pageState}
           stateProps={{skeleton: <DirectorySkeleton />, 
@@ -494,7 +494,7 @@ export function DirectoryPage() {
           )}
         </PageState>
 
-        {/* ───────── Recent Activity Feed ───────── */}
+        {/* --- Recent Activity Feed --- */}
         {pageState === 'ready' && members.length > 0 && (
           <RecentActivityFeed
             recentlyJoined={recentlyJoined}
@@ -505,7 +505,7 @@ export function DirectoryPage() {
         )}
       </PageContent>
 
-      {/* ───────── Member Compare Modal ───────── */}
+      {/* --- Member Compare Modal --- */}
       <MemberCompareModal
         open={compareModalOpen && !!compareMembers}
         onOpenChange={(open) => !open && setCompareModalOpen(false)}

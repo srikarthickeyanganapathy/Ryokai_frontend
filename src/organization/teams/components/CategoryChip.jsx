@@ -2,9 +2,9 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { cn } from '@/shared/lib/cn'
 
-/* ══════════════════════════════════════════════════════
- * SMART CATEGORIZATION BAR — CategoryChip (extracted from TeamsPage)
- * ══════════════════════════════════════════════════════ */
+/* ===
+ * SMART CATEGORIZATION BAR -- CategoryChip (extracted from TeamsPage)
+ * === */
 
 export function CategoryChip({ label, count, isActive, onClick, hue }) {
   return (

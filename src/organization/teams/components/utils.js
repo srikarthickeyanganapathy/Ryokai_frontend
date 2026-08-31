@@ -1,6 +1,6 @@
-/* ══════════════════════════════════════════════════════
+/* ===
  * UTILITY HELPERS (extracted from TeamsPage)
- * ══════════════════════════════════════════════════════ */
+ * === */
 
 export function hashHue(str = '') {
   let hash = 0
@@ -14,7 +14,7 @@ export function hashIndex(str = '', max = 0) {
   return Math.abs(hash) % max
 }
 
-const MOOD_EMOJIS = ['🚀', '🔥', '⚡', '🎯', '🌟', '💡', '🛠️', '🎨', '📊', '🧩', '💎', '🏆', '🌈', '🎪', '🔮', '🎭']
+const MOOD_EMOJIS = ['  ', '  ', ' ', '  ', '  ', '  ', '   ', '  ', '  ', '  ', '  ', '  ', '  ', '  ', '  ', '  ']
 
 export function teamMood(name) {
   return MOOD_EMOJIS[hashIndex(name, MOOD_EMOJIS.length)]

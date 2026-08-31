@@ -39,7 +39,7 @@ export function RolePassport({ role, isAdmin = false, stats = { read: 0, write: 
         <p className="text-[11.5px] leading-relaxed text-[var(--text-secondary)] mt-1.5">{rolePurpose(role.name)}</p>
         <div className="text-[11px] text-[var(--text-muted)] mt-1.5">
           Priority <strong className="text-[var(--text-secondary)] font-semibold font-mono">{role.priority ?? 100}</strong>
-          {isAdmin && <span className="ml-2 text-[var(--warning)] font-semibold">· System</span>}
+          {isAdmin && <span className="ml-2 text-[var(--warning)] font-semibold">  System</span>}
         </div>
       </div>
 
@@ -77,7 +77,7 @@ export function RolePassport({ role, isAdmin = false, stats = { read: 0, write: 
               <span key={name} className="text-[10px] font-medium text-[var(--text-secondary)] bg-[var(--bg-subtle)] px-2 py-1 rounded-md">{name}</span>
             ))
           ) : (
-            <span className="text-[10px] italic text-[var(--text-muted)]">No one — lowest rank</span>
+            <span className="text-[10px] italic text-[var(--text-muted)]">No one -- lowest rank</span>
           )}
         </div>
       </div>

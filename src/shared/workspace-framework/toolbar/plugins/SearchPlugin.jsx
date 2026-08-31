@@ -3,13 +3,13 @@ import { cn } from '@/shared/lib/cn'
 
 /**
  * SearchPlugin
- * ─────────────────────────────────────────────────────────
+ * ---
  * Toolbar search input plugin.
- * Stateless — page provides value and onChange.
+ * Stateless -- page provides value and onChange.
  *
- * @param {string} value — Current search value
- * @param {function} onChange — Search value change handler
- * @param {string} [placeholder='Search...'] — Input placeholder
+ * @param {string} value -- Current search value
+ * @param {function} onChange -- Search value change handler
+ * @param {string} [placeholder='Search...'] -- Input placeholder
  */
 export function SearchPlugin({ value, onChange, placeholder = 'Search...', className }) {
   return (

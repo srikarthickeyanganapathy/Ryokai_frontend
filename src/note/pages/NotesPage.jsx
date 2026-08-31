@@ -207,7 +207,7 @@ function CaptureStrip({ onCreate, isCreating }) {
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onKeyDown={onKeyDown}
-        placeholder="Start typing… — [ ] checklist, ``` code, > quote"
+        placeholder="Start typing... -- [ ] checklist, ``` code, > quote"
         rows={3}
         className="w-full px-4 py-3 bg-transparent text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none resize-none leading-relaxed"
       />
@@ -650,7 +650,7 @@ export function NotesPage() {
 
   return (
     <PageShell maxWidth="default" workspaceMode={workspaceModeLabel}>
-      {/* Page hero — workspace-framework PageHero contract */}
+      {/* Page hero -- workspace-framework PageHero contract */}
       <PageHero
         eyebrow={eyebrow}
         title="Notes"

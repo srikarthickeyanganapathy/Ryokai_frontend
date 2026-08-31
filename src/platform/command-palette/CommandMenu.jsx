@@ -14,7 +14,7 @@ export function CommandMenu() {
       <Icons.search className="w-3.5 h-3.5" />
       <span className="flex-1 text-left">Search...</span>
       <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded-[var(--radius-xs)] bg-[var(--bg-elevated)] px-1.5 font-mono text-[10px] font-medium text-[var(--text-tertiary)] shadow-sm">
-        <span className="text-[10px]">⌘</span>K
+        <span className="text-[10px]"> </span>K
       </kbd>
     </div>
   )

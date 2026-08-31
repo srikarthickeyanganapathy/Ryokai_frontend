@@ -23,7 +23,7 @@ export function validateFile(file, { maxSize = MAX_SCREENSHOT_SIZE, accept = 'im
     const isValidType = acceptedTypes.some(type => {
       if (!file.type) {
         // Some files (e.g. .md, .csv) report no MIME type in the browser.
-        // Let them through — the backend whitelist is the authoritative check.
+        // Let them through -- the backend whitelist is the authoritative check.
         return true;
       }
       if (type.endsWith('/*')) {

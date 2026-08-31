@@ -86,7 +86,7 @@ export const useResetPasswordMutation = () => {
   })
 }
 
-// FIX (SEC-Min01): new logout-all mutation — invalidates ALL sessions by
+// FIX (SEC-Min01): new logout-all mutation -- invalidates ALL sessions by
 // incrementing token_version on the backend. Useful for the Security page
 // "Sign out everywhere" button.
 export const useLogoutAllMutation = () => {

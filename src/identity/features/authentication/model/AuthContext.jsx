@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
       setTimeout(() => { sessionExpiredHandled.current = false }, 1000)
     }
 
-    // Re-validate auth when the tab regains focus — catches expired sessions
+    // Re-validate auth when the tab regains focus -- catches expired sessions
     // after the user has been away from the tab for a while
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && getAccessToken()) {

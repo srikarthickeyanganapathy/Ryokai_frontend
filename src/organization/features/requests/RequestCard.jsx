@@ -89,7 +89,7 @@ export function RequestCard({ request, index = 0 }) {
                 <Text className="font-medium text-sm text-[var(--text-primary)]">
                   {request.username || request.user?.username || 'Team Member'}
                 </Text>
-                <span className="text-xs text-[var(--text-muted)]">•</span>
+                <span className="text-xs text-[var(--text-muted)]">*</span>
                 <span className="text-xs text-[var(--text-muted)]">
                   {formatSubmittedDate(request.createdAt)}
                 </span>

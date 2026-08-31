@@ -1,9 +1,9 @@
 import React from 'react'
 import { hashHue } from './utils'
 
-/* ══════════════════════════════════════════════════════
+/* ===
  * MEMBER AVATAR PILL (extracted from TeamsPage)
- * ══════════════════════════════════════════════════════ */
+ * === */
 
 export function MemberAvatarPill({ member, index }) {
   const mHue = hashHue(member.username || String(index))

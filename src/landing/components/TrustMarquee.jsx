@@ -3,7 +3,7 @@ import { Zap, Clock, Users, Layers, FileText, Shield } from 'lucide-react';
 import { useEffect } from 'react';
 
 const marqueeItems = [
-  { text: "Intent → Execution", icon: Zap },
+  { text: "Intent -> Execution", icon: Zap },
   { text: "Personal Focus", icon: Clock },
   { text: "Crew Collaboration", icon: Users },
   { text: "Organizational Alignment", icon: Layers },
@@ -35,7 +35,7 @@ export default function TrustMarquee() {
         return (
           <span key={idx} className="mi">
             <Icon size={18} className="mr-2" /> {item.text}
-            <span className="dot mx-4 opacity-50">·</span>
+            <span className="dot mx-4 opacity-50"> </span>
           </span>
         );
       })}

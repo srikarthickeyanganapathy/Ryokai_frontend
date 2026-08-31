@@ -2,15 +2,15 @@ import React, { useEffect, useRef } from 'react';
 import { cn } from '@/shared/lib/cn';
 
 /**
- * CosmicBackground — ambient pulsar/starfield particles that extend the
+ * CosmicBackground -- ambient pulsar/starfield particles that extend the
  * Ryokai branding beyond just the logo. Renders a subtle animated canvas
  * with tiny floating particles and occasional twinkle pulses.
  *
  * Uses requestAnimationFrame and is fully throttled when tab is hidden.
  * Extremely lightweight (~3KB) with zero dependencies.
  *
- * @param {'full'|'sidebar'|'hero'} [props.variant='full'] — density control
- * @param {number} [props.opacity=0.4] — overall particle opacity
+ * @param {'full'|'sidebar'|'hero'} [props.variant='full'] -- density control
+ * @param {number} [props.opacity=0.4] -- overall particle opacity
  */
 export function CosmicBackground({ variant = 'full', opacity = 0.4, className }) {
   const canvasRef = useRef(null);

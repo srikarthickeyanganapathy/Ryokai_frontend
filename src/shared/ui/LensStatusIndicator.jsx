@@ -3,7 +3,7 @@ import { cn } from '@/shared/lib/cn';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 
 /**
- * LensStatusIndicator — compact chip naming the active workspace.
+ * LensStatusIndicator -- compact chip naming the active workspace.
  * Static dot (no perpetual pulse); the sidebar switcher remains the place
  * to change workspaces.
  */

@@ -153,7 +153,7 @@ export function RequestDetailDrawer({ request, isOpen, onClose }) {
                   {request.username || request.user?.username || 'Team Member'}
                 </Text>
                 <Text size="xs" variant="muted">
-                  Organization Member • Request ID #{request.id || 'N/A'}
+                  Organization Member * Request ID #{request.id || 'N/A'}
                 </Text>
               </div>
             </div>

@@ -16,7 +16,7 @@ export const PRESENCE_CONFIG = {
   },
 };
 
-// Stable fallback timestamp — module scope keeps render pure (React Compiler)
+// Stable fallback timestamp -- module scope keeps render pure (React Compiler)
 const FALLBACK_NOW = Date.now();
 
 // Deterministic hue for avatar gradients (teams design language)

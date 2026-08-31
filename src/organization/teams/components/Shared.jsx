@@ -26,18 +26,18 @@ import {
   MoreHorizontal,
 } from 'lucide-react'
 
-/* ═══════════════════════════════════════════════════════════
+/* ===
    EXISTING COMPONENTS (preserved & enhanced)
-   ═══════════════════════════════════════════════════════════ */
+   === */
 
 export { ProgressBar, PermissionButton, SummaryStat, AnalyticsStat }
 
-/* ── SVG Icons ── */
+/* --- SVG Icons --- */
 export { LockIcon, InsightsIcon, ChatIcon, FolderIcon, ChecklistIcon, AlertIcon, CheckIcon } from '@/shared/ui/Icons/custom'
 
-/* ── Empty State (enhanced with optional illustration) ── */
+/* --- Empty State (enhanced with optional illustration) --- */
 /**
- * EmptyState — placeholder for empty views.
+ * EmptyState -- placeholder for empty views.
  * @param {{ icon?: React.ElementType, illustration?: React.ReactNode, title: string, description?: string, actionLabel?: string, onAction?: () => void, actionAllowed?: boolean, actionReason?: string }} props
  */
 export function EmptyState({
@@ -84,13 +84,13 @@ export function EmptyState({
   )
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* ===
    NEW PREMIUM COMPONENTS
-   ═══════════════════════════════════════════════════════════ */
+   === */
 
-// ── Helpers ──
+// --- Helpers ---
 
-/** Smoothly animates a number from 0 → target over `duration` ms. */
+/** Smoothly animates a number from 0 -> target over `duration` ms. */
 function useAnimatedNumber(target, duration = 800, enabled = true) {
   const [current, setCurrent] = useState(0)
   const raf = useRef(null)
@@ -150,16 +150,16 @@ const TEMPLATE_CONFIG = {
 
 /** Mood scale definition. */
 const MOOD_STATES = [
-  { score: 1, emoji: '😤', label: 'Struggling', hint: 'Blockers piling up' },
-  { score: 2, emoji: '😟', label: 'Concerned', hint: 'A bit overwhelmed' },
-  { score: 3, emoji: '😐', label: 'Neutral', hint: 'Steady pace' },
-  { score: 4, emoji: '😊', label: 'Positive', hint: 'Making progress' },
-  { score: 5, emoji: '🤩', label: 'Thriving', hint: 'Everything flows' },
+  { score: 1, emoji: '  ', label: 'Struggling', hint: 'Blockers piling up' },
+  { score: 2, emoji: '  ', label: 'Concerned', hint: 'A bit overwhelmed' },
+  { score: 3, emoji: '  ', label: 'Neutral', hint: 'Steady pace' },
+  { score: 4, emoji: '  ', label: 'Positive', hint: 'Making progress' },
+  { score: 5, emoji: '  ', label: 'Thriving', hint: 'Everything flows' },
 ]
 
-/* ── TeamPulse ── */
+/* --- TeamPulse --- */
 /**
- * TeamPulse — compact 7-day activity sparkline with staggered bar animation.
+ * TeamPulse -- compact 7-day activity sparkline with staggered bar animation.
  * @param {{ data?: number[], className?: string }} props
  */
 export function TeamPulse({ data, className }) {
@@ -190,7 +190,7 @@ export function TeamPulse({ data, className }) {
       variants={{
         show: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } },
       }}
-      aria-label="Team activity sparkline – last 7 days"
+      aria-label="Team activity sparkline - last 7 days"
     >
       {bars.map((val, i) => {
         const h = Math.max(4, Math.round((val / maxVal) * 100))
@@ -214,9 +214,9 @@ export function TeamPulse({ data, className }) {
   )
 }
 
-/* ── MoodIndicator ── */
+/* --- MoodIndicator --- */
 /**
- * MoodIndicator — segmented sentiment slider for team mood.
+ * MoodIndicator -- segmented sentiment slider for team mood.
  * @param {{ score?: number, className?: string, size?: 'sm'|'md' }} props
  */
 export function MoodIndicator({ score = 3, className, size = 'md' }) {
@@ -288,7 +288,7 @@ export function MoodIndicator({ score = 3, className, size = 'md' }) {
   )
 }
 
-/* ── QuickActionMenu ── */
+/* --- QuickActionMenu --- */
 const QUICK_ACTIONS = [
   { key: 'pin', label: 'Pin to top', icon: Pin },
   { key: 'duplicate', label: 'Duplicate team', icon: Copy },
@@ -298,7 +298,7 @@ const QUICK_ACTIONS = [
 ]
 
 /**
- * QuickActionMenu — context menu with AnimatePresence for team row actions.
+ * QuickActionMenu -- context menu with AnimatePresence for team row actions.
  * @param {{ open: boolean, onAction: (key: string) => void, onClose?: () => void, align?: 'left'|'right', trigger?: React.ReactNode }} props
  */
 export function QuickActionMenu({ open, onAction, onClose, align = 'right', trigger }) {
@@ -376,9 +376,9 @@ export function QuickActionMenu({ open, onAction, onClose, align = 'right', trig
   )
 }
 
-/* ── TeamTemplateBadge ── */
+/* --- TeamTemplateBadge --- */
 /**
- * TeamTemplateBadge — colored badge showing the team's template origin.
+ * TeamTemplateBadge -- colored badge showing the team's template origin.
  * @param {{ template?: string, className?: string }} props
  */
 export function TeamTemplateBadge({ template, className }) {
@@ -422,9 +422,9 @@ export function TeamTemplateBadge({ template, className }) {
   )
 }
 
-/* ── LiveActivityDot ── */
+/* --- LiveActivityDot --- */
 /**
- * LiveActivityDot — pulsing green dot for real-time activity indication.
+ * LiveActivityDot -- pulsing green dot for real-time activity indication.
  * @param {{ isActive?: boolean, className?: string, size?: 'sm'|'md'|'lg' }} props
  */
 export function LiveActivityDot({ isActive, className, size = 'md' }) {
@@ -447,9 +447,9 @@ export function LiveActivityDot({ isActive, className, size = 'md' }) {
   )
 }
 
-/* ── SmartStatPill ── */
+/* --- SmartStatPill --- */
 /**
- * SmartStatPill — enhanced stat pill with counter animation, trend, & sparkline.
+ * SmartStatPill -- enhanced stat pill with counter animation, trend, & sparkline.
  * @param {{ icon?: React.ElementType, label: string, value: number, trend?: number, sparkline?: number[], animate?: boolean, className?: string }} props
  */
 export function SmartStatPill({
@@ -530,7 +530,7 @@ export function SmartStatPill({
   )
 }
 
-/* ── TeamIdentityBanner ── */
+/* --- TeamIdentityBanner --- */
 const TEAM_HUES = [
   220, // blue
   280, // purple
@@ -542,7 +542,7 @@ const TEAM_HUES = [
 ]
 
 /**
- * TeamIdentityBanner — full-width team header for detail pages.
+ * TeamIdentityBanner -- full-width team header for detail pages.
  * @param {{ team: { name?: string, tagline?: string, avatarUrl?: string, initials?: string }, hue?: number, memberCount?: number, onlineCount?: number, onEdit?: (field: string, value: string) => void, quickActions?: React.ReactNode, className?: string }} props
  */
 export function TeamIdentityBanner({
@@ -601,7 +601,7 @@ export function TeamIdentityBanner({
               <span>{initials || name.slice(0, 2).toUpperCase()}</span>
             )}
           </div>
-          {/* Online indicator — only when real presence data is passed in */}
+          {/* Online indicator -- only when real presence data is passed in */}
           {onlineCount > 0 && (
             <LiveActivityDot
               isActive
@@ -624,7 +624,7 @@ export function TeamIdentityBanner({
               onClick={() => onEdit('tagline', '')}
               className="text-[13px] text-white/30 italic hover:text-white/50 transition-colors mt-0.5 text-left"
             >
-              Add a tagline…
+              Add a tagline...
             </button>
           ) : null}
 

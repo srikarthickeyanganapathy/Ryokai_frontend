@@ -44,7 +44,7 @@ export function useCreateEvent(scope = {}) {
 }
 
 /**
- * Update event with optimistic UI — patches all cached calendar event
+ * Update event with optimistic UI -- patches all cached calendar event
  * query arrays in-place, rolls back on error.
  */
 export function useUpdateEvent() {

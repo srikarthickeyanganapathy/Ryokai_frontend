@@ -5,7 +5,7 @@ import { Badge } from '@/shared/ui/Badge';
 import { cn } from '@/shared/lib/cn';
 import { Hash, Volume2, Plus, Trash2 } from '@/shared/ui/Icons';
 
-/* Column 1: Channels sidebar — search, text channels, voice rooms. */
+/* Column 1: Channels sidebar -- search, text channels, voice rooms. */
 export function ChannelSidebar({ channels, activeChannel, isCreator, unreadCounts, onSelectChannel, onDeleteChannel, onOpenCreate }) {
   const [channelSearch, setChannelSearch] = useState('');
 

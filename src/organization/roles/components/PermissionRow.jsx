@@ -107,7 +107,7 @@ export function PermissionRow({ perm, isEnabled, isAdmin, onToggle, currentScope
           </div>
         )}
 
-        {/* Resources — inline chips for small lists, popover picker for large lists */}
+        {/* Resources -- inline chips for small lists, popover picker for large lists */}
         {showResources && (
           <div className="flex items-center gap-1.5 flex-wrap flex-1 basis-full" onClick={(e) => e.stopPropagation()}>
             <span className="font-mono text-[8px] font-bold uppercase tracking-[0.1em] text-[var(--text-muted)]">
@@ -115,7 +115,7 @@ export function PermissionRow({ perm, isEnabled, isAdmin, onToggle, currentScope
             </span>
 
             {usePopover ? (
-              /* ── Popover picker for large resource lists ── */
+              /* --- Popover picker for large resource lists --- */
               <ResourcePopoverPicker
                 scope={scope}
                 resourceList={resourceList}
@@ -126,7 +126,7 @@ export function PermissionRow({ perm, isEnabled, isAdmin, onToggle, currentScope
                 onToggleAll={handleAllResources}
               />
             ) : (
-              /* ── Inline chips for small resource lists (≤3) ── */
+              /* --- Inline chips for small resource lists ( 3) --- */
               <>
                 {resourceList.map((res) => {
                   const on = selectedIds.has(res.id);
@@ -174,9 +174,9 @@ export function PermissionRow({ perm, isEnabled, isAdmin, onToggle, currentScope
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────
- * ResourcePopoverPicker — searchable popover for large resource lists
- * ────────────────────────────────────────────────────────────────────*/
+/* ---
+ * ResourcePopoverPicker -- searchable popover for large resource lists
+ * ---*/
 function ResourcePopoverPicker({ scope, resourceList, selectedIds, selectedCount, isAdmin, onToggle, onToggleAll }) {
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
@@ -226,7 +226,7 @@ function ResourcePopoverPicker({ scope, resourceList, selectedIds, selectedCount
               )}
             </>
           ) : (
-            <span>Select {scopeLabel}s…</span>
+            <span>Select {scopeLabel}s...</span>
           )}
           <ChevronDown className={cn('w-3 h-3 shrink-0 transition-transform', open && 'rotate-180')} />
         </button>
