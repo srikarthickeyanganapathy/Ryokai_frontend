@@ -83,6 +83,8 @@ export default function App() {
                     <Route path="organizations/:orgId" element={<OrganizationAdministrationPage />} />
                     <Route path="teams" element={<TeamsPage />} />
                     <Route path="organizations/:orgId/teams/:teamId" element={<TeamDetailPage />} />
+                    <Route path="organizations/:orgId/whiteboards/:boardId" element={<WhiteboardPage />} />
+                    <Route path="organizations/:orgId/teams/:teamId/whiteboards/:boardId" element={<WhiteboardPage />} />
                     <Route path="crews" element={<CrewsPage />} />
                     <Route path="crews/discover" element={<CrewDiscoverPage />} />
                     <Route path="crews/join" element={<CrewJoinPage />} />

@@ -3,7 +3,10 @@ import { Heading, Text } from '@/shared/ui/Typography';
 import { Button } from '@/shared/ui/Button';
 import { Pencil, Plus, Sparkles } from '@/shared/ui/Icons';
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog';
-import { useWhiteboards, useCreateWhiteboard, useDeleteWhiteboard } from '@/whiteboard';
+import {
+  useWhiteboards, useCreateWhiteboard, useDeleteWhiteboard,
+  useTeamWhiteboards, useCreateTeamWhiteboard, useDeleteTeamWhiteboard,
+} from '@/whiteboard';
 import { TEMPLATES } from './whiteboards/templates';
 import { StarterTemplateCard } from './whiteboards/StarterTemplateCard';
 import { WhiteboardCard } from './whiteboards/WhiteboardCard';
@@ -11,7 +14,26 @@ import { WhiteboardToolbar } from './whiteboards/WhiteboardToolbar';
 import { WhiteboardCollection } from './whiteboards/WhiteboardCollection';
 import { CreateWhiteboardModal } from './whiteboards/CreateWhiteboardModal';
 
-export function WhiteboardsTab({ crewId, isCreator }) {
+/**
+ * The whiteboard hub for BOTH scopes:
+ *  - crews:  <WhiteboardsTab crewId={id} isCreator={...} />
+ *  - org teams: <WhiteboardsTab team={{ orgId, teamId }} isCreator={...} />
+ * Identical UX; boards, links, and permissions stay isolated per scope.
+ */
+export function WhiteboardsTab({ crewId, isCreator, team }) {
+  const isTeam = Boolean(team?.teamId);
+  const orgId = team?.orgId;
+  const teamId = team?.teamId;
+  const scopeKey = isTeam ? `${orgId}-team-${teamId}` : crewId;
+  const basePath = isTeam ? `/app/organizations/${orgId}/teams/${teamId}/whiteboards` : undefined;
+
+  const crewQuery = useWhiteboards(isTeam ? undefined : crewId);
+  const teamQuery = useTeamWhiteboards(orgId, teamId);
+  const createCrew = useCreateWhiteboard(isTeam ? undefined : crewId);
+  const createTeam = useCreateTeamWhiteboard(orgId, teamId);
+  const deleteCrew = useDeleteWhiteboard(isTeam ? undefined : crewId);
+  const deleteTeam = useDeleteTeamWhiteboard(orgId, teamId);
+
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [boardTitle, setBoardTitle] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,16 +43,17 @@ export function WhiteboardsTab({ crewId, isCreator }) {
   const [viewMode, setViewMode] = useState('grid'); // grid | list
   const [favorites, setFavorites] = useState(() => {
     try {
-      const saved = localStorage.getItem(`ryokai_fav_whiteboards_${crewId}`);
+      const saved = localStorage.getItem(`ryokai_fav_whiteboards_${scopeKey}`);
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
     }
   });
   
-  const { data: whiteboards = [], isLoading, isError, error, refetch } = useWhiteboards(crewId);
-  const createBoardMutation = useCreateWhiteboard(crewId);
-  const deleteBoardMutation = useDeleteWhiteboard(crewId);
+  const activeQuery = isTeam ? teamQuery : crewQuery;
+  const { data: whiteboards = [], isLoading, isError, error, refetch } = activeQuery;
+  const createBoardMutation = isTeam ? createTeam : createCrew;
+  const deleteBoardMutation = isTeam ? deleteTeam : deleteCrew;
   const { confirm, dialog: confirmDialog } = useConfirmDialog();
 
   // Save favorites to localStorage
@@ -40,7 +63,7 @@ export function WhiteboardsTab({ crewId, isCreator }) {
     } catch (e) {
       console.warn('Failed to save whiteboard favorites to localStorage', e);
     }
-  }, [favorites, crewId]);
+  }, [favorites, scopeKey]);
 
   const handleOpenCreateModal = (templateId = 'blank') => {
     setSelectedTemplate(templateId);
@@ -114,6 +137,7 @@ export function WhiteboardsTab({ crewId, isCreator }) {
       key={board.id} 
       board={board} 
       crewId={crewId} 
+      basePath={basePath} 
       isCreator={isCreator} 
       onDelete={handleDelete} 
       isFavorite={favorites.includes(board.id)}

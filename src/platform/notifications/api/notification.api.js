@@ -22,8 +22,8 @@ export const markAsRead = async (id) => {
   await api.put(`/notifications/${id}/read`);
 };
 
-export const markAllRead = async () => {
-  await api.put('/notifications/read-all');
+export const markAllRead = async (params) => {
+  await api.put('/notifications/read-all', null, { params });
 };
 
 export const deleteNotification = async (id) => {

@@ -80,6 +80,8 @@ export const queryKeys = {
     leaveRequests: (id) => ['organizations', id, 'leave-requests'],
     exitRequests: (id) => ['organizations', id, 'exit-requests'],
     invites: () => [...queryKeys.organizations.all, 'invites'],
+    whiteboards: (id) => [...queryKeys.organizations.detail(id), 'whiteboards'],
+    teamWhiteboards: (orgId, teamId) => [...queryKeys.organizations.detail(orgId), 'teams', teamId, 'whiteboards'],
   },
   announcements: {
     all: ['announcements'],

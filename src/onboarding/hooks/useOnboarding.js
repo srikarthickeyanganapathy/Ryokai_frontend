@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getOnboardingStatus, completeOnboarding, skipOnboarding } from '../api/onboarding.api';
+import { getOnboardingStatus, completeOnboarding, skipOnboarding, completeTour } from '../api/onboarding.api';
 
 export const ONBOARDING_STATUS = {
   NOT_STARTED: 'NOT_STARTED',
@@ -12,9 +12,11 @@ export const onboardingKeys = {
 };
 
 /**
- * Backend-persisted onboarding state. The welcome experience shows once
+ * Backend-persisted onboarding state (the ONLY source of truth for new vs
+ * returning user — never localStorage). The welcome experience shows once
  * (NOT_STARTED), never nags after COMPLETED/SKIPPED, and stays reopenable
- * from the Help Center regardless of state.
+ * from the Help Center regardless of state. `tourCompleted` reports whether
+ * the 30-second tour was taken on any device.
  */
 export function useOnboardingStatus() {
   return useQuery({
@@ -38,5 +40,10 @@ export function useOnboardingActions() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: onboardingKeys.status() }),
   });
 
-  return { complete, skip };
+  const tourComplete = useMutation({
+    mutationFn: completeTour,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: onboardingKeys.status() }),
+  });
+
+  return { complete, skip, tourComplete };
 }

@@ -16,3 +16,8 @@ export const completeOnboarding = async () => {
 export const skipOnboarding = async () => {
   await api.post('/workspace/onboarding/skip');
 };
+
+/** Records that the user finished the 30-second tour (backend source of truth). */
+export const completeTour = async () => {
+  await api.post('/workspace/onboarding/tour/complete');
+};

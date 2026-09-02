@@ -6,6 +6,8 @@ import {
   ChevronRight, ChevronDown, ExternalLink,
 } from 'lucide-react'
 import { Modal, ModalContent, ModalTitle } from '@/shared/ui/Modal'
+import { Button } from '@/shared/ui/Button'
+import { useTourStore } from '../model/tourStore'
 import { cn } from '@/shared/lib/cn'
 
 /**
@@ -98,6 +100,7 @@ const SECTIONS = [
 
 export function HelpCenter({ open, onOpenChange }) {
   const navigate = useNavigate()
+  const requestTour = useTourStore((s) => s.requestTour)
   const [expanded, setExpanded] = useState({ 'getting-started': true })
   const [topic, setTopic] = useState({ 'getting-started': 0 })
 
@@ -112,6 +115,12 @@ export function HelpCenter({ open, onOpenChange }) {
   const goTo = (to) => {
     onOpenChange?.(false)
     navigate(to)
+  }
+
+  const replayTour = () => {
+    onOpenChange?.(false)
+    navigate('/app')
+    requestTour()
   }
 
   return (
@@ -202,6 +211,15 @@ export function HelpCenter({ open, onOpenChange }) {
               </div>
             )
           })}
+        </div>
+
+        <div className="flex items-center justify-between gap-2 pt-1 border-t border-[var(--border-subtle)] mt-2 pt-3">
+          <span className="text-[11.5px] text-[var(--text-tertiary)]">
+            Want the highlights again?
+          </span>
+          <Button variant="outline" size="sm" onClick={replayTour}>
+            Replay the 30-second tour
+          </Button>
         </div>
       </ModalContent>
     </Modal>

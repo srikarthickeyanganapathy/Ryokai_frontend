@@ -15,7 +15,10 @@ import { formatRelativeTime, getAvatarGradient } from './utils';
 import { VisualCanvasThumbnail } from './VisualCanvasThumbnail';
 
 // Individual Whiteboard Card Component
-export function WhiteboardCard({ board, crewId, isCreator, onDelete, isFavorite, onToggleFavorite, index, viewMode = 'grid' }) {
+// basePath: optional link prefix override so org/team boards can reuse this
+// card (defaults to the crew route when only crewId is given).
+export function WhiteboardCard({ board, crewId, basePath, isCreator, onDelete, isFavorite, onToggleFavorite, index, viewMode = 'grid' }) {
+  const boardHref = basePath || `/app/crews/${crewId}/whiteboards`;
   const recentEditors = board.editors || board.collaborators || board.activeUsers || [];
   const isLive = board.isLive || (recentEditors.length > 0);
   const boardTemplate = TEMPLATES.find(t => t.id === board.template) || TEMPLATES[4];
@@ -36,7 +39,7 @@ export function WhiteboardCard({ board, crewId, isCreator, onDelete, isFavorite,
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <Link 
-                to={`/app/crews/${crewId}/whiteboards/${board.id}`}
+                to={`${boardHref}/${board.id}`}
                 className="font-semibold text-[13px] text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors truncate"
               >
                 {board.title}
@@ -105,7 +108,7 @@ export function WhiteboardCard({ board, crewId, isCreator, onDelete, isFavorite,
             )}
 
             <Link
-              to={`/app/crews/${crewId}/whiteboards/${board.id}`}
+              to={`${boardHref}/${board.id}`}
               className="p-1.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-colors ml-1"
               title="Open Whiteboard"
             >
@@ -165,7 +168,7 @@ export function WhiteboardCard({ board, crewId, isCreator, onDelete, isFavorite,
       </div>
 
       {/* Card Content & Launcher */}
-      <Link to={`/app/crews/${crewId}/whiteboards/${board.id}`} className="flex-1 flex flex-col p-4">
+      <Link to={`${boardHref}/${board.id}`} className="flex-1 flex flex-col p-4">
         <div className="flex items-start justify-between gap-2 mb-1.5">
           <Heading level={4} className="text-[14px] font-semibold tracking-tight text-[var(--text-primary)] truncate group-hover:text-[var(--accent)] transition-colors">
             {board.title}

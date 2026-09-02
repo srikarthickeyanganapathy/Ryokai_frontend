@@ -5,12 +5,14 @@ import React, { useRef, useEffect, useState } from 'react'
 import { cn } from '@/shared/lib/cn'
 import { useRealtime } from '@/app/providers/RealTimeProvider'
 import { useAuth } from '@/identity'
-import { saveSnapshot } from '../api/whiteboard.api'
+import { saveSnapshot, saveOrgSnapshot, saveTeamSnapshot } from '../api/whiteboard.api'
 
 const COLORS = ['#ffffff', '#f87171', '#fbbf24', '#4ade80', '#60a5fa', '#c084fc']
 const SNAPSHOT_INTERVAL_MS = 10000
 
-export function WhiteboardCanvas({ crewId, boardId, initialSnapshot }) {
+// Scope-aware: pass crewId OR orgId (exactly one) — the board belongs to one
+// workspace and persists its snapshot to that workspace's endpoint.
+export function WhiteboardCanvas({ crewId, orgId, teamId, boardId, initialSnapshot }) {
   const canvasRef = useRef(null)
   const ctxRef = useRef(null)
   const drawing = useRef(false)
@@ -103,11 +105,17 @@ export function WhiteboardCanvas({ crewId, boardId, initialSnapshot }) {
       if (canvasRef.current && hasUnsavedChanges.current) {
         hasUnsavedChanges.current = false
         const dataUrl = canvasRef.current.toDataURL('image/png')
-        saveSnapshot(crewId, boardId, dataUrl).catch(() => {})
+        if (teamId && orgId) {
+          saveTeamSnapshot(orgId, teamId, boardId, dataUrl).catch(() => {})
+        } else if (orgId) {
+          saveOrgSnapshot(orgId, boardId, dataUrl).catch(() => {})
+        } else {
+          saveSnapshot(crewId, boardId, dataUrl).catch(() => {})
+        }
       }
     }, SNAPSHOT_INTERVAL_MS)
     return () => clearInterval(interval)
-  }, [crewId, boardId])
+  }, [crewId, orgId, teamId, boardId])
 
   const getPos = (e) => {
     const rect = canvasRef.current.getBoundingClientRect()

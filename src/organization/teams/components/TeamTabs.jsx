@@ -1,5 +1,5 @@
 import React from 'react'
-import { LayoutDashboard, KanbanSquare, Users, MessageSquare, ChartColumn } from 'lucide-react'
+import { LayoutDashboard, KanbanSquare, Users, MessageSquare, ChartColumn, Pencil } from 'lucide-react'
 import { DetailTabs } from '@/shared/ui/DetailTabs'
 
 /* ============================================================
@@ -10,6 +10,7 @@ import { DetailTabs } from '@/shared/ui/DetailTabs'
 export const TEAM_TABS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'work', label: 'Work', icon: KanbanSquare },
+  { id: 'whiteboards', label: 'Whiteboards', icon: Pencil },
   { id: 'people', label: 'People', icon: Users },
   { id: 'discussion', label: 'Discussion', icon: MessageSquare },
   { id: 'insights', label: 'Insights', icon: ChartColumn },

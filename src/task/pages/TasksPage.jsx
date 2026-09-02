@@ -353,6 +353,9 @@ export function TasksPage() {
         onComplete={logic.handleQuickComplete}
         onDelete={logic.handleQuickDelete}
         onOpen={handleTaskNavigate}
+        hasFilters={logic.searchActive || logic.filtersActive}
+        onClearFilters={logic.handleClearFilters}
+        onCreateTask={() => logic.setCreateOpen(true)}
       />
         )}
 

@@ -26,11 +26,12 @@ export function NotificationPanel({
 
   // Invite decision taken inside this panel ('accepted' | 'declined') -- the
   // card must reflect the outcome instead of showing action buttons forever.
-  // Reset when a different notification is opened.
+  // Reset when a different notification is opened (keyed derivation instead
+  // of setState-in-effect).
+  const [inviteDecisionFor, setInviteDecisionFor] = useState(null)
   const [inviteDecision, setInviteDecision] = useState(null)
-  useEffect(() => {
-    setInviteDecision(null)
-  }, [notification?.id])
+  const effectiveInviteDecision =
+    inviteDecisionFor === notification?.id ? inviteDecision : null
 
   const startResizing = useCallback((e) => {
     e.preventDefault()
@@ -190,7 +191,7 @@ export function NotificationPanel({
                 </div>
 
                 {/* DYNAMIC ACTION TRIGGER CARDS */}
-                {isInvite && inviteId && inviteDecision === 'accepted' && (
+                {isInvite && inviteId && effectiveInviteDecision === 'accepted' && (
                   <div className="p-5 rounded-2xl bg-[var(--success-soft)]/30 border border-[var(--success)]/30 space-y-2">
                     <div className="flex items-center gap-2 text-sm font-semibold text-[var(--success)]">
                       <CheckCircle2 className="w-4 h-4" />
@@ -207,7 +208,7 @@ export function NotificationPanel({
                   </div>
                 )}
 
-                {isInvite && inviteId && inviteDecision === 'declined' && (
+                {isInvite && inviteId && effectiveInviteDecision === 'declined' && (
                   <div className="p-5 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-subtle)] space-y-2">
                     <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)]">
                       <XCircle className="w-4 h-4" />
@@ -224,7 +225,7 @@ export function NotificationPanel({
                   </div>
                 )}
 
-                {isInvite && inviteId && !inviteDecision && (
+                {isInvite && inviteId && !effectiveInviteDecision && (
                   <div className="p-5 rounded-2xl bg-[var(--accent-soft)]/20 border border-[var(--accent-border)] space-y-3">
                     <div className="flex items-center gap-2 text-sm font-semibold text-[var(--accent)]">
                       <ShieldAlert className="w-4 h-4" />
@@ -239,7 +240,7 @@ export function NotificationPanel({
                         variant="primary"
                         disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending}
                         onClick={() => acceptInviteMutation.mutate(inviteId, {
-                          onSuccess: () => setInviteDecision('accepted'),
+                          onSuccess: () => { setInviteDecisionFor(notification?.id); setInviteDecision('accepted') },
                           onError: (err) => toast.error(err?.response?.data?.message || 'Failed to accept invitation'),
                         })}
                         className="gap-1.5 text-xs"
@@ -252,7 +253,7 @@ export function NotificationPanel({
                         variant="outline"
                         disabled={acceptInviteMutation.isPending || declineInviteMutation.isPending}
                         onClick={() => declineInviteMutation.mutate(inviteId, {
-                          onSuccess: () => setInviteDecision('declined'),
+                          onSuccess: () => { setInviteDecisionFor(notification?.id); setInviteDecision('declined') },
                           onError: (err) => toast.error(err?.response?.data?.message || 'Failed to decline invitation'),
                         })}
                         className="gap-1.5 text-xs"

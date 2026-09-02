@@ -1,32 +1,71 @@
-import React from 'react'
-import { useOnboardingStatus, ONBOARDING_STATUS } from '../hooks/useOnboarding'
+import React, { useState } from 'react'
+import { useOnboardingStatus, useOnboardingActions, ONBOARDING_STATUS } from '../hooks/useOnboarding'
 import { useHelpCenterStore } from '../model/helpCenterStore'
+import { markProgress, PROGRESS_KEYS } from '../model/progressBus'
 import { WelcomeOnboarding } from './WelcomeOnboarding'
 import { PageCoach } from './PageCoach'
+import { OnboardingChecklist } from './OnboardingChecklist'
+import { FirstSuccessMoment } from './FirstSuccessMoment'
 import { HelpCenter } from './HelpCenter'
 
 /**
- * Mounts the first-run and help experiences:
- *  - WelcomeOnboarding renders once, only while backend state is NOT_STARTED
- *    (loading or COMPLETED/SKIPPED render nothing -- never nags).
- *  - HelpCenter renders on demand from any surface via the zustand store.
- *  - PageCoach teaches each page on first visit after the welcome flow
- *    (Dashboard -> Tasks -> Projects -> Calendar -> Analytics chain).
+ * First-run experience orchestration:
  *
+ *   Welcome modal (one decision)
+ *     → "Let's get started"  → records completion → dashboard tour fires
+ *     → "I'll explore"       → records skip → no tour, no nagging
+ *   Setup checklist (persistent, dismissible, ticks on real actions)
+ *   First Success Moment (one-time celebration on first real action)
+ *   Help Center (always reopenable from the sidebar)
+ *
+ * Completion/skip persist on the backend, so nothing ever repeats for the
+ * same user on any device.
  */
 export function OnboardingRoot() {
   const { data, isLoading } = useOnboardingStatus()
+  const { complete, skip } = useOnboardingActions()
   const helpOpen = useHelpCenterStore((s) => s.isOpen)
   const closeHelp = useHelpCenterStore((s) => s.close)
 
-  const showWelcome = !isLoading && data?.status === ONBOARDING_STATUS.NOT_STARTED
+  const [welcomeDismissed, setWelcomeDismissed] = useState(false)
+
+  const showWelcome =
+    !isLoading &&
+    !welcomeDismissed &&
+    data?.status === ONBOARDING_STATUS.NOT_STARTED
+
+  const isFresh = data?.status === ONBOARDING_STATUS.NOT_STARTED
+
+  const handleGetStarted = () => {
+    setWelcomeDismissed(true)
+    if (isFresh) {
+      // Completing onboarding flips PageCoach on, which auto-starts the
+      // dashboard tour — "teach by showing the real product".
+      complete.mutate()
+    }
+  }
+
+  const handleExplore = () => {
+    setWelcomeDismissed(true)
+    if (isFresh) skip.mutate()
+  }
+
+  const handleHelpOpenChange = (open) => {
+    if (open) markProgress(PROGRESS_KEYS.HELP_OPENED)
+    else closeHelp()
+  }
 
   return (
     <>
-      {showWelcome && <WelcomeOnboarding status={data.status} />}
+      <WelcomeOnboarding
+        open={showWelcome}
+        onGetStarted={handleGetStarted}
+        onExplore={handleExplore}
+      />
       <PageCoach />
-      <HelpCenter open={helpOpen} onOpenChange={(open) => !open && closeHelp()} />
+      {!showWelcome && <OnboardingChecklist />}
+      <FirstSuccessMoment />
+      <HelpCenter open={helpOpen} onOpenChange={handleHelpOpenChange} />
     </>
   )
 }
-

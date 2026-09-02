@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import { projectsApi } from '../api'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { toast } from 'sonner'
+import { markProgress, PROGRESS_KEYS } from '@/onboarding/model/progressBus'
 
 export function useProjects(filters = {}) {
   return useQuery({
@@ -25,6 +26,7 @@ export function useCreateProject() {
     mutationFn: projectsApi.createProject,
     onSuccess: () => {
       toast.success('Project created successfully')
+      markProgress(PROGRESS_KEYS.PROJECT_CREATED)
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all })
     },

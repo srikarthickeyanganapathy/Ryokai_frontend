@@ -205,7 +205,10 @@
 @layer base {
   * { border-color: var(--border-subtle); }
   ::selection { background-color: var(--accent-soft); color: var(--text-primary); }
+  /* Native controls, scrollbars and form fields must follow the active theme
+     — without the .dark override, dark mode renders light native chrome. */
   html { color-scheme: light; }
+  html.dark { color-scheme: dark; }
   * { scroll-behavior: smooth; }
 }
 

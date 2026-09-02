@@ -15,19 +15,23 @@ const api = axios.create({
 export const SERVER_UNREACHABLE_EVENT = 'ryokai:server-unreachable';
 
 /**
- * Debounced error toast -- prevents flooding when many queries fail simultaneously
- * (e.g. backend down triggers 10+ concurrent API calls).
+ * Deduped error toast -- identical messages within the window render ONCE.
+ * React Query retries (retry: 1), parallel failing queries, and interceptor +
+ * caller double-handling would otherwise stack duplicates: one is enough.
+ * The stable sonner id additionally collapses same-message toasts even after
+ * the window has passed (sonner replaces instead of stacking).
  */
-let lastToastMessage = '';
-let lastToastTime = 0;
-const TOAST_DEBOUNCE_MS = 3000;
-const debouncedToast = (message) => {
+const TOAST_DEDUP_MS = 3000;
+const recentToastAt = new Map();
+const dedupedToast = (message) => {
   const now = Date.now();
-  if (message !== lastToastMessage || now - lastToastTime > TOAST_DEBOUNCE_MS) {
-    lastToastMessage = message;
-    lastToastTime = now;
-    toast.error(message, { id: 'api-error' });
+  // Prune stale entries so the map stays tiny.
+  for (const [msg, at] of recentToastAt) {
+    if (now - at > TOAST_DEDUP_MS * 4) recentToastAt.delete(msg);
   }
+  if (now - (recentToastAt.get(message) || 0) < TOAST_DEDUP_MS) return;
+  recentToastAt.set(message, now);
+  toast.error(message, { id: `api-error:${message}` });
 };
 
 // We no longer use proactive refresh because cross-tab race conditions on the timer
@@ -166,27 +170,32 @@ api.interceptors.response.use(
         if (error.response.data?.code === 'EMAIL_NOT_VERIFIED') {
           // Auth-flow specific: handled by the login form (redirect to verify-email).
         } else {
-          toast.error("You don't have permission to do that");
+          // 403 is an expected authorization outcome, not a server error:
+          // the calling feature surfaces it in context (its own error toast /
+          // denied-state UI), and AuthContext resets permission state via the
+          // event below. Toasting here made EVERY denied request -- including
+          // permission probes and scope-gated reads a fully-permitted user
+          // triggers -- shout a scary generic error. One surface is enough.
           window.dispatchEvent(new Event('auth-forbidden'));
         }
       } else if (error.response.status === 409) {
-        const code = error.response.data?.code;
-        if (code === 'OPTIMISTIC_LOCK_CONFLICT') {
-          toast.error("This resource was updated by someone else. Please refresh to get the latest changes.");
-        } else {
-          toast.error(error.response.data?.message || "Conflict error");
+        if (error.response.data?.code === 'OPTIMISTIC_LOCK_CONFLICT') {
+          // No feature handles this code -- this hint is its only surface.
+          dedupedToast("This resource was updated by someone else. Please refresh to get the latest changes.");
         }
+        // Other conflicts are toasted by the calling feature with context.
       } else if (error.response.status === 400 && error.response.data) {
+        // Normalize field errors into `message` so the calling feature's own
+        // error toast shows the details; toasting here too duplicated it.
         const data = error.response.data;
         if (data.errors && typeof data.errors === 'object') {
           const details = Object.values(data.errors).join(', ');
           data.message = data.message ? `${data.message}: ${details}` : details;
         }
-        toast.error(data.message || 'Validation error');
       } else if (error.response.status === 429) {
-        debouncedToast("Rate limited -- please slow down");
+        dedupedToast("Rate limited -- please slow down");
       } else if (error.response.status >= 500) {
-        debouncedToast("Server error -- try again");
+        dedupedToast("Server error -- try again");
       }
     }
     // No-response failures are surfaced by ServerStatusProvider's overlay;

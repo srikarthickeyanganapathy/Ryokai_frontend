@@ -227,7 +227,7 @@ export function GoalCard({ goal, expanded, onToggle, canManage, onUpdateKR, onEd
           <AnimatedNumber
             value={goal.progress}
             suffix="%"
-            className="text-sm font-mono font-semibold text-[var(--text-base)] w-12 text-right"
+            className="text-sm font-mono font-semibold text-[var(--text-primary)] w-12 text-right"
           />
         </div>
 
@@ -291,7 +291,7 @@ export function GoalCard({ goal, expanded, onToggle, canManage, onUpdateKR, onEd
                       e.stopPropagation();
                       onEdit();
                     }}
-                    className="h-7 text-[11px] px-2.5 gap-1 text-[var(--text-muted)] hover:text-[var(--text-base)]"
+                    className="h-7 text-[11px] px-2.5 gap-1 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                   >
                     <Edit2 className="w-3 h-3" /> Edit goal
                   </Button>

@@ -1,10 +1,28 @@
 <!doctype html>
-<html lang="en" class="dark">
+  <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Ryokai -- The system for turning intent into execution">
     <meta name="theme-color" content="#030712">
+
+    <!-- Apply the stored (or system) theme BEFORE first paint. Without this,
+         light-theme users get a hardcoded dark flash and the pre-hydration
+         class falls out of sync with ThemeProvider. Must match the storageKey
+         in app/providers/ThemeProvider.jsx. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('ryokai-theme');
+          var theme = stored === 'light' || stored === 'dark'
+            ? stored
+            : (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+          var root = document.documentElement;
+          root.classList.remove('light', 'dark');
+          root.classList.add(theme);
+        } catch (e) { /* default class="dark" stands */ }
+      })();
+    </script>
     
     <!-- Open Graph Meta Tags -->
     <meta property="og:type" content="website">
@@ -50,7 +68,7 @@
     </script>
   </head>
   <body class="font-sans antialiased min-h-screen overflow-x-hidden">
-    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-[var(--accent)] focus:text-white focus:rounded-lg">Skip to main content</a>
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-[var(--accent)] focus:text-[var(--text-on-accent)] focus:rounded-lg">Skip to main content</a>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

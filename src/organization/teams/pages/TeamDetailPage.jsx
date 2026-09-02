@@ -18,6 +18,7 @@ import { useAuth, usePermissions } from '@/identity'
 import { useConfirmDialog } from '@/shared/ui/ConfirmDialog/ConfirmDialog'
 import { ManageTeamMembersModal } from '../modals/ManageTeamMembersModal'
 import { TeamTabs } from '../components/TeamTabs'
+import { WhiteboardsTab } from '@/crew/components/CrewDetailTabs/WhiteboardsTab'
 import { OverviewTab } from '../components/OverviewTab'
 import { ProjectsTab } from '../components/ProjectsTab'
 import { TasksTab } from '../components/TasksTab'
@@ -486,6 +487,13 @@ export function TeamDetailPage() {
                       isReadOnly={isReadOnly}
                       onCreateProject={() => setIsCreateProjectOpen(true)}
                       onStatusChange={handleUpdateProjectStatus}
+                    />
+                  )}
+                  {activeTab === 'whiteboards' && (
+                    <WhiteboardsTab
+                      key="whiteboards"
+                      team={{ orgId: Number(orgId), teamId: Number(teamId) }}
+                      isCreator={canManage}
                     />
                   )}
                   {activeTab === 'people' && (

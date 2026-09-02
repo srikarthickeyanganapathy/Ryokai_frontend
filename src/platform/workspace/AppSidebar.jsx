@@ -11,6 +11,7 @@ import { useOrgTeams } from '@/organization';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/Avatar';
 import { Popover, PopoverTrigger, PopoverContent } from '@/shared/ui/Popover';
 import { Separator } from '@/shared/ui/Separator';
+import { useHelpCenterStore } from '@/onboarding';
 import {
   LayoutDashboard, Inbox, CheckSquare, FolderClosed, Zap,
   Calendar, Pencil, BarChart2, Bookmark, Users, Building2,
@@ -99,13 +100,13 @@ function UserMenu({ user, logout, isExpanded }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className={cn(
+        <button data-tour="sidebar-profile" className={cn(
           "flex items-center transition-all duration-200 hover:bg-[var(--bg-hover)] rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--accent)]",
           isExpanded ? "w-full px-2.5 py-2 gap-2.5 mb-1" : "w-10 h-10 justify-center mb-1"
         )}>
           <Avatar size="sm" className="w-6 h-6 shrink-0 ring-1 ring-[var(--border-subtle)]">
             <AvatarImage src={user?.avatarUrl} />
-            <AvatarFallback className="bg-[var(--accent)] text-white text-[10px] font-bold">
+            <AvatarFallback className="bg-[var(--accent)] text-[var(--text-on-accent)] text-[10px] font-bold">
               {user?.name?.charAt(0) || user?.username?.charAt(0) || 'U'}
             </AvatarFallback>
           </Avatar>
@@ -188,7 +189,7 @@ export function AppSidebar({ isOpen, onClose }) {
   const workspaceNav = {
     PERSONAL: [
       { to: '/app', icon: ICONS.dashboard, label: 'Home', end: true },
-      { to: '/app/inbox', icon: ICONS.inbox, label: 'Inbox' },
+      { to: '/app/inbox', icon: ICONS.inbox, label: 'Notifications' },
       { to: '/app/tasks', icon: ICONS.tasks, label: 'My Tasks' },
       { to: '/app/projects', icon: ICONS.projects, label: 'Projects' },
       { to: '/app/github', icon: ICONS.github, label: 'GitHub', section: 'Code' },
@@ -196,12 +197,14 @@ export function AppSidebar({ isOpen, onClose }) {
     ],
     CREWS: [
       { to: '/app', icon: ICONS.dashboard, label: 'Home', end: true },
+      { to: '/app/inbox', icon: ICONS.inbox, label: 'Inbox' },
       { to: '/app/crews', icon: ICONS.crews, label: 'My Crews', end: true },
       { to: '/app/crews/discover', icon: ICONS.discover, label: 'Discover' },
       { to: '/app/projects', icon: ICONS.projects, label: 'Projects' }
     ],
     ORG: [
       { to: '/app', icon: ICONS.dashboard, label: 'Home', end: true },
+      { to: '/app/inbox', icon: ICONS.inbox, label: 'Inbox' },
       { to: '/app/tasks', icon: ICONS.tasks, label: 'Tasks' },
       { to: '/app/projects', icon: ICONS.projects, label: 'Projects' },
       { to: '/app/teams', icon: ICONS.teams, label: 'Teams' },

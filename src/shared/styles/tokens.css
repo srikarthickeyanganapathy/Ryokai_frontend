@@ -225,6 +225,12 @@
     --mark-star-op-7: 0.30;
     --mark-node: #d9642f;
     --mark-glow: rgba(226, 137, 90, 0.35);
+
+    /* --- Utility aliases (must exist in BOTH themes so dark never falls
+       back to a light value or an undefined var) --- */
+    --border-hover: #D8B69E;
+    --bg-primary: var(--bg-base);
+    --accent-rgb: 242, 114, 74;
   }
 
   .dark {
@@ -409,6 +415,12 @@
     --mark-star-op-7: 0.40;
     --mark-node: #ffe9b8;
     --mark-glow: rgba(91, 58, 143, 0.45);
+
+    /* --- Utility aliases (must exist in BOTH themes so dark never falls
+       back to a light value or an undefined var) --- */
+    --border-hover: rgba(248, 250, 252, 0.38);
+    --bg-primary: var(--bg-base);
+    --accent-rgb: 248, 250, 252;
   }
 
   body {

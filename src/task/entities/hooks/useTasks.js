@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useAuth, usePermissions } from '@/identity';
 import { useWorkspace } from '@/app/providers/WorkspaceProvider';
 import { toBackendStatus } from '@/shared/lib/status';
+import { markProgress, PROGRESS_KEYS } from '@/onboarding/model/progressBus';
 
 /**
  * Workspace isolation: derive the server-side scope from the active workspace.
@@ -155,6 +156,7 @@ export const useCreateTask = () => {
     onSuccess: (data, variables) => {
       const taskTitle = data?.title || variables?.title || 'Task';
       toast.success(`'${taskTitle}' created successfully`);
+      markProgress(PROGRESS_KEYS.TASK_CREATED);
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
@@ -219,6 +221,7 @@ export const useSubmitTask = () => {
     onSuccess: (data) => {
       const title = data?.title || 'Task';
       toast.success(`'${title}' submitted for review`);
+      markProgress(PROGRESS_KEYS.TASK_COMPLETED);
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to submit task');
@@ -239,6 +242,7 @@ export const useCompletePersonalTask = () => {
     onSuccess: (data) => {
       const title = data?.title || 'Task';
       toast.success(`'${title}' marked as complete`);
+      markProgress(PROGRESS_KEYS.TASK_COMPLETED);
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to complete task');
@@ -261,6 +265,7 @@ export const useCompleteCrewTask = () => {
     onSuccess: (data) => {
       const title = data?.title || 'Crew task';
       toast.success(`'${title}' completed`);
+      markProgress(PROGRESS_KEYS.TASK_COMPLETED);
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || error.message || 'Failed to complete crew task');

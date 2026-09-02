@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Building2, Home, Settings, ShieldAlert } from '@/shared/ui/Icons';
+import { Building2, Home, Settings, ShieldAlert, Pencil } from '@/shared/ui/Icons';
 import { useOrganization, useOrgMembers, useOrgTeams, useLeaveRequests } from '../features/hooks/useOrganizations';
 import { usePermissions } from '@/identity';
 import { PageShell, PageHero } from '@/shared/ui/PageShell';
@@ -15,6 +15,7 @@ import { useGoals } from '@/organization/goals/features/hooks/useGoals';
 import { OrganizationOverview } from '../components/Administration/OrganizationOverview';
 import { OrganizationAdministrationHub } from '../components/Administration/OrganizationAdministrationHub';
 import { DangerZone } from '../components/Administration/DangerZone';
+import { OrgWhiteboardsTab } from '../components/Administration/OrgWhiteboardsTab';
 import { Skeleton } from '@/shared/ui/Skeleton';
 
 export function OrganizationAdministrationPage() {
@@ -52,6 +53,7 @@ export function OrganizationAdministrationPage() {
   // Command Center Vertical Navigation
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Home },
+    { id: 'whiteboards', label: 'Whiteboards', icon: Pencil },
     { id: 'administration', label: 'Administration', icon: Settings },
     { id: 'danger', label: 'Danger Zone', icon: ShieldAlert },
   ];
@@ -88,6 +90,10 @@ export function OrganizationAdministrationPage() {
             <div data-tour="org-invite">
               <OrganizationOverview org={org} counts={counts} />
             </div>
+          )}
+
+          {activeTab === 'whiteboards' && (
+            <OrgWhiteboardsTab orgId={orgId} />
           )}
 
           {activeTab === 'administration' && (

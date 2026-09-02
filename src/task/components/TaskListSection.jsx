@@ -1,12 +1,75 @@
 import React, { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Check, Trash2, UserPlus, UserX } from 'lucide-react'
+import { Check, Trash2, UserPlus, UserX, Users, FolderPlus, Plus, Filter } from 'lucide-react'
 import { Badge } from '@/shared/ui/Badge'
 import { Avatar, AvatarFallback } from '@/shared/ui/Avatar'
 import { Checkbox } from '@/shared/ui/Checkbox'
 import { StatusBadge } from '@/shared/ui/StatusBadge'
 import { EmptyState } from '@/shared/ui/EmptyState'
+import { Button } from '@/shared/ui/Button'
 import { normalizePriority, PRIORITY_HEX } from '@/shared/lib/priority'
+import { useWorkspace } from '@/app/providers/WorkspaceProvider'
+
+/**
+ * Mode-aware, educating empty state (spec: empty states teach the next
+ * step — confident, concise, human; never "no data").
+ */
+export function TaskEmptyState({ hasFilters = false, onClearFilters, onCreateTask, className }) {
+  const { workspaceMode } = useWorkspace()
+  const navigate = useNavigate()
+
+  if (hasFilters) {
+    return (
+      <EmptyState
+        icon={Filter}
+        title="Nothing matches"
+        description="Loosen the filters and your work reappears."
+        actionLabel="Clear filters"
+        onAction={onClearFilters}
+        className={className}
+      />
+    )
+  }
+
+  if (workspaceMode === 'ORG') {
+    return (
+      <EmptyState
+        icon={Users}
+        title="Your organization is ready"
+        description="Invite your team — then assign work with confidence."
+        actionLabel="Invite members"
+        onAction={() => navigate('/app/directory')}
+        className={className}
+      />
+    )
+  }
+
+  if (workspaceMode === 'CREWS') {
+    return (
+      <EmptyState
+        icon={FolderPlus}
+        title="Better together"
+        description="Start a project and add tasks your crew can claim."
+        actionLabel="Start a project"
+        onAction={() => navigate('/app/projects')}
+        className={className}
+      />
+    )
+  }
+
+  return (
+    <EmptyState
+      icon={Plus}
+      title="Start with one task"
+      description="What is one thing you will finish today? Put it here."
+      actionLabel="Create a task"
+      onAction={onCreateTask}
+      className={className}
+    />
+  )
+}
+
 
 /* ============================================================
    components/TaskListSection.jsx -- urgency-first task list.
@@ -133,6 +196,9 @@ export function TaskListSection({
   onComplete,
   onDelete,
   onOpen,
+  hasFilters,
+  onClearFilters,
+  onCreateTask,
 }) {
   const groups = useMemo(() => {
     const open = tasks.filter(t => !isDone(t))
@@ -148,7 +214,14 @@ export function TaskListSection({
   }, [tasks])
 
   if (tasks.length === 0) {
-    return <EmptyState icon={Check} title="No tasks here" description="Try a different filter or search." className="min-h-[280px]" />
+    return (
+      <TaskEmptyState
+        hasFilters={hasFilters}
+        onClearFilters={onClearFilters}
+        onCreateTask={onCreateTask}
+        className="min-h-[280px]"
+      />
+    )
   }
 
   const rowProps = {

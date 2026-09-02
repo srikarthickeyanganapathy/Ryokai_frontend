@@ -53,7 +53,9 @@ export const useMarkRead = () => {
 export const useMarkAllRead = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => notificationApi.markAllRead(),
+    // Accepts optional scope params ({ workspace, orgId, crewId }) so bulk
+    // read only touches the current workspace's inbox.
+    mutationFn: (params) => notificationApi.markAllRead(params),
     onMutate: async () => {
       // Optimistic: set unread count to 0
       await queryClient.cancelQueries({ queryKey: queryKeys.notifications.unreadCount() });

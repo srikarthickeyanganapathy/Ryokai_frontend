@@ -1,146 +1,187 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { X, ArrowRight, ArrowLeft, Lightbulb } from 'lucide-react';
-import { useOnboardingStatus, ONBOARDING_STATUS } from '../hooks/useOnboarding';
+import { useOnboardingStatus, useOnboardingActions, ONBOARDING_STATUS } from '../hooks/useOnboarding';
+import { markProgress, PROGRESS_KEYS } from '../model/progressBus';
+import { useTourStore } from '../model/tourStore';
 
-const SEEN_KEY = 'ryokai.spotlightTour.seen.v1';
+const CARD_W = 320;
+const CARD_H_ESTIMATE = 230; // used only to keep the card inside the viewport
+const EDGE = 16;
 
-const readSeen = () => {
-  try { return JSON.parse(localStorage.getItem(SEEN_KEY) || '{}') } catch { return {} }
-}
-const markSeen = (key) => {
-  try {
-    const seen = readSeen()
-    seen[key] = Date.now()
-    localStorage.setItem(SEEN_KEY, JSON.stringify(seen))
-  } catch { }
-}
+// How long to wait for the dashboard content before giving up on the
+// auto-tour (the user can still start it from the checklist / Help Center).
+const WAIT_FOR_DASHBOARD_MS = 15000;
+const POLL_INTERVAL_MS = 400;
+const SETTLE_DELAY_MS = 800;
 
-const TOUR_CONFIGS = {
-  dashboard: {
-    match: (p) => p === '/app' || p === '/app/',
-    steps: [
-      { target: 'dashboard-stats', title: 'Mission Control', text: 'This is your Mission Control. It shows your active tasks, deadlines, and quick actions.' },
-      { target: 'dashboard-quick-actions', title: 'Quick Actions', text: 'Use these quick actions to create tasks or start a focus session.' },
-      { target: 'sidebar-nav', title: 'Navigation', text: 'Navigate between Tasks, Projects, Calendar, and more from the sidebar.' }
-    ]
-  },
-  tasks: {
-    match: (p) => p === '/app/tasks',
-    steps: [
-      { target: 'tasks-new-btn', title: 'Create Tasks', text: 'Click here to create your first task. Give it a title, priority, and due date.' },
-      { target: 'tasks-view-toggle', title: 'Multiple Views', text: 'Switch between List, Table, and Kanban views to organize your tasks differently.' },
-      { target: 'tasks-first-card', title: 'Task Details', text: 'Click any task to see its details, checklist, and progress.' },
-      { target: 'tasks-filter-bar', title: 'Find Anything', text: 'Filter and search your tasks to find what you need.' }
-    ]
-  },
-  projects: {
-    match: (p) => p === '/app/projects',
-    steps: [
-      { target: 'projects-new-btn', title: 'Create Projects', text: 'Create a project to group related tasks together.' },
-      { target: 'projects-first-card', title: 'Project Details', text: 'Click a project to see its tasks, progress, and team.' },
-      { target: 'projects-share-info', title: 'Collaborate', text: 'You can share personal projects with your crew using the Share button on any project.' }
-    ]
-  },
-  calendar: {
-    match: (p) => p === '/app/calendar',
-    steps: [
-      { target: 'calendar-grid', title: 'Your Schedule', text: 'Your task deadlines and events appear here.' },
-      { target: 'calendar-create-area', title: 'Create Events', text: 'Click any day to create a new event.' },
-      { target: 'calendar-view-toggle', title: 'Change Views', text: 'Switch between Month and Week views.' }
-    ]
-  },
-  analytics: {
-    match: (p) => p.startsWith('/app/analytics'),
-    steps: [
-      { target: 'analytics-stats', title: 'Quick Stats', text: 'Track your completion rate and workload at a glance.' },
-      { target: 'analytics-charts', title: 'Trends', text: 'See trends in your task completion over time.' }
-    ]
-  },
-  crews: {
-    match: (p) => p.startsWith('/app/crews') && p.split('/').length <= 3,
-    steps: [
-      { target: 'crews-create-btn', title: 'Form a Crew', text: 'Create a crew to collaborate with others.' },
-      { target: 'crews-invite-info', title: 'Work Together', text: 'Invite members and share projects to work together.' }
-    ]
-  },
-  organizations: {
-    match: (p) => p.startsWith('/app/organizations'),
-    steps: [
-      { target: 'org-overview', title: 'Organization Structure', text: 'Organizations add structure with roles, teams, and permissions.' },
-      { target: 'org-invite', title: 'Grow your Team', text: 'Invite members and assign roles to organize your team.' }
-    ]
-  }
-};
+/**
+ * THE 30-second tour. One guided pass over the dashboard, anchored to real
+ * UI. It starts in exactly two ways:
+ *   1. automatically, ONCE per user — but only after the dashboard content
+ *      has actually loaded (the stats widget is in the DOM), never on a
+ *      half-rendered page; and
+ *   2. on demand, from the setup checklist or Help Center (tourStore).
+ *
+ * "New vs returning user" comes ONLY from the backend (tourCompleted flag);
+ * localStorage is never consulted, so the tour cannot replay on another
+ * device and cannot fire for existing users.
+ */
+const TOUR_STEPS = [
+  { target: 'dashboard-stats', title: 'Your day at a glance', text: 'Active work, deadlines, and momentum — in one view.' },
+  { target: 'dashboard-quick-actions', title: 'Start here', text: 'Create tasks or jump into Focus Mode in one click.' },
+  { target: 'sidebar-nav', title: 'Everything has a home', text: 'Tasks, Projects, Calendar — always one click away.' },
+  { target: 'sidebar-profile', title: 'Yours to tune', text: 'Profile, security, and sessions live under your avatar.' },
+];
+
+const isDashboard = (p) => p === '/app' || p === '/app/';
+
+const dashboardReady = () =>
+  Boolean(document.querySelector('[data-tour="dashboard-stats"]'));
 
 export function PageCoach() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { data } = useOnboardingStatus();
-  
+  const { tourComplete } = useOnboardingActions();
+  const tourPending = useTourStore((s) => s.pending);
+  const consumeRequest = useTourStore((s) => s.consumeRequest);
+
   const status = data?.status;
   const onboarded = status === ONBOARDING_STATUS.COMPLETED || status === ONBOARDING_STATUS.SKIPPED;
+  // Backend is the single source of truth for "has taken the tour".
+  const tourTaken = Boolean(data?.tourCompleted);
 
-  const [activeTour, setActiveTour] = useState(null);
+  const [active, setActive] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState(null);
+  const rafRef = useRef(null);
+  const startedRef = useRef(false);
 
+  const startTour = useCallback(() => {
+    startedRef.current = true;
+    setActive(true);
+    setCurrentStepIndex(0);
+  }, []);
+
+  // (1) Auto-fire once per user, only after the dashboard CONTENT has loaded.
+  // Polls for the stats widget (rendered only when data arrives) instead of
+  // starting on a skeleton. Gives up after WAIT_FOR_DASHBOARD_MS.
   useEffect(() => {
-    if (!onboarded) return;
-    const tourKey = Object.keys(TOUR_CONFIGS).find(k => TOUR_CONFIGS[k].match(location.pathname));
-    if (!tourKey) { setActiveTour(null); return; }
-    
-    const seen = readSeen();
-    if (seen[tourKey]) { setActiveTour(null); return; }
-    
-    const timer = setTimeout(() => {
-      setActiveTour(tourKey);
-      setCurrentStepIndex(0);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [location.pathname, onboarded]);
+    if (!onboarded || tourTaken || startedRef.current) return;
+    if (!isDashboard(location.pathname)) return;
 
-  const updateRect = useCallback(() => {
-    if (!activeTour) return;
-    const steps = TOUR_CONFIGS[activeTour].steps;
-    const step = steps[currentStepIndex];
-    if (!step) return;
+    const startedAt = Date.now();
+    const timer = setInterval(() => {
+      if (startedRef.current) {
+        clearInterval(timer);
+        return;
+      }
+      if (dashboardReady()) {
+        clearInterval(timer);
+        // Settle delay: let animations/layout finish so the spotlight rects
+        // are measured against the final positions.
+        setTimeout(() => {
+          if (!startedRef.current) startTour();
+        }, SETTLE_DELAY_MS);
+      } else if (Date.now() - startedAt > WAIT_FOR_DASHBOARD_MS) {
+        clearInterval(timer);
+      }
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [location.pathname, onboarded, tourTaken, startTour]);
 
-    const el = document.querySelector(`[data-tour="${step.target}"]`);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => {
-        const rect = el.getBoundingClientRect();
-        setTargetRect({
-          top: rect.top,
-          left: rect.left,
-          width: rect.width,
-          height: rect.height,
-        });
-      }, 300);
-    } else {
-      setTargetRect(null);
+  // (2) On-demand launch from the checklist / Help Center. Also waits for
+  // the dashboard content when arriving from another page.
+  useEffect(() => {
+    if (!tourPending || !onboarded) return;
+    if (!isDashboard(location.pathname)) {
+      navigate('/app', { replace: false });
+      return;
     }
-  }, [activeTour, currentStepIndex]);
+    if (dashboardReady()) {
+      const t = setTimeout(() => {
+        consumeRequest();
+        startTour();
+      }, SETTLE_DELAY_MS);
+      return () => clearTimeout(t);
+    }
+    const startedAt = Date.now();
+    const timer = setInterval(() => {
+      if (dashboardReady()) {
+        clearInterval(timer);
+        consumeRequest();
+        setTimeout(() => {
+          if (!startedRef.current) startTour();
+        }, SETTLE_DELAY_MS);
+      } else if (Date.now() - startedAt > WAIT_FOR_DASHBOARD_MS) {
+        clearInterval(timer);
+        consumeRequest();
+      }
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [tourPending, onboarded, location.pathname, consumeRequest, navigate, startTour]);
 
+  /** Instantly re-measure the current target (no scrolling). */
+  const measureTarget = useCallback((stepIndex) => {
+    const step = TOUR_STEPS[stepIndex];
+    if (!step) return;
+    const el = document.querySelector(`[data-tour="${step.target}"]`);
+    if (!el) { setTargetRect(null); return; }
+    const rect = el.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) { setTargetRect(null); return; }
+    setTargetRect({ top: rect.top, left: rect.left, width: rect.width, height: rect.height });
+  }, []);
+
+  // On step change: scroll the target into view, then measure (deferred so
+  // effects never set state synchronously; the rAF scroll listener keeps the
+  // spotlight accurate while the smooth scroll runs).
   useEffect(() => {
-    updateRect();
-    window.addEventListener('resize', updateRect);
-    window.addEventListener('scroll', updateRect, { passive: true });
-    return () => {
-      window.removeEventListener('resize', updateRect);
-      window.removeEventListener('scroll', updateRect);
+    if (!active) return;
+    const step = TOUR_STEPS[currentStepIndex];
+    if (!step) return;
+    const el = document.querySelector(`[data-tour="${step.target}"]`);
+    const timer = setTimeout(() => {
+      if (!el) { setTargetRect(null); return; }
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const rect = el.getBoundingClientRect();
+      setTargetRect(rect.width === 0 && rect.height === 0
+        ? null
+        : { top: rect.top, left: rect.left, width: rect.width, height: rect.height });
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [active, currentStepIndex]);
+
+  // Live repositioning on scroll/resize (rAF-throttled).
+  useEffect(() => {
+    if (!active) return;
+    const onMove = () => {
+      if (rafRef.current) return;
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null;
+        measureTarget(currentStepIndex);
+      });
     };
-  }, [updateRect]);
+    window.addEventListener('resize', onMove);
+    window.addEventListener('scroll', onMove, { passive: true });
+    return () => {
+      window.removeEventListener('resize', onMove);
+      window.removeEventListener('scroll', onMove);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, [active, currentStepIndex, measureTarget]);
 
-  if (!activeTour) return null;
+  if (!active) return null;
 
-  const steps = TOUR_CONFIGS[activeTour].steps;
-  const currentStep = steps[currentStepIndex];
+  const currentStep = TOUR_STEPS[currentStepIndex];
 
   const handleNext = () => {
-    if (currentStepIndex < steps.length - 1) {
+    if (currentStepIndex < TOUR_STEPS.length - 1) {
       setCurrentStepIndex(prev => prev + 1);
     } else {
       dismiss();
@@ -154,46 +195,62 @@ export function PageCoach() {
   };
 
   const dismiss = () => {
-    markSeen(activeTour);
-    setActiveTour(null);
+    markProgress(PROGRESS_KEYS.TOUR_DONE);
+    // Persist to the backend (single source of truth, idempotent): finishing
+    // OR deliberately dismissing counts — the tour must never replay for
+    // this user on any device. Fire-and-forget; failure degrades to a tour
+    // replay on next visit instead of blocking the UI.
+    tourComplete.mutate();
+    setActive(false);
+    setTargetRect(null);
   };
 
+  // Card position: anchored below (or above) the target, clamped to the
+  // viewport; falls back to exact viewport center WITHOUT transforms.
+  let cardStyle;
+  if (targetRect) {
+    const prefersAbove = targetRect.top + targetRect.height + 24 + CARD_H_ESTIMATE > window.innerHeight;
+    const top = prefersAbove
+      ? Math.max(EDGE, targetRect.top - CARD_H_ESTIMATE - 16)
+      : Math.min(window.innerHeight - CARD_H_ESTIMATE - EDGE, targetRect.top + targetRect.height + 16);
+    const left = Math.min(Math.max(EDGE, targetRect.left), window.innerWidth - CARD_W - EDGE);
+    cardStyle = { top, left };
+  } else {
+    cardStyle = {
+      top: Math.max(EDGE, window.innerHeight / 2 - CARD_H_ESTIMATE / 2),
+      left: Math.max(EDGE, window.innerWidth / 2 - CARD_W / 2),
+    };
+  }
+
   return createPortal(
-    <div className="fixed inset-0 z-[9999] pointer-events-auto">
-      <div 
-        className="absolute inset-0 bg-black/50 transition-all duration-300 pointer-events-none"
+    <div className="fixed inset-0 z-[9999] pointer-events-none">
+      <div
+        className="absolute inset-0 bg-black/50 transition-all duration-300"
         style={targetRect ? {
           clipPath: `polygon(
-            0% 0%, 0% 100%, 
-            ${targetRect.left - 8}px 100%, 
-            ${targetRect.left - 8}px ${targetRect.top - 8}px, 
-            ${targetRect.left + targetRect.width + 8}px ${targetRect.top - 8}px, 
-            ${targetRect.left + targetRect.width + 8}px ${targetRect.top + targetRect.height + 8}px, 
-            ${targetRect.left - 8}px ${targetRect.top + targetRect.height + 8}px, 
-            ${targetRect.left - 8}px 100%, 
+            0% 0%, 0% 100%,
+            ${targetRect.left - 8}px 100%,
+            ${targetRect.left - 8}px ${targetRect.top - 8}px,
+            ${targetRect.left + targetRect.width + 8}px ${targetRect.top - 8}px,
+            ${targetRect.left + targetRect.width + 8}px ${targetRect.top + targetRect.height + 8}px,
+            ${targetRect.left - 8}px ${targetRect.top + targetRect.height + 8}px,
+            ${targetRect.left - 8}px 100%,
             100% 100%, 100% 0%
           )`
         } : { clipPath: 'none' }}
       />
-      
+
       <AnimatePresence mode="wait">
         <motion.div
           key={currentStepIndex}
-          initial={{ opacity: 0, y: 10, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
+          role="dialog"
+          aria-label={`Tour step ${currentStepIndex + 1} of ${TOUR_STEPS.length}`}
           className="absolute bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-2xl rounded-xl w-[320px] p-4 pointer-events-auto"
-          style={
-            targetRect ? {
-              top: targetRect.top + targetRect.height + 20 > window.innerHeight - 200 
-                ? targetRect.top - 180 
-                : targetRect.top + targetRect.height + 16,
-              left: Math.max(16, Math.min(targetRect.left, window.innerWidth - 340))
-            } : {
-              top: '50%', left: '50%', transform: 'translate(-50%, -50%)'
-            }
-          }
+          style={cardStyle}
         >
           <div className="flex items-start gap-3">
             <div className="shrink-0 w-8 h-8 rounded-lg bg-[var(--accent-soft)] flex items-center justify-center">
@@ -202,9 +259,9 @@ export function PageCoach() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">
-                  Step {currentStepIndex + 1} of {steps.length}
+                  Step {currentStepIndex + 1} of {TOUR_STEPS.length}
                 </span>
-                <button onClick={dismiss} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                <button onClick={dismiss} aria-label="Dismiss tour" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
                   <X className="w-3 h-3" />
                 </button>
               </div>
@@ -214,29 +271,29 @@ export function PageCoach() {
               <p className="mt-1 text-[12px] text-[var(--text-secondary)] leading-relaxed">
                 {currentStep.text}
               </p>
-              
+
               <div className="mt-4 flex items-center justify-between">
-                <button 
+                <button
                   onClick={dismiss}
                   className="text-[11px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 >
-                  Skip Tour
+                  Skip tour
                 </button>
                 <div className="flex items-center gap-2">
                   {currentStepIndex > 0 && (
-                    <button 
+                    <button
                       onClick={handlePrev}
                       className="px-2.5 py-1.5 rounded-md text-[11px] font-medium border border-[var(--border-subtle)] hover:bg-[var(--bg-subtle)] text-[var(--text-primary)] transition-colors"
                     >
                       <ArrowLeft className="w-3 h-3 inline-block mr-1" /> Back
                     </button>
                   )}
-                  <button 
+                  <button
                     onClick={handleNext}
-                    className="px-3 py-1.5 rounded-md text-[11px] font-semibold bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors shadow-sm flex items-center gap-1"
+                    className="px-3 py-1.5 rounded-md text-[11px] font-semibold bg-[var(--accent)] text-[var(--text-on-accent)] hover:bg-[var(--accent-hover)] transition-colors shadow-sm flex items-center gap-1"
                   >
-                    {currentStepIndex === steps.length - 1 ? 'Finish' : 'Next'} 
-                    {currentStepIndex < steps.length - 1 && <ArrowRight className="w-3 h-3" />}
+                    {currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}
+                    {currentStepIndex < TOUR_STEPS.length - 1 && <ArrowRight className="w-3 h-3" />}
                   </button>
                 </div>
               </div>
@@ -248,4 +305,3 @@ export function PageCoach() {
     document.body
   );
 }
-
