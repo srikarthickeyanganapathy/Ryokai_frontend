@@ -21,3 +21,12 @@ export const skipOnboarding = async () => {
 export const completeTour = async () => {
   await api.post('/workspace/onboarding/tour/complete');
 };
+
+/**
+ * Terminal dismissal of the setup checklist (explicit X or auto-complete of
+ * every item). Backend, per user — the checklist is a first-login experience
+ * and must never come back afterwards, on any device.
+ */
+export const dismissChecklist = async () => {
+  await api.post('/workspace/onboarding/checklist/dismiss');
+};

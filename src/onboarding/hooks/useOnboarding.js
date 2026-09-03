@@ -1,5 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getOnboardingStatus, completeOnboarding, skipOnboarding, completeTour } from '../api/onboarding.api';
+import {
+  getOnboardingStatus,
+  completeOnboarding,
+  skipOnboarding,
+  completeTour,
+  dismissChecklist,
+} from '../api/onboarding.api';
 
 export const ONBOARDING_STATUS = {
   NOT_STARTED: 'NOT_STARTED',
@@ -16,7 +22,9 @@ export const onboardingKeys = {
  * returning user — never localStorage). The welcome experience shows once
  * (NOT_STARTED), never nags after COMPLETED/SKIPPED, and stays reopenable
  * from the Help Center regardless of state. `tourCompleted` reports whether
- * the 30-second tour was taken on any device.
+ * the 30-second tour was taken on any device; `checklistDismissed` reports
+ * whether the setup checklist reached its terminal state (dismissed or fully
+ * completed) — both per user, on any device.
  */
 export function useOnboardingStatus() {
   return useQuery({
@@ -45,5 +53,10 @@ export function useOnboardingActions() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: onboardingKeys.status() }),
   });
 
-  return { complete, skip, tourComplete };
+  const checklistDismiss = useMutation({
+    mutationFn: dismissChecklist,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: onboardingKeys.status() }),
+  });
+
+  return { complete, skip, tourComplete, checklistDismiss };
 }

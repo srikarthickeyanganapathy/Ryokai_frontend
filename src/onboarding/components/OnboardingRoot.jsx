@@ -14,12 +14,15 @@ import { HelpCenter } from './HelpCenter'
  *   Welcome modal (one decision)
  *     → "Let's get started"  → records completion → dashboard tour fires
  *     → "I'll explore"       → records skip → no tour, no nagging
- *   Setup checklist (persistent, dismissible, ticks on real actions)
+ *   Setup checklist (per-user on the backend; dismissible, ticks on real
+ *     actions, gone for good once dismissed or fully completed)
  *   First Success Moment (one-time celebration on first real action)
  *   Help Center (always reopenable from the sidebar)
  *
- * Completion/skip persist on the backend, so nothing ever repeats for the
- * same user on any device.
+ * New-vs-returning is backend state, so nothing ever repeats for the same
+ * user on any device. Nothing renders until the status request resolves —
+ * guessing "new user" during the fetch would flash the welcome modal or the
+ * checklist onto returning users on every login.
  */
 export function OnboardingRoot() {
   const { data, isLoading } = useOnboardingStatus()
@@ -29,8 +32,12 @@ export function OnboardingRoot() {
 
   const [welcomeDismissed, setWelcomeDismissed] = useState(false)
 
+  // Unknown status (loading or request failed) => show nothing. Failing
+  // closed keeps a dismissed checklist from flashing back during outages.
+  const statusKnown = !isLoading && Boolean(data)
+
   const showWelcome =
-    !isLoading &&
+    statusKnown &&
     !welcomeDismissed &&
     data?.status === ONBOARDING_STATUS.NOT_STARTED
 
@@ -63,7 +70,7 @@ export function OnboardingRoot() {
         onExplore={handleExplore}
       />
       <PageCoach />
-      {!showWelcome && <OnboardingChecklist />}
+      {statusKnown && !showWelcome && <OnboardingChecklist />}
       <FirstSuccessMoment />
       <HelpCenter open={helpOpen} onOpenChange={handleHelpOpenChange} />
     </>

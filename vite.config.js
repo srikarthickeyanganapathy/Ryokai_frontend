@@ -31,4 +31,7 @@ export default defineConfig({
       },
     },
   },
+  test: {
+    setupFiles: './src/test/setup.js',
+  },
 })

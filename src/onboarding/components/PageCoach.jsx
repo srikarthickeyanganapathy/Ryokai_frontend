@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { X, ArrowRight, ArrowLeft, Lightbulb } from 'lucide-react';
@@ -21,7 +21,7 @@ const SETTLE_DELAY_MS = 800;
  * THE 30-second tour. One guided pass over the dashboard, anchored to real
  * UI. It starts in exactly two ways:
  *   1. automatically, ONCE per user — but only after the dashboard content
- *      has actually loaded (the stats widget is in the DOM), never on a
+ *      has actually loaded (the quick actions bar is in the DOM), never on a
  *      half-rendered page; and
  *   2. on demand, from the setup checklist or Help Center (tourStore).
  *
@@ -38,12 +38,15 @@ const TOUR_STEPS = [
 
 const isDashboard = (p) => p === '/app' || p === '/app/';
 
+// Content-ready probe that works in EVERY workspace mode: the quick actions
+// bar renders in PERSONAL, CREWS, and ORG. The stats grid is gated to ORG by
+// the dashboard widget registry, so probing for it meant the tour never
+// became "ready" outside organization mode.
 const dashboardReady = () =>
-  Boolean(document.querySelector('[data-tour="dashboard-stats"]'));
+  Boolean(document.querySelector('[data-tour="dashboard-quick-actions"]'));
 
 export function PageCoach() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { data } = useOnboardingStatus();
   const { tourComplete } = useOnboardingActions();
   const tourPending = useTourStore((s) => s.pending);
@@ -55,20 +58,38 @@ export function PageCoach() {
   const tourTaken = Boolean(data?.tourCompleted);
 
   const [active, setActive] = useState(false);
+  // Steps whose anchors are actually rendered for the current workspace mode
+  // (e.g. the stats grid is ORG-only); computed when the tour starts.
+  const [steps, setSteps] = useState(TOUR_STEPS);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState(null);
   const rafRef = useRef(null);
   const startedRef = useRef(false);
+  const settleRef = useRef(null);
+
+  const clearSettle = useCallback(() => {
+    if (settleRef.current) {
+      clearTimeout(settleRef.current);
+      settleRef.current = null;
+    }
+  }, []);
 
   const startTour = useCallback(() => {
     startedRef.current = true;
-    setActive(true);
+    // Anchor the tour only to steps that exist in the current workspace mode,
+    // so a missing widget is skipped instead of spotlighting nothing.
+    const available = TOUR_STEPS.filter((step) =>
+      Boolean(document.querySelector(`[data-tour="${step.target}"]`))
+    );
+    if (available.length === 0) return;
+    setSteps(available);
     setCurrentStepIndex(0);
+    setActive(true);
   }, []);
 
   // (1) Auto-fire once per user, only after the dashboard CONTENT has loaded.
-  // Polls for the stats widget (rendered only when data arrives) instead of
-  // starting on a skeleton. Gives up after WAIT_FOR_DASHBOARD_MS.
+  // Polls for the quick actions bar (rendered only when data arrives) instead
+  // of starting on a skeleton. Gives up after WAIT_FOR_DASHBOARD_MS.
   useEffect(() => {
     if (!onboarded || tourTaken || startedRef.current) return;
     if (!isDashboard(location.pathname)) return;
@@ -83,64 +104,77 @@ export function PageCoach() {
         clearInterval(timer);
         // Settle delay: let animations/layout finish so the spotlight rects
         // are measured against the final positions.
-        setTimeout(() => {
+        settleRef.current = setTimeout(() => {
+          settleRef.current = null;
           if (!startedRef.current) startTour();
         }, SETTLE_DELAY_MS);
       } else if (Date.now() - startedAt > WAIT_FOR_DASHBOARD_MS) {
         clearInterval(timer);
       }
     }, POLL_INTERVAL_MS);
-    return () => clearInterval(timer);
-  }, [location.pathname, onboarded, tourTaken, startTour]);
+    return () => {
+      clearInterval(timer);
+      clearSettle();
+    };
+  }, [location.pathname, onboarded, tourTaken, startTour, clearSettle]);
 
-  // (2) On-demand launch from the checklist / Help Center. Also waits for
-  // the dashboard content when arriving from another page.
+  // (2) On-demand launch from the checklist / Help Center. Those surfaces
+  // navigate to the dashboard BEFORE requesting, so by the time this effect
+  // runs we are either already on the dashboard (wait for content, then
+  // start) or the user has navigated elsewhere — drop the request. Never
+  // steer the user back to the dashboard while a request is pending: that
+  // used to trap them on the dashboard for as long as the request lived.
   useEffect(() => {
     if (!tourPending || !onboarded) return;
     if (!isDashboard(location.pathname)) {
-      navigate('/app', { replace: false });
+      consumeRequest();
       return;
     }
     if (dashboardReady()) {
-      const t = setTimeout(() => {
+      settleRef.current = setTimeout(() => {
+        settleRef.current = null;
         consumeRequest();
         startTour();
       }, SETTLE_DELAY_MS);
-      return () => clearTimeout(t);
+      return () => clearSettle();
     }
     const startedAt = Date.now();
     const timer = setInterval(() => {
       if (dashboardReady()) {
         clearInterval(timer);
-        consumeRequest();
-        setTimeout(() => {
-          if (!startedRef.current) startTour();
+        settleRef.current = setTimeout(() => {
+          settleRef.current = null;
+          consumeRequest();
+          startTour();
         }, SETTLE_DELAY_MS);
       } else if (Date.now() - startedAt > WAIT_FOR_DASHBOARD_MS) {
         clearInterval(timer);
         consumeRequest();
       }
     }, POLL_INTERVAL_MS);
-    return () => clearInterval(timer);
-  }, [tourPending, onboarded, location.pathname, consumeRequest, navigate, startTour]);
+    return () => {
+      clearInterval(timer);
+      clearSettle();
+    };
+  }, [tourPending, onboarded, location.pathname, consumeRequest, startTour, clearSettle]);
 
   /** Instantly re-measure the current target (no scrolling). */
   const measureTarget = useCallback((stepIndex) => {
-    const step = TOUR_STEPS[stepIndex];
+    const step = steps[stepIndex];
     if (!step) return;
     const el = document.querySelector(`[data-tour="${step.target}"]`);
     if (!el) { setTargetRect(null); return; }
     const rect = el.getBoundingClientRect();
     if (rect.width === 0 && rect.height === 0) { setTargetRect(null); return; }
     setTargetRect({ top: rect.top, left: rect.left, width: rect.width, height: rect.height });
-  }, []);
+  }, [steps]);
 
   // On step change: scroll the target into view, then measure (deferred so
   // effects never set state synchronously; the rAF scroll listener keeps the
   // spotlight accurate while the smooth scroll runs).
   useEffect(() => {
     if (!active) return;
-    const step = TOUR_STEPS[currentStepIndex];
+    const step = steps[currentStepIndex];
     if (!step) return;
     const el = document.querySelector(`[data-tour="${step.target}"]`);
     const timer = setTimeout(() => {
@@ -152,7 +186,7 @@ export function PageCoach() {
         : { top: rect.top, left: rect.left, width: rect.width, height: rect.height });
     }, 350);
     return () => clearTimeout(timer);
-  }, [active, currentStepIndex]);
+  }, [active, currentStepIndex, steps]);
 
   // Live repositioning on scroll/resize (rAF-throttled).
   useEffect(() => {
@@ -178,10 +212,11 @@ export function PageCoach() {
 
   if (!active) return null;
 
-  const currentStep = TOUR_STEPS[currentStepIndex];
+  const currentStep = steps[currentStepIndex];
+  if (!currentStep) return null;
 
   const handleNext = () => {
-    if (currentStepIndex < TOUR_STEPS.length - 1) {
+    if (currentStepIndex < steps.length - 1) {
       setCurrentStepIndex(prev => prev + 1);
     } else {
       dismiss();
@@ -248,7 +283,7 @@ export function PageCoach() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           role="dialog"
-          aria-label={`Tour step ${currentStepIndex + 1} of ${TOUR_STEPS.length}`}
+          aria-label={`Tour step ${currentStepIndex + 1} of ${steps.length}`}
           className="absolute bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-2xl rounded-xl w-[320px] p-4 pointer-events-auto"
           style={cardStyle}
         >
@@ -259,7 +294,7 @@ export function PageCoach() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">
-                  Step {currentStepIndex + 1} of {TOUR_STEPS.length}
+                  Step {currentStepIndex + 1} of {steps.length}
                 </span>
                 <button onClick={dismiss} aria-label="Dismiss tour" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
                   <X className="w-3 h-3" />
@@ -292,8 +327,8 @@ export function PageCoach() {
                     onClick={handleNext}
                     className="px-3 py-1.5 rounded-md text-[11px] font-semibold bg-[var(--accent)] text-[var(--text-on-accent)] hover:bg-[var(--accent-hover)] transition-colors shadow-sm flex items-center gap-1"
                   >
-                    {currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}
-                    {currentStepIndex < TOUR_STEPS.length - 1 && <ArrowRight className="w-3 h-3" />}
+                    {currentStepIndex === steps.length - 1 ? 'Finish' : 'Next'}
+                    {currentStepIndex < steps.length - 1 && <ArrowRight className="w-3 h-3" />}
                   </button>
                 </div>
               </div>
