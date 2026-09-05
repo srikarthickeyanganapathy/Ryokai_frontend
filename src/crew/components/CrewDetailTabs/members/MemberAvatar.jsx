@@ -1,82 +1,67 @@
-import { Badge } from '@/shared/ui/Badge';
 import { cn } from '@/shared/lib/cn';
-import { Crown, ShieldCheck, UserCheck } from '@/shared/ui/Icons';
-import { PRESENCE_CONFIG, getAvatarGradient, getMemberInitial, getMemberPresence } from './utils';
+import { PRESENCE_CONFIG, getAvatarColor, getMemberInitial, getMemberPresence } from './utils';
 
 /* ===
    Shared member presentational primitives
-   (RoleBadge / PresenceChip / MemberAvatar)
+   (RoleLabel / PresenceLabel / MemberAvatar)
    === */
 
-// Role badge chip (shared Badge component -- teams design language)
-export function RoleBadge({ member }) {
+// Role, as plain text -- weight and color carry the meaning, no pill needed
+export function RoleLabel({ member, className }) {
   const isOwner = member.role === 'CREATOR' || member.role === 'OWNER';
+  const isAdmin = member.role === 'ADMIN';
 
-  if (isOwner) {
-    return (
-      <Badge variant="warning" size="xs" className="gap-1 font-mono uppercase tracking-wider">
-        <Crown className="w-3 h-3" />
-        Owner
-      </Badge>
-    );
-  }
-  if (member.role === 'ADMIN') {
-    return (
-      <Badge variant="primary" size="xs" className="gap-1 font-mono uppercase tracking-wider">
-        <ShieldCheck className="w-3 h-3" />
-        Admin
-      </Badge>
-    );
-  }
   return (
-    <Badge variant="outline" size="xs" className="gap-1 font-mono uppercase tracking-wider text-[var(--text-secondary)]">
-      <UserCheck className="w-3 h-3" />
-      Member
-    </Badge>
+    <span
+      className={cn(
+        'text-xs font-medium',
+        isOwner ? 'text-[var(--accent)]' : isAdmin ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]',
+        className
+      )}
+    >
+      {isOwner ? 'Owner' : isAdmin ? 'Admin' : 'Member'}
+    </span>
   );
 }
 
 // Presence status dot + label
-export function PresenceChip({ presence }) {
+export function PresenceLabel({ presence, className }) {
   const cfg = PRESENCE_CONFIG[presence] || PRESENCE_CONFIG.offline;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 text-[10px] font-medium', cfg.textColor)}>
-      <span className={cn('w-2 h-2 rounded-full', cfg.dotBg)} />
+    <span className={cn('inline-flex items-center gap-1.5 text-xs', cfg.textColor, className)}>
+      <span className={cn('w-1.5 h-1.5 rounded-full', cfg.dotBg)} />
       {cfg.label}
     </span>
   );
 }
 
-// Hue-gradient avatar with presence dot (teams design language)
+// Flat-color initial avatar with a presence dot
 export function MemberAvatar({ member, size = 'md', className }) {
   const presence = getMemberPresence(member);
   const cfg = PRESENCE_CONFIG[presence] || PRESENCE_CONFIG.offline;
 
   const sizes = {
-    sm: 'w-9 h-9 text-xs',
+    sm: 'w-8 h-8 text-xs',
     md: 'w-10 h-10 text-sm',
-    lg: 'w-16 h-16 text-xl',
+    lg: 'w-14 h-14 text-lg',
   };
   const dotSizes = {
-    sm: 'w-2.5 h-2.5',
-    md: 'w-3 h-3',
-    lg: 'w-4 h-4',
+    sm: 'w-2 h-2',
+    md: 'w-2.5 h-2.5',
+    lg: 'w-3 h-3',
   };
 
   return (
     <div className={cn('relative shrink-0', className)}>
       <div
-        className={cn(
-          'rounded-xl flex items-center justify-center font-bold text-white shadow-sm border border-white/10',
-          sizes[size]
-        )}
-        style={{ background: getAvatarGradient(member) }}
+        className={cn('rounded-full flex items-center justify-center font-medium text-white', sizes[size])}
+        style={{ backgroundColor: getAvatarColor(member) }}
       >
         {getMemberInitial(member)}
       </div>
       <span
         className={cn(
-          'absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-[var(--bg-card)]',
+          'absolute bottom-0 right-0 rounded-full ring-2 ring-[var(--bg-card)]',
           dotSizes[size],
           cfg.dotBg
         )}

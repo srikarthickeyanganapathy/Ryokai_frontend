@@ -2,7 +2,6 @@
 // All presence/avatar/workload/highlight logic lives here so every
 // members view (card, table, drawer, header) uses the same rules.
 
-// --- Presence Configurations (standard app tokens) ---
 export const PRESENCE_CONFIG = {
   active: {
     label: 'Active',
@@ -19,7 +18,7 @@ export const PRESENCE_CONFIG = {
 // Stable fallback timestamp -- module scope keeps render pure (React Compiler)
 const FALLBACK_NOW = Date.now();
 
-// Deterministic hue for avatar gradients (teams design language)
+// Deterministic hue for a member's flat avatar color
 export function hashHue(str) {
   return Math.abs((str || '').split('').reduce((acc, c) => c.charCodeAt(0) + ((acc << 5) - acc), 0)) % 360;
 }
@@ -32,9 +31,10 @@ export function getMemberInitial(member) {
   return (member?.username || 'U').charAt(0).toUpperCase();
 }
 
-export function getAvatarGradient(member) {
+// A single flat color per member, not a gradient -- quieter and easier to tell apart at a glance
+export function getAvatarColor(member) {
   const hue = hashHue(member?.username || member?.email || '');
-  return `linear-gradient(135deg, hsl(${hue} 70% 55%), hsl(${(hue + 35) % 360} 65% 40%))`;
+  return `hsl(${hue} 42% 45%)`;
 }
 
 export function getMemberPresence(member) {
@@ -47,7 +47,8 @@ export function getMemberPresence(member) {
   return 'offline';
 }
 
-// Workload metrics calculation based on assigned tasks
+// Workload metrics based on assigned tasks. Returns a text color for the
+// level (used inline, not as a badge) and a bar color for the progress bar.
 export function getMemberWorkload(username, tasks = []) {
   const memberTasks = tasks.filter(
     (t) =>
@@ -65,17 +66,17 @@ export function getMemberWorkload(username, tasks = []) {
 
   const count = activeTasks.length;
   let level = 'Low';
-  let colorClass = 'bg-[var(--accent)]';
-  let badgeClass = 'bg-[var(--accent-soft)] text-[var(--accent)] border-transparent';
+  let barColor = 'bg-[var(--accent)]';
+  let levelColor = 'text-[var(--text-muted)]';
 
   if (count >= 5) {
     level = 'High';
-    colorClass = 'bg-rose-500';
-    badgeClass = 'bg-rose-500/10 text-rose-500 border-rose-500/20';
+    barColor = 'bg-[var(--danger)]';
+    levelColor = 'text-[var(--danger)]';
   } else if (count >= 3) {
     level = 'Medium';
-    colorClass = 'bg-[var(--warning)]';
-    badgeClass = 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning-border)]';
+    barColor = 'bg-[var(--warning)]';
+    levelColor = 'text-[var(--warning)]';
   }
 
   return {
@@ -83,19 +84,19 @@ export function getMemberWorkload(username, tasks = []) {
     active: count,
     completed: completedTasks.length,
     level,
-    colorClass,
-    badgeClass,
+    barColor,
+    levelColor,
     memberTasks,
   };
 }
 
-// Helper to highlight search results safely
+// Highlight search matches inline, no styling beyond a subtle underline color
 export const highlightText = (text, query) => {
   if (!query || typeof text !== 'string') return text;
   const parts = text.split(new RegExp(`(${query})`, 'gi'));
   return parts.map((part, i) =>
     part.toLowerCase() === query.toLowerCase() ? (
-      <mark key={i} className="bg-[var(--accent-soft)] text-[var(--accent)] px-0.5 rounded font-medium">
+      <mark key={i} className="bg-transparent text-[var(--accent)] font-semibold">
         {part}
       </mark>
     ) : (

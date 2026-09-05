@@ -1,28 +1,22 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/ui/Button';
-import { Sparkles, Check, Copy } from '@/shared/ui/Icons';
+import { Check, Copy } from '@/shared/ui/Icons';
 
-// Shareable link active alert (shown while an invite link is generated)
+// Shown while a shareable invite link is active
 export function InviteLinkBanner({ inviteLink, isLinkCopied, onCopy }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: -6 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="p-3 bg-[var(--bg-card)] border border-[var(--accent-border)] rounded-xl flex items-center justify-between gap-3 shadow-sm"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex items-center justify-between gap-3 py-2.5 px-4 border border-[var(--border-subtle)] rounded-lg"
     >
-      <div className="flex items-center gap-2 min-w-0">
-        <Sparkles className="w-4 h-4 text-[var(--accent)] shrink-0" />
-        <span className="text-xs text-[var(--text-muted)] font-medium shrink-0">Invite Link:</span>
-        <span className="text-xs font-mono text-[var(--text-primary)] truncate">{inviteLink}</span>
+      <div className="flex items-center gap-2 min-w-0 text-sm">
+        <span className="text-[var(--text-muted)] shrink-0">Invite link</span>
+        <span className="font-mono text-[var(--text-primary)] truncate">{inviteLink}</span>
       </div>
-      <Button
-        variant="outline"
-        size="sm"
-        className="h-8 text-[12px] gap-1 font-semibold shrink-0"
-        onClick={onCopy}
-      >
-        {isLinkCopied ? <Check className="w-3.5 h-3.5 text-[var(--success)]" /> : <Copy className="w-3.5 h-3.5" />}
-        {isLinkCopied ? 'Copied' : 'Copy Link'}
+      <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5 shrink-0" onClick={onCopy}>
+        {isLinkCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+        {isLinkCopied ? 'Copied' : 'Copy'}
       </Button>
     </motion.div>
   );

@@ -686,7 +686,7 @@ export function OverviewTab({
                 onClick={() => setActiveTab('members')}
                 className="text-[11px] font-semibold text-[var(--accent)] hover:underline"
               >
-                View All ({members.length}) ->
+                View All ({members.length}) &rarr;
               </button>
             }
           >

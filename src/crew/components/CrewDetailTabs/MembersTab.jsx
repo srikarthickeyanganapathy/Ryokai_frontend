@@ -25,12 +25,11 @@ import { NoResultsState } from './members/NoResultsState';
 import { ReadOnlyBanner } from './members/ReadOnlyBanner';
 import { getMemberPresence, getMemberWorkload } from './members/utils';
 
-// --- Main Living Team Directory Component (orchestrator) ---
+// --- Crew members directory (orchestrator) ---
 export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = false, isLoading = false, isError = false, refetch }) {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL'); // 'ALL' | 'OWNER' | 'ADMIN' | 'MEMBER'
-  const [presenceFilter, setPresenceFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'FOCUS' | 'AWAY'
   const [selectedMember, setSelectedMember] = useState(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
@@ -39,7 +38,7 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
 
   const { confirm, dialog: confirmDialog } = useConfirmDialog();
 
-  // Queries & Mutations
+  // Queries & mutations
   const { data: fetchedMembers, isLoading: isMembersLoading, isError: isMembersError, refetch: refetchMembers } = useCrewMembers(crewId);
   const { data: { tasks: rawCrewTasks = [] } = {} } = useTaskList({ crewId });
 
@@ -48,7 +47,7 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
   const removeMutation = useRemoveCrewMember(crewId);
   const transferOwnershipMutation = useTransferCrewOwnership(crewId);
 
-  // Resolved Member Roster
+  // Resolved member roster
   const actualMembers = useMemo(() => {
     if (members && members.length > 0) return members;
     return fetchedMembers || [];
@@ -57,10 +56,9 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
   const activeLoading = isLoading || isMembersLoading;
   const activeError = isError || isMembersError;
 
-  // Workload calculator helper
   const getWorkload = (username) => getMemberWorkload(username, rawCrewTasks);
 
-  // Filtered Roster
+  // Filtered roster
   const filteredMembers = useMemo(() => {
     return actualMembers.filter((m) => {
       const matchSearch =
@@ -76,12 +74,9 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
         (roleFilter === 'ADMIN' && m.role === 'ADMIN') ||
         (roleFilter === 'MEMBER' && !isOwner && m.role !== 'ADMIN');
 
-      const presence = getMemberPresence(m).toUpperCase();
-      const matchPresence = presenceFilter === 'ALL' || presenceFilter === presence;
-
-      return matchSearch && matchRole && matchPresence;
+      return matchSearch && matchRole;
     });
-  }, [actualMembers, searchQuery, roleFilter, presenceFilter]);
+  }, [actualMembers, searchQuery, roleFilter]);
 
   // Actions
   const handleSendInvite = (e) => {
@@ -118,9 +113,9 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
   const handleTransferOwnership = async (userId) => {
     if (
       await confirm({
-        title: 'Transfer Crew Ownership?',
-        description: 'You will relinquish crew owner rights and become a standard member.',
-        confirmLabel: 'Transfer Ownership',
+        title: 'Transfer crew ownership?',
+        description: 'You will relinquish owner rights and become a standard member.',
+        confirmLabel: 'Transfer ownership',
         cancelLabel: 'Cancel',
         danger: true,
       })
@@ -132,9 +127,9 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
   const handleRemoveMember = async (userId) => {
     if (
       await confirm({
-        title: 'Remove Member from Crew?',
+        title: 'Remove member from crew?',
         description: 'They will immediately lose access to crew tasks, channels, and projects.',
-        confirmLabel: 'Remove Member',
+        confirmLabel: 'Remove member',
         cancelLabel: 'Cancel',
         danger: true,
       })
@@ -143,18 +138,16 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
     }
   };
 
-  // State 1: Shimmer Skeleton (Loading State)
   if (activeLoading && actualMembers.length === 0) {
     return <LoadingSkeleton />;
   }
 
-  // State 4: Error State
   if (activeError && actualMembers.length === 0) {
     return (
       <div className="p-6 max-w-4xl mx-auto">
         <ErrorState
           title="Unable to load team directory"
-          description="Failed to retrieve crew members. Please check your network connection and try again."
+          description="Failed to retrieve crew members. Check your connection and try again."
           onRetry={() => {
             if (refetch) refetch();
             refetchMembers();
@@ -164,19 +157,16 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
     );
   }
 
-  // State 2: Zero Members Empty State
   if (!activeLoading && actualMembers.length === 0) {
     return (
       <div className="p-6 max-w-4xl mx-auto">
         <EmptyState
           icon={Users}
-          title="No Team Members Found"
-          description="Build your living team by inviting collaborators to this crew workspace."
-          actionLabel="Invite Team Member"
+          title="No members yet"
+          description="Invite collaborators to this crew workspace."
+          actionLabel="Invite member"
           onAction={() => setIsInviteModalOpen(true)}
         />
-
-        {/* Email Invitation Modal */}
         <InviteMemberModal
           open={isInviteModalOpen}
           onOpenChange={setIsInviteModalOpen}
@@ -191,10 +181,8 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
 
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-[1400px] mx-auto">
-      {/* State 5: Permission Control Banner (Non-owners read-only notice) */}
       {!isCreator && <ReadOnlyBanner />}
 
-      {/* Directory Header Toolbar -- teams design language (icon chip + title + subtitle) */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-[var(--border-subtle)]">
         <MembersHeader
           totalCount={actualMembers.length}
@@ -202,7 +190,6 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
           activeCount={actualMembers.filter((m) => getMemberPresence(m) === 'active').length}
         />
 
-        {/* Controls: Search, Filters, View Switcher & Action Buttons */}
         <MembersToolbar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -217,30 +204,26 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
         />
       </div>
 
-      {/* Shareable Link Active Alert (If generated) */}
       {inviteLink && (
         <InviteLinkBanner inviteLink={inviteLink} isLinkCopied={isLinkCopied} onCopy={handleCopyInviteLink} />
       )}
 
-      {/* State 3: Filter / Search Empty Results State */}
       {filteredMembers.length === 0 ? (
         <NoResultsState
           query={searchQuery}
           onClear={() => {
             setSearchQuery('');
             setRoleFilter('ALL');
-            setPresenceFilter('ALL');
           }}
         />
       ) : (
-        /* State 7: Interactive Living Directory (Grid vs Table View) */
         <AnimatePresence mode="wait">
           {viewMode === 'grid' ? (
             <motion.div
               key="grid"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
             >
@@ -261,9 +244,9 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
           ) : (
             <motion.div
               key="table"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
               <MemberTable
@@ -280,7 +263,6 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
         </AnimatePresence>
       )}
 
-      {/* Interactive Member Detail Drawer */}
       <MemberDetailDrawer
         member={selectedMember}
         isOpen={!!selectedMember}
@@ -291,7 +273,6 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
         onRemove={handleRemoveMember}
       />
 
-      {/* Email Invitation Modal */}
       <InviteMemberModal
         open={isInviteModalOpen}
         onOpenChange={setIsInviteModalOpen}
@@ -301,7 +282,6 @@ export function MembersTab({ crewId, members = [], memberCap = 10, isCreator = f
         onSubmit={handleSendInvite}
       />
 
-      {/* Global Confirmation Dialog */}
       {confirmDialog}
     </div>
   );
