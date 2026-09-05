@@ -49,15 +49,7 @@ export function AnalyticsPage() {
         value: s.count,
         color: s.color,
       })),
-      historicalData: rawStats.historicalData || [
-        { name: 'Mon', completed: Math.round((rawStats.doneCount || 0) * 0.2) },
-        { name: 'Tue', completed: Math.round((rawStats.doneCount || 0) * 0.5) },
-        { name: 'Wed', completed: Math.round((rawStats.doneCount || 0) * 0.4) },
-        { name: 'Thu', completed: Math.round((rawStats.doneCount || 0) * 0.8) },
-        { name: 'Fri', completed: Math.round((rawStats.doneCount || 0) * 0.9) },
-        { name: 'Sat', completed: Math.round((rawStats.doneCount || 0) * 1.0) },
-        { name: 'Sun', completed: rawStats.doneCount || 0 },
-      ]
+      historicalData: rawStats.historicalData || []
     }
   }, [rawStats])
 
@@ -170,7 +162,13 @@ export function AnalyticsPage() {
               data-tour="analytics-charts"
             >
               <div className="lg:col-span-2 min-w-0">
-                <CompletionChart data={stats?.historicalData} />
+                {stats?.historicalData?.length > 0 ? (
+                  <CompletionChart data={stats?.historicalData} />
+                ) : (
+                  <div className="h-[280px] flex items-center justify-center border border-dashed border-[var(--border-subtle)] rounded-xl bg-[var(--bg-subtle)]">
+                    <Text size="sm" className="text-[var(--text-muted)]">No historical data available yet.</Text>
+                  </div>
+                )}
               </div>
               <div className="lg:col-span-1 min-w-0">
                 <PriorityChart data={stats?.priorityData} />
